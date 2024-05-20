@@ -24,9 +24,12 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
   const toggleRobot = (robot: RobotModel) => () => selectRobot(robot);
   const toggleStats = action(() => (model.statsOpen = !model.statsOpen));
 
-  const dropdownButtonClassNames = classNames(" outline-none cursor-pointer flex-shrink-0 h-[50px] transition-transform duration-300 ease-in-out ", {
-    ["rotate-180 "]: model.statsOpen,
-  });
+  const dropdownButtonClassNames = classNames(
+    " outline-none cursor-pointer flex-shrink-0 h-[50px] transition-transform duration-300 ease-in-out ",
+    {
+      ["rotate-180 "]: model.statsOpen,
+    },
+  );
 
   return (
     <>
@@ -42,7 +45,12 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
           <IconDropdown />
         </button>
       </div>
-      <Collapsible open={model.statsOpen} className={"grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 border-0 border-t border-b border-gray-300 dark:border-gray-650 bg-gray-250 dark:bg-gray-850"}>
+      <Collapsible
+        open={model.statsOpen}
+        className={
+          "grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 border-0 border-t border-b border-gray-300 dark:border-gray-650 bg-gray-250 dark:bg-gray-850"
+        }
+      >
         <div className={"box-border width-full text-left"}>
           <div className={"uppercase text-sm text-gray-600 dark:text-gray-200"}>Packets</div>
           <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packets)}</div>
@@ -59,7 +67,7 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
           <div className={"uppercase text-sm text-gray-600 dark:text-gray-200"}>Bytes/s</div>
           <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytesPerSecond.rate)}</div>
         </div>
-      </Collapsible >
+      </Collapsible>
     </>
   );
 });

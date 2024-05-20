@@ -14,7 +14,7 @@ const meta: Meta<typeof Modal> = {
     (story) => {
       return <div className="p-4">{story()}</div>;
     },
-    ThemeDecorator
+    ThemeDecorator,
   ],
 };
 
@@ -25,7 +25,10 @@ type Story = StoryObj<typeof Modal>;
 // TODO: Replace this with the NUsight <Button> component once that gets proper keyboard focus styles
 function Button(props: { onClick?: () => void; children: React.ReactNode }) {
   return (
-    <button className="border border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800 rounded px-3 py-1 hover:bg-gray-300 dark:hover:bg-gray-700" onClick={props.onClick}>
+    <button
+      className="border border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800 rounded px-3 py-1 hover:bg-gray-300 dark:hover:bg-gray-700"
+      onClick={props.onClick}
+    >
       {props.children}
     </button>
   );

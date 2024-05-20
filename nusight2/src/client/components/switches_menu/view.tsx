@@ -21,7 +21,11 @@ export type SwitchesMenuProps = {
 export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
   const { options } = props;
   const dropdownToggle = (
-    <button className={"flex flex-col items-center justify-center h-14 px-4 bg-transparent cursor-pointer  transition-colors duration-200 outline-none fill-gray-100 hover:fill-gray-450"}>
+    <button
+      className={
+        "flex flex-col items-center justify-center h-14 px-4 bg-transparent cursor-pointer  transition-colors duration-200 outline-none fill-gray-100 hover:fill-gray-450"
+      }
+    >
       <IconMenu />
     </button>
   );
@@ -32,7 +36,10 @@ export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
           {options.length === 0 && <div className={"bg-300 dark:bg-gray-700 p-4 rounded-md"}>No options</div>}
           {options.map((option) => {
             return (
-              <label key={option.label} className={"items-center flex justify-between p-6 hover:bg-gray-300 dark:hover:bg-gray-700"}>
+              <label
+                key={option.label}
+                className={"items-center flex justify-between p-6 hover:bg-gray-300 dark:hover:bg-gray-700"}
+              >
                 <span className={style.optionLabel}>{option.label}</span>
                 <Switch on={option.enabled} onChange={option.toggle} />
               </label>

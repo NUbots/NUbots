@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function IconRobot(props: { className?: string, style?: React.CSSProperties }) {
+export default function IconRobot(props: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       className={props.className}

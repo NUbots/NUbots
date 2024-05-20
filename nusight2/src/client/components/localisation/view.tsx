@@ -57,7 +57,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
         {FieldDimensionOptions.map((option) => (
           <div
             key={option.value}
-            className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value ? "bg-gray-300 dark:bg-gray-600 " : "bg-gray-100 dark:bg-gray-700"}`}
+            className={`${"flex p-2 "}${
+              this.props.model.field.fieldType === option.value
+                ? "bg-gray-300 dark:bg-gray-600 "
+                : "bg-gray-100 dark:bg-gray-700"
+            }`}
             onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
           >
             <Icon size={24}>
@@ -100,7 +104,11 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div className={"flex flex-grow flex-shrink flex-col relative bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100"}>
+      <div
+        className={
+          "flex flex-grow flex-shrink flex-col relative bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100"
+        }
+      >
         <LocalisationMenuBar
           model={this.props.model}
           Menu={this.props.Menu}
@@ -227,7 +235,7 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
         <div className="flex items-center justify-center">
           <div className="flex items-center rounded">
             <span className="mx-2">{props.label}</span>
-            <Icon size={24} >{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
           </div>
         </div>
       </button>
@@ -277,7 +285,11 @@ const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div className={"bg-[rgba(0,0,0,0.3)] rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"}>
+    <div
+      className={
+        "bg-[rgba(0,0,0,0.3)] rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+      }
+    >
       <span className={"text-left w-1/3"}>&#160;</span>
       <span className={"w-1/3"}>{target}</span>
       <span className={"text-right w-1/3"}>{viewModeString(props.model.viewMode)}</span>

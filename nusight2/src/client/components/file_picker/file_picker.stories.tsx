@@ -14,7 +14,7 @@ const meta: Meta<typeof FilePicker> = {
   parameters: {
     layout: "fullscreen",
   },
-  decorators: [ThemeDecorator]
+  decorators: [ThemeDecorator],
 };
 
 export default meta;

@@ -16,7 +16,7 @@ const meta: Meta<typeof Icon> = {
     flip: { control: "inline-radio" },
     rotate: { control: "inline-radio" },
   },
-  decorators: [ThemeDecorator]
+  decorators: [ThemeDecorator],
 };
 
 export default meta;

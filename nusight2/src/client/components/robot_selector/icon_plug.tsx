@@ -1,13 +1,8 @@
 import React from "react";
 
-export default function IconPlug(props: { className?: string, style?: React.CSSProperties }) {
+export default function IconPlug(props: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      className={props.className}
-      style={props.style}
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-    >
+    <svg className={props.className} style={props.style} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
       <path d="M308.6 11.7c-6.8 0-12.3 5.5-12.3 12.3v87.3h-80.6V23.9c0-6.8-5.5-12.3-12.3-12.3-6.8 0-12.3 5.5-12.3 12.3v87.3h-52.5c-6.8 0-12.3 5.5-12.3 12.3s5.5 12.2 12.3 12.2h12.2v71.7c0 40.7 23.4 76.1 57.3 93.5v40.9c0 15.6 12.7 28.3 28.3 28.3h7.2v4c0 27.7 22.5 50.2 50.2 50.2h41.4c14.2 0 25.7 11.5 25.7 25.7s-11.5 25.7-25.7 25.7H138.7c-6.8 0-12.3 5.5-12.3 12.3s5.5 12.3 12.3 12.3h196.6c27.7 0 50.2-22.5 50.2-50.2 0-27.7-22.5-50.2-50.2-50.2H294c-14.2 0-25.7-11.5-25.7-25.7v-4h7.2c15.6 0 28.3-12.7 28.3-28.3V301c34-17.4 57.3-52.7 57.3-93.5v-71.7h12.2c6.8 0 12.3-5.5 12.3-12.2s-5.5-12.3-12.3-12.3h-52.5V23.9c0-6.7-5.5-12.2-12.2-12.2zm-29.4 330.2c0 2.1-1.7 3.8-3.8 3.8h-38.8c-2.1 0-3.8-1.7-3.8-3.8v-32c7.5 1.7 15.2 2.7 23.2 2.7s15.7-1 23.2-2.7v32zm57.4-134.4c0 44.4-36.1 80.6-80.6 80.6s-80.6-36.1-80.6-80.6v-71.7h161.1v71.7z" />
     </svg>
   );

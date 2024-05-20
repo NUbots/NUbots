@@ -17,10 +17,13 @@ export const Switch = (props: SwitchProps) => {
     ["bg-gray-400 dark:bg-gray-600"]: !on,
     ["bg-blue-600 opacity-50"]: on,
   });
-  const thumbClassName = classNames("rounded-full shadow-md h-[1.6em] left-0 absolute w-[1.6em] top-0 transition-transform duration-250 ease-in-out", {
-    ["bg-gray-100 dark:bg-gray-500"]: !on,
-    ["bg-blue-600 translate-x-[1.3em]"]: on,
-  });
+  const thumbClassName = classNames(
+    "rounded-full shadow-md h-[1.6em] left-0 absolute w-[1.6em] top-0 transition-transform duration-250 ease-in-out",
+    {
+      ["bg-gray-100 dark:bg-gray-500"]: !on,
+      ["bg-blue-600 translate-x-[1.3em]"]: on,
+    },
+  );
   return (
     <span className={"flex items-center cursor-pointer h-[1.6em] relative w-[2.85em]"}>
       <span className={trackClassName} />

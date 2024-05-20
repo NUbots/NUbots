@@ -2,12 +2,12 @@
 import colors from "tailwindcss/colors";
 import defaultTheme from "tailwindcss/defaultTheme";
 import plugin from "tailwindcss/plugin";
-const colors = require('tailwindcss/colors')
+const colors = require("tailwindcss/colors");
 
 /** @type {import("tailwindcss").Config} */
 const config = {
   content: ["./index.html", "./src/client/**/*.{js,jsx,ts,tsx}", ".storybook/**/*.{js,jsx,ts,tsx}"],
-  darkMode: 'class',
+  darkMode: "class",
 
   theme: {
     colors: {
@@ -46,7 +46,7 @@ const config = {
         200: "#22D449",
         300: "#0ABC31",
         400: "#008F20",
-        500: "#006C18"
+        500: "#006C18",
       },
 
       orange: {

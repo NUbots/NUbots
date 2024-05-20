@@ -22,7 +22,6 @@ import { LineChartModel } from "./model";
 // const darkModeTextColor = "#000000";
 // const lightModeTextColor = "#edf2f7";
 
-
 export class LineChartViewModel {
   // textColor: string;
 

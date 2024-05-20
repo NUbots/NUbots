@@ -34,9 +34,7 @@ export class Dashboard extends Component<DashboardProps> {
         <Menu>
           <ul className="list-none h-full flex items-center">
             <li className="flex px-4">
-              <Button onClick={this.onToggleOrientationClick}>
-                Flip Orientation
-              </Button>
+              <Button onClick={this.onToggleOrientationClick}>Flip Orientation</Button>
             </li>
           </ul>
         </Menu>

@@ -22,7 +22,11 @@ export class OdometryView extends React.Component<{
       Menu,
     } = this.props;
     return (
-      <div className={"flex flex-grow flex-shrink flex-col text-center relative w-full h-full bg-gray-200 dark:bg-gray-850"}>
+      <div
+        className={
+          "flex flex-grow flex-shrink flex-col text-center relative w-full h-full bg-gray-200 dark:bg-gray-850"
+        }
+      >
         <Menu>
           <div className={"h-full flex items-center justify-end"}>
             <RobotSelectorSingle

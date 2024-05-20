@@ -1,6 +1,6 @@
 import "./preview.css";
 
-import type { Preview } from '@storybook/react';
+import type { Preview } from "@storybook/react";
 
 const preview: Preview = {
   parameters: {
@@ -15,12 +15,12 @@ const preview: Preview = {
 
   globalTypes: {
     theme: {
-      description: 'Global theme for components',
-      defaultValue: 'light',
+      description: "Global theme for components",
+      defaultValue: "light",
       toolbar: {
-        title: 'Theme',
-        icon: 'mirror',
-        items: ['light', 'dark', 'both'],
+        title: "Theme",
+        icon: "mirror",
+        items: ["light", "dark", "both"],
         dynamicTitle: true,
       },
     },

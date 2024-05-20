@@ -82,9 +82,24 @@ export class CameraView extends Component<CameraViewProps> {
             <SwitchesMenu dropdownMenuPosition="right" options={this.drawOptions} />
             {allowPanAndZoom ? (
               <div className="flex flex-col">
-                <IconButton className={"stroke-gray-100 hover:stroke-gray-450"} Icon={IconZoomIn} title="Zoom In" onClick={() => controller.zoomCenter(1)} />
-                <IconButton className={"stroke-gray-100 hover:stroke-gray-450"} Icon={IconZoomOut} title="Zoom Out" onClick={() => controller.zoomCenter(-1)} />
-                <IconButton className={"fill-gray-100 hover:fill-gray-450 pb-4"} Icon={IconZoomReset} title="Zoom Reset" onClick={controller.resetCamera} />
+                <IconButton
+                  className={"stroke-gray-100 hover:stroke-gray-450"}
+                  Icon={IconZoomIn}
+                  title="Zoom In"
+                  onClick={() => controller.zoomCenter(1)}
+                />
+                <IconButton
+                  className={"stroke-gray-100 hover:stroke-gray-450"}
+                  Icon={IconZoomOut}
+                  title="Zoom Out"
+                  onClick={() => controller.zoomCenter(-1)}
+                />
+                <IconButton
+                  className={"fill-gray-100 hover:fill-gray-450 pb-4"}
+                  Icon={IconZoomReset}
+                  title="Zoom Reset"
+                  onClick={controller.resetCamera}
+                />
               </div>
             ) : null}
           </div>

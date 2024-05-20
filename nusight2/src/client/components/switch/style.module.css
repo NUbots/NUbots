@@ -1,52 +1,52 @@
 .switch {
-    align-items: center;
-    cursor: pointer;
-    display: flex;
-    height: 1.6em;
-    position: relative;
-    width: 2.85em;
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 1.6em;
+  position: relative;
+  width: 2.85em;
 }
 
 .nativeControl {
-    cursor: inherit;
-    height: inherit;
-    opacity: 0;
-    position: absolute;
-    width: inherit;
+  cursor: inherit;
+  height: inherit;
+  opacity: 0;
+  position: absolute;
+  width: inherit;
 }
 
 .thumb {
-    border-radius: 100%;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-    height: 1.6em;
-    left: 0;
-    position: absolute;
-    width: 1.6em;
-    top: 0;
-    transition: transform 250ms cubic-bezier(0.22, 0.61, 0.36, 1) 0ms;
+  border-radius: 100%;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  height: 1.6em;
+  left: 0;
+  position: absolute;
+  width: 1.6em;
+  top: 0;
+  transition: transform 250ms cubic-bezier(0.22, 0.61, 0.36, 1) 0ms;
 }
 
 .thumbOff {
-    background-color: #fafafa;
+  background-color: #fafafa;
 }
 
 .thumbOn {
-    background-color: #1197d3;
-    transform: translateX(1.3em);
+  background-color: #1197d3;
+  transform: translateX(1.3em);
 }
 
 .track {
-    border-radius: 1em;
-    height: 1.1em;
-    width: inherit;
-    position: relative;
+  border-radius: 1em;
+  height: 1.1em;
+  width: inherit;
+  position: relative;
 }
 
 .trackOff {
-    background-color: rgba(0, 0, 0, 0.38);
+  background-color: rgba(0, 0, 0, 0.38);
 }
 
 .trackOn {
-    background-color: #1197d3;
-    opacity: 0.5;
+  background-color: #1197d3;
+  opacity: 0.5;
 }

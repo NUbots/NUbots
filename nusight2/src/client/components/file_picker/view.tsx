@@ -162,10 +162,11 @@ const FilePickerNavButton = observer((props: FilePickerNavButtonProps) => {
   const { Icon, disabled, onClick } = props;
   return (
     <button
-      className={`px-2 py-1 rounded ${disabled
-        ? "opacity-40"
-        : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 dark:focus-visible:bg-gray-700"
-        }`}
+      className={`px-2 py-1 rounded ${
+        disabled
+          ? "opacity-40"
+          : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 dark:focus-visible:bg-gray-700"
+      }`}
       disabled={disabled}
       onClick={onClick}
     >
@@ -302,10 +303,11 @@ const FilePickerPathEditor = observer((props: FilePickerPathEditorProps) => {
       />
       <button
         data-id="filepicker-go-button"
-        className={` rounded-lg h-full px-2 ml-0.5 ${goButtonDisabled
-          ? "opacity-40"
-          : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 focus-visible:text-black"
-          }`}
+        className={` rounded-lg h-full px-2 ml-0.5 ${
+          goButtonDisabled
+            ? "opacity-40"
+            : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 focus-visible:text-black"
+        }`}
         title="Go to path entered"
         disabled={goButtonDisabled}
         onClick={() => {
@@ -365,11 +367,11 @@ const expandPath = (p: string) => {
   const homeDir = "/home/nubots"; // Replace with the actual user's home directory in your application
   const cwd = "/home/nubots/NUbots/nusight2"; // Replace with the actual current working directory in your application
 
-  if (p.startsWith('~')) {
+  if (p.startsWith("~")) {
     return homeDir + p.slice(1);
-  } else if (p === '.') {
+  } else if (p === ".") {
     return cwd;
-  } else if (p.startsWith('./')) {
+  } else if (p.startsWith("./")) {
     return cwd + p.slice(1);
   } else {
     return p;
@@ -394,7 +396,11 @@ const FilePickerSidebarGroup = observer((props: FilePickerSidebarGroupProps) => 
             <button
               key={path}
               title={path}
-              className={`flex text-left items-center px-3 py-1 min-w-0 w-full ${isActive ? "bg-gray-250 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-800"}`}
+              className={`flex text-left items-center px-3 py-1 min-w-0 w-full ${
+                isActive
+                  ? "bg-gray-250 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+                  : "hover:bg-gray-250 dark:hover:bg-gray-800"
+              }`}
               onClick={() => props.onPathChange(path)}
             >
               <IconFolder className="w-4 h-4 mr-2 shrink-0" /> <span className="truncate flex-grow w-0">{name}</span>
@@ -435,12 +441,16 @@ const FilePickerList = observer((props: FilePickerListProps) => {
 
   return (
     <>
-      <div className="file-picker-list grid gap-1 border-b mb-1 sticky top-0 border-gray-300 dark:border-gray-800" style={{ gridTemplateColumns }}>
+      <div
+        className="file-picker-list grid gap-1 border-b mb-1 sticky top-0 border-gray-300 dark:border-gray-800"
+        style={{ gridTemplateColumns }}
+      >
         {filePickerListColumns.map(({ label, key }) => (
           <button
             key={key}
-            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-gray-250 hover:text-black ${key === "size" ? "justify-end" : ""
-              }`}
+            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-gray-250 hover:text-black ${
+              key === "size" ? "justify-end" : ""
+            }`}
             onClick={() => controller.changeSort(key)}
           >
             {label}
@@ -499,8 +509,9 @@ const FilePickerListItems = observer((props: FilePickerListItemsProps) => {
         return (
           <button
             key={entry.name}
-            className={`grid gap-1 w-full items-center text-left py-2 mt-0.5 outline-0 focus-visible:outline-1 ${entryIsSelected ? "hover:bg-gray-250 dark:hover:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-700"
-              }`}
+            className={`grid gap-1 w-full items-center text-left py-2 mt-0.5 outline-0 focus-visible:outline-1 ${
+              entryIsSelected ? "hover:bg-gray-250 dark:hover:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-700"
+            }`}
             style={{ gridTemplateColumns }}
             data-modal-autofocus={index === 0 ? true : null}
             onClick={(event) => {

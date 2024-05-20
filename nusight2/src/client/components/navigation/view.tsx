@@ -14,8 +14,9 @@ const NavigationItemView = ({ url, Icon, children }: NavigationItemViewProps) =>
   <li className="whitespace-nowrap">
     <NavLink
       className={({ isActive }) => {
-        return `p-4 flex flex-col items-center text-gray-100 text-xs leading-5 transition-colors duration-200 hover:bg-gray-700 focus:bg-gray-700 ${isActive ? "!bg-orange-500" : ""
-          }`;
+        return `p-4 flex flex-col items-center text-gray-100 text-xs leading-5 transition-colors duration-200 hover:bg-gray-700 focus:bg-gray-700 ${
+          isActive ? "!bg-orange-500" : ""
+        }`;
       }}
       to={url}
     >

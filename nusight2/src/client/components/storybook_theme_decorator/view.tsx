@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
 export const ThemeDecorator = (Story, context) => {
   context.globals.showThemeButton = true; // Show the theme button when this decorator is used
 
-  if (context.globals.theme === 'both') {
+  if (context.globals.theme === "both") {
     return (
       <div>
         <div className="light pb-4">

@@ -18,7 +18,7 @@ const meta: Meta<typeof Collapsible> = {
         </div>
       );
     },
-    ThemeDecorator
+    ThemeDecorator,
   ],
 };
 
