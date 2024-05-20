@@ -1,6 +1,17 @@
-# Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-servo_gain: 6.64
+mode: IK # Options: IK
 
-keep_level: false
+servo_gains:
+  L_HIP_YAW: 8
+  L_HIP_ROLL: 8
+  L_HIP_PITCH: 8
+  L_KNEE: 8
+  L_ANKLE_PITCH: 8
+  L_ANKLE_ROLL: 8
+  R_HIP_YAW: 8
+  R_HIP_ROLL: 8
+  R_HIP_PITCH: 8
+  R_KNEE: 8
+  R_ANKLE_PITCH: 8
+  R_ANKLE_ROLL: 8

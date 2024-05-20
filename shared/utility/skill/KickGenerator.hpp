@@ -39,7 +39,7 @@
 namespace utility::skill {
 
     using utility::input::LimbID;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::Waypoint;
 
@@ -171,6 +171,14 @@ namespace utility::skill {
          */
         void add_torso_waypoint(const Waypoint<Scalar>& waypoint) {
             torso_waypoints.push_back(waypoint);
+        }
+
+        /**
+         * @brief Clear all waypoints from the foot and torso trajectories.
+         */
+        void clear_waypoints() {
+            foot_waypoints.clear();
+            torso_waypoints.clear();
         }
 
     private:

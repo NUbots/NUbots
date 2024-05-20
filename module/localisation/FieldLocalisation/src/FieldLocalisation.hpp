@@ -38,6 +38,7 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
 
+#include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
 #include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/stats/multivariate.hpp"
@@ -131,7 +132,7 @@ namespace module::localisation {
         utility::math::filter::ParticleFilter<double, FieldModel> filter;
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
-        OccupancyMap<double> fieldline_distance_map;
+        utility::localisation::OccupancyMap<double> fieldline_distance_map;
 
         /// @brief Time at startup
         NUClear::clock::time_point startup_time;

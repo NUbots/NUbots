@@ -1,0 +1,10 @@
+# This role is used to run the system configuration module. The module ensures correct packages are installed on the
+# robot. It sets up the network configuration on the robot.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::configuration::GlobalConfig
+  # System configuration module
+  tools::RoboCupConfiguration
+)
