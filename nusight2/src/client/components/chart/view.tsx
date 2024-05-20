@@ -14,11 +14,9 @@ import { ChartModel } from "./model";
 import { ChartNetwork } from "./network";
 import { TreeLabel } from "./tree_label/view";
 
-type MenuProps = PropsWithChildren & { className?: string };
-
 @observer
 export class ChartView extends Component<{
-  Menu: ComponentType<MenuProps>;
+  Menu: ComponentType<PropsWithChildren>;
   model: ChartModel;
   network: ChartNetwork;
   controller: ChartController;
@@ -31,7 +29,7 @@ export class ChartView extends Component<{
     LineChart,
   }: {
     model: ChartModel;
-    Menu: ComponentType<MenuProps>;
+    Menu: ComponentType<PropsWithChildren>;
     nusightNetwork: NUsightNetwork;
     LineChart: ComponentType<LineChartProps>;
   }): ComponentType {
