@@ -117,7 +117,6 @@ namespace module::purpose {
                 case Position::GOALIE: emit<Task>(std::make_unique<Goalie>(cfg.force_playing)); break;
                 case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
                 case Position::DYNAMIC:
-                    // default to defender?
                     // if (robocup.state == State::UNPENALISED) {
                     // TODO: remember that you need to store penalised robots so you can keep track of location
                     manage_active_robots(robocup);
@@ -176,24 +175,18 @@ namespace module::purpose {
             auto now = std::chrono::steady_clock::now();
             constexpr auto timeout = std::chrono::seconds(10); //TODO: test with faster computer
 
-            // TODO: do better
-            bool changed = false;
-
             // remove inactive robots
-            auto it = active_robots.begin();
-            while (it != active_robots.end()) {
+            for (auto it = active_robots.begin(); it != active_robots.end(); ) {
                 if (it->robot_id != PLAYER_ID && now - it->last_heard_from > timeout) {
                     log<NUClear::DEBUG>("remove player ", int(it->robot_id));
                     it = active_robots.erase(it);
-                    changed = true;
+                    decide_purposes();
                 } else {
                     ++it;
                 }
             }
 
-            if (changed) {
-                decide_purposes();
-            }
+            log<NUClear::DEBUG>("active robots length ", int(active_robots.size()));
         });
     }
 
@@ -228,7 +221,7 @@ namespace module::purpose {
 
 
             bool self_is_leader = active_robots.front().robot_id == PLAYER_ID;
-            // a robot may emit leader positions thinking it is leader, so filter out here
+            // A robot may emit leader messages mistakenly. Ignore them.
             bool other_is_leader = active_robots.front().robot_id == incoming_robot_id;
 
             if (self_is_leader) {
@@ -259,9 +252,8 @@ namespace module::purpose {
 
     // decide everyone's soccer positions if I am the leader
     void Soccer::decide_purposes() {
-        // robocup + position tracker probs needed here later
+        // TODO: robocup + position tracker probs needed here later
         auto purposes_msg = std::make_unique<Purposes>();
-
         uint8_t striker_idx = find_striker();
 
         for (int i = 0; i < int(active_robots.size()); ++i) {
@@ -275,8 +267,18 @@ namespace module::purpose {
         emit(purposes_msg);
     };
 
-    // TODO: listen to soccer positions if they are the leader
+    // listen to soccer positions if they are the leader
     void Soccer::learn_purpose(const RoboCup& robocup) {
+        for (const auto& purpose : robocup.purposes.purposes) {
+            if (purpose.purpose == SoccerPosition::DEFENDER) {
+                emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                log<NUClear::DEBUG>("made defender");
+            }
+            else if (purpose.purpose == SoccerPosition::STRIKER) {
+                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                log<NUClear::DEBUG>("made striker");
+            }
+        }
     }
 
 

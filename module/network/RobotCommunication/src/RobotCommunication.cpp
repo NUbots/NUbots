@@ -89,15 +89,6 @@ namespace module::network {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
-                            for (const auto& purpose : incoming_msg.purposes) {
-                                if (purpose == SoccerPosition::DEFENDER) {
-                                    log<NUClear::DEBUG>("purpose TEST DEFENDER");
-                                }
-                                else if (purpose == SoccerPosition::STRIKER) {
-                                    log<NUClear::DEBUG>("purpose TEST STRIKER");
-                                }
-                            }
-
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
