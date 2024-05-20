@@ -1,0 +1,37 @@
+# This module is used to manually move the robot around in Webots. It is primarily used for testing motions.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  output::ImageCompressor
+  output::Overview
+  network::PlotJuggler
+  # Sensors
+  input::SensorFilter
+  platform::Mujoco
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  skill::SplineKick
+  #skill::GetUp
+  skill::Look
+  # Planners
+  #planning::GetUpPlanner
+  #planning::FallingRelaxPlanner
+  # Strategies
+  #strategy::FallRecovery
+  #strategy::StandStill
+  # Purpose
+  purpose::KeyboardWalk
+)

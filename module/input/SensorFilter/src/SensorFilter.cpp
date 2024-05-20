@@ -229,12 +229,15 @@ namespace module::input {
             // Determine the current position with potential fallback to the last known good position
             double current_position = raw_servo.present_position;
             if (previous_sensors
-                && (fabs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change
-                    || hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
-                current_position = previous_sensors->servo[id].present_position;
+                && std::abs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change) {
                 NUClear::log<NUClear::DEBUG>("Suspected encoder error on servo ",
                                              id,
                                              ": Using last known good position.");
+                log<NUClear::DEBUG>("current_position", current_position);
+                log<NUClear::DEBUG>("previous_sensors->servo[id].present_position",
+                                    previous_sensors->servo[id].present_position);
+                log<NUClear::DEBUG>("cfg.max_servo_change", cfg.max_servo_change);
+                current_position = previous_sensors->servo[id].present_position;
             }
 
             sensors->servo.emplace_back(

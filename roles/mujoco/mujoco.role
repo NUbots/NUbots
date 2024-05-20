@@ -7,6 +7,8 @@ nuclear_role(
   # Simulator Connection
   network::NUClearNet
   network::NetworkForwarder
+  input::SensorFilter
+  network::PlotJuggler
   platform::Mujoco
   output::ImageCompressor
   # support::logging::DataLogging

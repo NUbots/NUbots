@@ -54,71 +54,76 @@ namespace module::platform {
         int W          = 800;
         int H          = 800;
 
-        // load model, init simulation and rendering
-        void initMuJoCo(const char* filename) {
-            // load and compile
-            char error[1000] = "Could not load binary model";
-            if (std::strlen(filename) > 4 && !std::strcmp(filename + std::strlen(filename) - 4, ".mjb")) {
-                m = mj_loadModel(filename, 0);
-            }
-            else {
-                m = mj_loadXML(filename, 0, error, 1000);
-            }
-            if (!m) {
-                mju_error("Load model error: %s", error);
-            }
+        /// @brief The maximum velocity allowed by the NUgus motors in webots
+        double max_velocity_mx64;
+        double max_velocity_mx106;
 
-            // make data, run one computation to initialize all fields
-            d = mj_makeData(m);
-            mj_forward(m, d);
+        /// @brief Current state of a servo
+        struct ServoState {
+            /// @brief ID of the servo
+            int id;
 
-            // initialize visualization data structures
-            mjv_defaultCamera(&cam);
-            mjv_defaultOption(&opt);
-            mjv_defaultScene(&scn);
-            mjr_defaultContext(&con);
+            /// @brief Name of the servo
+            std::string name;
 
-            // create scene and context
-            mjv_makeScene(m, &scn, 2000);
-            mjr_makeContext(m, &con, 200);
+            double p_gain = 32.0 / 255.0;
+            // `i` and `d` gains are always 0
+            static constexpr double i_gain = 0.0;
+            double d_gain                  = 0.0;
 
-            // default free camera
-            mjv_defaultFreeCamera(m, &cam);
-        }
+            double moving_speed  = 0.0;
+            double goal_position = 0.0;
+            double torque        = 0.0;  // 0.0 to 1.0
 
-        // deallocate everything
-        void closeMuJoCo(void) {
-            mj_deleteData(d);
-            mj_deleteModel(m);
-            mjr_freeContext(&con);
-            mjv_freeScene(&scn);
-        }
+            /// Values that are read from the simulator
+            double present_position = 0.0;
+            double present_speed    = 0.0;
+        };
 
+        /// @brief Our current servo states
+        std::map<std::string, ServoState> servo_state;
 
-        // create OpenGL context/window
-        void initOpenGL(void) {
-            // init GLFW
-            if (!glfwInit()) {
-                mju_error("Could not initialize GLFW");
-            }
-
-            // create invisible window, single-buffered
-            glfwWindowHint(GLFW_VISIBLE, 0);
-            glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
-            window = glfwCreateWindow(W, H, "Invisible window", NULL, NULL);
-            if (!window) {
-                mju_error("Could not create GLFW window");
-            }
-
-            // make context current
+        void render(void) {
+            auto now = NUClear::clock::now();
+            // std::unique_lock<std::mutex> lock(render_mutex);
             glfwMakeContextCurrent(window);
-        }
 
+            // update abstract scene
+            mjv_updateScene(m, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
 
-        // close OpenGL context/window
-        void closeOpenGL(void) {
-            // terminate GLFW
-            glfwTerminate();
+            // render scene in offscreen buffer
+            mjr_render(viewport, &scn, &con);
+
+            // add time stamp in upper-left corner
+            char stamp[50];
+            mju::sprintf_arr(stamp, "Time = %.3f", d->time);
+            mjr_overlay(mjFONT_NORMAL, mjGRID_TOPLEFT, viewport, stamp, NULL, &con);
+
+            // read rgb and depth buffers
+            mjr_readPixels(rgb, depth, viewport, &con);
+
+            auto image            = std::make_unique<message::input::Image>();
+            image->timestamp      = NUClear::clock::now();
+            image->dimensions.x() = W;
+            image->dimensions.y() = H;
+
+            // flip the image
+            for (int row = 0; row < H / 2; ++row) {
+                for (int col = 0; col < W; ++col) {
+                    for (int channel = 0; channel < 3; ++channel) {
+                        std::swap(rgb[(row * W + col) * 3 + channel], rgb[((H - 1 - row) * W + col) * 3 + channel]);
+                    }
+                }
+            }
+
+            std::vector<uint8_t> image_data(rgb, rgb + 3 * W * H);
+            image->data.assign(image_data.begin(), image_data.end());
+            image->format = utility::vision::fourcc("RGB3");
+            image->name   = "Mujoco";
+            emit(std::move(image));
+            auto end      = NUClear::clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
+            log<NUClear::DEBUG>("Rendering took", duration, "ms");
         }
     };
 

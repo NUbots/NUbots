@@ -25,37 +25,68 @@
     <mesh name="right_upper_arm_visual" file="right_upper_arm_visual.stl"/>
     <mesh name="right_lower_arm_visual" file="right_lower_arm_visual.stl"/>
   </asset>
+
   <actuator>
-    <!-- Physical limits of the actuator. -->
-    <!-- Values taken from https://www.universal-robots.com/articles/ur-articles/max-joint-torques/ -->
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_yaw" name="torq_j1"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_roll" name="torq_j2"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_pitch" name="torq_j3"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_knee_pitch" name="torq_j4"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_ankle_pitch" name="torq_j5"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_ankle_roll" name="torq_j6"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_yaw" name="left_hip_yaw"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_roll" name="left_hip_roll"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_pitch" name="left_hip_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_knee_pitch" name="left_knee_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_ankle_pitch" name="left_ankle_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_ankle_roll" name="left_ankle_roll"/>
 
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_yaw" name="torq_j7"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_roll" name="torq_j8"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_pitch" name="torq_j9"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_knee_pitch" name="torq_j10"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_ankle_pitch" name="torq_j11"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_ankle_roll" name="torq_j12"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_yaw" name="right_hip_yaw"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_roll" name="right_hip_roll"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_pitch" name="right_hip_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_knee_pitch" name="right_knee_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_ankle_pitch" name="right_ankle_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_ankle_roll" name="right_ankle_roll"/>
 
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="neck_yaw" name="torq_j13"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="head_pitch" name="torq_j14"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="neck_yaw" name="neck_yaw"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="head_pitch" name="head_pitch"/>
 
-    <motor ctrllimited="true" ctrlrange="-360.0 360.0" joint="left_shoulder_pitch" name="torq_j15"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_shoulder_roll" name="torq_j16"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_elbow_pitch" name="torq_j17"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_shoulder_pitch" name="torq_j18"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_shoulder_roll" name="torq_j19"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_elbow_pitch" name="torq_j20"/>
+    <motor ctrllimited="true" ctrlrange="-360.0 360.0" joint="left_shoulder_pitch" name="left_shoulder_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_shoulder_roll" name="left_shoulder_roll"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_elbow_pitch" name="left_elbow_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_shoulder_pitch" name="right_shoulder_pitch"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_shoulder_roll" name="right_shoulder_roll"/>
+    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_elbow_pitch" name="right_elbow_pitch"/>
   </actuator>
+
+  <sensor>
+    <actuatorpos name="left_hip_yaw" actuator="left_hip_yaw"/>
+    <actuatorpos name="left_hip_roll" actuator="left_hip_roll"/>
+    <actuatorpos name="left_hip_pitch" actuator="left_hip_pitch"/>
+    <actuatorpos name="left_knee_pitch" actuator="left_knee_pitch"/>
+    <actuatorpos name="left_ankle_pitch" actuator="left_ankle_pitch"/>
+    <actuatorpos name="left_ankle_roll" actuator="left_ankle_roll"/>
+
+    <actuatorpos name="right_hip_yaw" actuator="right_hip_yaw"/>
+    <actuatorpos name="right_hip_roll" actuator="right_hip_roll"/>
+    <actuatorpos name="right_hip_pitch" actuator="right_hip_pitch"/>
+    <actuatorpos name="right_knee_pitch" actuator="right_knee_pitch"/>
+    <actuatorpos name="right_ankle_pitch" actuator="right_ankle_pitch"/>
+    <actuatorpos name="right_ankle_roll" actuator="right_ankle_roll"/>
+
+    <actuatorpos name="neck_yaw" actuator="neck_yaw"/>
+    <actuatorpos name="head_pitch" actuator="head_pitch"/>
+
+    <actuatorpos name="left_shoulder_pitch" actuator="left_shoulder_pitch"/>
+    <actuatorpos name="left_shoulder_roll" actuator="left_shoulder_roll"/>
+    <actuatorpos name="left_elbow_pitch" actuator="left_elbow_pitch"/>
+    <actuatorpos name="right_shoulder_pitch" actuator="right_shoulder_pitch"/>
+    <actuatorpos name="right_shoulder_roll" actuator="right_shoulder_roll"/>
+    <actuatorpos name="right_elbow_pitch" actuator="right_elbow_pitch"/>
+
+    <gyro          name='gyro'    site='imu' noise='5e-4' cutoff='34.9'/>
+    <accelerometer name='accelerometer' site='imu' noise='1e-2' cutoff='157'/>
+
+  </sensor>
+
   <worldbody>
     <body name="torso">
       <inertial pos="-0.000971341 -7.63301e-05 0.0898493" quat="0.998034 0.00199235 0.0599357 0.0182343" mass="1.83264" diaginertia="0.0156368 0.0131516 0.00578565"/>
       <joint name="torso_free_joint" type="free"/>
+      <site name='imu' size='0.01' pos='0 0 0'/>
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.286275 0.286275 0.286275 1" mesh="torso_visual"/>
       <geom size="0.0697546 0.0949914 0.130902" pos="-0.00200103 -1.04979e-05 0.108568" type="box" rgba="0.286275 0.286275 0.286275 0"/>
       <body name="left_hip_yaw" pos="0 0.055 0" quat="1 0 0 0">
