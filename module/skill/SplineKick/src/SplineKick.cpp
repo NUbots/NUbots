@@ -64,6 +64,7 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Add kick motion waypoints
+            kick_generator.clear_waypoints();
             for (const auto& foot_waypoint : config["foot_waypoints"].config) {
                 Waypoint<double> waypoint;
                 Eigen::Vector4d frame = foot_waypoint.as<Expression>();
@@ -140,8 +141,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = kick_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, kick_generator.is_left_foot_planted()));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !kick_generator.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
