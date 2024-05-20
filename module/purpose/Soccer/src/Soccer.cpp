@@ -124,7 +124,7 @@ namespace module::purpose {
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
-            // SPC: Need to remove robot from active_robots
+            // Need to remove penalised robot from active_robots
             for (auto it = active_robots.begin(); it != active_robots.end(); ++it) {
                 if (it->robot_id == self_penalisation.robot_id) {
                     active_robots.erase(it);
@@ -146,6 +146,7 @@ namespace module::purpose {
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
+                // TODO: check if we still need the FindPurpose thing
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 auto msg = std::make_unique<RoboCup>();
                 msg->current_pose.player_id = PLAYER_ID;
@@ -166,6 +167,7 @@ namespace module::purpose {
             }
         });
 
+        // check if we have heard from robots periodically, and remove them if not
         on<Every<2, Per<std::chrono::seconds>>>().then([this] {
             auto now = std::chrono::steady_clock::now();
             constexpr auto timeout = std::chrono::seconds(10); //TODO: test with faster computer
@@ -186,7 +188,7 @@ namespace module::purpose {
     }
 
     void Soccer::add_robot(RobotInfo new_robot) {
-        // Find the correct insertion point using std::lower_bound
+        // Find the correct insertion point
         auto insertPos = std::lower_bound(active_robots.begin(), active_robots.end(), new_robot,
             [](const RobotInfo& a, const RobotInfo& b) {
                 return a.robot_id < b.robot_id;
@@ -210,6 +212,7 @@ namespace module::purpose {
         if (it != active_robots.end()) {
             // Update existing robot's last_heard_from
             it->last_heard_from = now;
+
             // TODO: may need more data
             // Update existing robot's x position
         } else {
