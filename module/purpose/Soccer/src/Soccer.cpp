@@ -117,8 +117,6 @@ namespace module::purpose {
                 case Position::GOALIE: emit<Task>(std::make_unique<Goalie>(cfg.force_playing)); break;
                 case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
                 case Position::DYNAMIC:
-                    // if (robocup.state == State::UNPENALISED) {
-                    // TODO: remember that you need to store penalised robots so you can keep track of location
                     manage_active_robots(robocup);
                     break;
                 default: log<NUClear::ERROR>("Invalid robot position");
@@ -127,10 +125,8 @@ namespace module::purpose {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // SPC: Need to remove robot from active_robots
-            // TODO: keeping robot around for now, might want to keep info, revisit
             for (auto it = active_robots.begin(); it != active_robots.end(); ++it) {
                 if (it->robot_id == self_penalisation.robot_id) {
-                    penalised_robots.push_back(*it);
                     active_robots.erase(it);
                     break;
                 }
@@ -148,7 +144,6 @@ namespace module::purpose {
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
-            // TODO: maybe take robot from penalised vector and add robot to active_robots
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
@@ -202,6 +197,9 @@ namespace module::purpose {
     }
 
     void Soccer::manage_active_robots(const RoboCup& robocup) {
+        // do not manage penalised robots
+        if (robocup.state == State::PENALISED) { return; }
+
         uint8_t incoming_robot_id = robocup.current_pose.player_id;
         auto now = std::chrono::steady_clock::now();
 
@@ -221,7 +219,7 @@ namespace module::purpose {
 
 
             bool self_is_leader = active_robots.front().robot_id == PLAYER_ID;
-            // A robot may emit leader messages mistakenly. Ignore them.
+            // A robot may emit leader messages mistakenly. Only listen to real leader.
             bool other_is_leader = active_robots.front().robot_id == incoming_robot_id;
 
             if (self_is_leader) {

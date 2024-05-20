@@ -66,17 +66,6 @@ namespace module::purpose {
             operator int() const {
                 return value;
             }
-
-            // TODO: temp, remove me
-            std::string toString() const {
-                switch(value) {
-                    case STRIKER: return "STRIKER";
-                    case GOALIE: return "GOALIE";
-                    case DEFENDER: return "DEFENDER";
-                    case DYNAMIC: return "DYNAMIC";
-                    default: throw std::runtime_error("Invalid value for Position");
-                }
-            }
         };
 
         /// @brief Stores configuration values
@@ -113,9 +102,6 @@ namespace module::purpose {
 
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;
-
-        /// @brief Store penalised robots
-        std::list<RobotInfo> penalised_robots;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
