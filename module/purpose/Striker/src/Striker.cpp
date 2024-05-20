@@ -147,7 +147,8 @@ namespace module::purpose {
         on<Provide<CornerKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Goal kick
-        on<Provide<GoalKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<GoalKickStriker>>().then([this] { play(); });
+
 
         // Throw in
         on<Provide<ThrowInStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
