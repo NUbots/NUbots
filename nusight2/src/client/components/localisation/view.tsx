@@ -590,8 +590,9 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel; }) => {
         if (child instanceof THREE.Mesh) {
           // Set opacity for all mesh children
           child.material.transparent = true;
-          child.material.color = new THREE.Color(0xadd8e6);
-          child.material.opacity = 0.4;
+          // light green
+          child.material.color = new THREE.Color(0x90ee90);
+          child.material.opacity = 0.3;
         }
       });
     }
