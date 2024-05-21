@@ -1,7 +1,7 @@
 #[[
 MIT License
 
-Copyright (c) 2023 NUbots
+Copyright (c) 2024 NUbots
 
 This file is part of the NUbots codebase.
 See https://github.com/NUbots/NUbots for further info.
@@ -25,10 +25,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
-# Check subcontroller before we build
-if(NOT SUBCONTROLLER STREQUAL "OpenCR")
-  return()
-endif()
+# Find Curses (we need ncurses)
+set(CURSES_NEED_NCURSES TRUE)
+find_package(Curses REQUIRED)
 
 # Build our NUClear module
-nuclear_module()
+nuclear_module(INCLUDES ${CURSES_INCLUDE_DIR} LIBRARIES ${CURSES_LIBRARIES})

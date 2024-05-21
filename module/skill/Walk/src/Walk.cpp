@@ -105,6 +105,9 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+
+            // Since walk needs a Stability message to run, emit one at the beginning
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
         // Start - Runs every time the Walk provider starts (wasn't running)
@@ -125,11 +128,12 @@ namespace module::skill {
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
            With<Sensors>,
+           With<Stability>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
+            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -137,14 +141,16 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
 
-                // Update the walk engine and emit the stability state
-                switch (
-                    walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase).value) {
-                    case WalkState::State::WALKING:
-                    case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
-                    case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkState::State::UNKNOWN:
-                    default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                // Update the walk engine and emit the stability state, only if not falling/fallen
+                if (stability >= Stability::DYNAMIC) {
+                    switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
+                                .value) {
+                        case WalkState::State::WALKING:
+                        case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
+                        case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                        case WalkState::State::UNKNOWN:
+                        default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                    }
                 }
 
                 // Compute the goal position time

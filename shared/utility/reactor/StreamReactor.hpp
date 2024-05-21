@@ -1,6 +1,7 @@
 #ifndef UTILITY_REACTOR_STREAMREACTOR_HPP
 #define UTILITY_REACTOR_STREAMREACTOR_HPP
 
+#include <cctype>
 #include <fmt/format.h>
 #include <memory>
 #include <mutex>
@@ -93,6 +94,14 @@ namespace utility::reactor {
                                                             errno));
                     }
                     bytes_written += written;
+                }
+                if (log_level <= NUClear::TRACE) {
+                    std::stringstream debug_string{};
+                    for (const auto& byte : t.data) {
+                        debug_string << std::isprint(byte) ? std::string(1, char(byte))
+                                                           : fmt::format("\\{:#04x} ", byte);
+                    }
+                    log<NUClear::TRACE>("Wrote:", debug_string.str());
                 }
             });
 
@@ -427,9 +436,15 @@ namespace utility::reactor {
          * passes it to the parser. Once the parser finds a packet it emits that packet.
          */
         void process(const int& fd) {
+            std::stringstream debug_string;
             // Read bytes one at a time
             uint8_t byte = 0;
             while (::read(fd, &byte, 1) == 1) {
+
+                if (log_level <= NUClear::TRACE) {
+                    debug_string << std::isprint(byte) ? std::string(1, char(byte)) : fmt::format("\\{:#04x} ", byte);
+                }
+
                 try {
                     // Pass the byte to the parser and emit the packet if it is complete
                     auto packet = parser(byte);
@@ -442,6 +457,9 @@ namespace utility::reactor {
                 catch (const std::exception& ex) {
                     log<NUClear::WARN>(ex.what());
                 }
+            }
+            if (log_level <= NUClear::TRACE) {
+                log<NUClear::TRACE>("Read:", debug_string.str());
             }
         }
 

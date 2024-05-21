@@ -26,7 +26,7 @@ SOFTWARE.
 ]]
 
 # Check subcontroller before we build
-if(NOT SUBCONTROLLER STREQUAL "OpenCR")
+if(NOT SUBCONTROLLER STREQUAL "NUSense")
   return()
 endif()
 
