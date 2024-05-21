@@ -31,6 +31,8 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "utility/math/euler.hpp"
+
 namespace module::strategy {
 
     class WalkToFieldPosition : public ::extension::behaviour::BehaviourReactor {

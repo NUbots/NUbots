@@ -28,13 +28,18 @@ syntax = "proto3";
 package message.planning;
 
 import "Vector.proto";
+import "Transform.proto";
 
 /// Plan a path to walk to the specified point
 message WalkTo {
     /// Point {P} to walk to from robot {R} in robot {r} space
     vec3 rPRr = 1;
+
     /// Desired heading in robot {r} space (radians)
     double heading = 2;
+
+    /// Transform from desired pose {p} to robot {r} space
+    iso3 Hrp = 3;
 }
 
 /// Turn on the spot in the given direction
