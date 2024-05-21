@@ -267,6 +267,7 @@ namespace module::purpose {
             } else {
                 purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
             }
+            // TODO: if we are in first loop iteration, assign
         }
 
         emit(purposes_msg);
@@ -275,13 +276,15 @@ namespace module::purpose {
     // listen to soccer positions if they are the leader
     void Soccer::learn_purpose(const RoboCup& robocup) {
         for (const auto& purpose : robocup.purposes.purposes) {
-            if (purpose.purpose == SoccerPosition::DEFENDER) {
-                emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-                log<NUClear::DEBUG>("made defender");
-            }
-            else if (purpose.purpose == SoccerPosition::STRIKER) {
-                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                log<NUClear::DEBUG>("made striker");
+            if (purpose.player_id == PLAYER_ID ) {
+                if (purpose.purpose == SoccerPosition::DEFENDER) {
+                    emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                    log<NUClear::DEBUG>("made defender");
+                }
+                else if (purpose.purpose == SoccerPosition::STRIKER) {
+                    emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                    log<NUClear::DEBUG>("made striker");
+                }
             }
         }
     }
