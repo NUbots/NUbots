@@ -73,44 +73,46 @@ namespace module::strategy {
 
                 // Compute the current position error and heading error in field {f} space
                 const double position_error = Hrp.translation().norm();
-                const double heading_error  = mat_to_rpy_intrinsic(Hrp.linear()).z();
+                const double heading_error  = std::abs(mat_to_rpy_intrinsic(Hrp.linear()).z());
+                log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
 
                 // If we have stopped but our position and heading error is now above resume tolerance, resume
                 // walking
-                if (stopped && position_error < cfg.resume_tolerance_position
-                    && heading_error < cfg.resume_tolerance_heading) {
-                    stopped = true;
-                    return;
+                if (stopped
+                    && (position_error > cfg.resume_tolerance_position
+                        || heading_error > cfg.resume_tolerance_heading)) {
+                    stopped = false;
                 }
 
                 // If the error in the desired field position and heading is low enough, don't do anything
                 if (!stopped && position_error < cfg.stop_tolerance_position
                     && heading_error < cfg.stop_tolerance_heading) {
                     stopped = true;
+                }
+
+                // If we are stopped, do nothing
+                if (stopped) {
                     return;
                 }
 
-                // If we are at position, but not at heading, then rotate in place in the direction of the desired
-                // heading
-                if (position_error < cfg.stop_tolerance_position) {
-                    // Get the desired heading in robot space
-                    const double desired_heading = mat_to_rpy_intrinsic(Hrp.linear()).z();
-                    bool clockwise               = desired_heading < 0;
-                    if (heading_error > cfg.stop_tolerance_heading) {
-                        emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
-                        log<NUClear::DEBUG>("Rotating in place to desired heading");
-                    }
-                }
-                // Otherwise, walk directly to the field position
-                else {
-                    log<NUClear::DEBUG>("Walking directly to field position");
+                // If we are far from position and desired heading, walk directly to the field position
+                if (position_error > cfg.stop_tolerance_position && heading_error > cfg.stop_tolerance_heading) {
                     const double desired_heading = std::atan2(Hrp.translation().y(), Hrp.translation().x());
                     emit<Task>(std::make_unique<WalkTo>(Hrp.translation(), desired_heading, Hrp));
                     emit(std::make_unique<WalkTo>(Hrp.translation(), desired_heading, Hrp));
+                    log<NUClear::DEBUG>("Walking to desired position");
                 }
-
-                if (log_level <= NUClear::DEBUG) {
-                    log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
+                // If we are close to desired position but not orientated correctly, rotate in place
+                else if (position_error < cfg.stop_tolerance_position && heading_error > cfg.stop_tolerance_heading) {
+                    // Get the desired heading in robot space
+                    const double desired_heading = mat_to_rpy_intrinsic(Hrp.linear()).z();
+                    bool clockwise               = desired_heading < 0;
+                    emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
+                    log<NUClear::DEBUG>("Rotating in place to desired heading");
+                }
+                // Otherwise,do nothing
+                else {
+                    log<NUClear::DEBUG>("At desired position, stopping");
                 }
             });
     }
