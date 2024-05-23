@@ -63,6 +63,7 @@ class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
       name: "Darwin #1",
       address: "127.0.0.1",
       port: 1234,
+      type: "nuclearnet-peer",
     });
     return LocalisationRobotModel.of(robotModel);
   }

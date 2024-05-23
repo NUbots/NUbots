@@ -1,6 +1,8 @@
 import { computed, observable } from "mobx";
 
-export type FilePickerEntry = {
+import { PathSegments } from "../../file/path_segments";
+
+export type FileDialogEntry = {
   type: "file" | "directory";
   name: string;
   path: string;
@@ -10,7 +12,7 @@ export type FilePickerEntry = {
 };
 
 /** Generic path information: a name and full path. */
-export type FilePickerPath = {
+export type FileDialogPath = {
   /** Last entry in the path: the name of the file or directory */
   name: string;
   /** The full path */
@@ -18,71 +20,89 @@ export type FilePickerPath = {
 };
 
 /** A path segment description: the name of the segment and the full path up to that name. */
-export type FilePickerPathSegment = {
+export type FileDialogPathSegment = {
   name: string;
   path: string;
 };
 
-export type FilePickerSort = {
+export type FileDialogSort = {
   column: "name" | "dateModified" | "size";
   direction: "asc" | "desc";
 };
 
-export type FilePickerNavigationHistory = {
+export type FileDialogNavigationHistory = {
   /** Paths in the back history, from oldest to newest */
   back: string[];
   /** Paths in the forward history, from oldest to newest */
   forward: string[];
 };
 
-export class FilePickerModel {
-  /** Whether or not the file picker is shown */
+type EntryComparison = (a: FileDialogEntry, b: FileDialogEntry) => number;
+
+const entryComparison: Record<string, EntryComparison> = {
+  name: (a, b) => {
+    return a.name.localeCompare(b.name, "en", { numeric: true, sensitivity: "base" });
+  },
+  dateModified: (a, b) => {
+    return a.dateModified.valueOf() - b.dateModified.valueOf();
+  },
+  size: (a, b) => {
+    return a.size - b.size;
+  },
+} as const;
+
+export class FileDialogModel {
+  /** Whether or not the file dialog is shown */
   @observable isShown: boolean;
 
-  /** Error to show in the file picker, e.g. when attempting to navigate to a non-existent path */
+  /** Error to show in the file dialog, e.g. when attempting to navigate to a non-existent path */
   @observable error: string;
 
-  /** The current path of the file picker */
+  /** The current path of the file dialog */
   @observable currentPath: string;
 
   /** The entries (files and folders) at the current path */
-  @observable currentPathEntries?: FilePickerEntry[];
+  @observable currentPathEntries?: FileDialogEntry[];
+
+  /** The previously visited path, to highlight where we have come from */
+  @observable lastVisitedPath: PathSegments;
 
   /** How to sort entries for display */
-  @observable sortEntries: FilePickerSort;
+  @observable sortEntries: FileDialogSort;
 
   /** List of quick paths to show in the sidebar */
-  @observable quickPaths: FilePickerPath[];
+  @observable quickPaths: FileDialogPath[];
 
   /** List of recent paths to show in the sidebar */
-  @observable recentPaths: FilePickerPath[];
+  @observable recentPaths: FileDialogPath[];
 
-  /** Full paths to files currently selected in the file picker */
-  @observable selectedFiles: string[];
+  /** Currently selected entries of the current path */
+  @observable selectedEntries: FileDialogEntry[];
 
   /** The index of the last selected file in the current path entries */
-  @observable lastSelectedFileIndex?: number;
+  @observable lastSelectedEntryIndex?: number;
 
-  /** The navigation history of the file picker: keeps track of the paths that
+  /** The navigation history of the file dialog: keeps track of the paths that
    *  were visited in the back and forward directions */
-  @observable navigationHistory: FilePickerNavigationHistory;
+  @observable navigationHistory: FileDialogNavigationHistory;
 
   constructor(opts: {
     isShown: boolean;
     error: string;
     currentPath: string;
-    currentPathEntries?: FilePickerEntry[];
-    quickPaths: FilePickerPath[];
-    recentPaths: FilePickerPath[];
-    selectedFiles: string[];
+    currentPathEntries?: FileDialogEntry[];
+    quickPaths: FileDialogPath[];
+    recentPaths: FileDialogPath[];
+    selectedEntries: FileDialogEntry[];
   }) {
     this.isShown = opts.isShown;
     this.error = opts.error;
     this.currentPath = opts.currentPath;
     this.currentPathEntries = opts.currentPathEntries;
+    this.lastVisitedPath = new PathSegments(this.currentPath);
     this.quickPaths = opts.quickPaths;
     this.recentPaths = opts.recentPaths;
-    this.selectedFiles = opts.selectedFiles;
+    this.selectedEntries = opts.selectedEntries;
 
     this.sortEntries = { column: "name", direction: "asc" };
     this.navigationHistory = { back: [], forward: [] };
@@ -93,33 +113,49 @@ export class FilePickerModel {
       isShown?: boolean;
       error?: string;
       currentPath?: string;
-      currentPathEntries?: FilePickerEntry[];
-      quickPaths?: FilePickerPath[];
-      recentPaths?: FilePickerPath[];
-      selectedFiles?: string[];
+      currentPathEntries?: FileDialogEntry[];
+      quickPaths?: FileDialogPath[];
+      recentPaths?: FileDialogPath[];
+      selectedEntries?: FileDialogEntry[];
     } = {},
   ) {
-    return new FilePickerModel({
+    return new FileDialogModel({
       isShown: false,
       error: "",
       currentPath: "",
       currentPathEntries: undefined,
-      quickPaths: [],
+      quickPaths: [
+        { name: "/", path: "/" },
+        { name: "Home", path: "~" },
+        { name: "NUsight CWD", path: "." },
+      ],
       recentPaths: [],
-      selectedFiles: [],
+      selectedEntries: [],
       ...opts,
     });
   }
 
+  /** Full paths to the currently selected files in the dialog */
+  @computed
+  get selectedFilePaths(): ReadonlyArray<string> {
+    return this.selectedEntries.filter((entry) => entry.type === "file").map((file) => file.path);
+  }
+
+  /** Full paths to the currently selected directory entries in the dialog */
+  @computed
+  get selectedDirectoryPaths(): ReadonlyArray<string> {
+    return this.selectedEntries.filter((entry) => entry.type === "directory").map((directory) => directory.path);
+  }
+
   /** List of segments (name, path) in the current path */
   @computed
-  get currentPathSegments(): FilePickerPathSegment[] {
+  get currentPathSegments(): FileDialogPathSegment[] {
     return parsePathSegments(this.currentPath);
   }
 
   /** List of the current path entries, sorted by the current sort */
   @computed
-  get currentPathEntriesSorted(): FilePickerEntry[] | undefined {
+  get currentPathEntriesSorted(): FileDialogEntry[] | undefined {
     if (!this.currentPathEntries) {
       return undefined;
     }
@@ -131,19 +167,10 @@ export class FilePickerModel {
     const sortBy = this.sortEntries.column;
     const direction = this.sortEntries.direction;
 
-    function sorter(a: FilePickerEntry, b: FilePickerEntry) {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
+    const compare = entryComparison[sortBy];
 
-      if (aValue < bValue) {
-        return direction === "asc" ? -1 : 1;
-      }
-
-      if (aValue > bValue) {
-        return direction === "asc" ? 1 : -1;
-      }
-
-      return 0;
+    function sorter(a: FileDialogEntry, b: FileDialogEntry) {
+      return direction === "asc" ? compare(a, b) : -compare(a, b);
     }
 
     // Sort the directories
@@ -152,17 +179,27 @@ export class FilePickerModel {
     // Sort the files
     const files = this.currentPathEntries.filter((entry) => entry.type === "file").sort(sorter);
 
-    // Directories first if sorting ASC, files first if sorting DESC
-    return direction === "asc" ? [...directories, ...files] : [...files, ...directories];
+    // Put directories first, then files
+    return [...directories, ...files];
   }
 
-  /** Summary of the selected files, to show at the bottom of the picker */
+  /** Summary of the selected files, to show at the bottom of the dialog */
   @computed
   get selectedFilesSummary(): string {
-    return this.selectedFiles.length === 1
-      ? this.selectedFiles[0]
-      : `${this.selectedFiles[0]} + ${this.selectedFiles.length - 1} ${
-          this.selectedFiles.length === 2 ? "file" : "files"
+    return this.selectedFilePaths.length === 1
+      ? this.selectedFilePaths[0]
+      : `${this.selectedFilePaths[0]} + ${this.selectedFilePaths.length - 1} ${
+          this.selectedFilePaths.length === 2 ? "file" : "files"
+        }`;
+  }
+
+  /** Summary of the selected directory paths, to show at the bottom of the dialog */
+  @computed
+  get selectedDirectoriesSummary(): string {
+    return this.selectedDirectoryPaths.length === 1
+      ? this.selectedDirectoryPaths[0]
+      : `${this.selectedDirectoryPaths[0]} + ${this.selectedDirectoryPaths.length - 1} ${
+          this.selectedDirectoryPaths.length === 2 ? "path" : "paths"
         }`;
   }
 }
@@ -181,7 +218,7 @@ export class FilePickerModel {
  * ]
  * ```
  */
-export function parsePathSegments(path: string): FilePickerPathSegment[] {
+export function parsePathSegments(path: string): FileDialogPathSegment[] {
   // Ignore paths with only whitespace
   if (path.trim().length === 0) {
     return [];

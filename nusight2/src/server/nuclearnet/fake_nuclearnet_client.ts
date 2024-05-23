@@ -4,7 +4,7 @@ import { NUClearNetSend } from "nuclearnet.js";
 import { NUClearNetPeer } from "nuclearnet.js";
 import { NUClearNetPacket } from "nuclearnet.js";
 
-import { NUClearEventListener } from "../../shared/nuclearnet/nuclearnet_client";
+import { NUClearEventListener, NUClearNetPeerWithType } from "../../shared/nuclearnet/nuclearnet_client";
 import { NUClearPacketListener } from "../../shared/nuclearnet/nuclearnet_client";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 
@@ -21,7 +21,7 @@ import { parseEventString } from "./parse_event_string";
  * The fake helpers are public, but should only be used by FakeNUClearNetServer.
  */
 export class FakeNUClearNetClient implements NUClearNetClient {
-  peer?: NUClearNetPeer;
+  peer?: NUClearNetPeerWithType;
   private events: EventEmitter;
   private connected: boolean;
 
@@ -44,6 +44,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
       address: "127.0.0.1",
       // TODO (Annable): Inject a random function.
       port: Math.floor(Math.random() * (65536 - 1024) + 1024),
+      type: "nuclearnet-peer",
     };
     this.connected = true;
     const disconnect = this.server.connect(this);
@@ -55,7 +56,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
   }
 
   onJoin(cb: NUClearEventListener): () => void {
-    const listener = (peer: NUClearNetPeer) => {
+    const listener = (peer: NUClearNetPeerWithType) => {
       if (this.connected) {
         cb(peer);
       }
@@ -65,7 +66,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
   }
 
   onLeave(cb: NUClearEventListener): () => void {
-    const listener = (peer: NUClearNetPeer) => {
+    const listener = (peer: NUClearNetPeerWithType) => {
       if (this.connected) {
         cb(peer);
       }

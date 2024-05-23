@@ -5,7 +5,7 @@ import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
 import { message } from "../../../shared/messages";
 import { Clock } from "../../../shared/time/clock";
-import { toSeconds } from "../../../shared/time/timestamp";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -13,37 +13,11 @@ import { RobotModel } from "../robot/model";
 import { ChartModel } from "./model";
 import { DataSeries } from "./model";
 import { TreeData } from "./model";
-
-import Sensors = message.input.Sensors;
 import DataPoint = message.eye.DataPoint;
-
-const ServoIds = [
-  "Right Shoulder Pitch",
-  "Left Shoulder Pitch",
-  "Right Shoulder Roll",
-  "Left Shoulder Roll",
-  "Right Elbow",
-  "Left Elbow",
-  "Right Hip Yaw",
-  "Left Hip Yaw",
-  "Right Hip Roll",
-  "Left Hip Roll",
-  "Right Hip Pitch",
-  "Left Hip Pitch",
-  "Right Knee",
-  "Left Knee",
-  "Right Ankle Pitch",
-  "Left Ankle Pitch",
-  "Right Ankle Roll",
-  "Left Ankle Roll",
-  "Head Yaw",
-  "Head Pitch",
-];
 
 export class ChartNetwork {
   constructor(private clock: Clock, private network: Network, private model: ChartModel) {
     this.network.on(DataPoint, this.onDataPoint);
-    this.network.on(Sensors, this.onSensorData);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: ChartModel): ChartNetwork {
@@ -81,7 +55,7 @@ export class ChartNetwork {
 
       if (!node.has(key)) {
         // Create a new series with the start time of this datapoint
-        node.set(key, DataSeries.of(toSeconds(data.timestamp)));
+        node.set(key, DataSeries.of(TimestampObject.toSeconds(data.timestamp)));
       }
 
       const leaf = node.get(key) as DataSeries;
@@ -91,7 +65,7 @@ export class ChartNetwork {
       const chartTime = this.clock.now() - this.model.startTime;
 
       // Now according to the datapoint
-      const pointTime = toSeconds(data.timestamp) - leaf.startTime;
+      const pointTime = TimestampObject.toSeconds(data.timestamp) - leaf.startTime;
 
       // Estimate the drifting distance between the clocks
       leaf.updateDelta(pointTime - chartTime);
@@ -117,171 +91,5 @@ export class ChartNetwork {
         series.splice(0, newStart);
       }
     });
-  };
-
-  @action
-  private onSensorData = (robotModel: RobotModel, sensorData: Sensors) => {
-    const { accelerometer, gyroscope, battery, voltage, button, servo, feet } = sensorData;
-    const timestamp = sensorData.timestamp!;
-
-    if (accelerometer) {
-      this.onDataPoint(
-        robotModel,
-        new DataPoint({
-          label: "Sensor/Accelerometer",
-          value: [accelerometer.x!, accelerometer.y!, accelerometer.z!],
-          timestamp,
-        }),
-      );
-    }
-
-    if (gyroscope) {
-      this.onDataPoint(
-        robotModel,
-        new DataPoint({
-          label: "Sensor/Gyroscope",
-          value: [gyroscope.x!, gyroscope.y!, gyroscope.z!],
-          timestamp,
-        }),
-      );
-    }
-
-    if (battery) {
-      this.onDataPoint(
-        robotModel,
-        new DataPoint({
-          label: "Sensor/Battery",
-          value: [battery],
-          timestamp,
-        }),
-      );
-    }
-
-    if (voltage) {
-      this.onDataPoint(
-        robotModel,
-        new DataPoint({
-          label: "Sensor/CM740 Voltage",
-          value: [voltage],
-          timestamp,
-        }),
-      );
-    }
-
-    this.onDataPoint(
-      robotModel,
-      new DataPoint({
-        label: "Sensor/Buttons",
-        value: button.map((b) => (b.value ? 1 : 0)),
-        timestamp,
-      }),
-    );
-
-    if (feet.length == 2) {
-      this.onDataPoint(
-        robotModel,
-        new DataPoint({
-          label: "Sensor/Foot Down/Right",
-          value: [feet[0].down ? 1 : 0],
-          timestamp,
-        }),
-      );
-
-      this.onDataPoint(
-        robotModel,
-        new DataPoint({
-          label: "Sensor/Foot Down/Left",
-          value: [feet[1].down ? 1 : 0],
-          timestamp,
-        }),
-      );
-    }
-
-    // Servos
-    if (servo.length) {
-      servo.forEach((servo: Sensors.IServo, index: number) => {
-        const name = ServoIds[index];
-
-        // PID gain
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Gain`,
-            value: [servo.pGain!, servo.iGain!, servo.dGain!],
-            timestamp,
-          }),
-        );
-
-        // Goal position
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Position/Goal`,
-            value: [servo.goalPosition!],
-            timestamp,
-          }),
-        );
-
-        // Goal Velocity
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Velocity/Goal`,
-            value: [servo.goalVelocity!],
-            timestamp,
-          }),
-        );
-
-        // Present position
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Position/Present`,
-            value: [servo.presentPosition!],
-            timestamp,
-          }),
-        );
-
-        // Present Velocity
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Velocity/Present`,
-            value: [servo.presentVelocity!],
-            timestamp,
-          }),
-        );
-
-        // Load
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Load`,
-            value: [servo.load!],
-            timestamp,
-          }),
-        );
-
-        // Voltage
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Voltage`,
-            value: [servo.voltage!],
-            timestamp,
-          }),
-        );
-
-        // Temperature
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/Servos/${name}/Temperature`,
-            value: [servo.temperature!],
-            timestamp,
-          }),
-        );
-      });
-    }
   };
 }

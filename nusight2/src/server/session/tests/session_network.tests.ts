@@ -186,8 +186,10 @@ describe("NUsightSessionNetwork", () => {
     // Create a handler for the RPC request
     const onScrubberLoadRequest = jest.fn().mockImplementation((request: ScrubberLoadRequest) => {
       return new ScrubberLoadRequest.Response({
-        rpcToken: request.rpcToken,
-        ok: true,
+        rpc: {
+          token: request.rpc?.token,
+          ok: true,
+        },
       });
     });
 
@@ -201,7 +203,7 @@ describe("NUsightSessionNetwork", () => {
 
     const requestTypeName = messageTypeToName(ScrubberLoadRequest);
     const request = {
-      rpcToken: 1,
+      rpc: { token: 1 },
       files: ["a.nbs", "b.nbs"],
     };
 
@@ -221,8 +223,10 @@ describe("NUsightSessionNetwork", () => {
     const expectedResponseType = messageTypeToName(ScrubberLoadRequest.Response);
     const expectedResponse = createPacketFromServer(
       new ScrubberLoadRequest.Response({
-        rpcToken: request.rpcToken,
-        ok: true,
+        rpc: {
+          token: request.rpc.token,
+          ok: true,
+        },
       }),
     );
     expect(mockSocket.connection.send).toHaveBeenCalledWith(expectedResponseType, expectedResponse);
@@ -251,7 +255,7 @@ describe("NUsightSessionNetwork", () => {
 
     const requestTypeName = messageTypeToName(ScrubberLoadRequest);
     const request = {
-      rpcToken: 1,
+      rpc: { token: 1 },
       files: ["a.nbs", "b.nbs"],
     };
 
@@ -270,9 +274,11 @@ describe("NUsightSessionNetwork", () => {
     const expectedResponseType = messageTypeToName(ScrubberLoadRequest.Response);
     const expectedResponse = createPacketFromServer(
       new ScrubberLoadRequest.Response({
-        rpcToken: request.rpcToken,
-        ok: false,
-        error: "Something went wrong",
+        rpc: {
+          token: request.rpc.token,
+          ok: false,
+          error: "Something went wrong",
+        },
       }),
     );
     expect(mockSocket.connection.send).toHaveBeenCalledWith(expectedResponseType, expectedResponse);

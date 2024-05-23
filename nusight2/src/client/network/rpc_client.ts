@@ -120,14 +120,16 @@ export class RpcClient {
       }
 
       // Set the request token
-      request.rpcToken = requestToken;
+      request.rpc = {
+        token: requestToken,
+      };
 
       // Set up a listener for the response
       const removeOn = this.network.on(
         ResponseType,
-        (robotModel, response: { rpcToken: number; ok: boolean; error?: string }) => {
+        (robotModel, response: { rpc: { token: number; ok: boolean; error?: string } }) => {
           // Ignore responses that don't match the request token
-          if (response.rpcToken !== requestToken) {
+          if (response.rpc.token !== requestToken) {
             return;
           }
 
@@ -149,10 +151,10 @@ export class RpcClient {
             });
           }
           // If there was an error from the remote end, resolve with an error
-          else if (!response.ok) {
+          else if (!response.rpc.ok) {
             resolve({
               ok: false,
-              error: new RpcError(response.error ?? "Unknown error from remote", {
+              error: new RpcError(response.rpc.error ?? "Unknown error from remote", {
                 cause: "REMOTE_ERROR",
                 request,
                 RequestType,
