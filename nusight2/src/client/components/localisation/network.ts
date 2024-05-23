@@ -63,7 +63,7 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onRobots(robotModel: RobotModel, localisaVector3tion_robots: message.localisation.Robots) {
+  private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.robots = localisation_robots.robots.map((localisation_robot) => ({
       id: localisation_robot.id!,

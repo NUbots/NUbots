@@ -231,7 +231,6 @@ export class LocalisationRobotModel {
     return this.Hfw.multiply(this.Hrw.invert()).multiply(this.Hrz);
   }
 
-
   /** Ball position in field space */
   @computed
   get rBFf(): Vector3 | undefined {

@@ -520,16 +520,14 @@ const WalkPathGoals = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map((robot) => {
       if (robot.visible) {
-        return (
-          <URDFWalkPathGoal key={robot.id} model={robot} />
-        );
+        return <URDFWalkPathGoal key={robot.id} model={robot} />;
       }
       return null;
     })}
   </>
 );
 
-const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel; }) => {
+const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once
@@ -544,8 +542,18 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel; }) => {
 
   const rZFf = model.Hfz.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
-  const Rfz_quat =new THREE.Quaternion(model.Hfz.decompose().rotation.x, model.Hfz.decompose().rotation.y, model.Hfz.decompose().rotation.z, model.Hfz.decompose().rotation.w);
-  const Rft_quat = new THREE.Quaternion(model.Hft.decompose().rotation.x, model.Hft.decompose().rotation.y, model.Hft.decompose().rotation.z, model.Hft.decompose().rotation.w);
+  const Rfz_quat = new THREE.Quaternion(
+    model.Hfz.decompose().rotation.x,
+    model.Hfz.decompose().rotation.y,
+    model.Hfz.decompose().rotation.z,
+    model.Hfz.decompose().rotation.w,
+  );
+  const Rft_quat = new THREE.Quaternion(
+    model.Hft.decompose().rotation.x,
+    model.Hft.decompose().rotation.y,
+    model.Hft.decompose().rotation.z,
+    model.Hft.decompose().rotation.w,
+  );
 
   // Get euler angles from quaternion
   const Rfz_euler = new THREE.Euler().setFromQuaternion(Rfz_quat, "ZYX");
@@ -596,11 +604,10 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel; }) => {
         }
       });
     }
-  },);
+  });
 
   return <object3D ref={robotRef} />;
 };
-
 
 const Robot = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
