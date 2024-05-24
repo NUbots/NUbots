@@ -192,12 +192,12 @@ def main():
     truth_s_6 = convert_to_relative(truth_s_6)
 
     # Smooth targets using gaussian filter
-    # truth_s_smoothed = gaussian_smooth(truth_s, 50)
-    # truth_s_2_smoothed = gaussian_smooth(truth_s_2, 50)
-    # truth_s_3_smoothed = gaussian_smooth(truth_s_3, 50)
-    # truth_s_4_smoothed = gaussian_smooth(truth_s_4, 50)
-    # truth_s_5_smoothed = gaussian_smooth(truth_s_5, 50)
-    # truth_s_6_smoothed = gaussian_smooth(truth_s_6, 50)
+    truth_s_smoothed = gaussian_smooth(truth_s, 50)
+    truth_s_2_smoothed = gaussian_smooth(truth_s_2, 50)
+    truth_s_3_smoothed = gaussian_smooth(truth_s_3, 50)
+    truth_s_4_smoothed = gaussian_smooth(truth_s_4, 50)
+    truth_s_5_smoothed = gaussian_smooth(truth_s_5, 50)
+    truth_s_6_smoothed = gaussian_smooth(truth_s_6, 50)
 
     # print("truth 1: ", truth_s.shape)
     # print("Smoothed truth 1: ", truth_s_smoothed.shape)
@@ -218,8 +218,8 @@ def main():
     # join separate arrays
     imu_joined = np.concatenate([imu_s, imu_s_2, imu_s_3, imu_s_4, imu_s_5, imu_s_6], axis=0)
     servos_joined = np.concatenate([servos_s, servos_s_2, servos_s_3, servos_s_4, servos_s_5, servos_s_6], axis=0)
-    # truth_joined = np.concatenate([truth_s_smoothed, truth_s_2_smoothed, truth_s_3_smoothed, truth_s_4_smoothed, truth_s_5_smoothed, truth_s_6_smoothed], axis=0)
-    truth_joined = np.concatenate([truth_s, truth_s_2, truth_s_3, truth_s_4, truth_s_5, truth_s_6], axis=0)
+    truth_joined = np.concatenate([truth_s_smoothed, truth_s_2_smoothed, truth_s_3_smoothed, truth_s_4_smoothed, truth_s_5_smoothed, truth_s_6_smoothed], axis=0)
+    # truth_joined = np.concatenate([truth_s, truth_s_2, truth_s_3, truth_s_4, truth_s_5, truth_s_6], axis=0)
     # debugs
     print("imu_joined: ", imu_joined.shape)
     print("servos_joined: ",servos_joined.shape)
@@ -266,14 +266,14 @@ def main():
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
-    # mean = train_arr.mean(axis=0)
-    # std = train_arr.std(axis=0)
-    # print("mean: ", mean)
-    # print("std: ", std)
+    mean = train_arr.mean(axis=0)
+    std = train_arr.std(axis=0)
+    print("mean: ", mean)
+    print("std: ", std)
 
-    # train_arr = (train_arr - mean) / std
-    # validate_arr = (validate_arr - mean) / std
-    # test_arr = (test_arr - mean) / std
+    train_arr = (train_arr - mean) / std
+    validate_arr = (validate_arr - mean) / std
+    test_arr = (test_arr - mean) / std
     # # # #
 
     print(f"Training set size: {train_arr.shape}")
@@ -288,13 +288,13 @@ def main():
     # test_arr_clipped = np.clip(test_arr, -4, 4)
 
     ## Min/Max Scaling ##
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    # Fit scaler to training data only
-    scaler.fit(train_arr)
-    # Transform the data
-    train_arr_scaled = scaler.transform(train_arr)
-    validate_arr_scaled = scaler.transform(validate_arr)
-    test_arr_scaled = scaler.transform(test_arr)
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    # # Fit scaler to training data only
+    # scaler.fit(train_arr)
+    # # Transform the data
+    # train_arr_scaled = scaler.transform(train_arr)
+    # validate_arr_scaled = scaler.transform(validate_arr)
+    # test_arr_scaled = scaler.transform(test_arr)
 
     # Plot and inspect after normalising
     # num_channels = test_arr_scaled.shape[1]
@@ -310,20 +310,20 @@ def main():
 
     # Split into data and targets
     # Training
-    input_data_train = train_arr_scaled[:, :18]  # imu and servos
-    input_targets_train = train_arr_scaled[:, 18:]  # truth
+    input_data_train = train_arr[:, :18]  # imu and servos
+    input_targets_train = train_arr[:, 18:]  # truth
     # Convert sliced targets to relative position
     input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
-    input_data_validate = validate_arr_scaled[:, :18]  # imu and servos
-    input_targets_validate = validate_arr_scaled[:, 18:]  # truth
+    input_data_validate = validate_arr[:, :18]  # imu and servos
+    input_targets_validate = validate_arr[:, 18:]  # truth
     # Convert sliced targets to relative position
     input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
-    input_data_test= test_arr_scaled[:, :18]  # imu and servos
-    input_targets_test = test_arr_scaled[:, 18:]  # truth
+    input_data_test= test_arr[:, :18]  # imu and servos
+    input_targets_test = test_arr[:, 18:]  # truth
     # Convert sliced targets to relative position
     input_targets_test = convert_to_relative(input_targets_test)
 
@@ -432,7 +432,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 1000             #
+    epochs = 800             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -457,7 +457,7 @@ def main():
     decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     print(f"Decay to epoch: {decay_to_epoch}")
     print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.08, m_mul=1, alpha=0.000001)
+    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.000001)
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
@@ -498,30 +498,36 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0004, l2=0.004), return_sequences=True)(dropout)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.35)(inputs)
+    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
-    lstm2 = keras.layers.LSTM(160, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0004, l2=0.004), return_sequences=True)(dropout2)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.35)(normalise)
+    lstm2 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
-    dropout3 = keras.layers.Dropout(rate=0.30)(normalise2)
-    lstm3 = keras.layers.LSTM(160, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0004, l2=0.004), return_sequences=True)(dropout3)    # 32 originally
+    dropout3 = keras.layers.Dropout(rate=0.35)(normalise2)
+    lstm3 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout3)    # 32 originally
     normalise3 = keras.layers.LayerNormalization()(lstm3)
 
-    # # Apply attention layer that considers lstm outputs
-    # attention = keras.layers.Attention()([normalise, normalise])
+    # Apply attention layer that considers lstm outputs
+    attention = keras.layers.Attention()([normalise, normalise3])
+
+    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
+    model = keras.Model(inputs=inputs, outputs=dense2)
     # # Compute dot product between attention weights and last LSTM layer
     # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
 
-    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(normalise3)    # 32 originally
-    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    normalise4 = keras.layers.LayerNormalization()(lstm4)
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
-    dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(dense1)   # Target shape[1] is 3
+    # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(normalise4)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
     model.summary()
