@@ -32,6 +32,7 @@ namespace module::input {
     using extension::Configuration;
 
     using message::actuation::BodySide;
+    using message::behaviour::state::Stability;
     using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonLeftUp;
@@ -96,11 +97,14 @@ namespace module::input {
             emit(std::make_unique<WalkState>(message::behaviour::state::WalkState::State::UNKNOWN,
                                              Eigen::Vector3d::Zero(),
                                              message::behaviour::state::WalkState::Phase::DOUBLE));
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
-        on<Trigger<RawSensors>, Optional<With<Sensors>>, Single, Priority::HIGH>().then(
+        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<Stability>, Single, Priority::HIGH>().then(
             "Main Sensors Loop",
-            [this](const RawSensors& raw_sensors, const std::shared_ptr<const Sensors>& previous_sensors) {
+            [this](const RawSensors& raw_sensors,
+                   const std::shared_ptr<const Sensors>& previous_sensors,
+                   const Stability& stability) {
                 auto sensors = std::make_unique<Sensors>();
 
                 // Raw sensors (Accelerometer, Gyroscope, etc.)
@@ -110,7 +114,7 @@ namespace module::input {
                 update_kinematics(sensors, raw_sensors);
 
                 // Odometry (Htw and Hrw)
-                update_odometry(sensors, previous_sensors, raw_sensors);
+                update_odometry(sensors, previous_sensors, raw_sensors, stability);
 
                 // Graph debug information
                 if (log_level <= NUClear::DEBUG) {
@@ -334,83 +338,10 @@ namespace module::input {
 
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const RawSensors& raw_sensors) {
-        if (!cfg.use_ground_truth) {
-            // Compute time since last update
-            const double dt = std::max(
-                std::chrono::duration_cast<std::chrono::duration<double>>(
-                    raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
-                    .count(),
-                0.0);
-
-            // If sensors detected a new foot phase, update the anchor frame
-            if (planted_anchor_foot != sensors->planted_foot_phase
-                && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
-                // Update anchor frame to the new planted foot
-                switch (planted_anchor_foot.value) {
-                    case WalkState::Phase::RIGHT:
-                        Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
-                        break;
-                    case WalkState::Phase::LEFT:
-                        Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
-                        break;
-                    default: log<NUClear::WARN>("Anchor frame should not be updated in double support phase"); break;
-                }
-                // Update our current anchor foot indicator to new foot
-                planted_anchor_foot = sensors->planted_foot_phase;
-                // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
-                Hwp.translation().z() = 0;
-                Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
-            }
-
-            // Compute torso pose using kinematics from anchor frame (current planted foot)
-            Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT
-                                        ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
-                                        : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
-
-            // Perform Anchor Update (x, y, z, yaw)
-            Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
-            Eigen::Vector3d rpy_anchor   = mat_to_rpy_intrinsic(Hwt_anchor.linear());
-
-            // Perform Mahony update (roll, pitch)
-            auto Rwt_mahony = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
-
-            // Convert the rotation matrices from anchor and mahony method into euler angles
-            Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
-            // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
-            mahony_filter.set_state(rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0)));
-            // Construct world {w} to torso {t} space transform
-            Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
-            // Take the translation from the anchor method
-            Hwt.translation() = Hwt_anchor.translation();
-            // Fuse roll + pitch of mahony filter with yaw of anchor method
-            Hwt.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
-            sensors->Htw = Hwt.inverse();
-
-            // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
-            Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-            Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
-            sensors->Hrw          = Hwr.inverse();
-
-            // Low pass filter for torso y velocity
-            double y_current     = Hwt.translation().y();
-            double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
-            double y_dot_current = (y_current - y_prev) / dt;
-            double y_dot         = (dt / cfg.y_cut_off_frequency) * y_dot_current
-                           + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
-
-            // Low pass filter for torso x velocity
-            double x_current     = Hwt.translation().x();
-            double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
-            double x_dot_current = (x_current - x_prev) / dt;
-            double x_dot         = (dt / cfg.x_cut_off_frequency) * x_dot_current
-                           + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
-
-            // Fuse the velocity estimates
-            sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
-        }
-        else {
+                                       const RawSensors& raw_sensors,
+                                       const Stability& stability) {
+        // Use ground truth instead of calculating odometry, then return
+        if (cfg.use_ground_truth) {
             // Construct world {w} to torso {t} space transform from ground truth
             Eigen::Isometry3d Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
             sensors->Htw          = Hwt.inverse();
@@ -421,7 +352,102 @@ namespace module::input {
             Hwr.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
             sensors->Hrw      = Hwr.inverse();
             sensors->vTw      = raw_sensors.odometry_ground_truth.vTw;
+            return;
         }
+
+        // Compute time since last update
+        const double dt = std::max(
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
+                .count(),
+            0.0);
+
+        // Perform Mahony update (roll, pitch)
+        auto Rwt_mahony = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
+        // Convert the rotation matrix from the mahony method into euler angles
+        Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
+        // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
+        mahony_filter.set_state(rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0)));
+
+        // If fallen, calculate roll and pitch but keep yaw and position still
+        if (stability <= Stability::FALLING) {
+            // Get torso to world
+            Eigen::Isometry3d Hwt =
+                previous_sensors == nullptr ? Eigen::Isometry3d::Identity() : previous_sensors->Htw.inverse();
+            // Htw rotation is combination of Mahony pitch and roll and existing yaw
+            Hwt.linear() = rpy_intrinsic_to_mat(
+                Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), mat_to_rpy_intrinsic(Hwt.rotation()).z()));
+            sensors->Htw = Hwt.inverse();
+
+            // Get robot to world
+            sensors->Hrw = previous_sensors == nullptr ? Eigen::Isometry3d::Identity() : previous_sensors->Hrw;
+
+            // Set velocity to zero
+            sensors->vTw = Eigen::Vector3d::Zero();
+
+            return;
+        }
+
+        // If sensors detected a new foot phase, update the anchor frame
+        if (planted_anchor_foot != sensors->planted_foot_phase
+            && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
+            // Update anchor frame to the new planted foot
+            switch (planted_anchor_foot.value) {
+                case WalkState::Phase::RIGHT:
+                    Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                    break;
+                case WalkState::Phase::LEFT:
+                    Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                    break;
+                default: log<NUClear::WARN>("Anchor frame should not be updated in double support phase"); break;
+            }
+            // Update our current anchor foot indicator to new foot
+            planted_anchor_foot = sensors->planted_foot_phase;
+            // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
+            Hwp.translation().z() = 0;
+            Hwp.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
+        }
+
+        // Compute torso pose using kinematics from anchor frame (current planted foot)
+        Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT
+                                    ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
+                                    : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
+
+        // Perform Anchor Update (x, y, z, yaw)
+        Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
+        Eigen::Vector3d rpy_anchor   = mat_to_rpy_intrinsic(Hwt_anchor.linear());
+
+        // Construct world {w} to torso {t} space transform
+        Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+        // Take the translation from the anchor method
+        Hwt.translation() = Hwt_anchor.translation();
+        // Fuse roll + pitch of mahony filter with yaw of anchor method
+        Hwt.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
+        sensors->Htw = Hwt.inverse();
+
+        // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
+        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+        Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        // Don't update translation if falling/fallen
+        Hwr.translation() = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
+        sensors->Hrw      = Hwr.inverse();
+
+        // Low pass filter for torso y velocity
+        double y_current     = Hwt.translation().y();
+        double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
+        double y_dot_current = (y_current - y_prev) / dt;
+        double y_dot =
+            (dt / cfg.y_cut_off_frequency) * y_dot_current + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
+
+        // Low pass filter for torso x velocity
+        double x_current     = Hwt.translation().x();
+        double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
+        double x_dot_current = (x_current - x_prev) / dt;
+        double x_dot =
+            (dt / cfg.x_cut_off_frequency) * x_dot_current + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
+
+        // Fuse the velocity estimates
+        sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {

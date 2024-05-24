@@ -102,7 +102,7 @@ namespace module::purpose {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
-            if (self_penalisation.context == GameEvents::Context::SELF) {
+            if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
@@ -112,7 +112,7 @@ namespace module::purpose {
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
-            if (self_unpenalisation.context == GameEvents::Context::SELF) {
+            if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });

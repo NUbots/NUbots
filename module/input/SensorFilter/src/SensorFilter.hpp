@@ -39,6 +39,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/BodySide.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
@@ -153,7 +154,8 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
-                             const RawSensors& raw_sensors);
+                             const RawSensors& raw_sensors,
+                             const message::behaviour::state::Stability& stability);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

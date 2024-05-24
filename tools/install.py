@@ -140,12 +140,14 @@ def run(target, local, user, config, toolchain, **kwargs):
     script_files = b.cmake_cache["SCRIPT_FILES"]
     model_files = b.cmake_cache["MODEL_FILES"]
     data_files = b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]
+    alias_config_files = b.cmake_cache["ALIAS_CONFIG"]
 
     # If there is only a single file then the b script returns this as a string rather than a list
     # Handle this by forcing into a list if it is not already
     config_files = [data_files] if not isinstance(data_files, list) else data_files
     config_files += [script_files] if not isinstance(script_files, list) else script_files
     config_files += [model_files] if not isinstance(model_files, list) else model_files
+    config_files += [alias_config_files] if not isinstance(alias_config_files, list) else alias_config_files
     config_files = config_files if isinstance(config_files, list) else [config_files]
 
     # Get list of config files
