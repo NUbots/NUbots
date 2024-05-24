@@ -15,9 +15,22 @@ const config = {
       black: "#000000",
       icon: "#0000008a",
       divider: "#0000001f",
-      blue: colors.blue,
       red: "#ff0000ff",
       transparent: "transparent",
+
+      blue: {
+        50: "#eff6ff",
+        100: "#dbeafe",
+        200: "#bfdbfe",
+        300: "#93c5fd",
+        400: "#60a5fa",
+        500: "#3b82f6",
+        600: "#2563eb",
+        700: "#1d4ed8",
+        800: "#1e40af",
+        900: "#1e3a8a",
+        950: "#172554"
+      },
 
       gray: {
         50: "#fafafa",
@@ -61,7 +74,6 @@ const config = {
     },
     extend: {
       spacing: {
-        11: "2.85rem",
         inherit: "inherit",
       },
     },
