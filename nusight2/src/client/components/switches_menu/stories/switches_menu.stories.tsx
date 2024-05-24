@@ -4,8 +4,8 @@ import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
-import { SwitchesMenu, SwitchesMenuOption } from "../view";
 import { ThemeDecorator } from "../../storybook_theme_decorator/view";
+import { SwitchesMenu, SwitchesMenuOption } from "../view";
 
 const meta: Meta<typeof SwitchesMenu> = {
   title: "components/SwitchesMenu",

@@ -1,8 +1,8 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
-import { LoadingIcon } from "../view";
 import { ThemeDecorator } from "../../storybook_theme_decorator/view";
+import { LoadingIcon } from "../view";
 
 const meta: Meta<typeof LoadingIcon> = {
   title: "components/LoadingIcon",

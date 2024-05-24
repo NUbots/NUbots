@@ -20,8 +20,7 @@ import { TreeData } from "../model";
 import { LineChartModel } from "./model";
 
 export class LineChartViewModel {
-
-  constructor(private model: LineChartModel) { }
+  constructor(private model: LineChartModel) {}
 
   static of = createTransformer((model: LineChartModel): LineChartViewModel => {
     return new LineChartViewModel(model);

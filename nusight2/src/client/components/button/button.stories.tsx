@@ -1,9 +1,9 @@
 import React from "react";
 import { action } from "@storybook/addon-actions";
 import type { Meta, StoryObj } from "@storybook/react";
-import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 import { Icon } from "../icon/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 import { Button } from "./view";
 

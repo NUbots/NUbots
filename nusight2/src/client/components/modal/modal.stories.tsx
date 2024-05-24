@@ -1,8 +1,9 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
-import { Modal } from "./view";
 import { ThemeDecorator } from "../storybook_theme_decorator/view";
+
+import { Modal } from "./view";
 
 const meta: Meta<typeof Modal> = {
   title: "components/Modal",

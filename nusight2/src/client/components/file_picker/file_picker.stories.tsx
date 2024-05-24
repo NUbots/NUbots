@@ -2,11 +2,12 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { observer } from "mobx-react";
 
+import { Button } from "../button/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
+
 import { FilePickerController } from "./controller";
 import { FilePickerEntry, FilePickerModel, parsePathSegments } from "./model";
 import { FilePicker } from "./view";
-import { ThemeDecorator } from "../storybook_theme_decorator/view";
-import { Button } from "../button/view";
 
 const meta: Meta<typeof FilePicker> = {
   title: "components/FilePicker",

@@ -4,12 +4,13 @@ import { Component } from "react";
 import { ComponentType } from "react";
 import { observer } from "mobx-react";
 
+import { Button } from "../button/view";
+
 import { DashboardController } from "./controller";
 import { DashboardModel } from "./model";
 import { DashboardNetwork } from "./network";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
-import { Button } from "../button/view";
 
 export type DashboardProps = {
   controller: DashboardController;

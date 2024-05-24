@@ -8,8 +8,8 @@ import { now } from "mobx-utils";
 import { SeededRandom } from "../../../../shared/base/random/seeded_random";
 import { RobotNetworkStatsModel } from "../../../network/model";
 import { RobotModel } from "../../robot/model";
-import { RobotSelector } from "../view";
 import { ThemeDecorator } from "../../storybook_theme_decorator/view";
+import { RobotSelector } from "../view";
 
 const actions = {
   selectRobot: action("selectRobot"),

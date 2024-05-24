@@ -1,8 +1,9 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
-import { Icon } from "./view";
 import { ThemeDecorator } from "../storybook_theme_decorator/view";
+
+import { Icon } from "./view";
 
 const meta: Meta<typeof Icon> = {
   title: "components/Icon",

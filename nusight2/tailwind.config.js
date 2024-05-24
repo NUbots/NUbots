@@ -1,8 +1,6 @@
 /* eslint-env node */
-import colors from "tailwindcss/colors";
 import defaultTheme from "tailwindcss/defaultTheme";
 import plugin from "tailwindcss/plugin";
-const colors = require("tailwindcss/colors");
 
 /** @type {import("tailwindcss").Config} */
 const config = {
@@ -29,7 +27,7 @@ const config = {
         700: "#1d4ed8",
         800: "#1e40af",
         900: "#1e3a8a",
-        950: "#172554"
+        950: "#172554",
       },
 
       gray: {

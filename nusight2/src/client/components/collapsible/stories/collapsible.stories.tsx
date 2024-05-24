@@ -4,8 +4,8 @@ import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
-import { Collapsible } from "../view";
 import { ThemeDecorator } from "../../storybook_theme_decorator/view";
+import { Collapsible } from "../view";
 
 const meta: Meta<typeof Collapsible> = {
   title: "components/Collapsible",

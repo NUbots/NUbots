@@ -1,5 +1,6 @@
+import React, { useEffect, useMemo, useState } from "react";
+
 import { IconButton, IconButtonProps } from "../icon_button/view";
-import React, { useState, useEffect, useMemo } from "react";
 
 export default function ThemeSwitcherButton(props: IconButtonProps) {
   const [isDark, setIsDark] = useState(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);

@@ -2,8 +2,6 @@ import React from "react";
 import { ReactNode } from "react";
 import classNames from "classnames";
 
-import style from "./style.module.css";
-
 export type ButtonProps = {
   type?: "normal" | "primary";
   fullwidth?: boolean;
@@ -41,7 +39,7 @@ export class Button extends React.PureComponent<ButtonProps> {
             ["bg-blue-600 border-blue-700 text-white " + (disabled ? "" : "hover:bg-blue-700 dark:hover:bg-blue-500")]:
               type === "primary",
             ["bg-gray-100 dark:text-gray-300 dark:bg-gray-800 border-gray-350 dark:border-gray-700 " +
-              (disabled ? "" : "hover:bg-gray-250 dark:hover:bg-gray-750")]: type === "normal",
+            (disabled ? "" : "hover:bg-gray-250 dark:hover:bg-gray-750")]: type === "normal",
             ["w-full"]: fullwidth,
             ["ml_auto"]: iconAfterAlignedRight,
             ["justify-start"]: textAlign === "left",

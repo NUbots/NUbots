@@ -5,8 +5,8 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { RobotModel } from "../../robot/model";
-import { RobotSelectorSingle } from "../view";
 import { ThemeDecorator } from "../../storybook_theme_decorator/view";
+import { RobotSelectorSingle } from "../view";
 
 const meta: Meta<typeof RobotSelectorSingle> = {
   title: "components/RobotSelectorSingle",

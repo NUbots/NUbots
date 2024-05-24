@@ -2,10 +2,9 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
 import { Icon, IconProps } from "../icon/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 import { IconButton, IconButtonProps } from "./view";
-import { ThemeDecorator } from "../storybook_theme_decorator/view";
-import { useGlobals } from "@storybook/api";
 
 const meta: Meta<typeof IconButton> = {
   title: "components/IconButton",

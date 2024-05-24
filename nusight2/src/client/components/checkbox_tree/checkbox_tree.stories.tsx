@@ -2,6 +2,7 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { action, computed, observable } from "mobx";
 import { createTransformer } from "mobx-utils";
+
 import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 import { CheckedState, TreeModel, TreeNodeModel } from "./model";

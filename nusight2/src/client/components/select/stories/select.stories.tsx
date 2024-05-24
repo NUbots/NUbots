@@ -5,8 +5,8 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { Icon } from "../../icon/view";
-import { Option, Select } from "../view";
 import { ThemeDecorator } from "../../storybook_theme_decorator/view";
+import { Option, Select } from "../view";
 
 const IconColor = () => <Icon>palette</Icon>;
 const IconColoredCircle = (props: { color: string }) => (

@@ -3,10 +3,10 @@ import { autorun, computed } from "mobx";
 import { observer } from "mobx-react";
 
 import { RobotModel } from "../robot/model";
+import IconRobot from "../robot_selector/icon_robot";
 import { Option, Select } from "../select/view";
 
 import IconPlug from "./icon_plug";
-import IconRobot from "../robot_selector/icon_robot";
 
 export type RobotSelectorSingleProps = {
   autoSelect?: boolean;

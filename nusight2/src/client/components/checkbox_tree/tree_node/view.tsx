@@ -11,7 +11,6 @@ import { TreeNodeModel } from "../model";
 
 import IconChevronDown from "./icon_chevron_down";
 import IconChevronRight from "./icon_chevron_right";
-import { instancedMesh } from "../../three/builders";
 
 export interface TreeNodeProps {
   node: TreeNodeModel;
