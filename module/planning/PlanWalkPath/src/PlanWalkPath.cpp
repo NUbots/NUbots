@@ -80,9 +80,9 @@ namespace module::planning {
         // Repulsion of the obstacles
         for (const auto& obstacle : obstacles) {
             vector_field_direction.x() +=
-                ((x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
+                ((x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength / obstacles.size();
             vector_field_direction.y() +=
-                ((y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
+                ((y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength / obstacles.size();
         }
 
         // Repulsion of the walls
