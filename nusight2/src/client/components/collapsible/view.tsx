@@ -46,6 +46,10 @@ export const Collapsible = observer((props: CollapsibleProps) => {
 function onEnter(node: HTMLElement) {
   // Initialize max-height to a numeric value for the enter transition
   node.style.maxHeight = "0";
+
+  // Hide the overflowing content during the transition
+  node.dataset.originalOverflow = node.style.overflow;
+  node.style.overflow = "hidden";
 }
 
 function onEntering(node: HTMLElement) {
@@ -56,11 +60,18 @@ function onEntering(node: HTMLElement) {
 function onEntered(node: HTMLElement) {
   // Enter transition done: remove max-height to allow the element to grow
   node.style.maxHeight = "none";
+
+  // Show overflowing content again
+  node.style.overflow = node.dataset.originalOverflow ?? "";
 }
 
 function onExit(node: HTMLElement) {
   // Restore max-height for the exit transition
   node.style.maxHeight = node.scrollHeight + "px";
+
+  // Hide the overflowing content during the transition
+  node.dataset.originalOverflow = node.style.overflow;
+  node.style.overflow = "hidden";
 }
 
 function onExiting(node: HTMLElement) {

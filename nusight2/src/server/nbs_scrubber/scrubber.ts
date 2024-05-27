@@ -1,8 +1,8 @@
 import { NbsDecoder, NbsTimestamp, NbsTypeSubtypeBuffer } from "nbsdecoder.js";
-import { NUClearNetPeer } from "nuclearnet.js";
 import path from "path";
 
 import { NbsScrubber } from "../../shared/nbs_scrubber";
+import { NUClearNetPeerWithType } from "../../shared/nuclearnet/nuclearnet_client";
 import { Clock } from "../../shared/time/clock";
 import { NodeSystemClock } from "../time/node_clock";
 
@@ -12,7 +12,7 @@ import { timestampObjectToNanos } from "./utils";
 /** Holds the data for a loaded NBS scrubber and handles interactions with the scrubber. */
 export class Scrubber {
   /** The fake peer that the scrubber will be presented as */
-  peer: NUClearNetPeer;
+  peer: NUClearNetPeerWithType;
 
   /** NBS decoder with the files loaded for scrubbing */
   decoder: NbsDecoder;
@@ -66,6 +66,7 @@ export class Scrubber {
       name: this.data.name,
       address: "0.0.0.0",
       port: opts.id,
+      type: "nbs-scrubber",
     };
 
     this.clock = opts.clock;

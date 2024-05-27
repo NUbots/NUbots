@@ -7,7 +7,7 @@ export type NUClearPacketMetadata = { subtype: number };
 
 export type NUClearPacketListener = (packet: NUClearNetPacket, packetMetadata?: NUClearPacketMetadata) => void;
 
-export type NUClearEventListener = (peer: NUClearNetPeer) => void;
+export type NUClearEventListener = (peer: NUClearNetPeerWithType) => void;
 
 export interface NUClearNetClient {
   /** Connect to the NUClear network */
@@ -39,3 +39,6 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 /** A data packet received from the NUClear network, where the payload is possibly undefined */
 export type NUClearNetPacketMaybeEmpty = PartialBy<NUClearNetPacket, "payload">;
+
+/** A NUClearNet peer with peer type information */
+export type NUClearNetPeerWithType = NUClearNetPeer & { type: "nbs-scrubber" | "nuclearnet-peer" | "nusight-server" };

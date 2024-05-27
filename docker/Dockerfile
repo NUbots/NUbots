@@ -402,14 +402,13 @@ RUN pip install --upgrade \
     black==22.6.0 \
     licenseheaders==0.8.8
 
-RUN install-package \
-    yarn \
-    nodejs \
-    npm
-
+RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O - \
+    | tar --extract --xz --strip-components=1 --directory /usr --file - \
+    node-v20.13.1-linux-x64/bin/ node-v20.13.1-linux-x64/include/ node-v20.13.1-linux-x64/lib/
 RUN npm install -g \
+    yarn@1.22.19 \
     prettier@2.7.1 \
-    eslint@8.27.0
+    eslint@8.57.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all

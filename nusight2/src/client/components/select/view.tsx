@@ -5,9 +5,8 @@ import { observable } from "mobx";
 import { observer } from "mobx-react";
 import OutsideClickHandler from "react-outside-click-handler/esm/OutsideClickHandler";
 
-import { Button } from "../button/view";
+import { Button } from "../button/button";
 import { Dropdown } from "../dropdown/view";
-import { Icon } from "../icon/view";
 
 import { SelectOption } from "./option";
 import style from "./style.module.css";
@@ -57,11 +56,11 @@ export class Select extends React.Component<SelectProps> {
 
     const button = (
       <Button
+        contentAlign="left"
+        className="w-full"
         iconBefore={icon}
-        iconAfter={<Icon className="-mr-0.5">arrow_drop_down</Icon>}
-        textAlign="left"
-        iconAfterAlignedRight
-        fullwidth
+        iconAfter="arrow_drop_down"
+        iconAfterProps={{ className: "ml-auto" }}
       >
         {selectedOption ? selectedOption.label : placeholder}
       </Button>
