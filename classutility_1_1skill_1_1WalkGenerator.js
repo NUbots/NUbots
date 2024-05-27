@@ -3,6 +3,7 @@ var classutility_1_1skill_1_1WalkGenerator =
     [ "WalkParameters", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters" ],
     [ "Iso3", "classutility_1_1skill_1_1WalkGenerator.html#ad071f35adbd7687051b46998617ce8fe", null ],
     [ "Vec3", "classutility_1_1skill_1_1WalkGenerator.html#aa6b41240eb93694a73a9900cfdb0226f", null ],
+    [ "generate_starting_trajectories", "classutility_1_1skill_1_1WalkGenerator.html#a7508e6c1c349f20baafb7174b95000ca", null ],
     [ "generate_swing_foot_trajectory", "classutility_1_1skill_1_1WalkGenerator.html#a4c478870afce86d744b6bf49c7ba480f", null ],
     [ "generate_torso_trajectory", "classutility_1_1skill_1_1WalkGenerator.html#a1fad8838ebc38f9280655f24ca1a664c", null ],
     [ "generate_walking_trajectories", "classutility_1_1skill_1_1WalkGenerator.html#a66a6f0e7e13ad66efea23a04401b7820", null ],
