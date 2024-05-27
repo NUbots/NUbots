@@ -182,7 +182,7 @@ namespace utility::skill {
             Hps_start.linear().setIdentity();
 
             // Initialize torso pose
-            Hpt_start.translation() = p.torso_sway_offset + p.torso_position_offset;
+            Hpt_start.translation() = p.torso_position_offset + Vec3(0.0, get_foot_width_offset() / 2, p.torso_height);
             Hpt_start.linear()      = Eigen::AngleAxis<Scalar>(p.torso_pitch, Vec3::UnitY()).toRotationMatrix();
 
             // Start time at end of step period to avoid taking a step when starting.
@@ -213,34 +213,44 @@ namespace utility::skill {
                 // Requested velocity target is zero and we have finished taking a step, remain stopped
                 engine_state = WalkState::State::STOPPED;
             }
-            else {
-                // Requested velocity target is non-zero, walk
-                engine_state = WalkState::State::WALKING;
+            else if (!velocity_target.isZero() && engine_state.value == WalkState::State::STOPPED) {
+                // Requested velocity target is non-zero and we are stopped, start walking
+                engine_state = WalkState::State::STARTING;
+                t            = 0;
             }
 
             // If the sensors have detected either double support or next foot planted, allow switching the planted foot
             bool can_switch = sensors_planted_foot_phase != phase || !p.only_switch_when_planted;
-
             switch (engine_state.value) {
+                case WalkState::State::STARTING:
+                    update_time(dt);
+                    // Generate starting trajectories for the torso and swing foot
+                    generate_starting_trajectories();
+                    if (t >= p.step_period) {
+                        engine_state = WalkState::State::WALKING;
+                        t            = 0;
+                    }
+                    break;
                 case WalkState::State::WALKING:
                     update_time(dt);
                     // If we are at the end of the step and can switch feet, switch the planted foot and reset time
                     if (t >= p.step_period && can_switch) {
                         switch_planted_foot();
                     }
+                    generate_walking_trajectories(velocity_target);
                     break;
                 case WalkState::State::STOPPING:
                     update_time(dt);
-                    // We do not switch the planted foot here because we want to transition to the standing state
+                    generate_walking_trajectories(velocity_target);
+                    // We do not switch the planted foot here because we want to transition to the stopped state
                     break;
                 case WalkState::State::STOPPED:
-                    // We do not update the time here because we want to remain in the standing state
+                    // We do not update the time here because we want to remain in the stopped state
+                    generate_walking_trajectories(velocity_target);
                     break;
-                default: NUClear::log<NUClear::WARN>("Unknown state"); break;
+                default: NUClear::log<NUClear::WARN>("Unknown state", engine_state.value);
             }
 
-            // Generate the torso and swing foot trajectories to reach the next foot step location
-            generate_walking_trajectories(velocity_target);
 
             return engine_state;
         }
@@ -321,7 +331,7 @@ namespace utility::skill {
             // ******************************** Torso Trajectory ********************************
             torso_trajectory.clear();
 
-            // Start waypoint: Start from the current torso position at time = 0
+            // Start waypoint: Current torso position
             wp.time_point       = 0.0;
             wp.position         = Hpt_start.translation();
             wp.velocity         = Vec3::Zero();
@@ -329,7 +339,7 @@ namespace utility::skill {
             wp.angular_velocity = Vec3::Zero();
             torso_trajectory.add_waypoint(wp);
 
-            // Middle waypoint: Shift torso to the p.torso_sway_offset at time = p.torso_sway_ratio * p.step_period
+            // Middle waypoint: Shift torso over planted foot
             wp.time_point         = p.torso_sway_ratio * p.step_period;
             Scalar torso_offset_y = phase == LEFT ? -p.torso_sway_offset.y() : p.torso_sway_offset.y();
             wp.position = Vec3(p.torso_sway_offset.x(), torso_offset_y, p.torso_height + p.torso_sway_offset.z())
@@ -339,7 +349,7 @@ namespace utility::skill {
             wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
             torso_trajectory.add_waypoint(wp);
 
-            // End waypoint: Shift torso back to the final torso position at time = p.step_period
+            // End waypoint: Final torso position, ratio of the next step position
             wp.time_point = p.step_period;
             wp.position   = Vec3(p.torso_final_position_ratio.x() * step.x(),
                                get_foot_width_offset() / 2 + p.torso_final_position_ratio.y() * step.y(),
@@ -363,7 +373,7 @@ namespace utility::skill {
             // ******************************** Swing Foot Trajectory ********************************
             swing_foot_trajectory.clear();
 
-            // Start waypoint: Start from the current swing foot position at time = 0
+            // Start waypoint: Current swing foot position
             wp.time_point       = 0.0;
             wp.position         = Hps_start.translation();
             wp.velocity         = Vec3::Zero();
@@ -371,7 +381,7 @@ namespace utility::skill {
             wp.angular_velocity = Vec3::Zero();
             swing_foot_trajectory.add_waypoint(wp);
 
-            // Middle waypoint: Raise foot to step height at time = p.step_apex_ratio * p.step_period
+            // Middle waypoint: Raise foot to step height
             wp.time_point       = p.step_apex_ratio * p.step_period;
             wp.position         = Vec3(0, get_foot_width_offset(), p.step_height);
             wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
@@ -379,7 +389,7 @@ namespace utility::skill {
             wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
             swing_foot_trajectory.add_waypoint(wp);
 
-            // End waypoint: End at next foot placement on ground at time = p.step_period
+            // End waypoint: Next foot placement on ground
             wp.time_point       = p.step_period;
             wp.position         = Vec3(step.x(), get_foot_width_offset() + step.y(), 0);
             wp.velocity         = Vec3::Zero();
@@ -404,6 +414,54 @@ namespace utility::skill {
 
             // Generate swing foot trajectory
             generate_swing_foot_trajectory(step, velocity_target);
+        }
+
+        /**
+         * @brief Generate starting trajectories for the torso and swing foot.
+         */
+        void generate_starting_trajectories() {
+            // Create a waypoint variable to use for all waypoints
+            Waypoint<Scalar> wp;
+
+            // ******************************** Swing Foot Trajectory ********************************
+            swing_foot_trajectory.clear();
+
+            // Start waypoint: Start from the current swing foot position
+            wp.time_point       = 0.0;
+            wp.position         = Hps_start.translation();
+            wp.velocity         = Vec3::Zero();
+            wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
+            wp.angular_velocity = Vec3::Zero();
+            swing_foot_trajectory.add_waypoint(wp);
+
+            // Start waypoint: End at the current swing foot position
+            wp.time_point       = p.step_period;
+            wp.position         = Hps_start.translation();
+            wp.velocity         = Vec3::Zero();
+            wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
+            wp.angular_velocity = Vec3::Zero();
+            swing_foot_trajectory.add_waypoint(wp);
+
+            // ******************************** Torso Trajectory ********************************
+            torso_trajectory.clear();
+
+            // Start waypoint: Start from the current torso position
+            wp.time_point       = 0.0;
+            wp.position         = Hpt_start.translation();
+            wp.velocity         = Vec3::Zero();
+            wp.orientation      = mat_to_rpy_intrinsic(Hpt_start.rotation());
+            wp.angular_velocity = Vec3::Zero();
+            torso_trajectory.add_waypoint(wp);
+
+            // Middle waypoint: Shift torso over planted foot
+            wp.time_point         = p.step_period;
+            Scalar torso_offset_y = phase == LEFT ? -p.torso_sway_offset.y() : p.torso_sway_offset.y();
+            wp.position = Vec3(p.torso_sway_offset.x(), torso_offset_y, p.torso_height + p.torso_sway_offset.z())
+                          + p.torso_position_offset;
+            wp.velocity         = Vec3(0, 0, 0);
+            wp.orientation      = Vec3(0.0, p.torso_pitch, 0);
+            wp.angular_velocity = Vec3(0.0, 0.0, 0);
+            torso_trajectory.add_waypoint(wp);
         }
 
         /**
@@ -441,7 +499,7 @@ namespace utility::skill {
                 return;
             }
 
-            // Update the phase
+            // Update the time
             t += dt;
 
             // Clamp time to step period
