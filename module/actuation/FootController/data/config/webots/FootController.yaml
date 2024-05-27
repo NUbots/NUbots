@@ -4,9 +4,9 @@ mode: IK # Options: IK
 
 startup:
   # Gain to use in startup phase
-  servo_gain: 1
+  servo_gain: 30
   # Startup phase duration before setting desired gains
-  duration: 2
+  duration: 0
 
 servo_gains:
   L_HIP_YAW: 30
