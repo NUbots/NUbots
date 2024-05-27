@@ -32,9 +32,10 @@ import "Vector.proto";
 message WalkState {
     enum State {
         UNKNOWN  = 0;
-        WALKING  = 1;
-        STOPPING = 2;
-        STOPPED  = 3;
+        STARTING = 1;
+        WALKING  = 2;
+        STOPPING = 3;
+        STOPPED  = 4;
     }
 
     enum Phase {
