@@ -145,6 +145,7 @@ namespace module::skill {
                 if (stability >= Stability::DYNAMIC) {
                     switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
                                 .value) {
+                        case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                         case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
