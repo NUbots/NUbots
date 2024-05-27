@@ -65,6 +65,5 @@ nuclear_role(
   purpose::Soccer
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
-  # Datalogging
-  # support::logging::DataLogging
+  # Datalogging support::logging::DataLogging
 )
