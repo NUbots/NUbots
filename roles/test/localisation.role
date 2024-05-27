@@ -15,8 +15,7 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   output::ImageCompressor
-  # Platform
-  platform::${SUBCONTROLLER}::HardwareIO
+  # Input
   input::Camera
   input::SensorFilter
   # Network
@@ -28,9 +27,10 @@ nuclear_role(
   vision::GoalDetector
   vision::BallDetector
   vision::FieldLineDetector
+  vision::Yolo
   # Localisation
   localisation::BallLocalisation
-  localisation::FieldLocalisation
+  localisation::FieldLocalisationNLopt
   # Director
   extension::Director
   # Servos
@@ -50,4 +50,6 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

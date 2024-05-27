@@ -245,7 +245,7 @@ async function generateRpcCallTypes(outputFilePath, messageFieldsDesc) {
   walkMessageFields(messageFieldsDesc, (node) => {
     const isRpcRequestMessage =
       node.parentKey.endsWith("Request") &&
-      Array.from(Object.keys(node.value)).some((fieldName) => fieldName === "rpcToken");
+      Array.from(Object.keys(node.value)).some((fieldName) => fieldName === "rpc");
 
     if (isRpcRequestMessage) {
       rpcMessages.push({

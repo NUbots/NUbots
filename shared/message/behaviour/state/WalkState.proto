@@ -32,15 +32,16 @@ import "Vector.proto";
 message WalkState {
     enum State {
         UNKNOWN  = 0;
-        WALKING  = 1;
-        STOPPING = 2;
-        STOPPED  = 3;
+        STARTING = 1;
+        WALKING  = 2;
+        STOPPING = 3;
+        STOPPED  = 4;
     }
 
-    enum SupportPhase {
-        LEFT   = 0;
-        RIGHT  = 1;
-        DOUBLE = 2;
+    enum Phase {
+        DOUBLE = 0;
+        LEFT   = 1;
+        RIGHT  = 2;
     }
 
     /// Walking state
@@ -49,6 +50,6 @@ message WalkState {
     /// Current requested velocity target (dx, dy, dtheta)
     vec3 velocity_target = 2;
 
-    /// Support phase
-    SupportPhase support_phase = 3;
+    /// Walk phase
+    Phase phase = 3;
 }

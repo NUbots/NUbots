@@ -14,7 +14,6 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
   # Vision
@@ -22,8 +21,9 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
+  vision::Yolo
   # Localisation
-  localisation::FieldLocalisation
+  localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
   # Director
   extension::Director
@@ -36,6 +36,8 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
+  skill::Say
+  skill::GPT
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
@@ -53,4 +55,6 @@ nuclear_role(
   strategy::AlignBallToGoal
   # Purposes
   purpose::Tester
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

@@ -39,6 +39,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/BodySide.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
@@ -99,6 +100,9 @@ namespace module::input {
 
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+
+            /// @brief Limit on the maximum change in servo angle per update before the encoder is considered invalid
+            double max_servo_change = 0.0;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
@@ -107,11 +111,11 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief Current support phase of the robot
-        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+        /// @brief Planted foot associated with the current anchor point (Hwp)
+        WalkState::Phase planted_anchor_foot = WalkState::Phase::LEFT;
 
-        /// @brief Transform from anchor {a} to world {w} space
-        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+        /// @brief Transform from planted foot {p} to world {w} space
+        Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
@@ -151,14 +155,12 @@ namespace module::input {
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
-                             const std::shared_ptr<const WalkState>& walk_state);
+                             const message::behaviour::state::Stability& stability);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
         /// @param raw_sensors The raw sensor data
-        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
-                                 const RawSensors& raw_sensors,
-                                 const std::shared_ptr<const WalkState>& walk_state);
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

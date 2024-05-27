@@ -12,6 +12,7 @@ nuclear_role(
   network::PlotJuggler
   output::Overview
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )
