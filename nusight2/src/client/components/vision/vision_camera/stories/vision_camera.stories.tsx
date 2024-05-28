@@ -59,7 +59,8 @@ const robotModelOpts = {
   id: "nuclearnet_client_1",
   name: "nuclearnet_client_1",
   port: 7447,
-};
+  type: "nuclearnet-peer",
+} as const;
 
 export const WithVisionRenderables: Story = {
   render: ({ objectFit, viewType, allowPanAndZoom }) => {

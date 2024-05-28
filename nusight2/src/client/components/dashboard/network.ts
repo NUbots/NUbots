@@ -5,7 +5,7 @@ import { Matrix3 } from "../../../shared/math/matrix3";
 import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
-import { toSeconds } from "../../../shared/time/timestamp";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -33,7 +33,7 @@ export class DashboardNetwork {
     const robot = DashboardRobotModel.of(robotModel);
 
     // Timestamp this message was sent (for comparison with last seen)
-    robot.time = toSeconds(overview.timestamp);
+    robot.time = TimestampObject.toSeconds(overview.timestamp);
 
     // The id number of the robot
     robot.playerId = overview.robotId;
@@ -65,9 +65,9 @@ export class DashboardNetwork {
     robot.penaltyReason = overview.penaltyReason;
 
     // The last time we had a camera image, saw a ball/goal
-    robot.lastCameraImage = toSeconds(overview.lastCameraImage);
-    robot.lastSeenBall = toSeconds(overview.lastSeenBall);
-    robot.lastSeenGoal = toSeconds(overview.lastSeenGoal);
+    robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
+    robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
+    robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
 
     // The walk command and
     robot.walkCommand = Vector3.from(overview.walkCommand);

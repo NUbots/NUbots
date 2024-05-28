@@ -24,3 +24,33 @@ export function memoize<A extends object, B>(fn: (a: A) => B): (a: A) => B {
     return map.get(a)!;
   };
 }
+
+/**
+ * Memoize a function by its simple arguments.
+ *
+ * This is a more flexible version of `memoize()` since it allows the function to have any
+ * number of arguments and they can be of any type that is uniquely serializable to a string.
+ * Primitives and arrays of primitives are OK. Symbols, objects, and arrays that contain
+ * symbols or objects are not. An optional function can be provided to create a unique
+ * key from the arguments, in which case the above restrictions do not apply.
+ *
+ * The downside is that the cache is not garbage collected until the memoized function
+ * itself is, so it's best to use this for functions that are called with a small
+ * number of unique arguments, where the cache won't grow too large.
+ */
+export function memoizeBySimpleArgs<T extends (...args: any[]) => any>(
+  fn: T,
+  createKey?: (...args: Parameters<T>) => string,
+): T {
+  const cache = new Map<string, ReturnType<T>>();
+  return ((...args: Parameters<T>) => {
+    const key = createKey ? createKey(...args) : args.join(",");
+    const cached = cache.get(key);
+    if (cached) {
+      return cached;
+    }
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  }) as T;
+}
