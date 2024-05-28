@@ -80,17 +80,17 @@ namespace module::tools {
             // Get the character the user has typed
             switch (getch()) {
                 case KEY_UP:  // Change row_selection up
-                    row_selection = row_selection != 0 ? row_selection - 1 : (column_selection ? 1 : 5);
+                    row_selection = row_selection != 0 ? row_selection - 1 : (column_selection ? 3 : 4);
                     break;
                 case KEY_DOWN:  // Change row_selection down
-                    row_selection = column_selection ? (row_selection + 1) % 2 : (row_selection + 1) % 6;
+                    row_selection = column_selection ? (row_selection + 1) % 4 : (row_selection + 1) % 5;
                     break;
                 case KEY_LEFT:  // Network config
                     column_selection = 0;
                     break;
                 case KEY_RIGHT:  // Game config
                     column_selection = 1;
-                    row_selection    = row_selection > 1 ? 1 : row_selection;
+                    row_selection    = row_selection > 4 ? 4 : row_selection;
                     break;
                 case '\n':       // Edit selected field
                 case KEY_ENTER:  // Edit selected field
@@ -143,6 +143,9 @@ namespace module::tools {
     void RoboCupConfiguration::get_config_values() {
         // Hostname
         hostname = utility::support::get_hostname();
+
+        // Robot name
+        robot_name = utility::platform::get_robot_alias(hostname);
 
         // Wifi interface
         wifi_interface = utility::support::get_wireless_interface();
@@ -249,6 +252,11 @@ namespace module::tools {
             return;
         }
 
+        // Write robot name
+        if (!robot_name.empty()) {
+            utility::platform::set_robot_alias(hostname, robot_name);
+        }
+
         // Check if any of ip_address, ssid or password are empty
         if (ip_address.empty() || ssid.empty() || password.empty()) {
             log_message = "Configure Error: IP Address, SSID and Password must be set!";
@@ -312,24 +320,24 @@ namespace module::tools {
     void RoboCupConfiguration::toggle_selection() {
         // Networking configuration column
         if (column_selection == 0) {
-            switch (row_selection) {
-                case 2:  // player_id
-                    player_id = player_id == 6 ? 1 : player_id + 1;
-                    break;
-                case 3:  // team_id
-                    team_id = team_id == 33 ? 1 : team_id + 1;
-                    break;
-            }
             return;
         }
         // Game configuration column
-        if (row_selection == 0) {
-            ++robot_position;
+        switch (row_selection) {
+            case 0:  // player_id
+                player_id = player_id == 6 ? 1 : player_id + 1;
+                break;
+            case 1:  // team_id
+                team_id = team_id == 33 ? 1 : team_id + 1;
+                break;
+            case 2:  // position
+                ++robot_position;
 
-            // Get ready position for this position
-            std::string ready_file = get_config_file(robot_position.get_config_name());
-            YAML::Node config      = YAML::LoadFile(ready_file);
-            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+                // Get ready position for this position
+                std::string ready_file = get_config_file(robot_position.get_config_name());
+                YAML::Node config      = YAML::LoadFile(ready_file);
+                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+                break;
         }
     }
 
@@ -337,22 +345,19 @@ namespace module::tools {
         // Networking configuration column
         if (column_selection == 0) {
             switch (row_selection) {
-                case 0:  // wifi interface
+                case 0:  // robot name
+                    robot_name = user_input();
+                    break;
+                case 1:  // wifi interface
                     wifi_interface = user_input();
                     break;
-                case 1:  // ip_address
+                case 2:  // ip_address
                     ip_address = user_input();
                     break;
-                case 2:  // player_id
-                    player_id = std::stoi(user_input());
-                    break;
-                case 3:  // team_id
-                    team_id = std::stoi(user_input());
-                    break;
-                case 4:  // ssid
+                case 3:  // ssid
                     ssid = user_input();
                     break;
-                case 5:  // password
+                case 4:  // password
                     password = user_input();
                     break;
             }
@@ -360,7 +365,13 @@ namespace module::tools {
         }
         // Game configuration column
         switch (row_selection) {
-            case 0:  // robot position
+            case 0:  // player_id
+                player_id = std::stoi(user_input());
+                break;
+            case 1:  // team_id
+                team_id = std::stoi(user_input());
+                break;
+            case 2:  // robot position
                 robot_position = user_input();
                 {
                     // Get ready position for this position
@@ -369,7 +380,7 @@ namespace module::tools {
                     ready_position         = config["ready_position"].as<Eigen::Vector3d>();
                 }
                 break;
-            case 1:  // ready position
+            case 3:  // ready position
                 std::stringstream ss(user_input());
                 ss >> ready_position.x() >> ready_position.y() >> ready_position.z();
                 break;
@@ -448,21 +459,22 @@ namespace module::tools {
         mvprintw(2, 2, "Networking");
         attroff(A_ITALIC);
         mvprintw(4, 2, ("Hostname        : " + hostname).c_str());
-        mvprintw(5, 2, ("Wifi Interface  : " + wifi_interface).c_str());
-        mvprintw(6, 2, ("IP Address      : " + ip_address).c_str());
-        mvprintw(7, 2, ("Player ID       : " + std::to_string(player_id)).c_str());
-        mvprintw(8, 2, ("Team ID         : " + std::to_string(team_id)).c_str());
-        mvprintw(9, 2, ("SSID            : " + ssid).c_str());
-        mvprintw(10, 2, ("Password        : " + password).c_str());
+        mvprintw(5, 2, ("Robot Name      : " + robot_name).c_str());
+        mvprintw(6, 2, ("Wifi Interface  : " + wifi_interface).c_str());
+        mvprintw(7, 2, ("IP Address      : " + ip_address).c_str());
+        mvprintw(8, 2, ("SSID            : " + ssid).c_str());
+        mvprintw(9, 2, ("Password        : " + password).c_str());
 
         attron(A_ITALIC);
         mvprintw(2, 40, "Game Configuration");
         attroff(A_ITALIC);
-        mvprintw(5, 40, ("Position: " + std::string(robot_position)).c_str());
+        mvprintw(5, 40, ("Player ID: " + std::to_string(player_id)).c_str());
+        mvprintw(6, 40, ("Team ID  : " + std::to_string(team_id)).c_str());
+        mvprintw(7, 40, ("Position : " + std::string(robot_position)).c_str());
 
         std::stringstream ready_string{};
         ready_string << ready_position.transpose();
-        mvprintw(6, 40, ("Ready   : " + ready_string.str()).c_str());
+        mvprintw(8, 40, ("Ready    : " + ready_string.str()).c_str());
 
         // Print commands
         // Heading Commands
@@ -513,7 +525,7 @@ namespace module::tools {
         attroff(A_BOLD);
 
         // Highlight our selected point
-        mvchgat(row_selection + 5, 20 + (column_selection * 30), 13, A_STANDOUT, 0, nullptr);
+        mvchgat(row_selection + 5, 20 + (column_selection * 31), 13, A_STANDOUT, 0, nullptr);
 
         refresh();
     }

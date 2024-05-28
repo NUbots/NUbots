@@ -37,6 +37,8 @@ namespace module::tools {
     private:
         /// @brief The hostname of the robot
         std::string hostname = "";
+        /// @brief The name of the robot
+        std::string robot_name = "";
         /// @brief The wifi interface that the robot is connected to
         std::string wifi_interface = "";
         /// @brief The IP address of the robot
