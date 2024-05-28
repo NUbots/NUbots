@@ -233,6 +233,16 @@ namespace module::tools {
             file << config;
         }
 
+        {
+            // Write team_id and player_id to the global config
+            std::string global_file = get_config_file("GlobalConfig.yaml");
+            YAML::Node config       = YAML::LoadFile(global_file);
+            config["team_id"]       = team_id;
+            config["player_id"]     = player_id;
+            std::ofstream file(global_file);
+            file << config;
+        }
+
         // Check if we are on a robot
         if (get_platform() != "nugus") {
             log_message = "Configure Error: Network configuration only available on NUgus robots!";
