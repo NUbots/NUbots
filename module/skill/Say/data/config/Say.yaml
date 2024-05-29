@@ -1,7 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-voice: "en_US/vctk_low#p363"
+voice: "en_US-lessac-medium.onnx"
 
 device_name: "default"
 
