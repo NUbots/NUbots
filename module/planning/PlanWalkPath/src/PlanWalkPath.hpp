@@ -43,8 +43,16 @@ namespace module::planning {
             double min_translational_velocity_magnitude = 0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0;
-            /// @brief Region around ball to begin decelerating in
+
+            /// @brief
             double approach_radius = 0;
+
+            /// @brief
+            double align_radius = 0;
+
+            /// @brief
+            double walk_direct_angle_threshold = 0;
+
             /// @brief Maximum angular velocity command for walking to ball
             double max_angular_velocity = 0;
             /// @brief Minimum angular velocity command for walking to ball

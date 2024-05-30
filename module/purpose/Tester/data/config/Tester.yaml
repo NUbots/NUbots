@@ -5,12 +5,12 @@ log_level: INFO
 tasks:
   # Strategies
   align_ball_to_goal_priority: 0
-  find_ball_priority: 1
-  look_at_ball_priority: 2
-  walk_to_ball_priority: 3
-  walk_to_kick_ball_priority: 4
-  walk_to_field_position_priority: 0
-  kick_to_goal_priority: 5
+  find_ball_priority: 0
+  look_at_ball_priority: 0
+  walk_to_ball_priority: 0
+  walk_to_kick_ball_priority: 0
+  walk_to_field_position_priority: 1
+  kick_to_goal_priority: 0
   stand_still_priority: 0
 
   # Planners
@@ -23,7 +23,7 @@ tasks:
   audiogpt_priority: 0
 
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
-walk_to_field_position_position: [0, 0, 0]
+walk_to_field_position_position: [0, 0, -3.14]
 
 # What to have the robot say when speaking
 say_text: "Hello!"

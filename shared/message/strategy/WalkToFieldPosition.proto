@@ -27,13 +27,10 @@ syntax = "proto3";
 
 package message.strategy;
 
-import "Vector.proto";
+import "Transform.proto";
 
 /// Robot walks to position on field
 message WalkToFieldPosition {
-    /// Position on the field to walk to (x, y, 0)
-    vec3 rPFf = 1;
-
-    /// Orientation of the robot on the field (in radians)
-    double heading = 2;
+    /// Transform from desired robot pose {d} to field {f} space
+    iso3 Hfd = 1;
 }

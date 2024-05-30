@@ -40,6 +40,7 @@
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
@@ -65,6 +66,8 @@ namespace module::purpose {
     using message::strategy::WalkToFieldPosition;
 
     using DefenderTask = message::purpose::Defender;
+
+    using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
     Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -107,8 +110,8 @@ namespace module::purpose {
             // If we are stable, walk to the ready field position
             log<NUClear::DEBUG>("READY");
             emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
 
         // Normal PLAYING state

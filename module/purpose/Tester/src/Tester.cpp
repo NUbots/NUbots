@@ -43,6 +43,7 @@
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
@@ -65,6 +66,7 @@ namespace module::purpose {
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
 
+    using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
     Tester::Tester(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -114,12 +116,12 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<KickToGoal>(), cfg.kick_to_goal_priority);
             }
             if (cfg.walk_to_field_position_priority > 0) {
-                emit<Task>(
-                    std::make_unique<WalkToFieldPosition>(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
-                                                                          cfg.walk_to_field_position_position.y(),
-                                                                          0),
-                                                          cfg.walk_to_field_position_position.z()),
-                    cfg.walk_to_field_position_priority);
+                emit<Task>(std::make_unique<WalkToFieldPosition>(
+                               pos_rpy_to_transform(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
+                                                                    cfg.walk_to_field_position_position.y(),
+                                                                    0),
+                                                    Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z()))),
+                           cfg.walk_to_field_position_priority);
             }
             if (cfg.kick_to_priority > 0) {
                 emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);

@@ -26,6 +26,8 @@
  */
 #include "WalkToFieldPosition.hpp"
 
+#include <tinyrobotics/math.hpp>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -51,68 +53,20 @@ namespace module::strategy {
 
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
-            this->log_level               = config["log_level"].as<NUClear::LogLevel>();
-            cfg.stop_tolerance_position   = config["stop_tolerance"]["position"].as<double>();
-            cfg.stop_tolerance_heading    = config["stop_tolerance"]["heading"].as<double>();
-            cfg.resume_tolerance_position = config["resume_tolerance"]["position"].as<double>();
-            cfg.resume_tolerance_heading  = config["resume_tolerance"]["heading"].as<double>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
-                // Get the transformation from robot {r} space to field {f} space
-                const Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
-
-                Eigen::Isometry3d Hfp = Eigen::Isometry3d::Identity();
-                Hfp.translation()     = Eigen::Vector3d(walk_to_field_position.rPFf);
-                Hfp.linear() =
-                    Eigen::AngleAxisd(walk_to_field_position.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                // Get the transformation from field {f} space to robot {r} space
+                const Eigen::Isometry3d Hrf = sensors.Hrw * field.Hfw.inverse();
 
                 // Transform from desired field position into robot space
-                Eigen::Isometry3d Hrp = Hfr.inverse() * Hfp;
+                Eigen::Isometry3d Hrd = Hrf * walk_to_field_position.Hfd;
 
-                // Compute the current position error and heading error in field {f} space
-                const double position_error = Hrp.translation().norm();
-                const double heading_error  = std::abs(mat_to_rpy_intrinsic(Hrp.linear()).z());
-                log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
+                auto pose_error = tinyrobotics::homogeneous_error(walk_to_field_position.Hfd, Hrf.inverse());
 
-                // Emit non-task message (for visualisation)
-                const double desired_heading = std::atan2(Hrp.translation().y(), Hrp.translation().x());
-                emit(std::make_unique<WalkTo>(Hrp.translation(), desired_heading, Hrp));
-
-                // If we have stopped but our position or heading error is now above resume tolerance, resume walking
-                if (stopped
-                    && (position_error > cfg.resume_tolerance_position
-                        || heading_error > cfg.resume_tolerance_heading)) {
-                    stopped = false;
-                }
-
-                // If the error in the desired field position and heading is low enough, don't do anything
-                if (!stopped && position_error < cfg.stop_tolerance_position
-                    && heading_error < cfg.stop_tolerance_heading) {
-                    stopped = true;
-                }
-
-                // If we are stopped, do nothing
-                if (stopped) {
-                    return;
-                }
-
-                // If we are far from position and desired heading, walk directly to the field position
-                if (position_error > cfg.stop_tolerance_position) {
-                    emit<Task>(std::make_unique<WalkTo>(Hrp.translation(), desired_heading, Hrp));
-                    log<NUClear::DEBUG>("Walking to desired position");
-                }
-                // If we are close to desired position but not orientated correctly, rotate in place
-                else if (heading_error > cfg.stop_tolerance_heading) {
-                    bool clockwise = Hrp(1, 0) < 0;
-                    emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
-                    log<NUClear::DEBUG>("Rotating in place to desired heading");
-                }
-                // Otherwise,do nothing
-                else {
-                    log<NUClear::DEBUG>("At desired position, stopping");
-                }
+                emit<Task>(std::make_unique<WalkTo>(Hrd));
             });
     }
 

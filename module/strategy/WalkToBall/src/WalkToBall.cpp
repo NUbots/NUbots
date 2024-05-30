@@ -37,6 +37,8 @@
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
 
+#include "utility/math/euler.hpp"
+
 namespace module::strategy {
 
     using extension::Configuration;
@@ -48,6 +50,8 @@ namespace module::strategy {
     using WalkToBallTask     = message::strategy::WalkToBall;
     using WalkToKickBallTask = message::strategy::WalkToKickBall;
     using FieldDescription   = message::support::FieldDescription;
+
+    using utility::math::euler::pos_rpy_to_transform;
 
     WalkToBall::WalkToBall(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -77,9 +81,10 @@ namespace module::strategy {
                     // Add an offset to account for walking with the foot in front of the ball
                     rBRr.y() += cfg.ball_y_offset;
                     const double heading = std::atan2(rBRr.y(), rBRr.x());
-                    emit<Task>(std::make_unique<WalkTo>(rBRr, heading), 2);
+                    auto Hrb             = pos_rpy_to_transform(rBRr, Eigen::Vector3d(0, 0, heading));
+                    emit<Task>(std::make_unique<WalkTo>(Hrb), 2);
                     log<NUClear::INFO>("Walking to ball");
-                    emit(std::make_unique<WalkTo>(rBRr, heading));
+                    emit(std::make_unique<WalkTo>(Hrb));
                 }
             });
 
@@ -110,8 +115,9 @@ namespace module::strategy {
                     // Compute the heading (angle between the x-axis and the vector from the kick position to the goal)
                     double heading = std::atan2(rKBf.y(), rKBf.x());
 
-                    // Add an offset to
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(rKFf, heading));
+                    auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, heading));
+
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk));
                 }
             });
     }
