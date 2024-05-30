@@ -47,196 +47,65 @@ def main():
             smoothed_data[:, i] = gaussian_filter1d(data[:, i], window_size, axis=0)
 
         # print shapes to verify i didn't f up
-        print("Original data shape: ", data.shape)
-        print("Smoothed data shape: ", smoothed_data.shape)
+        # print("Original data shape: ", data.shape)
+        # print("Smoothed data shape: ", smoothed_data.shape)
         return smoothed_data
 
     # numpy arrays
-    imu_s = np.load("processed-outputs/numpy/s/1/s-imu-1.npy")
-    servos_s = np.load("processed-outputs/numpy/s/1/s-servos-1.npy")
-    truth_all_s = np.load("processed-outputs/numpy/s/1/s-truth-1.npy")
-    # More data
-    imu_s_2 = np.load("processed-outputs/numpy/s/2/s-imu-2.npy")
-    servos_s_2 = np.load("processed-outputs/numpy/s/2/s-servos-2.npy")
-    truth_all_s_2 = np.load("processed-outputs/numpy/s/2/s-truth-2.npy")
-    # Even more data
-    imu_s_3 = np.load("processed-outputs/numpy/s/3/s-imu-3.npy")
-    servos_s_3 = np.load("processed-outputs/numpy/s/3/s-servos-3.npy")
-    truth_all_s_3 = np.load("processed-outputs/numpy/s/3/s-truth-3.npy")
-    # Even more data
-    imu_s_4 = np.load("processed-outputs/numpy/s/4/s-imu-4.npy")
-    servos_s_4 = np.load("processed-outputs/numpy/s/4/s-servos-4.npy")
-    truth_all_s_4 = np.load("processed-outputs/numpy/s/4/s-truth-4.npy")
-    # Even more data
-    imu_s_5 = np.load("processed-outputs/numpy/s/5/s-imu-5.npy")
-    servos_s_5 = np.load("processed-outputs/numpy/s/5/s-servos-5.npy")
-    truth_all_s_5 = np.load("processed-outputs/numpy/s/5/s-truth-5.npy")
-    # Even more data
-    imu_s_6 = np.load("processed-outputs/numpy/s/6/s-imu-6.npy")
-    servos_s_6 = np.load("processed-outputs/numpy/s/6/s-servos-6.npy")
-    truth_all_s_6 = np.load("processed-outputs/numpy/s/6/s-truth-6.npy")
+    num_files = 22  # Number of files to load
+    imu = []
+    servos = []
+    truth_all = []
+
+    for i in range(1, num_files):
+        imu.append(np.load(f"processed-outputs/numpy/s/{i}/s-imu-{i}.npy"))
+        servos.append(np.load(f"processed-outputs/numpy/s/{i}/s-servos-{i}.npy"))
+        truth_all.append(np.load(f"processed-outputs/numpy/s/{i}/s-truth-{i}.npy"))
+
+    # Need to do the relative conversions here
+    # Use the convert_to_relative function to convert the truth data to relative positions
+    truth_all = [convert_to_relative(truth) for truth in truth_all]
+
+    # Smoothing should be done here
+    # Loop through each truth array and smooth
+    truth_all = [gaussian_smooth(truth, 50) for truth in truth_all]
+
+    # Loop through each array and concatenate into a numpy array
+    for i in range(0, num_files):
+        imu_joined = np.concatenate(imu, axis=0)
+        servos_joined = np.concatenate(servos, axis=0)
+        truth_all_joined = np.concatenate(truth_all, axis=0)
+
+    # Print the shape of the joined arrays
+    print("IMU s joined: ", imu_joined.shape)
+    print("Servos s joined: ", servos_joined.shape)
+    print("Truth s joined: ", truth_all_joined.shape)
 
     # Slice out the arm and head servos
-    # NOTE: Remember to reshape if adding or removing features
-    servos_s = servos_s[:, 6:18]
-    servos_s_2 = servos_s_2[:, 6:18]
-    servos_s_3 = servos_s_3[:, 6:18]
-    servos_s_4 = servos_s_4[:, 6:18]
-    servos_s_5 = servos_s_5[:, 6:18]
-    servos_s_6 = servos_s_6[:, 6:18]
+    servos_joined = servos_joined[:, 6:18]
 
-    # tstamps = np.load('processed-outputs/numpy/s/1/s-tstamps-1.npy')
-    print("IMU s: ", imu_s.shape)
-    # print("IMU max: ", np.max(imu_s))
-    # print("IMU min: ", np.min(imu_s))
-    print("Servos s: ", servos_s.shape)
-    print("Truth s: ", truth_all_s.shape)
-
-    print("IMU s 2: ", imu_s_2.shape)
-    # print("IMU max 2: ", np.max(imu_s_2))
-    # print("IMU min 2: ", np.min(imu_s_2))
-    print("Servos s 2: ", servos_s_2.shape)
-    print("Truth s 2: ", truth_all_s_2.shape)
-
-    print("IMU s 3: ", imu_s_3.shape)
-    # print("IMU max 3: ", np.max(imu_s_3))
-    # print("IMU min 3: ", np.min(imu_s_3))
-    print("Servos s 3: ", servos_s_3.shape)
-    print("Truth s 3: ", truth_all_s_3.shape)
-
-    print("IMU s 4: ", imu_s_4.shape)
-    # print("IMU max 4: ", np.max(imu_s_4))
-    # print("IMU min 4: ", np.min(imu_s_4))
-    print("Servos s 4: ", servos_s_4.shape)
-    print("Truth s 4: ", truth_all_s_4.shape)
-
-    print("IMU s 5: ", imu_s_5.shape)
-    # print("IMU max 5: ", np.max(imu_s_5))
-    # print("IMU min 5: ", np.min(imu_s_5))
-    print("Servos s 5: ", servos_s_5.shape)
-    print("Truth s 5: ", truth_all_s_5.shape)
-
-    print("IMU s 6: ", imu_s_6.shape)
-    # print("IMU max 6: ", np.max(imu_s_6))
-    # print("IMU min 6: ", np.min(imu_s_6))
-    print("Servos s 6: ", servos_s_6.shape)
-    print("Truth s 6: ", truth_all_s_6.shape)
-
-    # Plot and inspect
-    # num_channels = truth_s_4.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(imu[200000:250000, i], label=f'Channel {i+1}')
-    # # Add a legend
-    # plt.legend()
-    # plt.show()
-
-    # Plot and inspect
-    # num_channels = truth_all_s_6.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(truth_all_s_6[0:100000, i], label=f'truth_all_s_6 {i+1}')
-    #     # plt.plot(imu_s[0:100000, i], label=f'IMU {i+1}')
-    # # Add a legend
-    # # plt.ylim(np.min(imu), np.max(imu))
-    # plt.autoscale(enable=True, axis="both")
-    # plt.legend()
-    # plt.show()
-
-    # # Reconstruct the matrices
-    # # "data.odometryGroundTruth.Htw.x.x", - 0
-    # # "data.odometryGroundTruth.Htw.x.y", - 1
-    # # "data.odometryGroundTruth.Htw.x.z", - 2
-    # # "data.odometryGroundTruth.Htw.y.x", - 3
-    # # "data.odometryGroundTruth.Htw.y.y", - 4
-    # # "data.odometryGroundTruth.Htw.y.z", - 5
-    # # "data.odometryGroundTruth.Htw.z.x", - 6
-    # # "data.odometryGroundTruth.Htw.z.y", - 7
-    # # "data.odometryGroundTruth.Htw.z.z", - 8
-    # # "data.odometryGroundTruth.Htw.t.x", - 9
-    # # "data.odometryGroundTruth.Htw.t.y", - 10
-    # # "data.odometryGroundTruth.Htw.t.z" - 11
-    # Hwts = []
-    # for t in truth_all:
-    #     m = np.array[[t[0], t[3], t[6], t[9]],[t[1], t[4], t[7], t[10]],[t[2], t[5], t[8], t[11]],[0.0, 0.0, 0.0, 1.0]]
-    #     Hwts.append(m)
-    # Htws = [np.linalg.inv(m) for m in Hwts]
-    # robot_position_in_world_truth = np.array([h[3,:3] for h in Htws])
+    # Plot and inspect each joined array
+    num_channels = servos_joined.shape[1]
+    plt.figure(figsize=(10, 5))
+    # Plot each channel
+    for i in range(num_channels):
+        plt.plot(servos_joined[0:100000, i], label=f'servo {i+1}')
+    # Add a legend
+    # plt.ylim(np.min(imu), np.max(imu))
+    plt.autoscale(enable=True, axis="both")
+    plt.legend()
+    plt.show()
 
     # NOTE: Using only position for first tests to see what happens. May add in heading later.
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     # NOTE: 17/04/2024 - Due to fluctuations in the z component, trying with just x, y
     # NOTE: Remember to reshape if adding or removing features
 
-    truth_s = truth_all_s[:, 9:11]
-    print("Truth s shape: ", truth_s.shape)
-    truth_s_2 = truth_all_s_2[:, 9:11]
-    print("Truth s 2 shape: ", truth_s_2.shape)
-    truth_s_3 = truth_all_s_3[:, 9:11]
-    print("Truth s 3 shape: ", truth_s_3.shape)
-    truth_s_4 = truth_all_s_4[:, 9:11]
-    print("Truth s 4 shape: ", truth_s_4.shape)
-    truth_s_5 = truth_all_s_5[:, 9:11]
-    print("Truth s 4 shape: ", truth_s_4.shape)
-    truth_s_6 = truth_all_s_6[:, 9:11]
-    print("Truth s 4 shape: ", truth_s_4.shape)
-
-    # Convert each truth to relative (path relative to starting point)
-    truth_s = convert_to_relative(truth_s)
-    truth_s_2 = convert_to_relative(truth_s_2)
-    truth_s_3 = convert_to_relative(truth_s_3)
-    truth_s_4 = convert_to_relative(truth_s_4)
-    truth_s_5 = convert_to_relative(truth_s_5)
-    truth_s_6 = convert_to_relative(truth_s_6)
-
-    # Smooth targets using gaussian filter
-    truth_s_smoothed = gaussian_smooth(truth_s, 50)
-    truth_s_2_smoothed = gaussian_smooth(truth_s_2, 50)
-    truth_s_3_smoothed = gaussian_smooth(truth_s_3, 50)
-    truth_s_4_smoothed = gaussian_smooth(truth_s_4, 50)
-    truth_s_5_smoothed = gaussian_smooth(truth_s_5, 50)
-    truth_s_6_smoothed = gaussian_smooth(truth_s_6, 50)
-
-    # print("truth 1: ", truth_s.shape)
-    # print("Smoothed truth 1: ", truth_s_smoothed.shape)
-
-    # Plot and inspect
-    # num_channels = truth_s_4.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(truth_s_4[:50000, i], label=f'Unsmoothed {i+1}')
-    #     plt.plot(truth_s_4_smoothed[:50000, i], label=f'Smoothed {i+1}')
-    # # Add a legend
-    # # plt.ylim(np.min(imu), np.max(imu))
-    # plt.autoscale(enable=True, axis="both")
-    # plt.legend()
-    # plt.show()
-
-    # join separate arrays
-    imu_joined = np.concatenate([imu_s, imu_s_2, imu_s_3, imu_s_4, imu_s_5, imu_s_6], axis=0)
-    servos_joined = np.concatenate([servos_s, servos_s_2, servos_s_3, servos_s_4, servos_s_5, servos_s_6], axis=0)
-    truth_joined = np.concatenate([truth_s_smoothed, truth_s_2_smoothed, truth_s_3_smoothed, truth_s_4_smoothed, truth_s_5_smoothed, truth_s_6_smoothed], axis=0)
-    # truth_joined = np.concatenate([truth_s, truth_s_2, truth_s_3, truth_s_4, truth_s_5, truth_s_6], axis=0)
-    # debugs
-    print("imu_joined: ", imu_joined.shape)
-    print("servos_joined: ",servos_joined.shape)
-    print("truth_joined: ",truth_joined.shape)
-
-    # Plot and inspect after concatenation
-    # num_channels = truth_joined.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(truth_joined[0:100000, i], label=f'Channel {i+1}')
-    # # Add a legend
-    # plt.legend()
-    # plt.show()
+    # slice out the x and y positions (9:11) of the truth array
+    truth_joined_sliced = truth_all_joined[:, 9:11]
 
     # Join the data
-    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined], axis=1)
+    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
     print("Total joined data shape: ", joined_data.shape)
 
     # Split the training data into training, validation and test sets
@@ -297,14 +166,14 @@ def main():
     # test_arr_scaled = scaler.transform(test_arr)
 
     # Plot and inspect after normalising
-    # num_channels = test_arr_scaled.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(test_arr_scaled[0:100000, i], label=f'Channel {i+1}')
-    # # Add a legend
-    # plt.legend()
-    # plt.show()
+    num_channels = test_arr.shape[1]
+    plt.figure(figsize=(10, 5))
+    # Plot each channel
+    for i in range(num_channels):
+        plt.plot(test_arr[0:100000, i], label=f'Channel {i+1}')
+    # Add a legend
+    plt.legend()
+    plt.show()
 
     # NOTE: Remember to reshape if adding or removing features
 
@@ -432,7 +301,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 800             #
+    epochs = 40             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -486,51 +355,43 @@ def main():
     # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
 
     # Tensorboard
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    log_dir = "logs/fit/" + timestamp
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    # timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    # log_dir = "logs/fit/" + timestamp
+    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-    # Regulariser
-    # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
+    # # Model Layers
+    # inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
+    # dropout = keras.layers.Dropout(rate=0.35)(inputs)
+    # lstm = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout)    # 32 originally
+    # normalise = keras.layers.LayerNormalization()(lstm)
 
-    # Model Layers
-    inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout = keras.layers.Dropout(rate=0.35)(inputs)
-    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout)    # 32 originally
-    normalise = keras.layers.LayerNormalization()(lstm)
+    # dropout2 = keras.layers.Dropout(rate=0.35)(normalise)
+    # lstm2 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout2)    # 32 originally
+    # normalise2 = keras.layers.LayerNormalization()(lstm2)
 
-    dropout2 = keras.layers.Dropout(rate=0.35)(normalise)
-    lstm2 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout2)    # 32 originally
-    normalise2 = keras.layers.LayerNormalization()(lstm2)
+    # dropout3 = keras.layers.Dropout(rate=0.35)(normalise2)
+    # lstm3 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout3)    # 32 originally
+    # normalise3 = keras.layers.LayerNormalization()(lstm3)
 
-    dropout3 = keras.layers.Dropout(rate=0.35)(normalise2)
-    lstm3 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout3)    # 32 originally
-    normalise3 = keras.layers.LayerNormalization()(lstm3)
+    # # Apply attention layer that considers lstm outputs
+    # attention = keras.layers.Attention()([normalise, normalise3])
 
-    # Apply attention layer that considers lstm outputs
-    attention = keras.layers.Attention()([normalise, normalise3])
+    # # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
 
-    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
-    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # # # Compute dot product between attention weights and last LSTM layer
+    # # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
 
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
-    model = keras.Model(inputs=inputs, outputs=dense2)
-    # # Compute dot product between attention weights and last LSTM layer
-    # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
-
-    lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
-    normalise4 = keras.layers.LayerNormalization()(lstm4)
-    # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
-    # NOTE: Changed dense layer units to 2 due to removing z component
-    # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
-    # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(normalise4)   # Target shape[1] is 3
-    model = keras.Model(inputs=inputs, outputs=dense2)
-    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
-    model.summary()
+    # # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
+    # # NOTE: Changed dense layer units to 2 due to removing z component
+    # # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
+    # # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
+    # dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
+    # model = keras.Model(inputs=inputs, outputs=dense2)
+    # model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+    # model.summary()
 
     # Examples
     # lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
