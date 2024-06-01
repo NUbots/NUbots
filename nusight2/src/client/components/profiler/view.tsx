@@ -9,7 +9,6 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { ProfilerController } from "./controller";
 import { ProfilerModel, ProfilerRobotModel } from "./model";
-import style from "./style.module.css";
 
 @observer
 export class ProfilerView extends React.Component<{
@@ -25,9 +24,9 @@ export class ProfilerView extends React.Component<{
     } = this.props;
 
     return (
-      <div className={style.Profiler}>
+      <div className={"flex flex-grow flex-shrink flex-col text-center relative w-full h-full"}>
         <Menu>
-          <div className={style.selector}>
+          <div className={"h-full flex items-center justify-end"}>
             <RobotSelectorSingle
               autoSelect={true}
               robots={robots}
@@ -37,15 +36,15 @@ export class ProfilerView extends React.Component<{
           </div>
         </Menu>
         {selectedRobot && (
-          <div className="overflow-x-auto p-2">
+          <div className="overflow-x-auto p-8">
             <div>
               <RobotStats totalCount={selectedRobot.totalCount} totalTime={selectedRobot.totalTime} />
             </div>
-            <div className="flex-col m-2">
+            <div className="flex-col py-4">
               <SearchBox model={selectedRobot} controller={controller} />
             </div>
 
-            <table className="min-w-full table-auto border-collapse border border-gray-200">
+            <table className="min-w-full table-auto bg-gray-100 dark:bg-gray-800 border border-collapse border-gray-300 dark:border-gray-700">
               <thead>
                 <tr>
                   <th onClick={() => controller.setSort(selectedRobot!, "reactionId")}>
@@ -119,10 +118,10 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
 
   return (
     <div className="relative w-64">
-      <Icon className="absolute left-1 top-1 text-icon pointer-events-none">search</Icon>
+      <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-white focus:outline-none focus:border-transparent focus:ring-2 focus:ring-nusight-500"
+        className="pl-8 pr-2 h-7 w-[320px] bg-gray-100 dark:bg-gray-800 border border-gray-300 rounded-md dark:border-gray-700 rounded focus:outline-none focus:border-transparent focus:ring-2 ring-gray-300 dark:focus:ring-gray-700"
         placeholder="Filter profiles"
         value={model.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -140,13 +139,13 @@ export const RobotStats = (props: RobotStatsProps) => {
   return (
     <div>
       <div>
-        <div className="flex justify-center">
-          <div className="px-12 py-4 border rounded-md mx-12">
+        <div className="flex justify-center pt-8">
+          <div className="px-12 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md mx-12">
             <div className="text-lg text-gray-500">Total Time (s)</div>
             <div className="text-3xl">{(props.totalTime / 1e3).toFixed(1)}</div>
           </div>
 
-          <div className="px-12 py-4 border rounded-md ">
+          <div className="px-12 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md ">
             <div className="text-lg text-gray-500">Total Reactions</div>
             <div className="text-3xl">{props.totalCount.toLocaleString()}</div>
           </div>
