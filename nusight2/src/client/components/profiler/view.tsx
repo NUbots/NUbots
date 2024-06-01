@@ -44,34 +44,34 @@ export class ProfilerView extends React.Component<{
               <SearchBox model={selectedRobot} controller={controller} />
             </div>
 
-            <table className="min-w-full table-auto bg-gray-100 dark:bg-gray-800 border border-collapse border-gray-300 dark:border-gray-700">
+            <table className="min-w-full table-auto bg-auto-surface-1 border border-collapse border-gray-300 dark:border-gray-700">
               <thead>
                 <tr>
-                  <th onClick={() => controller.setSort(selectedRobot!, "reactionId")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "reactionId")}>
                     Reaction ID {controller.getSortIcon(selectedRobot!, "reactionId")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "reactor")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "reactor")}>
                     Reactor Name {controller.getSortIcon(selectedRobot!, "reactor")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "name")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "name")}>
                     Reaction Name {controller.getSortIcon(selectedRobot!, "name")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "total_time")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "total_time")}>
                     Total Time (ms) {controller.getSortIcon(selectedRobot!, "total_time")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "count")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "count")}>
                     Count {controller.getSortIcon(selectedRobot!, "count")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "min_time")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "min_time")}>
                     Min Time (ms) {controller.getSortIcon(selectedRobot!, "min_time")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "max_time")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "max_time")}>
                     Max Time (ms) {controller.getSortIcon(selectedRobot!, "max_time")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "avg_time")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "avg_time")}>
                     Average Time (ms) {controller.getSortIcon(selectedRobot!, "avg_time")}
                   </th>
-                  <th onClick={() => controller.setSort(selectedRobot!, "percentage")}>
+                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "percentage")}>
                     Time % {controller.getSortIcon(selectedRobot!, "percentage")}
                   </th>
                 </tr>
@@ -121,7 +121,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] bg-gray-100 dark:bg-gray-800 border border-gray-300 rounded-md dark:border-gray-700 rounded focus:outline-none focus:border-transparent focus:ring-2 ring-gray-300 dark:focus:ring-gray-700"
+        className="pl-8 pr-2 h-7 w-[320px] bg-auto-surface-1 border border-gray-300 rounded-md dark:border-gray-700 rounded focus:outline-none focus:border-transparent focus:ring-2 ring-gray-300 dark:focus:ring-gray-700"
         placeholder="Filter profiles"
         value={model.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -140,12 +140,12 @@ export const RobotStats = (props: RobotStatsProps) => {
     <div>
       <div>
         <div className="flex justify-center pt-8">
-          <div className="px-12 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md mx-12">
+          <div className="px-12 py-4 bg-auto-surface-1 border border-gray-300 dark:border-gray-700 rounded-md mx-12">
             <div className="text-lg text-gray-500">Total Time (s)</div>
             <div className="text-3xl">{(props.totalTime / 1e3).toFixed(1)}</div>
           </div>
 
-          <div className="px-12 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md ">
+          <div className="px-12 py-4 bg-auto-surface-1 border border-gray-300 dark:border-gray-700 rounded-md ">
             <div className="text-lg text-gray-500">Total Reactions</div>
             <div className="text-3xl">{props.totalCount.toLocaleString()}</div>
           </div>

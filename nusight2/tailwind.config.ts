@@ -230,6 +230,9 @@ const config: Config = {
         generateAutoColorUtilities(pick(themeColors, ["primary", "secondary", "divider"]), "outline-color", "outline"),
       )
 
+      // Add the `fill-auto-...` utilities
+      addUtilities(generateAutoColorUtilities(pick(themeColors, ["contrast"]), "fill", "fill"));
+
       // Add the `bg-auto-...` utilities
       const bg = generateAutoColorUtilities(pick(themeColors, ["surface", "contrast"]), ["background-color"], "bg");
       addUtilities(bg);

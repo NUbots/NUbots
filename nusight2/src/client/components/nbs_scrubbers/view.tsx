@@ -81,19 +81,19 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
     <div className="flex relative">
       <button
         className={classNames(
-          "inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px] hover:bg-[#f8f8f8] focus:bg-[#f8f8f8] active:bg-[#eee]",
+          "inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]",
         )}
         onClick={onClick}
       >
         {showScrubbers ? (
-          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px]" />
+          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px] fill-auto-contrast-1" />
         ) : (
           <IconNbs className="w-7 h-7 mt-1 -ml-[20px]" />
         )}
         <span className="text-[0.7rem]">Scrub NBS</span>
       </button>
       <button
-        className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:bg-gray-200 h-8 rounded inline-flex items-center"
+        className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:bg-auto-contrast-1 h-8 rounded inline-flex items-center"
         onClick={onToggle}
       >
         <Icon size="20" weight="500" rotate={showScrubbers ? 180 : 0} className="transition-transform">
