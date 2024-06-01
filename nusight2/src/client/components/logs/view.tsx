@@ -33,7 +33,7 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
         </div>
       </Menu>
       {selectedLogsRobot ? (
-        <div className="flex-grow border-t border-gray-300 flex flex-col">
+        <div className="flex-grow flex flex-col">
           <Toolbar model={selectedLogsRobot} controller={controller} />
           <div className="relative h-full w-full">
             <LogLines model={selectedLogsRobot} />
@@ -71,14 +71,15 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
   const { model, controller } = props;
 
   return (
-    <div className="bg-gray-100 px-2 py-1.5 border-b border-gray-300 flex">
+    <div className="bg-auto-surface-2 px-2 py-1.5 flex border-t border-b border-gray-300 dark:border-transparent">
       <SearchBox model={model} controller={controller} />
 
-      <div className="flex gap-1 border-x px-2 mx-2">
+      <div className="flex gap-1 border-x border-gray-300 dark:border-transparent px-2 mx-2">
         <ToggleButton on={model.filters.levels.trace} onClick={(on) => controller.setFilter(model, "trace", !on)}>
           <Icon size={20}>{logLevelToIcon.trace}</Icon>
           Trace
         </ToggleButton>
+        {console.log(model.filters.levels.trace)}
         <ToggleButton on={model.filters.levels.debug} onClick={(on) => controller.setFilter(model, "debug", !on)}>
           <Icon size={20}>{logLevelToIcon.debug}</Icon>
           Debug
@@ -121,10 +122,10 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
 
   return (
     <div className="relative">
-      <Icon className="absolute left-1 top-1 text-icon pointer-events-none">search</Icon>
+      <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-white focus:outline-none focus:border-transparent focus:ring-2 focus:ring-nusight-500"
+        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 dark:border-gray-700 rounded bg-gray-200 dark:bg-gray-650 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700"
         placeholder="Filter logs"
         value={model.filters.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -142,9 +143,10 @@ interface ToggleButtonProps {
 function ToggleButton(props: ToggleButtonProps) {
   return (
     <button
-      className={`h-7 px-2 inline-flex items-center border rounded ${
-        props.on ? "bg-nusight-500 border-nusight-500 text-white" : "bg-white border-gray-300"
-      }`}
+      className={`h-7 px-2 inline-flex items-center border rounded ${props.on
+        ? "bg-blue-600 border-blue-700 text-gray-100"
+        : "bg-gray-100 dark:bg-gray-650 border-gray-350 dark:border-gray-700"
+        } `}
       onClick={() => props.onClick(props.on)}
     >
       {props.children}
@@ -169,9 +171,13 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
 
   if (model.messagesFilteredBySearch.length === 0) {
     if (model.messages.length === 0) {
-      return <div className="text-center py-4 text-lg text-gray-400">No log messages yet</div>;
+      return <div className="text-center py-4 text-lg text-gray-500 dark:text-gray-650">No log messages yet</div>;
     } else {
-      return <div className="text-center py-4 text-lg text-gray-400">No messages match your filters and search</div>;
+      return (
+        <div className="text-center py-4 text-lg text-gray-500 dark:text-gray-650">
+          No messages match your filters and search
+        </div>
+      );
     }
   }
 
@@ -203,7 +209,10 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
   const { model, message } = props;
 
   return (
-    <div className={`flex gap-3 items-center py-0.5 border-b border-black/10 ${logLevelToTextColor[message.level]}`}>
+    <div
+      className={`flex gap - 3 items - center py - 0.5 border - b border - black / 10 ${logLevelToTextColor[message.level]
+        } `}
+    >
       <div className="inline-flex items-end self-start gap-1">
         <div className="w-12 uppercase text-right">{message.level}</div>
         <Icon fill className="text-lg/none">

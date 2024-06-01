@@ -99,31 +99,31 @@ const config: Config = {
           "0-inverse": "#333333ff",
 
           1: colors.neutral[100],
-          "1-inverse": colors.neutral[850],
+          "1-inverse": "#404040",
 
           2: colors.white,
-          "2-inverse": colors.neutral[850],
+          "2-inverse": "#525252",
         },
 
         // Use to create contrast against the current background for indicating states like hovered, pressed, and selected.
         contrast: {
           1: "rgba(0, 0, 0, 0.05)",
-          "1-inverse": "rgba(255, 255, 255, 0.05)",
+          "1-inverse": "rgba(255, 255, 255, 0.10)",
 
           2: "rgba(0, 0, 0, 0.10)",
-          "2-inverse": "rgba(255, 255, 255, 0.10)",
+          "2-inverse": "rgba(255, 255, 255, 0.15)",
 
           3: "rgba(0, 0, 0, 0.15)",
-          "3-inverse": "rgba(255, 255, 255, 0.15)",
+          "3-inverse": "rgba(255, 255, 255, 0.20)",
 
           4: "rgba(0, 0, 0, 0.20)",
-          "4-inverse": "rgba(255, 255, 255, 0.20)",
+          "4-inverse": "rgba(255, 255, 255, 0.25)",
 
           5: "rgba(0, 0, 0, 0.25)",
-          "5-inverse": "rgba(255, 255, 255, 0.25)",
+          "5-inverse": "rgba(255, 255, 255, 0.30)",
 
           6: "rgba(0, 0, 0, 0.30)",
-          "6-inverse": "rgba(255, 255, 255, 0.30)",
+          "6-inverse": "rgba(255, 255, 255, 0.35)",
 
           max: colors.black,
           "max-inverse": colors.white,
@@ -157,6 +157,10 @@ const config: Config = {
       boxShadow: {
         "auto-card":
           "var(--color-auto-contrast-3) 0 0 0 1px, var(--color-auto-shadow-card) 0 5px 15px -3px, var(--color-auto-shadow-card) 0 4px 8px -4px",
+      },
+
+      spacing: {
+        inherit: "inherit",
       },
     },
   },
@@ -220,6 +224,11 @@ const config: Config = {
           "text",
         ),
       );
+
+      // Add the `outline-auto-...` utilities
+      addUtilities(
+        generateAutoColorUtilities(pick(themeColors, ["primary", "secondary", "divider"]), "outline-color", "outline"),
+      )
 
       // Add the `bg-auto-...` utilities
       const bg = generateAutoColorUtilities(pick(themeColors, ["surface", "contrast"]), ["background-color"], "bg");

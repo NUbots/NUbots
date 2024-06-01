@@ -4,6 +4,8 @@ import { Component } from "react";
 import { ComponentType } from "react";
 import { observer } from "mobx-react";
 
+import { Button } from "../button/button";
+
 import { DashboardController } from "./controller";
 import { DashboardModel } from "./model";
 import { DashboardNetwork } from "./network";
@@ -30,27 +32,25 @@ export class Dashboard extends Component<DashboardProps> {
     const showPanels = model.robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
-      <div className={style.page}>
+      <div className={"flex flex-col w-full"}>
         <Menu>
-          <ul className={style.menu}>
-            <li className={style.menuItem}>
-              <button className={style.menuButton} onClick={this.onToggleOrientationClick}>
-                Flip Orientation
-              </button>
+          <ul className="list-none h-full flex items-center">
+            <li className="flex px-4">
+              <Button onClick={this.onToggleOrientationClick}>Flip Orientation</Button>
             </li>
           </ul>
         </Menu>
-        <div className={style.dashboard}>
-          <div className={style.field}>
+        <div className="flex flex-col flex-1 bg-auto-surface-0">
+          <div className="flex-1 relative">
             <Field />
           </div>
           {showPanels && (
-            <div className={style.panels}>
+            <div className="flex p-2">
               {model.robots.map((robot) => {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
-                    <div className={style.panel} key={robot.id}>
+                    <div className="rounded-sm shadow-md flex-1 ml-2 overflow-hidden first:ml-0" key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}

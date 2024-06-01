@@ -53,17 +53,17 @@ interface NbsScrubbersProps {
 
 const NbsScrubbers = observer(({ viewModel, onScrubberFocused }: NbsScrubbersProps) => {
   return (
-    <div className="divide-y divide-gray-300 border-y border-gray-300">
+    <div className="shadow">
       {viewModel.scrubberList.map((scrubber) => (
         <NbsScrubberView key={scrubber.id} model={scrubber} onFocus={() => onScrubberFocused(scrubber)} />
       ))}
       {viewModel.scrubberList.length === 0 ? (
-        <div className="flex px-2 h-12 items-center bg-gray-200">
-          <Icon className="text-icon mr-2">info</Icon>
+        <div className="flex px-2 h-12 items-center bg-auto-surface-2">
+          <Icon className="mr-2">info</Icon>
           <span>No scrubbers currently loaded. Click the “Scrub NBS” button to load NBS files for scrubbing.</span>
-        </div>
+        </div >
       ) : null}
-    </div>
+    </div >
   );
 });
 
