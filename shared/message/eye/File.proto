@@ -1,0 +1,75 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+syntax = "proto3";
+
+package message.eye;
+
+import "google/protobuf/timestamp.proto";
+
+import "message/eye/Rpc.proto";
+
+/// Type of file entries that can be requested in a ListFilesRequest
+enum FilesRequestType {
+    UNKNOWN   = 0;
+    DIRECTORY = 1;
+    NBS       = 2;
+}
+
+message FileEntry {
+    enum Type {
+        UNKNOWN   = 0;
+        DIRECTORY = 1;
+        FILE      = 2;
+    }
+
+    /// The entry type: directory or file
+    Type type = 1;
+    /// The name of the entry
+    string name = 2;
+    /// The absolute path of the entry
+    string path = 3;
+    /// The size of the entry in bytes
+    uint64 size = 4;
+    /// The last modified time of the entry
+    google.protobuf.Timestamp date_modified = 5;
+}
+
+message ListFilesRequest {
+    message Response {
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
+        /// The absolute path of the directory
+        string directory = 2;
+        /// The entries in the directory
+        repeated FileEntry entries = 3;
+    }
+
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
+    /// The absolute path of the directory to list
+    string directory = 2;
+    /// The type of files to list
+    FilesRequestType type = 3;
+}

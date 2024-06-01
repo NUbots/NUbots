@@ -47,5 +47,5 @@
 
 .treenode__header:hover {
   background-color: #eee;
-  color: #1197d3;
+  color: var(--color-nusight-500);
 }
