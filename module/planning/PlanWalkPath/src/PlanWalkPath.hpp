@@ -51,7 +51,7 @@ namespace module::planning {
             double align_radius = 0;
 
             /// @brief
-            double walk_direct_angle_threshold = 0;
+            double walk_direct_error_threshold = 0;
 
             /// @brief Maximum angular velocity command for walking to ball
             double max_angular_velocity = 0;

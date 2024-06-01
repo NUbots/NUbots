@@ -67,6 +67,8 @@ namespace module::strategy {
                 auto pose_error = tinyrobotics::homogeneous_error(walk_to_field_position.Hfd, Hrf.inverse());
 
                 emit<Task>(std::make_unique<WalkTo>(Hrd));
+                // Emit non-task for debugging
+                emit(std::make_unique<WalkTo>(Hrd));
             });
     }
 

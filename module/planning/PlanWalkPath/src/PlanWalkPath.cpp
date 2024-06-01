@@ -47,7 +47,10 @@ namespace module::planning {
     using message::localisation::Ball;
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
+    using message::planning::WalkAlign;
+    using message::planning::WalkDirect;
     using message::planning::WalkTo;
+
     using message::skill::Walk;
 
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -66,11 +69,13 @@ namespace module::planning {
             cfg.acceleration                = config["acceleration"].as<double>();
             cfg.approach_radius             = config["approach_radius"].as<double>();
             cfg.align_radius                = config["align_radius"].as<double>();
-            cfg.walk_direct_angle_threshold = config["walk_direct_angle_threshold"].as<double>();
+            cfg.walk_direct_error_threshold = config["walk_direct_error_threshold"].as<double>();
 
 
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
             cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
+
+            log<NUClear::INFO>("Max translational velocity magnitude: ", cfg.max_translational_velocity_magnitude);
 
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
             cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
@@ -91,79 +96,79 @@ namespace module::planning {
             auto pose_error               = tinyrobotics::homogeneous_error(walk_to.Hrd, Eigen::Isometry3d::Identity());
             double goal_position_error    = pose_error.head(3).norm();
             double goal_orientation_error = pose_error.tail(3).norm();
-            double walk_direct_angle_threshold_error =
+            double walk_direct_orientation_error =
                 std::abs(std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()));
 
-            emit(graph("Pose error",
-                       pose_error(0),
-                       pose_error(1),
-                       pose_error(2),
-                       pose_error(3),
-                       pose_error(4),
-                       pose_error(5)));
             emit(graph("Goal position error", goal_position_error));
             emit(graph("Goal orientation error", goal_orientation_error));
-            emit(graph("Walk direct angle error", walk_direct_angle_threshold_error));
+            emit(graph("Walk direct angle error", walk_direct_orientation_error));
 
             // 1. If far away, and not facing the goal, then rotate on spot to face the goal
             if (goal_position_error > cfg.approach_radius
-                && walk_direct_angle_threshold_error > cfg.walk_direct_angle_threshold) {
-                bool clockwise = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()) < 0;
-                emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
+                && walk_direct_orientation_error > cfg.walk_direct_error_threshold) {
+                emit<Task>(std::make_unique<TurnOnSpot>(
+                    std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()) < 0));
                 log<NUClear::INFO>("Rotating on spot to face goal");
                 return;
             }
 
             // 2. If far away, and facing the goal, then walk towards the goal directly
             if (goal_position_error > cfg.approach_radius
-                && walk_direct_angle_threshold_error < cfg.walk_direct_angle_threshold) {
-                // Accelerate to max velocity
-                velocity_magnitude += cfg.acceleration;
-                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
-                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
-                // Obtain the unit vector to desired target in robot space and scale by magnitude
-                Eigen::Vector3d velocity_target = walk_to.Hrd.translation().normalized() * velocity_magnitude;
-
-                // Set the angular velocity component of the velocity_target with the angular displacement and saturate
-                // with value cfg.max_angular_velocity
-                auto heading        = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
-                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, heading, cfg.max_angular_velocity);
-
-                emit<Task>(std::make_unique<Walk>(velocity_target));
-                log<NUClear::INFO>("Walking towards goal");
+                && walk_direct_orientation_error < cfg.walk_direct_error_threshold) {
+                emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd));
+                log<NUClear::INFO>("Walking directly towards goal");
                 return;
             }
 
             // 3. If close to the goal, then walk towards the goal directly but do not rotate towards the goal
             if (goal_position_error < cfg.approach_radius && goal_position_error > cfg.align_radius) {
-                // Decelerate to min velocity
-                velocity_magnitude -= cfg.acceleration;
-                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
-
-                // Obtain the unit vector to desired target in robot space and scale by magnitude
-                Eigen::Vector3d velocity_target = walk_to.Hrd.translation().normalized() * velocity_magnitude;
-
-                // Set the angular velocity component of the velocity_target to zero
-                velocity_target.z() = 0;
-
-                emit<Task>(std::make_unique<Walk>(velocity_target));
-                log<NUClear::INFO>("Strafing towards goal");
+                emit<Task>(std::make_unique<WalkAlign>(walk_to.Hrd));
+                log<NUClear::INFO>("Aligning towards goal");
                 return;
             }
 
             // 4. If close to the goal, but not aligned with the goal, then rotate on spot to face the goal
-            if (goal_position_error < cfg.align_radius && goal_orientation_error > cfg.walk_direct_angle_threshold) {
-                bool clockwise = walk_to.Hrd(1, 0) < 0;
-                emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
+            if (goal_position_error < cfg.align_radius && goal_orientation_error > cfg.walk_direct_error_threshold) {
+                emit<Task>(std::make_unique<TurnOnSpot>(walk_to.Hrd(1, 0) < 0));
                 log<NUClear::INFO>("Rotating on spot to face goal");
                 return;
             }
 
-            // // 5. If close to the goal, and aligned with the goal, then stop
-            // if (goal_position_error < cfg.align_radius && goal_orientation_error < cfg.walk_direct_angle_threshold) {
-            //     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
-            //     return;
-            // }
+            // 5. If close to the goal, and aligned with the goal, then walk slowly towards the goal
+            emit<Task>(std::make_unique<WalkAlign>(walk_to.Hrd));
+        });
+
+        on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
+            // Accelerate to max velocity
+            velocity_magnitude += cfg.acceleration;
+            velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
+                                          std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
+            // Obtain the unit vector to desired target in robot space and scale by magnitude
+            Eigen::Vector3d velocity_target = walk_direct.Hrd.translation().normalized() * velocity_magnitude;
+
+            // Set the angular velocity component of the velocity_target with the angular displacement and clamp
+            auto heading        = std::atan2(walk_direct.Hrd.translation().y(), walk_direct.Hrd.translation().x());
+            velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, heading, cfg.max_angular_velocity);
+
+            emit<Task>(std::make_unique<Walk>(velocity_target));
+            log<NUClear::DEBUG>("Walking directly towards goal");
+        });
+
+        on<Provide<WalkAlign>>().then([this](const WalkAlign& walk_align) {
+            // Decelerate to min velocity
+            velocity_magnitude -= cfg.acceleration;
+            velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
+
+            // Obtain the unit vector to desired target in robot space and scale by magnitude
+            Eigen::Vector3d velocity_target = walk_align.Hrd.translation().normalized() * velocity_magnitude;
+
+            // Set the angular velocity component to the angular displacement and clamp
+            velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity,
+                                                       mat_to_rpy_intrinsic(walk_align.Hrd.linear()).z(),
+                                                       cfg.max_angular_velocity);
+
+            emit<Task>(std::make_unique<Walk>(velocity_target));
+            log<NUClear::DEBUG>("Aligning towards goal");
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
