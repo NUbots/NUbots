@@ -19,10 +19,10 @@ const SizeToClassName = {
 
 const ColorToClassName = {
   default:
-    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-slate-800 dark:text-white dark:ring-slate-700 dark:enabled:hover:bg-slate-700 dark:enabled:hover:ring-slate-600 dark:enabled:active:bg-slate-800",
-  primary: "shadow-sm bg-nusight-500 text-white enabled:hover:bg-nusight-400 enabled:active:bg-nusight-600",
+    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-gray-800 dark:text-white dark:ring-gray-700 dark:enabled:hover:bg-gray-700 dark:enabled:hover:ring-gray-600 dark:enabled:active:bg-gray-800",
+  primary: "shadow-sm bg-blue-500 text-white enabled:hover:bg-blue-400 enabled:active:bg-blue-600",
   transparent:
-    "bg-transparent text-nusight-500 ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:text-nusight-500 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
+    "bg-transparent text-blue-500 ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:text-blue-500 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
 } as const;
 
 export function IconButton(props: IconButtonProps) {

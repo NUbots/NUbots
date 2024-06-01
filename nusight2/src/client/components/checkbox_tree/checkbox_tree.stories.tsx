@@ -3,12 +3,15 @@ import { Meta, StoryObj } from "@storybook/react";
 import { action, computed, observable } from "mobx";
 import { createTransformer } from "mobx-utils";
 
+import { lightAndDarkDecorator } from "../storybook/color_mode";
+
 import { CheckedState, TreeModel, TreeNodeModel } from "./model";
 import { CheckboxTree } from "./view";
 
 const meta: Meta<typeof CheckboxTree> = {
   title: "components/CheckboxTree",
   component: CheckboxTree,
+  decorators: [lightAndDarkDecorator({ className: "max-w-3xl" })],
 };
 
 export default meta;

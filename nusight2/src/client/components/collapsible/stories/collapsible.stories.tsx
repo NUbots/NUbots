@@ -4,6 +4,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
+import { lightAndDarkDecorator } from "../../storybook/color_mode";
 import { Select } from "../../select/view";
 import { Collapsible } from "../view";
 
@@ -11,6 +12,7 @@ const meta: Meta<typeof Collapsible> = {
   title: "components/Collapsible",
   component: Collapsible,
   decorators: [
+    lightAndDarkDecorator({ className: "max-w-3xl" }),
     (Story) => {
       return (
         <div className="max-w-[320px]">
@@ -127,7 +129,7 @@ export const WithOverflow: Story = {
               { id: 1, label: "Option 2" },
               { id: 2, label: "Option 3" },
             ]}
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </Collapsible>
       </>

@@ -14,7 +14,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gray: colors.neutral,
+        gray: {
+          50: "#fafafa",
+          100: "#fcfcfcff",
+          150: "#f9f9f9ff",
+          200: "#f5f5f5",
+          250: "#f2f2f2ff",
+          300: "#e5e5e5",
+          350: "#dcdcdcff",
+          400: "#d4d4d4",
+          450: "#c9c9c9ff",
+          500: "#a3a3a3",
+          550: "#8f8f8fff",
+          600: "#737373",
+          650: "#676767ff",
+          700: "#525252",
+          750: "#474747ff",
+          800: "#404040",
+          850: "#333333ff",
+          900: "#262626",
+          950: "#171717",
+        },
+
 
         // Use for main UI text
         primary: {
@@ -75,13 +96,13 @@ const config: Config = {
         // Use for background color of UI surfaces including panels, cards, modals, etc
         surface: {
           0: colors.neutral[200],
-          "0-inverse": colors.slate[950],
+          "0-inverse": "#333333ff",
 
           1: colors.neutral[100],
-          "1-inverse": colors.slate[900],
+          "1-inverse": colors.neutral[850],
 
           2: colors.white,
-          "2-inverse": colors.slate[800],
+          "2-inverse": colors.neutral[850],
         },
 
         // Use to create contrast against the current background for indicating states like hovered, pressed, and selected.
@@ -114,17 +135,19 @@ const config: Config = {
         },
 
         nusight: {
-          50: "#e1f4fb",
-          100: "#b2e3f5",
-          200: "#81d0ef",
-          300: "#53bee8",
-          400: "#32b1e5",
-          500: "#17a3e1",
-          600: "#1196d3",
-          700: "#0983c0",
-          800: "#0872ac",
-          900: "#01538a",
+          50: "#fff4e0",
+          100: "#ffe0b3",
+          200: "#ffc980",
+          300: "#ffb24d",
+          400: "#ffaa00",
+          500: "#F9A50D",
+          600: "#e59400",
+          700: "#cc8300",
+          800: "#b37200",
+          900: "#996100",
+          950: "#804f00"
         },
+
       },
 
       fontFamily: {

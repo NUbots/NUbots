@@ -10,8 +10,6 @@ import { Icon } from "../../icon/view";
 import { CheckedState } from "../model";
 import { TreeNodeModel } from "../model";
 
-import style from "./style.module.css";
-
 export interface TreeNodeProps {
   node: TreeNodeModel;
   level?: number;
@@ -47,7 +45,7 @@ export class TreeNode extends Component<TreeNodeProps> {
     const children = this.props.node.children;
     const hasChildren = children.length > 0;
     const level = this.props.level || 0;
-    const classes = classNames(style.treenode);
+    const classes = classNames("flex flex-col list-none m-0 p-0");
     const renderLabel = this.props.renderLabel;
 
     // Using inline paddingLeft to indent so that the hover and selected background indicators
@@ -60,13 +58,15 @@ export class TreeNode extends Component<TreeNodeProps> {
       <ul className={classes}>
         <li>
           <div
-            className={style.treenode__header}
+            className={
+              "flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-800"
+            }
             style={headerInlineStyle}
             onClick={this.props.onExpand ? this.onClick : undefined}
             onMouseEnter={this.props.onMouseEnter ? this.onMouseEnter : undefined}
             onMouseLeave={this.props.onMouseLeave ? this.onMouseLeave : undefined}
           >
-            <div className={style.treenode__icon}>
+            <div className={"w-[18px] h-[18px] mr-2 shrink-0"}>
               {hasChildren ? (
                 <Icon size={20} rotate={this.props.node.expanded ? 90 : 0}>
                   chevron_right
@@ -74,11 +74,17 @@ export class TreeNode extends Component<TreeNodeProps> {
               ) : null}
             </div>
 
-            <div className={style.treenode__checkbox}>
-              <input type="checkbox" ref={this.onRef} onClick={this.onCheckboxClick} onChange={this.onCheckboxChange} />
+            <div className={"mr-2"}>
+              <input
+                type="checkbox"
+                ref={this.onRef}
+                onClick={this.onCheckboxClick}
+                onChange={this.onCheckboxChange}
+                className={"accent-blue-600"}
+              />
             </div>
 
-            <div className={style.treenode__label}>
+            <div className={"grow leading-4 min-w-0"}>
               {renderLabel ? renderLabel(this.props.node) : this.props.node.label}
             </div>
           </div>

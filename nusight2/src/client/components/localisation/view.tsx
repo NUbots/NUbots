@@ -13,6 +13,7 @@ import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
+import { Button } from "../button/button"
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
@@ -50,27 +51,26 @@ interface FieldDimensionSelectorProps {
 
 @observer
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
-  private dropdownToggle = (<button className={style.localisation__menuButton}>Field Type</button>);
+  private dropdownToggle = (<Button>Field Type</Button>);
 
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        <div className="bg-white rounded-lg w-28">
-          {FieldDimensionOptions.map((option) => (
-            <div
-              key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
-              onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
-            >
-              <Icon size={24}>
-                {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
-              </Icon>{" "}
-              <span>{option.label}</span>
-            </div>
-          ))}
-        </div>
+        {FieldDimensionOptions.map((option) => (
+          <div
+            key={option.value}
+            className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value
+              ? "bg-gray-300 dark:bg-gray-600 "
+              : "bg-gray-100 dark:bg-gray-700"
+              }`}
+            onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
+          >
+            <Icon size={24}>
+              {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
+            </Icon>{" "}
+            <span>{option.label}</span>
+          </div>
+        ))}
       </EnhancedDropdown>
     );
   }
@@ -105,7 +105,11 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div className={style.localisation}>
+      <div
+        className={
+          "flex flex-grow flex-shrink flex-col relative bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100"
+        }
+      >
         <LocalisationMenuBar
           model={this.props.model}
           Menu={this.props.Menu}

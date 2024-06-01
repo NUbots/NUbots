@@ -76,10 +76,10 @@ export class Select extends React.Component<SelectProps> {
           isFullwidth={true}
           onToggleClick={this.onToggleClick}
         >
-          <div className={style.dropdown}>
-            {options.length === 0 && <div className={style.empty}>{empty || "No options"}</div>}
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 shadow-md">
+            {options.length === 0 && <div className={"p-6 text-center"}>{empty || "No options"}</div>}
             {options.length > 0 && (
-              <div className={style.options}>
+              <div>
                 {options.map((option) => {
                   const isSelected = Boolean(selectedOption && selectedOption.id === option.id);
                   return (

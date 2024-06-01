@@ -14,7 +14,7 @@ export class AppView extends Component<{ nav: NavigationConfiguration }> {
     return (
       <BrowserRouter>
         <ContextMenuProvider>
-          <div className="min-h-screen flex items-stretch bg-white text-sm text-[#4d4d4d]">
+          <div className="min-h-screen flex items-stretch bg-surface text-sm text-primary-auto">
             <NavigationView nav={this.props.nav} />
             <div className="flex flex-grow flex-col">
               <div className="flex flex-grow">
