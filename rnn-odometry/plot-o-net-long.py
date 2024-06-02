@@ -39,67 +39,76 @@ def main():
     # path_to_data = args.path_to_data
 
     # numpy arrays
-    imu = np.load('processed-outputs/numpy/long/1/long-imu-1.npy')
-    servos = np.load('processed-outputs/numpy/long/1/long-servos-1.npy')
-    truth = np.load('processed-outputs/numpy/long/1/long-truth-1.npy')
-    tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
+    # imu = np.load('processed-outputs/numpy/s/18/s-imu-18.npy')
+    # servos = np.load('processed-outputs/numpy/s/18/s-servos-18.npy')
+    truth = np.load('processed-outputs/numpy/s/23/s-truth-23.npy')
+    # tstamps = np.load('processed-outputs/numpy/s/18/s-tstamps-18.npy')
+    truth2 = np.load('processed-outputs/numpy/s/24/s-truth-24.npy')
+    truth3 = np.load('processed-outputs/numpy/s/25/s-truth-25.npy')
 
-    # Sizes
-    print('Size of imu data: ' + str(imu.shape))
-    print('Size of servo data: ' + str(servos.shape))
-    print('Size of truth data: ' + str(truth.shape))
-    print('Size of tstamps data: ' + str(tstamps.shape))
+    # print the shape of "truth" array
+    print(truth.shape)
 
-    plt.close('all')
-    plot_num_low = 200000
-    plot_num_high = 250000
-
-    # plot
-    fig, ax = plt.subplots(3, 1, figsize=(18, 6), sharex = True)
-    ax[0].plot(imu[plot_num_low:plot_num_high, [0, 1]], 'o-')
-    ax[0].plot(imu[plot_num_low:plot_num_high, [2]]-np.array([9.8]), 'o-')
-    ax[1].plot(imu[plot_num_low:plot_num_high, [3, 4, 5]], 'o-')
-    ax[2].plot(servos[plot_num_low:plot_num_high, [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]], 'o-')
-    ax[0].legend([
-        "accelerometer.x",
-        "accelerometer.y",
-        "accelerometer.z",
-    ])
-    ax[1].legend([
-        "gyroscope.x",
-        "gyroscope.y",
-        "gyroscope.z"
-    ])
-    ax[2].legend([
-        # "servo.rShoulderPitch.presentPosition",
-        # "servo.lShoulderPitch.presentPosition",
-        # "servo.rShoulderRoll.presentPosition",
-        # "servo.lShoulderRoll.presentPosition",
-        # "servo.rElbow.presentPosition",
-        # "servo.lElbow.presentPosition",
-        "servo.rHipYaw.presentPosition",
-        "servo.lHipYaw.presentPosition",
-        "servo.rHipRoll.presentPosition",
-        "servo.lHipRoll.presentPosition",
-        "servo.rHipPitch.presentPosition",
-        "servo.lHipPitch.presentPosition",
-        "servo.rKnee.presentPosition",
-        "servo.lKnee.presentPosition",
-        "servo.rAnklePitch.presentPosition",
-        "servo.lAnklePitch.presentPosition",
-        "servo.rAnkleRoll.presentPosition",
-        "servo.lAnkleRoll.presentPosition"
-        # "servo.headPan.presentPosition",
-        # "servo.headTilt.presentPosition"
-    ])
-
-    plt.figure()
-    tstamps_diff = (tstamps[1:] - tstamps[:-1])
-    # plt.plot(tstamps_diff[:plot_num], 'o-')
-    plt.plot(tstamps[plot_num_low:plot_num_high], 'o-')
-
-
+   # Plot just the first 1000 samples of the truth array
+    plt.plot(truth[:10000, 9], label='X: +y > -y')
+    plt.plot(truth[:10000, 10], label='Y: +y > -y')
+    # plt.plot(truth[:10000, 11], label='Z: +y > -y')
+    plt.plot(truth3[:10000, 9], label='X2: -y > +y')
+    plt.plot(truth3[:10000, 10], label='Y2: -y > +y')
+    # plt.plot(truth3[:10000, 11], label='Z2: -y > +y')
+    plt.plot(truth2[:10000, 9], label='X3: +x > -x')
+    plt.plot(truth2[:10000, 10], label='Y3: +x > -x')
+    # plt.plot(truth2[:10000, 11], label='Z3: +x > -x')
+    plt.legend()
     plt.show()
+
+    # # Plot the first 100 samples of the imu array
+    # plt.plot(imu[:100, 0], label='X')
+    # plt.plot(imu[:100, 1], label='Y')
+    # plt.plot(imu[:100, 2], label='Z')
+    # plt.legend()
+    # plt.show()
+
+    # # Plot the first 100 samples of the servos array
+    # plt.plot(servos[:100, 0], label='X')
+    # plt.plot(servos[:100, 1], label='Y')
+    # plt.plot(servos[:100, 2], label='Z')
+    # plt.legend()
+    # plt.show()
+
+    # # Plot the first 100 samples of the tstamps array
+    # plt.plot(tstamps[:100])
+    # plt.show()
+
+    # # Plot the first 100 samples of the imu array
+    # plt.plot(imu[:100, 0], label='X')
+    # plt.plot(imu[:100, 1], label='Y')
+    # plt.plot(imu[:100, 2], label='Z')
+    # plt.legend()
+    # plt.show()
+
+    # # Plot the first 100 samples of the servos array
+    # plt.plot(servos[:100, 0], label='X')
+    # plt.plot(servos[:100, 1], label='Y')
+    # plt.plot(servos[:100, 2], label='Z')
+    # plt.legend()
+    # plt.show()
+
+    # # Plot the first 100 samples of the tstamps array
+    # plt.plot(tstamps[:100])
+    # plt.show()
+
+    # # Plot the first 100 samples of the imu array
+    # plt.plot(imu[:100, 0], label='X')
+    # plt.plot(imu[:100, 1], label='Y')
+    # plt.plot(imu[:100, 2], label='Z')
+    # plt.legend()
+    # plt.show()
+
+    # # Plot the first 100 samples of the servos array
+    # plt.plot(servos[:100, 0], label='X')
+    # plt.plot(servos[:100, 1], label='Y')
+    # plt.plot(servos[:100, 2], label='Z')
 
 
 
