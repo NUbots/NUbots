@@ -52,15 +52,17 @@ def main():
         return smoothed_data
 
     # numpy arrays
+    first_file = 7
     num_files = 22  # Number of files to load
+    prefix = "s"  # s for servo, h for head, a for arm
     imu = []
     servos = []
     truth_all = []
 
-    for i in range(1, num_files):
-        imu.append(np.load(f"processed-outputs/numpy/s/{i}/s-imu-{i}.npy"))
-        servos.append(np.load(f"processed-outputs/numpy/s/{i}/s-servos-{i}.npy"))
-        truth_all.append(np.load(f"processed-outputs/numpy/s/{i}/s-truth-{i}.npy"))
+    for i in range(first_file, num_files):
+        imu.append(np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy"))
+        servos.append(np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy"))
+        truth_all.append(np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy"))
 
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
@@ -68,13 +70,12 @@ def main():
 
     # Smoothing should be done here
     # Loop through each truth array and smooth
-    truth_all = [gaussian_smooth(truth, 50) for truth in truth_all]
+    # truth_all = [gaussian_smooth(truth, 50) for truth in truth_all]
 
     # Loop through each array and concatenate into a numpy array
-    for i in range(0, num_files):
-        imu_joined = np.concatenate(imu, axis=0)
-        servos_joined = np.concatenate(servos, axis=0)
-        truth_all_joined = np.concatenate(truth_all, axis=0)
+    imu_joined = np.concatenate(imu, axis=0)
+    servos_joined = np.concatenate(servos, axis=0)
+    truth_all_joined = np.concatenate(truth_all, axis=0)
 
     # Print the shape of the joined arrays
     print("IMU s joined: ", imu_joined.shape)
@@ -85,16 +86,16 @@ def main():
     servos_joined = servos_joined[:, 6:18]
 
     # Plot and inspect each joined array
-    num_channels = servos_joined.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(servos_joined[0:100000, i], label=f'servo {i+1}')
-    # Add a legend
-    # plt.ylim(np.min(imu), np.max(imu))
-    plt.autoscale(enable=True, axis="both")
-    plt.legend()
-    plt.show()
+    # num_channels = truth_all_joined.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(truth_all_joined[0:100000, i], label=f'servo {i+1}')
+    # # Add a legend
+    # # plt.ylim(np.min(imu), np.max(imu))
+    # plt.autoscale(enable=True, axis="both")
+    # plt.legend()
+    # plt.show()
 
     # NOTE: Using only position for first tests to see what happens. May add in heading later.
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
@@ -103,6 +104,17 @@ def main():
 
     # slice out the x and y positions (9:11) of the truth array
     truth_joined_sliced = truth_all_joined[:, 9:11]
+
+    # Plot and inspect after slicing
+    # num_channels = truth_joined_sliced.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(truth_joined_sliced[100000:, i], label=f'Position {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
 
     # Join the data
     joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
@@ -166,14 +178,14 @@ def main():
     # test_arr_scaled = scaler.transform(test_arr)
 
     # Plot and inspect after normalising
-    num_channels = test_arr.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(test_arr[0:100000, i], label=f'Channel {i+1}')
-    # Add a legend
-    plt.legend()
-    plt.show()
+    # num_channels = test_arr.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(test_arr[0:100000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
 
     # NOTE: Remember to reshape if adding or removing features
 
@@ -182,19 +194,30 @@ def main():
     input_data_train = train_arr[:, :18]  # imu and servos
     input_targets_train = train_arr[:, 18:]  # truth
     # Convert sliced targets to relative position
-    input_targets_train = convert_to_relative(input_targets_train)
+    # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     input_data_validate = validate_arr[:, :18]  # imu and servos
     input_targets_validate = validate_arr[:, 18:]  # truth
     # Convert sliced targets to relative position
-    input_targets_validate = convert_to_relative(input_targets_validate)
+    # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     input_data_test= test_arr[:, :18]  # imu and servos
     input_targets_test = test_arr[:, 18:]  # truth
     # Convert sliced targets to relative position
-    input_targets_test = convert_to_relative(input_targets_test)
+    # input_targets_test = convert_to_relative(input_targets_test)
+
+    # Plot and inspect after splitting
+    # num_channels = input_targets_train.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(input_targets_train[0:100000, i], label=f'Target {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
 
     # print dataset shapes
     print(f"input_data_train: {input_data_train.shape}")
@@ -301,7 +324,8 @@ def main():
 
     # Model parameters
     learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 40             #
+    epochs = 1500
+
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -355,51 +379,51 @@ def main():
     # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
 
     # Tensorboard
-    # timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    # log_dir = "logs/fit/" + timestamp
-    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = "logs/fit/" + timestamp
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-    # # Model Layers
-    # inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    # dropout = keras.layers.Dropout(rate=0.35)(inputs)
-    # lstm = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout)    # 32 originally
-    # normalise = keras.layers.LayerNormalization()(lstm)
+    # Model Layers
+    inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
+    dropout = keras.layers.Dropout(rate=0.47)(inputs)
+    lstm = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout)    # 32 originally
+    normalise = keras.layers.LayerNormalization()(lstm)
 
-    # dropout2 = keras.layers.Dropout(rate=0.35)(normalise)
-    # lstm2 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout2)    # 32 originally
-    # normalise2 = keras.layers.LayerNormalization()(lstm2)
+    dropout2 = keras.layers.Dropout(rate=0.47)(normalise)
+    lstm2 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout2)    # 32 originally
+    normalise2 = keras.layers.LayerNormalization()(lstm2)
 
-    # dropout3 = keras.layers.Dropout(rate=0.35)(normalise2)
-    # lstm3 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0008, l2=0.008), return_sequences=True)(dropout3)    # 32 originally
-    # normalise3 = keras.layers.LayerNormalization()(lstm3)
+    dropout3 = keras.layers.Dropout(rate=0.47)(normalise2)
+    lstm3 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
+    normalise3 = keras.layers.LayerNormalization()(lstm3)
 
-    # # Apply attention layer that considers lstm outputs
-    # attention = keras.layers.Attention()([normalise, normalise3])
+    # Apply attention layer that considers lstm outputs
+    attention = keras.layers.Attention()([normalise, normalise3])
 
-    # # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
-    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
 
-    # # # Compute dot product between attention weights and last LSTM layer
-    # # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
+    # # Compute dot product between attention weights and last LSTM layer
+    # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
 
-    # # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
-    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
-    # # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
-    # # NOTE: Changed dense layer units to 2 due to removing z component
-    # # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
-    # # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    # dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
-    # model = keras.Model(inputs=inputs, outputs=dense2)
-    # model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
-    # model.summary()
+    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
+    # NOTE: Changed dense layer units to 2 due to removing z component
+    # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
+    # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
+    model = keras.Model(inputs=inputs, outputs=dense2)
+    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+    model.summary()
 
-    # Examples
-    # lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
-    # lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
-    # dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
+    Examples
+    lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
+    lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
-    # lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
-    # dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
+    lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
+    dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
 
     model.fit(
         train_dataset,
