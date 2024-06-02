@@ -66,7 +66,8 @@ def main():
 
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
-    truth_all = [convert_to_relative(truth) for truth in truth_all]
+    # NOTE: Htw is already relative to the starting point!!
+    # truth_all = [convert_to_relative(truth) for truth in truth_all]
 
     # Smoothing should be done here
     # Loop through each truth array and smooth
@@ -193,18 +194,25 @@ def main():
     # Training
     input_data_train = train_arr[:, :18]  # imu and servos
     input_targets_train = train_arr[:, 18:]  # truth
+    # Split targets into x and y
+    targets_train_x = input_targets_train[:, 0]
+    targets_train_y = input_targets_train[:, 1]
     # Convert sliced targets to relative position
     # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     input_data_validate = validate_arr[:, :18]  # imu and servos
     input_targets_validate = validate_arr[:, 18:]  # truth
+    targets_validate_x = input_targets_validate[:, 0]
+    targets_validate_y = input_targets_validate[:, 1]
     # Convert sliced targets to relative position
     # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     input_data_test= test_arr[:, :18]  # imu and servos
     input_targets_test = test_arr[:, 18:]  # truth
+    targets_test_x = input_targets_test[:, 0]
+    targets_test_y = input_targets_test[:, 1]
     # Convert sliced targets to relative position
     # input_targets_test = convert_to_relative(input_targets_test)
 
@@ -274,15 +282,23 @@ def main():
         batch_size=batch_size
     )
 
-    train_dataset_targets = tf.keras.utils.timeseries_dataset_from_array(
-        data=input_targets_train,
+    train_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_train_x,
         targets=None,
         sequence_length=sequence_length,
         sequence_stride=sequence_stride,
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
-    train_dataset = tf.data.Dataset.zip((train_dataset_features, train_dataset_targets))
+    train_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_train_y,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    train_dataset = tf.data.Dataset.zip((train_dataset_features, (train_dataset_targets_x, train_dataset_targets_y)))
 
     validate_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_validate,
@@ -293,15 +309,23 @@ def main():
         batch_size=batch_size
     )
 
-    validate_dataset_targets = tf.keras.utils.timeseries_dataset_from_array(
-        data=input_targets_validate,
+    validate_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_validate_x,
         targets=None,
         sequence_length=sequence_length,
         sequence_stride=sequence_stride,
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
-    validate_dataset = tf.data.Dataset.zip((validate_dataset_features, validate_dataset_targets))
+    validate_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_validate_y,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    validate_dataset = tf.data.Dataset.zip((validate_dataset_features, (validate_dataset_targets_x, validate_dataset_targets_y)))
 
     test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_test,
@@ -312,19 +336,27 @@ def main():
         batch_size=batch_size
     )
 
-    test_dataset_targets = tf.keras.utils.timeseries_dataset_from_array(
-        data=input_targets_test,
+    test_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_test_x,
         targets=None,
         sequence_length=sequence_length,
         sequence_stride=sequence_stride,
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
-    test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets))
+    test_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_test_y,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
 
     # Model parameters
     learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 1500
+    epochs = 150
 
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
@@ -412,18 +444,20 @@ def main():
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
     # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
-    model = keras.Model(inputs=inputs, outputs=dense2)
-    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
+    output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
+    output_y = keras.layers.Lambda(lambda x: x[:, :, 1], name='output_y')(dense2)
+    model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
+    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0, 'output_y': 2.0},loss=loss_function, metrics=["mse"])
     model.summary()
 
-    Examples
-    lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
-    lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
-    dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
+    # Examples
+    # lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
+    # lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
+    # dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
-    lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
-    dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
+    # lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
+    # dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
 
     model.fit(
         train_dataset,
