@@ -40,8 +40,8 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center h-full w-full bg-gray-100">
-          <div className="text-icon mb-2">
+        <div className="flex flex-col justify-center items-center h-full w-full">
+          <div className="text-nusight-500 mb-2">
             <Icon size={48}>electrical_services</Icon>
           </div>
           <div className="text-2xl">No connected robots</div>
@@ -71,10 +71,10 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
   const { model, controller } = props;
 
   return (
-    <div className="bg-auto-surface-2 px-2 py-1.5 flex border-t border-b border-gray-300 dark:border-transparent">
+    <div className="bg-auto-surface-2 px-2 py-1.5 flex border-t border-b border-auto dark:border-transparent">
       <SearchBox model={model} controller={controller} />
 
-      <div className="flex gap-1 border-x border-gray-300 dark:border-transparent px-2 mx-2">
+      <div className="flex gap-1 border-x border-auto px-2 mx-2">
         <ToggleButton on={model.filters.levels.trace} onClick={(on) => controller.setFilter(model, "trace", !on)}>
           <Icon size={20}>{logLevelToIcon.trace}</Icon>
           Trace
@@ -125,7 +125,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 dark:border-gray-700 rounded bg-gray-200 dark:bg-gray-650 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700"
+        className="pl-8 pr-2 h-7 w-[320px] border border-auto rounded bg-auto-contrast-1 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-auto"
         placeholder="Filter logs"
         value={model.filters.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -145,7 +145,7 @@ function ToggleButton(props: ToggleButtonProps) {
     <button
       className={`h-7 px-2 inline-flex items-center border rounded ${props.on
         ? "bg-blue-600 border-blue-700 text-gray-100"
-        : "bg-gray-100 dark:bg-gray-650 border-gray-350 dark:border-gray-700"
+        : "bg-auto-contrast-1 border-auto"
         } `}
       onClick={() => props.onClick(props.on)}
     >

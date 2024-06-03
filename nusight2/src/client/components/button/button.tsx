@@ -24,10 +24,9 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const ColorToClassName = {
   default:
-    "shadow-sm bg-auto-surface-2 text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-auto-contrast-1 enabled:active:bg-gray-200 dark:text-white dark:ring-gray-700 enabled:hover:ring-auto-contrast-1 dark:enabled:active:bg-gray-800",
-  primary: "shadow-sm bg-blue-500 text-white enabled:hover:bg-blue-400 enabled:active:bg-blue-600",
-  transparent:
-    "bg-transparent text-blue-500 ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:text-blue-500 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
+    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 dark:bg-gray-600 dark:text-white dark:ring-gray-500",
+  primary: "dark shadow-sm bg-blue-500 text-white",
+  transparent: "bg-transparent text-blue-500 ring-transparent dark:text-blue-500",
 } as const;
 
 const SizeToClassName = {
@@ -73,7 +72,7 @@ export function Button(props: ButtonProps) {
     <button
       {...buttonProps}
       className={classNames(
-        "gap-2 inline-flex items-center rounded disabled:opacity-40 pt-[1px]",
+        "relative gap-2 inline-flex items-center rounded disabled:opacity-40 pt-[1px] group",
         SizeToClassName[size],
         ColorToClassName[color],
         ContentAlignToClassName[contentAlign],
@@ -88,6 +87,11 @@ export function Button(props: ButtonProps) {
       {createIcon(iconBefore, iconBeforeProps)}
       {children}
       {createIcon(iconAfter, iconAfterProps)}
+      <span
+        className={classNames(
+          "absolute inset-0 rounded group-hover:bg-auto-contrast-1 group-active:bg-auto-contrast-2 pointer-events-none",
+        )}
+      />
     </button>
   );
 }

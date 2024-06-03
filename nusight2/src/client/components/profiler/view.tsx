@@ -121,7 +121,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] bg-auto-surface-1 border border-gray-300 rounded-md dark:border-gray-700 rounded focus:outline-none focus:border-transparent focus:ring-2 ring-gray-300 dark:focus:ring-gray-700"
+        className="pl-8 pr-2 h-7 w-[320px] bg-auto-surface-1 border border-auto rounded-md rounded focus:outline-none focus:border-transparent focus:ring-2 ring-auto"
         placeholder="Filter profiles"
         value={model.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -140,13 +140,13 @@ export const RobotStats = (props: RobotStatsProps) => {
     <div>
       <div>
         <div className="flex justify-center pt-8">
-          <div className="px-12 py-4 bg-auto-surface-1 border border-gray-300 dark:border-gray-700 rounded-md mx-12">
-            <div className="text-lg text-gray-500">Total Time (s)</div>
+          <div className="px-12 py-4 bg-auto-surface-1 border border-auto rounded-md mx-12">
+            <div className="text-lg text-auto-secondary">Total Time (s)</div>
             <div className="text-3xl">{(props.totalTime / 1e3).toFixed(1)}</div>
           </div>
 
-          <div className="px-12 py-4 bg-auto-surface-1 border border-gray-300 dark:border-gray-700 rounded-md ">
-            <div className="text-lg text-gray-500">Total Reactions</div>
+          <div className="px-12 py-4 bg-auto-surface-1 border border-auto rounded-md ">
+            <div className="text-lg text-auto-secondary">Total Reactions</div>
             <div className="text-3xl">{props.totalCount.toLocaleString()}</div>
           </div>
         </div>

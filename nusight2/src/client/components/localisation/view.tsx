@@ -54,21 +54,23 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        {FieldDimensionOptions.map((option) => (
-          <div
-            key={option.value}
-            className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value
-                ? "bg-gray-300 dark:bg-gray-600 "
-                : "bg-gray-100 dark:bg-gray-700"
-              }`}
-            onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
-          >
-            <Icon size={24}>
-              {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
-            </Icon>{" "}
-            <span>{option.label}</span>
-          </div>
-        ))}
+        <div className={"bg-auto-surface-2"}>
+          {FieldDimensionOptions.map((option) => (
+            <div
+              key={option.value}
+              className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1 "
+                : "hover:bg-auto-contrast-1 "
+                }`}
+              onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
+            >
+              <Icon size={24}>
+                {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
+              </Icon>{" "}
+              <span>{option.label}</span>
+            </div>
+          ))}
+        </div>
       </EnhancedDropdown>
     );
   }

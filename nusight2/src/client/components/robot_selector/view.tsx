@@ -18,7 +18,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
 
   const dropdownToggle = (
-    <button className="text-gray-900 fill-gray-900 dark:text-gray-300 dark:fill-gray-300">
+    <button className="items-center justify-center cursor-pointer flex flex-col fill-auto-primary">
       <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out" />
       Select robots
     </button>
@@ -28,9 +28,9 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
       <div className="bg-auto-surface-2 shadow-md text-black dark:text-white">
         {robots.length === 0 && (
           <div className="bg-gray-600 p-[1em] text-center">
-            <IconPlug className="bg-gray-800 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
+            <IconPlug className="bg-nusight-500 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
             <div className="text-lg p-1 whitespace-nowrap">No connected robots</div>
-            <span className="text-base whitespace-nowrap">Run yarn start:sim to simulate robots</span>
+            <span className="text-base whitespace-nowrap text-nusight-500">Run yarn start:sim to simulate robots</span>
           </div>
         )}
         {robots.map((robot) => (

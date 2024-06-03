@@ -27,8 +27,8 @@ function LightMode({ children }: { children: React.ReactNode }) {
 
 function DarkMode({ children }: { children: React.ReactNode }) {
   return (
-    <div className="dark relative bg-slate-800 p-5 rounded-b-lg overflow-hidden max-w-2xl">
-      <span className="absolute top-0 left-0 bg-slate-700 text-white py-1.5 px-2.5 rounded-br flex">
+    <div className="dark relative bg-gray-800 p-5 rounded-b-lg overflow-hidden max-w-2xl">
+      <span className="absolute top-0 left-0 bg-gray-700 text-white py-1.5 px-2.5 rounded-br flex">
         <Icon size="20">dark_mode</Icon>
       </span>
       {children}

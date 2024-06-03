@@ -24,28 +24,28 @@ export type RobotPanelProps = {
 
 export const RobotPanel = (props: RobotPanelProps) => {
   const connectionStatusClassName = classNames({
-    "w-3 h-3 rounded-full border border-green-400 mr-2": true,
-    "bg-green-200": props.connected,
-    "bg-red": !props.connected,
+    "w-3 h-3 rounded-full border mr-2": true,
+    "bg-green-500 border-green-800": props.connected,
+    "bg-red-500 border-red-800": !props.connected,
   });
   const cameraClassName = classNames({
     "items-center flex justify-around": true,
     ["text-orange-400"]: props.lastCameraImage === "warning",
-    ["text-red"]: props.lastCameraImage === "danger",
+    ["text-red-500"]: props.lastCameraImage === "danger",
   });
   const ballClassName = classNames({
     "items-center flex justify-around": true,
     ["text-orange-400"]: props.lastSeenBall === "warning",
-    ["text-red"]: props.lastSeenBall === "danger",
+    ["text-red-500"]: props.lastSeenBall === "danger",
   });
   const goalClassName = classNames({
     "items-center flex justify-around h-6 w-6": true,
     ["fill-orange-400"]: props.lastSeenGoal === "warning",
-    ["fill-red"]: props.lastSeenGoal === "danger",
+    ["fill-red-500"]: props.lastSeenGoal === "danger",
   });
   return (
     <div>
-      <header className="bg-gray-700 dark:bg-gray-800 text-white rounded-t-md">
+      <header className="bg-gray-700 text-white rounded-t-md">
         <div className="items-center flex text-sm h-7 px-2">
           <span className={connectionStatusClassName} title={props.connected ? "Connected" : "Disconnected"} />
           <span className="flex-1">{props.title}</span>

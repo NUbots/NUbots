@@ -19,7 +19,7 @@ function ColorMode({ mode, children, className, onToggle }: ModeProps & { mode: 
     <div
       className={classNames("rounded-lg ", mode === "dark" ? "dark" : "border border-auto", className)}
     >
-      <div className="h-full relative px-14 py-10 bg-auto-surface-2 text-auto-primary">
+      <div className="h-full relative px-14 py-10 bg-gray-50 dark:bg-gray-800 text-auto-primary">
         {toggleable ? (
           <button
             className={classNames(indicatorClassName, toggleable ? "hover:bg-auto-contrast-2" : "")}

@@ -19,10 +19,9 @@ const SizeToClassName = {
 
 const ColorToClassName = {
   default:
-    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-gray-800 dark:text-white dark:ring-gray-700 dark:enabled:hover:bg-gray-700 dark:enabled:hover:ring-gray-600 dark:enabled:active:bg-gray-800",
-  primary: "shadow-sm bg-blue-500 text-white enabled:hover:bg-blue-400 enabled:active:bg-blue-600",
-  transparent:
-    "bg-transparent text-white ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
+    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 dark:bg-gray-600 dark:text-white dark:ring-gray-500",
+  primary: "dark shadow-sm bg-blue-500 text-white",
+  transparent: "bg-transparent text-blue-500 ring-transparent dark:text-blue-500",
 } as const;
 
 export function IconButton(props: IconButtonProps) {
@@ -32,12 +31,17 @@ export function IconButton(props: IconButtonProps) {
     <button
       {...buttonProps}
       className={classNames(
-        "inline-flex items-center justify-center flex-shrink-0 rounded disabled:opacity-40",
+        "relative inline-flex items-center justify-center flex-shrink-0 rounded disabled:opacity-40 group",
         SizeToClassName[size],
         ColorToClassName[color],
         className,
       )}
     >
+      <span
+        className={classNames(
+          "absolute inset-0 rounded group-hover:bg-auto-contrast-1 group-active:bg-auto-contrast-2 pointer-events-none",
+        )}
+      />
       {typeof children === "string" ? (
         <Icon {...iconProps} className={size === "large" ? "text-[2rem]" : undefined}>
           {children}

@@ -86,7 +86,7 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
         onClick={onClick}
       >
         {showScrubbers ? (
-          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px] fill-auto-contrast-1" />
+          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px] fill-blue-500 text-white" />
         ) : (
           <IconNbs className="w-7 h-7 mt-1 -ml-[20px]" />
         )}

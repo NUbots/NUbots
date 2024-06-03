@@ -14,28 +14,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gray: {
-          50: "#fafafa",
-          100: "#fcfcfcff",
-          150: "#f9f9f9ff",
-          200: "#f5f5f5",
-          250: "#f2f2f2ff",
-          300: "#e5e5e5",
-          350: "#dcdcdcff",
-          400: "#d4d4d4",
-          450: "#c9c9c9ff",
-          500: "#a3a3a3",
-          550: "#8f8f8fff",
-          600: "#737373",
-          650: "#676767ff",
-          700: "#525252",
-          750: "#474747ff",
-          800: "#404040",
-          850: "#333333ff",
-          900: "#262626",
-          950: "#171717",
-        },
-
+        gray: colors.neutral,
 
         // Use for main UI text
         primary: {
@@ -99,10 +78,10 @@ const config: Config = {
           "0-inverse": "#333333ff",
 
           1: colors.neutral[100],
-          "1-inverse": "#404040",
+          "1-inverse": "#424242",
 
           2: colors.white,
-          "2-inverse": "#525252",
+          "2-inverse": "#4a4a4a",
         },
 
         // Use to create contrast against the current background for indicating states like hovered, pressed, and selected.
@@ -231,7 +210,7 @@ const config: Config = {
       )
 
       // Add the `fill-auto-...` utilities
-      addUtilities(generateAutoColorUtilities(pick(themeColors, ["contrast"]), "fill", "fill"));
+      addUtilities(generateAutoColorUtilities(pick(themeColors, ["contrast", "primary"]), "fill", "fill"));
 
       // Add the `bg-auto-...` utilities
       const bg = generateAutoColorUtilities(pick(themeColors, ["surface", "contrast"]), ["background-color"], "bg");

@@ -38,7 +38,7 @@ export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
             return (
               <label
                 key={option.label}
-                className={"items-center flex justify-between p-6 hover:bg-auto-contrast-1 "}
+                className={"items-center flex justify-between p-4 hover:bg-auto-contrast-1 "}
               >
                 <span className={style.optionLabel}>{option.label}</span>
                 <Switch on={option.enabled} onChange={option.toggle} />
