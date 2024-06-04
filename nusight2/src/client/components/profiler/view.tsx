@@ -44,7 +44,7 @@ export class ProfilerView extends React.Component<{
               <SearchBox model={selectedRobot} controller={controller} />
             </div>
 
-            <table className="min-w-full table-auto bg-auto-surface-1 border border-collapse border-gray-300 dark:border-gray-700">
+            <table className="min-w-full table-auto bg-auto-surface-1 border border-collapse border-auto">
               <thead>
                 <tr>
                   <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "reactionId")}>

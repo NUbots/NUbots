@@ -79,7 +79,6 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
           <Icon size={20}>{logLevelToIcon.trace}</Icon>
           Trace
         </ToggleButton>
-        {console.log(model.filters.levels.trace)}
         <ToggleButton on={model.filters.levels.debug} onClick={(on) => controller.setFilter(model, "debug", !on)}>
           <Icon size={20}>{logLevelToIcon.debug}</Icon>
           Debug
@@ -191,13 +190,13 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
 });
 
 const logLevelToTextColor: Record<LogLevel, string> = {
-  unknown: "text-gray-800",
-  trace: "text-gray-800",
-  debug: "text-green-800",
-  info: "text-blue-800",
-  warn: "text-yellow-800",
-  error: "text-red-800",
-  fatal: "text-red-800",
+  unknown: "text-gray-700 dark:text-gray-300",
+  trace: "text-gray-700 dark:text-gray-300",
+  debug: "text-green-700 dark:text-green-300",
+  info: "text-blue-700 dark:text-blue-300",
+  warn: "text-yellow-700 dark:text-yellow-300",
+  error: "text-red-700 dark:text-red-300",
+  fatal: "text-red-700 dark:text-red-300",
 };
 
 interface LogLineProps {
@@ -210,8 +209,7 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
 
   return (
     <div
-      className={`flex gap - 3 items - center py - 0.5 border - b border - black / 10 ${logLevelToTextColor[message.level]
-        } `}
+      className={`flex gap-3 items-center py-0.5 bg-auto-surface-1 border-b border-auto ${logLevelToTextColor[message.level]}`}
     >
       <div className="inline-flex items-end self-start gap-1">
         <div className="w-12 uppercase text-right">{message.level}</div>
@@ -219,7 +217,9 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
           {logLevelToIcon[message.level]}
         </Icon>
       </div>
-      {model.showTimestamps ? <div className="text-gray-500">{message.timestamp.toLocaleTimeString()}</div> : null}
+      {model.showTimestamps ? (
+        <div className="text-gray-500">{message.timestamp.toLocaleTimeString()}</div>
+      ) : null}
       <div>{message.reactor.split("::").at(-1)}</div>
       <div className="flex-grow whitespace-pre-wrap">{message.message}</div>
     </div>
