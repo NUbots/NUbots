@@ -26,6 +26,7 @@ const ColorToClassName = {
   default:
     "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 dark:bg-gray-600 dark:text-white dark:ring-gray-500",
   primary: "dark shadow-sm bg-blue-500 text-white",
+  nusight: "dark shadow-sm bg-nusight-500 text-white",
   transparent: "bg-transparent text-blue-500 ring-transparent dark:text-blue-500",
 } as const;
 
