@@ -1,5 +1,9 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa8aeabd10341e169a8169119178a737a":[2,0,3,9,1,1,0,103],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa9858a56f05c6a13f09ab5935ce04a13":[2,0,3,9,1,1,0,112],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa9d256b0bb59ecf9e970c4458bf924eb":[2,0,3,9,1,1,0,83],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daab05843c87aeddfed59b94dfa3aa54fc":[2,0,3,9,1,1,0,247],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daac83f38b3b5053371aee190c01479e78":[2,0,3,9,1,1,0,205],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daad61faaeb14e22720172a1cdfa21e616":[2,0,3,9,1,1,0,118],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daaeb7e05ac69dc73cd0848deaf0ab1f68":[2,0,3,9,1,1,0,40],
@@ -245,9 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a2e1c331f5a6e557ba77ca856f7d24ff9":[2,0,3,10,9,0,15],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a52573463cb681cec293aa3a6eafea122":[2,0,3,10,9,0,7],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a53945c4e4eb46fc0b107f22ae21dfbbe":[2,0,3,10,9,0,6],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a6dbad76fc414f4b24f011b528f1c3023":[2,0,3,10,9,0,13],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a86e05d9221cd1bce85c21845e76ddb8f":[2,0,3,10,9,0,0],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a8ee4a61dad4c38bf08ebc783cdcf16d3":[2,0,3,10,9,0,8],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#aa3363a277beb3445ec091a22f737aac2":[2,0,3,10,9,0,3],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#ab9401797c800beacc4ca93e9ef50c2ff":[2,0,3,10,9,0,1]
+"structmodule_1_1purpose_1_1Tester_1_1Config.html#a6dbad76fc414f4b24f011b528f1c3023":[2,0,3,10,9,0,13]
 };

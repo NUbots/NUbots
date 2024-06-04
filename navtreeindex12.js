@@ -108,8 +108,11 @@ var NAVTREEINDEX12 =
 "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#aae62c71b72ddb5532f209705478e13c5":[2,0,1,0,0,6,3],
 "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html":[2,0,2,0],
 "structmodule_1_1actuation_1_1FootController_1_1Config.html":[2,0,3,0,0,0],
-"structmodule_1_1actuation_1_1FootController_1_1Config.html#aa772658fae4ab489bb27dc7894e54054":[2,0,3,0,0,0,1],
-"structmodule_1_1actuation_1_1FootController_1_1Config.html#ae7ffbc157832192edf8ac52b55d965a1":[2,0,3,0,0,0,0],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#a1b29dbf8f43adf58fe0213e46cad615d":[2,0,3,0,0,0,3],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#a7f93660d9b76865b7a39544e38707847":[2,0,3,0,0,0,0],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#aa772658fae4ab489bb27dc7894e54054":[2,0,3,0,0,0,2],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#adbbcc34ccc45dc005c323ac7479b2b32":[2,0,3,0,0,0,4],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#ae7ffbc157832192edf8ac52b55d965a1":[2,0,3,0,0,0,1],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html":[2,0,3,0,1,0],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a28a41cd2b52aead9251e89dc18c748c1":[2,0,3,0,1,0,0],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a701a6b09dad69851545bff0a044f8c5a":[2,0,3,0,1,0,1],
@@ -117,6 +120,7 @@ var NAVTREEINDEX12 =
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#aea765f11fa685fc05e49d823e86aa555":[2,0,3,0,1,0,3],
 "structmodule_1_1actuation_1_1Servos_1_1Count.html":[2,0,3,0,3,0],
 "structmodule_1_1actuation_1_1Servos_1_1Count.html#a3020b94d9a33ca42700aa78241af5daf":[2,0,3,0,3,0,0],
+"structmodule_1_1actuation_1_1SetGains.html":[2,0,3,0,4],
 "structmodule_1_1extension_1_1Director_1_1OkSolution.html":[2,0,3,1,1,0],
 "structmodule_1_1extension_1_1Director_1_1OkSolution.html#a027cf073c6972549cfd5081901646c7b":[2,0,3,1,1,0,0],
 "structmodule_1_1extension_1_1Director_1_1OkSolution.html#a0469602c61bcf704b7263b5c6c7375bc":[2,0,3,1,1,0,5],
@@ -245,9 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1MotionModel_1_1StateVec.html#a568319ec1da914c22443eee8888d6b28":[2,0,3,2,8,0,8],
 "structmodule_1_1input_1_1MotionModel_1_1StateVec.html#a937eae3807c79fa9dee28ede1347bedb":[2,0,3,2,8,0,2],
 "structmodule_1_1input_1_1MotionModel_1_1StateVec.html#a9eafaa68808960e18a8f795ee158b708":[2,0,3,2,8,0,6],
-"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#aad15398a1719262a7d5835138403365d":[2,0,3,2,8,0,7],
-"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97b":[2,0,3,2,8,0,0],
-"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba02a108b8df8d52e7cc22879bcd3e55dc":[2,0,3,2,8,0,0,3],
-"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba1eb521a1d1e21638928dda0475f8e132":[2,0,3,2,8,0,0,1],
-"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba70ec42829d2436823649c564347d9e21":[2,0,3,2,8,0,0,2]
+"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#aad15398a1719262a7d5835138403365d":[2,0,3,2,8,0,7]
 };

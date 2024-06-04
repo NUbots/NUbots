@@ -1,5 +1,9 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1actuation_1_1ServoMap_3_01RightHipYaw_01_4.html":[2,0,7,0,17],
+"structutility_1_1actuation_1_1ServoMap_3_01RightHipYaw_01_4.html#ac488cf360c20c819434b8e8bb2c9c15b":[2,0,7,0,17,0],
+"structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html":[2,0,7,0,18],
+"structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html#ad1c20190aaccd6c9a4a7c6aef777ebc5":[2,0,7,0,18,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html":[2,0,7,0,19],
 "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html#a4d1e9f49d72c98e4a15956606716ceed":[2,0,7,0,19,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html":[2,0,7,0,20],
@@ -245,9 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#ac099474dcc072ba9627f7ea28e601cd8":[2,0,7,6,0,8,8],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#ac1681db4f35928d44d38b5266b66f71c":[2,0,7,6,0,8,4],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#acb4576c3299263e12f1df1808f017962":[2,0,7,6,0,8,3],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#ad29806b54d3a511b1e3aafef9178ce2a":[2,0,7,6,0,8,11],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#ad395f559f7aa884e1561f056666e6c26":[2,0,7,6,0,8,9],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#adc5ace3f6223d8534f68d82685434302":[2,0,7,6,0,8,6],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#af7e7850b617af25932632501c025746f":[2,0,7,6,0,8,18],
-"structutility_1_1motion_1_1splines_1_1Waypoint.html":[2,0,7,6,0,9]
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#ad29806b54d3a511b1e3aafef9178ce2a":[2,0,7,6,0,8,11]
 };

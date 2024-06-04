@@ -68,6 +68,7 @@ var hierarchy =
     [ "module::actuation::FootController::Config", "structmodule_1_1actuation_1_1FootController_1_1Config.html", null ],
     [ "module::actuation::Kinematics::Config", "structmodule_1_1actuation_1_1Kinematics_1_1Config.html", null ],
     [ "module::actuation::Servos::Count< Sequence >", "structmodule_1_1actuation_1_1Servos_1_1Count.html", null ],
+    [ "module::actuation::SetGains", "structmodule_1_1actuation_1_1SetGains.html", null ],
     [ "module::extension::component::DirectorTask", "structmodule_1_1extension_1_1component_1_1DirectorTask.html", null ],
     [ "module::extension::component::Provider", "structmodule_1_1extension_1_1component_1_1Provider.html", null ],
     [ "module::extension::component::Provider::WhenCondition", "structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html", null ],

@@ -1,5 +1,9 @@
 var NAVTREEINDEX19 =
 {
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#ad395f559f7aa884e1561f056666e6c26":[2,0,7,6,0,8,9],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#adc5ace3f6223d8534f68d82685434302":[2,0,7,6,0,8,6],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#af7e7850b617af25932632501c025746f":[2,0,7,6,0,8,18],
+"structutility_1_1motion_1_1splines_1_1Waypoint.html":[2,0,7,6,0,9],
 "structutility_1_1motion_1_1splines_1_1Waypoint.html#a006278e7e33e92761d8acee23b8ae317":[2,0,7,6,0,9,0],
 "structutility_1_1motion_1_1splines_1_1Waypoint.html#a00dd4080e486d1d9544b0172ea1ba615":[2,0,7,6,0,9,6],
 "structutility_1_1motion_1_1splines_1_1Waypoint.html#a1c31d84dd342bcf793403e37f3ae1e66":[2,0,7,6,0,9,1],
@@ -240,14 +244,10 @@ var NAVTREEINDEX19 =
 "structutility_1_1support_1_1Expression.html#a85557b6cbcf5c7fb2465415956552b74":[2,0,7,13,2,2],
 "structutility_1_1support_1_1Expression.html#aa98ac82792d5e9302f95c379ba772372":[2,0,7,13,2,1],
 "structutility_1_1support_1_1Expression.html#acb87986fbdf5badbb3e40e983187887c":[2,0,7,13,2,9],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,3],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,5],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,8],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,3],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,7],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,8],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,4],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,6],
-"structutility_1_1support_1_1LazyEvaluation.html":[2,0,7,13,3],
-"structutility_1_1support_1_1LazyEvaluation.html#a405f3e6a7d2f4a3630296a9a291b7c46":[2,0,7,13,3,1],
-"structutility_1_1support_1_1LazyEvaluation.html#a6fc2eba1f57246dd848e823a211111ba":[2,0,7,13,3,0],
-"structutility_1_1support_1_1LazyEvaluation.html#aa4775fa7f02fa3c7e3106770b0fec85d":[2,0,7,13,3,2]
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,6]
 };

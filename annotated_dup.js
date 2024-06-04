@@ -61,7 +61,8 @@ var annotated_dup =
         [ "FootController", "classmodule_1_1actuation_1_1FootController.html", "classmodule_1_1actuation_1_1FootController" ],
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
         [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
-        [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
+        [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ],
+        [ "SetGains", "structmodule_1_1actuation_1_1SetGains.html", null ]
       ] ],
       [ "extension", null, [
         [ "component", null, [
