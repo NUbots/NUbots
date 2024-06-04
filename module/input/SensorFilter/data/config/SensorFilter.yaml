@@ -11,9 +11,9 @@ foot_down:
 # Mahony filter for roll + pitch
 mahony:
   # Proportional gain
-  Kp: 0.5
+  Kp: 0.1
   # Integral gain
-  Ki: 0.3
+  Ki: 0.1
   # Initial bias
   initial_bias: [0, 0, 0]
   # Initial orientation (roll, pitch, yaw)
@@ -31,4 +31,4 @@ use_ground_truth: false
 urdf_path: "models/robot.urdf"
 
 # Limit on the maximum change in servo angle per update before the encoder is considered invalid
-max_servo_change: 0.1
+max_servo_change: 0.2
