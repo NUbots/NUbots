@@ -292,7 +292,7 @@ namespace module::platform::OpenCR {
                 time_span = std::max(time_span, 0.0f);
 
                 // Update our internal state
-                if (servo_states[command.id].torque != command.torque
+                if (servo_states[command.id].torque_enabled != command.torque_enabled
                     || servo_states[command.id].position_p_gain != command.gain
                     || servo_states[command.id].position_i_gain != command.gain * 0
                     || servo_states[command.id].position_d_gain != command.gain * 0
@@ -301,7 +301,7 @@ namespace module::platform::OpenCR {
 
                     servo_states[command.id].dirty = true;
 
-                    servo_states[command.id].torque = command.torque;
+                    servo_states[command.id].torque_enabled = command.torque_enabled;
 
                     servo_states[command.id].position_p_gain = command.gain;
                     servo_states[command.id].position_i_gain = command.gain * 0;

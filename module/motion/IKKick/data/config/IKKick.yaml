@@ -3,7 +3,7 @@ execution_priority: 40
 
 servo:
   gain: 30
-  torque: 100
+  torque_enabled: 100
 
 balancer:
   servo_angle_threshold: 0.1

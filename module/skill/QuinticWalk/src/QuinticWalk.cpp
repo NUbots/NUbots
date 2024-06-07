@@ -118,11 +118,11 @@ namespace module::skill {
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
             // Sets the leg gains
             if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<double>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<double>(), 100, 0.0);
             }
             // Sets the arm gains
             if (id < ServoID::R_HIP_YAW) {
-                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100, 0.0);
             }
         }
 

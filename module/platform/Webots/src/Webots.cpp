@@ -76,6 +76,7 @@ namespace module::platform {
     using message::platform::webots::Message;
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
+    using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::OdometryGroundTruth;
     using message::platform::webots::SensorMeasurements;
@@ -395,7 +396,7 @@ namespace module::platform {
                     || servo_state[target.id].d_gain != target.gain * 0.0
                     || servo_state[target.id].moving_speed != speed
                     || servo_state[target.id].goal_position != target.position
-                    || servo_state[target.id].torque != target.torque) {
+                    || servo_state[target.id].torque_enabled != target.torque_enabled) {
 
                     servo_state[target.id].dirty = true;
                     servo_state[target.id].id    = target.id;
@@ -407,8 +408,9 @@ namespace module::platform {
                     // servo_state[target.id].d_gain        = target.gain * 0.0;
                     servo_state[target.id].moving_speed  = speed;
                     servo_state[target.id].goal_position = target.position;
+                    servo_state[target.id].goal_torque   = target.goal_torque;
 
-                    servo_state[target.id].torque = target.torque;
+                    servo_state[target.id].torque_enabled = target.torque_enabled;
                 }
             }
         });
@@ -439,7 +441,7 @@ namespace module::platform {
                 servo.p_gain           = 32.0 / 255.0;
                 servo.moving_speed     = 0.0;
                 servo.goal_position    = 0.0;
-                servo.torque           = 0.0;
+                servo.torque_enabled   = 0.0;
                 servo.present_position = 0.0;
                 servo.present_speed    = 0.0;
             }
@@ -623,16 +625,19 @@ namespace module::platform {
                             servo.dirty = false;
 
                             // Create servo position message
-                            actuator_requests.motor_positions.emplace_back(
-                                MotorPosition(servo.name, servo.goal_position));
+                            // actuator_requests.motor_positions.emplace_back(
+                            //     MotorPosition(servo.name, servo.goal_position));
 
-                            // Create servo velocity message
-                            actuator_requests.motor_velocities.emplace_back(
-                                MotorVelocity(servo.name, servo.moving_speed));
+                            // // Create servo velocity message
+                            // actuator_requests.motor_velocities.emplace_back(
+                            //     MotorVelocity(servo.name, servo.moving_speed));
 
-                            // Create servo PID message
-                            actuator_requests.motor_pids.emplace_back(
-                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                            // // Create servo PID message
+                            // actuator_requests.motor_pids.emplace_back(
+                            //     MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+
+                            // Create servo torque message
+                            actuator_requests.motor_torques.emplace_back(MotorTorque(servo.name, servo.goal_torque));
                         }
 
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk

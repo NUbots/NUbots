@@ -95,8 +95,8 @@ namespace module::motion {
 
             foot_separation = config["balancer"]["foot_separation"].as<float>();
 
-            gain_legs = config["servo"]["gain"].as<float>();
-            torque    = config["servo"]["torque"].as<float>();
+            gain_legs      = config["servo"]["gain"].as<float>();
+            torque_enabled = config["servo"]["torque_enabled"].as<float>();
 
             auto& balanceConfig = config["active_balance"];
             feedback_active     = balanceConfig["enabled"].as<bool>();
@@ -240,7 +240,8 @@ namespace module::motion {
 
                 // Push back each servo command
                 for (auto& joint : joints) {
-                    waypoints->commands.emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs, torque);
+                    waypoints->commands
+                        .emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs, torque_enabled);
                 }
 
                 // Send message

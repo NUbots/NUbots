@@ -110,7 +110,6 @@ namespace module::actuation {
 
             if (cfg.mode == "IK") {
                 for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
-                    ik_task->servos[id] = ServoState(cfg.servo_states[id].gain, TORQUE_ENABLED);
                     // Get servo from sensors for graphing information
                     auto it          = std::find_if(sensors.servo.begin(),
                                            sensors.servo.end(),
@@ -122,6 +121,7 @@ namespace module::actuation {
                     emit(graph("Servo Present Position/" + name, servo.present_position));
                     emit(graph("Servo Goal Position/" + name, servo.goal_position));
                     emit(graph("Servo Error/" + name, servo.present_position - servo.goal_position));
+                    ik_task->servos[id] = ServoState(cfg.servo_states[id].gain, TORQUE_ENABLED, servo.present_position);
                 }
             }
             else {

@@ -87,7 +87,7 @@ namespace module::skill {
 
             // Configure the arms
             for (auto id : utility::input::LimbID::servos_for_arms()) {
-                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100, 0.0);
             }
             cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH,
                                            config["arms"]["right_shoulder_pitch"].as<double>());

@@ -47,7 +47,9 @@ message ServoTarget {
     /// values are in range 0~254. K_p : p_gain / 8
     float gain = 4;
     /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque = 5;
+    float torque_enabled = 5;
+    /// Goal torque
+    float goal_torque = 6;
 }
 
 message ServoTargets {
@@ -68,7 +70,7 @@ message SubcontrollerServoTarget {
     /// values are in range 0~254. K_p : p_gain / 8
     float gain = 4;
     /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque = 5;
+    float torque_enabled = 5;
 }
 
 message SubcontrollerServoTargets {

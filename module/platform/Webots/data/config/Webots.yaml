@@ -8,11 +8,11 @@ max_fsr_value: 65.535
 max_velocity_mx64: 8.17
 max_velocity_mx106: 5.76
 # Requested time step between sensors
-time_step: 8
+time_step: 2
 # Minimum time step allowed between camera sensors
-min_camera_time_step: 16
+min_camera_time_step: 6
 # Minimum time step allowed between other sensors
-min_sensor_time_step: 8
+min_sensor_time_step: 2
 
 clock_smoothing: 0.6
 

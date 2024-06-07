@@ -35,7 +35,9 @@ message ServoState {
     /// values are in range 0-100.
     float gain = 1;
     /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque = 2;
+    float torque_enabled = 2;
+    /// Present position of the servo in radians.
+    float present_position = 3;
 }
 
 message ServoCommand {
@@ -45,4 +47,6 @@ message ServoCommand {
     float position = 2;
     /// Gain and torque of the servo
     ServoState state = 3;
+    /// Goal torque
+    float torque = 4;
 }
