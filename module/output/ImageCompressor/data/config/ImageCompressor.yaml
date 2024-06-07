@@ -1,8 +1,8 @@
 # Log level of DEBUG will print out compression rates
-log_level: DEBUG
+log_level: INFO
 # The settings for each compressor
 # These compressors will be tried in order per camera id until a free compressor is found
 compressors:
   - name: turbojpeg
     concurrent: 2
-    quality: 90
+    quality: 100

@@ -1,26 +1,30 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 world_path: "models/nugus/scene.xml"
 
+initial_floating_base:
+  pos: [0, 0, 0.473774]
+  quat: [0.994428, 0.00107808, 0.104931, -0.0100319]
+
 initial_joint_positions:
-  right_shoulder_pitch: 1.7
-  left_shoulder_pitch: 1.7
-  right_shoulder_roll: -0.2
-  left_shoulder_roll: 0.2
-  right_elbow_pitch: -0.7
-  left_elbow_pitch: -0.7
-  right_hip_yaw: 0
-  left_hip_yaw: 0
-  right_hip_roll: 0
-  left_hip_roll: 0
-  right_hip_pitch: 0
-  left_hip_pitch: 0
-  right_knee_pitch: 0
-  left_knee_pitch: 0
-  right_ankle_pitch: 0
-  left_ankle_pitch: 0
-  right_ankle_roll: 0
-  left_ankle_roll: 0
+  right_shoulder_pitch: 1.714
+  left_shoulder_pitch: 1.716
+  right_shoulder_roll: -0.198
+  left_shoulder_roll: 0.198
+  right_elbow_pitch: -0.720
+  left_elbow_pitch: -0.715
+  right_hip_yaw: -0.033
+  left_hip_yaw: 0.034
+  right_hip_roll: -0.162
+  left_hip_roll: 0.163
+  right_hip_pitch: -0.905
+  left_hip_pitch: -0.905
+  right_knee_pitch: 1.206
+  left_knee_pitch: 1.206
+  right_ankle_pitch: -0.510
+  left_ankle_pitch: -0.512
+  right_ankle_roll: 0.168
+  left_ankle_roll: -0.167
   neck_yaw: 0.0
   head_pitch: 0.0

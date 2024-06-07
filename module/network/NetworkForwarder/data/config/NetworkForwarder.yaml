@@ -22,6 +22,7 @@ targets:
     # Vision messages
     message.input.Image: false # You probably don't want this unless you're testing something very weird
     message.output.CompressedImage: 10
+    message.output.Mujoco: true
     message.vision.Balls: true
     message.vision.Goals: true
     message.vision.Robots: true

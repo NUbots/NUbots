@@ -125,9 +125,11 @@ export class LocalisationRobotModel {
   @observable name: string;
   @observable color?: string;
   @observable Htw: Matrix4; // World to torso
+  @observable Htw_mujoco: Matrix4; // World to torso
   @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
+  @observable motors_mujoco: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable particles: { particle: Vector3[] }; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
@@ -141,9 +143,11 @@ export class LocalisationRobotModel {
     name,
     color,
     Htw,
+    Htw_mujoco,
     Hfw,
     Rwt,
     motors,
+    motors_mujoco,
     fieldLinePoints,
     particles,
     ball,
@@ -155,9 +159,11 @@ export class LocalisationRobotModel {
     name: string;
     color?: string;
     Htw: Matrix4;
+    Htw_mujoco: Matrix4;
     Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
+    motors_mujoco: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     particles: { particle: Vector3[] };
     ball?: { rBWw: Vector3 };
@@ -169,9 +175,11 @@ export class LocalisationRobotModel {
     this.name = name;
     this.color = color;
     this.Htw = Htw;
+    this.Htw_mujoco = Htw_mujoco;
     this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
+    this.motors_mujoco = motors_mujoco;
     this.fieldLinePoints = fieldLinePoints;
     this.particles = particles;
     this.ball = ball;
@@ -185,9 +193,11 @@ export class LocalisationRobotModel {
       model,
       name: model.name,
       Htw: Matrix4.of(),
+      Htw_mujoco: Matrix4.of(),
       Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
+      motors_mujoco: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
       particles: { particle: [] },
       goals: { points: [] },

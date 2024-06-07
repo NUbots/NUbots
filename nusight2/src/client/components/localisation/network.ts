@@ -24,6 +24,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.output.Mujoco, this.onMujoco);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -128,6 +129,43 @@ export class LocalisationNetwork {
     robot.motors.leftAnkleRoll.angle = sensors.servo[17].presentPosition!;
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
+  };
+
+  @action
+  private onMujoco = (robotModel: RobotModel, mujoco: message.output.Mujoco) => {
+    // Ignore empty Sensors packets which may be emitted by the nbs scrubber
+    // when there's no Sensors data at a requested timestamp).
+    if (!mujoco.Htw) {
+      return;
+    }
+
+    console.log("onMujoco", mujoco);
+
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(mujoco.Htw!)).invert());
+    robot.Htw_mujoco = Matrix4.from(mujoco.Htw);
+    // robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
+    robot.motors_mujoco.rightShoulderPitch.angle = mujoco.servoMap["right_shoulder_pitch"]!;
+    robot.motors_mujoco.leftShoulderPitch.angle = mujoco.servoMap["left_shoulder_pitch"]!;
+    robot.motors_mujoco.rightShoulderRoll.angle = mujoco.servoMap["right_shoulder_roll"]!;
+    robot.motors_mujoco.leftShoulderRoll.angle = mujoco.servoMap["left_shoulder_roll"]!;
+    robot.motors_mujoco.rightElbow.angle = mujoco.servoMap["right_elbow"]!;
+    robot.motors_mujoco.leftElbow.angle = mujoco.servoMap["left_elbow"]!;
+    robot.motors_mujoco.rightHipYaw.angle = mujoco.servoMap["right_hip_yaw"]!;
+    robot.motors_mujoco.leftHipYaw.angle = mujoco.servoMap["left_hip_yaw"]!;
+    robot.motors_mujoco.rightHipRoll.angle = mujoco.servoMap["right_hip_roll"]!;
+    robot.motors_mujoco.leftHipRoll.angle = mujoco.servoMap["left_hip_roll"]!;
+    robot.motors_mujoco.rightHipPitch.angle = mujoco.servoMap["right_hip_pitch"]!;
+    robot.motors_mujoco.leftHipPitch.angle = mujoco.servoMap["left_hip_pitch"]!;
+    robot.motors_mujoco.rightKnee.angle = mujoco.servoMap["right_knee"]!;
+    robot.motors_mujoco.leftKnee.angle = mujoco.servoMap["left_knee"]!;
+    robot.motors_mujoco.rightAnklePitch.angle = mujoco.servoMap["right_ankle_pitch"]!;
+    robot.motors_mujoco.leftAnklePitch.angle = mujoco.servoMap["left_ankle_pitch"]!;
+    robot.motors_mujoco.rightAnkleRoll.angle = mujoco.servoMap["right_ankle_roll"]!;
+    robot.motors_mujoco.leftAnkleRoll.angle = mujoco.servoMap["left_ankle_roll"]!;
+    robot.motors_mujoco.headPan.angle = mujoco.servoMap["neck_yaw"]!;
+    robot.motors_mujoco.headTilt.angle = mujoco.servoMap["head_pitch"]!;
   };
 }
 

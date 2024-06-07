@@ -51,12 +51,26 @@ namespace module::platform {
         GLFWwindow* window;
 
         int framecount = 0;
-        int W          = 800;
-        int H          = 800;
+        int W          = 1920;
+        int H          = 1080;
 
         /// @brief The maximum velocity allowed by the NUgus motors in webots
         double max_velocity_mx64;
         double max_velocity_mx106;
+
+        /// @brief The number of time ticks which have passed since the last IO::READ trigger
+        double sim_delta = 0;
+        /// @brief The number of milliseconds which have passed since the last IO::READ trigger
+        double real_delta = 0;
+        /// @brief The current simulation time in ticks
+        double current_sim_time = 0;
+        /// @brief The current real time in milliseconds (unix time)
+        NUClear::clock::time_point current_real_time = NUClear::clock::now();
+        /// @brief Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from Webots), 1.0 takes no
+        /// updates from Webots
+        double clock_smoothing = 0.6;
+        /// @brief Real time factor of the simulation clock
+        double rtf = 1.0;
 
         /// @brief Current state of a servo
         struct ServoState {

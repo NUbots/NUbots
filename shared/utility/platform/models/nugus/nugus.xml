@@ -26,30 +26,52 @@
     <mesh name="right_lower_arm_visual" file="right_lower_arm_visual.stl"/>
   </asset>
 
+  <default>
+    <joint damping="1.23" armature="0.01" frictionloss="0.1"/>
+    <position kp="500" ctrlrange="-3.141592 3.141592" forcerange="-10 10"/>
+    <!-- <geom contype="0" conaffinity="0" condim="1" solref="0.005 1"/>
+    <equality solref="0.005 1"/>
+    <default class="cassie">
+      <geom material="cassie" group="2"/>
+    </default>
+    <default class="collision">
+      <geom contype="1" group="3" type="capsule"/>
+      <default class="collision-left">
+        <geom contype="2" conaffinity="4"/>
+      </default>
+      <default class="collision-right">
+        <geom contype="4" conaffinity="2"/>
+      </default>
+    </default> -->
+  </default>
+
+  <option timestep='0.001' iterations='50' solver='PGS' gravity='0 0 -9.81'/>
+  <!-- <flag frictionloss="enable"/> -->
+
   <actuator>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_yaw" name="left_hip_yaw"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_roll" name="left_hip_roll"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_hip_pitch" name="left_hip_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_knee_pitch" name="left_knee_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_ankle_pitch" name="left_ankle_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_ankle_roll" name="left_ankle_roll"/>
+    <position joint="left_hip_yaw" name="left_hip_yaw"/>
+    <position joint="left_hip_roll" name="left_hip_roll"/>
+    <position joint="left_hip_pitch" name="left_hip_pitch"/>
+    <position joint="left_knee_pitch" name="left_knee_pitch"/>
+    <position joint="left_ankle_pitch" name="left_ankle_pitch"/>
+    <position joint="left_ankle_roll" name="left_ankle_roll"/>
 
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_yaw" name="right_hip_yaw"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_roll" name="right_hip_roll"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_hip_pitch" name="right_hip_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_knee_pitch" name="right_knee_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_ankle_pitch" name="right_ankle_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_ankle_roll" name="right_ankle_roll"/>
+    <position joint="right_hip_yaw" name="right_hip_yaw"/>
+    <position joint="right_hip_roll" name="right_hip_roll"/>
+    <position joint="right_hip_pitch" name="right_hip_pitch"/>
+    <position joint="right_knee_pitch" name="right_knee_pitch"/>
+    <position joint="right_ankle_pitch" name="right_ankle_pitch"/>
+    <position joint="right_ankle_roll" name="right_ankle_roll"/>
 
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="neck_yaw" name="neck_yaw"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="head_pitch" name="head_pitch"/>
+    <position joint="neck_yaw" name="neck_yaw"/>
+    <position joint="head_pitch" name="head_pitch"/>
 
-    <motor ctrllimited="true" ctrlrange="-360.0 360.0" joint="left_shoulder_pitch" name="left_shoulder_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_shoulder_roll" name="left_shoulder_roll"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="left_elbow_pitch" name="left_elbow_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_shoulder_pitch" name="right_shoulder_pitch"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_shoulder_roll" name="right_shoulder_roll"/>
-    <motor ctrllimited="true" ctrlrange="-150.0 150.0" joint="right_elbow_pitch" name="right_elbow_pitch"/>
+    <position joint="left_shoulder_pitch" name="left_shoulder_pitch"/>
+    <position joint="left_shoulder_roll" name="left_shoulder_roll"/>
+    <position joint="left_elbow_pitch" name="left_elbow_pitch"/>
+    <position joint="right_shoulder_pitch" name="right_shoulder_pitch"/>
+    <position joint="right_shoulder_roll" name="right_shoulder_roll"/>
+    <position joint="right_elbow_pitch" name="right_elbow_pitch"/>
   </actuator>
 
   <sensor>
