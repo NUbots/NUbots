@@ -3,7 +3,6 @@ log_level: INFO
 
 # Servo controller parameters
 head_gain: 6.0
-head_torque: 100.0
 
 # Smoothing factor for goal angle to reduce look judder and oscillation, https://en.wikipedia.org/wiki/Exponential_smoothing
 smoothing_factor: 0.01

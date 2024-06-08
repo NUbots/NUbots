@@ -67,20 +67,20 @@ namespace module::actuation {
             /// @brief Foot controller mode
             std::string mode = "IK";
 
-            /// @brief Map between ServoID and ServoState
-            std::map<utility::input::ServoID, message::actuation::ServoState> servo_states = {
-                {utility::input::ServoID::L_HIP_YAW, message::actuation::ServoState()},
-                {utility::input::ServoID::L_HIP_ROLL, message::actuation::ServoState()},
-                {utility::input::ServoID::L_HIP_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::L_KNEE, message::actuation::ServoState()},
-                {utility::input::ServoID::L_ANKLE_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::L_ANKLE_ROLL, message::actuation::ServoState()},
-                {utility::input::ServoID::R_HIP_YAW, message::actuation::ServoState()},
-                {utility::input::ServoID::R_HIP_ROLL, message::actuation::ServoState()},
-                {utility::input::ServoID::R_HIP_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::R_KNEE, message::actuation::ServoState()},
-                {utility::input::ServoID::R_ANKLE_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::R_ANKLE_ROLL, message::actuation::ServoState()},
+            /// @brief Map between ServoID and Servos
+            std::map<utility::input::ServoID, message::actuation::Servo> servos = {
+                {utility::input::ServoID::L_HIP_YAW, message::actuation::Servo()},
+                {utility::input::ServoID::L_HIP_ROLL, message::actuation::Servo()},
+                {utility::input::ServoID::L_HIP_PITCH, message::actuation::Servo()},
+                {utility::input::ServoID::L_KNEE, message::actuation::Servo()},
+                {utility::input::ServoID::L_ANKLE_PITCH, message::actuation::Servo()},
+                {utility::input::ServoID::L_ANKLE_ROLL, message::actuation::Servo()},
+                {utility::input::ServoID::R_HIP_YAW, message::actuation::Servo()},
+                {utility::input::ServoID::R_HIP_ROLL, message::actuation::Servo()},
+                {utility::input::ServoID::R_HIP_PITCH, message::actuation::Servo()},
+                {utility::input::ServoID::R_KNEE, message::actuation::Servo()},
+                {utility::input::ServoID::R_ANKLE_PITCH, message::actuation::Servo()},
+                {utility::input::ServoID::R_ANKLE_ROLL, message::actuation::Servo()},
             };
 
             /// @brief Startup gain before setting the desired gains

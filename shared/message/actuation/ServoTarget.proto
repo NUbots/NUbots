@@ -30,49 +30,15 @@ package message.actuation;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
+import "message/actuation/ServoCommand.proto";
+
 /**
  * @author Trent Houliston
  */
 message ServoTarget {
-    /// When the target was created
-    google.protobuf.Timestamp time = 1;
-    /// The ID of the servo being controlled
-    uint32 id = 2;
-    /// The position value of the destination. 0 to 4,095 (0xFFF) is available.
-    /// The unit is 0.088 [°]. If Goal Position is out of the range, Angle Limit
-    /// Error Bit (Bit1) of Status Packet is returned as ‘1’ and Alarm is
-    /// triggered as set in Alarm LED/Shutdown
-    float position = 3;
-    /// Proportional gain. In proportion to the servo's position error. Gain
-    /// values are in range 0~254. K_p : p_gain / 8
-    float gain = 4;
-    /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque_enabled = 5;
-    /// Goal torque
-    float goal_torque = 6;
+    Servo servo = 1;
 }
 
 message ServoTargets {
     repeated ServoTarget targets = 1;
-}
-
-message SubcontrollerServoTarget {
-    /// How long it should take the servo to reach the desired position
-    google.protobuf.Duration time = 1;
-    /// The ID of the servo being controlled
-    uint32 id = 2;
-    /// The position value of the destination. 0 to 4,095 (0xFFF) is available.
-    /// The unit is 0.088 [°]. If Goal Position is out of the range, Angle Limit
-    /// Error Bit (Bit1) of Status Packet is returned as ‘1’ and Alarm is
-    /// triggered as set in Alarm LED/Shutdown
-    float position = 3;
-    /// Proportional gain. In proportion to the servo's position error. Gain
-    /// values are in range 0~254. K_p : p_gain / 8
-    float gain = 4;
-    /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque_enabled = 5;
-}
-
-message SubcontrollerServoTargets {
-    repeated SubcontrollerServoTarget targets = 1;
 }

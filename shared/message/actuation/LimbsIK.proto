@@ -34,30 +34,24 @@ import "Transform.proto";
 
 /// Left leg motion information including target matrix, time and gain and torque for each servo
 message LeftLegIK {
-    /// When the command should execute
-    google.protobuf.Timestamp time = 1;
     /// Target left foot position to torso
-    iso3 Htf = 2;
-    /// Gain and torque of each servo, with the key corresponding to ServoID
-    map<uint32, ServoState> servos = 3;
+    iso3 Htf = 1;
+    /// Servo commands for each servo (gains and goal time)
+    map<uint32, Servo> servos = 2;
 }
 
 /// Right leg motion information including target matrix, time and gain and torque for each servo
 message RightLegIK {
-    /// When the command should execute
-    google.protobuf.Timestamp time = 1;
     /// Target right foot position to torso
-    iso3 Htf = 2;
-    /// Gain and torque of each servo, with the key corresponding to ServoID
-    map<uint32, ServoState> servos = 3;
+    iso3 Htf = 1;
+    /// Servo commands for each servo (gains and goal time)
+    map<uint32, Servo> servos = 2;
 }
 
 /// Head motion information including look direction, time and gain and torque for each servo
 message HeadIK {
-    /// When the command should execute
-    google.protobuf.Timestamp time = 1;
     /// Vector for the head to look towards (camera to point in torso space)
-    vec3 uPCt = 2;
-    /// Gain and torque of each servo, with the key corresponding to ServoID
-    map<uint32, ServoState> servos = 3;
+    vec3 uPCt = 1;
+    /// Servo commands for each servo (gains and goal time)
+    map<uint32, Servo> servos = 2;
 }

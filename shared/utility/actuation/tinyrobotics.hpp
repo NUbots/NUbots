@@ -46,7 +46,7 @@
 namespace utility::actuation::tinyrobotics {
 
     using message::actuation::BodySide;
-    using message::actuation::ServoCommand;
+    using message::actuation::Servo;
     using utility::input::FrameID;
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -59,8 +59,8 @@ namespace utility::actuation::tinyrobotics {
      * @param servo_id ID of the servo to check
      * @return true if the servo exists in the map
      */
-    inline bool servo_exists(const std::map<u_int32_t, ServoCommand>& servos_map, ServoID servo_id) {
-        return servos_map.find(servo_id) != servos_map.end();
+    inline bool servo_exists(const std::map<u_int32_t, Servo>& servos, ServoID servo_id) {
+        return servos.find(servo_id) != servos.end();
     }
 
     // clang-format off
@@ -121,12 +121,12 @@ namespace utility::actuation::tinyrobotics {
      * @tparam Servos type of the Servos message
      * @return tinyrobotics joint configuration vector
      */
-    template <typename Servos, typename Scalar, int nq>
-    inline Eigen::Matrix<Scalar, nq, 1> servos_to_configuration(const Servos* servos) {
+    template <typename Scalar, int nq>
+    inline Eigen::Matrix<Scalar, nq, 1> servos_to_configuration(const std::map<u_int32_t, Servo>& servos) {
         Eigen::Matrix<Scalar, nq, 1> q = Eigen::Matrix<Scalar, nq, 1>::Zero();
         for (const auto& [index, servo_id] : joint_map) {
             if (servo_exists(servos->servos, servo_id)) {
-                q(index, 0) = servos->servos.at(servo_id).position;
+                q(index, 0) = *servos[servo_id].present_position;
             }
         }
         return q;
@@ -138,28 +138,14 @@ namespace utility::actuation::tinyrobotics {
      * @tparam Servos type of the Servos message
      * @return tinyrobotics joint configuration vector
      */
-    template <typename Servos, typename Scalar, int nq>
-    inline void configuration_to_servos(Servos* servos, const Eigen::Matrix<Scalar, nq, 1>& q) {
+    template <typename Scalar, int nq>
+    inline void configuration_to_servos(const std::map<u_int32_t, Servo>& servos,
+                                        const Eigen::Matrix<Scalar, nq, 1>& q) {
         for (const auto& [index, servo_id] : joint_map) {
-            if (index < q.size() && servo_exists(servos->servos, servo_id)) {
-                servos->servos[servo_id].position = q(index, 0);
+            if (index < q.size() && servo_exists(servos, servo_id)) {
+                servos[servo_id].position = q(index, 0);
             }
         }
-    }
-
-    /**
-     * @brief Converts a Sensors message to a tinyrobotics joint configuration vector
-     * @param sensors Sensors message to convert
-     * @return tinyrobotics joint configuration vector
-     */
-    template <typename Scalar, int nq>
-    inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
-        Eigen::Matrix<Scalar, nq, 1> q = Eigen::Matrix<Scalar, nq, 1>::Zero();
-        q.resize(sensors->servo.size(), 1);
-        for (const auto& [index, servo_id] : joint_map) {
-            q(index, 0) = sensors->servo.at(servo_id).present_position;
-        }
-        return q;
     }
 
     /**

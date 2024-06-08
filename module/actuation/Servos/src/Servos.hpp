@@ -51,33 +51,24 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Trigger<Sensors>>().then([this](const Servo& servo,
-                                                               const RunInfo& info,
-                                                               const Sensors& sensors) {
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-
-                    double torque =
-                        servo.command.state.gain * (servo.command.position - sensors.servo.at(ID).present_position);
-
-                    if (log_level <= NUClear::DEBUG) {
-                        emit(graph("Servo " + std::to_string(ID) + " (Present Position,Goal Position, Gain, Torque): ",
-                                   sensors.servo.at(ID).present_position,
-                                   servo.command.position,
-                                   servo.command.state.gain,
-                                   torque));
+            on<Provide<Servo>, Trigger<Sensors>>().then(
+                [this](const Servo& servo, const RunInfo& info, const Sensors& sensors) {
+                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                        if (log_level <= NUClear::DEBUG) {
+                            emit(graph("Servo " + std::to_string(ID)
+                                           + " (Present Position, Goal Position, Present Current, Goal Current): ",
+                                       sensors.servos[ID].present_position,
+                                       servo.goal_position,
+                                       sensors.servos[ID].present_current,
+                                       servo.goal_current));
+                        }
+                        emit(std::make_unique<ServoTarget>(servo));
                     }
-                    emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                       ID,
-                                                       servo.command.position,
-                                                       servo.command.state.gain,
-                                                       servo.command.state.torque_enabled,
-                                                       torque));
-                }
-                // If the time to reach the position is over, then stop requesting the position
-                else if (NUClear::clock::now() >= servo.command.time) {
-                    emit<Task>(std::make_unique<Done>());
-                }
-            });
+                    // If the time to reach the position is over, then stop requesting the position
+                    else if (NUClear::clock::now() >= servo.goal_time) {
+                        emit<Task>(std::make_unique<Done>());
+                    }
+                });
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.

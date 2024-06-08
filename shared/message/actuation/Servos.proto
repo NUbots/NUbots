@@ -32,81 +32,81 @@ import "message/actuation/ServoCommand.proto";
 // Message for each servo with command information
 
 message RightShoulderPitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftShoulderPitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightShoulderRoll {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftShoulderRoll {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightElbow {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftElbow {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightHipYaw {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftHipYaw {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightHipRoll {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftHipRoll {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightHipPitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftHipPitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightKnee {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftKnee {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightAnklePitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftAnklePitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message RightAnkleRoll {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message LeftAnkleRoll {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message HeadYaw {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }
 
 message HeadPitch {
-    ServoCommand command = 1;
+    Servo servo = 1;
 }

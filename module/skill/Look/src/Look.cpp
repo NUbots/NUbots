@@ -31,7 +31,6 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
-#include "message/actuation/ServoCommand.hpp"
 #include "message/skill/Look.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -43,7 +42,7 @@ namespace module::skill {
     using extension::Configuration;
     using message::actuation::HeadIK;
     using message::actuation::LimbsSequence;
-    using message::actuation::ServoState;
+
     using utility::input::ServoID;
     using utility::math::coordinates::screen_angular_from_object_direction;
     using utility::math::coordinates::sphericalToCartesian;
@@ -57,7 +56,13 @@ namespace module::skill {
             this->log_level      = config["log_level"].as<NUClear::LogLevel>();
             cfg.smoothing_factor = config["smoothing_factor"].as<float>();
             cfg.head_gain        = config["head_gain"].as<float>();
-            cfg.head_torque      = config["head_torque"].as<float>();
+
+            head_pitch.id              = ServoID::HEAD_PITCH;
+            head_yaw.id                = ServoID::HEAD_YAW;
+            head_pitch.torque_enable   = true;
+            head_yaw.torque_enable     = true;
+            head_pitch.position_p_gain = cfg.head_gain;
+            head_yaw.position_p_gain   = cfg.head_gain;
         });
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
@@ -76,11 +81,12 @@ namespace module::skill {
 
             // Create the HeadIK message
             auto head_ik  = std::make_unique<HeadIK>();
-            head_ik->time = NUClear::clock::now();
             head_ik->uPCt = uPCt;
 
-            head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque, 0.0);
-            head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque, 0.0);
+            head_yaw_servo.goal_time             = NUClear::clock::now();
+            head_pitch_servo.goal_time           = NUClear::clock::now();
+            head_ik->servos[ServoID::HEAD_YAW]   = head_yaw_servo;
+            head_ik->servos[ServoID::HEAD_PITCH] = head_pitch_servo;
 
             emit<Task>(head_ik);
         });

@@ -30,23 +30,169 @@ package message.actuation;
 
 import "google/protobuf/timestamp.proto";
 
-message ServoState {
-    /// Proportional gain. In proportion to the servo's position error. Gain
-    /// values are in range 0-100.
-    float gain = 1;
-    /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque_enabled = 2;
-    /// Present position of the servo in radians.
-    float present_position = 3;
-}
+message Servo {
+    // Model number of the servo
+    uint32 model_number = 1; // Address: 0, Size: 2 bytes
 
-message ServoCommand {
-    /// The time that the servo should reach the given position
-    google.protobuf.Timestamp time = 1;
-    /// The position value of the destination in radians.
-    float position = 2;
-    /// Gain and torque of the servo
-    ServoState state = 3;
-    /// Goal torque
-    float torque = 4;
+    // Model information
+    string model_information = 2; // Address: 2, Size: 4 bytes
+
+    // Firmware version
+    string firmware_version = 3; // Address: 6, Size: 1 byte
+
+    // DYNAMIXEL ID
+    uint32 id = 4; // Address: 7, Size: 1 byte
+
+    // Communication baud rate
+    uint32 baud_rate = 5; // Address: 8, Size: 1 byte
+
+    // Response delay time
+    uint32 return_delay_time = 6; // Address: 9, Size: 1 byte
+
+    // Drive mode
+    uint32 drive_mode = 7; // Address: 10, Size: 1 byte
+
+    // Operating mode
+    uint32 operating_mode = 8; // Address: 11, Size: 1 byte
+
+    // Secondary ID
+    uint32 secondary_id = 9; // Address: 12, Size: 1 byte
+
+    // Protocol type
+    uint32 protocol_type = 10; // Address: 13, Size: 1 byte
+
+    // Home position offset
+    double homing_offset = 11; // Address: 20, Size: 4 bytes
+
+    // Velocity threshold for movement detection
+    double moving_threshold = 12; // Address: 24, Size: 4 bytes
+
+    // Maximum internal temperature limit
+    double temperature_limit = 13; // Address: 31, Size: 1 byte
+
+    // Maximum input voltage limit
+    double max_voltage_limit = 14; // Address: 32, Size: 2 bytes
+
+    // Minimum input voltage limit
+    double min_voltage_limit = 15; // Address: 34, Size: 2 bytes
+
+    // Maximum PWM limit
+    double pwm_limit = 16; // Address: 36, Size: 2 bytes
+
+    // Maximum current limit
+    double current_limit = 17; // Address: 38, Size: 2 bytes
+
+    // Maximum acceleration limit
+    double acceleration_limit = 18; // Address: 40, Size: 4 bytes
+
+    // Maximum velocity limit
+    double velocity_limit = 19; // Address: 44, Size: 4 bytes
+
+    // Maximum position limit
+    double max_position_limit = 20; // Address: 48, Size: 4 bytes
+
+    // Minimum position limit
+    double min_position_limit = 21; // Address: 52, Size: 4 bytes
+
+    // Shutdown error information
+    uint32 shutdown = 22; // Address: 63, Size: 1 byte
+
+    // Motor torque on/off
+    bool torque_enable = 23; // Address: 64, Size: 1 byte
+
+    // Status LED on/off
+    bool led = 24; // Address: 65, Size: 1 byte
+
+    // Select types of status return
+    uint32 status_return_level = 25; // Address: 68, Size: 1 byte
+
+    // REG_WRITE instruction flag
+    bool registered_instruction = 26; // Address: 69, Size: 1 byte
+
+    // Hardware error status
+    uint32 hardware_error_status = 27; // Address: 70, Size: 1 byte
+
+    // I gain of velocity
+    double velocity_i_gain = 28; // Address: 76, Size: 2 bytes
+
+    // P gain of velocity
+    double velocity_p_gain = 29; // Address: 78, Size: 2 bytes
+
+    // D gain of position
+    double position_d_gain = 30; // Address: 80, Size: 2 bytes
+
+    // I gain of position
+    double position_i_gain = 31; // Address: 82, Size: 2 bytes
+
+    // P gain of position
+    double position_p_gain = 32; // Address: 84, Size: 2 bytes
+
+    // 2nd gain of feed-forward
+    double feedforward_2nd_gain = 33; // Address: 88, Size: 2 bytes
+
+    // 1st gain of feed-forward
+    double feedforward_1st_gain = 34; // Address: 90, Size: 2 bytes
+
+    // DYNAMIXEL BUS watchdog
+    bool bus_watchdog = 35; // Address: 98, Size: 1 byte
+
+    // Desired PWM value
+    double goal_pwm = 36; // Address: 100, Size: 2 bytes
+
+    // Desired current value
+    double goal_current = 37; // Address: 102, Size: 2 bytes
+
+    // Desired velocity value
+    double goal_velocity = 38; // Address: 104, Size: 4 bytes
+
+    // Acceleration value of profile
+    double profile_acceleration = 39; // Address: 108, Size: 4 bytes
+
+    // Velocity value of profile
+    double profile_velocity = 40; // Address: 112, Size: 4 bytes
+
+    // Desired position
+    double goal_position = 41; // Address: 116, Size: 4 bytes
+
+    // Count time in milliseconds
+    double realtime_tick = 42; // Address: 120, Size: 2 bytes
+
+    // Movement flag
+    bool moving = 43; // Address: 122, Size: 1 byte
+
+    // Detailed information of movement status
+    uint32 moving_status = 44; // Address: 123, Size: 1 byte
+
+    // Present PWM value
+    double present_pwm = 45; // Address: 124, Size: 2 bytes
+
+    // Present current value
+    double present_current = 46; // Address: 126, Size: 2 bytes
+
+    // Present velocity value
+    double present_velocity = 47; // Address: 128, Size: 4 bytes
+
+    // Present position value
+    double present_position = 48; // Address: 132, Size: 4 bytes
+
+    // Desired velocity trajectory from profile
+    double velocity_trajectory = 49; // Address: 136, Size: 4 bytes
+
+    // Desired position trajectory from profile
+    double position_trajectory = 50; // Address: 140, Size: 4 bytes
+
+    // Present input voltage
+    double present_input_voltage = 51; // Address: 144, Size: 2 bytes
+
+    // Present internal temperature
+    double present_temperature = 52; // Address: 146, Size: 1 byte
+
+    // True if we need to write new values to the hardware
+    bool dirty = 53;
+
+    // Whether we have initialised this servo yet
+    bool initialised = 54;
+
+    // Goal time for the servo to reach the goal position
+    google.protobuf.Timestamp goal_time = 55;
 }

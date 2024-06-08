@@ -33,6 +33,7 @@ import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
 import "Transform.proto";
+import "message/actuation/ServoCommand.proto";
 
 import "message/behaviour/state/WalkState.proto";
 
@@ -40,55 +41,6 @@ message Sensors {
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/ ;
     /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106-2/
-    message Servo {
-        /// Set of things which can or have gone wrong.
-        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#hardware-error-status70
-        uint32 hardware_error = 1;
-        uint32 id             = 2;
-        /// Whether the torque is on or off
-        bool enabled = 3;
-        /// Proportional gain. In proportion to the servo's position error. Gain
-        /// values are in range 0~254. K_p : p_gain / 8
-        double p_gain = 4;
-        /// Integral gain. Increases in relation to the error, and how long the
-        /// error has persisted. Gain values are in range 0~254.
-        /// K_i : i_gain * 1000 / 2048
-        double i_gain = 5;
-        /// Derivative gain. Does not consider error, just dampens forces to reduce
-        /// derivatives. Gain values are in range 0~254. K_d : d_gain * 4 / 1000
-        double d_gain = 6;
-        /// It is a position value of destination. 0 to 4,095 (0xFFF) is available.
-        /// The unit is 0.088 [°]. (FROM
-        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#specifications): If
-        /// Goal Position is out of the range, Angle Limit Error Bit (Bit1) of
-        /// Status Packet is returned as ‘1’ and Alarm is triggered as set in Alarm
-        /// LED/Shutdown
-        double goal_position = 7;
-        double goal_velocity = 8;
-        /// The range of the value is 0~4095 (0xFFF), and the unit is 0.088 [°]
-        double present_position = 9;
-        /// 0 ~ 2,047 (0x000 ~ 0x7FF) can be used. The value unit is about 0.11rpm.
-        /// If a value is in the range of 0 ~ 1,023 then the motor rotates to the
-        /// counter-clockwise direction. else the motor rotates to the clockwise
-        /// direction
-        double present_velocity = 10;
-        /// The range of the value is 0~2047, and the unit is about 0.1%
-        /// If the value is 0~1,023, it means the load works to the CCW direction.
-        /// If the value is 1,024~2,047, it means the load works to the CW
-        /// direction. That is, the 10th bit becomes the direction bit to control
-        /// the direction, and 1,024 is equal to 0. For example, the value is 512,
-        /// it means the load is detected in the direction of CCW about 50% of the
-        /// maximum torque
-        double load = 11;
-        /// Present voltage. This value is 10 times larger than the actual voltage.
-        /// For example, when 10V is supplied, the data value is 100 (0x64).
-        /// If Present Voltage(42) value is out of range, Voltage Range Error Bit
-        /// (Bit0) of Status Packet is returned as ‘1’ and Alarm is triggered and
-        /// set the address 17 and set 1 to the Bit 0 of the address 18
-        double voltage = 12;
-        /// Data value is identical to the actual temperature in Celsius
-        double temperature = 13;
-    }
 
     /// Button information
     message Button {
@@ -125,7 +77,7 @@ message Sensors {
     repeated Foot feet = 4 [(array_size) = 2];
 
     /// Set of servos on the robot
-    repeated Servo servo = 5;
+    map<uint32, message.actuation.Servo> servos = 5;
 
     /// Set of buttons on the robot
     repeated Button button = 6;
