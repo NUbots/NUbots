@@ -34,14 +34,20 @@
 #include "NUgus.hpp"
 #include "dynamixel/v2/Dynamixel.hpp"
 
+#include "message/actuation/Servos.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/ServoLED.hpp"
 #include "message/platform/StatusReturn.hpp"
 
+#include "utility/input/ServoID.hpp"
 #include "utility/io/uart.hpp"
 #include "utility/platform/RawSensors.hpp"
 
 namespace module::platform::OpenCR {
+
+    using message::actuation::Servo;
+
+    using utility::input::ServoID;
 
     class HardwareIO : public NUClear::Reactor {
 
@@ -124,7 +130,7 @@ namespace module::platform::OpenCR {
         OpenCRState opencr_state{};
 
         /// @brief The state of the servos, used to store read values and to store values to be written
-        std::array<ServoState, 20> servo_states{};
+        std::map<ServoID, Servo> servos;
 
         /// @brief The state of the battery
         Battery battery_state{};

@@ -33,7 +33,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/output/CompressedImage.hpp"
@@ -65,8 +65,8 @@ extern "C" {
 namespace module::platform {
 
     using extension::Configuration;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
     using message::input::Image;
     using message::input::Sensors;
     using message::platform::RawSensors;
@@ -363,8 +363,8 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoTargets& targets,
-                                                                                    const RawSensors& sensors) {
+        on<Trigger<ServoGoals>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoGoals& targets,
+                                                                                  const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -415,8 +415,8 @@ namespace module::platform {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget& target) {
-            auto targets = std::make_unique<ServoTargets>();
+        on<Trigger<ServoGoal>>().then([this](const ServoGoal& target) {
+            auto targets = std::make_unique<ServoGoals>();
             targets->targets.emplace_back(target);
 
             // Emit it so it's captured by the reaction above
@@ -446,7 +446,7 @@ namespace module::platform {
                 servo.present_speed    = 0.0;
             }
 
-            auto targets = std::make_unique<ServoTargets>();
+            auto targets = std::make_unique<ServoGoals>();
 
             // Clear all servo targets on reset
             for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {

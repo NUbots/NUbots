@@ -32,7 +32,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
 namespace module::skill {
 
@@ -43,7 +43,6 @@ namespace module::skill {
         /// @brief Stores configuration values
         struct Config {
             float smoothing_factor = 0.0;
-            float head_gain        = 0.0;
         } cfg;
 
         /// Head pitch servo

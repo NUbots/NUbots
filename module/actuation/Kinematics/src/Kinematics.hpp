@@ -36,7 +36,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/Limbs.hpp"
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/input/ServoID.hpp"
 

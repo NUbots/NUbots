@@ -36,7 +36,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 
 #include "utility/input/ServoID.hpp"

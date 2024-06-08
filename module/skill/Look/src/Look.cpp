@@ -55,14 +55,11 @@ namespace module::skill {
             // Use configuration here from file Look.yaml
             this->log_level      = config["log_level"].as<NUClear::LogLevel>();
             cfg.smoothing_factor = config["smoothing_factor"].as<float>();
-            cfg.head_gain        = config["head_gain"].as<float>();
 
-            head_pitch.id              = ServoID::HEAD_PITCH;
-            head_yaw.id                = ServoID::HEAD_YAW;
-            head_pitch.torque_enable   = true;
-            head_yaw.torque_enable     = true;
-            head_pitch.position_p_gain = cfg.head_gain;
-            head_yaw.position_p_gain   = cfg.head_gain;
+            head_pitch.goal.id, head_pitch.state.id                        = ServoID::HEAD_PITCH;
+            head_yaw.goal.id, head_yaw.state.id                            = ServoID::HEAD_YAW;
+            head_pitch.goal.torque_enabled, head_yaw.goal.torque_enabled   = true;
+            head_pitch.goal.position_p_gain, head_yaw.goal.position_p_gain = config["head_gain"].as<float>();
         });
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
@@ -83,10 +80,10 @@ namespace module::skill {
             auto head_ik  = std::make_unique<HeadIK>();
             head_ik->uPCt = uPCt;
 
-            head_yaw_servo.goal_time             = NUClear::clock::now();
-            head_pitch_servo.goal_time           = NUClear::clock::now();
-            head_ik->servos[ServoID::HEAD_YAW]   = head_yaw_servo;
-            head_ik->servos[ServoID::HEAD_PITCH] = head_pitch_servo;
+            head_yaw.goal.goal_time              = NUClear::clock::now();
+            head_pitch.goal.goal_time            = NUClear::clock::now();
+            head_ik->servos[ServoID::HEAD_YAW]   = head_yaw;
+            head_ik->servos[ServoID::HEAD_PITCH] = head_pitch;
 
             emit<Task>(head_ik);
         });

@@ -31,7 +31,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/actuation/ServoMap.hpp"
@@ -39,7 +39,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
-    using message::actuation::ServoTarget;
+    using message::actuation::ServoGoal;
     using message::input::Sensors;
     using utility::input::ServoID;
     using utility::nusight::graph;
@@ -57,15 +57,15 @@ namespace module::actuation {
                         if (log_level <= NUClear::DEBUG) {
                             emit(graph("Servo " + std::to_string(ID)
                                            + " (Present Position, Goal Position, Present Current, Goal Current): ",
-                                       sensors.servos[ID].present_position,
-                                       servo.goal_position,
-                                       sensors.servos[ID].present_current,
-                                       servo.goal_current));
+                                       sensors.servos[ID].state.present_position,
+                                       servo.servo.goal.goal_position,
+                                       sensors.servos[ID].state.present_current,
+                                       servo.servo.goal.goal_current));
                         }
-                        emit(std::make_unique<ServoTarget>(servo));
+                        emit(std::make_unique<ServoGoal>(servo.servo.goal));
                     }
                     // If the time to reach the position is over, then stop requesting the position
-                    else if (NUClear::clock::now() >= servo.goal_time) {
+                    else if (NUClear::clock::now() >= servo.servo.goal.goal_time) {
                         emit<Task>(std::make_unique<Done>());
                     }
                 });

@@ -27,8 +27,8 @@ Once every loop, a RawSensors message is constructed with the current data recor
 - `message::platform::RawSensors::EyeLED` requesting a change to eye LED colour
 - `message::platform::RawSensors::HeadLED` requesting a change to head LED colour
 - `message::platform::RawSensors::LEDPanel` requesting a change to LED panel colour
-- `message::actuation::ServoTarget` requesting a single servo command be performed
-- `message::actuation::ServoTargets` requesting a batch of servo commands be performed
+- `message::actuation::ServoGoal` requesting a single servo command be performed
+- `message::actuation::ServoGoals` requesting a batch of servo commands be performed
 - `message::platform::StatusReturn` used locally in the module to capture data input from the controller and process it in a separate reaction with `Sync`.
 
 ## Emits

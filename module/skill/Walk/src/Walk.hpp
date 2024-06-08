@@ -32,7 +32,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkGenerator.hpp"

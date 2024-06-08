@@ -32,7 +32,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/platform/NUSenseData.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/reflection.hpp"
@@ -44,10 +44,10 @@
 namespace module::platform::NUSense {
 
     using extension::Configuration;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
-    using message::actuation::SubcontrollerServoTarget;
-    using message::actuation::SubcontrollerServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
+    using message::actuation::SubcontrollerServoGoal;
+    using message::actuation::SubcontrollerServoGoals;
     using message::platform::NUSense;
     using message::platform::RawSensors;
     using utility::support::Expression;
@@ -120,35 +120,11 @@ namespace module::platform::NUSense {
             sensors->battery = 0;  // not yet implemented
 
             // Servo data
-            for (const auto& [key, val] : data.servo_map) {
-                // Get a reference to the servo we are populating
-                RawSensors::Servo& servo = utility::platform::get_raw_servo(val.id - 1, *sensors);
-                // fill all servo values from the reference
-                servo.hardware_error        = val.hardware_error;
-                servo.torque_enabled        = val.torque_enabled;
-                servo.velocity_i_gain       = 0;  // not present in NUSense message
-                servo.velocity_p_gain       = 0;  // not present in NUSense message
-                servo.position_d_gain       = 0;  // not present in NUSense message
-                servo.position_i_gain       = 0;  // not present in NUSense message
-                servo.position_p_gain       = 0;  // not present in NUSense message
-                servo.feed_forward_1st_Gain = 0;  // not present in NUSense message
-                servo.feed_forward_2nd_Gain = 0;  // not present in NUSense message
-                servo.present_PWM           = val.present_pwm;
-                servo.present_current       = val.present_current;
-                servo.present_velocity      = val.present_velocity;
-                servo.present_position      = val.present_position;
-                servo.goal_PWM              = val.goal_pwm;
-                servo.goal_current          = val.goal_current;
-                servo.goal_velocity         = val.goal_velocity;
-                servo.goal_position         = val.goal_position;
-                servo.voltage               = val.voltage;
-                servo.temperature           = val.temperature;
-                servo.profile_acceleration  = 0;  // not present in NUSense message
-                servo.profile_velocity      = 0;  // not present in NUSense message
-
+            sensors->servos = data.servos;
+            for (auto& servo : sensors->servos) {
                 // Add the offsets and switch the direction.
-                servo.present_position *= nugus.servo_direction[val.id - 1];
-                servo.present_position += nugus.servo_offset[val.id - 1];
+                servo.present_position *= nugus.servo_direction[servo.id];
+                servo.present_position += nugus.servo_offset[servo.id];
             }
 
             log<NUClear::TRACE>(
@@ -188,10 +164,10 @@ namespace module::platform::NUSense {
 
 
         // Sync is used because uart write is a shared resource
-        on<Trigger<ServoTargets>, Sync<HardwareIO>>().then([this](const ServoTargets& commands) {
+        on<Trigger<ServoGoals>, Sync<HardwareIO>>().then([this](const ServoGoals& commands) {
             // Copy the data into a new message so we can use a duration instead of a timepoint
             // and take the offsets and switch the direction.
-            auto servo_targets = SubcontrollerServoTargets();
+            auto servo_targets = SubcontrollerServoGoals();
 
             // Change the timestamp in servo targets to the difference between the timestamp and now
             // Take away the offset and switch the direction if needed
@@ -207,8 +183,8 @@ namespace module::platform::NUSense {
             send_packet(servo_targets);
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            auto command_list = std::make_unique<ServoTargets>();
+        on<Trigger<ServoGoal>>().then([this](const ServoGoal& command) {
+            auto command_list = std::make_unique<ServoGoals>();
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above

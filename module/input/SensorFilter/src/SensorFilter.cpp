@@ -224,25 +224,21 @@ namespace module::input {
             if (servo.hardware_error != RawSensors::HardwareError::HARDWARE_OK) {
                 NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(servo, servo.id));
             }
-
+            sensors[servo.id] = servo;
             // Determine the current position with potential fallback to the last known good position
-            double current_position = servo.present_position;
-            double current_velocity = servo.present_velocity;
+            double position = servo.state.present_position;
+            double velocity = servo.state.present_velocity;
             if (previous_sensors
-                && (fabs(current_position - previous_sensors->servo[servo.id].present_position) > cfg.max_servo_change
-                    || servo.hardware_error == RawSensors::HardwareError::MOTOR_ENCODER)) {
-                current_position = previous_sensors->servo[servo.id].present_position;
-                current_velocity = previous_sensors->servo[servo.id].present_velocity;
+                && (fabs(position - previous_sensors->servos[servo.state.id].present_position) > cfg.max_servo_change
+                    || servo.state.hardware_error == RawSensors::HardwareError::MOTOR_ENCODER)) {
+                position = previous_sensors->servos[servo.state.id].present_position;
+                velocity = previous_sensors->servos[servo.state.id].present_velocity;
                 NUClear::log<NUClear::DEBUG>("Suspected encoder error on servo ",
-                                             servo.id,
+                                             ServoID(servo.state.id),
                                              ": Using last known good position.");
             }
-
-            // Make copy of the servo and update the position
-            auto updated_servo             = servo;
-            updated_servo.present_position = current_position;
-            updated_servo.present_velocity = current_velocity;
-            sensors[servo.id]              = updated_servo;
+            sensors[servo.id].state.present_position = position;
+            sensors[servo.id].state.present_velocity = velocity;
         }
     }
 

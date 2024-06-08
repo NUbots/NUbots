@@ -20,13 +20,16 @@
     "*.role": "cmake",
     ".clang-tidy": "yaml",
     ".Doxyfile": "properties",
-    "random": "cpp"
+    "random": "cpp",
+    "*.ipp": "cpp",
+    "__locale": "cpp",
+    "thread": "cpp"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
   "[python]": {
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+      "source.organizeImports": "explicit"
     }
   },
   "[jsonc]": {

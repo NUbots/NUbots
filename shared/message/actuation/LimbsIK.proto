@@ -27,8 +27,7 @@ syntax = "proto3";
 
 package message.actuation;
 
-import "google/protobuf/timestamp.proto";
-import "message/actuation/ServoCommand.proto";
+import "message/actuation/Servos.proto";
 import "Vector.proto";
 import "Transform.proto";
 

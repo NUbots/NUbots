@@ -38,8 +38,8 @@ The keyboard controls are as follows:
 
 ## Emits
 
-- `message::actuation::ServoTarget` to control currently selected servo when locked or unlocked
-- `message::actuation::ServoTargets` to control all servos when transitioning between frames
+- `message::actuation::ServoGoal` to control currently selected servo when locked or unlocked
+- `message::actuation::ServoGoals` to control all servos when transitioning between frames
 - `message::actuation::LimbsSequence` to play the script
 - `module::behaviour::tools::LockServo` (internal to this class only) to trigger servo lock event
 

@@ -34,7 +34,7 @@
 #include "extension/Behaviour.hpp"
 
 #include "message/actuation/LimbsIK.hpp"
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
 
@@ -44,18 +44,17 @@
 #include "utility/math/comparison.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
-#define TORQUE_ENABLED 100
-
 namespace module::actuation {
 
     using message::actuation::LeftLegIK;
     using message::actuation::RightLegIK;
-    using message::actuation::ServoState;
+    using message::actuation::Servo;
     using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
 
     using utility::input::LimbID;
+    using utility::input::ServoID;
     using utility::nusight::graph;
 
     struct SetGains {};
@@ -68,19 +67,19 @@ namespace module::actuation {
             std::string mode = "IK";
 
             /// @brief Map between ServoID and Servos
-            std::map<utility::input::ServoID, message::actuation::Servo> servos = {
-                {utility::input::ServoID::L_HIP_YAW, message::actuation::Servo()},
-                {utility::input::ServoID::L_HIP_ROLL, message::actuation::Servo()},
-                {utility::input::ServoID::L_HIP_PITCH, message::actuation::Servo()},
-                {utility::input::ServoID::L_KNEE, message::actuation::Servo()},
-                {utility::input::ServoID::L_ANKLE_PITCH, message::actuation::Servo()},
-                {utility::input::ServoID::L_ANKLE_ROLL, message::actuation::Servo()},
-                {utility::input::ServoID::R_HIP_YAW, message::actuation::Servo()},
-                {utility::input::ServoID::R_HIP_ROLL, message::actuation::Servo()},
-                {utility::input::ServoID::R_HIP_PITCH, message::actuation::Servo()},
-                {utility::input::ServoID::R_KNEE, message::actuation::Servo()},
-                {utility::input::ServoID::R_ANKLE_PITCH, message::actuation::Servo()},
-                {utility::input::ServoID::R_ANKLE_ROLL, message::actuation::Servo()},
+            std::map<ServoID, Servo> servos = {
+                {ServoID::L_HIP_YAW, Servo()},
+                {ServoID::L_HIP_ROLL, Servo()},
+                {ServoID::L_HIP_PITCH, Servo()},
+                {ServoID::L_KNEE, Servo()},
+                {ServoID::L_ANKLE_PITCH, Servo()},
+                {ServoID::L_ANKLE_ROLL, Servo()},
+                {ServoID::R_HIP_YAW, Servo()},
+                {ServoID::R_HIP_ROLL, Servo()},
+                {ServoID::R_HIP_PITCH, Servo()},
+                {ServoID::R_KNEE, Servo()},
+                {ServoID::R_ANKLE_PITCH, Servo()},
+                {ServoID::R_ANKLE_ROLL, Servo()},
             };
 
             /// @brief Startup gain before setting the desired gains
@@ -105,23 +104,18 @@ namespace module::actuation {
                           const Sensors& sensors,
                           LimbID limb_id) {
 
-            ik_task->time = foot_control_task.time;
-            ik_task->Htf  = foot_control_task.Htf;
+            ik_task->Htf = foot_control_task.Htf;
 
             if (cfg.mode == "IK") {
                 for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
                     // Get servo from sensors for graphing information
-                    auto it          = std::find_if(sensors.servo.begin(),
-                                           sensors.servo.end(),
-                                           [id](const message::input::Sensors::Servo& servo) {
-                                               return servo.id == static_cast<uint32_t>(id);
-                                           });
-                    auto servo       = *it;
+                    auto servo       = sensors.servos[unit32_t(id)];
                     std::string name = static_cast<std::string>(id);
-                    emit(graph("Servo Present Position/" + name, servo.present_position));
-                    emit(graph("Servo Goal Position/" + name, servo.goal_position));
-                    emit(graph("Servo Error/" + name, servo.present_position - servo.goal_position));
-                    ik_task->servos[id] = ServoState(cfg.servo_states[id].gain, TORQUE_ENABLED, servo.present_position);
+                    emit(graph("Servo Present Position/" + name, servo.state.present_position));
+                    emit(graph("Servo Goal Position/" + name, servo.state.goal_position));
+                    emit(graph("Servo Error/" + name, servo.state.present_position - servo.goal.goal_position));
+                    ik_task->servos[id]                = cfg.servos[unit32_t(id)];
+                    ik_task->servos[id].goal.goal_time = foot_control_task.time;
                 }
             }
             else {

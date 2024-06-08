@@ -27,7 +27,66 @@ syntax = "proto3";
 
 package message.actuation;
 
-import "message/actuation/ServoCommand.proto";
+import "google/protobuf/timestamp.proto";
+
+message ServoState {
+    /// The ID of the servo
+    uint32 id = 1;
+    /// Current error state of the servo
+    /// different to the dynamixel packet error status
+    uint32 hardware_error = 2;
+    // Values that are either simulated or read from the servos
+    /// The last read pulse width modulation of the servo
+    float present_pwm = 3;
+    /// The last read current of the servo
+    float present_current = 4;
+    /// The last read velocity of the servo
+    float present_velocity = 5;
+    /// The last read position of the servo
+    float present_position = 6;
+    /// The last read voltage of the servo
+    float voltage = 7;
+    /// The last read temperature of the servo
+    float temperature = 8;
+    /// True if we need to write new values to the hardware
+    bool dirty = 9;
+    // Whether we have initialised this servo yet
+    bool initialised = 10;
+}
+
+message ServoStates {
+    repeated ServoState states = 1;
+}
+
+message ServoGoal {
+    /// The ID of the servo
+    uint32 id = 1;
+    /// Whether the servo's torque is enabled, allowing it to move
+    bool torque_enabled = 2;
+    // The desired pwm value for motor control
+    float goal_pwm = 3;
+    // The desired current value for the servo
+    float goal_current = 4;
+    // The desired velocity value for the servo
+    float goal_velocity = 5;
+    // The desired position value for the servo
+    float goal_position = 6;
+    // Goal time to reach the desired state
+    google.protobuf.Timestamp goal_time = 7;
+    /// Propotional gain of the servo
+    float position_p_gain = 8;
+}
+
+message ServoGoals {
+    repeated ServoGoal goals = 1;
+}
+
+message Servo {
+    /// Servo state
+    ServoState state = 1;
+    /// Servo goal
+    ServoGoal goal = 3;
+}
 
 // Message for each servo with command information
 

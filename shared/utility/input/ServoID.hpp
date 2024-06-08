@@ -119,6 +119,7 @@ namespace utility::input {
         operator uint64_t() const {
             return value;
         }
+
         operator int() const {
             return value;
         }

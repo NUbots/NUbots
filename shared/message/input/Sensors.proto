@@ -33,7 +33,7 @@ import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
 import "Transform.proto";
-import "message/actuation/ServoCommand.proto";
+import "message/actuation/Servos.proto";
 
 import "message/behaviour/state/WalkState.proto";
 

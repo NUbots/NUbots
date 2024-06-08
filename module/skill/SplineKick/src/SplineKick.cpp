@@ -45,8 +45,6 @@ namespace module::skill {
 
     using message::actuation::LeftArm;
     using message::actuation::RightArm;
-    using message::actuation::ServoCommand;
-    using message::actuation::ServoState;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using message::skill::Kick;
@@ -85,19 +83,13 @@ namespace module::skill {
             kick_generator.reset();
             last_update_time = NUClear::clock::now();
 
-            // Configure the arms
-            for (auto id : utility::input::LimbID::servos_for_arms()) {
-                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100, 0.0);
+            // Configure the arm servos
+            for (auto& servo : initial_positions) {
+                arm_servos[servo.first].goal.goal_position   = servo.second;
+                arm_servos[servo.first].goal.goal_time       = NUClear::clock::now();
+                arm_servos[servo.first].goal.torque_enabled  = true;
+                arm_servos[servo.first].goal.position_p_gain = config["gains"]["arms"].as<double>();
             }
-            cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH,
-                                           config["arms"]["right_shoulder_pitch"].as<double>());
-            cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_PITCH,
-                                           config["arms"]["left_shoulder_pitch"].as<double>());
-            cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_ROLL,
-                                           config["arms"]["right_shoulder_roll"].as<double>());
-            cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
-            cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
-            cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
         });
 
         // Start - Runs every time the Kick provider starts (wasn't running)
@@ -144,16 +136,14 @@ namespace module::skill {
                 emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
                 emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
 
-                // Construct Arm IK tasks
+                // Construct Arm limb tasks
                 auto left_arm  = std::make_unique<LeftArm>();
                 auto right_arm = std::make_unique<RightArm>();
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
-                    right_arm->servos[id] =
-                        ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+                    right_arm->servos[id] = arm_servos[id];
                 }
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_ARM)) {
-                    left_arm->servos[id] =
-                        ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+                    left_arm->servos[id] = arm_servos[id];
                 }
                 emit<Task>(left_arm, 0, true, "Walk left arm");
                 emit<Task>(right_arm, 0, true, "Walk right arm");

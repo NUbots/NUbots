@@ -12,8 +12,8 @@ This module is built when the subcontroller CMake flag is set to `NUSense`. Usin
 
 ## Consumes
 
-- `message::actuation::ServoTarget` requesting a single servo command be performed
-- `message::actuation::ServoTargets` requesting a batch of servo commands be performed
+- `message::actuation::ServoGoal` requesting a single servo command be performed
+- `message::actuation::ServoGoals` requesting a batch of servo commands be performed
 
 ## Emits
 

@@ -33,7 +33,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
@@ -47,8 +47,7 @@
 
 namespace utility::skill {
 
-    using message::actuation::ServoCommand;
-    using message::actuation::ServoState;
+    using message::actuation::Servo;
     using utility::input::ServoID;
 
     /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
@@ -243,7 +242,12 @@ namespace utility::skill {
             // Add the servos in the frame to a map
             std::map<uint32_t, ServoCommand> servos{};
             for (const auto& target : frame.targets) {
-                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                auto servo                 = Servo();
+                servo.goal.goal_time       = time;
+                servo.goal.goal_position   = target.position;
+                servo.goal.torque_enabled  = true;
+                servo.goal.position_p_gain = target.gain;
+                servos[target.id]          = servo;
             }
 
             // Add the map to the pack. This represents one sequence of servos.

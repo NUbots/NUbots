@@ -35,7 +35,7 @@
 
 #include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/FrameID.hpp"

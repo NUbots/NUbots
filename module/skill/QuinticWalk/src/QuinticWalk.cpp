@@ -33,7 +33,7 @@
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"

@@ -33,7 +33,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
@@ -43,8 +43,8 @@
 namespace module::platform::OpenCR {
 
     using extension::Configuration;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
     using utility::input::ServoID;
@@ -282,7 +282,7 @@ namespace module::platform::OpenCR {
 
         // REACTIONS FOR RECEIVING HARDWARE REQUESTS FROM THE SYSTEM
 
-        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+        on<Trigger<ServoGoals>>().then([this](const ServoGoals& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
                 // Desired time to reach the goal position (in milliseconds)
@@ -315,8 +315,8 @@ namespace module::platform::OpenCR {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            auto command_list = std::make_unique<ServoTargets>();
+        on<Trigger<ServoGoal>>().then([this](const ServoGoal& command) {
+            auto command_list = std::make_unique<ServoGoals>();
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
