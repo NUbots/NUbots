@@ -2,7 +2,7 @@ log_level: INFO
 
 walk:
   # Time for one complete step (in seconds).
-  period: 0.39
+  period: 0.45
   # Bool to indicate whether or not to only switch if the next foot is planted
   only_switch_when_planted: true
   step:
@@ -18,7 +18,7 @@ walk:
     # Torso height (in meters)
     height: 0.46
     # Torso pitch (in radians)
-    pitch: 12 * pi / 180
+    pitch: 5 * pi / 180
     # Torso constant position offset
     position_offset: [0.0, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
