@@ -119,6 +119,8 @@ namespace module::platform::NUSense {
             // Battery data
             sensors->battery = 0;  // not yet implemented
 
+            log<NUClear::WARN>("Dispatch from NUSense: " + std::string(data.dispatch.data(), 5) + " £££££££\n");
+
             // Servo data
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
@@ -145,6 +147,25 @@ namespace module::platform::NUSense {
                 servo.temperature           = val.temperature;
                 servo.profile_acceleration  = 0;  // not present in NUSense message
                 servo.profile_velocity      = 0;  // not present in NUSense message
+
+                if (val.num_errors != 0) {
+                    log<NUClear::WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
+                                                   val.num_errors,
+                                                   val.id,
+                                                   nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.num_crc_errors != 0) {
+                    log<NUClear::DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
+                                                    val.num_crc_errors,
+                                                    val.id,
+                                                    nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.num_timeouts != 0) {
+                    log<NUClear::WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
+                                                   val.num_timeouts,
+                                                   val.id,
+                                                   nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
 
                 // Add the offsets and switch the direction.
                 servo.present_position *= nugus.servo_direction[val.id - 1];
