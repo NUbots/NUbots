@@ -40,7 +40,6 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -53,8 +52,8 @@ namespace module::actuation {
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
 
+    using message::actuation::ServoID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
     using utility::nusight::graph;
 
     struct SetGains {};

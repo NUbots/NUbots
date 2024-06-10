@@ -39,10 +39,10 @@ namespace module::input {
     using message::platform::ButtonMiddleDown;
     using message::platform::ButtonMiddleUp;
 
+    using message::actuation::ServoID;
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
     using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::FrameID;
-    using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;

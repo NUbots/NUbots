@@ -33,8 +33,6 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/Servos.hpp"
 
-#include "utility/input/ServoID.hpp"
-
 namespace module::actuation {
 
     using extension::Configuration;
@@ -76,7 +74,7 @@ namespace module::actuation {
     using message::actuation::RightLegSequence;
     using message::actuation::RightShoulderPitch;
     using message::actuation::RightShoulderRoll;
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
 
     Servos::Servos(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 

@@ -36,7 +36,6 @@
 #include "message/actuation/Servos.hpp"
 
 #include "utility/file/fileutil.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/platform/aliases.hpp"
 #include "utility/support/network.hpp"
 
@@ -48,7 +47,7 @@
 namespace utility::skill {
 
     using message::actuation::Servo;
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
 
     /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
     struct ScriptRequest {

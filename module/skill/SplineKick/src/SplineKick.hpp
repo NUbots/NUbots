@@ -34,13 +34,12 @@
 
 #include "message/actuation/Servos.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/motion/splines/Trajectory.hpp"
 #include "utility/skill/KickGenerator.hpp"
 
 namespace module::skill {
 
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
     using utility::motion::splines::Waypoint;
 
     using message::actuation::Servo;

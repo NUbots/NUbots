@@ -49,8 +49,8 @@ namespace module::skill {
     using message::skill::ControlRightFoot;
     using message::skill::Kick;
 
+    using message::actuation::ServoID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
     using utility::nusight::graph;
     using utility::support::Expression;
 

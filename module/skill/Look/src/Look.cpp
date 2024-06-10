@@ -31,9 +31,9 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/skill/Look.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -43,7 +43,7 @@ namespace module::skill {
     using message::actuation::HeadIK;
     using message::actuation::LimbsSequence;
 
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
     using utility::math::coordinates::screen_angular_from_object_direction;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::nusight::graph;

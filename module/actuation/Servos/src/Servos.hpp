@@ -35,13 +35,12 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/actuation/ServoMap.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
     using message::actuation::ServoGoal;
+    using message::actuation::ServoID;
     using message::input::Sensors;
-    using utility::input::ServoID;
     using utility::nusight::graph;
 
     class Servos : public ::extension::behaviour::BehaviourReactor {

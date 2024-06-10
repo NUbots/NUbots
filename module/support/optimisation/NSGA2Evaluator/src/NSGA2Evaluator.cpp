@@ -37,6 +37,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -50,7 +51,6 @@
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
@@ -74,8 +74,8 @@ namespace module::support::optimisation {
     using message::support::optimisation::OptimisationRobotPosition;
     using message::support::optimisation::OptimisationTimeUpdate;
 
+    using message::actuation::ServoID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
     using utility::support::Expression;
 
     NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)

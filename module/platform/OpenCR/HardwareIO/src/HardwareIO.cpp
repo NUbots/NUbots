@@ -45,9 +45,9 @@ namespace module::platform::OpenCR {
     using extension::Configuration;
     using message::actuation::ServoGoal;
     using message::actuation::ServoGoals;
+    using message::actuation::ServoID;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
-    using utility::input::ServoID;
     using utility::support::Expression;
 
     using message::output::Buzzer;

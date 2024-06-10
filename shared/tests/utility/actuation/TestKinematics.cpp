@@ -32,19 +32,19 @@
 
 #include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 
 using Catch::Matchers::WithinAbs;
 using message::actuation::BodySide;
 using message::actuation::KinematicsModel;
+using message::actuation::ServoID;
 using message::input::Sensors;
 using utility::input::LimbID;
-using utility::input::ServoID;
 
 static const KinematicsModel kinematics_model = {
     // Leg

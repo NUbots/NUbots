@@ -30,7 +30,7 @@
 
 #include <set>
 
-#include "utility/input/ServoID.hpp"
+#include "message/actuation/Servos.hpp"
 
 namespace utility::input {
     // LimbID is a higher level of ServoID (see ServoID.h),

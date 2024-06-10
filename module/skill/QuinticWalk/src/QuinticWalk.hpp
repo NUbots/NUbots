@@ -39,7 +39,6 @@
 #include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkEngine.hpp"
 
 namespace module::skill {

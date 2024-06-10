@@ -39,7 +39,6 @@
 #include "message/platform/ServoLED.hpp"
 #include "message/platform/StatusReturn.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/io/uart.hpp"
 #include "utility/platform/RawSensors.hpp"
 
@@ -47,7 +46,7 @@ namespace module::platform::OpenCR {
 
     using message::actuation::Servo;
 
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
 
     class HardwareIO : public NUClear::Reactor {
 

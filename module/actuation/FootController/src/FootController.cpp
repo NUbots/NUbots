@@ -32,7 +32,7 @@ namespace module::actuation {
 
     using extension::Configuration;
 
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
 
 
     FootController::FootController(std::unique_ptr<NUClear::Environment> environment)

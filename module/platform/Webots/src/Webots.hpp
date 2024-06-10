@@ -44,13 +44,11 @@
 #include "message/input/Image.hpp"
 #include "message/platform/webots/messages.hpp"
 
-#include "utility/input/ServoID.hpp"
-
 namespace module::platform {
 
     using message::actuation::Servo;
 
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
 
     class Webots : public NUClear::Reactor {
     private:

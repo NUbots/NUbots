@@ -35,19 +35,19 @@
 
 #include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 
 namespace utility::actuation::kinematics {
 
     using message::actuation::BodySide;
     using message::actuation::KinematicsModel;
+    using message::actuation::ServoID;
     using message::input::Sensors;
     using utility::input::LimbID;
-    using utility::input::ServoID;
 
 
     [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateHeadJointPosition(const KinematicsModel& model,

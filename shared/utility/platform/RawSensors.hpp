@@ -27,14 +27,13 @@
 #ifndef UTILITY_PLATFORM_RAWSENSORS_HPP
 #define UTILITY_PLATFORM_RAWSENSORS_HPP
 
+#include "message/actuation/Servos.hpp"
 #include "message/platform/RawSensors.hpp"
-
-#include "utility/input/ServoID.hpp"
 
 namespace utility::platform {
 
+    using message::actuation::ServoID;
     using message::platform::RawSensors;
-    using utility::input::ServoID;
 
     /**
      * @brief Functions to create log strings for packet errors and servo errors

@@ -31,12 +31,12 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
+#include "message/actuation/Servos.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
@@ -46,8 +46,8 @@ namespace module::support::optimisation {
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2TrialExpired;
 
+    using message::actuation::ServoID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
     using utility::support::Expression;
 
     void StrafeEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {

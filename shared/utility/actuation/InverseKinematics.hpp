@@ -37,17 +37,17 @@
 #include <vector>
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
 
 namespace utility::actuation::kinematics {
 
+    using message::actuation::ServoID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
     using utility::math::angle::acos_clamped;
     using utility::math::angle::angle_between;
 

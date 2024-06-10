@@ -34,7 +34,6 @@
 
 #include "message/actuation/Servos.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {

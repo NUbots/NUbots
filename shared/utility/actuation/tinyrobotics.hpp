@@ -40,16 +40,15 @@
 
 #include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 
 namespace utility::actuation::tinyrobotics {
 
     using message::actuation::BodySide;
     using message::actuation::Servo;
+    using message::actuation::ServoID;
     using utility::input::FrameID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
 
     using message::input::Sensors;
 

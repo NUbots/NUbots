@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
@@ -41,7 +42,6 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::motion {

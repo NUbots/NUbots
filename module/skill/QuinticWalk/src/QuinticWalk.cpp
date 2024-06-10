@@ -63,7 +63,7 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::Walk;
 
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;

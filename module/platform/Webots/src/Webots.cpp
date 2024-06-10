@@ -45,7 +45,6 @@
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 #include "utility/input/FrameID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -87,8 +86,8 @@ namespace module::platform {
     using message::support::optimisation::OptimisationRobotPosition;
     using message::support::optimisation::OptimisationTimeUpdate;
 
+    using message::actuation::ServoID;
     using utility::input::FrameID;
-    using utility::input::ServoID;
     using utility::platform::get_raw_servo;
     using utility::support::Expression;
     using utility::vision::fourcc;

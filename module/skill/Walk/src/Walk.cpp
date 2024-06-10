@@ -59,8 +59,8 @@ namespace module::skill {
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
+    using message::actuation::ServoID;
     using utility::input::LimbID;
-    using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;

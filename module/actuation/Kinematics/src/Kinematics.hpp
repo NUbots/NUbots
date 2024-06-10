@@ -38,8 +38,6 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/Servos.hpp"
 
-#include "utility/input/ServoID.hpp"
-
 namespace module::actuation {
 
     using tinyrobotics::InverseKinematicsMethod;
