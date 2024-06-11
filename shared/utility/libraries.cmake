@@ -37,6 +37,10 @@ target_link_libraries(nuclear_utility PUBLIC ALSA::ALSA)
 find_package(Lame REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
 
+find_package(Torch REQUIRED)
+target_link_libraries(nuclear_utility PRIVATE "torch;torch_library")
+target_include_directories(nuclear_utility PUBLIC ${TORCH_INCLUDE_DIRS})
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
