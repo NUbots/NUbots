@@ -136,7 +136,7 @@ export class DashboardRobotModel {
       lastSeenBall: 0,
       lastSeenGoal: 0,
       penaltyReason: PenaltyReason.UNKNOWN_PENALTY_REASON,
-      robotColor: "#015457",
+      robotColor: "#015726",
       robotPosition: Vector3.of(),
       robotPositionCovariance: Matrix3.of(),
       roleName: "",
