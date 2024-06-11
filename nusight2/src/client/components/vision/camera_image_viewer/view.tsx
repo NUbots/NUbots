@@ -78,7 +78,7 @@ const CameraImageViewerMain = observer(
         />
         <IconButton
           className="absolute top-2 left-2"
-          color="semitransparent"
+          color="default"
           size="large"
           iconProps={{ weight: 400 }}
           onClick={() => props.onSelectCamera(-1)}

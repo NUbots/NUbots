@@ -83,12 +83,6 @@ export const Variants: Story = {
         <Row label="Default, disabled">
           <ButtonSet color="default" disabled size={size} />
         </Row>
-        <Row label="Nusight">
-          <ButtonSet color="nusight" size={size} />
-        </Row>
-        <Row label="Nusight, disabled">
-          <ButtonSet color="nusight" disabled size={size} />
-        </Row>
         <Row label="Primary">
           <ButtonSet color="primary" size={size} />
         </Row>

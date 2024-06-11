@@ -9,7 +9,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   /** The size of the button */
   size?: "normal" | "large";
   /** The color of the button */
-  color?: "default" | "primary" | "nusight" | "transparent";
+  color?: "default" | "primary" | "transparent";
   /** The alignment of the child elements of the button */
   contentAlign?: "left" | "center" | "right";
   /** Icon positioned before the children */
@@ -26,7 +26,6 @@ const ColorToClassName = {
   default:
     "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 dark:bg-gray-600 dark:text-white dark:ring-gray-500",
   primary: "dark shadow-sm bg-blue-500 text-white",
-  nusight: "dark shadow-sm bg-nusight-500 text-white",
   transparent: "bg-transparent text-blue-500 ring-transparent dark:text-blue-500",
 } as const;
 
