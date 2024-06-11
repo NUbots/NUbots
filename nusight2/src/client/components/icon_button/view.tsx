@@ -19,7 +19,7 @@ const SizeToClassName = {
 
 const ColorToClassName = {
   default:
-    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-slate-800 dark:text-white dark:ring-slate-700 dark:enabled:hover:bg-slate-700 dark:enabled:hover:ring-slate-600 dark:enabled:active:bg-slate-800",
+    "shadow-sm bg-white text-gray-500 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-gray-700 dark:text-white dark:ring-gray-600 dark:enabled:hover:bg-gray-600 dark:enabled:hover:ring-gray-500 dark:enabled:active:bg-gray-700",
   primary: "shadow-sm bg-blue-500 text-white enabled:hover:bg-blue-400 enabled:active:bg-blue-600",
   transparent:
     "bg-transparent text-white ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
