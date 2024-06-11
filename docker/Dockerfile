@@ -373,6 +373,9 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 # lame
 RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
+# LibTorch
+RUN install-package python-pytorch
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
