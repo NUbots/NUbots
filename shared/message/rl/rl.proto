@@ -1,0 +1,17 @@
+
+syntax = "proto3";
+
+package message.rl;
+
+import "Transform.proto";
+
+message Reward {
+    double value = 1;
+}
+
+message FeedForwardPoseAction {
+    // Left foot pose offset
+    iso3 Htl = 1;
+    // Right foot pose offset
+    iso3 Htr = 2;
+}
