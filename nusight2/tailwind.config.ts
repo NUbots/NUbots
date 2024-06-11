@@ -80,7 +80,7 @@ const config: Config = {
           1: colors.neutral[100],
           "1-inverse": "#424242",
 
-          2: colors.white,
+          2: colors.neutral[50],
           "2-inverse": "#4a4a4a",
         },
 
