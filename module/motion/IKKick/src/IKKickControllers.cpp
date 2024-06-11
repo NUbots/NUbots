@@ -36,7 +36,7 @@ namespace module::motion {
 
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
+    using ServoID = message::actuation::ServoID;
     using FrameID = utility::input::FrameID;
     using message::actuation::KinematicsModel;
 

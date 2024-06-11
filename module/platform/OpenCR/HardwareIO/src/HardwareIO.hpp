@@ -129,7 +129,7 @@ namespace module::platform::OpenCR {
         OpenCRState opencr_state{};
 
         /// @brief The state of the servos, used to store read values and to store values to be written
-        std::map<ServoID, Servo> servos;
+        std::map<uint32_t, Servo> servos;
 
         /// @brief The state of the battery
         Battery battery_state{};

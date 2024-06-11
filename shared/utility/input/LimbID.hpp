@@ -35,7 +35,7 @@
 namespace utility::input {
     // LimbID is a higher level of ServoID (see ServoID.h),
     // which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
-    using ServoID = utility::input::ServoID;
+    using ServoID = message::actuation::ServoID;
 
     struct LimbID {
         enum Value { UNKNOWN = 0, LEFT_LEG = 1, RIGHT_LEG = 2, LEFT_ARM = 3, RIGHT_ARM = 4, HEAD = 5 };

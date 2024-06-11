@@ -68,9 +68,9 @@ namespace module::skill {
 
             utility::skill::WalkingParameter params{};
 
-            std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
+            std::map<message::actuation::ServoID, message::actuation::ServoState> servo_states{};
 
-            std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
+            std::vector<std::pair<message::actuation::ServoID, double>> arm_positions{};
         } normal_cfg{}, goalie_cfg{};
 
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);

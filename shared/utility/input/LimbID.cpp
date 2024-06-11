@@ -30,7 +30,7 @@
 
 namespace utility::input {
 
-    using ServoID = utility::input::ServoID;
+    using ServoID = message::actuation::ServoID;
 
     LimbID::LimbID(std::string const& str) {
         // clang-format off

@@ -292,25 +292,25 @@ namespace module::platform::OpenCR {
                 time_span = std::max(time_span, 0.0f);
 
                 // Update our internal state
-                if (servo_states[command.id].torque_enabled != command.torque_enabled
-                    || servo_states[command.id].position_p_gain != command.gain
-                    || servo_states[command.id].position_i_gain != command.gain * 0
-                    || servo_states[command.id].position_d_gain != command.gain * 0
-                    || servo_states[command.id].goal_position != command.position
-                    || servo_states[command.id].profile_velocity != time_span) {
+                if (servos[command.id].goal.torque_enabled != command.torque_enabled
+                    || servos[command.id].goal.position_p_gain != command.gain
+                    || servos[command.id].goal.position_i_gain != command.gain * 0
+                    || servos[command.id].goal.position_d_gain != command.gain * 0
+                    || servos[command.id].goal.goal_position != command.position
+                    || servos[command.id].goal.profile_velocity != time_span) {
 
-                    servo_states[command.id].dirty = true;
+                    servos[command.id].goal.dirty = true;
 
-                    servo_states[command.id].torque_enabled = command.torque_enabled;
+                    servos[command.id].goal.torque_enabled = command.torque_enabled;
 
-                    servo_states[command.id].position_p_gain = command.gain;
-                    servo_states[command.id].position_i_gain = command.gain * 0;
-                    servo_states[command.id].position_d_gain = command.gain * 0;
+                    servos[command.id].goal.position_p_gain = command.gain;
+                    servos[command.id].goal.position_i_gain = command.gain * 0;
+                    servos[command.id].goal.position_d_gain = command.gain * 0;
 
-                    servo_states[command.id].goal_position = command.position;
+                    servos[command.id].goal.goal_position = command.position;
                     // Drive Mode is Time-Based, so we need to set the profile velocity to the time (in milliseconds) we
                     // want to take to reach the goal position
-                    servo_states[command.id].profile_velocity = time_span;
+                    servos[command.id].goal.profile_velocity = time_span;
                 }
             }
         });

@@ -165,13 +165,13 @@ namespace utility::skill {
                                                                                          * script.duration_modifier);
 
                 // Add the servos in the frame to a map
-                std::map<uint32_t, ServoCommand> servos{};
+                std::map<uint32_t, ServoGoal> servo_goals{};
                 for (const auto& target : frame.targets) {
-                    servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                    servo_goals[target.id] = ServoGoal(target.id, target.position, time, target.gain, target.torque);
                 }
 
-                // Add the map to the pack. This represents one sequence of servos.
-                msg->frames.emplace_back(servos);
+                // Add the map to the pack. This represents one sequence of servo_goals.
+                msg->frames.emplace_back(servo_goals);
             }
         }
 

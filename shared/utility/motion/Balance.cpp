@@ -31,7 +31,7 @@
 namespace utility::motion {
 
     using LimbID = utility::input::LimbID;
-    // using ServoID = utility::input::ServoID;
+    // using ServoID = message::actuation::ServoID;
     using message::actuation::KinematicsModel;
     using message::input::Sensors;
 

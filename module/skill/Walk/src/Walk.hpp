@@ -50,10 +50,10 @@ namespace module::skill {
     private:
         struct Config {
             /// @brief Stores the gains for each servo
-            std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
+            std::map<message::actuation::ServoID, message::actuation::ServoState> servo_states{};
 
             /// @brief Desired arm positions while walking
-            std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
+            std::vector<std::pair<message::actuation::ServoID, double>> arm_positions{};
 
             /// @brief Walk engine parameters
             utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};

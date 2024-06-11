@@ -13,7 +13,6 @@ nuclear_role(
   network::PlotJuggler
   # Sensors
   input::SensorFilter
-  platform::HardwareSimulator
   # Director
   extension::Director
   # Servos

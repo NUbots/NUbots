@@ -56,8 +56,7 @@ enum ServoID {
 message ServoState {
     /// The ID of the servo
     uint32 id = 1;
-    /// Current error state of the servo
-    /// different to the dynamixel packet error status
+    /// Current error state of the servo, different to the dynamixel packet error status
     uint32 hardware_error = 2;
     // Values that are either simulated or read from the servos
     /// The last read pulse width modulation of the servo
@@ -72,37 +71,47 @@ message ServoState {
     float voltage = 7;
     /// The last read temperature of the servo
     float temperature = 8;
-    /// True if we need to write new values to the hardware
-    bool dirty = 9;
     // Whether we have initialised this servo yet
     bool initialised = 10;
 }
 
 message ServoStates {
-    repeated ServoState states = 1;
+    map<uint32, ServoState> states = 1;
 }
 
 message ServoGoal {
     /// The ID of the servo
     uint32 id = 1;
-    /// Whether the servo's torque is enabled, allowing it to move
-    bool torque_enabled = 2;
-    // The desired pwm value for motor control
-    float goal_pwm = 3;
-    // The desired current value for the servo
-    float goal_current = 4;
-    // The desired velocity value for the servo
-    float goal_velocity = 5;
     // The desired position value for the servo
-    float goal_position = 6;
+    float goal_position = 2;
     // Goal time to reach the desired state
-    google.protobuf.Timestamp goal_time = 7;
+    google.protobuf.Timestamp goal_time = 3;
+    /// Whether the servo's torque is enabled, allowing it to move
+    bool torque_enabled = 5;
     /// Propotional gain of the servo
-    float position_p_gain = 8;
+    float position_p_gain = 4;
+    /// Integral gain of the servo
+    float position_i_gain = 5;
+    /// Derivative gain of the servo
+    float position_d_gain = 6;
+    /// feedforward_1st_gain
+    float feedforward_1st_gain = 7;
+    /// feedforward_2nd_gain
+    float feedforward_2nd_gain = 8;
+    /// profile_velocity
+    float profile_velocity = 9;
+    /// profile_acceleration
+    float profile_acceleration = 10;
+    // The desired current value for the servo
+    float goal_current = 11;
+    // The desired velocity value for the servo
+    float goal_velocity = 12;
+    // The desired pwm value for motor control
+    float goal_pwm = 13;
 }
 
 message ServoGoals {
-    repeated ServoGoal goals = 1;
+    map<uint32, ServoGoal> goals = 1;
 }
 
 message Servo {
@@ -115,81 +124,81 @@ message Servo {
 // Message for each servo with command information
 
 message RightShoulderPitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftShoulderPitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightShoulderRoll {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftShoulderRoll {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightElbow {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftElbow {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightHipYaw {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftHipYaw {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightHipRoll {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftHipRoll {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightHipPitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftHipPitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightKnee {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftKnee {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightAnklePitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftAnklePitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message RightAnkleRoll {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftAnkleRoll {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message HeadYaw {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }
 
 message HeadPitch {
-    Servo servo = 1;
+    ServoGoal servo = 1;
 }

@@ -67,7 +67,7 @@ namespace module::purpose {
     using utility::skill::Frame;
     using utility::skill::Script;
     using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
+    using ServoID = message::actuation::ServoID;
 
     struct LockServo {};
 
