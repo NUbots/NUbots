@@ -2,15 +2,16 @@ import React, { ComponentType, useMemo } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 
+import { IconButton } from "../../icon_button/view";
+import { Button } from "../../button/button";
+import { ResizeContainer } from "../../resize_container/resize_container";
+import { ResizePanel } from "../../resize_container/resize_panel";
 import { RobotModel } from "../../robot/model";
 import { VisionRobotModel } from "../model";
 import { VisionCameraModel } from "../vision_camera/model";
 import { VisionCameraViewProps } from "../vision_camera/view";
 import { VisionCameraViewModel } from "../vision_camera/view_model";
 
-import IconChevronLeft from "./icon_chevron_left";
-import IconChevronRight from "./icon_chevron_right";
-import IconClose from "./icon_close";
 import style from "./style.module.css";
 
 export const CameraImageViewer = observer(
@@ -22,23 +23,30 @@ export const CameraImageViewer = observer(
     onSelectCamera: (cameraIndex: number) => void;
     onPreviousCamera: () => void;
     onNextCamera: () => void;
+    children?: React.ReactNode;
   }) => {
     return (
-      <div className="flex w-full h-full relative">
-        <CameraImageViewerMain
-          CameraView={props.CameraView}
-          selectedRobot={props.selectedRobot}
-          selectedCamera={props.selectedCamera}
-          onSelectCamera={props.onSelectCamera}
-          onPreviousCamera={props.onPreviousCamera}
-          onNextCamera={props.onNextCamera}
-        />
-        <CameraImageViewerThumbnails
-          CameraView={props.CameraView}
-          selectedRobot={props.selectedRobot}
-          onSelectCamera={props.onSelectCamera}
-        />
-      </div>
+      <ResizeContainer horizontal className="w-full h-full flex dark">
+        <ResizePanel minSize={250}>
+          <CameraImageViewerMain
+            CameraView={props.CameraView}
+            selectedRobot={props.selectedRobot}
+            selectedCamera={props.selectedCamera}
+            onSelectCamera={props.onSelectCamera}
+            onPreviousCamera={props.onPreviousCamera}
+            onNextCamera={props.onNextCamera}
+          >
+            {props.children}
+          </CameraImageViewerMain>
+        </ResizePanel>
+        <ResizePanel initialRatio={0} minSize={150} maxSize={550}>
+          <CameraImageViewerThumbnails
+            CameraView={props.CameraView}
+            selectedRobot={props.selectedRobot}
+            onSelectCamera={props.onSelectCamera}
+          />
+        </ResizePanel>
+      </ResizeContainer>
     );
   },
 );
@@ -51,13 +59,14 @@ const CameraImageViewerMain = observer(
     onSelectCamera: (cameraIndex: number) => void;
     onPreviousCamera: () => void;
     onNextCamera: () => void;
+    children?: React.ReactNode;
   }) => {
     const cameraViewModel = useMemo(
       () => VisionCameraViewModel.of(props.selectedCamera, props.selectedRobot),
       [props.selectedCamera, props.selectedRobot],
     );
     return (
-      <div className="flex-grow h-full relative">
+      <div className="flex-grow h-full relative dark">
         <props.CameraView
           key={props.selectedCamera.id}
           model={props.selectedCamera}
@@ -67,24 +76,33 @@ const CameraImageViewerMain = observer(
           objectFit="fill"
           allowPanAndZoom
         />
-        <button
-          className="absolute bg-[rgba(0,0,0,0.6)] rounded-lg flex leading-none p-1.5 top-2 left-2 text-gray-100 hover:text-gray-450"
+        <IconButton
+          className="absolute top-2 left-2"
+          color="semitransparent"
+          size="large"
+          iconProps={{ weight: 400 }}
           onClick={() => props.onSelectCamera(-1)}
         >
-          <IconClose className="text-gray-100 h-8 w-8" />
-        </button>
-        <button
-          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-[50%] left-2 hover:text-gray-450 textshadow-lg"
+          close
+        </IconButton>
+        <IconButton
+          className="absolute top-[50%] left-2"
+          color="transparent"
+          size="large"
+          iconProps={{ weight: 400 }}
           onClick={props.onPreviousCamera}
         >
-          <IconChevronLeft className="text-gray-100 h-8 w-8" />
-        </button>
-        <button
-          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-[50%] right-2 hover:text-gray-450"
+          chevron_left
+        </IconButton>
+        <IconButton
+          className="absolute top-[50%] right-2"
+          color="transparent"
+          size="large"
+          iconProps={{ weight: 400 }}
           onClick={props.onNextCamera}
         >
-          <IconChevronRight className="text-gray-100 h-8 w-8" />
-        </button>
+          chevron_right
+        </IconButton>
       </div>
     );
   },
@@ -97,9 +115,9 @@ const CameraImageViewerThumbnails = observer(
     onSelectCamera: (cameraIndex: number) => void;
   }) => {
     return (
-      <div className="w-1/5 max-w-[216px] min-w-[120px] h-full bg-black border-l border-gray-700 relative">
+      <div className="h-full bg-black border-l border-gray-700 relative">
         <div className="w-full h-full overflow-y-auto absolute top-0 right-0">
-          <div className="grid grid-cols-1 auto-rows-[140px] gap-1 p-1.5">
+          <div className="grid grid-cols-1 gap-1 p-1.5">
             {props.selectedRobot?.cameraList.map((camera, index) => (
               <CameraImageViewerThumbnail
                 key={camera.id}
@@ -129,7 +147,7 @@ const CameraImageViewerThumbnail = observer(
     );
     return (
       <div
-        className={classNames(style.cameraThumbnail, "cursor-pointer relative", {
+        className={classNames(style.cameraThumbnail, "cursor-pointer relative aspect-video border border-gray-900", {
           [style.cameraThumbnailSelected]: props.camera.selected,
         })}
       >

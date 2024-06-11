@@ -87,22 +87,22 @@ const config: Config = {
         // Use to create contrast against the current background for indicating states like hovered, pressed, and selected.
         contrast: {
           1: "rgba(0, 0, 0, 0.05)",
-          "1-inverse": "rgba(255, 255, 255, 0.10)",
+          "1-inverse": "rgba(255, 255, 255, 0.05)",
 
           2: "rgba(0, 0, 0, 0.10)",
-          "2-inverse": "rgba(255, 255, 255, 0.15)",
+          "2-inverse": "rgba(255, 255, 255, 0.10)",
 
           3: "rgba(0, 0, 0, 0.15)",
-          "3-inverse": "rgba(255, 255, 255, 0.20)",
+          "3-inverse": "rgba(255, 255, 255, 0.15)",
 
           4: "rgba(0, 0, 0, 0.20)",
-          "4-inverse": "rgba(255, 255, 255, 0.25)",
+          "4-inverse": "rgba(255, 255, 255, 0.20)",
 
           5: "rgba(0, 0, 0, 0.25)",
-          "5-inverse": "rgba(255, 255, 255, 0.30)",
+          "5-inverse": "rgba(255, 255, 255, 0.25)",
 
           6: "rgba(0, 0, 0, 0.30)",
-          "6-inverse": "rgba(255, 255, 255, 0.35)",
+          "6-inverse": "rgba(255, 255, 255, 0.30)",
 
           max: colors.black,
           "max-inverse": colors.white,
