@@ -9,7 +9,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   /** The size of the button */
   size?: "normal" | "large";
   /** The color of the button */
-  color?: "default" | "primary" | "transparent";
+  color?: "default" | "primary" | "nusight" | "transparent";
   /** The alignment of the child elements of the button */
   contentAlign?: "left" | "center" | "right";
   /** Icon positioned before the children */
