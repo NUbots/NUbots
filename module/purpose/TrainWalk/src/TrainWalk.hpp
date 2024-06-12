@@ -2,10 +2,17 @@
 #define MODULE_PURPOSE_TRAINWALK_HPP
 
 #include <nuclear>
+#include <torch/torch.h>
 
 #include "extension/Behaviour.hpp"
 
-#include "utility/rl/PPO.hpp"
+#include "message/rl/rl.hpp"
+
+// #include "utility/rl/Models.h"
+// #include "utility/rl/PPO.hpp"
+// #include "utility/rl/ProximalPolicyOptimization.h"
+// #include "utility/rl/RLAgent.hpp"
+// #include "utility/rl/TestEnvironment.h"
 
 namespace module::purpose {
 
@@ -13,6 +20,12 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
+            uint n_iter          = 10000;
+            uint n_steps         = 2048;
+            uint n_epochs        = 15;
+            uint mini_batch_size = 512;
+            uint ppo_epochs      = 4;
+            double beta          = 1e-3;
         } cfg;
 
     public:
@@ -35,14 +48,44 @@ namespace module::purpose {
         /// right foot pose 6
         /// walk phase 1
         /// reference velocity 3
-        static const int N_STATES = 52;
+        static const int N_STATES = 6;  // 52;
 
         /// @brief Buffer size for storing the states and actions
-        static const int BUFFER_SIZE = 2;
+        static const int BUFFER_SIZE = 5;
+
+        /// @brief Agent for training the walk
+        // utility::rl::RLAgent agent{N_STATES, N_ACTIONS};
+
+        // VT states;
+        // VT actions;
+        // VT rewards;
+        // VT dones;
+
+        // VT log_probs;
+        // VT returns;
+        // VT values;
+
+        // // Model.
+        // uint n_in  = 4;
+        // uint n_out = 2;
+        // double std = 2e-2;
+
+        // ActorCritic ac = ActorCritic(n_in, n_out, std);
 
 
-        /// @brief PPO agent for training the walk
-        utility::rl::PPOAgent ppo_agent{N_STATES, N_ACTIONS};
+        // Counter.
+        uint c = 0;
+
+        // Average reward.
+        double best_avg_reward = 0.;
+        double avg_reward      = 0.;
+
+
+        /// @brief Compute reward for the current state and action
+        /// @param state The current state
+        /// @param action The current action
+        /// @return The reward for the current state and action
+        // torch::Tensor calculate_reward(const torch::Tensor& state, torch::Tensor& action);
     };
 
 }  // namespace module::purpose

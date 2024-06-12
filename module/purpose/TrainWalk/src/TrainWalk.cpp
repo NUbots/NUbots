@@ -3,18 +3,20 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
-#include "message/rl/rl.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/support/optimisation/OptimisationCommand.hpp"
+
+#include "utility/rl/ProximalPolicyOptimization.h"
 
 
 namespace module::purpose {
 
     using extension::Configuration;
 
-    using State  = message::input::Sensors;
-    using Action = message::rl::FeedForwardPoseAction;
+    using Action = message::rl::Action;
     using Reward = message::rl::Reward;
+    using State  = message::rl::State;
+    using message::input::Sensors;
 
     using message::skill::Walk;
     using message::support::optimisation::OptimisationCommand;
@@ -24,33 +26,27 @@ namespace module::purpose {
         on<Configuration>("TrainWalk.yaml").then([this](const Configuration& config) {
             // Use configuration here from file TrainWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            // ac->to(torch::kF64);
+            // ac->normal(0., std);
         });
 
         on<Startup>().then([this] {
-            // Emit start policy State, Action, Reward
+            // Emit walk skill
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0.1, 0.0, 0.0)));
         });
 
-        // Calculate the reward
-        on<Trigger<State>, With<Action>>().then([this](const State& state, const Action& action) {
-            // TODO: Calculate the reward
-            double reward_value = 0.0;
+        on<Trigger<Sensors>, With<Walk>>().then(
+            [this](const Sensors& sensors, const Walk& walk) { log<NUClear::DEBUG>("Construct state"); });
 
-            emit(std::make_unique<Reward>(reward_value));
+        on<Trigger<State>>().then([this](const State& state) {
+            // torch::optim::Adam opt(ac->parameters(), 1e-3);
         });
-
-        on<Last<BUFFER_SIZE, Trigger<State, Action, Reward>>>().then(
-            [this](const std::list<std::shared_ptr<const State>>& state_buffer,
-                   const std::list<std::shared_ptr<const Action>>& action_buffer,
-                   const std::list<std::shared_ptr<const Reward>>& reward_buffer) {
-                // Create tensors for the states, actions and rewards
-                std::vector<torch::Tensor> states;
-                std::vector<torch::Tensor> actions;
-                std::vector<torch::Tensor> rewards;
-                for (int i = 0; i < BUFFER_SIZE; i++) {
-                }
-
-                // Perform PPO update
-            });
     }
+
+    // torch::Tensor TrainWalk::calculate_reward(const torch::Tensor& state, torch::Tensor& action) {
+    //     // Calculate the reward
+    //     return torch::tensor(0.0);
+    // }
 
 }  // namespace module::purpose
