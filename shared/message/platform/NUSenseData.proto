@@ -110,5 +110,6 @@ message NUSense {
      */
     map<uint32, Servo> servo_map = 1;
     IMU                imu       = 2;
+    // A generic string-based message for uncommon errors, exceptions, etc.
     string             dispatch  = 3;
 }

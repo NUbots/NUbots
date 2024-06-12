@@ -120,7 +120,9 @@ namespace module::platform::NUSense {
             sensors->battery = 0;  // not yet implemented
 
             // Log the latest dispatch from NUSense; only very rare exceptions should be dispatched.
-            log<NUClear::WARN>("Dispatch from NUSense: " + data.dispatch);
+            if (data.dispatch.size() > 3) {
+                log<NUClear::WARN>("Dispatch from NUSense: " + data.dispatch);
+            }
 
             // Servo data
             for (const auto& [key, val] : data.servo_map) {
