@@ -7,8 +7,14 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/rl/rl.hpp"
+
 #include "utility/rl/ProximalPolicyOptimization.h"
-#include "utility/rl/TestEnvironment.h"
+
+
+using Action = message::rl::Action;
+using Reward = message::rl::Reward;
+using State  = message::rl::State;
 
 namespace module::purpose {
 
@@ -21,17 +27,10 @@ namespace module::purpose {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Startup>().then([this] {
-            // Random engine.
-            std::random_device rd;
-            std::mt19937 re(rd());
-            std::uniform_int_distribution<> dist(-5, 5);
 
-            // Environment.
-            double x = double(dist(re));  // goal x pos
-            double y = double(dist(re));  // goal y pos
-            TestEnvironment env(x, y);
+        on<Startup>().then([this] { emit(std::make_unique<State>()); });
 
+        on<Trigger<State>>().then([this](const State& state) {
             // Model.
             uint n_in  = 4;
             uint n_out = 2;
@@ -42,26 +41,10 @@ namespace module::purpose {
             ac->normal(0., std);
             torch::optim::Adam opt(ac->parameters(), 1e-3);
 
-            // Training loop.
-            uint n_iter          = 10000;
-            uint n_steps         = 2048;
-            uint n_epochs        = 15;
-            uint mini_batch_size = 512;
-            uint ppo_epochs      = 4;
-            double beta          = 1e-3;
-
-            VT states;
-            VT actions;
-            VT rewards;
-            VT dones;
-
-            VT log_probs;
-            VT returns;
-            VT values;
 
             // Output.
             std::ofstream out;
-            out.open("../data/data.csv");
+            out.open("recordings/data/data.csv");
 
             // episode, agent_x, agent_y, goal_x, goal_y, STATUS=(PLAYING, WON, LOST, RESETTING)
             out << 1 << ", " << env.pos_(0) << ", " << env.pos_(1) << ", " << env.goal_(0) << ", " << env.goal_(1)
@@ -180,6 +163,13 @@ namespace module::purpose {
             }
 
             out.close();
+        });
+
+        // "Simulate" the environment.
+        on<Trigger<Action>>().then([this](const Action& action) {
+            // Act.
+
+            // Emit the new state.
         });
     }
 

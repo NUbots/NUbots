@@ -9,9 +9,9 @@ message Reward {
     double value = 1;
 }
 
-message FeedForwardPoseAction {
-    // Left foot pose offset
-    iso3 Htl = 1;
-    // Right foot pose offset
-    iso3 Htr = 2;
+message Action {
+    repeated double action = 1;
+}
+message State {
+    repeated double state = 1;
 }
