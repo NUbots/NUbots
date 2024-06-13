@@ -119,11 +119,6 @@ namespace module::platform::NUSense {
             // Battery data
             sensors->battery = 0;  // not yet implemented
 
-            // Log the latest dispatch from NUSense; only very rare exceptions should be dispatched.
-            if (data.dispatch.size() > 3) {
-                log<NUClear::WARN>("Dispatch from NUSense: " + data.dispatch);
-            }
-
             // Servo data
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
@@ -152,23 +147,23 @@ namespace module::platform::NUSense {
                 servo.profile_velocity      = 0;  // not present in NUSense message
 
                 // Log any errors and timeouts from the servo.
-                if (val.num_errors != 0) {
+                if (val.packet_counts.errors != 0) {
                     log<NUClear::WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
-                                                   val.num_errors,
+                                                   val.packet_counts.errors,
                                                    val.id,
                                                    nugus.device_name(static_cast<NUgus::ID>(val.id))));
                 }
-                if (val.num_crc_errors != 0) {
+                if (val.packet_counts.crc_errors != 0) {
                     // For now, the CRC is set to debug until terminating-resistors are gotten since there are many when
                     // the robot is walking.
                     log<NUClear::DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
-                                                    val.num_crc_errors,
+                                                    val.packet_counts.crc_errors,
                                                     val.id,
                                                     nugus.device_name(static_cast<NUgus::ID>(val.id))));
                 }
-                if (val.num_timeouts != 0) {
+                if (val.packet_counts.timeouts != 0) {
                     log<NUClear::WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
-                                                   val.num_timeouts,
+                                                   val.packet_counts.timeouts,
                                                    val.id,
                                                    nugus.device_name(static_cast<NUgus::ID>(val.id))));
                 }

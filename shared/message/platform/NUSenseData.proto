@@ -34,6 +34,18 @@ package message.platform;
 // Message mainly for NUSense <-> NUC communication. NUSense will encode this message via nanopb after it queries all
 // servo states and send it to the NUC.
 message Servo {
+
+    message PacketCounts {
+        /// The number of successes.
+        uint32 total = 1;
+        /// The number of timeouts.
+        uint32 timeouts = 2;
+        /// The number of CRC-errors.
+        uint32 crc_errors = 3;
+        /// The number of packet-errors.
+        uint32 errors = 4;
+    }
+
     /// The ID of the servo
     uint32 id = 1;
     /// Current error state of the servo
@@ -62,14 +74,9 @@ message Servo {
     float voltage = 12;
     /// The last read temperature of the servo
     float temperature = 13;
-    /// The number of successes.
-    uint32 num_successes = 14;
-    /// The number of timeouts.
-    uint32 num_timeouts = 15;
-    /// The number of CRC-errors.
-    uint32 num_crc_errors = 16;
-    /// The number of packet-errors.
-    uint32 num_errors = 17;
+    /// The windowed counts of the dynamixel packets since the last NUSense message
+    PacketCounts packet_counts = 14;
+
 }
 
 message IMU {
@@ -110,6 +117,4 @@ message NUSense {
      */
     map<uint32, Servo> servo_map = 1;
     IMU                imu       = 2;
-    // A generic string-based message for uncommon errors, exceptions, etc.
-    string             dispatch  = 3;
 }
