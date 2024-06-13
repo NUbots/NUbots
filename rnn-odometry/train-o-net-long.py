@@ -66,8 +66,8 @@ def main():
 
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
-    # NOTE: Htw is already relative to the starting point!!
-    # truth_all = [convert_to_relative(truth) for truth in truth_all]
+    # NOTE: Htw is already relative to the starting point!! But the starting point can vary if not converted
+    truth_all = [convert_to_relative(truth) for truth in truth_all]
 
     # Smoothing should be done here
     # Loop through each truth array and smooth
@@ -87,11 +87,11 @@ def main():
     servos_joined = servos_joined[:, 6:18]
 
     # Plot and inspect each joined array
-    # num_channels = truth_all_joined.shape[1]
+    # num_channels = servos_joined.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_all_joined[0:100000, i], label=f'servo {i+1}')
+    #     plt.plot(servos_joined[0:100000, i], label=f'servo {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -107,11 +107,11 @@ def main():
     truth_joined_sliced = truth_all_joined[:, 9:11]
 
     # Plot and inspect after slicing
-    # num_channels = truth_joined_sliced.shape[1]
+    # num_channels = servos_joined.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_joined_sliced[100000:, i], label=f'Position {i+1}')
+    #     plt.plot(servos_joined[100000:, i], label=f'Servos {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -148,21 +148,15 @@ def main():
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
-    mean = train_arr.mean(axis=0)
-    std = train_arr.std(axis=0)
-    print("mean: ", mean)
-    print("std: ", std)
+    # mean = train_arr.mean(axis=0)
+    # std = train_arr.std(axis=0)
+    # print("mean: ", mean)
+    # print("std: ", std)
 
-    train_arr = (train_arr - mean) / std
-    validate_arr = (validate_arr - mean) / std
-    test_arr = (test_arr - mean) / std
+    # train_arr = (train_arr - mean) / std
+    # validate_arr = (validate_arr - mean) / std
+    # test_arr = (test_arr - mean) / std
     # # # #
-
-    print(f"Training set size: {train_arr.shape}")
-    print("Training set min:", np.min(train_arr))
-    print("Training set max:", np.max(train_arr))
-    print(f"Validation set size: {validate_arr.shape}")
-    print(f"Test set size: {test_arr.shape}")
 
     # # clip the outliers in the data
     # train_arr_clipped = np.clip(train_arr, -4, 4)
@@ -170,20 +164,27 @@ def main():
     # test_arr_clipped = np.clip(test_arr, -4, 4)
 
     ## Min/Max Scaling ##
-    # scaler = MinMaxScaler(feature_range=(-1, 1))
-    # # Fit scaler to training data only
-    # scaler.fit(train_arr)
-    # # Transform the data
-    # train_arr_scaled = scaler.transform(train_arr)
-    # validate_arr_scaled = scaler.transform(validate_arr)
-    # test_arr_scaled = scaler.transform(test_arr)
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    # Fit scaler to training data only
+    scaler.fit(train_arr)
+    # Transform the data
+    train_arr = scaler.transform(train_arr)
+    validate_arr = scaler.transform(validate_arr)
+    test_arr = scaler.transform(test_arr)
+
+    # Print the shapes and min/max values of the datasets
+    print(f"Training set size: {train_arr.shape}")
+    print("Training set min:", np.min(train_arr))
+    print("Training set max:", np.max(train_arr))
+    print(f"Validation set size: {validate_arr.shape}")
+    print(f"Test set size: {test_arr.shape}")
 
     # Plot and inspect after normalising
-    # num_channels = test_arr.shape[1]
+    # num_channels = train_arr.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(test_arr[0:100000, i], label=f'Channel {i+1}')
+    #     plt.plot(train_arr[0:80000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -298,7 +299,8 @@ def main():
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
-    train_dataset = tf.data.Dataset.zip((train_dataset_features, (train_dataset_targets_x, train_dataset_targets_y)))
+    # train_dataset = tf.data.Dataset.zip((train_dataset_features, (train_dataset_targets_x, train_dataset_targets_y)))
+    train_dataset = tf.data.Dataset.zip((train_dataset_features, train_dataset_targets_x))
 
     validate_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_validate,
@@ -325,7 +327,9 @@ def main():
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
-    validate_dataset = tf.data.Dataset.zip((validate_dataset_features, (validate_dataset_targets_x, validate_dataset_targets_y)))
+    # validate_dataset = tf.data.Dataset.zip((validate_dataset_features, (validate_dataset_targets_x, validate_dataset_targets_y)))
+    validate_dataset = tf.data.Dataset.zip((validate_dataset_features, validate_dataset_targets_x))
+
 
     test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_test,
@@ -352,11 +356,12 @@ def main():
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
-    test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
+    # test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
+    test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_x))
 
     # Model parameters
     learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 150
+    epochs = 500
 
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
@@ -417,20 +422,24 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout = keras.layers.Dropout(rate=0.47)(inputs)
-    lstm = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.30)(inputs)
+    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0005, l2=0.005), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    dropout2 = keras.layers.Dropout(rate=0.47)(normalise)
-    lstm2 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout2)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
+    lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0005, l2=0.005), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
-    dropout3 = keras.layers.Dropout(rate=0.47)(normalise2)
-    lstm3 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
-    normalise3 = keras.layers.LayerNormalization()(lstm3)
+    # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
+    # lstm3 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
+    # normalise3 = keras.layers.LayerNormalization()(lstm3)
+
+    # dropout4 = keras.layers.Dropout(rate=0.47)(normalise3)
+    # lstm4 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout4)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
 
     # Apply attention layer that considers lstm outputs
-    attention = keras.layers.Attention()([normalise, normalise3])
+    attention = keras.layers.Attention()([normalise, normalise2])
 
     # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
@@ -444,11 +453,13 @@ def main():
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
     # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(1, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
     output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
-    output_y = keras.layers.Lambda(lambda x: x[:, :, 1], name='output_y')(dense2)
-    model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
-    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0, 'output_y': 2.0},loss=loss_function, metrics=["mse"])
+    # output_y = keras.layers.Lambda(lambda x: x[:, :, 1], name='output_y')(dense2)
+    # model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
+    model = keras.Model(inputs=inputs, outputs=[output_x])
+    # model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0, 'output_y': 1.0},loss=loss_function)
+    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0},loss=loss_function)
     model.summary()
 
     # Examples
