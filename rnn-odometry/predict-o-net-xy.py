@@ -11,7 +11,7 @@ test_data = np.load('datasets/input_data_test.npy')
 test_targets = np.load('datasets/input_targets_test.npy')
 
 # Load model
-model = load_model('models/model-20240613-180738')
+model = load_model('models/model-20240613-194721')
 
 system_sample_rate = 115
 sequence_length = system_sample_rate * 1
@@ -49,7 +49,8 @@ test_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
     batch_size=batch_size
 )
 
-test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
+# test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
+test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_x))
 
 # Predict
 predictions = model.predict(test_dataset)
@@ -59,15 +60,24 @@ predictions = np.array(predictions)
 
 # Check shapes
 print('prediction shape:', predictions.shape)
-print('loaded target set shape:', test_targets.shape)
+print('loaded target set shape x:', test_targets_x.shape)
+print('loaded target set shape y:', test_targets_y.shape)
 
-# single plot
-num_time_steps = predictions.shape[1]
+# Adjust the plotting code to match the correct shapes
+# plt.figure(figsize=(10, 6))
+# # Adjust the index for predictions to match the correct dimension
+# plt.plot(predictions[0, :, 0], label='Predictions x')  # Adjusted for correct indexing
+# plt.plot(predictions[1, :, 0], label='Predictions y')  # Adjusted for correct indexing
+# # Adjust the slicing of targets to match the length of predictions
+# plt.plot(test_targets_x[:predictions.shape[1]], label='Targets x')  # Adjusted for correct length
+# plt.plot(test_targets_y[:predictions.shape[1]], label='Targets y')  # Adjusted for correct length
+# plt.legend()
+# plt.show()
 
+# Single prediction
 plt.figure(figsize=(10, 6))
-plt.plot(predictions[0, :, 0], label=f'Predictions x')
-plt.plot(predictions[0, :, 1], label=f'Predictions y')
-plt.plot(test_targets_x[:num_time_steps], label=f'Targets x')
-plt.plot(test_targets_y[:num_time_steps], label=f'Targets y')
+# Directly use the predictions array without additional indexing
+plt.plot(predictions[:, -1], label='Predictions')  # Assuming you want to plot the last prediction for each sequence
+plt.plot(test_targets_x[:predictions.shape[0]], label='Targets x')  # Adjusted for correct length, matching the number of sequences
 plt.legend()
 plt.show()
