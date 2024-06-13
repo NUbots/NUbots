@@ -7,11 +7,11 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 
 # Load data
-test_data = np.load('datasets/input_data_train.npy')
-test_targets = np.load('datasets/input_targets_train.npy')
+test_data = np.load('datasets/input_data_test.npy')
+test_targets = np.load('datasets/input_targets_test.npy')
 
 # Load model
-model = load_model('models/model-20240601-213604')
+model = load_model('models/model-20240613-180738')
 
 system_sample_rate = 115
 sequence_length = system_sample_rate * 1
@@ -28,8 +28,8 @@ test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
     batch_size=batch_size
 )
 
-test_targets_x = test_targets[:, :, 0]
-test_targets_y = test_targets[:, :, 1]
+test_targets_x = test_targets[:, 0]
+test_targets_y = test_targets[:, 1]
 
 test_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
     data=test_targets_x,
@@ -53,6 +53,9 @@ test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets
 
 # Predict
 predictions = model.predict(test_dataset)
+
+# Convert predictions to numpy array
+predictions = np.array(predictions)
 
 # Check shapes
 print('prediction shape:', predictions.shape)
