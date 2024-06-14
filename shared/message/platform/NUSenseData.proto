@@ -36,7 +36,7 @@ package message.platform;
 message Servo {
 
     message PacketCounts {
-        /// The number of successes.
+        /// The total number of packets received.
         uint32 total = 1;
         /// The number of timeouts.
         uint32 timeouts = 2;
