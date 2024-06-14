@@ -43,7 +43,7 @@ message Servo {
         /// The number of CRC-errors.
         uint32 crc_errors = 3;
         /// The number of packet-errors.
-        uint32 errors = 4;
+        uint32 packet_errors = 4;
     }
 
     /// The ID of the servo
