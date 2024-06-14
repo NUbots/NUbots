@@ -67,7 +67,7 @@ def main():
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
     # NOTE: Htw is already relative to the starting point!! But the starting point can vary if not converted
-    truth_all = [convert_to_relative(truth) for truth in truth_all]
+    # truth_all = [convert_to_relative(truth) for truth in truth_all]
 
     # Smoothing should be done here
     # Loop through each truth array and smooth
@@ -423,11 +423,11 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0005, l2=0.005), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00009, l2=0.0009), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
     dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
-    lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0005, l2=0.005), return_sequences=True)(dropout2)    # 32 originally
+    lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00009, l2=0.0009), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
     # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
