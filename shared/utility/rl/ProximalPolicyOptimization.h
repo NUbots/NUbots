@@ -21,7 +21,7 @@ class PPO {
 public:
     static auto returns(VT& rewards, VT& dones, VT& vals, double gamma, double lambda)
         -> VT;  // Generalized advantage estimate, https://arxiv.org/abs/1506.02438
-    static auto update(ActorCritic& ac,
+    static auto update(ActorCriticImpl& ac,
                        torch::Tensor& states,
                        torch::Tensor& actions,
                        torch::Tensor& log_probs,
@@ -56,7 +56,7 @@ auto PPO::returns(VT& rewards, VT& dones, VT& vals, double gamma, double lambda)
     return returns;
 }
 
-auto PPO::update(ActorCritic& ac,
+auto PPO::update(ActorCriticImpl& ac,
                  torch::Tensor& states,
                  torch::Tensor& actions,
                  torch::Tensor& log_probs,
@@ -86,10 +86,10 @@ auto PPO::update(ActorCritic& ac,
             cpy_adv[b] = advantages[idx];
         }
 
-        auto av           = ac->forward(cpy_sta);  // action value pairs
+        auto av           = ac.forward(cpy_sta);  // action value pairs
         auto action       = std::get<0>(av);
-        auto entropy      = ac->entropy().mean();
-        auto new_log_prob = ac->log_prob(cpy_act);
+        auto entropy      = ac.entropy().mean();
+        auto new_log_prob = ac.log_prob(cpy_act);
 
         auto old_log_prob = cpy_log;
         auto ratio        = (new_log_prob - old_log_prob).exp();

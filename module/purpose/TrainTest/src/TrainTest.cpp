@@ -9,8 +9,6 @@
 
 #include "message/rl/rl.hpp"
 
-#include "utility/rl/ProximalPolicyOptimization.h"
-
 
 using Action = message::rl::Action;
 using Reward = message::rl::Reward;
@@ -25,22 +23,25 @@ namespace module::purpose {
         on<Configuration>("TrainTest.yaml").then([this](const Configuration& config) {
             // Use configuration here from file TrainTest.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            ac              = std::make_shared<ActorCriticImpl>(n_in, n_out, stdv);
+            ac->to(torch::kF64);
+            ac->normal(0., stdv);
+            opt = std::make_shared<torch::optim::Adam>(ac->parameters(), torch::optim::AdamOptions(1e-3));
+        });
+
+        // Start
+        on<Startup>().then([this] {
+            // Get our initial state.
+            // auto initial_state = env.State();
+            // auto state         = std::make_unique<State>();
+            // state->state.push_back(initial_state);
+            // Emit the initial state.
+            emit(std::make_unique<State>());
         });
 
 
-        on<Startup>().then([this] { emit(std::make_unique<State>()); });
-
         on<Trigger<State>>().then([this](const State& state) {
             // Model.
-            uint n_in  = 4;
-            uint n_out = 2;
-            double std = 2e-2;
-
-            ActorCritic ac(n_in, n_out, std);
-            ac->to(torch::kF64);
-            ac->normal(0., std);
-            torch::optim::Adam opt(ac->parameters(), 1e-3);
-
 
             // Output.
             std::ofstream out;
@@ -113,18 +114,21 @@ namespace module::purpose {
                         torch::Tensor t_states     = torch::cat(states);
                         torch::Tensor t_actions    = torch::cat(actions);
                         torch::Tensor t_advantages = t_returns - t_values.slice(0, 0, n_steps);
-
-                        PPO::update(ac,
+                        auto tic                   = std::chrono::system_clock::now();
+                        PPO::update(*ac,
                                     t_states,
                                     t_actions,
                                     t_log_probs,
                                     t_returns,
                                     t_advantages,
-                                    opt,
+                                    *opt,
                                     n_steps,
                                     ppo_epochs,
                                     mini_batch_size,
                                     beta);
+                        auto toc                                      = std::chrono::system_clock::now();
+                        std::chrono::duration<double> elapsed_seconds = toc - tic;
+                        log<NUClear::INFO>("Update time: ", elapsed_seconds.count(), "s");
 
                         c = 0;
 

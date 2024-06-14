@@ -37,9 +37,11 @@ target_link_libraries(nuclear_utility PUBLIC ALSA::ALSA)
 find_package(Lame REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
 
+set(CMAKE_CXX_STANDARD 17)
 find_package(Torch REQUIRED)
-target_link_libraries(nuclear_utility PRIVATE "torch;torch_library")
-target_include_directories(nuclear_utility PUBLIC ${TORCH_INCLUDE_DIRS})
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS})
+target_link_libraries(nuclear_utility PUBLIC "torch;libtorch_cpu.so;libc10.so")
+target_include_directories(nuclear_utility PUBLIC /usr/include/torch/csrc/api/include/)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)

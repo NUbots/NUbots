@@ -4,6 +4,7 @@
 #include <nuclear>
 #include <random>
 
+#include "utility/rl/ProximalPolicyOptimization.h"
 #include "utility/rl/TestEnvironment.h"
 
 namespace module::purpose {
@@ -44,6 +45,16 @@ namespace module::purpose {
         VT log_probs;
         VT returns;
         VT values;
+
+        // Actor-critic.
+        uint n_in   = 4;
+        uint n_out  = 2;
+        double stdv = 2e-2;
+        std::shared_ptr<ActorCriticImpl> ac;
+        std::shared_ptr<torch::optim::Adam> opt;
+
+        // Counter.
+        uint c = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the TrainTest reactor.

@@ -6,12 +6,12 @@ package message.rl;
 import "Transform.proto";
 
 message Reward {
-    double value = 1;
+    float value = 1;
 }
 
 message Action {
-    repeated double action = 1;
+    repeated float action = 1;
 }
 message State {
-    repeated double state = 1;
+    repeated float state = 1;
 }
