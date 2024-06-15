@@ -2,8 +2,8 @@
 log_level: DEBUG
 
 # General playing tuning values for walking
-max_translational_velocity_magnitude: 0.5
-min_translational_velocity_magnitude: 0.1
+max_translational_velocity_magnitude: 0.2
+min_translational_velocity_magnitude: 0.05
 max_angular_velocity: 0.4
 min_angular_velocity: -0.4
 acceleration: 0.005 # maximum increment in walk command velocity
@@ -20,25 +20,27 @@ pivot_ball_velocity_y: -0.2
 
 # Error must be above these thresholds to run task
 rotate_to_target:
-  start_pos_error_threshold: 1.0
-  start_ori_error_threshold: 0.2
-  stop_pos_error_threshold: 2.0
-  stop_ori_error_threshold: 0.2
+  enter_pos_threshold: 1.0
+  enter_ori_threshold: 0.2
+  leave_pos_threshold: 1.0
+  leave_ori_threshold: 0.25
 
 walk_to_target:
-  start_pos_error_threshold: 1.0
-  start_ori_error_threshold: -1.0
-  stop_pos_error_threshold: 2.0
-  stop_ori_error_threshold: -1.0
+  enter_pos_threshold: 1.0
+  enter_ori_threshold: -1.0
+  leave_pos_threshold: 1.05
+  leave_ori_threshold: -1.0
 
 strafe_to_target:
-  start_pos_error_threshold: 0.5
-  start_ori_error_threshold: -1.0
-  stop_pos_error_threshold: 1
-  stop_ori_error_threshold: -1.0
+  enter_pos_threshold: 0.3
+  enter_ori_threshold: -1.0
+  leave_pos_threshold: 1.0
+  leave_ori_threshold: -1.0
 
 align_with_target:
-  start_pos_error_threshold: 0.0
-  start_ori_error_threshold: 0.2
-  stop_pos_error_threshold: 0.0
-  stop_ori_error_threshold: 0.2
+  enter_pos_threshold: 0.0
+  enter_ori_threshold: 0.2
+  leave_pos_threshold: 0.0
+  leave_ori_threshold: 0.2
+
+approach_radius: 0.5
