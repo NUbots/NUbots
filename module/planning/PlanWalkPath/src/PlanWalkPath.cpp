@@ -166,8 +166,7 @@ namespace module::planning {
             // 1. If far away, and not facing the target, then rotate on spot to face the target
             if (translational_error > rotate_to_target_pos_error_threshold
                 && angle_error > rotate_to_target_ori_error_threshold) {
-                log<NUClear::DEBUG>("Rotating to face target");
-                int sign = angle < 0 ? true : false;
+                int sign = angle < 0 ? -1 : 1;
                 // Turn on the spot
                 emit<Task>(std::make_unique<Walk>(
                     Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
@@ -195,7 +194,6 @@ namespace module::planning {
             // Accelerate to max velocity
             if (translational_error > walk_to_target_pos_error_threshold
                 && angle_error > walk_to_target_ori_error_threshold) {
-                log<NUClear::DEBUG>("Walking directly towards target");
                 velocity_magnitude += cfg.acceleration;
                 velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
                                               std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
@@ -203,10 +201,8 @@ namespace module::planning {
                 Eigen::Vector3d velocity_target =
                     walk_direct_to_target.Hrd.translation().normalized() * velocity_magnitude;
 
-                // Set the angular velocity component of the velocity_target with the angular displacement and clamp
-                auto heading        = std::atan2(walk_direct_to_target.Hrd.translation().y(),
-                                          walk_direct_to_target.Hrd.translation().x());
-                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, heading, cfg.max_angular_velocity);
+                // Set the angular velocity as the angle to the target and clamp to min and max angular velocity
+                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, angle, cfg.max_angular_velocity);
 
                 emit<Task>(std::make_unique<Walk>(velocity_target));
                 emit(graph("Walking directly towards target", true));
@@ -232,7 +228,6 @@ namespace module::planning {
             // 3. If close to the target, then strafe to target but do not rotate towards the target
             if (translational_error > strafe_to_target_pos_error_threshold
                 && angle_error > strafe_to_target_ori_error_threshold) {
-                log<NUClear::DEBUG>("Strafing towards goal");
                 // Decelerate to min velocity
                 velocity_magnitude -= cfg.acceleration;
                 velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
@@ -240,10 +235,8 @@ namespace module::planning {
                 // Obtain the unit vector to desired target in robot space and scale by magnitude
                 Eigen::Vector3d velocity_target = strafe_to_target.Hrd.translation().normalized() * velocity_magnitude;
 
-                // Set the angular velocity component to the angular displacement and clamp
-                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity,
-                                                           mat_to_rpy_intrinsic(strafe_to_target.Hrd.linear()).z(),
-                                                           cfg.max_angular_velocity);
+                // Set the angular velocity to zero so we only strafe
+                velocity_target.z() = 0;
 
                 emit<Task>(std::make_unique<Walk>(velocity_target));
                 emit(graph("Strafing towards goal", true));
@@ -270,7 +263,7 @@ namespace module::planning {
             // Determine the direction of rotation
             if (translational_error > align_with_target_pos_error_threshold
                 && heading_error > align_with_target_ori_error_threshold) {
-                int sign = heading < 0 ? true : false;
+                int sign = heading < 0 ? -1 : 1;
 
                 // Turn on the spot
                 emit<Task>(std::make_unique<Walk>(
