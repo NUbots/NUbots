@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useRef } from 'react'
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -23,6 +23,7 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
+import { Vector } from '../../../shared/math/vector';
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -59,9 +60,8 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
+                } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -327,10 +327,47 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
+      <DistanceCircle model={model} />
       <Robots model={model} />
     </object3D>
   );
 });
+
+const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
+  const position = new Vector3(3, 1, 0); // Dummy position vector
+  const rotation = [0, 0, 3]; // Dummy rotation (euler angles)
+  const rotationThreshold = Math.PI / 2; // Threshold for rotation in radians
+  var path = new THREE.Path();
+  return (
+    <>
+      {
+        model.robots.map(
+          (robot) =>
+            robot.visible && (
+              <object3D key={robot.id}>
+                <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
+                  <circleBufferGeometry args={[.5, 40]} />
+                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.25} transparent={true} />
+                </mesh>
+                <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
+                  <ringBufferGeometry args={[.5, 1, 40]} />
+                  <meshBasicMaterial color="rgb(84, 184, 255)" opacity={0.25} transparent={true} />
+                </mesh>
+                <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
+                  <ringBufferGeometry args={[.5, 1, 40, 40, 0, rotationThreshold]} />
+                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.15} transparent={true} />
+                </mesh>
+                <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
+                  <circleBufferGeometry args={[.5, 40, rotationThreshold / 2, Math.PI / 100]} />
+                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.15} transparent={true} />
+                </mesh>
+              </object3D>
+            ),
+        )
+      }
+    </>
+  );
+};
 
 const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   <>
