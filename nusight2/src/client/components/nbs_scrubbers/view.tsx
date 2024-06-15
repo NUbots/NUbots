@@ -61,9 +61,9 @@ const NbsScrubbers = observer(({ viewModel, onScrubberFocused }: NbsScrubbersPro
         <div className="flex px-2 h-12 items-center bg-auto-surface-2">
           <Icon className="mr-2">info</Icon>
           <span>No scrubbers currently loaded. Click the “Scrub NBS” button to load NBS files for scrubbing.</span>
-        </div >
+        </div>
       ) : null}
-    </div >
+    </div>
   );
 });
 
@@ -80,9 +80,7 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
   return (
     <div className="flex relative">
       <button
-        className={classNames(
-          "inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]",
-        )}
+        className={classNames("inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]")}
         onClick={onClick}
       >
         {showScrubbers ? (

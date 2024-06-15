@@ -47,31 +47,55 @@ export class ProfilerView extends React.Component<{
             <table className="min-w-full table-auto bg-auto-surface-1 border border-collapse border-auto">
               <thead>
                 <tr>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "reactionId")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "reactionId")}
+                  >
                     Reaction ID {controller.getSortIcon(selectedRobot!, "reactionId")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "reactor")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "reactor")}
+                  >
                     Reactor Name {controller.getSortIcon(selectedRobot!, "reactor")}
                   </th>
                   <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "name")}>
                     Reaction Name {controller.getSortIcon(selectedRobot!, "name")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "total_time")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "total_time")}
+                  >
                     Total Time (ms) {controller.getSortIcon(selectedRobot!, "total_time")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "count")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "count")}
+                  >
                     Count {controller.getSortIcon(selectedRobot!, "count")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "min_time")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "min_time")}
+                  >
                     Min Time (ms) {controller.getSortIcon(selectedRobot!, "min_time")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "max_time")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "max_time")}
+                  >
                     Max Time (ms) {controller.getSortIcon(selectedRobot!, "max_time")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "avg_time")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "avg_time")}
+                  >
                     Average Time (ms) {controller.getSortIcon(selectedRobot!, "avg_time")}
                   </th>
-                  <th className="cursor-pointer select-none" onClick={() => controller.setSort(selectedRobot!, "percentage")}>
+                  <th
+                    className="cursor-pointer select-none"
+                    onClick={() => controller.setSort(selectedRobot!, "percentage")}
+                  >
                     Time % {controller.getSortIcon(selectedRobot!, "percentage")}
                   </th>
                 </tr>

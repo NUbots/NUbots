@@ -58,10 +58,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1 "
-                : "hover:bg-auto-contrast-1 "
-                }`}
+              className={`${"flex p-2 "}${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1 "
+                  : "hover:bg-auto-contrast-1 "
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>

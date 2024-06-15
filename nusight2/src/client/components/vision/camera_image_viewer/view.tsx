@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 
 import { IconButton } from "../../icon_button/view";
-import { Button } from "../../button/button";
 import { ResizeContainer } from "../../resize_container/resize_container";
 import { ResizePanel } from "../../resize_container/resize_panel";
 import { RobotModel } from "../../robot/model";

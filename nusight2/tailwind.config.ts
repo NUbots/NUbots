@@ -124,9 +124,8 @@ const config: Config = {
           700: "#cc8300",
           800: "#b37200",
           900: "#996100",
-          950: "#804f00"
+          950: "#804f00",
         },
-
       },
 
       fontFamily: {
@@ -207,7 +206,7 @@ const config: Config = {
       // Add the `outline-auto-...` utilities
       addUtilities(
         generateAutoColorUtilities(pick(themeColors, ["primary", "secondary", "divider"]), "outline-color", "outline"),
-      )
+      );
 
       // Add the `fill-auto-...` utilities
       addUtilities(generateAutoColorUtilities(pick(themeColors, ["contrast", "primary"]), "fill", "fill"));

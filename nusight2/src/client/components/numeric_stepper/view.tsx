@@ -27,17 +27,17 @@ export type NumericStepperProps = {
   /** The width of the value display */
   valueWidth?: "normal" | "wide" | "wider";
 } & (
-    | {
+  | {
       /** Whether the stepper can be reset to its default value */
       canReset?: true;
       /** The default value that the stepper should be reset to */
       defaultValue: number;
     }
-    | {
+  | {
       /** Whether the stepper can be reset to its default value */
       canReset?: false;
     }
-  );
+);
 
 const ValueWidthToClassName = {
   normal: "w-[3rem]",

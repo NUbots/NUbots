@@ -58,9 +58,7 @@ export class TreeNode extends Component<TreeNodeProps> {
       <ul className={classes}>
         <li>
           <div
-            className={
-              "flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer hover:bg-auto-contrast-1"
-            }
+            className={"flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer hover:bg-auto-contrast-1"}
             style={headerInlineStyle}
             onClick={this.props.onExpand ? this.onClick : undefined}
             onMouseEnter={this.props.onMouseEnter ? this.onMouseEnter : undefined}

@@ -9,7 +9,6 @@ import { Button } from "../button/button";
 import { Dropdown } from "../dropdown/view";
 
 import { SelectOption } from "./option";
-import style from "./style.module.css";
 
 export interface Option {
   id: string | number;
