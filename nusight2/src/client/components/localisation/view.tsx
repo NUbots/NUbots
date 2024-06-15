@@ -540,13 +540,13 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
     });
   }, []);
 
-  const rZFf = model.Hfz.decompose().translation;
+  const rZFf = model.Hfd.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
   const Rfz_quat = new THREE.Quaternion(
-    model.Hfz.decompose().rotation.x,
-    model.Hfz.decompose().rotation.y,
-    model.Hfz.decompose().rotation.z,
-    model.Hfz.decompose().rotation.w,
+    model.Hfd.decompose().rotation.x,
+    model.Hfd.decompose().rotation.y,
+    model.Hfd.decompose().rotation.z,
+    model.Hfd.decompose().rotation.w,
   );
   const Rft_quat = new THREE.Quaternion(
     model.Hft.decompose().rotation.x,
