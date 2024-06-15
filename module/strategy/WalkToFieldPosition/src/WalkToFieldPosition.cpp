@@ -58,17 +58,9 @@ namespace module::strategy {
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
-                // Get the transformation from field {f} space to robot {r} space
-                const Eigen::Isometry3d Hrf = sensors.Hrw * field.Hfw.inverse();
-
                 // Transform from desired field position into robot space
-                Eigen::Isometry3d Hrd = Hrf * walk_to_field_position.Hfd;
-
-                auto pose_error = tinyrobotics::homogeneous_error(walk_to_field_position.Hfd, Hrf.inverse());
-
+                Eigen::Isometry3d Hrd = sensors.Hrw * field.Hfw.inverse() * walk_to_field_position.Hfd;
                 emit<Task>(std::make_unique<WalkTo>(Hrd));
-                // Emit non-task for debugging
-                emit(std::make_unique<WalkTo>(Hrd));
             });
     }
 

@@ -44,10 +44,9 @@ export class LocalisationNetwork {
   };
 
   @action
-  private onWalkPathGoal= (robotModel: RobotModel, walk_path: message.planning.WalkTo) => {
-    console.log("Walk path received: ");
+  private onWalkPathGoal = (robotModel: RobotModel, walk_path: message.planning.WalkTo) => {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hrz = Matrix4.from(walk_path.Hrp);
+    robot.Hrd = Matrix4.from(walk_path.Hrd);
   };
 
   @action.bound

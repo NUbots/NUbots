@@ -45,11 +45,13 @@ namespace module::planning {
     using extension::Configuration;
 
     using message::localisation::Ball;
+    using message::planning::AlignWithTarget;
+    using message::planning::RotateToTarget;
+    using message::planning::StrafeToTarget;
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
-    using message::planning::WalkAlign;
-    using message::planning::WalkDirect;
     using message::planning::WalkTo;
+    using message::planning::WalkToTarget;
 
     using message::skill::Walk;
 
@@ -63,113 +65,230 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
+            // Walk tuning
             cfg.max_translational_velocity_magnitude = config["max_translational_velocity_magnitude"].as<double>();
             cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
+            cfg.acceleration                         = config["acceleration"].as<double>();
+            cfg.max_angular_velocity                 = config["max_angular_velocity"].as<double>();
+            cfg.min_angular_velocity                 = config["min_angular_velocity"].as<double>();
+            cfg.rotate_velocity                      = config["rotate_velocity"].as<double>();
+            cfg.rotate_velocity_x                    = config["rotate_velocity_x"].as<double>();
+            cfg.rotate_velocity_y                    = config["rotate_velocity_y"].as<double>();
+            cfg.pivot_ball_velocity                  = config["pivot_ball_velocity"].as<double>();
+            cfg.pivot_ball_velocity_x                = config["pivot_ball_velocity_x"].as<double>();
+            cfg.pivot_ball_velocity_y                = config["pivot_ball_velocity_y"].as<double>();
 
-            cfg.acceleration                = config["acceleration"].as<double>();
-            cfg.approach_radius             = config["approach_radius"].as<double>();
-            cfg.align_radius                = config["align_radius"].as<double>();
-            cfg.walk_direct_error_threshold = config["walk_direct_error_threshold"].as<double>();
-
-
-            cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
-            cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
-
-            log<NUClear::INFO>("Max translational velocity magnitude: ", cfg.max_translational_velocity_magnitude);
-
-            cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
-            cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
-            cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
-
-            cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
-            cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
-            cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
+            // Thresholds for different walk to tasks
+            cfg.start_rotate_to_target_pos_error_threshold =
+                config["rotate_to_target"]["start_pos_error_threshold"].as<double>();
+            cfg.start_rotate_to_target_ori_error_threshold =
+                config["rotate_to_target"]["start_ori_error_threshold"].as<double>();
+            cfg.stop_rotate_to_target_pos_error_threshold =
+                config["rotate_to_target"]["stop_pos_error_threshold"].as<double>();
+            cfg.stop_rotate_to_target_ori_error_threshold =
+                config["rotate_to_target"]["stop_ori_error_threshold"].as<double>();
+            cfg.start_walk_to_target_pos_error_threshold =
+                config["walk_to_target"]["start_pos_error_threshold"].as<double>();
+            cfg.start_walk_to_target_ori_error_threshold =
+                config["walk_to_target"]["start_ori_error_threshold"].as<double>();
+            cfg.stop_walk_to_target_pos_error_threshold =
+                config["walk_to_target"]["stop_pos_error_threshold"].as<double>();
+            cfg.stop_walk_to_target_ori_error_threshold =
+                config["walk_to_target"]["stop_ori_error_threshold"].as<double>();
+            cfg.start_strafe_to_target_pos_error_threshold =
+                config["strafe_to_target"]["start_pos_error_threshold"].as<double>();
+            cfg.start_strafe_to_target_ori_error_threshold =
+                config["strafe_to_target"]["start_ori_error_threshold"].as<double>();
+            cfg.stop_strafe_to_target_pos_error_threshold =
+                config["strafe_to_target"]["stop_pos_error_threshold"].as<double>();
+            cfg.stop_strafe_to_target_ori_error_threshold =
+                config["strafe_to_target"]["stop_ori_error_threshold"].as<double>();
+            cfg.start_align_with_target_pos_error_threshold =
+                config["align_with_target"]["start_pos_error_threshold"].as<double>();
+            cfg.start_align_with_target_ori_error_threshold =
+                config["align_with_target"]["start_ori_error_threshold"].as<double>();
+            cfg.stop_align_with_target_pos_error_threshold =
+                config["align_with_target"]["stop_pos_error_threshold"].as<double>();
+            cfg.stop_align_with_target_ori_error_threshold =
+                config["align_with_target"]["stop_ori_error_threshold"].as<double>();
         });
 
         // Path to walk to a particular point
         on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
+            // Emit the walk task as non-director task for debugging
+            emit(std::make_unique<WalkTo>(walk_to));
             // If we haven't got an active walk task, then reset the velocity to minimum velocity
             if (walk.run_state == GroupInfo::RunState::NO_TASK) {
                 velocity_magnitude = cfg.min_translational_velocity_magnitude;
             }
 
-            auto pose_error               = tinyrobotics::homogeneous_error(walk_to.Hrd, Eigen::Isometry3d::Identity());
-            double goal_position_error    = pose_error.head(3).norm();
-            double goal_orientation_error = pose_error.tail(3).norm();
-            double walk_direct_orientation_error =
-                std::abs(std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()));
+            // Translational error (distance) from robot to target
+            translational_error = walk_to.Hrd.translation().norm();
+            emit(graph("translational_error", translational_error));
 
-            emit(graph("Goal position error", goal_position_error));
-            emit(graph("Goal orientation error", goal_orientation_error));
-            emit(graph("Walk direct angle error", walk_direct_orientation_error));
+            // Angle between robot and target point
+            angle = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
+            emit(graph("angle", angle));
 
-            // 1. If far away, and not facing the goal, then rotate on spot to face the goal
-            if (goal_position_error > cfg.approach_radius
-                && walk_direct_orientation_error > cfg.walk_direct_error_threshold) {
-                emit<Task>(std::make_unique<TurnOnSpot>(
-                    std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()) < 0));
-                log<NUClear::INFO>("Rotating on spot to face goal");
-                return;
-            }
+            // Angle error (absolute) between robot and target point
+            angle_error = std::abs(std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()));
+            emit(graph("angle_error", angle_error));
 
-            // 2. If far away, and facing the goal, then walk towards the goal directly
-            if (goal_position_error > cfg.approach_radius
-                && walk_direct_orientation_error < cfg.walk_direct_error_threshold) {
-                emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd));
-                log<NUClear::INFO>("Walking directly towards goal");
-                return;
-            }
+            // Angle between robot and target heading
+            heading = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+            emit(graph("heading", heading));
 
-            // 3. If close to the goal, then walk towards the goal directly but do not rotate towards the goal
-            if (goal_position_error < cfg.approach_radius && goal_position_error > cfg.align_radius) {
-                emit<Task>(std::make_unique<WalkAlign>(walk_to.Hrd));
-                log<NUClear::INFO>("Aligning towards goal");
-                return;
-            }
+            // Angle error (absolute) between robot and target heading
+            heading_error = std::abs(std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x()));
+            emit(graph("heading_error", heading_error));
 
-            // 4. If close to the goal, but not aligned with the goal, then rotate on spot to face the goal
-            if (goal_position_error < cfg.align_radius && goal_orientation_error > cfg.walk_direct_error_threshold) {
-                emit<Task>(std::make_unique<TurnOnSpot>(walk_to.Hrd(1, 0) < 0));
-                log<NUClear::INFO>("Rotating on spot to face goal");
-                return;
-            }
 
-            // 5. If close to the goal, and aligned with the goal, then walk slowly towards the goal
-            emit<Task>(std::make_unique<WalkAlign>(walk_to.Hrd));
+            // Second argument is priority - higher number means higher priority
+            // 1. If far away, and not facing the target, then rotate on spot to face the target
+            emit<Task>(std::make_unique<RotateToTarget>(walk_to.Hrd), 4);
+
+            // 2. If far away, and facing the target, then walk towards the target directly
+            emit<Task>(std::make_unique<WalkToTarget>(walk_to.Hrd), 3);
+
+            // 3. If close to the target, then strafe to target but do not rotate towards the target
+            emit<Task>(std::make_unique<StrafeToTarget>(walk_to.Hrd), 2);
+
+            // 4. If close to the target, but not aligned with the target, then rotate on spot to face the target
+            emit<Task>(std::make_unique<AlignWithTarget>(walk_to.Hrd), 1);
         });
 
-        on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
+        on<Start<RotateToTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Starting RotateToTarget task");
+            rotate_to_target_pos_error_threshold = cfg.start_rotate_to_target_pos_error_threshold;
+            rotate_to_target_ori_error_threshold = cfg.start_rotate_to_target_ori_error_threshold;
+        });
+        on<Provide<RotateToTarget>>().then([this](const RotateToTarget& rotate_to_face_target) {
+            // 1. If far away, and not facing the target, then rotate on spot to face the target
+            if (translational_error > rotate_to_target_pos_error_threshold
+                && angle_error > rotate_to_target_ori_error_threshold) {
+                log<NUClear::DEBUG>("Rotating to face target");
+                int sign = angle < 0 ? true : false;
+                // Turn on the spot
+                emit<Task>(std::make_unique<Walk>(
+                    Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
+                emit(graph("Rotating to face target", true));
+            }
+            else {
+                emit(graph("Rotating to face target", false));
+            }
+            emit(graph("rotate_to_target_pos_error_threshold", rotate_to_target_pos_error_threshold));
+            emit(graph("rotate_to_target_ori_error_threshold", rotate_to_target_ori_error_threshold));
+        });
+        on<Stop<RotateToTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Stopping RotateToTarget task");
+            rotate_to_target_pos_error_threshold = cfg.stop_rotate_to_target_pos_error_threshold;
+            rotate_to_target_ori_error_threshold = cfg.stop_rotate_to_target_ori_error_threshold;
+        });
+
+        on<Start<WalkToTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Starting WalkToTarget task");
+            walk_to_target_pos_error_threshold = cfg.start_walk_to_target_pos_error_threshold;
+            walk_to_target_ori_error_threshold = cfg.start_walk_to_target_ori_error_threshold;
+        });
+        on<Provide<WalkToTarget>>().then([this](const WalkToTarget& walk_direct_to_target) {
+            // 2. If far away, and facing the target, then walk towards the target directly
             // Accelerate to max velocity
-            velocity_magnitude += cfg.acceleration;
-            velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
-                                          std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
-            // Obtain the unit vector to desired target in robot space and scale by magnitude
-            Eigen::Vector3d velocity_target = walk_direct.Hrd.translation().normalized() * velocity_magnitude;
+            if (translational_error > walk_to_target_pos_error_threshold
+                && angle_error > walk_to_target_ori_error_threshold) {
+                log<NUClear::DEBUG>("Walking directly towards target");
+                velocity_magnitude += cfg.acceleration;
+                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
+                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
+                // Obtain the unit vector to desired target in robot space and scale by magnitude
+                Eigen::Vector3d velocity_target =
+                    walk_direct_to_target.Hrd.translation().normalized() * velocity_magnitude;
 
-            // Set the angular velocity component of the velocity_target with the angular displacement and clamp
-            auto heading        = std::atan2(walk_direct.Hrd.translation().y(), walk_direct.Hrd.translation().x());
-            velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, heading, cfg.max_angular_velocity);
+                // Set the angular velocity component of the velocity_target with the angular displacement and clamp
+                auto heading        = std::atan2(walk_direct_to_target.Hrd.translation().y(),
+                                          walk_direct_to_target.Hrd.translation().x());
+                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, heading, cfg.max_angular_velocity);
 
-            emit<Task>(std::make_unique<Walk>(velocity_target));
-            log<NUClear::DEBUG>("Walking directly towards goal");
+                emit<Task>(std::make_unique<Walk>(velocity_target));
+                emit(graph("Walking directly towards target", true));
+            }
+            else {
+                emit(graph("Walking directly towards target", false));
+            }
+            emit(graph("walk_to_target_pos_error_threshold", walk_to_target_pos_error_threshold));
+            emit(graph("walk_to_target_ori_error_threshold", walk_to_target_ori_error_threshold));
+        });
+        on<Stop<WalkToTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Stopping WalkToTarget task");
+            walk_to_target_pos_error_threshold = cfg.stop_walk_to_target_pos_error_threshold;
+            walk_to_target_ori_error_threshold = cfg.stop_walk_to_target_ori_error_threshold;
         });
 
-        on<Provide<WalkAlign>>().then([this](const WalkAlign& walk_align) {
-            // Decelerate to min velocity
-            velocity_magnitude -= cfg.acceleration;
-            velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
-
-            // Obtain the unit vector to desired target in robot space and scale by magnitude
-            Eigen::Vector3d velocity_target = walk_align.Hrd.translation().normalized() * velocity_magnitude;
-
-            // Set the angular velocity component to the angular displacement and clamp
-            velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity,
-                                                       mat_to_rpy_intrinsic(walk_align.Hrd.linear()).z(),
-                                                       cfg.max_angular_velocity);
-
-            emit<Task>(std::make_unique<Walk>(velocity_target));
-            log<NUClear::DEBUG>("Aligning towards goal");
+        on<Start<StrafeToTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Starting StrafeToTarget task");
+            strafe_to_target_pos_error_threshold = cfg.start_strafe_to_target_pos_error_threshold;
+            strafe_to_target_ori_error_threshold = cfg.start_strafe_to_target_ori_error_threshold;
         });
+        on<Provide<StrafeToTarget>>().then([this](const StrafeToTarget& strafe_to_target) {
+            // 3. If close to the target, then strafe to target but do not rotate towards the target
+            if (translational_error > strafe_to_target_pos_error_threshold
+                && angle_error > strafe_to_target_ori_error_threshold) {
+                log<NUClear::DEBUG>("Strafing towards goal");
+                // Decelerate to min velocity
+                velocity_magnitude -= cfg.acceleration;
+                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
+
+                // Obtain the unit vector to desired target in robot space and scale by magnitude
+                Eigen::Vector3d velocity_target = strafe_to_target.Hrd.translation().normalized() * velocity_magnitude;
+
+                // Set the angular velocity component to the angular displacement and clamp
+                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity,
+                                                           mat_to_rpy_intrinsic(strafe_to_target.Hrd.linear()).z(),
+                                                           cfg.max_angular_velocity);
+
+                emit<Task>(std::make_unique<Walk>(velocity_target));
+                emit(graph("Strafing towards goal", true));
+            }
+            else {
+                emit(graph("Strafing towards goal", false));
+            }
+            emit(graph("strafe_to_target_pos_error_threshold", strafe_to_target_pos_error_threshold));
+            emit(graph("strafe_to_target_ori_error_threshold", strafe_to_target_ori_error_threshold));
+        });
+        on<Stop<StrafeToTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Stopping StrafeToTarget task");
+            strafe_to_target_pos_error_threshold = cfg.stop_strafe_to_target_pos_error_threshold;
+            strafe_to_target_ori_error_threshold = cfg.stop_strafe_to_target_ori_error_threshold;
+        });
+
+        on<Start<AlignWithTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Starting AlignWithTarget task");
+            align_with_target_pos_error_threshold = cfg.start_align_with_target_pos_error_threshold;
+            align_with_target_ori_error_threshold = cfg.start_align_with_target_ori_error_threshold;
+        });
+        on<Provide<AlignWithTarget>>().then([this](const AlignWithTarget& align_with_target) {
+            // 4. If close to the target, but not aligned with the target, then align with target heading
+            // Determine the direction of rotation
+            if (translational_error > align_with_target_pos_error_threshold
+                && heading_error > align_with_target_ori_error_threshold) {
+                int sign = heading < 0 ? true : false;
+
+                // Turn on the spot
+                emit<Task>(std::make_unique<Walk>(
+                    Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
+                emit(graph("Aligning with target", true));
+            }
+            else {
+                emit(graph("Aligning with target", false));
+            }
+            emit(graph("align_with_target_pos_error_threshold", align_with_target_pos_error_threshold));
+            emit(graph("align_with_target_ori_error_threshold", align_with_target_ori_error_threshold));
+        });
+        on<Stop<AlignWithTarget>>().then([this]() {
+            log<NUClear::DEBUG>("Stopping AlignWithTarget task");
+            align_with_target_pos_error_threshold = cfg.stop_align_with_target_pos_error_threshold;
+            align_with_target_ori_error_threshold = cfg.stop_align_with_target_ori_error_threshold;
+        });
+
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
             // Determine the direction of rotation

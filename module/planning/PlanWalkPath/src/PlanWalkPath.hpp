@@ -37,26 +37,36 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
+            double start_rotate_to_target_pos_error_threshold = 0;
+            double start_rotate_to_target_ori_error_threshold = 0;
+            double stop_rotate_to_target_pos_error_threshold  = 0;
+            double stop_rotate_to_target_ori_error_threshold  = 0;
+
+            double start_walk_to_target_pos_error_threshold = 0;
+            double start_walk_to_target_ori_error_threshold = 0;
+            double stop_walk_to_target_pos_error_threshold  = 0;
+            double stop_walk_to_target_ori_error_threshold  = 0;
+
+            double start_strafe_to_target_pos_error_threshold = 0;
+            double start_strafe_to_target_ori_error_threshold = 0;
+            double stop_strafe_to_target_pos_error_threshold  = 0;
+            double stop_strafe_to_target_ori_error_threshold  = 0;
+
+            double start_align_with_target_pos_error_threshold = 0;
+            double start_align_with_target_ori_error_threshold = 0;
+            double stop_align_with_target_pos_error_threshold  = 0;
+            double stop_align_with_target_ori_error_threshold  = 0;
+
+            /// @brief Maximum angular velocity command for walking to ball
+            double max_angular_velocity = 0;
+            /// @brief Minimum angular velocity command for walking to ball
+            double min_angular_velocity = 0;
             /// @brief Maximum walk command velocity magnitude for walking to ball
             double max_translational_velocity_magnitude = 0;
             /// @brief Minimum walk command velocity for walking to ball
             double min_translational_velocity_magnitude = 0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0;
-
-            /// @brief
-            double approach_radius = 0;
-
-            /// @brief
-            double align_radius = 0;
-
-            /// @brief
-            double walk_direct_error_threshold = 0;
-
-            /// @brief Maximum angular velocity command for walking to ball
-            double max_angular_velocity = 0;
-            /// @brief Minimum angular velocity command for walking to ball
-            double min_angular_velocity = 0;
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0;
             /// @brief Rotate on spot walk command forward velocity
@@ -73,6 +83,38 @@ namespace module::planning {
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0;
+
+        /// @brief Norm of translational error from robot to target
+        double translational_error = 0;
+
+        /// @brief Angle error (absolute) between robot and target point
+        double angle_error = 0;
+
+        /// @brief Angle error (absolute) between robot and target heading
+        double heading_error = 0;
+
+        /// @brief Angle between robot and target point
+        double angle = 0;
+
+        /// @brief Angle between robot and target heading
+        double heading = 0;
+
+        // Rotate to face target thresholds
+        double rotate_to_target_pos_error_threshold = 0;
+        double rotate_to_target_ori_error_threshold = 0;
+
+        // Walk to target thresholds
+        double walk_to_target_pos_error_threshold = 0;
+        double walk_to_target_ori_error_threshold = 0;
+
+        // Strafe to target thresholds
+        double strafe_to_target_pos_error_threshold = 0;
+        double strafe_to_target_ori_error_threshold = 0;
+
+        // Align to target thresholds
+        double align_with_target_pos_error_threshold = 0;
+        double align_with_target_ori_error_threshold = 0;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.

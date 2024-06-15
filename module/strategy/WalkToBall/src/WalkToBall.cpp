@@ -83,8 +83,6 @@ namespace module::strategy {
                     const double heading = std::atan2(rBRr.y(), rBRr.x());
                     auto Hrb             = pos_rpy_to_transform(rBRr, Eigen::Vector3d(0, 0, heading));
                     emit<Task>(std::make_unique<WalkTo>(Hrb), 2);
-                    log<NUClear::INFO>("Walking to ball");
-                    emit(std::make_unique<WalkTo>(Hrb));
                 }
             });
 

@@ -562,7 +562,6 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(Rft_euler.x, Rft_euler.y, Rfz_euler.z, "ZYX"));
   const position = new THREE.Vector3(rZFf.x, rZFf.y, rTFf.z);
 
-  console.log(position, rotation);
   const motors = model.motors;
 
   // Update the position of the robot to match the walk path goal

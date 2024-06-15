@@ -30,13 +30,16 @@ package message.planning;
 import "Vector.proto";
 import "Transform.proto";
 
-enum WalkToState {
-    UNKNOWN = 0;
-    ROTATE_TO_POINT = 1;
-    WALK_DIRECT_TO_GOAL = 2;
-    ALIGN_TO_GOAL = 3;
-    ROTATE_TO_GOAL = 4;
-    DONE = 5;
+/// Turn on the spot in the given direction
+message TurnOnSpot {
+    /// Direction to turn
+    bool clockwise = 1;
+}
+
+/// Turn around the ball in the given direction
+message TurnAroundBall {
+    /// Direction to turn
+    bool clockwise = 1;
 }
 
 /// Plan a path to walk to the specified point
@@ -45,24 +48,22 @@ message WalkTo {
     iso3 Hrd = 3;
 }
 
-/// Turn on the spot in the given direction
-message TurnOnSpot {
-    /// Direction to turn
-    bool clockwise = 1;
-}
-
-message WalkDirect {
+message RotateToTarget {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 3;
 }
 
-message WalkAlign {
+message WalkToTarget {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 3;
 }
 
-/// Turn around the ball in the given direction
-message TurnAroundBall {
-    /// Direction to turn
-    bool clockwise = 1;
+message StrafeToTarget {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 3;
+}
+
+message AlignWithTarget {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 3;
 }

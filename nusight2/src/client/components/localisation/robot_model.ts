@@ -127,7 +127,7 @@ export class LocalisationRobotModel {
   @observable Htw: Matrix4; // World to torso
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
-  @observable Hrz: Matrix4; // Walk path desired pose in robot space.
+  @observable Hrd: Matrix4; // Walk path desired pose in robot space.
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
@@ -145,7 +145,7 @@ export class LocalisationRobotModel {
     Htw,
     Hrw,
     Hfw,
-    Hrz,
+    Hrd,
     Rwt,
     motors,
     fieldLinePoints,
@@ -161,7 +161,7 @@ export class LocalisationRobotModel {
     Htw: Matrix4;
     Hrw: Matrix4;
     Hfw: Matrix4;
-    Hrz: Matrix4;
+    Hrd: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
@@ -177,7 +177,7 @@ export class LocalisationRobotModel {
     this.Htw = Htw;
     this.Hrw = Hrw;
     this.Hfw = Hfw;
-    this.Hrz = Hrz;
+    this.Hrd = Hrd;
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
@@ -195,7 +195,7 @@ export class LocalisationRobotModel {
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
-      Hrz: Matrix4.of(),
+      Hrd: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
@@ -228,7 +228,7 @@ export class LocalisationRobotModel {
   /** Walk path goal pose in field space */
   @computed
   get Hfz(): Matrix4 {
-    return this.Hfw.multiply(this.Hrw.invert()).multiply(this.Hrz);
+    return this.Hfw.multiply(this.Hrw.invert()).multiply(this.Hrd);
   }
 
   /** Ball position in field space */
