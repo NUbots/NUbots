@@ -27,6 +27,8 @@
 #ifndef MODULE_PLANNING_PLANWALKPATH_HPP
 #define MODULE_PLANNING_PLANWALKPATH_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -114,6 +116,8 @@ namespace module::planning {
         // Align to target thresholds
         double align_with_target_pos_error_threshold = 0;
         double align_with_target_ori_error_threshold = 0;
+
+        void emit_debug_information(const Eigen::Isometry3d& Hrd, const Eigen::Vector3d& velocity_target);
 
 
     public:

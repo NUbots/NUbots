@@ -23,7 +23,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
-    this.network.on(message.planning.WalkTo, this.onWalkPathGoal);
+    this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
   }
 
@@ -44,9 +44,10 @@ export class LocalisationNetwork {
   };
 
   @action
-  private onWalkPathGoal = (robotModel: RobotModel, walk_path: message.planning.WalkTo) => {
+  private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
+    console.log("walk_to_debug", walk_to_debug);
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hrd = Matrix4.from(walk_path.Hrd);
+    robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
   };
 
   @action.bound

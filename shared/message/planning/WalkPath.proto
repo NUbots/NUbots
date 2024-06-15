@@ -42,10 +42,24 @@ message TurnAroundBall {
     bool clockwise = 1;
 }
 
+message WalkDirect {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 3;
+}
+
 /// Plan a path to walk to the specified point
 message WalkTo {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 3;
+}
+
+enum WalkToState {
+    UNKNOWN = 0;
+    ROTATE_TO_TARGET = 1;
+    WALK_TO_TARGET = 2;
+    STRAFE_TO_TARGET = 3;
+    ALIGN_WITH_TARGET = 4;
+    AT_TARGET = 5;
 }
 
 message RotateToTarget {
@@ -66,4 +80,35 @@ message StrafeToTarget {
 message AlignWithTarget {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 3;
+}
+
+/// Debug information for walk to planning
+message WalkToDebug {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 1;
+
+    /// Current state of the walk to planning
+    WalkToState state = 2;
+
+    /// Requested walk velocity
+    vec3 velocity_target = 3;
+
+    double rotate_to_target_pos_error_threshold = 4;
+    double rotate_to_target_ori_error_threshold = 5;
+
+    double walk_to_target_pos_error_threshold = 6;
+    double walk_to_target_ori_error_threshold = 7;
+
+    double strafe_to_target_pos_error_threshold = 8;
+    double strafe_to_target_ori_error_threshold = 9;
+
+    double align_with_target_pos_error_threshold = 10;
+    double align_with_target_ori_error_threshold = 11;
+
+    double translational_error = 12;
+    double angle_error = 13;
+    double heading_error = 14;
+    double angle = 15;
+    double heading = 16;
+
 }

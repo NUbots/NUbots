@@ -327,7 +327,12 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      <WalkPathGoals model={model} />
+      {model.robots.map((robot) => {
+        if (robot.visible && robot.Hfd) {
+          return <URDFWalkPathGoal key={robot.id} model={robot} />;
+        }
+        return null;
+      })}
       <Robots model={model} />
     </object3D>
   );
@@ -516,16 +521,6 @@ const Robots = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
-const WalkPathGoals = ({ model }: { model: LocalisationModel }) => (
-  <>
-    {model.robots.map((robot) => {
-      if (robot.visible) {
-        return <URDFWalkPathGoal key={robot.id} model={robot} />;
-      }
-      return null;
-    })}
-  </>
-);
 
 const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
@@ -540,13 +535,13 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
     });
   }, []);
 
-  const rZFf = model.Hfd.decompose().translation;
+  const rZFf = model.Hfd?.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
   const Rfz_quat = new THREE.Quaternion(
-    model.Hfd.decompose().rotation.x,
-    model.Hfd.decompose().rotation.y,
-    model.Hfd.decompose().rotation.z,
-    model.Hfd.decompose().rotation.w,
+    model.Hfd?.decompose().rotation.x,
+    model.Hfd?.decompose().rotation.y,
+    model.Hfd?.decompose().rotation.z,
+    model.Hfd?.decompose().rotation.w,
   );
   const Rft_quat = new THREE.Quaternion(
     model.Hft.decompose().rotation.x,
@@ -560,7 +555,7 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   const Rft_euler = new THREE.Euler().setFromQuaternion(Rft_quat, "ZYX");
   // Fuse the euler angles into a single quaternion
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(Rft_euler.x, Rft_euler.y, Rfz_euler.z, "ZYX"));
-  const position = new THREE.Vector3(rZFf.x, rZFf.y, rTFf.z);
+  const position = new THREE.Vector3(rZFf?.x, rZFf?.y, rTFf.z);
 
   const motors = model.motors;
 

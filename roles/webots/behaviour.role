@@ -21,6 +21,7 @@ nuclear_role(
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::FieldLineDetector
+  vision::BallDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
