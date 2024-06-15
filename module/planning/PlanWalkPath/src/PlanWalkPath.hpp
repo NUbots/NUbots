@@ -36,40 +36,30 @@
 namespace module::planning {
 
     struct ErrorThresholds {
-        double enter_pos_threshold;
-        double enter_ori_threshold;
-        double leave_pos_threshold;
-        double leave_ori_threshold;
+        double enter_pos = 0;
+        double enter_ori = 0;
+        double leave_pos = 0;
+        double leave_ori = 0;
+
+        // Curent position error threshold
+        double pos = 0;
+
+        // Current orientation error threshold
+        double ori = 0;
     };
 
     class PlanWalkPath : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
-            double enter_rotate_to_target_pos_threshold = 0;
-            double enter_rotate_to_target_ori_threshold = 0;
-            double leave_rotate_to_target_pos_threshold = 0;
-            double leave_rotate_to_target_ori_threshold = 0;
 
-            double enter_walk_to_target_pos_threshold = 0;
-            double enter_walk_to_target_ori_threshold = 0;
-            double leave_walk_to_target_pos_threshold = 0;
-            double leave_walk_to_target_ori_threshold = 0;
-
-            double enter_strafe_to_target_pos_threshold = 0;
-            double enter_strafe_to_target_ori_threshold = 0;
-            double leave_strafe_to_target_pos_threshold = 0;
-            double leave_strafe_to_target_ori_threshold = 0;
-
-            double enter_align_with_target_pos_threshold = 0;
-            double enter_align_with_target_ori_threshold = 0;
-            double leave_align_with_target_pos_threshold = 0;
-            double leave_align_with_target_ori_threshold = 0;
-
+            ErrorThresholds rotate_to_thresholds;
+            ErrorThresholds walk_to_thresholds;
+            ErrorThresholds strafe_to_thresholds;
+            ErrorThresholds align_with_thresholds;
 
             // Distance to target point to begin decelerating
             double approach_radius = 0;
-
             /// @brief Maximum angular velocity command for walking to ball
             double max_angular_velocity = 0;
             /// @brief Minimum angular velocity command for walking to ball
@@ -105,22 +95,6 @@ namespace module::planning {
 
         /// @brief Angle between robot and target heading
         double angle_to_desired_heading = 0;
-
-        // Rotate to face target thresholds
-        double rotate_to_target_pos_threshold = 0;
-        double rotate_to_target_ori_threshold = 0;
-
-        // Walk to target thresholds
-        double walk_to_target_pos_threshold = 0;
-        double walk_to_target_ori_threshold = 0;
-
-        // Strafe to target thresholds
-        double strafe_to_target_pos_threshold = 0;
-        double strafe_to_target_ori_threshold = 0;
-
-        // Align to target thresholds
-        double align_with_target_pos_threshold = 0;
-        double align_with_target_ori_threshold = 0;
 
         void emit_debug_information(const Eigen::Isometry3d& Hrd, const Eigen::Vector3d& velocity_target);
 

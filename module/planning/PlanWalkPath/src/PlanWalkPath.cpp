@@ -80,31 +80,32 @@ namespace module::planning {
             cfg.pivot_ball_velocity_y                = config["pivot_ball_velocity_y"].as<double>();
 
             // Thresholds for different walk to tasks
-            cfg.enter_rotate_to_target_pos_threshold  = config["rotate_to_target"]["enter_pos_threshold"].as<double>();
-            cfg.enter_rotate_to_target_ori_threshold  = config["rotate_to_target"]["enter_ori_threshold"].as<double>();
-            cfg.leave_rotate_to_target_pos_threshold  = config["rotate_to_target"]["leave_pos_threshold"].as<double>();
-            cfg.leave_rotate_to_target_ori_threshold  = config["rotate_to_target"]["leave_ori_threshold"].as<double>();
-            cfg.enter_walk_to_target_pos_threshold    = config["walk_to_target"]["enter_pos_threshold"].as<double>();
-            cfg.enter_walk_to_target_ori_threshold    = config["walk_to_target"]["enter_ori_threshold"].as<double>();
-            cfg.leave_walk_to_target_pos_threshold    = config["walk_to_target"]["leave_pos_threshold"].as<double>();
-            cfg.leave_walk_to_target_ori_threshold    = config["walk_to_target"]["leave_ori_threshold"].as<double>();
-            cfg.enter_strafe_to_target_pos_threshold  = config["strafe_to_target"]["enter_pos_threshold"].as<double>();
-            cfg.enter_strafe_to_target_ori_threshold  = config["strafe_to_target"]["enter_ori_threshold"].as<double>();
-            cfg.leave_strafe_to_target_pos_threshold  = config["strafe_to_target"]["leave_pos_threshold"].as<double>();
-            cfg.leave_strafe_to_target_ori_threshold  = config["strafe_to_target"]["leave_ori_threshold"].as<double>();
-            cfg.enter_align_with_target_pos_threshold = config["align_with_target"]["enter_pos_threshold"].as<double>();
-            cfg.enter_align_with_target_ori_threshold = config["align_with_target"]["enter_ori_threshold"].as<double>();
-            cfg.leave_align_with_target_pos_threshold = config["align_with_target"]["leave_pos_threshold"].as<double>();
-            cfg.leave_align_with_target_ori_threshold = config["align_with_target"]["leave_ori_threshold"].as<double>();
+            cfg.rotate_to_thresholds.enter_pos  = config["rotate_to_target"]["enter_pos_threshold"].as<double>();
+            cfg.rotate_to_thresholds.enter_ori  = config["rotate_to_target"]["enter_ori_threshold"].as<double>();
+            cfg.rotate_to_thresholds.leave_pos  = config["rotate_to_target"]["leave_pos_threshold"].as<double>();
+            cfg.rotate_to_thresholds.leave_ori  = config["rotate_to_target"]["leave_ori_threshold"].as<double>();
+            cfg.walk_to_thresholds.enter_pos    = config["walk_to_target"]["enter_pos_threshold"].as<double>();
+            cfg.walk_to_thresholds.enter_ori    = config["walk_to_target"]["enter_ori_threshold"].as<double>();
+            cfg.walk_to_thresholds.leave_pos    = config["walk_to_target"]["leave_pos_threshold"].as<double>();
+            cfg.walk_to_thresholds.leave_ori    = config["walk_to_target"]["leave_ori_threshold"].as<double>();
+            cfg.strafe_to_thresholds.enter_pos  = config["strafe_to_target"]["enter_pos_threshold"].as<double>();
+            cfg.strafe_to_thresholds.enter_ori  = config["strafe_to_target"]["enter_ori_threshold"].as<double>();
+            cfg.strafe_to_thresholds.leave_pos  = config["strafe_to_target"]["leave_pos_threshold"].as<double>();
+            cfg.strafe_to_thresholds.leave_ori  = config["strafe_to_target"]["leave_ori_threshold"].as<double>();
+            cfg.align_with_thresholds.enter_pos = config["align_with_target"]["enter_pos_threshold"].as<double>();
+            cfg.align_with_thresholds.enter_ori = config["align_with_target"]["enter_ori_threshold"].as<double>();
+            cfg.align_with_thresholds.leave_pos = config["align_with_target"]["leave_pos_threshold"].as<double>();
+            cfg.align_with_thresholds.leave_ori = config["align_with_target"]["leave_ori_threshold"].as<double>();
 
-            rotate_to_target_pos_threshold  = cfg.enter_rotate_to_target_pos_threshold;
-            rotate_to_target_ori_threshold  = cfg.enter_rotate_to_target_ori_threshold;
-            walk_to_target_pos_threshold    = cfg.enter_walk_to_target_pos_threshold;
-            walk_to_target_ori_threshold    = cfg.enter_walk_to_target_ori_threshold;
-            strafe_to_target_pos_threshold  = cfg.enter_strafe_to_target_pos_threshold;
-            strafe_to_target_ori_threshold  = cfg.enter_strafe_to_target_ori_threshold;
-            align_with_target_pos_threshold = cfg.enter_align_with_target_pos_threshold;
-            align_with_target_ori_threshold = cfg.enter_align_with_target_ori_threshold;
+            // Initialise the thresholds to the enter thresholds
+            cfg.rotate_to_thresholds.pos  = cfg.rotate_to_thresholds.enter_pos;
+            cfg.rotate_to_thresholds.ori  = cfg.rotate_to_thresholds.enter_ori;
+            cfg.walk_to_thresholds.pos    = cfg.walk_to_thresholds.enter_pos;
+            cfg.walk_to_thresholds.ori    = cfg.walk_to_thresholds.enter_ori;
+            cfg.strafe_to_thresholds.pos  = cfg.strafe_to_thresholds.enter_pos;
+            cfg.strafe_to_thresholds.ori  = cfg.strafe_to_thresholds.enter_ori;
+            cfg.align_with_thresholds.pos = cfg.align_with_thresholds.enter_pos;
+            cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
 
             cfg.approach_radius = config["approach_radius"].as<double>();
         });
@@ -130,75 +131,75 @@ namespace module::planning {
 
 
             // 1. If far away, and not facing the target, then rotate on spot to face the target
-            if (translational_error > rotate_to_target_pos_threshold
-                && std::abs(angle_to_target) > rotate_to_target_ori_threshold) {
+            if (translational_error > cfg.rotate_to_thresholds.pos
+                && std::abs(angle_to_target) > cfg.rotate_to_thresholds.ori) {
                 int sign = angle_to_target < 0 ? -1 : 1;
                 // emit<Task>(std::make_unique<TurnOnSpot>(clockwise), 4);
                 // Turn on the spot
                 emit<Task>(std::make_unique<Walk>(
                     Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
 
-                // Increase thresholds to prevent oscillation when condition is just met
-                rotate_to_target_pos_threshold = cfg.leave_rotate_to_target_pos_threshold;
-                rotate_to_target_ori_threshold = cfg.leave_rotate_to_target_ori_threshold;
+                cfg.rotate_to_thresholds.pos = cfg.rotate_to_thresholds.enter_pos;
+                cfg.rotate_to_thresholds.ori = cfg.rotate_to_thresholds.enter_ori;
                 emit(graph("Rotating towards target", true));
                 return;
             }
             else {
-                rotate_to_target_pos_threshold = cfg.enter_rotate_to_target_pos_threshold;
-                rotate_to_target_ori_threshold = cfg.enter_rotate_to_target_ori_threshold;
+                // Increase thresholds to prevent oscillation when condition is just met
+                cfg.rotate_to_thresholds.pos = cfg.rotate_to_thresholds.leave_pos;
+                cfg.rotate_to_thresholds.ori = cfg.rotate_to_thresholds.leave_ori;
                 emit(graph("Rotating towards target", false));
             }
 
             // 2. If far away, and facing the target, then walk towards the target directly
-            if (translational_error > walk_to_target_pos_threshold
-                && std::abs(angle_to_target) > walk_to_target_ori_threshold) {
+            if (translational_error > cfg.walk_to_thresholds.enter_pos
+                && std::abs(angle_to_target) > cfg.walk_to_thresholds.ori) {
                 emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius));
-                walk_to_target_pos_threshold = cfg.leave_walk_to_target_pos_threshold;
-                walk_to_target_ori_threshold = cfg.leave_walk_to_target_ori_threshold;
+                cfg.walk_to_thresholds.pos = cfg.walk_to_thresholds.enter_pos;
+                cfg.walk_to_thresholds.ori = cfg.walk_to_thresholds.enter_ori;
                 emit(graph("Walking towards target", true));
                 return;
             }
             else {
-                walk_to_target_pos_threshold = cfg.enter_walk_to_target_pos_threshold;
-                walk_to_target_ori_threshold = cfg.enter_walk_to_target_ori_threshold;
+                cfg.walk_to_thresholds.pos = cfg.walk_to_thresholds.leave_pos;
+                cfg.walk_to_thresholds.ori = cfg.walk_to_thresholds.leave_ori;
                 emit(graph("Walking towards target", false));
             }
 
             //  3. If close to the target, then walk to target but do not rotate towards the target if it goes behind
-            if (translational_error > strafe_to_target_pos_threshold
-                && std::abs(angle_to_target) > strafe_to_target_ori_threshold) {
+            if (translational_error > cfg.strafe_to_thresholds.pos
+                && std::abs(angle_to_target) > cfg.strafe_to_thresholds.ori) {
                 if (walk_to.Hrd.translation().x() < 0) {
                     emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius, true));
                 }
                 else {
                     emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius));
                 }
-                strafe_to_target_pos_threshold = cfg.leave_strafe_to_target_pos_threshold;
-                strafe_to_target_ori_threshold = cfg.leave_strafe_to_target_ori_threshold;
+                cfg.strafe_to_thresholds.pos = cfg.strafe_to_thresholds.enter_pos;
+                cfg.strafe_to_thresholds.ori = cfg.strafe_to_thresholds.enter_ori;
                 emit(graph("Strafing towards target", true));
                 return;
             }
             else {
                 emit(graph("Strafing towards target", false));
-                strafe_to_target_pos_threshold = cfg.enter_strafe_to_target_pos_threshold;
-                strafe_to_target_ori_threshold = cfg.enter_strafe_to_target_ori_threshold;
+                cfg.strafe_to_thresholds.pos = cfg.strafe_to_thresholds.leave_pos;
+                cfg.strafe_to_thresholds.ori = cfg.strafe_to_thresholds.leave_ori;
             }
 
             // 4. If close to the target, but not aligned with the target, then align with target heading
-            if (translational_error > align_with_target_pos_threshold
-                && std::abs(angle_to_desired_heading) > align_with_target_ori_threshold) {
+            if (translational_error > cfg.align_with_thresholds.pos
+                && std::abs(angle_to_desired_heading) > cfg.align_with_thresholds.ori) {
                 // Determine the direction of rotation
                 bool clockwise = angle_to_desired_heading < 0 ? true : false;
                 emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
-                align_with_target_pos_threshold = cfg.leave_align_with_target_pos_threshold;
-                align_with_target_ori_threshold = cfg.leave_align_with_target_ori_threshold;
+                cfg.align_with_thresholds.pos = cfg.align_with_thresholds.enter_pos;
+                cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
                 emit(graph("Aligning with target heading", true));
             }
             else {
-                align_with_target_pos_threshold = cfg.enter_align_with_target_pos_threshold;
-                align_with_target_ori_threshold = cfg.enter_align_with_target_ori_threshold;
                 emit(graph("Aligning with target heading", false));
+                cfg.align_with_thresholds.pos = cfg.align_with_thresholds.leave_pos;
+                cfg.align_with_thresholds.ori = cfg.align_with_thresholds.leave_ori;
             }
 
             emit_debug_information(walk_to.Hrd, Eigen::Vector3d(0, 0, 0));
@@ -226,8 +227,13 @@ namespace module::planning {
             Eigen::Vector3d velocity_target = walk_direct.Hrd.translation().normalized() * velocity_magnitude;
 
             // Set the angular velocity as the angle_to_target to the target and clamp to min and max angular velocity
-            velocity_target.z() =
-                utility::math::clamp(cfg.min_angular_velocity, angle_to_target, cfg.max_angular_velocity);
+            if (!walk_direct.dont_align_towards_target) {
+                velocity_target.z() =
+                    utility::math::clamp(cfg.min_angular_velocity, angle_to_target, cfg.max_angular_velocity);
+            }
+            else {
+                velocity_target.z() = 0;
+            }
 
             emit<Task>(std::make_unique<Walk>(velocity_target));
         });
@@ -246,14 +252,14 @@ namespace module::planning {
         auto walk_to_debug = std::make_unique<WalkToDebug>();
         walk_to_debug->Hrd = Hrd;
         // walk_to_debug->velocity_target                 = velocity_target;
-        // walk_to_debug->rotate_to_target_pos_threshold  = rotate_to_target_pos_threshold;
-        // walk_to_debug->rotate_to_target_ori_threshold  = rotate_to_target_ori_threshold;
-        // walk_to_debug->walk_to_target_pos_threshold    = walk_to_target_pos_threshold;
-        // walk_to_debug->walk_to_target_ori_threshold    = walk_to_target_ori_threshold;
-        // walk_to_debug->strafe_to_target_pos_threshold  = strafe_to_target_pos_threshold;
-        // walk_to_debug->strafe_to_target_ori_threshold  = strafe_to_target_ori_threshold;
-        // walk_to_debug->align_with_target_pos_threshold = align_with_target_pos_threshold;
-        // walk_to_debug->align_with_target_ori_threshold = align_with_target_ori_threshold;
+        // walk_to_debug->cfg.rotate_to_thresholds.pos  = cfg.rotate_to_thresholds.pos;
+        // walk_to_debug->cfg.rotate_to_thresholds.ori  = cfg.rotate_to_thresholds.ori;
+        // walk_to_debug->cfg.walk_to_thresholds.enter_pos    = cfg.walk_to_thresholds.enter_pos;
+        // walk_to_debug->cfg.walk_to_thresholds.ori    = cfg.walk_to_thresholds.ori;
+        // walk_to_debug->cfg.strafe_to_thresholds.pos  = cfg.strafe_to_thresholds.pos;
+        // walk_to_debug->cfg.strafe_to_thresholds.ori  = cfg.strafe_to_thresholds.ori;
+        // walk_to_debug->cfg.align_with_thresholds.pos = cfg.align_with_thresholds.pos;
+        // walk_to_debug->cfg.align_with_thresholds.ori = cfg.align_with_thresholds.ori;
         // walk_to_debug->translational_error             = translational_error;
         // walk_to_debug->angle_to_target                 = angle_to_target;
         // walk_to_debug->angle_to_desired_headingr       = angle_to_desired_heading;

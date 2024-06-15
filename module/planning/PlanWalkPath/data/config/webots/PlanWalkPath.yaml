@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # General playing tuning values for walking
 max_translational_velocity_magnitude: 0.2
@@ -22,19 +22,19 @@ pivot_ball_velocity_y: -0.2
 rotate_to_target:
   enter_pos_threshold: 1.0
   enter_ori_threshold: 0.2
-  leave_pos_threshold: 1.0
+  leave_pos_threshold: 1.1
   leave_ori_threshold: 0.25
 
 walk_to_target:
   enter_pos_threshold: 1.0
   enter_ori_threshold: -1.0
-  leave_pos_threshold: 1.05
+  leave_pos_threshold: 1.1
   leave_ori_threshold: -1.0
 
 strafe_to_target:
   enter_pos_threshold: 0.3
   enter_ori_threshold: -1.0
-  leave_pos_threshold: 1.0
+  leave_pos_threshold: 0.8
   leave_ori_threshold: -1.0
 
 align_with_target:
