@@ -31,6 +31,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/LimbsIK.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Kick.hpp"
@@ -44,6 +45,8 @@ namespace module::planning {
 
     using extension::Configuration;
 
+    using message::actuation::LeftLegIK;
+    using message::actuation::RightLegIK;
     using message::localisation::Ball;
     using message::planning::AlignWithTarget;
     using message::planning::RotateToTarget;
@@ -111,12 +114,19 @@ namespace module::planning {
                 config["align_with_target"]["stop_pos_error_threshold"].as<double>();
             cfg.stop_align_with_target_ori_error_threshold =
                 config["align_with_target"]["stop_ori_error_threshold"].as<double>();
+
+            rotate_to_target_pos_error_threshold  = cfg.start_rotate_to_target_pos_error_threshold;
+            rotate_to_target_ori_error_threshold  = cfg.start_rotate_to_target_ori_error_threshold;
+            walk_to_target_pos_error_threshold    = cfg.start_walk_to_target_pos_error_threshold;
+            walk_to_target_ori_error_threshold    = cfg.start_walk_to_target_ori_error_threshold;
+            strafe_to_target_pos_error_threshold  = cfg.start_strafe_to_target_pos_error_threshold;
+            strafe_to_target_ori_error_threshold  = cfg.start_strafe_to_target_ori_error_threshold;
+            align_with_target_pos_error_threshold = cfg.start_align_with_target_pos_error_threshold;
+            align_with_target_ori_error_threshold = cfg.start_align_with_target_ori_error_threshold;
         });
 
         // Path to walk to a particular point
         on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
-            // Emit the walk task as non-director task for debugging
-            emit(std::make_unique<WalkTo>(walk_to));
             // If we haven't got an active walk task, then reset the velocity to minimum velocity
             if (walk.run_state == GroupInfo::RunState::NO_TASK) {
                 velocity_magnitude = cfg.min_translational_velocity_magnitude;
@@ -155,6 +165,9 @@ namespace module::planning {
 
             // 4. If close to the target, but not aligned with the target, then rotate on spot to face the target
             emit<Task>(std::make_unique<AlignWithTarget>(walk_to.Hrd), 1);
+
+            // Emit the walk task as non-director task for debugging
+            emit(std::make_unique<WalkTo>(walk_to));
         });
 
         on<Start<RotateToTarget>>().then([this]() {
