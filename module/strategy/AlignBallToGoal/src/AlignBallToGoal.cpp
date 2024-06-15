@@ -44,7 +44,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::planning::TurnAroundBall;
+    using message::planning::PivotAroundPoint;
     using message::support::FieldDescription;
     using AlignBallToGoalTask = message::strategy::AlignBallToGoal;
     using utility::support::Expression;
@@ -86,10 +86,10 @@ namespace module::strategy {
                     // Only align if we are not within a threshold of the goal
                     if (std::fabs(kick_angle) > cfg.angle_threshold) {
                         if (kick_angle < 0.0) {
-                            emit<Task>(std::make_unique<TurnAroundBall>(true));
+                            emit<Task>(std::make_unique<PivotAroundPoint>(true));
                         }
                         else {
-                            emit<Task>(std::make_unique<TurnAroundBall>(false));
+                            emit<Task>(std::make_unique<PivotAroundPoint>(false));
                         }
                     }
                 }

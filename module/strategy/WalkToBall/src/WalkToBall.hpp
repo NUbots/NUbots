@@ -48,6 +48,9 @@ namespace module::strategy {
 
             /// @brief The offset on goal target
             double goal_target_offset = 0.0;
+
+            /// @brief The distance when walking to the ball directly to start slowing down
+            double approach_ball_radius = 0.0;
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space

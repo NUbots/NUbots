@@ -48,13 +48,11 @@ namespace module::planning {
     using message::actuation::LeftLegIK;
     using message::actuation::RightLegIK;
     using message::localisation::Ball;
-    using message::planning::AlignWithTarget;
-    using message::planning::RotateToTarget;
-    using message::planning::StrafeToTarget;
-    using message::planning::TurnAroundBall;
+    using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
+    using message::planning::WalkDirect;
     using message::planning::WalkTo;
-    using message::planning::WalkToTarget;
+    using message::planning::WalkToDebug;
 
     using message::skill::Walk;
 
@@ -82,47 +80,33 @@ namespace module::planning {
             cfg.pivot_ball_velocity_y                = config["pivot_ball_velocity_y"].as<double>();
 
             // Thresholds for different walk to tasks
-            cfg.start_rotate_to_target_pos_error_threshold =
-                config["rotate_to_target"]["start_pos_error_threshold"].as<double>();
-            cfg.start_rotate_to_target_ori_error_threshold =
-                config["rotate_to_target"]["start_ori_error_threshold"].as<double>();
-            cfg.stop_rotate_to_target_pos_error_threshold =
-                config["rotate_to_target"]["stop_pos_error_threshold"].as<double>();
-            cfg.stop_rotate_to_target_ori_error_threshold =
-                config["rotate_to_target"]["stop_ori_error_threshold"].as<double>();
-            cfg.start_walk_to_target_pos_error_threshold =
-                config["walk_to_target"]["start_pos_error_threshold"].as<double>();
-            cfg.start_walk_to_target_ori_error_threshold =
-                config["walk_to_target"]["start_ori_error_threshold"].as<double>();
-            cfg.stop_walk_to_target_pos_error_threshold =
-                config["walk_to_target"]["stop_pos_error_threshold"].as<double>();
-            cfg.stop_walk_to_target_ori_error_threshold =
-                config["walk_to_target"]["stop_ori_error_threshold"].as<double>();
-            cfg.start_strafe_to_target_pos_error_threshold =
-                config["strafe_to_target"]["start_pos_error_threshold"].as<double>();
-            cfg.start_strafe_to_target_ori_error_threshold =
-                config["strafe_to_target"]["start_ori_error_threshold"].as<double>();
-            cfg.stop_strafe_to_target_pos_error_threshold =
-                config["strafe_to_target"]["stop_pos_error_threshold"].as<double>();
-            cfg.stop_strafe_to_target_ori_error_threshold =
-                config["strafe_to_target"]["stop_ori_error_threshold"].as<double>();
-            cfg.start_align_with_target_pos_error_threshold =
-                config["align_with_target"]["start_pos_error_threshold"].as<double>();
-            cfg.start_align_with_target_ori_error_threshold =
-                config["align_with_target"]["start_ori_error_threshold"].as<double>();
-            cfg.stop_align_with_target_pos_error_threshold =
-                config["align_with_target"]["stop_pos_error_threshold"].as<double>();
-            cfg.stop_align_with_target_ori_error_threshold =
-                config["align_with_target"]["stop_ori_error_threshold"].as<double>();
+            cfg.enter_rotate_to_target_pos_threshold  = config["rotate_to_target"]["enter_pos_threshold"].as<double>();
+            cfg.enter_rotate_to_target_ori_threshold  = config["rotate_to_target"]["enter_ori_threshold"].as<double>();
+            cfg.leave_rotate_to_target_pos_threshold  = config["rotate_to_target"]["leave_pos_threshold"].as<double>();
+            cfg.leave_rotate_to_target_ori_threshold  = config["rotate_to_target"]["leave_ori_threshold"].as<double>();
+            cfg.enter_walk_to_target_pos_threshold    = config["walk_to_target"]["enter_pos_threshold"].as<double>();
+            cfg.enter_walk_to_target_ori_threshold    = config["walk_to_target"]["enter_ori_threshold"].as<double>();
+            cfg.leave_walk_to_target_pos_threshold    = config["walk_to_target"]["leave_pos_threshold"].as<double>();
+            cfg.leave_walk_to_target_ori_threshold    = config["walk_to_target"]["leave_ori_threshold"].as<double>();
+            cfg.enter_strafe_to_target_pos_threshold  = config["strafe_to_target"]["enter_pos_threshold"].as<double>();
+            cfg.enter_strafe_to_target_ori_threshold  = config["strafe_to_target"]["enter_ori_threshold"].as<double>();
+            cfg.leave_strafe_to_target_pos_threshold  = config["strafe_to_target"]["leave_pos_threshold"].as<double>();
+            cfg.leave_strafe_to_target_ori_threshold  = config["strafe_to_target"]["leave_ori_threshold"].as<double>();
+            cfg.enter_align_with_target_pos_threshold = config["align_with_target"]["enter_pos_threshold"].as<double>();
+            cfg.enter_align_with_target_ori_threshold = config["align_with_target"]["enter_ori_threshold"].as<double>();
+            cfg.leave_align_with_target_pos_threshold = config["align_with_target"]["leave_pos_threshold"].as<double>();
+            cfg.leave_align_with_target_ori_threshold = config["align_with_target"]["leave_ori_threshold"].as<double>();
 
-            rotate_to_target_pos_error_threshold  = cfg.start_rotate_to_target_pos_error_threshold;
-            rotate_to_target_ori_error_threshold  = cfg.start_rotate_to_target_ori_error_threshold;
-            walk_to_target_pos_error_threshold    = cfg.start_walk_to_target_pos_error_threshold;
-            walk_to_target_ori_error_threshold    = cfg.start_walk_to_target_ori_error_threshold;
-            strafe_to_target_pos_error_threshold  = cfg.start_strafe_to_target_pos_error_threshold;
-            strafe_to_target_ori_error_threshold  = cfg.start_strafe_to_target_ori_error_threshold;
-            align_with_target_pos_error_threshold = cfg.start_align_with_target_pos_error_threshold;
-            align_with_target_ori_error_threshold = cfg.start_align_with_target_ori_error_threshold;
+            rotate_to_target_pos_threshold  = cfg.enter_rotate_to_target_pos_threshold;
+            rotate_to_target_ori_threshold  = cfg.enter_rotate_to_target_ori_threshold;
+            walk_to_target_pos_threshold    = cfg.enter_walk_to_target_pos_threshold;
+            walk_to_target_ori_threshold    = cfg.enter_walk_to_target_ori_threshold;
+            strafe_to_target_pos_threshold  = cfg.enter_strafe_to_target_pos_threshold;
+            strafe_to_target_ori_threshold  = cfg.enter_strafe_to_target_ori_threshold;
+            align_with_target_pos_threshold = cfg.enter_align_with_target_pos_threshold;
+            align_with_target_ori_threshold = cfg.enter_align_with_target_ori_threshold;
+
+            cfg.approach_radius = config["approach_radius"].as<double>();
         });
 
         // Path to walk to a particular point
@@ -137,164 +121,88 @@ namespace module::planning {
             emit(graph("translational_error", translational_error));
 
             // Angle between robot and target point
-            angle = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
-            emit(graph("angle", angle));
+            angle_to_target = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
+            emit(graph("angle_to_target", angle_to_target));
 
-            // Angle error (absolute) between robot and target point
-            angle_error = std::abs(std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x()));
-            emit(graph("angle_error", angle_error));
-
-            // Angle between robot and target heading
-            heading = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
-            emit(graph("heading", heading));
-
-            // Angle error (absolute) between robot and target heading
-            heading_error = std::abs(std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x()));
-            emit(graph("heading_error", heading_error));
+            // Angle between robot and target angle_to_desired_heading
+            angle_to_desired_heading = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+            emit(graph("angle_to_desired_heading", angle_to_desired_heading));
 
 
-            // Second argument is priority - higher number means higher priority
             // 1. If far away, and not facing the target, then rotate on spot to face the target
-            emit<Task>(std::make_unique<RotateToTarget>(walk_to.Hrd), 4);
-
-            // 2. If far away, and facing the target, then walk towards the target directly
-            emit<Task>(std::make_unique<WalkToTarget>(walk_to.Hrd), 3);
-
-            // 3. If close to the target, then strafe to target but do not rotate towards the target
-            emit<Task>(std::make_unique<StrafeToTarget>(walk_to.Hrd), 2);
-
-            // 4. If close to the target, but not aligned with the target, then rotate on spot to face the target
-            emit<Task>(std::make_unique<AlignWithTarget>(walk_to.Hrd), 1);
-
-            // Emit the walk task as non-director task for debugging
-            emit(std::make_unique<WalkTo>(walk_to));
-        });
-
-        on<Start<RotateToTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Starting RotateToTarget task");
-            rotate_to_target_pos_error_threshold = cfg.start_rotate_to_target_pos_error_threshold;
-            rotate_to_target_ori_error_threshold = cfg.start_rotate_to_target_ori_error_threshold;
-        });
-        on<Provide<RotateToTarget>>().then([this](const RotateToTarget& rotate_to_face_target) {
-            // 1. If far away, and not facing the target, then rotate on spot to face the target
-            if (translational_error > rotate_to_target_pos_error_threshold
-                && angle_error > rotate_to_target_ori_error_threshold) {
-                int sign = angle < 0 ? -1 : 1;
+            if (translational_error > rotate_to_target_pos_threshold
+                && std::abs(angle_to_target) > rotate_to_target_ori_threshold) {
+                int sign = angle_to_target < 0 ? -1 : 1;
+                // emit<Task>(std::make_unique<TurnOnSpot>(clockwise), 4);
                 // Turn on the spot
                 emit<Task>(std::make_unique<Walk>(
                     Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
-                emit(graph("Rotating to face target", true));
+
+                // Increase thresholds to prevent oscillation when condition is just met
+                rotate_to_target_pos_threshold = cfg.leave_rotate_to_target_pos_threshold;
+                rotate_to_target_ori_threshold = cfg.leave_rotate_to_target_ori_threshold;
+                emit(graph("Rotating towards target", true));
+                return;
             }
             else {
-                emit(graph("Rotating to face target", false));
+                rotate_to_target_pos_threshold = cfg.enter_rotate_to_target_pos_threshold;
+                rotate_to_target_ori_threshold = cfg.enter_rotate_to_target_ori_threshold;
+                emit(graph("Rotating towards target", false));
             }
-            emit(graph("rotate_to_target_pos_error_threshold", rotate_to_target_pos_error_threshold));
-            emit(graph("rotate_to_target_ori_error_threshold", rotate_to_target_ori_error_threshold));
-        });
-        on<Stop<RotateToTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Stopping RotateToTarget task");
-            rotate_to_target_pos_error_threshold = cfg.stop_rotate_to_target_pos_error_threshold;
-            rotate_to_target_ori_error_threshold = cfg.stop_rotate_to_target_ori_error_threshold;
-        });
 
-        on<Start<WalkToTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Starting WalkToTarget task");
-            walk_to_target_pos_error_threshold = cfg.start_walk_to_target_pos_error_threshold;
-            walk_to_target_ori_error_threshold = cfg.start_walk_to_target_ori_error_threshold;
-        });
-        on<Provide<WalkToTarget>>().then([this](const WalkToTarget& walk_direct_to_target) {
             // 2. If far away, and facing the target, then walk towards the target directly
-            // Accelerate to max velocity
-            if (translational_error > walk_to_target_pos_error_threshold
-                && angle_error > walk_to_target_ori_error_threshold) {
-                velocity_magnitude += cfg.acceleration;
-                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
-                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
-                // Obtain the unit vector to desired target in robot space and scale by magnitude
-                Eigen::Vector3d velocity_target =
-                    walk_direct_to_target.Hrd.translation().normalized() * velocity_magnitude;
-
-                // Set the angular velocity as the angle to the target and clamp to min and max angular velocity
-                velocity_target.z() = utility::math::clamp(cfg.min_angular_velocity, angle, cfg.max_angular_velocity);
-
-                emit<Task>(std::make_unique<Walk>(velocity_target));
-                emit(graph("Walking directly towards target", true));
+            if (translational_error > walk_to_target_pos_threshold
+                && std::abs(angle_to_target) > walk_to_target_ori_threshold) {
+                emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius));
+                walk_to_target_pos_threshold = cfg.leave_walk_to_target_pos_threshold;
+                walk_to_target_ori_threshold = cfg.leave_walk_to_target_ori_threshold;
+                emit(graph("Walking towards target", true));
+                return;
             }
             else {
-                emit(graph("Walking directly towards target", false));
+                walk_to_target_pos_threshold = cfg.enter_walk_to_target_pos_threshold;
+                walk_to_target_ori_threshold = cfg.enter_walk_to_target_ori_threshold;
+                emit(graph("Walking towards target", false));
             }
-            emit(graph("walk_to_target_pos_error_threshold", walk_to_target_pos_error_threshold));
-            emit(graph("walk_to_target_ori_error_threshold", walk_to_target_ori_error_threshold));
-        });
-        on<Stop<WalkToTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Stopping WalkToTarget task");
-            walk_to_target_pos_error_threshold = cfg.stop_walk_to_target_pos_error_threshold;
-            walk_to_target_ori_error_threshold = cfg.stop_walk_to_target_ori_error_threshold;
-        });
 
-        on<Start<StrafeToTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Starting StrafeToTarget task");
-            strafe_to_target_pos_error_threshold = cfg.start_strafe_to_target_pos_error_threshold;
-            strafe_to_target_ori_error_threshold = cfg.start_strafe_to_target_ori_error_threshold;
-        });
-        on<Provide<StrafeToTarget>>().then([this](const StrafeToTarget& strafe_to_target) {
-            // 3. If close to the target, then strafe to target but do not rotate towards the target
-            if (translational_error > strafe_to_target_pos_error_threshold
-                && angle_error > strafe_to_target_ori_error_threshold) {
-                // Decelerate to min velocity
-                velocity_magnitude -= cfg.acceleration;
-                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
-
-                // Obtain the unit vector to desired target in robot space and scale by magnitude
-                Eigen::Vector3d velocity_target = strafe_to_target.Hrd.translation().normalized() * velocity_magnitude;
-
-                // Set the angular velocity to zero so we only strafe
-                velocity_target.z() = 0;
-
-                emit<Task>(std::make_unique<Walk>(velocity_target));
-                emit(graph("Strafing towards goal", true));
+            //  3. If close to the target, then walk to target but do not rotate towards the target if it goes behind
+            if (translational_error > strafe_to_target_pos_threshold
+                && std::abs(angle_to_target) > strafe_to_target_ori_threshold) {
+                if (walk_to.Hrd.translation().x() < 0) {
+                    emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius, true));
+                }
+                else {
+                    emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius));
+                }
+                strafe_to_target_pos_threshold = cfg.leave_strafe_to_target_pos_threshold;
+                strafe_to_target_ori_threshold = cfg.leave_strafe_to_target_ori_threshold;
+                emit(graph("Strafing towards target", true));
+                return;
             }
             else {
-                emit(graph("Strafing towards goal", false));
+                emit(graph("Strafing towards target", false));
+                strafe_to_target_pos_threshold = cfg.enter_strafe_to_target_pos_threshold;
+                strafe_to_target_ori_threshold = cfg.enter_strafe_to_target_ori_threshold;
             }
-            emit(graph("strafe_to_target_pos_error_threshold", strafe_to_target_pos_error_threshold));
-            emit(graph("strafe_to_target_ori_error_threshold", strafe_to_target_ori_error_threshold));
-        });
-        on<Stop<StrafeToTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Stopping StrafeToTarget task");
-            strafe_to_target_pos_error_threshold = cfg.stop_strafe_to_target_pos_error_threshold;
-            strafe_to_target_ori_error_threshold = cfg.stop_strafe_to_target_ori_error_threshold;
-        });
 
-        on<Start<AlignWithTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Starting AlignWithTarget task");
-            align_with_target_pos_error_threshold = cfg.start_align_with_target_pos_error_threshold;
-            align_with_target_ori_error_threshold = cfg.start_align_with_target_ori_error_threshold;
-        });
-        on<Provide<AlignWithTarget>>().then([this](const AlignWithTarget& align_with_target) {
             // 4. If close to the target, but not aligned with the target, then align with target heading
-            // Determine the direction of rotation
-            if (translational_error > align_with_target_pos_error_threshold
-                && heading_error > align_with_target_ori_error_threshold) {
-                int sign = heading < 0 ? -1 : 1;
-
-                // Turn on the spot
-                emit<Task>(std::make_unique<Walk>(
-                    Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
-                emit(graph("Aligning with target", true));
+            if (translational_error > align_with_target_pos_threshold
+                && std::abs(angle_to_desired_heading) > align_with_target_ori_threshold) {
+                // Determine the direction of rotation
+                bool clockwise = angle_to_desired_heading < 0 ? true : false;
+                emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
+                align_with_target_pos_threshold = cfg.leave_align_with_target_pos_threshold;
+                align_with_target_ori_threshold = cfg.leave_align_with_target_ori_threshold;
+                emit(graph("Aligning with target heading", true));
             }
             else {
-                emit(graph("Aligning with target", false));
+                align_with_target_pos_threshold = cfg.enter_align_with_target_pos_threshold;
+                align_with_target_ori_threshold = cfg.enter_align_with_target_ori_threshold;
+                emit(graph("Aligning with target heading", false));
             }
-            emit(graph("align_with_target_pos_error_threshold", align_with_target_pos_error_threshold));
-            emit(graph("align_with_target_ori_error_threshold", align_with_target_ori_error_threshold));
-        });
-        on<Stop<AlignWithTarget>>().then([this]() {
-            log<NUClear::DEBUG>("Stopping AlignWithTarget task");
-            align_with_target_pos_error_threshold = cfg.stop_align_with_target_pos_error_threshold;
-            align_with_target_ori_error_threshold = cfg.stop_align_with_target_ori_error_threshold;
-        });
 
+            emit_debug_information(walk_to.Hrd, Eigen::Vector3d(0, 0, 0));
+        });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
             // Determine the direction of rotation
@@ -305,13 +213,50 @@ namespace module::planning {
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
         });
 
-        on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
+        on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
+            if (walk_direct.Hrd.translation().norm() > walk_direct.approach_radius) {
+                velocity_magnitude += cfg.acceleration;
+            }
+            else {
+                velocity_magnitude -= cfg.acceleration;
+            }
+            velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
+                                          std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
+            // Obtain the unit vector to desired target in robot space and scale by magnitude
+            Eigen::Vector3d velocity_target = walk_direct.Hrd.translation().normalized() * velocity_magnitude;
+
+            // Set the angular velocity as the angle_to_target to the target and clamp to min and max angular velocity
+            velocity_target.z() =
+                utility::math::clamp(cfg.min_angular_velocity, angle_to_target, cfg.max_angular_velocity);
+
+            emit<Task>(std::make_unique<Walk>(velocity_target));
+        });
+
+        on<Provide<PivotAroundPoint>>().then([this](const PivotAroundPoint& pivot_around_point) {
             // Determine the direction of rotation
-            int sign = turn_around_ball.clockwise ? -1 : 1;
+            int sign = pivot_around_point.clockwise ? -1 : 1;
             // Turn around the ball
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
         });
+    }
+
+    void PlanWalkPath::emit_debug_information(const Eigen::Isometry3d& Hrd, const Eigen::Vector3d& velocity_target) {
+        auto walk_to_debug = std::make_unique<WalkToDebug>();
+        walk_to_debug->Hrd = Hrd;
+        // walk_to_debug->velocity_target                 = velocity_target;
+        // walk_to_debug->rotate_to_target_pos_threshold  = rotate_to_target_pos_threshold;
+        // walk_to_debug->rotate_to_target_ori_threshold  = rotate_to_target_ori_threshold;
+        // walk_to_debug->walk_to_target_pos_threshold    = walk_to_target_pos_threshold;
+        // walk_to_debug->walk_to_target_ori_threshold    = walk_to_target_ori_threshold;
+        // walk_to_debug->strafe_to_target_pos_threshold  = strafe_to_target_pos_threshold;
+        // walk_to_debug->strafe_to_target_ori_threshold  = strafe_to_target_ori_threshold;
+        // walk_to_debug->align_with_target_pos_threshold = align_with_target_pos_threshold;
+        // walk_to_debug->align_with_target_ori_threshold = align_with_target_ori_threshold;
+        // walk_to_debug->translational_error             = translational_error;
+        // walk_to_debug->angle_to_target                 = angle_to_target;
+        // walk_to_debug->angle_to_desired_headingr       = angle_to_desired_heading;
+        emit(walk_to_debug);
     }
 }  // namespace module::planning

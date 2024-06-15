@@ -30,56 +30,35 @@ package message.planning;
 import "Vector.proto";
 import "Transform.proto";
 
+/// Plan a path to walk to the specified point
+message WalkTo {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 1;
+}
+
 /// Turn on the spot in the given direction
 message TurnOnSpot {
     /// Direction to turn
     bool clockwise = 1;
 }
 
-/// Turn around the ball in the given direction
-message TurnAroundBall {
-    /// Direction to turn
-    bool clockwise = 1;
-}
-
 message WalkDirect {
     /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 3;
+    iso3 Hrd = 1;
+    /// Aproach radius, distance to target at which the robot will start slowing down
+    double approach_radius = 2;
+    /// Don't align with the target heading
+    bool dont_align_towards_target = 3;
 }
 
-/// Plan a path to walk to the specified point
-message WalkTo {
-    /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 3;
-}
 
 enum WalkToState {
     UNKNOWN = 0;
-    ROTATE_TO_TARGET = 1;
+    ROTATE_TO_TARGET_POINT = 1;
     WALK_TO_TARGET = 2;
     STRAFE_TO_TARGET = 3;
-    ALIGN_WITH_TARGET = 4;
+    ROTATE_TO_TARGET_HEADING = 4;
     AT_TARGET = 5;
-}
-
-message RotateToTarget {
-    /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 3;
-}
-
-message WalkToTarget {
-    /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 3;
-}
-
-message StrafeToTarget {
-    /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 3;
-}
-
-message AlignWithTarget {
-    /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 3;
 }
 
 /// Debug information for walk to planning
@@ -106,9 +85,14 @@ message WalkToDebug {
     double align_with_target_ori_error_threshold = 11;
 
     double translational_error = 12;
-    double angle_error = 13;
-    double heading_error = 14;
-    double angle = 15;
-    double heading = 16;
+    double angle_to_target_error = 13;
+    double angle_to_desired_heading_error = 14;
+    double angle_to_target = 15;
+    double angle_to_desired_heading = 16;
+}
 
+/// Turn around the ball in the given direction
+message PivotAroundPoint {
+    /// Direction to turn
+    bool clockwise = 1;
 }

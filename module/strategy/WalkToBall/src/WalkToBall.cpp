@@ -45,6 +45,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::planning::WalkDirect;
     using message::planning::WalkTo;
     using message::strategy::WalkToFieldPosition;
     using WalkToBallTask     = message::strategy::WalkToBall;
@@ -61,9 +62,10 @@ namespace module::strategy {
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
-            cfg.ball_y_offset      = config["ball_y_offset"].as<double>();
-            cfg.ball_kick_distance = config["ball_kick_distance"].as<double>();
-            cfg.goal_target_offset = config["goal_target_offset"].as<double>();
+            cfg.ball_y_offset        = config["ball_y_offset"].as<double>();
+            cfg.ball_kick_distance   = config["ball_kick_distance"].as<double>();
+            cfg.goal_target_offset   = config["goal_target_offset"].as<double>();
+            cfg.approach_ball_radius = config["approach_ball_radius"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -82,7 +84,7 @@ namespace module::strategy {
                     rBRr.y() += cfg.ball_y_offset;
                     const double heading = std::atan2(rBRr.y(), rBRr.x());
                     auto Hrb             = pos_rpy_to_transform(rBRr, Eigen::Vector3d(0, 0, heading));
-                    emit<Task>(std::make_unique<WalkTo>(Hrb), 2);
+                    emit<Task>(std::make_unique<WalkDirect>(Hrb, cfg.approach_ball_radius));
                 }
             });
 

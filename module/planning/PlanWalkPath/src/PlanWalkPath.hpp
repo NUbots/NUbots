@@ -35,29 +35,40 @@
 
 namespace module::planning {
 
+    struct ErrorThresholds {
+        double enter_pos_threshold;
+        double enter_ori_threshold;
+        double leave_pos_threshold;
+        double leave_ori_threshold;
+    };
+
     class PlanWalkPath : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
-            double start_rotate_to_target_pos_error_threshold = 0;
-            double start_rotate_to_target_ori_error_threshold = 0;
-            double stop_rotate_to_target_pos_error_threshold  = 0;
-            double stop_rotate_to_target_ori_error_threshold  = 0;
+            double enter_rotate_to_target_pos_threshold = 0;
+            double enter_rotate_to_target_ori_threshold = 0;
+            double leave_rotate_to_target_pos_threshold = 0;
+            double leave_rotate_to_target_ori_threshold = 0;
 
-            double start_walk_to_target_pos_error_threshold = 0;
-            double start_walk_to_target_ori_error_threshold = 0;
-            double stop_walk_to_target_pos_error_threshold  = 0;
-            double stop_walk_to_target_ori_error_threshold  = 0;
+            double enter_walk_to_target_pos_threshold = 0;
+            double enter_walk_to_target_ori_threshold = 0;
+            double leave_walk_to_target_pos_threshold = 0;
+            double leave_walk_to_target_ori_threshold = 0;
 
-            double start_strafe_to_target_pos_error_threshold = 0;
-            double start_strafe_to_target_ori_error_threshold = 0;
-            double stop_strafe_to_target_pos_error_threshold  = 0;
-            double stop_strafe_to_target_ori_error_threshold  = 0;
+            double enter_strafe_to_target_pos_threshold = 0;
+            double enter_strafe_to_target_ori_threshold = 0;
+            double leave_strafe_to_target_pos_threshold = 0;
+            double leave_strafe_to_target_ori_threshold = 0;
 
-            double start_align_with_target_pos_error_threshold = 0;
-            double start_align_with_target_ori_error_threshold = 0;
-            double stop_align_with_target_pos_error_threshold  = 0;
-            double stop_align_with_target_ori_error_threshold  = 0;
+            double enter_align_with_target_pos_threshold = 0;
+            double enter_align_with_target_ori_threshold = 0;
+            double leave_align_with_target_pos_threshold = 0;
+            double leave_align_with_target_ori_threshold = 0;
+
+
+            // Distance to target point to begin decelerating
+            double approach_radius = 0;
 
             /// @brief Maximum angular velocity command for walking to ball
             double max_angular_velocity = 0;
@@ -89,33 +100,27 @@ namespace module::planning {
         /// @brief Norm of translational error from robot to target
         double translational_error = 0;
 
-        /// @brief Angle error (absolute) between robot and target point
-        double angle_error = 0;
-
-        /// @brief Angle error (absolute) between robot and target heading
-        double heading_error = 0;
-
         /// @brief Angle between robot and target point
-        double angle = 0;
+        double angle_to_target = 0;
 
         /// @brief Angle between robot and target heading
-        double heading = 0;
+        double angle_to_desired_heading = 0;
 
         // Rotate to face target thresholds
-        double rotate_to_target_pos_error_threshold = 0;
-        double rotate_to_target_ori_error_threshold = 0;
+        double rotate_to_target_pos_threshold = 0;
+        double rotate_to_target_ori_threshold = 0;
 
         // Walk to target thresholds
-        double walk_to_target_pos_error_threshold = 0;
-        double walk_to_target_ori_error_threshold = 0;
+        double walk_to_target_pos_threshold = 0;
+        double walk_to_target_ori_threshold = 0;
 
         // Strafe to target thresholds
-        double strafe_to_target_pos_error_threshold = 0;
-        double strafe_to_target_ori_error_threshold = 0;
+        double strafe_to_target_pos_threshold = 0;
+        double strafe_to_target_ori_threshold = 0;
 
         // Align to target thresholds
-        double align_with_target_pos_error_threshold = 0;
-        double align_with_target_ori_error_threshold = 0;
+        double align_with_target_pos_threshold = 0;
+        double align_with_target_ori_threshold = 0;
 
         void emit_debug_information(const Eigen::Isometry3d& Hrd, const Eigen::Vector3d& velocity_target);
 

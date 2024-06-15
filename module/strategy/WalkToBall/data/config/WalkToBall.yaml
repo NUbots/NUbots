@@ -11,3 +11,5 @@ ball_kick_distance: 0.5
 
 # Goal kick target should be behind line so goal kick position doesn't try position robot to kick ball out of goal when close to line
 goal_target_offset: 0.5
+
+approach_ball_radius: 0.4
