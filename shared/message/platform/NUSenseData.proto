@@ -76,7 +76,6 @@ message Servo {
     float temperature = 13;
     /// The windowed counts of the dynamixel packets since the last NUSense message
     PacketCounts packet_counts = 14;
-
 }
 
 message IMU {
