@@ -18,8 +18,6 @@ nuclear_role(
   support::logging::MessageLogHandler # Used to send log messages and reaction statistics to NUsight
   network::PlotJuggler
   # Sensors and network input
-  input::GameController
-  network::RobotCommunication
   input::SensorFilter
   platform::Webots
   # Vision
@@ -28,6 +26,7 @@ nuclear_role(
   vision::BallDetector
   vision::FieldLineDetector
   vision::RobotDetector
+  vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation

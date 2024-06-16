@@ -35,6 +35,8 @@
 #include "message/strategy/DiveToBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
+#include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/support/yaml_expression.hpp"
@@ -47,6 +49,7 @@ namespace module::purpose {
     using message::strategy::DiveToBall;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
+    using message::strategy::WalkToBall;
     using GoalieTask = message::purpose::Goalie;
     using message::purpose::CornerKickGoalie;
     using message::purpose::DirectFreeKickGoalie;
@@ -56,6 +59,7 @@ namespace module::purpose {
     using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
     using message::purpose::ThrowInGoalie;
+    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToFieldPosition;
 
     using extension::Configuration;
@@ -148,7 +152,8 @@ namespace module::purpose {
         emit<Task>(std::make_unique<WalkToFieldPosition>(position), cfg.ready_position.z(), 1);
         emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
-        emit<Task>(std::make_unique<DiveToBall>(), 4);  // dive to the ball
+        emit<Task>(std::make_unique<WalkToBall>(), 4);  // try to walk to the ball
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 6);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose
