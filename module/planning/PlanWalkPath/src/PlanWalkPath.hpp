@@ -37,6 +37,12 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
+            double enter_rotate_to_target  = 0.0;
+            double exit_rotate_to_target   = 0.0;
+            double enter_walk_to_target    = 0.0;
+            double exit_walk_to_target     = 0.0;
+            double enter_rotate_to_heading = 0.0;
+            double exit_rotate_to_heading  = 0.0;
             /// @brief Maximum walk command velocity magnitude for walking to ball
             double max_translational_velocity_magnitude = 0;
             /// @brief Minimum walk command velocity for walking to ball
@@ -62,6 +68,25 @@ namespace module::planning {
             /// @brief Pivot ball side velocity
             double pivot_ball_velocity_y = 0;
         } cfg;
+
+        struct State {
+            enum Value {
+                /// @brief The beginning of the planner, where we determine what state the robot is in
+                STOP,
+                /// @brief The robot is rotating to face the position it needs to walk to
+                /// This is to prevent attempts to strafe and walk backwards to reach the position target
+                ROTATE_TO_TARGET,
+                /// @brief The robot is walking to the target from a distance
+                /// The robot should slow down as it approaches the target
+                WALK_TO_TARGET,
+                /// @brief The robot is rotating on the spot to face the requested heading
+                ROTATE_TO_HEADING,
+            } value;
+            State(const Value& v) : value(v) {}
+            operator int() const {
+                return value;
+            }
+        };
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0;

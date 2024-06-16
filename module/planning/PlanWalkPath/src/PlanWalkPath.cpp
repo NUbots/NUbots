@@ -53,6 +53,13 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
+            cfg.enter_rotate_to_target  = config["enter_rotate_to_target"].as<double>();
+            cfg.exit_rotate_to_target   = config["exit_rotate_to_target"].as<double>();
+            cfg.enter_walk_to_target    = config["enter_walk_to_target"].as<double>();
+            cfg.exit_walk_to_target     = config["exit_walk_to_target"].as<double>();
+            cfg.enter_rotate_to_heading = config["enter_rotate_to_heading"].as<double>();
+            cfg.exit_rotate_to_heading  = config["exit_rotate_to_heading"].as<double>();
+
             cfg.max_translational_velocity_magnitude = config["max_translational_velocity_magnitude"].as<double>();
             cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
             cfg.acceleration                         = config["acceleration"].as<double>();
@@ -68,13 +75,50 @@ namespace module::planning {
             cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
             cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
+
+            // Initial state for the planner
+            emit(std::make_unique<State>(State::STOP));
         });
 
-        // Path to walk to a particular point
-        on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
-            // If we haven't got an active walk task, then reset the velocity to minimum velocity
-            if (walk.run_state == GroupInfo::RunState::NO_TASK) {
-                velocity_magnitude = cfg.min_translational_velocity_magnitude;
+        on<Start<WalkTo>>().then([this] {
+            // Reset the velocity magnitude to minimum velocity
+            velocity_magnitude = cfg.min_translational_velocity_magnitude;
+
+            // Initial state for the planner
+            emit(std::make_unique<State>(State::STOP));
+        });
+
+
+        on<Provide<WalkTo>, When<State, std::equal_to, State::ROTATE_TO_TARGET>>().then([this](const WalkTo& walk_to) {
+            // If the robot is close enough to the target, do not rotate to face the target
+            if (walk_to.rPRr.head(2).norm() < cfg.enter_walk_to_target) {
+                emit(std::make_unique<State>(State::ROTATE_TO_HEADING));
+                return;
+            }
+
+            // If robot is facing the target, transition to the next state
+            double angle = std::atan2(walk_to.rPRr.y(), walk_to.rPRr.x());
+            if (std::abs(angle) < cfg.exit_rotate_to_target) {
+                emit(std::make_unique<State>(State::WALK_TO_TARGET));
+            }
+            else {
+                // Rotate to face the target
+                emit<Task>(std::make_unique<TurnOnSpot>(angle < 0.0));
+            }
+        });
+
+        on<Provide<WalkTo>, When<State, std::equal_to, State::WALK_TO_TARGET>>().then([this](const WalkTo& walk_to) {
+            // If the robot is close enough to the target, do not walk to the target
+            if (walk_to.rPRr.head(2).norm() < cfg.exit_walk_to_target) {
+                emit(std::make_unique<State>(State::ROTATE_TO_HEADING));
+                return;
+            }
+
+            // If the robot isn't within threshold to face target, rotate to face target
+            // Enter threshold is larger than exit, so it is harder to reenter rotating to the target
+            if (std::abs(std::atan2(walk_to.rPRr.y(), walk_to.rPRr.x())) > cfg.enter_rotate_to_target) {
+                emit(std::make_unique<State>(State::ROTATE_TO_TARGET));
+                return;
             }
 
             // If robot getting close to the point, begin to decelerate to minimum velocity
@@ -98,6 +142,49 @@ namespace module::planning {
                 utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
 
             emit<Task>(std::make_unique<Walk>(velocity_target));
+        });
+
+        on<Provide<WalkTo>, When<State, std::equal_to, State::ROTATE_TO_HEADING>>().then([this](const WalkTo& walk_to) {
+            // If the robot is facing the target heading and close to the target, stop
+            double distance = walk_to.rPRr.head(2).norm();
+            if (std::abs(walk_to.heading) < cfg.exit_rotate_to_heading && distance < cfg.enter_walk_to_target) {
+                emit(std::make_unique<State>(State::STOP));
+            }
+
+            // If the robot is too far out of the position, walk to position
+            if (distance > cfg.enter_walk_to_target) {
+                emit(std::make_unique<State>(State::WALK_TO_TARGET));
+                return;
+            }
+
+            // Robot is not facing the heading but is close enough, rotate to face the heading
+            emit<Task>(std::make_unique<TurnOnSpot>(walk_to.heading < 0.0));
+        });
+
+        on<Provide<WalkTo>, When<State, std::equal_to, State::STOP>>().then([this](const WalkTo& walk_to) {
+            // Check if the robot is far away from the target and not facing the target, then face target
+            double angle = std::atan2(walk_to.rPRr.y(), walk_to.rPRr.x());
+            if (walk_to.rPRr.head(2).norm() > cfg.enter_walk_to_target
+                && std::abs(angle) > cfg.enter_rotate_to_target) {
+                emit(std::make_unique<State>(State::ROTATE_TO_TARGET));
+                return;
+            }
+
+            // Check if the robot is far from the target
+            if (walk_to.rPRr.head(2).norm() > cfg.enter_walk_to_target) {
+                emit(std::make_unique<State>(State::WALK_TO_TARGET));
+                return;
+            }
+
+            // The robot is close to the target
+            // Check if the robot is facing the target heading
+            if (std::abs(walk_to.heading) > cfg.enter_rotate_to_heading) {
+                emit(std::make_unique<State>(State::ROTATE_TO_HEADING));
+                return;
+            }
+
+            // The robot is close to the target and facing the target heading, keep stopped
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
