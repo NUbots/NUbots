@@ -1,15 +1,15 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Threshold values
-enter_rotate_to_target: 0.5
-exit_rotate_to_target: 0.1
+enter_rotate_to_target: 0.3
+exit_rotate_to_target: 0.05
 
-enter_walk_to_target: 0.5
-exit_walk_to_target: 0.1
+enter_walk_to_target: 0.1
+exit_walk_to_target: 0.05
 
-enter_rotate_to_heading: 0.5
-exit_rotate_to_heading: 0.1
+enter_rotate_to_heading: 0.2
+exit_rotate_to_heading: 0.05
 
 # General playing tuning values for approaching ball
 max_translational_velocity_magnitude: 0.4
