@@ -81,7 +81,7 @@ namespace module::purpose {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Idle stand if not doing anything
-            emit<Task>(std::make_unique<StandStill>());
+            // emit<Task>(std::make_unique<StandStill>());
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
             // This emit starts the tree to play soccer
