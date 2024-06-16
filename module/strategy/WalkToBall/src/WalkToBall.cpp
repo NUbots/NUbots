@@ -80,8 +80,8 @@ namespace module::strategy {
                     const Eigen::Vector3d rGFf(field_desc.dimensions.field_length / 2.0, 0.0, 0.0);
 
                     // Get heading toward goals
-                    Eigen::Vector3d rGRr = (sensors.Hrw * field.Hfw.inverse()) * rGFf;
-                    double heading       = std::atan2(rGRr.y(), rGRr.x());
+                    const Eigen::Vector3d rGRr = (sensors.Hrw * field.Hfw.inverse()) * rGFf;
+                    const double heading       = std::atan2(rGRr.y(), rGRr.x());
 
                     emit<Task>(std::make_unique<WalkTo>(rBRr, heading));
                 }
