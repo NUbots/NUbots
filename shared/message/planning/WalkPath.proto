@@ -37,6 +37,14 @@ message WalkTo {
     double heading = 2;
 }
 
+/// Walk straight to the target (main walk path)
+message WalkDirect {
+    /// Point {P} to walk to from robot {R} in robot {r} space
+    vec3 rPRr = 1;
+    /// Desired heading in robot {r} space (radians)
+    double heading = 2;
+}
+
 /// Turn on the spot in the given direction
 message TurnOnSpot {
     /// Direction to turn

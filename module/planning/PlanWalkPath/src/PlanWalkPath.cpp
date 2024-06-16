@@ -43,6 +43,7 @@ namespace module::planning {
     using message::localisation::Ball;
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
+    using message::planning::WalkDirect;
     using message::planning::WalkTo;
     using message::skill::Walk;
 
@@ -121,27 +122,7 @@ namespace module::planning {
                 return;
             }
 
-            // If robot getting close to the point, begin to decelerate to minimum velocity
-            if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
-                velocity_magnitude -= cfg.acceleration;
-                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
-            }
-            else {
-                // If robot is far away from the point, accelerate to max velocity
-                velocity_magnitude += cfg.acceleration;
-                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
-                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
-            }
-
-            // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
-
-            // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
-            // value cfg.max_angular_velocity
-            velocity_target.z() =
-                utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
-
-            emit<Task>(std::make_unique<Walk>(velocity_target));
+            emit<Task>(std::make_unique<WalkDirect>(walk_to.rPRr, walk_to.heading));
         });
 
         on<Provide<WalkTo>, When<State, std::equal_to, State::ROTATE_TO_HEADING>>().then([this](const WalkTo& walk_to) {
@@ -185,6 +166,30 @@ namespace module::planning {
 
             // The robot is close to the target and facing the target heading, keep stopped
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+        });
+
+        on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
+            // If robot getting close to the point, begin to decelerate to minimum velocity
+            if (walk_direct.rPRr.head(2).norm() < cfg.approach_radius) {
+                velocity_magnitude -= cfg.acceleration;
+                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
+            }
+            else {
+                // If robot is far away from the point, accelerate to max velocity
+                velocity_magnitude += cfg.acceleration;
+                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
+                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
+            }
+
+            // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
+            Eigen::Vector3d velocity_target = walk_direct.rPRr.normalized() * velocity_magnitude;
+
+            // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
+            // value cfg.max_angular_velocity
+            velocity_target.z() =
+                utility::math::clamp(cfg.min_angular_velocity, walk_direct.heading, cfg.max_angular_velocity);
+
+            emit<Task>(std::make_unique<Walk>(velocity_target));
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
