@@ -153,7 +153,7 @@ namespace module::purpose {
         emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 4);  // try to walk to the ball
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 6);  // Patrol bounded box region
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 5);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose
