@@ -31,15 +31,19 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/strategy/WalkToBall.hpp"
+#include "message/support/FieldDescription.hpp"
 
 namespace module::strategy {
 
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::Field;
     using message::planning::WalkTo;
+    using message::support::FieldDescription;
     using WalkToBallTask = message::strategy::WalkToBall;
 
     WalkToBall::WalkToBall(std::unique_ptr<NUClear::Environment> environment)
@@ -55,14 +59,30 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToBallTask>, With<Ball>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
-            [this](const Ball& ball, const Sensors& sensors) {
-                // If we have a ball, walk to it
+        on<Provide<WalkToBallTask>,
+           With<Ball>,
+           With<Field>,
+           With<FieldDescription>,
+           With<Sensors>,
+           Every<30, Per<std::chrono::seconds>>>()
+            .then([this](const Ball& ball,
+                         const Field& field,
+                         const FieldDescription& field_desc,
+                         const Sensors& sensors) {
+                // If there is a ball, walk to it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
+                    // Vector from robot to the ball
                     Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                     // Add an offset to account for walking with the foot in front of the ball
                     rBRr.y() += cfg.ball_y_offset;
-                    const double heading = std::atan2(rBRr.y(), rBRr.x());
+
+                    // Vector from the field to the middle of the opponent goal
+                    const Eigen::Vector3d rGFf(field_desc.dimensions.field_length / 2.0, 0.0, 0.0);
+
+                    // Get heading toward goals
+                    Eigen::Vector3d rGRr = (sensors.Hrw * field.Hfw.inverse()) * rGFf;
+                    double heading       = std::atan2(rGRr.y(), rGRr.x());
+
                     emit<Task>(std::make_unique<WalkTo>(rBRr, heading));
                 }
             });
