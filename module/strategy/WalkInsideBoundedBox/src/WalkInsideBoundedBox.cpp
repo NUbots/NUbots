@@ -49,18 +49,18 @@ namespace module::strategy {
     WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
         on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
-            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
-            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
-            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
-            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
+            this->log_level               = config["log_level"].as<NUClear::LogLevel>();
+            cfg.bounded_region_x_min      = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max      = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min      = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max      = config["bounded_region_y_max"].as<Expression>();
+            cfg.stay_behind_ball_distance = config["stay_behind_ball_distance"].as<Expression>();
         });
         on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
             [this](const Ball& ball, const Field& field) {
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;
                 Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
-
                 // Desired position of robot on field
                 Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
 
@@ -68,19 +68,21 @@ namespace module::strategy {
                 if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
                     && rBFf.y() > cfg.bounded_region_y_min && rBFf.y() < cfg.bounded_region_y_max) {
                     // Do nothing as ball is inside of defending region, play normally
-                    log<NUClear::DEBUG>("Ball is inside of bounding box");
+                    log<NUClear::INFO>("Ball is inside of bounding box");
                 }
                 else {
                     // If ball is in a region parallel and outside own bounding box of robot we clamp in the y
-                    // direction and move to 1m behind ball
+                    // direction and move to configured distance (m) behind ball
                     if (rBFf.x() >= 0 && rBFf.y() > cfg.bounded_region_y_min) {
-                        log<NUClear::DEBUG>("Ball is in own half and outside bounding box");
-                        // Clamp desired position to bounding box and try stay 1m behind ball
-                        rDFf.x() = std::clamp(rBFf.x() + 1.0, cfg.bounded_region_x_min, cfg.bounded_region_x_max);
+                        log<NUClear::INFO>("Ball is in own half and outside bounding box");
+                        // Clamp desired position to bounding box and try stay configured distance behind ball
+                        rDFf.x() = std::clamp(rBFf.x() + cfg.stay_behind_ball_distance,
+                                              cfg.bounded_region_x_min,
+                                              cfg.bounded_region_x_max);
                         rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
                     }
                     else {
-                        log<NUClear::DEBUG>("Ball is in opponents half and outside bounding box");
+                        log<NUClear::INFO>("Ball is in opponents half and outside bounding box");
                         // Clamp desired position to bounding box
                         rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
                         rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);

@@ -12,3 +12,6 @@ bounded_region_y_min: -2.3
 
 # Bounded area on field y max
 bounded_region_y_max: 2.3
+
+# Distance for the robot to stay behind the ball when the ball is to the side of the bounded box (m)
+stay_behind_ball_distance: 0.1
