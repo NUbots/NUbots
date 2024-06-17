@@ -68,13 +68,13 @@ namespace module::strategy {
                 if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
                     && rBFf.y() > cfg.bounded_region_y_min && rBFf.y() < cfg.bounded_region_y_max) {
                     // Do nothing as ball is inside of defending region, play normally
-                    log<NUClear::INFO>("Ball is inside of bounding box");
+                    log<NUClear::DEBUG>("Ball is inside of bounding box");
                 }
                 else {
                     // If ball is in a region parallel and outside own bounding box of robot we clamp in the y
                     // direction and move to configured distance (m) behind ball
                     if (rBFf.x() >= 0 && rBFf.y() > cfg.bounded_region_y_min) {
-                        log<NUClear::INFO>("Ball is in own half and outside bounding box");
+                        log<NUClear::DEBUG>("Ball is in own half and outside bounding box");
                         // Clamp desired position to bounding box and try stay configured distance behind ball
                         rDFf.x() = std::clamp(rBFf.x() + cfg.stay_behind_ball_distance,
                                               cfg.bounded_region_x_min,
@@ -82,7 +82,7 @@ namespace module::strategy {
                         rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
                     }
                     else {
-                        log<NUClear::INFO>("Ball is in opponents half and outside bounding box");
+                        log<NUClear::DEBUG>("Ball is in opponents half and outside bounding box");
                         // Clamp desired position to bounding box
                         rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
                         rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
