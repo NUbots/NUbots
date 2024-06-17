@@ -22,6 +22,7 @@ nuclear_role(
   platform::Webots
   # Vision
   vision::VisualMesh
+  vision::Yolo
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
