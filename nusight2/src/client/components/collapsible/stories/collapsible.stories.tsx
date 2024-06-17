@@ -4,6 +4,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
+import { Select } from "../../select/view";
 import { Collapsible } from "../view";
 
 const meta: Meta<typeof Collapsible> = {
@@ -85,6 +86,49 @@ export const Interactive: Story = {
             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum, tenetur eveniet.
             Adipisci sed, labore eos molestias.
           </div>
+        </Collapsible>
+      </>
+    ));
+
+    return <Component />;
+  },
+};
+
+export const WithOverflow: Story = {
+  name: "with overflowing content",
+  render: () => {
+    const model = observable({
+      open: true,
+      animate: true,
+    });
+
+    const onToggle = mobxAction(() => (model.open = !model.open));
+    const onCheckboxChange = mobxAction((event: React.ChangeEvent<HTMLInputElement>) => {
+      model.animate = event.target.checked;
+    });
+
+    const header = <div>Click to toggle</div>;
+    const Component = observer(() => (
+      <>
+        <label className="flex gap-2 mb-3">
+          <input type="checkbox" checked={model.animate} onChange={onCheckboxChange} />
+          <span>Animate</span>
+        </label>
+        <Collapsible open={model.open} onToggle={onToggle} header={header} animate={model.animate}>
+          <div>Collapsible content</div>
+          <div>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum, tenetur eveniet.
+            Adipisci sed, labore eos molestias.
+          </div>
+          <Select
+            placeholder="Show overflowing options"
+            options={[
+              { id: 0, label: "Option 1" },
+              { id: 1, label: "Option 2" },
+              { id: 2, label: "Option 3" },
+            ]}
+            onChange={() => {}}
+          />
         </Collapsible>
       </>
     ));

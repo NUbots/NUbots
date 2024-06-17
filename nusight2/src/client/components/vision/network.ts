@@ -8,7 +8,7 @@ import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { Vector4 } from "../../../shared/math/vector4";
 import { message } from "../../../shared/messages";
-import { toSeconds } from "../../../shared/time/timestamp";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { CameraParams } from "../camera/camera_params";
@@ -105,7 +105,7 @@ export class VisionNetwork {
       return;
     }
     camera.balls = balls.map((ball) => ({
-      timestamp: toSeconds(timestamp),
+      timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       cone: {
         axis: Vector3.from(ball.uBCc),
@@ -129,7 +129,7 @@ export class VisionNetwork {
       return;
     }
     camera.robots = robots.map((robot) => ({
-      timestamp: toSeconds(timestamp),
+      timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       rRCc: Vector3.from(robot.rRCc),
     }));
@@ -144,7 +144,7 @@ export class VisionNetwork {
       return;
     }
     camera.goals = goals.map((goal) => ({
-      timestamp: toSeconds(timestamp),
+      timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       side:
         goal.side === message.vision.Goal.Side.LEFT
@@ -169,7 +169,7 @@ export class VisionNetwork {
       return;
     }
     camera.boundingBoxes = boundingBoxes.map((boundingBox) => ({
-      timestamp: toSeconds(timestamp),
+      timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       name: boundingBox.name!,
       confidence: boundingBox.confidence!,

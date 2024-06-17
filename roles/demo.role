@@ -15,8 +15,7 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   output::ImageCompressor
-  # Platform
-  platform::${SUBCONTROLLER}::HardwareIO
+  # Input
   input::Camera
   input::SensorFilter
   # Network
@@ -48,4 +47,6 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::PS3Walk
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

@@ -4,7 +4,6 @@ nuclear_role(
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Network
   network::NUClearNet
@@ -17,4 +16,6 @@ nuclear_role(
   actuation::Servos
   # Purpose
   purpose::ScriptTuner
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

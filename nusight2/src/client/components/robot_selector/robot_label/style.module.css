@@ -44,18 +44,21 @@
   flex-shrink: 0;
   height: 50px;
   padding: 0 1em 0 0.5em;
+  display: inline-flex;
+  align-items: center;
 }
 
 .statsDropdownButton:hover,
 .statsDropdownButton:focus {
-  color: #1197d3;
+  color: var(--color-nusight-500);
 }
 
-.statsDropdownButton svg {
+.statsDropdownButton > * {
   transition: transform 0.3s ease;
+  transform: rotate(0);
 }
 
-.statsDropdownButtonOpen svg {
+.statsDropdownButtonOpen > * {
   transform: rotate(-180deg);
 }
 
