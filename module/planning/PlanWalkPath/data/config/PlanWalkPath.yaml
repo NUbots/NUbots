@@ -22,12 +22,12 @@ pivot_ball_velocity_y: -0.2
 rotate_to_target:
   enter_pos_threshold: 0.2
   enter_ori_threshold: 0.2
-  leave_pos_threshold: 0.4
+  leave_pos_threshold: 0.6
   leave_ori_threshold: 0.4
 
 walk_to_target:
   enter_pos_threshold: 0.2
-  leave_pos_threshold: 0.4
+  leave_pos_threshold: 0.5
 
 align_with_target:
   enter_ori_threshold: 0.2
