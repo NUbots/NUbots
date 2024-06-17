@@ -30,9 +30,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
+#include "message/strategy/FindFeature.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
@@ -45,7 +45,6 @@ namespace module::purpose {
     using message::input::GameState;
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
-    using message::planning::LookAround;
     using message::strategy::DiveToBall;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
@@ -59,6 +58,7 @@ namespace module::purpose {
     using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
     using message::purpose::ThrowInGoalie;
+    using message::strategy::FindBall;
     using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToFieldPosition;
 
@@ -150,7 +150,7 @@ namespace module::purpose {
         // Second argument is priority - higher number means higher priority
         Eigen::Vector3f position(cfg.ready_position.x(), cfg.ready_position.y(), 0);
         emit<Task>(std::make_unique<WalkToFieldPosition>(position), cfg.ready_position.z(), 1);
-        emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
+        emit<Task>(std::make_unique<FindBall>(), 2);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 4);  // try to walk to the ball
         emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 5);  // Patrol bounded box region
