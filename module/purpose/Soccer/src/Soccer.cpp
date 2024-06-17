@@ -214,16 +214,13 @@ namespace module::purpose {
         });
 
         if (it != active_robots.end()) {
-            // Update existing robot's last_heard_from
+            // if the robot is in active_robots, update timestamp
             it->last_heard_from = now;
-
-            // TODO: may need more data
-            // Update existing robot's x position
+            // add more data here
         } else {
-            // Add their robot info
+            // Add new robot's info, and re-assign positions
             RobotInfo new_robot{incoming_robot_id, now};
             add_robot(new_robot);
-
 
             bool self_is_leader = active_robots.front().robot_id == PLAYER_ID;
             // A robot may emit leader messages mistakenly. Only listen to real leader.
@@ -231,7 +228,7 @@ namespace module::purpose {
 
             if (self_is_leader) {
                 decide_purposes();
-            } else if (other_is_leader) {
+            } else if (other_is_leader && !robocup.purposes.purposes.empty()) {
                 learn_purpose(robocup);
             }
         }
@@ -239,25 +236,12 @@ namespace module::purpose {
 
     // find which robot should be our striker
     uint8_t Soccer::find_striker() {
-        // temp logic
-        return active_robots.size() - 1;
-
-        // TODO: player furthest ahead on field should be striker, or maybe based on closest to ball
-        //         // Get the current position of the ball on the field
-        //         Eigen::Isometry3d Hfw = field.Hfw;
-        //         Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
-
-        //         log<NUClear::DEBUG>("rBFf", rBFf.x());
-        //         // leeway to prevent kickoff confusion
-        //         // TODO: store this value, test variation instead?
-        //         if (rBFf.x() >= 0.2) {
-        //             // Ball is own half, so become Defender.
-
+        return 0;
+        // TODO: player furthest ahead on field could be striker, or maybe based on closest to ball
     }
 
     // decide everyone's soccer positions if I am the leader
     void Soccer::decide_purposes() {
-        // TODO: robocup + position tracker probs needed here later
         auto purposes_msg = std::make_unique<Purposes>();
         uint8_t striker_idx = find_striker();
 
@@ -267,7 +251,12 @@ namespace module::purpose {
             } else {
                 purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
             }
-            // TODO: if we are in first loop iteration, assign
+            if (striker_idx == 0) {
+                // note: at the moment our leader is always our striker, may not always be the case going forward
+                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                log<NUClear::DEBUG>("leader made striker");
+            }
+
         }
 
         emit(purposes_msg);
