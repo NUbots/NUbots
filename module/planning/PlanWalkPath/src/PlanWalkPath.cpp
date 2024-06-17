@@ -147,9 +147,9 @@ namespace module::planning {
                 emit(graph("Aligning with target heading", false));
                 // Increase thresholds to prevent oscillation when condition is reached
                 cfg.align_with_thresholds.ori = cfg.align_with_thresholds.leave_ori;
-                // 4. We are close to the target and aligned with the target, stop
-                emit<Task>(std::make_unique<StandStill>());
             }
+            // 4. We are close to the target and aligned with the target, stop
+            // Do nothing
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
