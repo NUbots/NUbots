@@ -52,10 +52,13 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-
+            // Error thresholds rotating to target
             ErrorThresholds rotate_to_thresholds;
+
+            // Error thresholds walking to target
             ErrorThresholds walk_to_thresholds;
-            ErrorThresholds strafe_to_thresholds;
+
+            // Error thresholds aligning with target heading
             ErrorThresholds align_with_thresholds;
 
             // Distance to target point to begin decelerating
@@ -95,9 +98,6 @@ namespace module::planning {
 
         /// @brief Angle between robot and target heading
         double angle_to_desired_heading = 0;
-
-        void emit_debug_information(const Eigen::Isometry3d& Hrd, const Eigen::Vector3d& velocity_target);
-
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
