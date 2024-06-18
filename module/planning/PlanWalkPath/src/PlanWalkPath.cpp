@@ -53,21 +53,29 @@ namespace module::planning {
     using message::skill::Walk;
 
     double g(const double x, const double y, const double x0, const double y0) {
-        return 1 / std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
+        double distance = std::pow(x - x0, 2) + std::pow(y - y0, 2);
+        return 1 / (distance * distance);
+    }
+
+    double g_target(const double x, const double y, const double x0, const double y0) {
+        return std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
     }
 
     // https://www.desmos.com/calculator/exmrdiugxn
-    Eigen::Vector2d PlanWalkPath::vector_field(const Eigen::Vector2d& self_position,
-                                               const Eigen::Vector2d& target_position,
+    Eigen::Vector2d PlanWalkPath::vector_field(const Eigen::Vector2d& target_position,
                                                const double heading,
                                                std::vector<Eigen::Vector2d> obstacles) {
-        double x = self_position.x();
-        double y = self_position.y();
+        double x = 0.0;
+        double y = 0.0;
 
         // Attraction of the target position
         Eigen::Vector2d vector_field_direction(
             (target_position.x() - x) * g(x, y, target_position.x(), target_position.y()) * cfg.target_strength,
             (target_position.y() - y) * g(x, y, target_position.x(), target_position.y()) * cfg.target_strength);
+
+        log<NUClear::INFO>("Target difference",
+                           (target_position.x() - x) * g_target(x, y, target_position.x(), target_position.y()),
+                           (target_position.y() - y) * g_target(x, y, target_position.x(), target_position.y()));
 
         // Create point next to target position at given heading
         double x_target = target_position.x() + std::cos(heading);
@@ -77,21 +85,38 @@ namespace module::planning {
         vector_field_direction.x() += ((x - x_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
         vector_field_direction.y() += ((y - y_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
 
+        log<NUClear::INFO>("Heading difference",
+                           (x - x_target) * g(x, y, x_target, y_target),
+                           (y - y_target) * g(x, y, x_target, y_target));
+
         // Repulsion of the obstacles
         for (const auto& obstacle : obstacles) {
             vector_field_direction.x() +=
                 ((x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
             vector_field_direction.y() +=
                 ((y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
+
+            log<NUClear::INFO>("Obstacle difference",
+                               (x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y()),
+                               (y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y()));
         }
 
         // Repulsion of the walls
-        vector_field_direction.x() -=
+        // vector_field_direction.x() -=
+        //     cfg.bounds_strength
+        //     * (std::abs(x - 4.5) * utility::math::sgn(x - 4.5) + std::abs(x + 4.5) * utility::math::sgn(x + 4.5));
+        // vector_field_direction.y() -=
+        //     cfg.bounds_strength
+        //     * (std::abs(y - 3.0) * utility::math::sgn(y - 3.0) + std::abs(y + 3.0) * utility::math::sgn(y + 3.0));
+
+        log<NUClear::INFO>(
+            "Bounds difference",
             cfg.bounds_strength
-            * (std::abs(x - 4.5) * utility::math::sgn(x - 4.5) + std::abs(x + 4.5) * utility::math::sgn(x + 4.5));
-        vector_field_direction.y() -=
+                * (std::abs(x - 4.5) * utility::math::sgn(x - 4.5) + std::abs(x + 4.5) * utility::math::sgn(x + 4.5)),
             cfg.bounds_strength
-            * (std::abs(y - 3.0) * utility::math::sgn(y - 3.0) + std::abs(y + 3.0) * utility::math::sgn(y + 3.0));
+                * (std::abs(y - 3.0) * utility::math::sgn(y - 3.0) + std::abs(y + 3.0) * utility::math::sgn(y + 3.0)));
+
+        log<NUClear::INFO>("Vector Field", vector_field_direction.transpose(), obstacles.size());
 
         return vector_field_direction;
     }
@@ -152,25 +177,17 @@ namespace module::planning {
                                               std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
             }
 
-            // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            // Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
-            Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
-            Eigen::Vector2d rPFf  = (Hfr * walk_to.rPRr).head(2);
-            Eigen::Vector2d rRFf  = Hfr.translation().head(2);
-
             std::vector<Eigen::Vector2d> obstacles{};
             for (const auto& robot : robots.robots) {
-                obstacles.push_back((field.Hfw * robot.rRWw).head(2));
+                obstacles.push_back((sensors.Hrw * robot.rRWw).head(2));
             }
 
             // Get the vector field
-            Eigen::Vector2d velocity_target = vector_field(rRFf, rPFf, walk_to.heading, obstacles);
-            velocity_target =
-                (Hfr.inverse().rotation() * Eigen::Vector3d(velocity_target.x(), velocity_target.y(), 0)).head(2);
-            velocity_target = velocity_target.normalized() * velocity_magnitude;
-            log<NUClear::INFO>("Vector Field", velocity_target.transpose(), velocity_magnitude, robots.robots.size());
-            // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
-            // value cfg.max_angular_velocity
+            Eigen::Vector2d velocity_target = vector_field(walk_to.rPRr.head(2), walk_to.heading, obstacles);
+            velocity_target                 = velocity_target.normalized() * velocity_magnitude;
+            // log<NUClear::INFO>("Vector Field", velocity_target.transpose(), velocity_magnitude,
+            // robots.robots.size()); Set the angular velocity component of the velocity_target with the angular
+            // displacement and saturate with value cfg.max_angular_velocity
             double h = utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
 
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(velocity_target.x(), velocity_target.y(), h)));

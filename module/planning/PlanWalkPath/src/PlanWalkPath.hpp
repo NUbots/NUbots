@@ -76,8 +76,7 @@ namespace module::planning {
         double velocity_magnitude = 0;
 
         /// @brief Vector field function for the walk command
-        Eigen::Vector2d vector_field(const Eigen::Vector2d& self_position,
-                                     const Eigen::Vector2d& target_position,
+        Eigen::Vector2d vector_field(const Eigen::Vector2d& target_position,
                                      const double heading,
                                      std::vector<Eigen::Vector2d> obstacles);
 
