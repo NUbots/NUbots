@@ -73,16 +73,16 @@ namespace module::planning {
         double x_target = target_position.x() + std::cos(heading);
         double y_target = target_position.y() + std::sin(heading);
 
-        // // Repulse the heading point
-        // vector_field_direction.x() += ((x - x_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
-        // vector_field_direction.y() += ((y - y_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
+        // Repulse the heading point
+        vector_field_direction.x() += ((x - x_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
+        vector_field_direction.y() += ((y - y_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
 
         // Repulsion of the obstacles
         for (const auto& obstacle : obstacles) {
             vector_field_direction.x() +=
-                ((x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength / obstacles.size();
+                ((x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
             vector_field_direction.y() +=
-                ((y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength / obstacles.size();
+                ((y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
         }
 
         // Repulsion of the walls
