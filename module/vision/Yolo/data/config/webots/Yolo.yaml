@@ -11,7 +11,7 @@ ball_confidence_threshold: 1.0
 goalpost_confidence_threshold: 0.5
 
 # Minimum confidence required for a robot detection to be accepted
-robot_confidence_threshold: 0.5
+robot_confidence_threshold: 0.1
 
 # Minimum confidence required for a field line intersection detection to be accepted
 intersection_confidence_threshold: 0.5
