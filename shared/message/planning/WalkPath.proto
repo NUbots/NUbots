@@ -76,19 +76,12 @@ message WalkToDebug {
     double rotate_to_target_ori_error_threshold = 5;
 
     double walk_to_target_pos_error_threshold = 6;
-    double walk_to_target_ori_error_threshold = 7;
 
-    double strafe_to_target_pos_error_threshold = 8;
-    double strafe_to_target_ori_error_threshold = 9;
+    double align_with_target_ori_error_threshold = 7;
 
-    double align_with_target_pos_error_threshold = 10;
-    double align_with_target_ori_error_threshold = 11;
-
-    double translational_error = 12;
-    double angle_to_target_error = 13;
-    double angle_to_desired_heading_error = 14;
-    double angle_to_target = 15;
-    double angle_to_desired_heading = 16;
+    double translational_error = 8;
+    double angle_to_target = 9;
+    double angle_to_desired_heading = 10;
 }
 
 /// Turn around the ball in the given direction

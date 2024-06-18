@@ -31,6 +31,6 @@ walk_to_target:
 
 align_with_target:
   enter_ori_threshold: 0.2
-  leave_ori_threshold: 0.4
+  leave_ori_threshold: 0.7
 
 approach_radius: 0.5

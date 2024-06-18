@@ -99,14 +99,31 @@ namespace module::planning {
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
             // Translational error (distance) from robot to target
             translational_error = walk_to.Hrd.translation().norm();
+            emit(graph("Translational error", std::abs(translational_error)));
 
             // Angle between robot and target point
             angle_to_target = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
+            emit(graph("Angle to target", std::abs(angle_to_target)));
 
             // Angle between robot and target angle_to_desired_heading
             angle_to_desired_heading = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+            emit(graph("Angle to desired heading", std::abs(angle_to_desired_heading)));
 
-            emit(std::make_unique<WalkToDebug>(walk_to.Hrd));
+            emit(graph("cfg.rotate_to_thresholds.pos", cfg.rotate_to_thresholds.pos));
+            emit(graph("cfg.rotate_to_thresholds.ori", cfg.rotate_to_thresholds.ori));
+            emit(graph("cfg.walk_to_thresholds.pos", cfg.walk_to_thresholds.pos));
+            emit(graph("cfg.align_with_thresholds.ori", cfg.align_with_thresholds.ori));
+
+            auto debug_information                                   = std::make_unique<WalkToDebug>();
+            debug_information->Hrd                                   = walk_to.Hrd;
+            debug_information->translational_error                   = translational_error;
+            debug_information->angle_to_target                       = angle_to_target;
+            debug_information->angle_to_desired_heading              = angle_to_desired_heading;
+            debug_information->rotate_to_target_pos_error_threshold  = cfg.rotate_to_thresholds.pos;
+            debug_information->rotate_to_target_ori_error_threshold  = cfg.rotate_to_thresholds.ori;
+            debug_information->walk_to_target_pos_error_threshold    = cfg.walk_to_thresholds.pos;
+            debug_information->align_with_target_ori_error_threshold = cfg.align_with_thresholds.ori;
+            emit(debug_information);
 
             // 1. If far away and not facing the target, then rotate on spot to face the target
             if (translational_error > cfg.rotate_to_thresholds.pos
@@ -142,6 +159,7 @@ namespace module::planning {
                 emit<Task>(std::make_unique<TurnOnSpot>(angle_to_desired_heading < 0));
                 cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
                 emit(graph("Aligning with target heading", true));
+                return;
             }
             else {
                 emit(graph("Aligning with target heading", false));
@@ -150,6 +168,7 @@ namespace module::planning {
             }
             // 4. We are close to the target and aligned with the target, stop
             // Do nothing
+            emit(graph("Close to target", true));
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
