@@ -168,6 +168,7 @@ namespace module::planning {
             }
             // 4. We are close to the target and aligned with the target, stop
             // Do nothing
+            emit<Task>(std::make_unique<StandStill>());
             emit(graph("Close to target", true));
         });
 
