@@ -44,6 +44,8 @@ namespace module::purpose {
             int look_at_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_ball_priority = 0;
+            /// @brief Priority of StandStill task
+            int walk_to_kick_ball_priority = 0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task

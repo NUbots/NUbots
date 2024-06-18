@@ -41,6 +41,7 @@
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
@@ -66,9 +67,11 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
-
+    using message::strategy::WalkToKickBall;
 
     using StrikerTask = message::purpose::Striker;
+
+    using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
     Striker::Striker(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -110,8 +113,8 @@ namespace module::purpose {
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // If we are stable, walk to the ready field position
             emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
 
         // Normal PLAYING state
@@ -159,8 +162,8 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);  // try to walk to the ball
-        emit<Task>(std::make_unique<KickToGoal>(), 5);       // kick the ball if possible
+        emit<Task>(std::make_unique<WalkToKickBall>(), 4);  // try to walk to the lead up kicking position
+        emit<Task>(std::make_unique<KickToGoal>(), 5);      // kick the ball if possible
     }
 
 }  // namespace module::purpose

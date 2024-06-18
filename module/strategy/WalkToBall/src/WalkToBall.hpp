@@ -27,6 +27,7 @@
 #ifndef MODULE_STRATEGY_WALKTOBALL_HPP
 #define MODULE_STRATEGY_WALKTOBALL_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -41,7 +42,19 @@ namespace module::strategy {
             NUClear::clock::duration ball_search_timeout{};
             /// @brief Offset to align the ball with the robot's foot
             double ball_y_offset = 0.0;
+
+            /// @brief The distance from ball to walk to
+            double ball_kick_distance = 0.0;
+
+            /// @brief The offset on goal target
+            double goal_target_offset = 0.0;
+
+            /// @brief The distance when walking to the ball directly to start slowing down
+            double approach_ball_radius = 0.0;
         } cfg;
+
+        /// @brief The position of the goal {g} in field {f} space
+        Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkToBall reactor.

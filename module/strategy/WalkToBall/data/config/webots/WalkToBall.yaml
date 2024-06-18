@@ -1,8 +1,13 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # How long to wait until the ball is lost and we should walk in a search pattern
 ball_search_timeout: 2
 
 # Y - Offset for ball position such that ball is approached with foot behind ball
 ball_y_offset: 0.1
+
+ball_kick_distance: 0.2
+
+# Goal kick target should be behind line so goal kick position doesn't try position robot to kick ball out of goal when close to line
+goal_target_offset: 0.5

@@ -27,28 +27,52 @@
 #ifndef MODULE_PLANNING_PLANWALKPATH_HPP
 #define MODULE_PLANNING_PLANWALKPATH_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
 
 namespace module::planning {
 
+    struct ErrorThresholds {
+        double enter_pos = 0;
+        double enter_ori = 0;
+        double leave_pos = 0;
+        double leave_ori = 0;
+
+        // Curent position error threshold
+        double pos = 0;
+
+        // Current orientation error threshold
+        double ori = 0;
+    };
+
     class PlanWalkPath : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            // Error thresholds rotating to target
+            ErrorThresholds rotate_to_thresholds;
+
+            // Error thresholds walking to target
+            ErrorThresholds walk_to_thresholds;
+
+            // Error thresholds aligning with target heading
+            ErrorThresholds align_with_thresholds;
+
+            // Distance to target point to begin decelerating
+            double approach_radius = 0;
+            /// @brief Maximum angular velocity command for walking to ball
+            double max_angular_velocity = 0;
+            /// @brief Minimum angular velocity command for walking to ball
+            double min_angular_velocity = 0;
             /// @brief Maximum walk command velocity magnitude for walking to ball
             double max_translational_velocity_magnitude = 0;
             /// @brief Minimum walk command velocity for walking to ball
             double min_translational_velocity_magnitude = 0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0;
-            /// @brief Region around ball to begin decelerating in
-            double approach_radius = 0;
-            /// @brief Maximum angular velocity command for walking to ball
-            double max_angular_velocity = 0;
-            /// @brief Minimum angular velocity command for walking to ball
-            double min_angular_velocity = 0;
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0;
             /// @brief Rotate on spot walk command forward velocity
@@ -65,6 +89,15 @@ namespace module::planning {
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0;
+
+        /// @brief Norm of translational error from robot to target
+        double translational_error = 0;
+
+        /// @brief Angle between robot and target point
+        double angle_to_target = 0;
+
+        /// @brief Angle between robot and target heading
+        double angle_to_desired_heading = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.

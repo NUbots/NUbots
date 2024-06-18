@@ -23,6 +23,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
+    this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
   }
 
@@ -40,6 +41,13 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
+  };
+
+  @action
+  private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
+    console.log("walk_to_debug", walk_to_debug);
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
   };
 
   @action.bound
@@ -106,6 +114,7 @@ export class LocalisationNetwork {
 
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
+    robot.Hrw = Matrix4.from(sensors.Hrw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;

@@ -28,13 +28,12 @@ syntax = "proto3";
 package message.planning;
 
 import "Vector.proto";
+import "Transform.proto";
 
 /// Plan a path to walk to the specified point
 message WalkTo {
-    /// Point {P} to walk to from robot {R} in robot {r} space
-    vec3 rPRr = 1;
-    /// Desired heading in robot {r} space (radians)
-    double heading = 2;
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 1;
 }
 
 /// Turn on the spot in the given direction
@@ -43,8 +42,57 @@ message TurnOnSpot {
     bool clockwise = 1;
 }
 
+message WalkDirect {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 1;
+    /// Aproach radius, distance to target at which the robot will start slowing down
+    double approach_radius = 2;
+    /// Don't align with the target heading
+    bool dont_align_towards_target = 3;
+}
+
+
+enum WalkToState {
+    UNKNOWN = 0;
+    ROTATE_TO_TARGET_POINT = 1;
+    WALK_TO_TARGET = 2;
+    STRAFE_TO_TARGET = 3;
+    ROTATE_TO_TARGET_HEADING = 4;
+    AT_TARGET = 5;
+}
+
+/// Debug information for walk to planning
+message WalkToDebug {
+    /// Transform from desired robot pose {d} to robot {r} space
+    iso3 Hrd = 1;
+
+    /// Current state of the walk to planning
+    WalkToState state = 2;
+
+    /// Requested walk velocity
+    vec3 velocity_target = 3;
+
+    double rotate_to_target_pos_error_threshold = 4;
+    double rotate_to_target_ori_error_threshold = 5;
+
+    double walk_to_target_pos_error_threshold = 6;
+    double walk_to_target_ori_error_threshold = 7;
+
+    double strafe_to_target_pos_error_threshold = 8;
+    double strafe_to_target_ori_error_threshold = 9;
+
+    double align_with_target_pos_error_threshold = 10;
+    double align_with_target_ori_error_threshold = 11;
+
+    double translational_error = 12;
+    double angle_to_target_error = 13;
+    double angle_to_desired_heading_error = 14;
+    double angle_to_target = 15;
+    double angle_to_desired_heading = 16;
+}
+
 /// Turn around the ball in the given direction
-message TurnAroundBall {
+message PivotAroundPoint {
     /// Direction to turn
     bool clockwise = 1;
 }
