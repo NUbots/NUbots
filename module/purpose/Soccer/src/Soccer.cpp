@@ -72,6 +72,8 @@ namespace module::purpose {
 
             // Get the soccer position, if not valid option then default to striker
             cfg.position = Position(config["position"].as<std::string>());
+
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
         });
 
         // Start the Director graph for the soccer scenario!
