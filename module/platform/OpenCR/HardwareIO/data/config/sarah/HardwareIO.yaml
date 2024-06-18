@@ -41,7 +41,7 @@ servos:
     simulated: false
   - # [10] R_HIP_PITCH
     direction: 1
-    offset: 0.23
+    offset: 0.0
     simulated: false
   - # [11] L_HIP_PITCH
     direction: -1
