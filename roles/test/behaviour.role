@@ -14,7 +14,6 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
   # Vision
@@ -22,6 +21,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
+  vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
@@ -55,4 +55,6 @@ nuclear_role(
   strategy::AlignBallToGoal
   # Purposes
   purpose::Tester
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

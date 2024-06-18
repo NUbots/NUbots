@@ -6,7 +6,7 @@ import { Vector2 } from "../../shared/math/vector2";
 import { Vector3 } from "../../shared/math/vector3";
 import { Ivec2, message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { toTimestamp } from "../../shared/time/timestamp";
+import { TimestampObject } from "../../shared/time/timestamp";
 import { Message, Simulator } from "../simulator";
 
 import { periodic } from "./periodic";
@@ -72,7 +72,7 @@ export class OverviewSimulator extends Simulator {
     const penaltyReasons = getEnumValues<PenaltyReason>(PenaltyReason);
 
     const buffer = Overview.encode({
-      timestamp: toTimestamp(time),
+      timestamp: TimestampObject.fromSeconds(time),
       robotId: this.robotIndex + 1,
       roleName: "Overview Simulator",
       battery: this.random.float(),
@@ -92,9 +92,9 @@ export class OverviewSimulator extends Simulator {
       gameMode: this.random.choice(modes),
       gamePhase: this.random.choice(phases),
       penaltyReason: this.random.choice(penaltyReasons),
-      lastCameraImage: toTimestamp(this.randomSeconds(time, -5)),
-      lastSeenBall: toTimestamp(this.randomSeconds(time, -30)),
-      lastSeenGoal: toTimestamp(this.randomSeconds(time, -30)),
+      lastCameraImage: TimestampObject.fromSeconds(this.randomSeconds(time, -5)),
+      lastSeenBall: TimestampObject.fromSeconds(this.randomSeconds(time, -30)),
+      lastSeenGoal: TimestampObject.fromSeconds(this.randomSeconds(time, -30)),
       walkCommand: {
         x: Math.cos(time / 3 + this.robotIndex),
         y: Math.cos(time / 5 + this.robotIndex),

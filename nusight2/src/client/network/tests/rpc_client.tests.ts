@@ -87,16 +87,17 @@ describe("RpcClient", () => {
       id: "robot1",
       name: "Robot 1",
       port: 0,
+      type: "nusight-server",
     });
     const { network, nuclearnetMockEmitter } = createNetwork([robotModel]);
     const client = new RpcClient(network);
 
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: ["a.nbs", "b.nbs"] });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: ["a.nbs", "b.nbs"] });
 
     const promise = client.call(request);
     client.cancelAll();
 
-    const response = ScrubberLoadRequest.Response.encode({ ok: true, rpcToken: nextRpcToken - 1 });
+    const response = ScrubberLoadRequest.Response.encode({ rpc: { ok: true, token: nextRpcToken - 1 } });
     const packet: NUClearNetPacket = {
       hash: undefined as any,
       payload: response.finish() as Buffer,
@@ -128,16 +129,17 @@ describe("RpcClient", () => {
       id: "robot1",
       name: "Robot 1",
       port: 0,
+      type: "nusight-server",
     });
     const { network, nuclearnetMockEmitter } = createNetwork([robotModel]);
     const client = new RpcClient(network);
 
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: ["a.nbs", "b.nbs"] });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: ["a.nbs", "b.nbs"] });
 
     const promise = client.call(request);
 
     // First emit a response for a different RPC call
-    const unrelatedResponse = ScrubberLoadRequest.Response.encode({ ok: true, rpcToken: 99 });
+    const unrelatedResponse = ScrubberLoadRequest.Response.encode({ rpc: { ok: true, token: 99 } });
     const unrelatedResponsePacket: NUClearNetPacket = {
       hash: undefined as any,
       payload: unrelatedResponse.finish() as Buffer,
@@ -151,7 +153,7 @@ describe("RpcClient", () => {
     nuclearnetMockEmitter.emit("message.eye.ScrubberLoadRequest.Response", unrelatedResponsePacket);
 
     // Then emit the response for the RPC call we're interested in
-    const response = ScrubberLoadRequest.Response.encode({ ok: true, rpcToken: nextRpcToken - 1 });
+    const response = ScrubberLoadRequest.Response.encode({ rpc: { ok: true, token: nextRpcToken - 1 } });
     const packet: NUClearNetPacket = {
       hash: undefined as any,
       payload: response.finish() as Buffer,
@@ -169,7 +171,7 @@ describe("RpcClient", () => {
       expect(result.ok).toBe(true);
       expect(result.data).toEqual({
         robotModel,
-        response: { ok: true, rpcToken: nextRpcToken - 1 },
+        response: { rpc: { ok: true, token: nextRpcToken - 1 } },
       });
     } else {
       throw new Error("Expected RPC call to succeed");

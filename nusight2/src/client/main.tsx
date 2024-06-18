@@ -4,6 +4,7 @@ import React from "react";
 import { configure } from "mobx";
 import { createRoot } from "react-dom/client";
 
+import { setAppContext } from "./components/app/context";
 import { AppController } from "./components/app/controller";
 import { AppModel } from "./components/app/model";
 import { AppNetwork } from "./components/app/network";
@@ -25,9 +26,11 @@ const appModel = AppModel.of();
 const nusightNetwork = NUsightNetwork.of(appModel);
 nusightNetwork.connect({ name: "nusight" });
 
+setAppContext({ nusightNetwork });
+
 const appController = AppController.of();
 AppNetwork.of(nusightNetwork, appModel);
-const Menu = withRobotSelectorMenuBar(appModel.robots, appController.toggleRobotEnabled, nusightNetwork);
+const Menu = withRobotSelectorMenuBar(appModel, appController.toggleRobotEnabled);
 
 installDashboard({ nav, appModel, nusightNetwork, Menu });
 installLocalisation({ nav, appModel, nusightNetwork, Menu });

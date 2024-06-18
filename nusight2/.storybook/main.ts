@@ -12,8 +12,14 @@ const config: StorybookConfig = {
     autodocs: "tag",
   },
   staticDirs: ["../src/assets"],
-  viteFinal: (config) => {
+  viteFinal: async (config) => {
     return mergeConfig(config, {
+      // Needed for Vite 5: https://github.com/storybookjs/storybook/issues/25256
+      assetsInclude: ["/sb-preview/**"],
+      // Support newer javascript features like bigint
+      build: {
+        target: "es2022",
+      },
       css: {
         postcss: {
           plugins: [require("tailwindcss")()],

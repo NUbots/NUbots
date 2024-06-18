@@ -4,12 +4,12 @@ import { action } from "mobx";
 import { observer } from "mobx-react";
 
 import { Collapsible } from "../../collapsible/view";
+import { Icon } from "../../icon/view";
 import { RobotModel } from "../../robot/model";
 import { Switch } from "../../switch/view";
 import { StatusIndicator } from "../status_indicator/view";
 
 import { formatSI } from "./format-si";
-import IconDropdown from "./icon_dropdown";
 import { RobotLabelModel } from "./model";
 import style from "./style.module.css";
 
@@ -40,7 +40,7 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
           </span>
         </label>
         <button className={dropdownButtonClassNames} onClick={toggleStats}>
-          <IconDropdown />
+          <Icon weight={400}>expand_more</Icon>
         </button>
       </div>
       <Collapsible open={model.statsOpen} className={style.dataTable}>
