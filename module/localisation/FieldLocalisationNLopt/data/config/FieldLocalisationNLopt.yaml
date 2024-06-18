@@ -5,7 +5,7 @@ log_level: DEBUG
 grid_size: 1e-2
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
-starting_side: LEFT
+starting_side: EITHER
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
