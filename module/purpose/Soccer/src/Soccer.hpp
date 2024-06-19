@@ -100,6 +100,9 @@ namespace module::purpose {
         /// @brief emit purpose based on leader's instructions
         void learn_purpose(const RoboCup& robocup);
 
+        /// @brief decide whether to listen for a new purpose
+        bool active_robots_changed;
+
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;
 
