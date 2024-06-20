@@ -33,5 +33,5 @@ message Walk {
     /// The target velocity to walk at: x metres per second, y metres per second, z radians per second
     vec3 velocity_target = 1;
     /// Gain to use for walking, uses config if not set
-    int gain = 2;
+    int32 gain = 2;
 }
