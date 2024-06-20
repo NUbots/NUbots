@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Allowable error for the servo position
+servo_error: 0.01

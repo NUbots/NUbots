@@ -86,8 +86,10 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
+            // When starting, we want to safely move to the stand position
+            emit<Task>(std::make_unique<StartSafely>(), 2);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 2);
+            emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
 
         on<Provide<FindPurpose>>().then([this] {
