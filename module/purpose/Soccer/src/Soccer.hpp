@@ -91,17 +91,17 @@ namespace module::purpose {
         /// @brief Add RobotInfo ordered by id
         void add_robot(RobotInfo new_robot);
 
-        /// @brief Decide the correct soccer positions
+        /// @brief Return the index of the striker
         uint8_t find_striker();
 
-        /// @brief Decide the correct soccer positions
-        void decide_purposes();
+        /// @brief Decide the correct soccer position
+        void give_directions();
 
         /// @brief emit purpose based on leader's instructions
-        void learn_purpose(const RoboCup& robocup);
+        void follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id);
 
-        /// @brief decide whether to listen for a new purpose
-        bool active_robots_changed;
+        /// @brief leader determines its own soccer position
+        void self_direct(uint8_t striker_idx);
 
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;
