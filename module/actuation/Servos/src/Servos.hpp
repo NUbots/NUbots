@@ -82,12 +82,15 @@ namespace module::actuation {
         void add_group_provider() {
             on<Provide<Group>, Needs<Elements>...>().then(
                 [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
+                    log<NUClear::DEBUG>("Received a Servo Group Task");
                     // Check if any subtask is Done
                     if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+
                         // If every servo task is done then emit Done (ignore servos that weren't included in the Task
                         // message)
                         if (((!group.servos.contains(utility::actuation::ServoMap<Elements>::value) || elements.done)
                              && ...)) {
+                            log<NUClear::DEBUG>("All Servo Group Tasks are Done");
                             emit<Task>(std::make_unique<Done>());
                             return;
                         }

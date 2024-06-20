@@ -110,9 +110,7 @@ namespace module::actuation {
 
             if (cfg.mode == "IK") {
                 for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
-                    // Use gain from message if it is set, otherwise use the gain from the configuration
-                    int gain = foot_control_task.gain == 0 ? cfg.servo_states[id].gain : foot_control_task.gain;
-                    ik_task->servos[id] = ServoState(gain, TORQUE_ENABLED);
+                    ik_task->servos[id] = ServoState(cfg.servo_states[id].gain, TORQUE_ENABLED);
                     // Get servo from sensors for graphing information
                     auto it          = std::find_if(sensors.servo.begin(),
                                            sensors.servo.end(),

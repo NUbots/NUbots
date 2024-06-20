@@ -38,6 +38,8 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Priority of StartSafely task
+            int start_safely_priority = 0;
             /// @brief Priority of FindBall task
             int find_ball_priority = 0;
             /// @brief Priority of LookAtBall task

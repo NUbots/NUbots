@@ -3,24 +3,21 @@
 
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
+
 namespace module::strategy {
 
-    class StartSafely : public NUClear::Reactor {
+    class StartSafely : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Allowable error in servo position
-            double error = 0.0;
-        } cfg;
-
-        /// @brief Stores the servo targets that have been seen
-        std::map<int, double> servo_targets = {};
-
-        /// @brief The provider for the StartSafely task
-        ReactionHandle provider{};
-
-        /// @brief The reaction that checks if the servos are at their target position
-        ReactionHandle position_check{};
+            /// @brief How long to tell the servo to move for in seconds
+            int move_time = 0;
+            /// @brief Gain for the servos
+            double servo_gain = 0.0;
+            /// @brief Stores the servo targets
+            std::map<int, double> servo_targets = {};
+        } cfg{};
 
     public:
         /// @brief Called by the powerplant to build and setup the StartSafely reactor.

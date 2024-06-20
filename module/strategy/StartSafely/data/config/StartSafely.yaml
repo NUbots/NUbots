@@ -1,5 +1,29 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Allowable error for the servo position
-servo_error: 0.01
+# Servo gain
+servo_gain: 3
+# How long to tell the servo to move for in seconds
+move_time: 5
+
+# Positions for each servo in radians
+right_shoulder_pitch: 1.710
+left_shoulder_pitch: 1.704
+right_shoulder_roll: -0.378
+left_shoulder_roll: 0.335
+right_elbow: -0.682
+left_elbow: -0.691
+right_hip_yaw: -0.014
+left_hip_yaw: 0.005
+right_hip_roll: -0.126
+left_hip_roll: 0.140
+right_hip_pitch: -0.932
+left_hip_pitch: -0.920
+right_knee: 1.334
+left_knee: 1.340
+right_ankle_pitch: -0.530
+left_ankle_pitch: -0.565
+right_ankle_roll: 0.114
+left_ankle_roll: -0.124
+head_yaw: 0.000
+head_pitch: 0.005

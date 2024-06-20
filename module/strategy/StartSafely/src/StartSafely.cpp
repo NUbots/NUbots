@@ -2,7 +2,8 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Limbs.hpp"
+#include "message/actuation/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/strategy/StartSafely.hpp"
 
@@ -10,60 +11,64 @@
 namespace module::strategy {
 
     using StartSafelyTask = message::strategy::StartSafely;
-    using message::actuation::ServoTarget;
+    using message::actuation::Body;
+    using message::actuation::ServoCommand;
+    using message::actuation::ServoState;
     using message::input::Sensors;
 
     using extension::Configuration;
 
-    StartSafely::StartSafely(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    StartSafely::StartSafely(std::unique_ptr<NUClear::Environment> environment)
+        : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("StartSafely.yaml").then([this](const Configuration& config) {
             // Use configuration here from file StartSafely.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.error       = config["error"].as<double>();
+            cfg.move_time   = config["move_time"].as<double>();
+            cfg.servo_gain  = config["servo_gain"].as<double>();
+
+            cfg.servo_targets[0]  = config["right_shoulder_pitch"].as<double>();
+            cfg.servo_targets[1]  = config["left_shoulder_pitch"].as<double>();
+            cfg.servo_targets[2]  = config["right_shoulder_roll"].as<double>();
+            cfg.servo_targets[3]  = config["left_shoulder_roll"].as<double>();
+            cfg.servo_targets[4]  = config["right_elbow"].as<double>();
+            cfg.servo_targets[5]  = config["left_elbow"].as<double>();
+            cfg.servo_targets[6]  = config["right_hip_yaw"].as<double>();
+            cfg.servo_targets[7]  = config["left_hip_yaw"].as<double>();
+            cfg.servo_targets[8]  = config["right_hip_roll"].as<double>();
+            cfg.servo_targets[9]  = config["left_hip_roll"].as<double>();
+            cfg.servo_targets[10] = config["right_hip_pitch"].as<double>();
+            cfg.servo_targets[11] = config["left_hip_pitch"].as<double>();
+            cfg.servo_targets[12] = config["right_knee"].as<double>();
+            cfg.servo_targets[13] = config["left_knee"].as<double>();
+            cfg.servo_targets[14] = config["right_ankle_pitch"].as<double>();
+            cfg.servo_targets[15] = config["left_ankle_pitch"].as<double>();
+            cfg.servo_targets[16] = config["right_ankle_roll"].as<double>();
+            cfg.servo_targets[17] = config["left_ankle_roll"].as<double>();
+            cfg.servo_targets[18] = config["head_yaw"].as<double>();
+            cfg.servo_targets[19] = config["head_pitch"].as<double>();
         });
 
-        provider = on<Provide<StartSafelyTask>>()
-                       .then([this] {
-                           // Emit a zero velocity walk task to make the robot stand
-                           log<NUClear::INFO>("Emitting Walk task to make the robot stand safely.");
-                           emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero(), 1));
-                       })
-                       .enabled();
+        on<Provide<StartSafelyTask>, Needs<Body>, Every<10, Per<std::chrono::seconds>>>().then(
+            [this](const RunInfo& run_info) {
+                if (run_info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    emit<Task>(std::make_unique<Done>());
+                    log<NUClear::INFO>("Done");
+                    return;
+                }
+                log<NUClear::INFO>("Starting safely");
 
-        position_check =
-            on<Trigger<ServoTarget>, With<Sensors>>()
-                .then([this](const ServoTarget& target, const Sensors& sensors) {
-                    // Check if we have seen this servo target before, and if not save the position
-                    if (servo_targets.find(target.id) == servo_targets.end()) {
-                        servo_targets[target.id] = target.position;
-                    }
+                NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
 
-                    // If we have seen all the servo targets, then we can check if the servos are at their
-                    // position
-                    if (servo_targets.size() == 20) {
-                        // Check if all the servos are at their target position
-                        bool all_at_target = true;
-                        for (i = 0; i < 20; i++) {
-                            double error = std::abs(sensors.servo[i].present_position - servo_targets[i]);
-                            if (error > 0.01) {
-                                all_at_target = false;
-                                break;  // don't keep looking if at least one is not in position
-                            }
-                        }
+                auto body = std::make_unique<Body>();
 
-                        // If all the servos are at their target position, then start safely can stop
-                        if (all_at_target) {
-                            log<NUClear::INFO>("All servos are at their target position, stopping StartSafely.");
+                for (int i = 0; i < 20; i++) {
+                    log<NUClear::INFO>("Setting servo", i, "to", cfg.servo_targets[i], "with gain", cfg.servo_gain);
+                    body->servos[i] = ServoCommand(time, cfg.servo_targets[i], ServoState(cfg.servo_gain, 100));
+                }
 
-                            provider.disable();
-                            provider.unbind();
-                            position_check.disable();
-                            position_check.unbind();
-                        }
-                    }
-                })
-                .enabled();
+                emit<Task>(body);
+            });
     }
 
 }  // namespace module::strategy

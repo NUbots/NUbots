@@ -163,8 +163,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_task.gain));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, walk_task.gain));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
@@ -172,16 +172,10 @@ namespace module::skill {
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
                     right_arm->servos[id] =
                         ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
-                    // Set gain from walk_task if non-zero
-                    right_arm->servos[id].state.gain =
-                        walk_task.gain == 0 ? right_arm->servos[id].state.gain : walk_task.gain;
                 }
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_ARM)) {
                     left_arm->servos[id] =
                         ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
-                    // Set gain from walk_task if non-zero
-                    left_arm->servos[id].state.gain =
-                        walk_task.gain == 0 ? left_arm->servos[id].state.gain : walk_task.gain;
                 }
                 emit<Task>(left_arm, 0, true, "Walk left arm");
                 emit<Task>(right_arm, 0, true, "Walk right arm");

@@ -44,6 +44,4 @@ message ControlRightFoot {
     iso3 Htf = 1;
     /// Time to complete the motion
     google.protobuf.Timestamp time = 2;
-    /// Gain for the right leg, if not set then uses configuration
-    int32 gain = 3;
 }

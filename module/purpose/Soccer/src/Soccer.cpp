@@ -43,6 +43,7 @@
 #include "message/skill/Look.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/StartSafely.hpp"
 
 namespace module::purpose {
 
@@ -62,6 +63,7 @@ namespace module::purpose {
     using message::skill::Look;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
+    using message::strategy::StartSafely;
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -77,7 +79,7 @@ namespace module::purpose {
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without these emis, modules that need a Stability and WalkState messages may not run
+            // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Idle stand if not doing anything
