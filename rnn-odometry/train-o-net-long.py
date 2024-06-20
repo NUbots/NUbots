@@ -58,11 +58,24 @@ def main():
     imu = []
     servos = []
     truth_all = []
+    truth_start_end_indicator = []
 
     for i in range(first_file, num_files):
-        imu.append(np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy"))
-        servos.append(np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy"))
-        truth_all.append(np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy"))
+        imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
+        imu.append(imu_data)
+
+        servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
+        servos.append(servos_data)
+
+        truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
+        truth_all.append(truth_data)
+
+        # Create a chunk for the truth_start_end_indicator array
+        chunk_size = truth_data.shape[0]  # Assuming the first dimension is the one we're interested in
+        indicator_chunk = np.zeros(chunk_size)
+        indicator_chunk[0] = 1  # Start indicator
+        indicator_chunk[-1] = 1  # End indicator
+        truth_start_end_indicator.extend(indicator_chunk)
 
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
@@ -77,11 +90,13 @@ def main():
     imu_joined = np.concatenate(imu, axis=0)
     servos_joined = np.concatenate(servos, axis=0)
     truth_all_joined = np.concatenate(truth_all, axis=0)
+    truth_start_end_indicator_joined = np.array(truth_start_end_indicator)
 
     # Print the shape of the joined arrays
     print("IMU s joined: ", imu_joined.shape)
     print("Servos s joined: ", servos_joined.shape)
     print("Truth s joined: ", truth_all_joined.shape)
+    print("Truth start/end indicator: ", truth_start_end_indicator_joined.shape)
 
     # Slice out the arm and head servos
     servos_joined = servos_joined[:, 6:18]
@@ -145,6 +160,7 @@ def main():
 
     #### Normalisation  ####
     ## Standardise ##
+
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
@@ -163,7 +179,10 @@ def main():
     # validate_arr_clipped = np.clip(validate_arr, -4, 4)
     # test_arr_clipped = np.clip(test_arr, -4, 4)
 
+    ## End of standardisation ##
+
     ## Min/Max Scaling ##
+
     scaler = MinMaxScaler(feature_range=(-1, 1))
     # Fit scaler to training data only
     scaler.fit(train_arr)
@@ -171,6 +190,8 @@ def main():
     train_arr = scaler.transform(train_arr)
     validate_arr = scaler.transform(validate_arr)
     test_arr = scaler.transform(test_arr)
+
+    ## End of Min/Max Scaling ##
 
     # Print the shapes and min/max values of the datasets
     print(f"Training set size: {train_arr.shape}")
@@ -189,9 +210,12 @@ def main():
     # plt.legend()
     # plt.show()
 
-    # NOTE: Remember to reshape if adding or removing features
+    #### End of normalisation ####
 
-    # Split into data and targets
+
+
+    #### Split into data and targets ####
+    # NOTE: Remember to reshape if adding or removing features
     # Training
     input_data_train = train_arr[:, :18]  # imu and servos
     input_targets_train = train_arr[:, 18:]  # truth
@@ -227,6 +251,21 @@ def main():
     # plt.legend()
     # plt.show()
 
+    #### End of splitting ####
+
+    #### Add indicator to the datasets ####
+    # Convert indicator the list to a numpy array before reshaping
+    truth_start_end_indicator_2d = np.array(truth_start_end_indicator).reshape(-1, 1)
+
+    # Split the indicator array
+    train_indicator = truth_start_end_indicator_2d[:train_arr.shape[0]]
+    validate_indicator = truth_start_end_indicator_2d[train_arr.shape[0]:train_arr.shape[0] + validate_arr.shape[0]]
+    test_indicator = truth_start_end_indicator_2d[train_arr.shape[0] + validate_arr.shape[0]:]
+    # Concatenate the indicator arrays to the main datasets
+    input_data_train = np.concatenate((input_data_train, train_indicator.reshape(-1, 1)), axis=1)
+    input_data_validate = np.concatenate((input_data_validate, validate_indicator.reshape(-1, 1)), axis=1)
+    input_data_test = np.concatenate((input_data_test, test_indicator.reshape(-1, 1)), axis=1)
+    #### End of adding indicator ####
 
     # print dataset shapes
     print(f"input_data_train: {input_data_train.shape}")
@@ -243,6 +282,16 @@ def main():
     np.save('datasets/input_targets_validate.npy', input_targets_validate)
     np.save('datasets/input_data_test.npy', input_data_test)
     np.save('datasets/input_targets_test.npy', input_targets_test)
+
+    # Plot and inspect after adding indicator
+    # num_channels = input_data_train.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(input_data_train[0:100000, i], label=f'Target {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
 
     # Plot and inspect
     # num_channels = train_arr_scaled.shape[1]
@@ -361,7 +410,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 500
+    epochs = 150
 
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
@@ -382,7 +431,7 @@ def main():
     # ** Optimizers **
     # LR schedules
     size_of_dataset = input_data_train.shape[0]
-    decay_to_epoch = 50                                         # Number of epochs for learning rate to decay over before it resets
+    decay_to_epoch = 25                                         # Number of epochs for learning rate to decay over before it resets
     steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
     decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     print(f"Decay to epoch: {decay_to_epoch}")
@@ -423,11 +472,11 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00009, l2=0.0009), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
     dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
-    lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00009, l2=0.0009), return_sequences=True)(dropout2)    # 32 originally
+    lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
     # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
