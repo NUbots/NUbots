@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react'
+import React, { useLayoutEffect, useRef, useMemo } from 'react'
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -6,6 +6,9 @@ import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
+// import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
+// import { BufferGeometryUtils } from 'three';
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
@@ -339,11 +342,65 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
   );
 });
 
+// const Pacman = ({ position, rotation }: { position: Vector3; rotation: Vector3 }) => {
+//   const merged = useMemo(() => {
+//     const pacman = new THREE.SphereBufferGeometry(16, 32, 32);
+//     const pacmanWall1 = new THREE.PlaneBufferGeometry(1, 1);
+//     pacman.merge(pacmanWall1);
+//     return pacman;
+//   }, []);
+//   return <mesh geometry={merged} />;
+// };
+
 const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
   const position = new Vector3(3, 1, 0); // Dummy position vector
   const rotation = [0, 0, 3]; // Dummy rotation (euler angles)
-  const rotationThreshold = Math.PI / 2; // Threshold for rotation in radians
+  const closeRotationThreshold = Math.PI / 8; // Threshold for rotation in radians
+  const distantRotationThreshold = Math.PI / 2;
+  const height = 0.3;
   var path = new THREE.Path();
+
+  const PointerInternalGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, rotationThreshold: number): THREE.BufferGeometry => {
+    const pacmanBase = new THREE.CylinderBufferGeometry(innerRadius, innerRadius, height, radialSegments, 1, false, 0, rotationThreshold);
+    const thetaEndWall = new THREE.PlaneBufferGeometry(innerRadius, height);
+    const thetaStartWall = new THREE.PlaneBufferGeometry(innerRadius, height);
+
+    thetaEndWall.translate(-innerRadius / 2, 0, 0);
+    thetaStartWall.translate(innerRadius / 2, 0, 0);
+
+    const axis = new THREE.Vector3(0, 1, 0);
+    const endAngle = Math.PI / 2 + rotationThreshold;
+    const startAngle = -Math.PI / 2;
+
+    const endWallRotationMatrix = new THREE.Matrix4().makeRotationAxis(axis.normalize(), endAngle);
+    const startWallRotationMatrix = new THREE.Matrix4().makeRotationAxis(axis.normalize(), startAngle);
+
+    thetaStartWall.applyMatrix4(startWallRotationMatrix);
+    thetaEndWall.applyMatrix4(endWallRotationMatrix);
+
+    const merged = BufferGeometryUtils.mergeBufferGeometries([pacmanBase, thetaStartWall, thetaEndWall]);
+    merged.translate(0, height / 2, 0);
+
+    return merged;
+  };
+
+  const PointerExternalGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, rotationThreshold: number): THREE.BufferGeometry => {
+    const pacmanBase = new THREE.CylinderBufferGeometry(innerRadius, innerRadius, height, radialSegments, 1, false, 0, rotationThreshold);
+    const pacmanRoof = new THREE.RingBufferGeometry(innerRadius, outerRadius, 40, 1, 0, rotationThreshold);
+    pacmanRoof.rotateX(-Math.PI / 2)
+    pacmanRoof.translate(0, height, 0)
+
+    const merged = BufferGeometryUtils.mergeBufferGeometries([pacmanRoof]);
+    return merged;
+  }
+
+  const PointerGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, innerRotationThreshold: number, outerRotationThreshold: number): THREE.BufferGeometry => {
+    const innerPointer = PointerInternalGeometry(innerRadius, outerRadius, height, radialSegments, innerRotationThreshold);
+    const outerPointer = PointerExternalGeometry(innerRadius, outerRadius, height, radialSegments, outerRotationThreshold);
+    return BufferGeometryUtils.mergeBufferGeometries([outerPointer]);
+  }
+
+
   return (
     <>
       {
@@ -351,7 +408,7 @@ const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
           (robot) =>
             robot.visible && (
               <object3D key={robot.id}>
-                <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
+                {/* <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
                   <circleBufferGeometry args={[.5, 40]} />
                   <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.25} transparent={true} />
                 </mesh>
@@ -366,8 +423,26 @@ const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
                 <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
                   <circleBufferGeometry args={[.5, 40, rotationThreshold / 2, Math.PI / 100]} />
                   <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.15} transparent={true} />
+                </mesh> */}
+
+
+                <mesh position={position.toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                  {/* <primitive object={PointerInternalGeometry(0.5, 1, height, 40, closeRotationThreshold)} /> */}
+                  <primitive object={PointerGeometry(0.5, 1, height, 40, closeRotationThreshold, distantRotationThreshold)} />
+                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.2} transparent={true} />
                 </mesh>
-              </object3D>
+
+                <mesh position={position.add(new Vector3(0, 0, height / 2)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderBufferGeometry args={[0.5, 0.5, height, 40, 1, false, closeRotationThreshold, (Math.PI * 2) - closeRotationThreshold]} />
+                  <meshBasicMaterial color="rgb(122, 3, 252)" opacity={0.05} transparent={true} />
+                </mesh>
+
+                {/* <mesh position={position.toArray()} rotation={[0, 0, 0]}>
+                  <primitive object={PoinerExternalGeometry(0.5, 1, height, 40, distantRotationThreshold)} />
+                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.2} transparent={true} />
+                </mesh> */}
+
+              </object3D >
             ),
         )
       }
