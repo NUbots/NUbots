@@ -26,6 +26,7 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.move_time   = config["move_time"].as<double>();
             cfg.servo_gain  = config["servo_gain"].as<double>();
+            cfg.start_delay = config["start_delay"].as<double>();
 
             cfg.servo_targets[0]  = config["right_shoulder_pitch"].as<double>();
             cfg.servo_targets[1]  = config["left_shoulder_pitch"].as<double>();
@@ -49,25 +50,44 @@ namespace module::strategy {
             cfg.servo_targets[19] = config["head_pitch"].as<double>();
         });
 
-        on<Provide<StartSafelyTask>, Needs<Body>, Every<10, Per<std::chrono::seconds>>>().then(
-            [this](const RunInfo& run_info) {
-                if (run_info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    emit<Task>(std::make_unique<Done>());
-                    log<NUClear::INFO>("Done");
+        on<Provide<StartSafelyTask>, Uses<Body>, Needs<Body>, Every<10, Per<std::chrono::seconds>>>().then(
+            [this](const Uses<Body>& body) {
+                // Wait for the subcontroller to connect
+                // HardwareIO isn't part of Director, so it doesn't know if the targets were never sent to the motors
+                if (NUClear::clock::now() - startup_time < std::chrono::seconds(cfg.start_delay)) {
+                    log<NUClear::TRACE>("Waiting for startup");
                     return;
                 }
-                log<NUClear::INFO>("Starting safely");
 
-                NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
-
-                auto body = std::make_unique<Body>();
-
-                for (int i = 0; i < 20; i++) {
-                    log<NUClear::INFO>("Setting servo", i, "to", cfg.servo_targets[i], "with gain", cfg.servo_gain);
-                    body->servos[i] = ServoCommand(time, cfg.servo_targets[i], ServoState(cfg.servo_gain, 100));
+                // Start safely is done once the robot has moved safely to the starting position
+                if (body.done) {
+                    emit<Task>(std::make_unique<Done>());
+                    log<NUClear::INFO>("Completed start safely.");
                 }
+                // Not requested Body yet and ready to request
+                else if (body.run_state == GroupInfo::RunState::NO_TASK) {
+                    log<NUClear::INFO>("Starting safely.");
 
-                emit<Task>(body);
+                    NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
+
+                    auto body = std::make_unique<Body>();
+
+                    for (int i = 0; i < 20; i++) {
+                        log<NUClear::TRACE>("Setting servo",
+                                            i,
+                                            "to",
+                                            cfg.servo_targets[i],
+                                            "with gain",
+                                            cfg.servo_gain);
+                        body->servos[i] = ServoCommand(time, cfg.servo_targets[i], ServoState(cfg.servo_gain, 100));
+                    }
+
+                    emit<Task>(body);
+                }
+                // Not done and already requested - idle
+                else {
+                    emit<Task>(std::make_unique<Idle>());
+                }
             });
     }
 

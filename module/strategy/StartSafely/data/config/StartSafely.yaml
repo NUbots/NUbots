@@ -1,10 +1,12 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
+# The time in seconds to wait before moving
+start_delay: 5
 # Servo gain
 servo_gain: 3
 # How long to tell the servo to move for in seconds
-move_time: 5
+move_time: 2
 
 # Positions for each servo in radians
 right_shoulder_pitch: 1.710
