@@ -40,7 +40,7 @@ namespace module::purpose {
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
-        uint PLAYER_ID;
+        uint player_id = 0;
 
         /// @brief Smart enum for the robot's position
         struct Position {
@@ -74,11 +74,14 @@ namespace module::purpose {
             bool force_playing = false;
             /// @brief The soccer position of the robot
             Position position{};
+            /// @brief The number of seconds to wait before assuming a teammate is inactive
+            uint8_t timeout = 5;
         } cfg;
 
         struct RobotInfo {
-            uint8_t robot_id;
-            std::chrono::steady_clock::time_point last_heard_from;
+            uint8_t robot_id = 0;
+            std::chrono::steady_clock::time_point last_heard_from = NUClear::clock::now();
+            Position position = Position("DEFENDER");
 
             bool operator<(const RobotInfo& other) const {
                 return robot_id < other.robot_id;
@@ -92,21 +95,26 @@ namespace module::purpose {
         Position soccer_position;
 
         /// @brief Add and update active robots
+        /// @param robocup A robocup message sent by another robot
         void manage_active_robots(const RoboCup& robocup);
 
-        /// @brief Add RobotInfo ordered by id
+        /// @brief Add RobotInfo ordered by id to active_robots
+        /// @param new_robot The new robot's information, to be added to active_robots
         void add_robot(RobotInfo new_robot);
 
-        /// @brief Return the index of the striker
+        /// @brief Return the index of the future striker
         uint8_t find_striker();
 
-        /// @brief Decide the correct soccer position
+        /// @brief Decide the correct soccer positions
         void give_directions();
 
         /// @brief Emit purpose based on leader's instructions
+        /// @param robocup A robocup message sent by another robot
+        /// @param incoming_robot_id The id of the robot that send the robocup message
         void follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id);
 
         /// @brief Leader determines its own soccer position
+        /// @param striker_idx The index of the future striker in active_robots
         void self_direct(uint8_t striker_idx);
 
 
