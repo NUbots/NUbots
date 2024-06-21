@@ -388,6 +388,7 @@ const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
     const pacmanBase = new THREE.CylinderBufferGeometry(innerRadius, innerRadius, height, radialSegments, 1, false, 0, rotationThreshold);
     const pacmanRoof = new THREE.RingBufferGeometry(innerRadius, outerRadius, 40, 1, 0, rotationThreshold);
     pacmanRoof.rotateX(-Math.PI / 2)
+    pacmanRoof.rotateY(Math.PI + closeRotationThreshold / 2 + rotationThreshold / 2)
     pacmanRoof.translate(0, height, 0)
 
     const merged = BufferGeometryUtils.mergeBufferGeometries([pacmanRoof]);
@@ -397,7 +398,7 @@ const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
   const PointerGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, innerRotationThreshold: number, outerRotationThreshold: number): THREE.BufferGeometry => {
     const innerPointer = PointerInternalGeometry(innerRadius, outerRadius, height, radialSegments, innerRotationThreshold);
     const outerPointer = PointerExternalGeometry(innerRadius, outerRadius, height, radialSegments, outerRotationThreshold);
-    return BufferGeometryUtils.mergeBufferGeometries([outerPointer]);
+    return BufferGeometryUtils.mergeBufferGeometries([innerPointer, outerPointer]);
   }
 
 
@@ -432,10 +433,10 @@ const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
                   <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.2} transparent={true} />
                 </mesh>
 
-                <mesh position={position.add(new Vector3(0, 0, height / 2)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                {/* <mesh position={position.add(new Vector3(0, 0, height / 2)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
                   <cylinderBufferGeometry args={[0.5, 0.5, height, 40, 1, false, closeRotationThreshold, (Math.PI * 2) - closeRotationThreshold]} />
                   <meshBasicMaterial color="rgb(122, 3, 252)" opacity={0.05} transparent={true} />
-                </mesh>
+                </mesh> */}
 
                 {/* <mesh position={position.toArray()} rotation={[0, 0, 0]}>
                   <primitive object={PoinerExternalGeometry(0.5, 1, height, 40, distantRotationThreshold)} />
