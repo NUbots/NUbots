@@ -85,6 +85,12 @@ namespace module::purpose {
             }
         };
 
+        /// @brief Store robots that can currently play
+        std::vector<RobotInfo> active_robots{};
+
+        /// @brief Store's the robot's current soccer position
+        Position soccer_position;
+
         /// @brief Add and update active robots
         void manage_active_robots(const RoboCup& robocup);
 
@@ -97,14 +103,12 @@ namespace module::purpose {
         /// @brief Decide the correct soccer position
         void give_directions();
 
-        /// @brief emit purpose based on leader's instructions
+        /// @brief Emit purpose based on leader's instructions
         void follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id);
 
-        /// @brief leader determines its own soccer position
+        /// @brief Leader determines its own soccer position
         void self_direct(uint8_t striker_idx);
 
-        /// @brief Store robots that can currently play
-        std::vector<RobotInfo> active_robots;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.

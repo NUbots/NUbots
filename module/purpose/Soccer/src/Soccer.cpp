@@ -83,10 +83,7 @@ namespace module::purpose {
             // Get the soccer position, if not valid option then default to striker
             cfg.position = Position(config["position"].as<std::string>());
 
-            // initialise robot storage
-            active_robots = std::vector<RobotInfo>();
-
-            // decide which player we are
+            // Decide which player we are
             PLAYER_ID = global_config.player_id;
             log<NUClear::DEBUG>("Configure Player ID ", int(PLAYER_ID));
         });
@@ -111,7 +108,7 @@ namespace module::purpose {
             emit(msg);
         });
 
-        on<Provide<FindPurpose>(), Trigger<RoboCup>>().then([this] (const RoboCup robocup) {
+        on<Provide<FindPurpose>, Trigger<RoboCup>>().then([this] (const RoboCup robocup) {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
@@ -139,9 +136,10 @@ namespace module::purpose {
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+            } else {
+                give_directions();
             }
 
-            give_directions();
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
@@ -168,12 +166,12 @@ namespace module::purpose {
             }
         });
 
-        // check if we have heard from robots periodically, and remove them if not
+        // Check if we have heard from robots periodically, and remove them if not
         on<Every<2, Per<std::chrono::seconds>>>().then([this] {
             auto now = std::chrono::steady_clock::now();
             constexpr auto timeout = std::chrono::seconds(8); //TODO: test with robot or get advice
 
-            // remove inactive robots
+            // Remove inactive robots
             for (auto it = active_robots.begin(); it != active_robots.end(); ) {
                 if (it->robot_id != PLAYER_ID && now - it->last_heard_from > timeout) {
                     log<NUClear::DEBUG>("remove player ", int(it->robot_id));
@@ -211,9 +209,9 @@ namespace module::purpose {
         });
 
         if (it != active_robots.end()) {
-            // if the robot is in active_robots, update timestamp
+            // If the robot is in active_robots, update timestamp
             it->last_heard_from = now;
-            // add more data here
+            // Add more data here
         } else {
             // Add new robot's info, and re-assign positions
             RobotInfo new_robot{incoming_robot_id, now};
@@ -224,13 +222,13 @@ namespace module::purpose {
         follow_directions(robocup, incoming_robot_id);
     };
 
-    // find which robot should be our striker
+    // Find which robot should be our striker
     uint8_t Soccer::find_striker() {
         return 0;
         // TODO: ideas- furthest ahead on field could be striker, or closest to ball
     }
 
-    // give directions if I am the leader
+    // Give directions if I am the leader
     void Soccer::give_directions() {
         bool self_is_leader = active_robots.front().robot_id == PLAYER_ID;
 
@@ -238,10 +236,10 @@ namespace module::purpose {
             auto purposes_msg = std::make_unique<Purposes>();
             uint8_t striker_idx = find_striker();
 
-            // assign own position
+            // Assign own position
             self_direct(striker_idx);
 
-            // decide soccer positions
+            // Decide soccer positions
             for (int i = 0; i < int(active_robots.size()); ++i) {
                 if (i == striker_idx) {
                     purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
@@ -256,17 +254,17 @@ namespace module::purpose {
 
     void Soccer::self_direct(uint8_t striker_idx) {
         if (striker_idx == 0) {
-            // note: at the moment our leader is always our striker, may not always be the case going forward
+            // Note: at the moment our leader is always our striker, may not always be the case going forward
             emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-            log<NUClear::DEBUG>("leader made striker");
+            log<NUClear::DEBUG>("Leader made striker");
         }
         else {
             emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-            log<NUClear::DEBUG>("leader made defender");
+            log<NUClear::DEBUG>("Leader made defender");
         }
     }
 
-    // listen to directions if they are the leader
+    // Listen to directions if they are the leader
     void Soccer::follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id) {
         // A robot may emit leader messages mistakenly. Only listen to real leader.
         bool other_is_leader = active_robots.front().robot_id == incoming_robot_id;
@@ -276,12 +274,16 @@ namespace module::purpose {
             for (const auto& purpose : robocup.purposes.purposes) {
                 if (purpose.player_id == PLAYER_ID ) {
                     if (purpose.purpose == SoccerPosition::DEFENDER) {
-                        emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-                        log<NUClear::DEBUG>("made defender");
+                        if (soccer_position != Position::DEFENDER) {
+                            emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                            log<NUClear::INFO>("Robot made defender");
+                        }
                     }
                     else if (purpose.purpose == SoccerPosition::STRIKER) {
-                        emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                        log<NUClear::DEBUG>("made striker");
+                        if (soccer_position != Position::STRIKER) {
+                            emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                            log<NUClear::INFO>("Robot made striker");
+                        }
                     }
                 }
             }
