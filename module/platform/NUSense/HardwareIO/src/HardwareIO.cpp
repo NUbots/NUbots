@@ -147,9 +147,9 @@ namespace module::platform::NUSense {
                 servo.profile_velocity      = 0;  // not present in NUSense message
 
                 // Log any errors and timeouts from the servo.
-                if (val.packet_counts.errors != 0) {
+                if (val.packet_counts.packet_errors != 0) {
                     log<NUClear::WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
-                                                   val.packet_counts.errors,
+                                                   val.packet_counts.packet_errors,
                                                    val.id,
                                                    nugus.device_name(static_cast<NUgus::ID>(val.id))));
                 }
