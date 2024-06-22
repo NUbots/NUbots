@@ -39,7 +39,7 @@
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/strategy/StartSafely/hpp"
+#include "message/strategy/StartSafely.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
