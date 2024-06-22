@@ -50,6 +50,7 @@ namespace module::planning {
     using message::skill::Walk;
     using message::strategy::StandStill;
 
+    using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -93,83 +94,48 @@ namespace module::planning {
             cfg.rotate_to_thresholds.ori  = cfg.rotate_to_thresholds.enter_ori;
             cfg.walk_to_thresholds.pos    = cfg.walk_to_thresholds.enter_pos;
             cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
+            velocity_magnitude            = cfg.min_translational_velocity_magnitude;
         });
 
-        // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            // Translational error (distance) from robot to target
-            translational_error = walk_to.Hrd.translation().norm();
-            emit(graph("Translational error", std::abs(translational_error)));
+            // Calculate the translational error (distance from robot to target) and the target angles
+            double translational_error = walk_to.Hrd.translation().norm();
+            double angle_to_target     = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
+            double angle_to_desired_heading =
+                std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
-            // Angle between robot and target point
-            angle_to_target = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
-            emit(graph("Angle to target", std::abs(angle_to_target)));
+            // Interpolate between current heading and the desired heading as the robot approaches the target
+            double translation_progress = std::max(0.0, 1.0 - (translational_error / cfg.approach_radius));
+            double interpolated_angle =
+                (1 - translation_progress) * angle_to_target + translation_progress * angle_to_desired_heading;
 
-            // Angle between robot and target angle_to_desired_heading
-            angle_to_desired_heading = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
-            emit(graph("Angle to desired heading", std::abs(angle_to_desired_heading)));
+            // Limit speed based on the angle to the target (only walk forward if aligned with target angle)
+            double angle_progress = std::clamp(1 - std::abs(angle_to_target) / M_PI_2, 0.0, 1.0);
+            emit(graph("angle_progress", angle_progress));
+            // Accelerate
+            velocity_magnitude += cfg.acceleration;
+            // Adjust velocities based on proximity to the target
+            double scaled_velocity_magnitude = velocity_magnitude * angle_progress;
+            scaled_velocity_magnitude        = std::clamp(scaled_velocity_magnitude,
+                                                   cfg.min_translational_velocity_magnitude,
+                                                   cfg.max_translational_velocity_magnitude);
 
-            emit(graph("cfg.rotate_to_thresholds.pos", cfg.rotate_to_thresholds.pos));
-            emit(graph("cfg.rotate_to_thresholds.ori", cfg.rotate_to_thresholds.ori));
-            emit(graph("cfg.walk_to_thresholds.pos", cfg.walk_to_thresholds.pos));
-            emit(graph("cfg.align_with_thresholds.ori", cfg.align_with_thresholds.ori));
+            emit(graph("velocity_magnitude", scaled_velocity_magnitude));
 
-            auto debug_information                                   = std::make_unique<WalkToDebug>();
-            debug_information->Hrd                                   = walk_to.Hrd;
-            debug_information->translational_error                   = translational_error;
-            debug_information->angle_to_target                       = angle_to_target;
-            debug_information->angle_to_desired_heading              = angle_to_desired_heading;
-            debug_information->rotate_to_target_pos_error_threshold  = cfg.rotate_to_thresholds.pos;
-            debug_information->rotate_to_target_ori_error_threshold  = cfg.rotate_to_thresholds.ori;
-            debug_information->walk_to_target_pos_error_threshold    = cfg.walk_to_thresholds.pos;
-            debug_information->align_with_target_ori_error_threshold = cfg.align_with_thresholds.ori;
+            Eigen::Vector3d velocity_target = walk_to.Hrd.translation().normalized() * scaled_velocity_magnitude;
+            velocity_target.z() = std::clamp(interpolated_angle, cfg.min_angular_velocity, cfg.max_angular_velocity);
+            emit(graph("interpolated_angle", interpolated_angle));
+
+            // Emit the walk task with the calculated velocities
+            emit<Task>(std::make_unique<Walk>(velocity_target));
+
+            // Emit debugging information for visualization and monitoring
+            auto debug_information = std::make_unique<WalkToDebug>();
+            Eigen::Isometry3d Hrd  = Eigen::Isometry3d::Identity();
+            Hrd.translation()      = walk_to.Hrd.translation();
+            Hrd.linear()           = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
+            debug_information->Hrd = Hrd;
             emit(debug_information);
-
-            // 1. If far away and not facing the target, then rotate on spot to face the target
-            if (translational_error > cfg.rotate_to_thresholds.pos
-                && std::abs(angle_to_target) > cfg.rotate_to_thresholds.ori) {
-                emit<Task>(std::make_unique<TurnOnSpot>(angle_to_target < 0));
-                cfg.rotate_to_thresholds.pos = cfg.rotate_to_thresholds.enter_pos;
-                cfg.rotate_to_thresholds.ori = cfg.rotate_to_thresholds.enter_ori;
-                emit(graph("Rotating towards target", true));
-                return;
-            }
-            else {
-                // Increase thresholds to prevent oscillation when condition is reached
-                cfg.rotate_to_thresholds.pos = cfg.rotate_to_thresholds.leave_pos;
-                cfg.rotate_to_thresholds.ori = cfg.rotate_to_thresholds.leave_ori;
-                emit(graph("Rotating towards target", false));
-            }
-
-            // 2. If just far away, then walk towards the target directly
-            if (translational_error > cfg.walk_to_thresholds.pos) {
-                emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius));
-                cfg.walk_to_thresholds.pos = cfg.walk_to_thresholds.enter_pos;
-                emit(graph("Walking towards target", true));
-                return;
-            }
-            else {
-                // Increase thresholds to prevent oscillation when condition is reached
-                cfg.walk_to_thresholds.pos = cfg.walk_to_thresholds.leave_pos;
-                emit(graph("Walking towards target", false));
-            }
-
-            // 3. If close to the target, but not aligned with the target, then align with target heading
-            if (std::abs(angle_to_desired_heading) > cfg.align_with_thresholds.ori) {
-                emit<Task>(std::make_unique<TurnOnSpot>(angle_to_desired_heading < 0));
-                cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
-                emit(graph("Aligning with target heading", true));
-                return;
-            }
-            else {
-                emit(graph("Aligning with target heading", false));
-                // Increase thresholds to prevent oscillation when condition is reached
-                cfg.align_with_thresholds.ori = cfg.align_with_thresholds.leave_ori;
-            }
-            // 4. We are close to the target and aligned with the target, stop
-            // Do nothing
-            emit<Task>(std::make_unique<StandStill>());
-            emit(graph("Close to target", true));
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
@@ -184,7 +150,7 @@ namespace module::planning {
         on<Start<WalkDirect>>().then([this] {
             log<NUClear::DEBUG>("Starting walk direct task");
             // Reset the walk direct velocity magnitude to minimum velocity
-            velocity_magnitude = cfg.min_translational_velocity_magnitude;
+            // velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
 
         on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
