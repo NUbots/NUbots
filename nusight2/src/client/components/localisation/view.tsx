@@ -336,101 +336,47 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         }
         return null;
       })}
-      <DistanceCircle model={model} />
+      <DistanceCircle model={model} innerCircleRadius={1} outerCircleRadius={2} innerRotationThreshold={Math.PI / 8} outerRotationThreshold={Math.PI / 2} />
       <Robots model={model} />
     </object3D>
   );
 });
 
-// const Pacman = ({ position, rotation }: { position: Vector3; rotation: Vector3 }) => {
-//   const merged = useMemo(() => {
-//     const pacman = new THREE.SphereBufferGeometry(16, 32, 32);
-//     const pacmanWall1 = new THREE.PlaneBufferGeometry(1, 1);
-//     pacman.merge(pacmanWall1);
-//     return pacman;
-//   }, []);
-//   return <mesh geometry={merged} />;
-// };
+interface DistanceCircleProps {
+  model: LocalisationModel;
+  innerCircleRadius: number;
+  outerCircleRadius: number;
+  innerRotationThreshold: number;
+  outerRotationThreshold: number;
+}
 
-const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
+const DistanceCircle = ((props: DistanceCircleProps) => {
   const position = new Vector3(3, 1, 0); // Dummy position vector
   const rotation = [0, 0, 3]; // Dummy rotation (euler angles)
-  const closeRotationThreshold = Math.PI / 8; // Threshold for rotation in radians
-  const distantRotationThreshold = Math.PI / 2;
-  const height = 0.3;
-  var path = new THREE.Path();
-
-  const PointerInternalGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, rotationThreshold: number): THREE.BufferGeometry => {
-    const pacmanBase = new THREE.CylinderBufferGeometry(innerRadius, innerRadius, height, radialSegments, 1, false, 0, rotationThreshold);
-    const thetaEndWall = new THREE.PlaneBufferGeometry(innerRadius, height);
-    const thetaStartWall = new THREE.PlaneBufferGeometry(innerRadius, height);
-
-    thetaEndWall.translate(-innerRadius / 2, 0, 0);
-    thetaStartWall.translate(innerRadius / 2, 0, 0);
-
-    const axis = new THREE.Vector3(0, 1, 0);
-    const endAngle = Math.PI / 2 + rotationThreshold;
-    const startAngle = -Math.PI / 2;
-
-    const endWallRotationMatrix = new THREE.Matrix4().makeRotationAxis(axis.normalize(), endAngle);
-    const startWallRotationMatrix = new THREE.Matrix4().makeRotationAxis(axis.normalize(), startAngle);
-
-    thetaStartWall.applyMatrix4(startWallRotationMatrix);
-    thetaEndWall.applyMatrix4(endWallRotationMatrix);
-
-    const merged = BufferGeometryUtils.mergeBufferGeometries([pacmanBase, thetaStartWall, thetaEndWall]);
-    merged.translate(0, height / 2, 0);
-
-    return merged;
-  };
-
-  const PointerExternalGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, rotationThreshold: number): THREE.BufferGeometry => {
-    const pacmanBase = new THREE.CylinderBufferGeometry(innerRadius, innerRadius, height, radialSegments, 1, false, 0, rotationThreshold);
-    const pacmanRoof = new THREE.RingBufferGeometry(innerRadius, outerRadius, 40, 1, 0, rotationThreshold);
-    pacmanRoof.rotateX(-Math.PI / 2)
-    pacmanRoof.rotateY(Math.PI + closeRotationThreshold / 2 + rotationThreshold / 2)
-    pacmanRoof.translate(0, height, 0)
-
-    const merged = BufferGeometryUtils.mergeBufferGeometries([pacmanRoof]);
-    return merged;
-  }
-
-  const PointerGeometry = (innerRadius: number, outerRadius: number, height: number, radialSegments: number, innerRotationThreshold: number, outerRotationThreshold: number): THREE.BufferGeometry => {
-    const innerPointer = PointerInternalGeometry(innerRadius, outerRadius, height, radialSegments, innerRotationThreshold);
-    const outerPointer = PointerExternalGeometry(innerRadius, outerRadius, height, radialSegments, outerRotationThreshold);
-    return BufferGeometryUtils.mergeBufferGeometries([innerPointer, outerPointer]);
-  }
-
+  const rotationThreshold = Math.PI / 2; // Threshold for rotation in radians
 
   return (
     <>
       {
-        model.robots.map(
+        props.model.robots.map(
           (robot) =>
             robot.visible && (
               <object3D key={robot.id}>
-                {/* <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
-                  <circleBufferGeometry args={[.5, 40]} />
-                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.25} transparent={true} />
+                <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
+                  <circleBufferGeometry args={[props.innerCircleRadius, 40]} />
+                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.08} transparent={true} />
                 </mesh>
                 <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
-                  <ringBufferGeometry args={[.5, 1, 40]} />
-                  <meshBasicMaterial color="rgb(84, 184, 255)" opacity={0.25} transparent={true} />
+                  <ringBufferGeometry args={[props.innerCircleRadius, props.outerCircleRadius, 40]} />
+                  <meshBasicMaterial color="rgb(84, 184, 255)" opacity={0.08} transparent={true} />
                 </mesh>
                 <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
-                  <ringBufferGeometry args={[.5, 1, 40, 40, 0, rotationThreshold]} />
-                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.15} transparent={true} />
+                  <ringBufferGeometry args={[props.innerCircleRadius, props.outerCircleRadius, 40, 40, 0, rotationThreshold]} />
+                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.08} transparent={true} />
                 </mesh>
                 <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
-                  <circleBufferGeometry args={[.5, 40, rotationThreshold / 2, Math.PI / 100]} />
-                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.15} transparent={true} />
-                </mesh> */}
-
-
-                <mesh position={position.toArray()} rotation={[Math.PI / 2, 0, 0]}>
-                  {/* <primitive object={PointerInternalGeometry(0.5, 1, height, 40, closeRotationThreshold)} /> */}
-                  <primitive object={PointerGeometry(0.5, 1, height, 40, closeRotationThreshold, distantRotationThreshold)} />
-                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.2} transparent={true} />
+                  <circleBufferGeometry args={[props.innerCircleRadius, 40, rotationThreshold / 2, Math.PI / 100]} />
+                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.08} transparent={true} />
                 </mesh>
 
                 {/* <mesh position={position.add(new Vector3(0, 0, height / 2)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
@@ -449,7 +395,7 @@ const DistanceCircle = ({ model }: { model: LocalisationModel }) => {
       }
     </>
   );
-};
+});
 
 const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   <>
