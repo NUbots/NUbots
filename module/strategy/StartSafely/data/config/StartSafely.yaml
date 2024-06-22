@@ -7,25 +7,7 @@ move_time: 5
 servo_gain: 4
 # Allowed servo error
 servo_error: 0.09
-
-# Positions for each servo in radians
-right_shoulder_pitch: 1.710
-left_shoulder_pitch: 1.704
-right_shoulder_roll: -0.378
-left_shoulder_roll: 0.335
-right_elbow: -0.682
-left_elbow: -0.691
-right_hip_yaw: -0.014
-left_hip_yaw: 0.005
-right_hip_roll: -0.126
-left_hip_roll: 0.140
-right_hip_pitch: -0.932
-left_hip_pitch: -0.920
-right_knee: 1.334
-left_knee: 1.340
-right_ankle_pitch: -0.530
-left_ankle_pitch: -0.565
-right_ankle_roll: 0.114
-left_ankle_roll: -0.124
-head_yaw: 0.000
-head_pitch: 0.005
+# The name of the script to load and use for the start pose
+script_name: "Stand.yaml"
+# The maximum time the module can run for, from startup, so it doesn't get the system stuck
+max_timeout: 10
