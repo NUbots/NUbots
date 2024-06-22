@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1skill_1_1QuinticWalk.html":[2,0,3,11,4],
 "classmodule_1_1skill_1_1QuinticWalk.html#a173a2816fae934f83c7674a64a064df6":[2,0,3,11,4,15],
 "classmodule_1_1skill_1_1QuinticWalk.html#a29da0cf89065e78629f6db44534a7f02":[2,0,3,11,4,3],
 "classmodule_1_1skill_1_1QuinticWalk.html#a43a1516889b916ac770e9f5e069297f9":[2,0,3,11,4,8],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a98487ab74020b390745c4659c2dbae3d":[2,0,3,13,2,10,20],
 "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#aa1b84fa27dee1f02e36a1448f2f92eac":[2,0,3,13,2,10,2],
 "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#abea109ed0459083685acd20c515689c9":[2,0,3,13,2,10,14],
-"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#abf913d5ed47e4b6ada2aef90a3f5cf6d":[2,0,3,13,2,10,3],
-"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ac2f642e78b012c121e22ef98f884e2ac":[2,0,3,13,2,10,4]
+"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#abf913d5ed47e4b6ada2aef90a3f5cf6d":[2,0,3,13,2,10,3]
 };

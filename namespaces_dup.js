@@ -1032,7 +1032,8 @@ var namespaces_dup =
         [ "get_raw_servo", "RawSensors_8hpp.html#af5589a17b45a3543f82530a2d2353bcb", null ],
         [ "get_robot_alias", "aliases_8hpp.html#afa95da58cc267df37e0bbf14595efa86", null ],
         [ "make_packet_error_string", "RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
-        [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
+        [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ],
+        [ "set_robot_alias", "aliases_8hpp.html#af3a595aa85e81995aee2ca94bffa5426", null ]
       ] ],
       [ "random", null, [
         [ "generate_alphanum_string", "random_8cpp.html#ade04216eaaf80b00efca9928bf8f5ebb", null ]

@@ -273,6 +273,7 @@ var hierarchy =
     [ "module::tools::FirmwareInstaller::Firmware", "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html", null ],
     [ "module::tools::FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
     [ "module::tools::FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
+    [ "module::tools::RoboCupConfiguration::Display", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html", null ],
     [ "module::tools::RoboCupConfiguration::Position", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html", null ],
     [ "module::vision::RobotDetector::Config", "structmodule_1_1vision_1_1RobotDetector_1_1Config.html", null ],
     [ "module::vision::VisualMesh::EngineContext", "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html", null ],

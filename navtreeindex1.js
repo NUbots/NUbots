@@ -104,6 +104,7 @@ var NAVTREEINDEX1 =
 "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61":[1,0,3,9,6],
 "Webots_8cpp.html#a490d8e2eafeea870cb0d5fcbd180b0fb":[1,0,3,9,7],
 "Webots_8cpp.html#aa06422bdf1cbba3ecfa22842768ccae4":[1,0,3,9,5],
+"aliases_8hpp.html#af3a595aa85e81995aee2ca94bffa5426":[1,0,7,11,5],
 "aliases_8hpp.html#afa95da58cc267df37e0bbf14595efa86":[1,0,7,11,2],
 "annotated.html":[2,0],
 "aravis__wrap_8hpp.html#a175c5d0592934f5c03f311a010aa355f":[1,0,3,2,0,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classmodule_1_1extension_1_1FileWatcher.html#a1296002db47739c079e7f7b1d62bfcd7":[2,0,3,1,2,18],
 "classmodule_1_1extension_1_1FileWatcher.html#a144c181bc8ca5ef427c844c87a364725":[2,0,3,1,2,6],
 "classmodule_1_1extension_1_1FileWatcher.html#a518b23e87ea993a79c3494b6605e58f0":[2,0,3,1,2,16],
-"classmodule_1_1extension_1_1FileWatcher.html#a5367086aa482f6b41194c5920a5db4d8":[2,0,3,1,2,7],
-"classmodule_1_1extension_1_1FileWatcher.html#a64b14dd027042481df03d7b2a4981ac9":[2,0,3,1,2,8]
+"classmodule_1_1extension_1_1FileWatcher.html#a5367086aa482f6b41194c5920a5db4d8":[2,0,3,1,2,7]
 };
