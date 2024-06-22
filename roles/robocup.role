@@ -19,7 +19,7 @@ nuclear_role(
   # Sensors and network (input)
   input::SensorFilter
   input::Camera
-  #input::GameController
+  input::GameController
   # network::RobotCommunication Vision
   vision::VisualMesh
   vision::GreenHorizonDetector

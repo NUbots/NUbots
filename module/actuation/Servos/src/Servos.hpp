@@ -84,7 +84,6 @@ namespace module::actuation {
                 [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
                     // Check if any subtask is Done
                     if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-
                         // If every servo task is done then emit Done (ignore servos that weren't included in the Task
                         // message)
                         if (((!group.servos.contains(utility::actuation::ServoMap<Elements>::value) || elements.done)

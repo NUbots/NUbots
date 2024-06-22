@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: ERROR
+log_level: INFO
 
 battery:
   charged_voltage: 16.8
@@ -8,7 +8,7 @@ battery:
 
 opencr:
   device: "/dev/ttyUSB0"
-  baud: 3000000
+  baud: 1000000
   byte_wait: 1200
   packet_wait: 100000
   bus_reset_wait_time_us: 0

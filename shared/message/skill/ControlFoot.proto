@@ -31,17 +31,15 @@ import "Transform.proto";
 import "google/protobuf/timestamp.proto";
 
 message ControlLeftFoot {
-    /// Desired left foot {f} pose in torso {t} space
+    // Desired left foot {f} pose in torso {t} space
     iso3 Htf = 1;
-    /// Time to complete the motion
+    // Time to complete the motion
     google.protobuf.Timestamp time = 2;
-    /// Gain for the left leg, if not set then uses configuration
-    int32 gain = 3;
 }
 
 message ControlRightFoot {
-    /// Desired right foot {f} pose in torso {t} space
+    // Desired right foot {f} pose in torso {t} space
     iso3 Htf = 1;
-    /// Time to complete the motion
+    // Time to complete the motion
     google.protobuf.Timestamp time = 2;
 }

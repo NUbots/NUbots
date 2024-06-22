@@ -30,6 +30,5 @@ package message.skill;
 import "Vector.proto";
 
 message Walk {
-    /// The target velocity to walk at: x metres per second, y metres per second, z radians per second
     vec3 velocity_target = 1;
 }
