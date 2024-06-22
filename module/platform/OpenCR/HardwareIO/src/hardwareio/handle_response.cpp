@@ -30,7 +30,17 @@ namespace module::platform::OpenCR {
 
     using message::platform::StatusReturn;
 
-    enum Phases : uint8_t { IDLE, HEADER_SYNC, PREAMBLE, DATA, FINISH, TIMEOUT };
+    enum Phases : uint8_t {
+        IDLE,         // Wait for the first byte of the header field
+        HEADER_SYNC,  // Match the next 3 bytes of the header after matching the first byte
+        PREAMBLE,     // Look for the next 5 bytes after successfully locating the header
+        DATA,         // Reading in the data
+        UNSTUFF_1,    // Seen a 0xFF while reading
+        UNSTUFF_2,    // Seen 0xFFFF while reading
+        UNSTUFF_3,    // Seen 0xFFFFFD while reading, if next byte is 0xFD drop it
+        FINISH,       // Finished reading a packet
+        TIMEOUT       // Happens when packet_start_time + timeout is greater than the current time
+    };
 
     void HardwareIO::handle_response() {
         static constexpr uint8_t packet_header[4]           = {0xFF, 0xFF, 0xFD, 0x00};
@@ -167,10 +177,37 @@ namespace module::platform::OpenCR {
                         if (response.size() == size_t(7 + packet_length)) {
                             current_phase = Phases::FINISH;
                         }
+                        // Go to UNSTUFF_1 if we see 0xFF in the data field and we haven't finished yet
+                        else if (buf[i] == packet_header[0]) {
+                            current_phase = Phases::UNSTUFF_1;
+                        }
                     }
                     else {
                         current_phase = Phases::TIMEOUT;
                     }
+                    break;
+
+                // Going to the case below means that we saw a 0xFF in the data field
+                // If the next byte is another 0xFF, then we go to UNSTUFF_2
+                case Phases::UNSTUFF_1:
+                    current_phase = buf[i] == packet_header[1] ? Phases::UNSTUFF_2 : Phases::DATA;
+                    response.push_back(buf[i]);
+                    break;
+
+                // Going to the case below means that we've seen 0xFFFF in the data field
+                // If the next byte is the 0xFD, then we go to UNSTUFF_3
+                case Phases::UNSTUFF_2:
+                    current_phase = buf[i] == packet_header[2] ? Phases::UNSTUFF_3 : Phases::DATA;
+                    response.push_back(buf[i]);
+                    break;
+
+                // Going to the case below means that we've seen our 0xFFFFFD in the data field
+                // If the next byte is 0xFD, ignore it and go back to the DATA phase
+                case Phases::UNSTUFF_3:
+                    if (buf[i] != packet_header[2]) {
+                        response.push_back(buf[i]);
+                    }
+                    current_phase = Phases::DATA;
                     break;
 
                 // Finish phase
