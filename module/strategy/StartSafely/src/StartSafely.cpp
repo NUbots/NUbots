@@ -52,7 +52,7 @@ namespace module::strategy {
             // Hard timeout for start safely so it should never get the system stuck
             if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count()
                 > cfg.max_timeout) {
-                log<NUClear::ERROR>("Start safely timed out.");
+                log<NUClear::INFO>("Start safely ended due to timeout.");
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
