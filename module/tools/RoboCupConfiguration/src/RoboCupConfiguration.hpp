@@ -49,8 +49,12 @@ namespace module::tools {
         std::string password = "";
         /// @brief The ID that the robot is player for
         int team_id = 0;
+        /// @brief Max team team ID
+        static const int MAX_TEAM_ID = 33;
         /// @brief The player ID of the robot
         int player_id = 0;
+        /// @brief Max player ID
+        static const int MAX_PLAYER_ID = 6;
         /// @brief The position the robot will move to in READY
         Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
 
@@ -101,14 +105,36 @@ namespace module::tools {
             }
         } robot_position;
 
-        /// @brief The index of the item the user is selecting
-        size_t row_selection = 0;
 
-        /// @brief Index of the column the user is selecting
-        size_t column_selection = 0;
-
-        /// @brief The log message to print to the user at the bottom of the window
-        std::string log_message = "";
+        /// @brief Display values
+        struct Display {
+            /// @brief Enum for options in first column
+            enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
+            /// @brief Enum for options in second column
+            enum class Column2 { PLAYER_ID, TEAM_ID, POSITION, READY_POSITION, END };
+            /// @brief Column 1 padding
+            static const size_t C1_PAD = 2;
+            /// @brief Column 1 selection position
+            static const size_t C1_SEL_POS = 20;
+            /// @brief Column 2 padding
+            static const size_t C2_PAD = 40;
+            /// @brief Column 2 selection position
+            static const size_t C2_SEL_POS = 51;
+            /// @brief Selection highlight width
+            static const size_t SELECT_WIDTH = 18;
+            /// @brief How much to pad the commands from the bottom of the window
+            static const size_t COMMAND_BOTTOM_PAD = 10;
+            /// @brief How much to pad the log message from the bottom of the window
+            static const size_t LOG_BOTTOM_PAD = 2;
+            /// @brief Gap between commands
+            static const size_t COMMAND_GAP = 17;
+            /// @brief The index of the item the user is selecting
+            size_t row_selection = 0;
+            /// @brief Index of the column the user is selecting
+            size_t column_selection = 0;
+            /// @brief The log message to print to the user at the bottom of the window
+            std::string log_message = "";
+        } display{};
 
         /// @brief Displays the screen with any updated values to the user
         void refresh_view();
