@@ -24,9 +24,10 @@ namespace module::strategy {
         on<Configuration>("StartSafely.yaml").then([this](const Configuration& config) {
             // Use configuration here from file StartSafely.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
             cfg.move_time   = config["move_time"].as<double>();
             cfg.servo_gain  = config["servo_gain"].as<double>();
-            cfg.start_delay = config["start_delay"].as<double>();
+            cfg.servo_error = config["servo_error"].as<double>();
 
             cfg.servo_targets[0]  = config["right_shoulder_pitch"].as<double>();
             cfg.servo_targets[1]  = config["left_shoulder_pitch"].as<double>();
@@ -50,45 +51,42 @@ namespace module::strategy {
             cfg.servo_targets[19] = config["head_pitch"].as<double>();
         });
 
-        on<Provide<StartSafelyTask>, Uses<Body>, Needs<Body>, Every<10, Per<std::chrono::seconds>>>().then(
-            [this](const Uses<Body>& body) {
-                // Wait for the subcontroller to connect
-                // HardwareIO isn't part of Director, so it doesn't know if the targets were never sent to the motors
-                if (NUClear::clock::now() - startup_time < std::chrono::seconds(cfg.start_delay)) {
-                    log<NUClear::TRACE>("Waiting for startup");
-                    return;
+        on<Startup>().then([this] {
+            // Set a time to complete now, so it won't keep moving further into the future each time Body is requested
+            destination_time = NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
+            log<NUClear::INFO>("StartSafely is starting");
+        });
+
+        on<Provide<StartSafelyTask>, Needs<Body>, Trigger<Sensors>>().then([this](const Sensors& sensors) {
+            // Check if servos have reached their positions
+            bool all_servos_at_target = true;
+            for (auto& servo : sensors.servo) {
+                double error = std::abs(servo.present_position - cfg.servo_targets[servo.id]);
+                if (error > cfg.servo_error) {
+                    log<NUClear::TRACE>("Servo", servo.id, "has not reached target position with error", error);
+                    all_servos_at_target = false;
+                    break;
                 }
+            }
 
-                // Start safely is done once the robot has moved safely to the starting position
-                if (body.done) {
-                    emit<Task>(std::make_unique<Done>());
-                    log<NUClear::INFO>("Completed start safely.");
-                }
-                // Not requested Body yet and ready to request
-                else if (body.run_state == GroupInfo::RunState::NO_TASK) {
-                    log<NUClear::INFO>("Starting safely.");
+            // If they are at their positions, start safely can end
+            if (all_servos_at_target) {
+                log<NUClear::INFO>("Start safely completed, servos at target positions.");
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
 
-                    NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
+            // If the servos are not at their positions, request to move
+            // Keep requesting as we don't know when the subcontroller will be active
+            auto body = std::make_unique<Body>();
 
-                    auto body = std::make_unique<Body>();
+            for (int i = 0; i < 20; i++) {
+                log<NUClear::TRACE>("Setting servo", i, "to", cfg.servo_targets[i], "with gain", cfg.servo_gain);
+                body->servos[i] = ServoCommand(destination_time, cfg.servo_targets[i], ServoState(cfg.servo_gain, 100));
+            }
 
-                    for (int i = 0; i < 20; i++) {
-                        log<NUClear::TRACE>("Setting servo",
-                                            i,
-                                            "to",
-                                            cfg.servo_targets[i],
-                                            "with gain",
-                                            cfg.servo_gain);
-                        body->servos[i] = ServoCommand(time, cfg.servo_targets[i], ServoState(cfg.servo_gain, 100));
-                    }
-
-                    emit<Task>(body);
-                }
-                // Not done and already requested - idle
-                else {
-                    emit<Task>(std::make_unique<Idle>());
-                }
-            });
+            emit<Task>(body);
+        });
     }
 
 }  // namespace module::strategy
