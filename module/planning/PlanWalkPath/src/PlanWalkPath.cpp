@@ -113,7 +113,14 @@ namespace module::planning {
             double angle_progress = std::clamp(1 - std::abs(angle_to_target) / M_PI_2, 0.0, 1.0);
             emit(graph("angle_progress", angle_progress));
             // Accelerate
-            velocity_magnitude += cfg.acceleration;
+            if (translational_error > cfg.approach_radius) {
+
+                velocity_magnitude += cfg.acceleration;
+            }
+            else {
+                // Decelerate
+                velocity_magnitude -= cfg.acceleration;
+            }
             // Adjust velocities based on proximity to the target
             double scaled_velocity_magnitude = velocity_magnitude * angle_progress;
             scaled_velocity_magnitude        = std::clamp(scaled_velocity_magnitude,

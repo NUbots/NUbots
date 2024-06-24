@@ -33,4 +33,4 @@ align_with_target:
   enter_ori_threshold: 0.2
   leave_ori_threshold: 0.6
 
-approach_radius: 0.75
+approach_radius: 0.4
