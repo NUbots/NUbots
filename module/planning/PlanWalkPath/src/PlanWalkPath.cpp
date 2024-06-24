@@ -152,11 +152,15 @@ namespace module::planning {
             emit<Task>(std::make_unique<Walk>(velocity_target));
 
             // Emit debugging information for visualization and monitoring
-            auto debug_information       = std::make_unique<WalkToDebug>();
-            Eigen::Isometry3d Hrd_target = Eigen::Isometry3d::Identity();
-            Hrd_target.translation()     = rDRr;
-            Hrd_target.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
-            debug_information->Hrd       = Hrd_target;
+            auto debug_information             = std::make_unique<WalkToDebug>();
+            Eigen::Isometry3d Hrd_target       = Eigen::Isometry3d::Identity();
+            Hrd_target.translation()           = rDRr;
+            Hrd_target.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
+            debug_information->Hrd             = Hrd_target;
+            debug_information->align_radius    = cfg.align_radius;
+            debug_information->angle_to_target = angle_to_target;  // Angle between robot and target point
+            debug_information->min_angle_error = cfg.min_angle_error;
+            debug_information->max_angle_error = cfg.max_angle_error;
             emit(debug_information);
         });
 
