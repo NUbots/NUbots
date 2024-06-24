@@ -62,10 +62,9 @@ namespace module::strategy {
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
-            cfg.ball_y_offset        = config["ball_y_offset"].as<double>();
-            cfg.ball_kick_distance   = config["ball_kick_distance"].as<double>();
-            cfg.goal_target_offset   = config["goal_target_offset"].as<double>();
-            cfg.approach_ball_radius = config["approach_ball_radius"].as<double>();
+            cfg.ball_y_offset      = config["ball_y_offset"].as<double>();
+            cfg.ball_kick_distance = config["ball_kick_distance"].as<double>();
+            cfg.goal_target_offset = config["goal_target_offset"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -96,6 +95,8 @@ namespace module::strategy {
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
                     // Position of the ball relative to the robot in the robot space
                     Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+                    // Add an offset to account for walking with the foot in front of the ball
+                    rBRr.y() += cfg.ball_y_offset;
 
                     // Position of the ball relative to the field in the field space
                     Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
@@ -106,14 +107,33 @@ namespace module::strategy {
                     // Normalize the vector
                     Eigen::Vector3d uGBf = rGBf.normalized();
 
-                    // Get position to ball to kick
-                    Eigen::Vector3d rKFf = rBFf - uGBf * cfg.ball_kick_distance;
+                    Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
 
-                    // Get position of ball from kicking position
-                    Eigen::Vector3d rKBf = rBFf - rKFf;
+                    // Get position of robot on field
+                    Eigen::Vector3d rRFf = Hfr.translation();
+                    Eigen::Vector3d uRFf = Hfr.linear().col(0);
 
                     // Compute the heading (angle between the x-axis and the vector from the kick position to the goal)
-                    double heading = std::atan2(rKBf.y(), rKBf.x());
+                    double heading = std::atan2(rGBf.y(), rGBf.x());
+
+                    // Compute the angle between the robot x-axis and the desired kick direction
+                    double angle_error = heading - std::atan2(uRFf.y(), uRFf.x());
+
+                    // Compute position to kick
+                    Eigen::Vector3d rKFf = Eigen::Vector3d::Zero();
+
+                    // If the ball is closer to the goal than the robot and robot is not facing the goal, walk to point
+                    // behind the ball
+                    if (rBFf.x() > rRFf.x() || std::abs(angle_error) > M_PI_2) {
+                        log<NUClear::INFO>("Walking to point behind ball");
+                        rKFf = rBFf - uGBf * cfg.ball_kick_distance;
+                    }
+                    else {
+                        log<NUClear::INFO>("Walking to ball directly");
+                        // Walk to the ball
+                        rKFf = rBFf;
+                    }
+                    log<NUClear::INFO>("Angle error: ", angle_error);
 
                     auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, heading));
 

@@ -35,56 +35,45 @@
 
 namespace module::planning {
 
-    struct ErrorThresholds {
-        double enter_pos = 0;
-        double enter_ori = 0;
-        double leave_pos = 0;
-        double leave_ori = 0;
-
-        // Curent position error threshold
-        double pos = 0;
-
-        // Current orientation error threshold
-        double ori = 0;
-    };
-
     class PlanWalkPath : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
-            // Error thresholds rotating to target
-            ErrorThresholds rotate_to_thresholds;
+            /// @brief Maximum walk command velocity x for walking
+            double max_translational_velocity_x = 0;
 
-            // Error thresholds walking to target
-            ErrorThresholds walk_to_thresholds;
+            /// @brief Maximum walk command velocity y for walking
+            double max_translational_velocity_y = 0;
 
-            // Error thresholds aligning with target heading
-            ErrorThresholds align_with_thresholds;
-
-            // Distance to target point to begin decelerating
-            double approach_radius = 0;
-            /// @brief Maximum angular velocity command for walking to ball
+            /// @brief Maximum angular velocity command for walking
             double max_angular_velocity = 0;
-            /// @brief Minimum angular velocity command for walking to ball
-            double min_angular_velocity = 0;
-            /// @brief Maximum walk command velocity magnitude for walking to ball
-            double max_translational_velocity_magnitude = 0;
-            /// @brief Minimum walk command velocity for walking to ball
-            double min_translational_velocity_magnitude = 0;
+
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0;
+
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0;
+
             /// @brief Rotate on spot walk command forward velocity
             double rotate_velocity_x = 0;
+
             /// @brief Rotate on spot walk command side velocity
             double rotate_velocity_y = 0;
+
             /// @brief Pivot ball command angular velocity
             double pivot_ball_velocity = 0;
             /// @brief Pivot ball forward velocity
             double pivot_ball_velocity_x = 0;
             /// @brief Pivot ball side velocity
             double pivot_ball_velocity_y = 0;
+
+            // Distance to target point to begin decelerating and aligning with target heading
+            double align_radius = 0;
+            // Maximum error in orientation to target heading for no translational velocity
+            double max_angle_error = 0;
+            // Minimum error in orientation to target heading for maximum translational velocity
+            double min_angle_error = 0;
+
         } cfg;
 
         /// @brief Current magnitude of the translational velocity of the walk command
@@ -98,6 +87,20 @@ namespace module::planning {
 
         /// @brief Angle between robot and target heading
         double angle_to_desired_heading = 0;
+
+        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v, double vx_max, double vy_max, double w_max) {
+            // Compute scale factors for x and y components
+            double sx = v.x() != 0 ? vx_max / std::abs(v.x()) : 0;
+            double sy = v.y() != 0 ? vy_max / std::abs(v.y()) : 0;
+            // Select the minimum scale factor to ensure neither limit is exceeded
+            double s = std::min(sx, sy);
+
+            // Scale the vector
+            Eigen::Vector2d translation_velocity = v.head<2>() * s;
+            double angular_velocity              = std::clamp(v.z(), -w_max, w_max);
+
+            return Eigen::Vector3d(translation_velocity.x(), translation_velocity.y(), angular_velocity);
+        }
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.

@@ -6,7 +6,7 @@ max_translational_velocity_magnitude: 0.175
 min_translational_velocity_magnitude: 0.05
 max_angular_velocity: 0.4
 min_angular_velocity: -0.4
-acceleration: 0.001 # maximum increment in walk command velocity
+acceleration: 0.0005 # maximum increment in walk command velocity
 
 # Rotate on the spot tuning values
 rotate_velocity: 0.4
@@ -22,15 +22,15 @@ pivot_ball_velocity_y: -0.2
 rotate_to_target:
   enter_pos_threshold: 0.2
   enter_ori_threshold: 0.2
-  leave_pos_threshold: 0.4
+  leave_pos_threshold: 0.6
   leave_ori_threshold: 0.4
 
 walk_to_target:
   enter_pos_threshold: 0.2
-  leave_pos_threshold: 0.4
+  leave_pos_threshold: 0.5
 
 align_with_target:
   enter_ori_threshold: 0.2
-  leave_ori_threshold: 0.4
+  leave_ori_threshold: 0.6
 
-approach_radius: 0.5
+approach_radius: 0.4

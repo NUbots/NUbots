@@ -50,6 +50,7 @@ namespace module::planning {
     using message::skill::Walk;
     using message::strategy::StandStill;
 
+    using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -61,95 +62,91 @@ namespace module::planning {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Walk tuning
-            cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
-            cfg.max_translational_velocity_magnitude = config["max_translational_velocity_magnitude"].as<double>();
-            cfg.acceleration                         = config["acceleration"].as<double>();
-            cfg.max_angular_velocity                 = config["max_angular_velocity"].as<double>();
-            cfg.min_angular_velocity                 = config["min_angular_velocity"].as<double>();
-            cfg.rotate_velocity                      = config["rotate_velocity"].as<double>();
-            cfg.rotate_velocity_x                    = config["rotate_velocity_x"].as<double>();
-            cfg.rotate_velocity_y                    = config["rotate_velocity_y"].as<double>();
-            cfg.pivot_ball_velocity                  = config["pivot_ball_velocity"].as<double>();
-            cfg.pivot_ball_velocity_x                = config["pivot_ball_velocity_x"].as<double>();
-            cfg.pivot_ball_velocity_y                = config["pivot_ball_velocity_y"].as<double>();
+            cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
+            cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
+            cfg.max_angular_velocity         = config["max_angular_velocity"].as<double>();
 
-            // Thresholds for different walk to tasks
-            cfg.rotate_to_thresholds.enter_pos  = config["rotate_to_target"]["enter_pos_threshold"].as<double>();
-            cfg.rotate_to_thresholds.enter_ori  = config["rotate_to_target"]["enter_ori_threshold"].as<double>();
-            cfg.rotate_to_thresholds.leave_pos  = config["rotate_to_target"]["leave_pos_threshold"].as<double>();
-            cfg.rotate_to_thresholds.leave_ori  = config["rotate_to_target"]["leave_ori_threshold"].as<double>();
-            cfg.walk_to_thresholds.enter_pos    = config["walk_to_target"]["enter_pos_threshold"].as<double>();
-            cfg.walk_to_thresholds.leave_pos    = config["walk_to_target"]["leave_pos_threshold"].as<double>();
-            cfg.align_with_thresholds.enter_ori = config["align_with_target"]["enter_ori_threshold"].as<double>();
-            cfg.align_with_thresholds.leave_ori = config["align_with_target"]["leave_ori_threshold"].as<double>();
+            cfg.acceleration = config["acceleration"].as<double>();
 
-            cfg.approach_radius = config["approach_radius"].as<double>();
+            cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
+            cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
+            cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
+
+            cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
+            cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
+            cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
+
+            cfg.align_radius    = config["align_radius"].as<double>();
+            cfg.max_angle_error = config["max_angle_error"].as<Expression>();
+            cfg.min_angle_error = config["min_angle_error"].as<Expression>();
         });
 
         on<Start<WalkTo>>().then([this] {
             log<NUClear::DEBUG>("Starting walk to task");
-            // Reset the thresholds to the enter thresholds
-            cfg.rotate_to_thresholds.pos  = cfg.rotate_to_thresholds.enter_pos;
-            cfg.rotate_to_thresholds.ori  = cfg.rotate_to_thresholds.enter_ori;
-            cfg.walk_to_thresholds.pos    = cfg.walk_to_thresholds.enter_pos;
-            cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
+            velocity_magnitude = 0;
         });
 
-        // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            // Translational error (distance) from robot to target
-            translational_error = walk_to.Hrd.translation().norm();
+            Eigen::Isometry3d Hrd           = walk_to.Hrd;
+            Eigen::Vector3d rDRr            = walk_to.Hrd.translation();
+            double translational_error      = Hrd.translation().norm();
+            double angle_to_target          = std::atan2(rDRr.y(), rDRr.x());
+            double angle_to_desired_heading = std::atan2(Hrd.linear().col(0).y(), Hrd.linear().col(0).x());
 
-            // Angle between robot and target point
-            angle_to_target = std::atan2(walk_to.Hrd.translation().y(), walk_to.Hrd.translation().x());
+            // When in the align radius, the robot should be decelerating and begin aligning with the target heading
+            double translation_progress = std::max(0.0, 1.0 - (translational_error / cfg.align_radius));
+            emit(graph("translation_progress", translation_progress));
 
-            // Angle between robot and target angle_to_desired_heading
-            angle_to_desired_heading = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+            // Linearly interpolate between the angle to the target and the angle to the desired heading when close
+            double interpolated_angle =
+                (1 - translation_progress) * angle_to_target + translation_progress * angle_to_desired_heading;
+            emit(graph("interpolated_angle", interpolated_angle));
 
-            emit(std::make_unique<WalkToDebug>(walk_to.Hrd));
+            // New calculation of angle_progress with smooth transition
+            double angle_progress =
+                (cfg.max_angle_error - std::abs(interpolated_angle)) / (cfg.max_angle_error - cfg.min_angle_error);
+            angle_progress = std::clamp(angle_progress, 0.0, 1.0);
+            emit(graph("angle_progress", angle_progress));
 
-            // 1. If far away and not facing the target, then rotate on spot to face the target
-            if (translational_error > cfg.rotate_to_thresholds.pos
-                && std::abs(angle_to_target) > cfg.rotate_to_thresholds.ori) {
-                emit<Task>(std::make_unique<TurnOnSpot>(angle_to_target < 0));
-                cfg.rotate_to_thresholds.pos = cfg.rotate_to_thresholds.enter_pos;
-                cfg.rotate_to_thresholds.ori = cfg.rotate_to_thresholds.enter_ori;
-                emit(graph("Rotating towards target", true));
-                return;
+            if (translational_error > cfg.align_radius) {
+                // Accelerate
+                double max_velocity_magnitude =
+                    std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
+                velocity_magnitude += cfg.acceleration;
+                velocity_magnitude = std::min(velocity_magnitude, max_velocity_magnitude);
             }
             else {
-                // Increase thresholds to prevent oscillation when condition is reached
-                cfg.rotate_to_thresholds.pos = cfg.rotate_to_thresholds.leave_pos;
-                cfg.rotate_to_thresholds.ori = cfg.rotate_to_thresholds.leave_ori;
-                emit(graph("Rotating towards target", false));
+                // Decelerate
+                double min_velocity_magnitude =
+                    std::min(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
+                velocity_magnitude -= cfg.acceleration;
+                velocity_magnitude = std::max(velocity_magnitude, min_velocity_magnitude);
             }
+            emit(graph("velocity_magnitude", velocity_magnitude));
 
-            // 2. If just far away, then walk towards the target directly
-            if (translational_error > cfg.walk_to_thresholds.pos) {
-                emit<Task>(std::make_unique<WalkDirect>(walk_to.Hrd, cfg.approach_radius));
-                cfg.walk_to_thresholds.pos = cfg.walk_to_thresholds.enter_pos;
-                emit(graph("Walking towards target", true));
-                return;
-            }
-            else {
-                // Increase thresholds to prevent oscillation when condition is reached
-                cfg.walk_to_thresholds.pos = cfg.walk_to_thresholds.leave_pos;
-                emit(graph("Walking towards target", false));
-            }
+            // Adjust velocity based on orientation error
+            double scaled_velocity_magnitude = velocity_magnitude * angle_progress;
 
-            // 3. If close to the target, but not aligned with the target, then align with target heading
-            if (std::abs(angle_to_desired_heading) > cfg.align_with_thresholds.ori) {
-                emit<Task>(std::make_unique<TurnOnSpot>(angle_to_desired_heading < 0));
-                cfg.align_with_thresholds.ori = cfg.align_with_thresholds.enter_ori;
-                emit(graph("Aligning with target heading", true));
-            }
-            else {
-                emit(graph("Aligning with target heading", false));
-                // Increase thresholds to prevent oscillation when condition is reached
-                cfg.align_with_thresholds.ori = cfg.align_with_thresholds.leave_ori;
-                // 4. We are close to the target and aligned with the target, stop
-                emit<Task>(std::make_unique<StandStill>());
-            }
+            emit(graph("scaled_velocity_magnitude", scaled_velocity_magnitude));
+
+            Eigen::Vector3d velocity_target = rDRr.normalized() * scaled_velocity_magnitude;
+            velocity_target.z()             = interpolated_angle;
+            velocity_target                 = constrain_velocity(velocity_target,
+                                                 cfg.max_translational_velocity_x,
+                                                 cfg.max_translational_velocity_y,
+                                                 cfg.max_angular_velocity);
+            emit(graph("velocity_target", velocity_target.x(), velocity_target.y(), velocity_target.z()));
+
+            // Emit the walk task with the calculated velocities
+            emit<Task>(std::make_unique<Walk>(velocity_target));
+
+            // Emit debugging information for visualization and monitoring
+            auto debug_information       = std::make_unique<WalkToDebug>();
+            Eigen::Isometry3d Hrd_target = Eigen::Isometry3d::Identity();
+            Hrd_target.translation()     = rDRr;
+            Hrd_target.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
+            debug_information->Hrd       = Hrd_target;
+            emit(debug_information);
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
@@ -164,30 +161,32 @@ namespace module::planning {
         on<Start<WalkDirect>>().then([this] {
             log<NUClear::DEBUG>("Starting walk direct task");
             // Reset the walk direct velocity magnitude to minimum velocity
-            velocity_magnitude = cfg.min_translational_velocity_magnitude;
+            // velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
 
         on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
-            if (walk_direct.Hrd.translation().norm() > walk_direct.approach_radius) {
+            if (walk_direct.Hrd.translation().norm() > cfg.align_radius) {
                 velocity_magnitude += cfg.acceleration;
             }
             else {
                 velocity_magnitude -= cfg.acceleration;
             }
-            velocity_magnitude = std::clamp(velocity_magnitude,
-                                            cfg.min_translational_velocity_magnitude,
-                                            cfg.max_translational_velocity_magnitude);
             // Obtain the unit vector to desired target in robot space and scale by magnitude
             Eigen::Vector3d velocity_target = walk_direct.Hrd.translation().normalized() * velocity_magnitude;
 
             // Set the angular velocity as the angle_to_target to the target and clamp to min and max angular velocity
             if (!walk_direct.dont_align_towards_target) {
-                velocity_target.z() =
-                    utility::math::clamp(cfg.min_angular_velocity, angle_to_target, cfg.max_angular_velocity);
+                velocity_target.z() = angle_to_target;
             }
             else {
                 velocity_target.z() = 0;
             }
+
+            // Constrain the velocity to the maximum translational and angular velocities
+            velocity_target = constrain_velocity(velocity_target,
+                                                 cfg.max_translational_velocity_x,
+                                                 cfg.max_translational_velocity_y,
+                                                 cfg.max_angular_velocity);
 
             emit<Task>(std::make_unique<Walk>(velocity_target));
         });
