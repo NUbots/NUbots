@@ -242,8 +242,9 @@ namespace module::purpose {
             auto purposes_msg = std::make_unique<Purposes>();
             uint8_t striker_idx = find_striker();
 
-            // Assign own position
-            self_direct(striker_idx);
+            // Leader assigns own position
+            emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+            log<NUClear::INFO>("Leader made striker");
 
             // Decide soccer positions
             for (int i = 0; i < int(active_robots.size()); ++i) {
@@ -262,18 +263,6 @@ namespace module::purpose {
             emit(purposes_msg);
         }
     };
-
-    void Soccer::self_direct(uint8_t striker_idx) {
-        if (striker_idx == 0) {
-            // Note: at the moment our leader is always our striker, may not always be the case going forward
-            emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-            log<NUClear::INFO>("Leader made striker");
-        }
-        else {
-            emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-            log<NUClear::INFO>("Leader made defender");
-        }
-    }
 
     // Listen to directions if they are the leader
     void Soccer::follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id) {
@@ -304,12 +293,6 @@ namespace module::purpose {
                     soccer_position = Position("DEFENDER");
                     log<NUClear::INFO>("Robot made defender");
                 }
-            }
-
-            // Store the new positions. Bit messy, but we should not reassign the striker if we become the leader later
-            // We cannot do this by index/same loop as our active_robots and our leader's active_robots may differ
-            for (size_t i = 0; i < active_robots.size(); ++i) {
-                active_robots[i].position = (active_robots[i].robot_id == striker_id) ? Position("STRIKER") : Position("DEFENDER");
             }
         }
     }

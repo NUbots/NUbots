@@ -119,10 +119,6 @@ namespace module::purpose {
         /// @param incoming_robot_id The id of the robot that send the robocup message
         void follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id);
 
-        /// @brief Leader determines its own soccer position
-        /// @param striker_idx The index of the future striker in active_robots
-        void self_direct(uint8_t striker_idx);
-
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
