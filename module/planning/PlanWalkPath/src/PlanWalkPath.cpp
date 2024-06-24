@@ -149,6 +149,7 @@ namespace module::planning {
             debug_information->align_radius    = cfg.align_radius;
             debug_information->angle_to_target = angle_to_target;  // Angle between robot and target point
             debug_information->min_angle_error = cfg.min_angle_error;
+            debug_information->max_angle_error = cfg.max_angle_error;
             emit(debug_information);
         });
 

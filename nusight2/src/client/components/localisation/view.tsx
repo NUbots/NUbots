@@ -361,7 +361,9 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   const robot_space_angle_to_target = model.angle_to_target;
   const field_space_angle_to_target = robot_space_angle_to_target + rTFf_rot_euler.z;
   const min_angle_error = model.min_angle_error;
+  const max_angle_error = model.max_angle_error;
   console.log("angle error min", min_angle_error);
+  console.log("angle error max", max_angle_error);
 
   return (
     <>
@@ -372,9 +374,15 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
         </mesh>
       </object3D>
       {/* Min angle thing */}
-      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.008]}>
+      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.010]}>
         <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * min_angle_error]}>
-          <circleBufferGeometry args={[align_radius, 40, 0, min_angle_error]} />
+          <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
+          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+        </mesh>
+      </object3D>
+      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.008]}>
+        <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * max_angle_error]}>
+          <circleBufferGeometry args={[1, 40, 0, max_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>

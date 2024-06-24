@@ -143,6 +143,7 @@ export class LocalisationRobotModel {
   @observable angle_to_target: number
   @observable translational_error: number
   @observable min_angle_error: number
+  @observable max_angle_error: number
   // @observable velocity_target: ivec3 | null| undefined
 
   constructor({
@@ -166,6 +167,7 @@ export class LocalisationRobotModel {
     angle_to_target,
     translational_error,
     min_angle_error,
+    max_angle_error,
     // velocity_target,
   }: {
     model: RobotModel;
@@ -188,6 +190,7 @@ export class LocalisationRobotModel {
     angle_to_target: number,
     translational_error: number,
     min_angle_error: number,
+    max_angle_error: number,
     // velocity_target: ivec3 | null | undefined,
   }) {
     this.model = model;
@@ -210,6 +213,7 @@ export class LocalisationRobotModel {
     this.angle_to_target = angle_to_target;
     this.translational_error = translational_error;
     this.min_angle_error = min_angle_error;
+    this.max_angle_error = max_angle_error;
     // this.velocity_target = velocity_target;
   }
 
@@ -231,6 +235,7 @@ export class LocalisationRobotModel {
       angle_to_target: 0,
       translational_error: 0,
       min_angle_error: 0,
+      max_angle_error: 0,
       // velocity_target: { x: 0, y: 0, z: 0 },
     });
   });

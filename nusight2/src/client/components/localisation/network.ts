@@ -53,6 +53,7 @@ export class LocalisationNetwork {
     robot.angle_to_target = walk_to_debug.angleToTarget
     robot.translational_error = walk_to_debug.translationalError
     robot.min_angle_error = walk_to_debug.minAngleError
+    robot.max_angle_error = walk_to_debug.maxAngleError
     // robot.velocity_target = walk_to_debug.velocityTarget
     console.log("align_radius", robot.align_radius);
   };
