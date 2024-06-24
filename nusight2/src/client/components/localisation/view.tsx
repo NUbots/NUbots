@@ -355,6 +355,7 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   const rDFf = model.Hfd?.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
   const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
+  const target_rotation = new THREE.Euler().setFromQuaternion(model.Hfd.decompose().rotation.toThree(), "XYZ");
   const angle_to_target = model.angle_to_target + robot_rotation.z;
   const min_align_radius = model.min_align_radius;
   const max_align_radius = model.max_align_radius;
@@ -393,13 +394,13 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
         </mesh>
       </object3D>
       <object3D position={[rTFf?.x, rTFf?.y, 0.008]}>
-        <mesh rotation={[0, 0, angle_to_target - 0.5 * min_angle_error]}>
+        <mesh rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
       <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
-        <mesh rotation={[0, 0, angle_to_target - 0.5 * max_angle_error]}>
+        <mesh rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, max_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
