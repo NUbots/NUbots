@@ -353,19 +353,15 @@ interface DistanceCircleProps {
 
 const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   // const rDFf = model.Hfd?.decompose().translation;
-  const rDFf_translation = model.Hfd?.decompose().translation;
-  const rTFf_translation = model.Hft.decompose().translation;
-  const rTFf_rot_quat = model.Hft.decompose().rotation;
-  const rTFf_rot_euler = new THREE.Euler().setFromQuaternion(rTFf_rot_quat.toThree(), "XYZ");
+  const rDFf = model.Hfd?.decompose().translation;
+  const rTFf = model.Hft.decompose().translation;
+  const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
+  const angle_to_target = model.angle_to_target + robot_rotation.z;
   const align_radius = model.align_radius;
-  const robot_space_angle_to_target = model.angle_to_target;
-  const field_space_angle_to_target = robot_space_angle_to_target + rTFf_rot_euler.z;
   const min_angle_error = model.min_angle_error;
   const max_angle_error = model.max_angle_error;
-  console.log("angle error min", min_angle_error);
-  console.log("angle error max", max_angle_error);
 
-  const arrowMesh = () => {
+  const arrowGeometry = () => {
     const arrowShape = new THREE.Shape();
 
     arrowShape.moveTo(0, -10);
@@ -384,33 +380,32 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
 
   return (
     <>
-      <object3D position={[rDFf_translation?.x, rDFf_translation?.y, 0.005]}>
+      <object3D position={[rDFf?.x, rDFf?.y, 0.005]}>
         <mesh rotation={[0, 0, Math.PI / 2]}>
           <circleBufferGeometry args={[align_radius, 40]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rDFf_translation?.x, rDFf_translation?.y, 0.006]}>
+      <object3D position={[rDFf?.x, rDFf?.y, 0.006]}>
         <mesh rotation={[0, 0, Math.PI / 2]}>
           <circleBufferGeometry args={[align_radius + 1, 40]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.009]}>
-        <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * min_angle_error]}>
+      <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
+        <mesh rotation={[0, 0, angle_to_target - 0.5 * min_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.009]}>
-        <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * max_angle_error]}>
+      <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
+        <mesh rotation={[0, 0, angle_to_target - 0.5 * max_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, max_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.010]}>
-        {/* <primitive object={arrowMesh()} scale={0.001} /> */}
-        <mesh geometry={arrowMesh()} scale={0.001} rotation={[0, 0, rTFf_rot_euler.z]}>
+      <object3D position={[rTFf?.x, rTFf?.y, 0.010]}>
+        <mesh geometry={arrowGeometry()} scale={0.001} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 255, 255)" opacity={.5} transparent={true} />
         </mesh>
       </object3D>
