@@ -48,14 +48,14 @@ export class LocalisationNetwork {
     console.log("walk_to_debug", walk_to_debug);
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
-    robot.align_radius = walk_to_debug.alignRadius;
+    robot.max_align_radius = walk_to_debug.maxAlignRadius;
+    robot.min_align_radius = walk_to_debug.minAlignRadius;
     robot.angle_to_desired_heading = walk_to_debug.angleToDesiredHeading;
-    robot.angle_to_target = walk_to_debug.angleToTarget
-    robot.translational_error = walk_to_debug.translationalError
-    robot.min_angle_error = walk_to_debug.minAngleError
-    robot.max_angle_error = walk_to_debug.maxAngleError
-    // robot.velocity_target = walk_to_debug.velocityTarget
-    console.log("align_radius", robot.align_radius);
+    robot.angle_to_target = walk_to_debug.angleToTarget;
+    robot.translational_error = walk_to_debug.translationalError;
+    robot.min_angle_error = walk_to_debug.minAngleError;
+    robot.max_angle_error = walk_to_debug.maxAngleError;
+    // robot.velocity_target = walk_to_debug.velocityTarget;
   };
 
   @action.bound
