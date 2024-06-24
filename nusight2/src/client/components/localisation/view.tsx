@@ -392,7 +392,7 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
+      <object3D position={[rTFf?.x, rTFf?.y, 0.008]}>
         <mesh rotation={[0, 0, angle_to_target - 0.5 * min_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
