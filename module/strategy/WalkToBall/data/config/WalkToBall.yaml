@@ -7,7 +7,10 @@ ball_search_timeout: 2
 # Y - Offset for ball position such that ball is approached with foot behind ball
 ball_y_offset: 0.0
 
-ball_kick_distance: 0.4
+ball_kick_distance: 0.5
 
 # Goal kick target should be behind line so goal kick position doesn't try position robot to kick ball out of goal when close to line
 goal_target_offset: 0.5
+
+max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
+min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed

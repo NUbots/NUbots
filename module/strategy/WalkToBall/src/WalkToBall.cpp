@@ -37,7 +37,10 @@
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
 
+#include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::strategy {
 
@@ -52,7 +55,10 @@ namespace module::strategy {
     using WalkToKickBallTask = message::strategy::WalkToKickBall;
     using FieldDescription   = message::support::FieldDescription;
 
+    using utility::math::angle::angle_between;
     using utility::math::euler::pos_rpy_to_transform;
+    using utility::nusight::graph;
+    using utility::support::Expression;
 
     WalkToBall::WalkToBall(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -65,6 +71,8 @@ namespace module::strategy {
             cfg.ball_y_offset      = config["ball_y_offset"].as<double>();
             cfg.ball_kick_distance = config["ball_kick_distance"].as<double>();
             cfg.goal_target_offset = config["goal_target_offset"].as<double>();
+            cfg.max_angle_error    = config["max_angle_error"].as<Expression>();
+            cfg.min_angle_error    = config["min_angle_error"].as<Expression>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -114,28 +122,33 @@ namespace module::strategy {
                     Eigen::Vector3d uRFf = Hfr.linear().col(0);
 
                     // Compute the heading (angle between the x-axis and the vector from the kick position to the goal)
-                    double heading = std::atan2(rGBf.y(), rGBf.x());
+                    double desired_heading = std::atan2(rGBf.y(), rGBf.x());
 
-                    // Compute the angle between the robot x-axis and the desired kick direction
-                    double angle_error = heading - std::atan2(uRFf.y(), uRFf.x());
+                    double angle_error = std::atan2(uGBf.y(), uGBf.x()) - std::atan2(uRFf.y(), uRFf.x());
+                    // Normalize the angle error to be within the range [-pi, pi]
+                    angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
+
+                    double angle_progress = std::clamp(std::abs(angle_error) / cfg.max_angle_error, 0.0, 1.0);
+                    emit(graph("angle_error", angle_error));
+                    emit(graph("walk_to_ball_angle_progress", angle_progress));
 
                     // Compute position to kick
                     Eigen::Vector3d rKFf = Eigen::Vector3d::Zero();
 
-                    // If the ball is closer to the goal than the robot and robot is not facing the goal, walk to point
-                    // behind the ball
-                    if (rBFf.x() > rRFf.x() || std::abs(angle_error) > M_PI_2) {
+                    // If the ball is closer to the goal than the robot and robot is not facing the goal, walk to a
+                    // point behind the ball
+                    if (rBFf.x() > rRFf.x() || std::abs(angle_error) > cfg.max_angle_error) {
                         log<NUClear::INFO>("Walking to point behind ball");
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance;
                     }
                     else {
                         log<NUClear::INFO>("Walking to ball directly");
                         // Walk to the ball
-                        rKFf = rBFf;
+                        rKFf = rBFf - uGBf * cfg.ball_kick_distance * angle_progress;
                     }
                     log<NUClear::INFO>("Angle error: ", angle_error);
 
-                    auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, heading));
+                    auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
 
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk));
                 }

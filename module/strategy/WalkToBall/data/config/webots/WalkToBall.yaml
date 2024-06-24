@@ -11,3 +11,6 @@ ball_kick_distance: 0.3
 
 # Goal kick target should be behind line so goal kick position doesn't try position robot to kick ball out of goal when close to line
 goal_target_offset: 0.5
+
+max_angle_error: 45 * pi / 180 # Maximum angle error
+min_angle_error: 20 * pi / 180 # Minimum angle error

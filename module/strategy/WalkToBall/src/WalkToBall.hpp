@@ -51,6 +51,9 @@ namespace module::strategy {
 
             /// @brief The distance when walking to the ball directly to start slowing down
             double approach_ball_radius = 0.0;
+
+            double max_angle_error = 0.0;
+            double min_angle_error = 0.0;
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space
