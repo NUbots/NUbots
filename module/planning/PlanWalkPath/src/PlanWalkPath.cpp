@@ -64,7 +64,10 @@ namespace module::planning {
             // Walk tuning
             cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
             cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
-            cfg.max_angular_velocity         = config["max_angular_velocity"].as<double>();
+            cfg.min_translational_velocity_x = config["min_translational_velocity_x"].as<double>();
+            cfg.min_translational_velocity_y = config["min_translational_velocity_y"].as<double>();
+
+            cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
 
             cfg.acceleration = config["acceleration"].as<double>();
 
@@ -76,9 +79,10 @@ namespace module::planning {
             cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
 
-            cfg.align_radius    = config["align_radius"].as<double>();
-            cfg.max_angle_error = config["max_angle_error"].as<Expression>();
-            cfg.min_angle_error = config["min_angle_error"].as<Expression>();
+            cfg.max_align_radius = config["max_align_radius"].as<double>();
+            cfg.min_align_radius = config["min_align_radius"].as<double>();
+            cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
+            cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
         });
 
         on<Start<WalkTo>>().then([this] {
@@ -87,14 +91,22 @@ namespace module::planning {
         });
 
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Isometry3d Hrd           = walk_to.Hrd;
-            Eigen::Vector3d rDRr            = walk_to.Hrd.translation();
-            double translational_error      = Hrd.translation().norm();
-            double angle_to_target          = std::atan2(rDRr.y(), rDRr.x());
+            Eigen::Isometry3d Hrd = walk_to.Hrd;
+            Eigen::Vector3d rDRr  = walk_to.Hrd.translation();
+
+            // Calculate the translational and orientation error
+            double translational_error = Hrd.translation().norm();
+            emit(graph("translational_error", translational_error));
+            double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
+            emit(graph("angle_to_target", angle_to_target));
             double angle_to_desired_heading = std::atan2(Hrd.linear().col(0).y(), Hrd.linear().col(0).x());
+            emit(graph("angle_to_desired_heading", angle_to_desired_heading));
 
             // When in the align radius, the robot should be decelerating and begin aligning with the target heading
-            double translation_progress = std::max(0.0, 1.0 - (translational_error / cfg.align_radius));
+            double translation_progress =
+                std::clamp((cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
+                           0.0,
+                           1.0);
             emit(graph("translation_progress", translation_progress));
 
             // Linearly interpolate between the angle to the target and the angle to the desired heading when close
@@ -103,30 +115,29 @@ namespace module::planning {
             emit(graph("interpolated_angle", interpolated_angle));
 
             // New calculation of angle_progress with smooth transition
-            double angle_progress =
-                (cfg.max_angle_error - std::abs(interpolated_angle)) / (cfg.max_angle_error - cfg.min_angle_error);
-            angle_progress = std::clamp(angle_progress, 0.0, 1.0);
+            double angle_progress = std::clamp(
+                (cfg.max_angle_error - std::abs(interpolated_angle)) / (cfg.max_angle_error - cfg.min_angle_error),
+                0.0,
+                1.0);
             emit(graph("angle_progress", angle_progress));
 
-            if (translational_error > cfg.align_radius) {
+            double scaled_velocity_magnitude = 0;
+            if (translational_error > cfg.max_align_radius) {
                 // Accelerate
+                velocity_magnitude += cfg.acceleration;
+                scaled_velocity_magnitude = velocity_magnitude * angle_progress;
+                // Constrain the velocity to the maximum translational velocity
                 double max_velocity_magnitude =
                     std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
-                velocity_magnitude += cfg.acceleration;
                 velocity_magnitude = std::min(velocity_magnitude, max_velocity_magnitude);
             }
             else {
-                // Decelerate
-                double min_velocity_magnitude =
-                    std::min(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
-                velocity_magnitude -= cfg.acceleration;
-                velocity_magnitude = std::max(velocity_magnitude, min_velocity_magnitude);
+                // Scale the velocity based on the translational error
+                double scale              = translational_error / cfg.max_align_radius;
+                scaled_velocity_magnitude = 2 * velocity_magnitude * scale;
+                emit(graph("scale", scale));
             }
             emit(graph("velocity_magnitude", velocity_magnitude));
-
-            // Adjust velocity based on orientation error
-            double scaled_velocity_magnitude = velocity_magnitude * angle_progress;
-
             emit(graph("scaled_velocity_magnitude", scaled_velocity_magnitude));
 
             Eigen::Vector3d velocity_target = rDRr.normalized() * scaled_velocity_magnitude;
@@ -165,7 +176,7 @@ namespace module::planning {
         });
 
         on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
-            if (walk_direct.Hrd.translation().norm() > cfg.align_radius) {
+            if (walk_direct.Hrd.translation().norm() > cfg.max_align_radius) {
                 velocity_magnitude += cfg.acceleration;
             }
             else {
