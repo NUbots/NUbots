@@ -26,6 +26,8 @@ syntax = "proto3";
 
 package message.input;
 
+import "google/protobuf/timestamp.proto";
+
 /// The detected purpose of the robot
 enum SoccerPosition {
     DEFENDER = 0;
@@ -40,4 +42,7 @@ message Purposes {
 
     // List of robot positions
     repeated Purpose purposes = 1;
+
+    // The sending robot's startup time
+    google.protobuf.Timestamp startup_time = 2;
 }

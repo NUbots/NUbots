@@ -42,6 +42,8 @@ namespace module::purpose {
     private:
         uint player_id = 0;
 
+        NUClear::clock::time_point startup_time = NUClear::clock::now();
+
         /// @brief Smart enum for the robot's position
         struct Position {
             enum Value {
@@ -75,16 +77,17 @@ namespace module::purpose {
             /// @brief The soccer position of the robot
             Position position{};
             /// @brief The number of seconds to wait before assuming a teammate is inactive
-            uint8_t timeout = 5;
+            uint8_t timeout = 0;
         } cfg;
 
         struct RobotInfo {
             uint8_t robot_id = 0;
-            std::chrono::steady_clock::time_point last_heard_from = NUClear::clock::now();
+            NUClear::clock::time_point startup_time = NUClear::clock::now();
+            NUClear::clock::time_point last_update_time = NUClear::clock::now();
             Position position = Position("DEFENDER");
 
             bool operator<(const RobotInfo& other) const {
-                return robot_id < other.robot_id;
+                return startup_time < other.startup_time;
             }
         };
 
@@ -93,6 +96,9 @@ namespace module::purpose {
 
         /// @brief Store's the robot's current soccer position
         Position soccer_position;
+
+        /// @brief Utility to set up robocup message to find purpose
+        void find_purpose();
 
         /// @brief Add and update active robots
         /// @param robocup A robocup message sent by another robot
