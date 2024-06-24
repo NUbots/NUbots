@@ -2,10 +2,10 @@
 log_level: INFO
 
 # General playing tuning values for walking
-max_translational_velocity_magnitude: 0.25
-min_translational_velocity_magnitude: 0.05
+max_translational_velocity_x: 0.25
+max_translational_velocity_y: 0.1
 max_angular_velocity: 0.4
-min_angular_velocity: -0.4
+
 acceleration: 0.005 # maximum increment in walk command velocity
 
 # Rotate on the spot tuning values
@@ -18,19 +18,6 @@ pivot_ball_velocity: 0.5
 pivot_ball_velocity_x: 0.0
 pivot_ball_velocity_y: -0.2
 
-# Error must be above these thresholds to run task
-rotate_to_target:
-  enter_pos_threshold: 0.2
-  enter_ori_threshold: 0.2
-  leave_pos_threshold: 0.4
-  leave_ori_threshold: 0.4
-
-walk_to_target:
-  enter_pos_threshold: 0.2
-  leave_pos_threshold: 0.4
-
-align_with_target:
-  enter_ori_threshold: 0.2
-  leave_ori_threshold: 0.7
-
-approach_radius: 0.4
+align_radius: 0.4 # Radius [m] to begin aligning with target heading
+max_angle_error: 90 * pi / 180 # Maximum angle error before only allowing turning on the spot
+min_angle_error: 45 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
