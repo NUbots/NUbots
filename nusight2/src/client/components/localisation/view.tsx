@@ -365,6 +365,23 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   console.log("angle error min", min_angle_error);
   console.log("angle error max", max_angle_error);
 
+  const arrowMesh = () => {
+    const arrowShape = new THREE.Shape();
+
+    arrowShape.moveTo(0, -10);
+    arrowShape.lineTo(0, 10);
+    arrowShape.lineTo(600, 10);
+    arrowShape.lineTo(600, 20);
+    arrowShape.lineTo(900, 0);
+    arrowShape.lineTo(600, -20);
+    arrowShape.lineTo(600, -10);
+    arrowShape.lineTo(0, -10);
+
+    const geometry = new THREE.ShapeGeometry(arrowShape);
+
+    return geometry;
+  };
+
   return (
     <>
       <object3D position={[rDFf_translation?.x, rDFf_translation?.y, 0.005]}>
@@ -373,17 +390,28 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      {/* Min angle thing */}
-      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.010]}>
+      <object3D position={[rDFf_translation?.x, rDFf_translation?.y, 0.006]}>
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <circleBufferGeometry args={[align_radius + 1, 40]} />
+          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+        </mesh>
+      </object3D>
+      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.009]}>
         <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * min_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.008]}>
+      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.009]}>
         <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * max_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, max_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+        </mesh>
+      </object3D>
+      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.010]}>
+        {/* <primitive object={arrowMesh()} scale={0.001} /> */}
+        <mesh geometry={arrowMesh()} scale={0.001} rotation={[0, 0, rTFf_rot_euler.z]}>
+          <meshBasicMaterial color="rgb(255, 255, 255)" opacity={.5} transparent={true} />
         </mesh>
       </object3D>
     </>
