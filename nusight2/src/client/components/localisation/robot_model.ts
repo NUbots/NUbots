@@ -6,6 +6,7 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
+import { ivec3, vec3 } from "../../../shared/messages";
 
 class ServoMotor {
   @observable angle: number;
@@ -137,6 +138,12 @@ export class LocalisationRobotModel {
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
+  @observable align_radius: number;
+  @observable angle_to_desired_heading: number
+  @observable angle_to_target: number
+  @observable translational_error: number
+  @observable min_angle_error: number
+  // @observable velocity_target: ivec3 | null| undefined
 
   constructor({
     model,
@@ -154,6 +161,12 @@ export class LocalisationRobotModel {
     fieldIntersections,
     goals,
     robots,
+    align_radius,
+    angle_to_desired_heading,
+    angle_to_target,
+    translational_error,
+    min_angle_error,
+    // velocity_target,
   }: {
     model: RobotModel;
     name: string;
@@ -170,6 +183,12 @@ export class LocalisationRobotModel {
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
+    align_radius: number;
+    angle_to_desired_heading: number,
+    angle_to_target: number,
+    translational_error: number,
+    min_angle_error: number,
+    // velocity_target: ivec3 | null | undefined,
   }) {
     this.model = model;
     this.name = name;
@@ -186,6 +205,12 @@ export class LocalisationRobotModel {
     this.fieldIntersections = fieldIntersections;
     this.goals = goals;
     this.robots = robots;
+    this.align_radius = align_radius;
+    this.angle_to_desired_heading = angle_to_desired_heading;
+    this.angle_to_target = angle_to_target;
+    this.translational_error = translational_error;
+    this.min_angle_error = min_angle_error;
+    // this.velocity_target = velocity_target;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -201,6 +226,12 @@ export class LocalisationRobotModel {
       particles: { particle: [] },
       goals: { points: [] },
       robots: [],
+      align_radius: 0,
+      angle_to_desired_heading: 0,
+      angle_to_target: 0,
+      translational_error: 0,
+      min_angle_error: 0,
+      // velocity_target: { x: 0, y: 0, z: 0 },
     });
   });
 

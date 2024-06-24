@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useMemo } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -6,9 +6,6 @@ import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
-// import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
-// import { BufferGeometryUtils } from 'three';
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
@@ -332,70 +329,58 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.goalVisible && <Goals model={model} />}
       {model.robots.map((robot) => {
         if (robot.visible && robot.Hfd) {
+          return <DistanceCircle key={robot.id} model={robot} />;
+        }
+        return null;
+      })}
+      {model.robots.map((robot) => {
+        if (robot.visible && robot.Hfd) {
           return <URDFWalkPathGoal key={robot.id} model={robot} />;
         }
         return null;
       })}
-      <DistanceCircle model={model} innerCircleRadius={1} outerCircleRadius={2} innerRotationThreshold={Math.PI / 8} outerRotationThreshold={Math.PI / 2} />
       <Robots model={model} />
     </object3D>
   );
 });
 
+
+// Props
 interface DistanceCircleProps {
-  model: LocalisationModel;
-  innerCircleRadius: number;
-  outerCircleRadius: number;
-  innerRotationThreshold: number;
-  outerRotationThreshold: number;
+  model: LocalisationRobotModel;
+
 }
 
-const DistanceCircle = ((props: DistanceCircleProps) => {
-  const position = new Vector3(3, 1, 0); // Dummy position vector
-  const rotation = [0, 0, 3]; // Dummy rotation (euler angles)
-  const rotationThreshold = Math.PI / 2; // Threshold for rotation in radians
+const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
+  // const rDFf = model.Hfd?.decompose().translation;
+  const rDFf_translation = model.Hfd?.decompose().translation;
+  const rTFf_translation = model.Hft.decompose().translation;
+  const rTFf_rot_quat = model.Hft.decompose().rotation;
+  const rTFf_rot_euler = new THREE.Euler().setFromQuaternion(rTFf_rot_quat.toThree(), "XYZ");
+  const align_radius = model.align_radius;
+  const robot_space_angle_to_target = model.angle_to_target;
+  const field_space_angle_to_target = robot_space_angle_to_target + rTFf_rot_euler.z;
+  const min_angle_error = model.min_angle_error;
+  console.log("angle error min", min_angle_error);
 
   return (
     <>
-      {
-        props.model.robots.map(
-          (robot) =>
-            robot.visible && (
-              <object3D key={robot.id}>
-                <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
-                  <circleBufferGeometry args={[props.innerCircleRadius, 40]} />
-                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.08} transparent={true} />
-                </mesh>
-                <mesh position={position.add(new Vector3(0, 0, 0.004)).toArray()} rotation={[0, 0, Math.PI / 2]}>
-                  <ringBufferGeometry args={[props.innerCircleRadius, props.outerCircleRadius, 40]} />
-                  <meshBasicMaterial color="rgb(84, 184, 255)" opacity={0.08} transparent={true} />
-                </mesh>
-                <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
-                  <ringBufferGeometry args={[props.innerCircleRadius, props.outerCircleRadius, 40, 40, 0, rotationThreshold]} />
-                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.08} transparent={true} />
-                </mesh>
-                <mesh position={position.add(new Vector3(0, 0, 0.006)).toArray()} rotation={rotation}>
-                  <circleBufferGeometry args={[props.innerCircleRadius, 40, rotationThreshold / 2, Math.PI / 100]} />
-                  <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.08} transparent={true} />
-                </mesh>
-
-                {/* <mesh position={position.add(new Vector3(0, 0, height / 2)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
-                  <cylinderBufferGeometry args={[0.5, 0.5, height, 40, 1, false, closeRotationThreshold, (Math.PI * 2) - closeRotationThreshold]} />
-                  <meshBasicMaterial color="rgb(122, 3, 252)" opacity={0.05} transparent={true} />
-                </mesh> */}
-
-                {/* <mesh position={position.toArray()} rotation={[0, 0, 0]}>
-                  <primitive object={PoinerExternalGeometry(0.5, 1, height, 40, distantRotationThreshold)} />
-                  <meshBasicMaterial color="rgb(3, 122, 252)" opacity={0.2} transparent={true} />
-                </mesh> */}
-
-              </object3D >
-            ),
-        )
-      }
+      <object3D position={[rDFf_translation?.x, rDFf_translation?.y, 0.005]}>
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <circleBufferGeometry args={[align_radius, 40]} />
+          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+        </mesh>
+      </object3D>
+      {/* Min angle thing */}
+      <object3D position={[rTFf_translation?.x, rTFf_translation?.y, 0.008]}>
+        <mesh rotation={[0, 0, field_space_angle_to_target - 0.5 * min_angle_error]}>
+          <circleBufferGeometry args={[align_radius, 40, 0, min_angle_error]} />
+          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+        </mesh>
+      </object3D>
     </>
   );
-});
+};
 
 const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   <>
@@ -594,7 +579,7 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
     });
   }, []);
 
-  const rZFf = model.Hfd?.decompose().translation;
+  const rDFf = model.Hfd?.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
   const Rfz_quat = new THREE.Quaternion(
     model.Hfd?.decompose().rotation.x,
@@ -614,7 +599,7 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   const Rft_euler = new THREE.Euler().setFromQuaternion(Rft_quat, "ZYX");
   // Fuse the euler angles into a single quaternion
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(Rft_euler.x, Rft_euler.y, Rfz_euler.z, "ZYX"));
-  const position = new THREE.Vector3(rZFf?.x, rZFf?.y, rTFf.z);
+  const position = new THREE.Vector3(rDFf?.x, rDFf?.y, rTFf.z);
 
   const motors = model.motors;
 

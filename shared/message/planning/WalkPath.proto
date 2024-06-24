@@ -61,6 +61,7 @@ message WalkToDebug {
     double angle_to_target = 4;
     double angle_to_desired_heading = 5;
     double align_radius = 6;
+    double min_angle_error = 7;
 }
 
 /// Turn around the ball in the given direction
