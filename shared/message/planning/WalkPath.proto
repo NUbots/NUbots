@@ -51,37 +51,16 @@ message WalkDirect {
     bool dont_align_towards_target = 3;
 }
 
-
-enum WalkToState {
-    UNKNOWN = 0;
-    ROTATE_TO_TARGET_POINT = 1;
-    WALK_TO_TARGET = 2;
-    STRAFE_TO_TARGET = 3;
-    ROTATE_TO_TARGET_HEADING = 4;
-    AT_TARGET = 5;
-}
-
 /// Debug information for walk to planning
 message WalkToDebug {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 1;
-
-    /// Current state of the walk to planning
-    WalkToState state = 2;
-
     /// Requested walk velocity
-    vec3 velocity_target = 3;
-
-    double rotate_to_target_pos_error_threshold = 4;
-    double rotate_to_target_ori_error_threshold = 5;
-
-    double walk_to_target_pos_error_threshold = 6;
-
-    double align_with_target_ori_error_threshold = 7;
-
-    double translational_error = 8;
-    double angle_to_target = 9;
-    double angle_to_desired_heading = 10;
+    vec3 velocity_target = 2;
+    double translational_error = 3;
+    double angle_to_target = 4;
+    double angle_to_desired_heading = 5;
+    double align_radius = 6;
 }
 
 /// Turn around the ball in the given direction
