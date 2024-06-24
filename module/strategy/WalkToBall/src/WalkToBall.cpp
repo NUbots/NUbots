@@ -125,11 +125,8 @@ namespace module::strategy {
 
                     double angle_error = std::atan2(uGBf.y(), uGBf.x()) - std::atan2(uRFf.y(), uRFf.x());
                     // Normalize the angle error to be within the range [-pi, pi]
-                    angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
-
+                    angle_error           = std::atan2(std::sin(angle_error), std::cos(angle_error));
                     double angle_progress = std::clamp(std::abs(angle_error) / cfg.max_angle_error, 0.0, 1.0);
-                    emit(graph("angle_error", angle_error));
-                    emit(graph("walk_to_ball_angle_progress", angle_progress));
 
                     // Compute position to kick
                     Eigen::Vector3d rKFf = Eigen::Vector3d::Zero();
@@ -137,15 +134,12 @@ namespace module::strategy {
                     // If the ball is closer to the goal than the robot and robot is not facing the goal, walk to a
                     // point behind the ball
                     if (rBFf.x() > rRFf.x() || std::abs(angle_error) > cfg.max_angle_error) {
-                        log<NUClear::INFO>("Walking to point behind ball");
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance;
                     }
                     else {
-                        log<NUClear::INFO>("Walking to ball directly");
                         // Walk to the ball
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance * angle_progress;
                     }
-                    log<NUClear::INFO>("Angle error: ", angle_error);
 
                     auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
 
