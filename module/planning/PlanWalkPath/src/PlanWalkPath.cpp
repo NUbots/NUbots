@@ -44,7 +44,6 @@ namespace module::planning {
 
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
-    using message::planning::WalkDirect;
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
     using message::skill::Walk;
@@ -61,106 +60,109 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Walk tuning
+            // WalkTo tuning
             cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
             cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
-            cfg.min_translational_velocity_x = config["min_translational_velocity_x"].as<double>();
-            cfg.min_translational_velocity_y = config["min_translational_velocity_y"].as<double>();
-
+            max_velocity_magnitude   = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
-
-            cfg.acceleration = config["acceleration"].as<double>();
-
-            cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
-            cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
-            cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
-
-            cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
-            cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
-            cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
+            cfg.acceleration         = config["acceleration"].as<double>();
 
             cfg.max_align_radius = config["max_align_radius"].as<double>();
             cfg.min_align_radius = config["min_align_radius"].as<double>();
             cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
             cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
+            cfg.strafe_gain      = config["strafe_gain"].as<double>();
+
+            // TurnOnSpot tuning
+            cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
+            cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
+            cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
+
+            // PivotAroundPoint tuning
+            cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
+            cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
+            cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
         });
 
         on<Start<WalkTo>>().then([this] {
             log<NUClear::DEBUG>("Starting walk to task");
+
+            // Reset the velocity magnitude to zero
             velocity_magnitude = 0;
         });
 
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Isometry3d Hrd = walk_to.Hrd;
-            Eigen::Vector3d rDRr  = walk_to.Hrd.translation();
+            // Decompose the target pose into position and orientation
+            Eigen::Vector3d rDRr = walk_to.Hrd.translation();
+            Eigen::Matrix3d Rrd  = walk_to.Hrd.linear();
 
-            // Calculate the translational and orientation error
-            double translational_error = Hrd.translation().norm();
-            emit(graph("translational_error", translational_error));
+            // Calculate the translational error between the robot and the target point (x, y)
+            double translational_error = rDRr.norm();
+
+            // Calculate the angle between the robot and the target point (x, y)
             double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
-            emit(graph("angle_to_target", angle_to_target));
-            double angle_to_desired_heading = std::atan2(Hrd.linear().col(0).y(), Hrd.linear().col(0).x());
-            emit(graph("angle_to_desired_heading", angle_to_desired_heading));
 
-            // When in the align radius, the robot should be decelerating and begin aligning with the target heading
+            // Calculate the angle between the robot and the desired heading
+            double angle_to_desired_heading = std::atan2(Rrd.col(0).y(), Rrd.col(0).x());
+
+            // Linearly interpolate between angle to the target and desired heading when inside the align radius region
             double translation_progress =
                 std::clamp((cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
                            0.0,
                            1.0);
-            emit(graph("translation_progress", translation_progress));
-
-            // Linearly interpolate between the angle to the target and the angle to the desired heading when close
             double interpolated_angle =
                 (1 - translation_progress) * angle_to_target + translation_progress * angle_to_desired_heading;
-            emit(graph("interpolated_angle", interpolated_angle));
 
-            // New calculation of angle_progress with smooth transition
-            double angle_progress = std::clamp(
+            // Scale the velocity with angle error
+            // [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
+            double angle_error_velocity_scaling_factor = std::clamp(
                 (cfg.max_angle_error - std::abs(interpolated_angle)) / (cfg.max_angle_error - cfg.min_angle_error),
                 0.0,
                 1.0);
-            emit(graph("angle_progress", angle_progress));
 
             double scaled_velocity_magnitude = 0;
             if (translational_error > cfg.max_align_radius) {
                 // Accelerate
                 velocity_magnitude += cfg.acceleration;
-                scaled_velocity_magnitude = velocity_magnitude * angle_progress;
-                // Constrain the velocity to the maximum translational velocity
-                double max_velocity_magnitude =
-                    std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
+                // Scale the velocity based on the angle error
+                scaled_velocity_magnitude = velocity_magnitude * angle_error_velocity_scaling_factor;
+                // Clamp the velocity magnitude to the maximum velocity
                 velocity_magnitude = std::min(velocity_magnitude, max_velocity_magnitude);
             }
             else {
-                // Scale the velocity based on the translational error
-                double scale              = translational_error / cfg.max_align_radius;
-                scaled_velocity_magnitude = 2 * velocity_magnitude * scale;
-                emit(graph("scale", scale));
+                // "Proportional control" to strafe towards the target inside align radius
+                double error              = translational_error / cfg.max_align_radius;
+                scaled_velocity_magnitude = cfg.strafe_gain * error * velocity_magnitude;
             }
-            emit(graph("velocity_magnitude", velocity_magnitude));
-            emit(graph("scaled_velocity_magnitude", scaled_velocity_magnitude));
 
-            Eigen::Vector3d velocity_target = rDRr.normalized() * scaled_velocity_magnitude;
-            velocity_target.z()             = interpolated_angle;
-            velocity_target                 = constrain_velocity(velocity_target,
+            // Calculate the target velocity
+            Eigen::Vector2d translational_velocity_target = rDRr.head(2).normalized() * scaled_velocity_magnitude;
+            Eigen::Vector3d velocity_target;
+            velocity_target << translational_velocity_target, interpolated_angle;
+
+            // Limit the velocity to the maximum translational and angular velocity
+            velocity_target = constrain_velocity(velocity_target,
                                                  cfg.max_translational_velocity_x,
                                                  cfg.max_translational_velocity_y,
                                                  cfg.max_angular_velocity);
-            emit(graph("velocity_target", velocity_target.x(), velocity_target.y(), velocity_target.z()));
 
             // Emit the walk task with the calculated velocities
             emit<Task>(std::make_unique<Walk>(velocity_target));
 
             // Emit debugging information for visualization and monitoring
-            auto debug_information             = std::make_unique<WalkToDebug>();
-            Eigen::Isometry3d Hrd_target       = Eigen::Isometry3d::Identity();
-            Hrd_target.translation()           = rDRr;
-            Hrd_target.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
-            debug_information->Hrd             = Hrd_target;
-            debug_information->align_radius    = cfg.align_radius;
-            debug_information->angle_to_target = angle_to_target;  // Angle between robot and target point
-            debug_information->min_angle_error = cfg.min_angle_error;
-            debug_information->max_angle_error = cfg.max_angle_error;
+            auto debug_information              = std::make_unique<WalkToDebug>();
+            Eigen::Isometry3d Hrd               = Eigen::Isometry3d::Identity();
+            Hrd.translation()                   = rDRr;
+            Hrd.linear()                        = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
+            debug_information->Hrd              = Hrd;
+            debug_information->min_align_radius = cfg.min_align_radius;
+            debug_information->max_align_radius = cfg.max_align_radius;
+            debug_information->min_angle_error  = cfg.min_angle_error;
+            debug_information->max_angle_error  = cfg.max_angle_error;
+            debug_information->angle_to_target  = angle_to_target;
+            debug_information->angle_to_desired_heading = angle_to_desired_heading;
+            debug_information->translational_error      = translational_error;
+            debug_information->velocity_target          = velocity_target;
             emit(debug_information);
         });
 
@@ -171,39 +173,6 @@ namespace module::planning {
             // Turn on the spot
             emit<Task>(std::make_unique<Walk>(
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
-        });
-
-        on<Start<WalkDirect>>().then([this] {
-            log<NUClear::DEBUG>("Starting walk direct task");
-            // Reset the walk direct velocity magnitude to minimum velocity
-            // velocity_magnitude = cfg.min_translational_velocity_magnitude;
-        });
-
-        on<Provide<WalkDirect>>().then([this](const WalkDirect& walk_direct) {
-            if (walk_direct.Hrd.translation().norm() > cfg.max_align_radius) {
-                velocity_magnitude += cfg.acceleration;
-            }
-            else {
-                velocity_magnitude -= cfg.acceleration;
-            }
-            // Obtain the unit vector to desired target in robot space and scale by magnitude
-            Eigen::Vector3d velocity_target = walk_direct.Hrd.translation().normalized() * velocity_magnitude;
-
-            // Set the angular velocity as the angle_to_target to the target and clamp to min and max angular velocity
-            if (!walk_direct.dont_align_towards_target) {
-                velocity_target.z() = angle_to_target;
-            }
-            else {
-                velocity_target.z() = 0;
-            }
-
-            // Constrain the velocity to the maximum translational and angular velocities
-            velocity_target = constrain_velocity(velocity_target,
-                                                 cfg.max_translational_velocity_x,
-                                                 cfg.max_translational_velocity_y,
-                                                 cfg.max_angular_velocity);
-
-            emit<Task>(std::make_unique<Walk>(velocity_target));
         });
 
         on<Provide<PivotAroundPoint>>().then([this](const PivotAroundPoint& pivot_around_point) {

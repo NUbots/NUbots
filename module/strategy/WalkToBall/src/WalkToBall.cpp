@@ -48,7 +48,6 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::planning::WalkDirect;
     using message::planning::WalkTo;
     using message::strategy::WalkToFieldPosition;
     using WalkToBallTask     = message::strategy::WalkToBall;
@@ -91,7 +90,7 @@ namespace module::strategy {
                     rBRr.y() += cfg.ball_y_offset;
                     const double heading = std::atan2(rBRr.y(), rBRr.x());
                     auto Hrb             = pos_rpy_to_transform(rBRr, Eigen::Vector3d(0, 0, heading));
-                    emit<Task>(std::make_unique<WalkDirect>(Hrb, cfg.approach_ball_radius));
+                    emit<Task>(std::make_unique<WalkTo>(Hrb));
                 }
             });
 
