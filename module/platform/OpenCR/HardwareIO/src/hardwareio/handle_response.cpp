@@ -192,6 +192,11 @@ namespace module::platform::OpenCR {
                 case Phases::UNSTUFF_1:
                     current_phase = buf[i] == packet_header[1] ? Phases::UNSTUFF_2 : Phases::DATA;
                     response.push_back(buf[i]);
+
+                    // In case we are finished with the packet
+                    if (response.size() == size_t(7 + packet_length)) {
+                        current_phase = Phases::FINISH;
+                    }
                     break;
 
                 // Going to the case below means that we've seen 0xFFFF in the data field
@@ -199,6 +204,11 @@ namespace module::platform::OpenCR {
                 case Phases::UNSTUFF_2:
                     current_phase = buf[i] == packet_header[2] ? Phases::UNSTUFF_3 : Phases::DATA;
                     response.push_back(buf[i]);
+
+                    // In case we are finished with the packet
+                    if (response.size() == size_t(7 + packet_length)) {
+                        current_phase = Phases::FINISH;
+                    }
                     break;
 
                 // Going to the case below means that we've seen our 0xFFFFFD in the data field
@@ -207,7 +217,17 @@ namespace module::platform::OpenCR {
                     if (buf[i] != packet_header[2]) {
                         response.push_back(buf[i]);
                     }
+                    // If we decide to ignore a packet we have to decrement the packet length
+                    else {
+                        packet_length--;
+                    }
+
                     current_phase = Phases::DATA;
+
+                    // In case we are finished with the packet
+                    if (response.size() == size_t(7 + packet_length)) {
+                        current_phase = Phases::FINISH;
+                    }
                     break;
 
                 // Finish phase
