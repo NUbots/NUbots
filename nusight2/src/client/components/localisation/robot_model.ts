@@ -145,7 +145,7 @@ export class LocalisationRobotModel {
   @observable translational_error: number;
   @observable min_angle_error: number;
   @observable max_angle_error: number;
-  @observable velocity_target: vec3;
+  @observable velocity_target: Vector3;
   constructor({
     model,
     name,
@@ -193,7 +193,7 @@ export class LocalisationRobotModel {
     translational_error: number;
     min_angle_error: number;
     max_angle_error: number;
-    velocity_target: vec3;
+    velocity_target: Vector3;
   }) {
     this.model = model;
     this.name = name;
@@ -240,7 +240,7 @@ export class LocalisationRobotModel {
       translational_error: 0,
       min_angle_error: 0,
       max_angle_error: 0,
-      velocity_target: { x: 0, y: 0, z: 0 },
+      velocity_target: Vector3.of(),
     });
   });
 
@@ -264,13 +264,19 @@ export class LocalisationRobotModel {
     return this.fieldLinePoints.rPWw.map((rPWw) => rPWw.applyMatrix4(this.Hfw));
   }
 
+  /** Transform from robot space to field space */
+  @computed
+  get Hfr(): Matrix4 | undefined {
+    return this.Hfw.multiply(this.Hrw.invert());
+  }
+
   /** Walk path goal pose in field space */
   @computed
   get Hfd(): Matrix4 | undefined {
-    if (!this.Hrd) {
+    if (!this.Hfr || !this.Hrd) {
       return Matrix4.of();
     }
-    return this.Hfw.multiply(this.Hrw.invert()).multiply(this.Hrd);
+    return this.Hfr.multiply(this.Hrd);
   }
 
   /** Ball position in field space */

@@ -346,7 +346,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
 });
 
 const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
-  if (!model.Hfd) {
+  if (!model.Hfd || !model.Hfr) {
     return null;
   }
   const rDFf = model.Hfd?.decompose().translation;
@@ -357,13 +357,16 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   const max_align_radius = model.max_align_radius;
   const min_angle_error = model.min_angle_error;
   const max_angle_error = model.max_angle_error;
-  var velocity_target = model.velocity_target;
-  const velocityQuaternion = new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(1, 0, 0),
-    new THREE.Vector3(velocity_target.x, velocity_target.y, 0).normalize(),
+  const Rfr = new THREE.Quaternion(
+    model.Hfr?.decompose().rotation.x,
+    model.Hfr?.decompose().rotation.y,
+    model.Hfr?.decompose().rotation.z,
+    model.Hfr?.decompose().rotation.w,
   );
-  const heading = new THREE.Euler().setFromQuaternion(velocityQuaternion, "ZXY").z - Math.PI / 2;
-  const speed = Math.sqrt(velocity_target.x ** 2 + velocity_target.y ** 2);
+  var vRf = model.velocity_target.toThree().applyQuaternion(Rfr);
+
+  const velocity_direction = Math.atan2(vRf.y, vRf.x);
+  const speed = Math.sqrt(vRf.x ** 2 + vRf.y ** 2) * 1.5;
 
   const arrowGeometry = (length: number) => {
     const arrowShape = new THREE.Shape();
@@ -405,13 +408,8 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
           <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
-      <mesh position={[rDFf?.x, rDFf?.y, 0.01]}>
-        <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
-          <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
-        </mesh>
-      </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.011]}>
-        <mesh geometry={arrowGeometry(speed * 5)} rotation={[0, 0, heading]}>
+        <mesh geometry={arrowGeometry(speed)} rotation={[0, 0, velocity_direction]}>
           <meshBasicMaterial color="rgb(0, 255, 0)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
