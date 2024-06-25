@@ -54,7 +54,7 @@ namespace module::planning {
             }
         });
 
-        on<Provide<LookAround>, Every<30, Per<std::chrono::seconds>>>().then([this] {
+        on<Provide<LookAround>>().then([this] {
             // How long the look has lingered - will move to the next position if long enough
             float time_since_last_search_moved =
                 std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - search_last_moved)
