@@ -140,7 +140,7 @@ export class LocalisationRobotModel {
   @observable robots: { id: number; rRWw: Vector3 }[];
   @observable max_align_radius: number;
   @observable min_align_radius: number;
-  @observable angle_to_desired_heading: number;
+  @observable angle_to_final_heading: number;
   @observable angle_to_target: number;
   @observable translational_error: number;
   @observable min_angle_error: number;
@@ -164,14 +164,13 @@ export class LocalisationRobotModel {
     robots,
     max_align_radius,
     min_align_radius,
-    angle_to_desired_heading,
+    angle_to_final_heading,
     angle_to_target,
     translational_error,
     min_angle_error,
     max_angle_error,
     velocity_target,
-  }:
-  {
+  }: {
     model: RobotModel;
     name: string;
     color?: string;
@@ -189,12 +188,12 @@ export class LocalisationRobotModel {
     robots: { id: number; rRWw: Vector3 }[];
     max_align_radius: number;
     min_align_radius: number;
-    angle_to_desired_heading: number;
+    angle_to_final_heading: number;
     angle_to_target: number;
     translational_error: number;
     min_angle_error: number;
     max_angle_error: number;
-    velocity_target: vec3,
+    velocity_target: vec3;
   }) {
     this.model = model;
     this.name = name;
@@ -213,7 +212,7 @@ export class LocalisationRobotModel {
     this.robots = robots;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
-    this.angle_to_desired_heading = angle_to_desired_heading;
+    this.angle_to_final_heading = angle_to_final_heading;
     this.angle_to_target = angle_to_target;
     this.translational_error = translational_error;
     this.min_angle_error = min_angle_error;
@@ -236,7 +235,7 @@ export class LocalisationRobotModel {
       robots: [],
       max_align_radius: 0,
       min_align_radius: 0,
-      angle_to_desired_heading: 0,
+      angle_to_final_heading: 0,
       angle_to_target: 0,
       translational_error: 0,
       min_angle_error: 0,

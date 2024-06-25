@@ -60,8 +60,9 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
-                } bg-white`}
+              className={`${style.fieldOption} ${
+                this.props.model.field.fieldType === option.value ? style.selected : ""
+              } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -329,13 +330,13 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.goalVisible && <Goals model={model} />}
       {model.robots.map((robot) => {
         if (robot.visible && robot.Hfd) {
-          return <DistanceCircle key={robot.id} model={robot} />;
+          return <WalkPathVisualiser key={robot.id} model={robot} />;
         }
         return null;
       })}
       {model.robots.map((robot) => {
         if (robot.visible && robot.Hfd) {
-          return <URDFWalkPathGoal key={robot.id} model={robot} />;
+          return <WalkPathGoal key={robot.id} model={robot} />;
         }
         return null;
       })}
@@ -344,18 +345,14 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
   );
 });
 
-// Props
-interface DistanceCircleProps {
-  model: LocalisationRobotModel;
-}
-
-const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
-  // const rDFf = model.Hfd?.decompose().translation;
+const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
+  if (!model.Hfd) {
+    return null;
+  }
   const rDFf = model.Hfd?.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
   const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
   const target_rotation = new THREE.Euler().setFromQuaternion(model.Hfd.decompose().rotation.toThree(), "XYZ");
-  const angle_to_target = model.angle_to_target + robot_rotation.z;
   const min_align_radius = model.min_align_radius;
   const max_align_radius = model.max_align_radius;
   const min_angle_error = model.min_angle_error;
@@ -363,25 +360,22 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   var velocity_target = model.velocity_target;
   const velocityQuaternion = new THREE.Quaternion().setFromUnitVectors(
     new THREE.Vector3(1, 0, 0),
-    new THREE.Vector3(velocity_target.x, velocity_target.y, 0).normalize()
+    new THREE.Vector3(velocity_target.x, velocity_target.y, 0).normalize(),
   );
   const heading = new THREE.Euler().setFromQuaternion(velocityQuaternion, "ZXY").z - Math.PI / 2;
   const speed = Math.sqrt(velocity_target.x ** 2 + velocity_target.y ** 2);
-  console.log(velocity_target);
-  console.log(heading);
-  console.log(speed);
 
   const arrowGeometry = (length: number) => {
     const arrowShape = new THREE.Shape();
 
-    arrowShape.moveTo(0, -.01);
-    arrowShape.lineTo(0, .01);
-    arrowShape.lineTo(length * .7, .01);
-    arrowShape.lineTo(length * .7, .02);
+    arrowShape.moveTo(0, -0.01);
+    arrowShape.lineTo(0, 0.01);
+    arrowShape.lineTo(length * 0.7, 0.01);
+    arrowShape.lineTo(length * 0.7, 0.02);
     arrowShape.lineTo(length, 0);
-    arrowShape.lineTo(length * .7, -.02);
-    arrowShape.lineTo(length * .7, -.01);
-    arrowShape.lineTo(0, -.01);
+    arrowShape.lineTo(length * 0.7, -0.02);
+    arrowShape.lineTo(length * 0.7, -0.01);
+    arrowShape.lineTo(0, -0.01);
 
     const geometry = new THREE.ShapeGeometry(arrowShape);
 
@@ -405,13 +399,13 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
       <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
         <circleBufferGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-      </mesh >
+      </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.009]}>
         <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
-      <mesh position={[rDFf?.x, rDFf?.y, 0.010]}>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.01]}>
         <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
@@ -421,7 +415,7 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
           <meshBasicMaterial color="rgb(0, 255, 0)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
-    </object3D >
+    </object3D>
   );
 };
 
@@ -609,7 +603,7 @@ const Robots = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
+const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once

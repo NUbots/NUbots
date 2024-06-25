@@ -53,7 +53,7 @@ message WalkToDebug {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 1;
     /// Requested walk velocity (vx, vy, w)
-    vec3   velocity_target          = 2;
+    vec3 velocity_target          = 2;
     /// Error between robot and target point
     double translational_error      = 3;
     /// Angle between the robot unit x and the target point
