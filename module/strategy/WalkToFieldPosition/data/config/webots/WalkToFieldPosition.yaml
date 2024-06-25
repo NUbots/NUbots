@@ -1,12 +1,2 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
-
-# Error tolerance for stopping at desired field position
-stop_tolerance:
-  position: 0.1
-  heading: 0.1
-
-# Resume walking to field position tolerance
-resume_tolerance:
-  position: 0.5
-  heading: 0.25
+log_level: INFO
