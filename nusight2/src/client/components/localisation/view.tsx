@@ -357,6 +357,7 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   const max_align_radius = model.max_align_radius;
   const min_angle_error = model.min_angle_error;
   const max_angle_error = model.max_angle_error;
+  const angle_to_final_heading = model.angle_to_final_heading;
   const Rfr = new THREE.Quaternion(
     model.Hfr?.decompose().rotation.x,
     model.Hfr?.decompose().rotation.y,
@@ -411,6 +412,11 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
       <mesh position={[rTFf?.x, rTFf?.y, 0.011]}>
         <mesh geometry={arrowGeometry(speed)} rotation={[0, 0, velocity_direction]}>
           <meshBasicMaterial color="rgb(0, 255, 0)" opacity={0.5} transparent={true} />
+        </mesh>
+      </mesh>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.011]}>
+        <mesh geometry={arrowGeometry(min_align_radius)} rotation={[0, 0, robot_rotation.z + angle_to_final_heading]}>
+          <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
     </object3D>
