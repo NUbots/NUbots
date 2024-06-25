@@ -90,7 +90,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>>().then([this] {
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
