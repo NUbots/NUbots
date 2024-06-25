@@ -616,7 +616,7 @@ const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
 
   const rDFf = model.Hfd?.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
-  const Rfz_quat = new THREE.Quaternion(
+  const Rfd_quat = new THREE.Quaternion(
     model.Hfd?.decompose().rotation.x,
     model.Hfd?.decompose().rotation.y,
     model.Hfd?.decompose().rotation.z,
@@ -630,7 +630,7 @@ const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   );
 
   // Get euler angles from quaternion
-  const Rfz_euler = new THREE.Euler().setFromQuaternion(Rfz_quat, "ZYX");
+  const Rfz_euler = new THREE.Euler().setFromQuaternion(Rfd_quat, "ZYX");
   const Rft_euler = new THREE.Euler().setFromQuaternion(Rft_quat, "ZYX");
   // Fuse the euler angles into a single quaternion
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(Rft_euler.x, Rft_euler.y, Rfz_euler.z, "ZYX"));
