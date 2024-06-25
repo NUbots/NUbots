@@ -72,6 +72,8 @@ namespace module::purpose {
             int audiogpt_listen_duration = 0;
         } cfg;
 
+        const int BEHAVIOUR_UPDATE_RATE = 10;
+
     public:
         /// @brief Called by the powerplant to build and setup the Tester reactor.
         explicit Tester(std::unique_ptr<NUClear::Environment> environment);
