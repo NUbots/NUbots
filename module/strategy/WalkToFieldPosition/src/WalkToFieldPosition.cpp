@@ -32,7 +32,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
-#include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 namespace module::strategy {
@@ -40,11 +39,8 @@ namespace module::strategy {
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Field;
-    using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
-    using message::strategy::StandStill;
     using WalkToFieldPositionTask = message::strategy::WalkToFieldPosition;
-    using utility::math::euler::mat_to_rpy_intrinsic;
 
     WalkToFieldPosition::WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
