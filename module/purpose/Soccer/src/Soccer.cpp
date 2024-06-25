@@ -239,32 +239,34 @@ namespace module::purpose {
 
     // Give directions if I am the leader
     void Soccer::give_directions() {
-        bool self_is_leader = active_robots.front().robot_id == player_id;
+        if (cfg.position == Position::DYNAMIC) {
+            bool self_is_leader = active_robots.front().robot_id == player_id;
 
-        if (self_is_leader) {
-            auto purposes_msg   = std::make_unique<Purposes>();
-            uint8_t striker_idx = find_striker();
+            if (self_is_leader) {
+                auto purposes_msg   = std::make_unique<Purposes>();
+                uint8_t striker_idx = find_striker();
 
-            // Leader assigns own position
-            emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-            soccer_position = Position("STRIKER");
-            log<NUClear::INFO>("Leader made striker");
+                // Leader assigns own position
+                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                soccer_position = Position("STRIKER");
+                log<NUClear::INFO>("Leader made striker");
 
-            // Decide soccer positions
-            for (int i = 0; i < int(active_robots.size()); ++i) {
-                if (i == striker_idx) {
-                    active_robots[i].position = Position("STRIKER");
-                    purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
-                } else {
-                    active_robots[i].position = Position("DEFENDER");
-                    purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
+                // Decide soccer positions
+                for (int i = 0; i < int(active_robots.size()); ++i) {
+                    if (i == striker_idx) {
+                        active_robots[i].position = Position("STRIKER");
+                        purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
+                    } else {
+                        active_robots[i].position = Position("DEFENDER");
+                        purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
+                    }
                 }
+
+                // Emit the startup time of the module to claim leadership
+                purposes_msg->startup_time = startup_time;
+
+                emit(purposes_msg);
             }
-
-            // Emit the startup time of the module to claim leadership
-            purposes_msg->startup_time = startup_time;
-
-            emit(purposes_msg);
         }
     };
 
