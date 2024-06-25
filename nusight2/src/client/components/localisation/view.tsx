@@ -361,17 +361,18 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   const min_angle_error = model.min_angle_error;
   const max_angle_error = model.max_angle_error;
 
-  const arrowGeometry = () => {
+
+  const arrowGeometry = (length: number) => {
     const arrowShape = new THREE.Shape();
 
-    arrowShape.moveTo(0, -10);
-    arrowShape.lineTo(0, 10);
-    arrowShape.lineTo(600, 10);
-    arrowShape.lineTo(600, 20);
-    arrowShape.lineTo(900, 0);
-    arrowShape.lineTo(600, -20);
-    arrowShape.lineTo(600, -10);
-    arrowShape.lineTo(0, -10);
+    arrowShape.moveTo(0, -.01);
+    arrowShape.lineTo(0, .01);
+    arrowShape.lineTo(length - .3, .01);
+    arrowShape.lineTo(length - .3, .02);
+    arrowShape.lineTo(length, 0);
+    arrowShape.lineTo(length - .3, -.02);
+    arrowShape.lineTo(length - .3, -.01);
+    arrowShape.lineTo(0, -.01);
 
     const geometry = new THREE.ShapeGeometry(arrowShape);
 
@@ -405,7 +406,7 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
         </mesh>
       </object3D>
       <object3D position={[rTFf?.x, rTFf?.y, 0.01]}>
-        <mesh geometry={arrowGeometry()} scale={0.001} rotation={[0, 0, robot_rotation.z]}>
+        <mesh geometry={arrowGeometry(1)} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
         </mesh>
       </object3D>
