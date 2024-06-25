@@ -45,7 +45,6 @@ export class LocalisationNetwork {
 
   @action
   private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
-    console.log("walk_to_debug", walk_to_debug);
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
     robot.max_align_radius = walk_to_debug.maxAlignRadius;
