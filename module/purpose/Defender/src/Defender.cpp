@@ -64,6 +64,7 @@ namespace module::purpose {
     using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
+    using message::strategy::WalkToKickBall;
 
     using DefenderTask = message::purpose::Defender;
 
