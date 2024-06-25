@@ -60,9 +60,8 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
+                } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -351,67 +350,79 @@ interface DistanceCircleProps {
 }
 
 const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
-  if (model.Hfd) {
-    const rDFf = model.Hfd?.decompose().translation;
-    const rTFf = model.Hft.decompose().translation;
-    const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
-    const target_rotation = new THREE.Euler().setFromQuaternion(model.Hfd.decompose().rotation.toThree(), "XYZ");
-    const min_align_radius = model.min_align_radius;
-    const max_align_radius = model.max_align_radius;
-    const min_angle_error = model.min_angle_error;
-    const max_angle_error = model.max_angle_error;
+  // const rDFf = model.Hfd?.decompose().translation;
+  const rDFf = model.Hfd?.decompose().translation;
+  const rTFf = model.Hft.decompose().translation;
+  const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
+  const target_rotation = new THREE.Euler().setFromQuaternion(model.Hfd.decompose().rotation.toThree(), "XYZ");
+  const angle_to_target = model.angle_to_target + robot_rotation.z;
+  const min_align_radius = model.min_align_radius;
+  const max_align_radius = model.max_align_radius;
+  const min_angle_error = model.min_angle_error;
+  const max_angle_error = model.max_angle_error;
+  var velocity_target = model.velocity_target;
+  const velocityQuaternion = new THREE.Quaternion().setFromUnitVectors(
+    new THREE.Vector3(1, 0, 0),
+    new THREE.Vector3(velocity_target.x, velocity_target.y, 0).normalize()
+  );
+  const heading = new THREE.Euler().setFromQuaternion(velocityQuaternion, "ZXY").z - Math.PI / 2;
+  const speed = Math.sqrt(velocity_target.x ** 2 + velocity_target.y ** 2);
+  console.log(velocity_target);
+  console.log(heading);
+  console.log(speed);
 
-    const arrowGeometry = () => {
-      const arrowShape = new THREE.Shape();
+  const arrowGeometry = (length: number) => {
+    const arrowShape = new THREE.Shape();
 
-      arrowShape.moveTo(0, -10);
-      arrowShape.lineTo(0, 10);
-      arrowShape.lineTo(600, 10);
-      arrowShape.lineTo(600, 20);
-      arrowShape.lineTo(900, 0);
-      arrowShape.lineTo(600, -20);
-      arrowShape.lineTo(600, -10);
-      arrowShape.lineTo(0, -10);
+    arrowShape.moveTo(0, -.01);
+    arrowShape.lineTo(0, .01);
+    arrowShape.lineTo(length * .7, .01);
+    arrowShape.lineTo(length * .7, .02);
+    arrowShape.lineTo(length, 0);
+    arrowShape.lineTo(length * .7, -.02);
+    arrowShape.lineTo(length * .7, -.01);
+    arrowShape.lineTo(0, -.01);
 
-      const geometry = new THREE.ShapeGeometry(arrowShape);
+    const geometry = new THREE.ShapeGeometry(arrowShape);
 
-      return geometry;
-    };
+    return geometry;
+  };
 
-    return (
-      <>
-        <object3D position={[rDFf?.x, rDFf?.y, 0.005]}>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <circleBufferGeometry args={[min_align_radius, 40]} />
-            <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-          </mesh>
-        </object3D>
-        <object3D position={[rDFf?.x, rDFf?.y, 0.006]}>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <circleBufferGeometry args={[max_align_radius, 40]} />
-            <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-          </mesh>
-        </object3D>
-        <object3D position={[rTFf?.x, rTFf?.y, 0.008]}>
-          <mesh rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
-            <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
-            <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-          </mesh>
-        </object3D>
-        <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
-          <mesh rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
-            <circleBufferGeometry args={[1, 40, 0, max_angle_error]} />
-            <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-          </mesh>
-        </object3D>
-        <object3D position={[rTFf?.x, rTFf?.y, 0.01]}>
-          <mesh geometry={arrowGeometry()} scale={0.001} rotation={[0, 0, robot_rotation.z]}>
-            <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
-          </mesh>
-        </object3D>
-      </>
-    );
-  }
+  return (
+    <object3D>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.005]}>
+        <circleBufferGeometry args={[min_align_radius, 40]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.006]}>
+        <circleBufferGeometry args={[max_align_radius, 40]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh>
+      <mesh position={[rTFf?.x, rTFf?.y, 0.007]} rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
+        <circleBufferGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh>
+      <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
+        <circleBufferGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh >
+      <mesh position={[rTFf?.x, rTFf?.y, 0.009]}>
+        <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
+          <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
+        </mesh>
+      </mesh>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.010]}>
+        <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
+          <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
+        </mesh>
+      </mesh>
+      <mesh position={[rTFf?.x, rTFf?.y, 0.011]}>
+        <mesh geometry={arrowGeometry(speed * 5)} rotation={[0, 0, heading]}>
+          <meshBasicMaterial color="rgb(0, 255, 0)" opacity={0.5} transparent={true} />
+        </mesh>
+      </mesh>
+    </object3D >
+  );
 };
 
 const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (

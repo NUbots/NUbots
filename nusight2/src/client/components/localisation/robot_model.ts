@@ -6,7 +6,7 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
-import { ivec3, vec3 } from "../../../shared/messages";
+import { ivec3, vec, vec3 } from "../../../shared/messages";
 
 class ServoMotor {
   @observable angle: number;
@@ -145,8 +145,7 @@ export class LocalisationRobotModel {
   @observable translational_error: number;
   @observable min_angle_error: number;
   @observable max_angle_error: number;
-  // @observable velocity_target: ivec3 | null| undefined
-
+  @observable velocity_target: vec3;
   constructor({
     model,
     name,
@@ -170,7 +169,8 @@ export class LocalisationRobotModel {
     translational_error,
     min_angle_error,
     max_angle_error,
-  }: // velocity_target,
+    velocity_target,
+  }:
   {
     model: RobotModel;
     name: string;
@@ -194,7 +194,7 @@ export class LocalisationRobotModel {
     translational_error: number;
     min_angle_error: number;
     max_angle_error: number;
-    // velocity_target: ivec3 | null | undefined,
+    velocity_target: vec3,
   }) {
     this.model = model;
     this.name = name;
@@ -218,7 +218,7 @@ export class LocalisationRobotModel {
     this.translational_error = translational_error;
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
-    // this.velocity_target = velocity_target;
+    this.velocity_target = velocity_target;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -241,7 +241,7 @@ export class LocalisationRobotModel {
       translational_error: 0,
       min_angle_error: 0,
       max_angle_error: 0,
-      // velocity_target: { x: 0, y: 0, z: 0 },
+      velocity_target: { x: 0, y: 0, z: 0 },
     });
   });
 
