@@ -60,9 +60,8 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
+                } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -382,13 +381,13 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   return (
     <>
       <object3D position={[rDFf?.x, rDFf?.y, 0.005]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
+        <mesh>
           <circleBufferGeometry args={[min_align_radius, 40]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
       <object3D position={[rDFf?.x, rDFf?.y, 0.006]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
+        <mesh>
           <circleBufferGeometry args={[max_align_radius, 40]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
