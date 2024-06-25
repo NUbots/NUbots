@@ -93,8 +93,7 @@ namespace module::planning {
 
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
             // Decompose the target pose into position and orientation
-            Eigen::Vector3d rDRr = walk_to.Hrd.translation();
-            Eigen::Matrix3d Rrd  = walk_to.Hrd.linear();
+            Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
 
             // Calculate the translational error between the robot and the target point (x, y)
             double translational_error = rDRr.norm();
@@ -102,43 +101,47 @@ namespace module::planning {
             // Calculate the angle between the robot and the target point (x, y)
             double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
 
-            // Calculate the angle between the robot and the desired heading
-            double angle_to_desired_heading = std::atan2(Rrd.col(0).y(), Rrd.col(0).x());
+            // Calculate the angle between the robot and the final desired heading
+            double angle_to_final_heading =
+                std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
             // Linearly interpolate between angle to the target and desired heading when inside the align radius region
             double translation_progress =
                 std::clamp((cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
                            0.0,
                            1.0);
-            double interpolated_angle =
-                (1 - translation_progress) * angle_to_target + translation_progress * angle_to_desired_heading;
+            double desired_heading =
+                (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
 
-            // Scale the velocity with angle error
-            // [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
-            double angle_error_velocity_scaling_factor = std::clamp(
-                (cfg.max_angle_error - std::abs(interpolated_angle)) / (cfg.max_angle_error - cfg.min_angle_error),
-                0.0,
-                1.0);
-
-            double scaled_velocity_magnitude = 0;
+            double desired_velocity_magnitude = 0;
             if (translational_error > cfg.max_align_radius) {
-                // Accelerate
+                // "Accelerate"
                 velocity_magnitude += cfg.acceleration;
-                // Scale the velocity based on the angle error
-                scaled_velocity_magnitude = velocity_magnitude * angle_error_velocity_scaling_factor;
-                // Clamp the velocity magnitude to the maximum velocity
+                // Limit the velocity magnitude to the maximum velocity
                 velocity_magnitude = std::min(velocity_magnitude, max_velocity_magnitude);
+                // Scale the velocity by angle error to have robot rotate on spot when far away and not facing target
+                // [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
+                double angle_error_gain = std::clamp(
+                    (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
+                    0.0,
+                    1.0);
+                desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
             }
             else {
+                // "Decelerate"
+                velocity_magnitude -= cfg.acceleration;
+                // Limit the velocity to zero
+                velocity_magnitude = std::max(velocity_magnitude, 0.0);
+                // Normalise error between [0, 1] inside align radius
+                double error = translational_error / cfg.max_align_radius;
                 // "Proportional control" to strafe towards the target inside align radius
-                double error              = translational_error / cfg.max_align_radius;
-                scaled_velocity_magnitude = cfg.strafe_gain * error * velocity_magnitude;
+                desired_velocity_magnitude = cfg.strafe_gain * error;
             }
 
             // Calculate the target velocity
-            Eigen::Vector2d translational_velocity_target = rDRr.head(2).normalized() * scaled_velocity_magnitude;
+            Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
             Eigen::Vector3d velocity_target;
-            velocity_target << translational_velocity_target, interpolated_angle;
+            velocity_target << desired_translational_velocity, desired_heading;
 
             // Limit the velocity to the maximum translational and angular velocity
             velocity_target = constrain_velocity(velocity_target,
@@ -150,19 +153,19 @@ namespace module::planning {
             emit<Task>(std::make_unique<Walk>(velocity_target));
 
             // Emit debugging information for visualization and monitoring
-            auto debug_information              = std::make_unique<WalkToDebug>();
-            Eigen::Isometry3d Hrd               = Eigen::Isometry3d::Identity();
-            Hrd.translation()                   = rDRr;
-            Hrd.linear()                        = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, interpolated_angle));
-            debug_information->Hrd              = Hrd;
-            debug_information->min_align_radius = cfg.min_align_radius;
-            debug_information->max_align_radius = cfg.max_align_radius;
-            debug_information->min_angle_error  = cfg.min_angle_error;
-            debug_information->max_angle_error  = cfg.max_angle_error;
-            debug_information->angle_to_target  = angle_to_target;
-            debug_information->angle_to_desired_heading = angle_to_desired_heading;
-            debug_information->translational_error      = translational_error;
-            debug_information->velocity_target          = velocity_target;
+            auto debug_information                    = std::make_unique<WalkToDebug>();
+            Eigen::Isometry3d Hrd                     = Eigen::Isometry3d::Identity();
+            Hrd.translation().head(2)                 = rDRr;
+            Hrd.linear()                              = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, desired_heading));
+            debug_information->Hrd                    = Hrd;
+            debug_information->min_align_radius       = cfg.min_align_radius;
+            debug_information->max_align_radius       = cfg.max_align_radius;
+            debug_information->min_angle_error        = cfg.min_angle_error;
+            debug_information->max_angle_error        = cfg.max_angle_error;
+            debug_information->angle_to_target        = angle_to_target;
+            debug_information->angle_to_final_heading = angle_to_final_heading;
+            debug_information->translational_error    = translational_error;
+            debug_information->velocity_target        = velocity_target;
             emit(debug_information);
         });
 

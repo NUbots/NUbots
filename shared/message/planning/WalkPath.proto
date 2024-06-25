@@ -58,8 +58,8 @@ message WalkToDebug {
     double translational_error      = 3;
     /// Angle between the robot unit x and the target point
     double angle_to_target          = 4;
-    /// Angle between the robot unit x and the desired heading
-    double angle_to_desired_heading = 5;
+    /// Angle between the robot unit x and the desired final heading
+    double angle_to_final_heading = 5;
     /// Distance to start aligning with the desired heading
     double max_align_radius         = 6;
     /// Distance to remain aligning with the desired heading

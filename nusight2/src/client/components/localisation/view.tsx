@@ -383,10 +383,10 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
     arrowShape.lineTo(length * .7, -.01);
     arrowShape.lineTo(0, -.01);
 
-    const geometry = new THREE.ShapeGeometry(arrowShape);
+      const geometry = new THREE.ShapeGeometry(arrowShape);
 
-    return geometry;
-  };
+      return geometry;
+    };
 
   return (
     <>
@@ -688,8 +688,8 @@ const URDFWalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
           // Set opacity for all mesh children
           child.material.transparent = true;
           // Red
-          child.material.color = new THREE.Color(0xff0000);
-          child.material.opacity = 0.3;
+          child.material.color = "rgb(0, 100, 100)";
+          child.material.opacity = 0.2;
         }
       });
     }
