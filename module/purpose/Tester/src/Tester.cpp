@@ -93,13 +93,17 @@ namespace module::purpose {
             cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
 
             cfg.start_delay = config["start_delay"].as<int>();
+            main_loop.disable();
         });
 
-        on<Startup>().then(
-            [this] { emit<Scope::DELAY>(std::make_unique<StartTester>(), std::chrono::seconds(cfg.start_delay)); });
-
-        on<Trigger<StartTester>>().then([this] {
+        on<Startup>().then([this] {
+            emit<Scope::DELAY>(std::make_unique<StartTester>(), std::chrono::seconds(cfg.start_delay));
             emit(std::make_unique<Stability>(Stability::STANDING));
+        });
+
+        on<Trigger<StartTester>>().then([this] { main_loop.enable(); });
+
+        main_loop = on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
             // Emit all the tasks with priorities higher than 0
             if (cfg.find_ball_priority > 0) {
                 emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);

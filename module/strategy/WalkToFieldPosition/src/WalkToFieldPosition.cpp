@@ -56,7 +56,7 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
+        on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
                 // Transform from desired field position into robot space
                 Eigen::Isometry3d Hrd = sensors.Hrw * field.Hfw.inverse() * walk_to_field_position.Hfd;
