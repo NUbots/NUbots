@@ -141,7 +141,8 @@ namespace module::strategy {
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance - uGBf * cfg.ball_approach_distance;
                     }
                     else {
-                        // Move towards kick distance, scaled by angle error
+                        // Move towards kick distance, where ball_approach_distance is scaled by angle error
+                        // to ensure robot is facing the desired heading before reaching kick distance
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance
                                - uGBf * cfg.ball_approach_distance * angle_error_scaling_factor;
                     }

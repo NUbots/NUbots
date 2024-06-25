@@ -40,9 +40,9 @@ namespace module::strategy {
         struct Config {
             /// @brief Length of time before the ball detection is too old and we should search for the ball
             NUClear::clock::duration ball_search_timeout{};
+
             /// @brief Offset to align the ball with the robot's foot
             double ball_y_offset = 0.0;
-
 
             /// @brief The offset on goal target
             double goal_target_offset = 0.0;
@@ -53,8 +53,8 @@ namespace module::strategy {
             /// @brief The distance from ball to walk to if the ball is in a tricky position
             double ball_approach_distance = 0.0;
 
+            /// @brief Maximum angle error to the ball before we need to walk to approach distance point
             double max_angle_error = 0.0;
-            double min_angle_error = 0.0;
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space
