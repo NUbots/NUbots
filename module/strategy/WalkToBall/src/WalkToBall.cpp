@@ -114,17 +114,17 @@ namespace module::strategy {
                     // Normalize the vector
                     Eigen::Vector3d uGBf = rGBf.normalized();
 
-                    Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
-
                     // Get position of robot on field
-                    Eigen::Vector3d rRFf = Hfr.translation();
-                    Eigen::Vector3d uRFf = Hfr.linear().col(0);
+                    Eigen::Isometry3d Hfr        = field.Hfw * sensors.Hrw.inverse();
+                    Eigen::Vector3d rRFf         = Hfr.translation();
+                    Eigen::Vector3d robot_unit_x = Hfr.linear().col(0);
 
                     // Compute the heading (angle between the x-axis and the vector from the kick position to the goal)
                     double desired_heading = std::atan2(rGBf.y(), rGBf.x());
 
                     // Compute the error between the robot unit x and desired heading
-                    double angle_error = std::atan2(uGBf.y(), uGBf.x()) - std::atan2(uRFf.y(), uRFf.x());
+                    double angle_error =
+                        std::atan2(uGBf.y(), uGBf.x()) - std::atan2(robot_unit_x.y(), robot_unit_x.x());
                     // Normalize the angle error to be within the range [-pi, pi]
                     angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
 
