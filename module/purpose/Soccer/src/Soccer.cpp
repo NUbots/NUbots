@@ -177,9 +177,9 @@ namespace module::purpose {
     }
 
     void Soccer::find_purpose() {
+        // This emit starts the tree to play soccer
         emit<Task>(std::make_unique<FindPurpose>(), 1);
         if (cfg.position == Position::DYNAMIC) {
-            // This emit starts the tree to play soccer
 
             // Trigger FindPurpose by emitting Robocup message
             auto msg = std::make_unique<RoboCup>();
