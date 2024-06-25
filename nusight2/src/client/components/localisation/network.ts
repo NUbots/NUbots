@@ -54,7 +54,7 @@ export class LocalisationNetwork {
     robot.translational_error = walk_to_debug.translationalError;
     robot.min_angle_error = walk_to_debug.minAngleError;
     robot.max_angle_error = walk_to_debug.maxAngleError;
-    // robot.velocity_target = walk_to_debug.velocityTarget;
+    robot.velocity_target = walk_to_debug.velocityTarget;
   };
 
   @action.bound
