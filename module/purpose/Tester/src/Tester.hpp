@@ -73,7 +73,7 @@ namespace module::purpose {
         } cfg;
 
         /// @brief The rate the tasks will emit, to drive the rest of the system
-        const int BEHAVIOUR_UPDATE_RATE = 10;
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
 
     public:
         /// @brief Called by the powerplant to build and setup the Tester reactor.
