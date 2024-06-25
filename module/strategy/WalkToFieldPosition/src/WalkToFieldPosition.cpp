@@ -26,8 +26,6 @@
  */
 #include "WalkToFieldPosition.hpp"
 
-#include <tinyrobotics/math.hpp>
-
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
