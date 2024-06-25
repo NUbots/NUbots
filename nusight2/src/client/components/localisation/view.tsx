@@ -383,53 +383,45 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
     arrowShape.lineTo(length * .7, -.01);
     arrowShape.lineTo(0, -.01);
 
-      const geometry = new THREE.ShapeGeometry(arrowShape);
+    const geometry = new THREE.ShapeGeometry(arrowShape);
 
-      return geometry;
-    };
+    return geometry;
+  };
 
   return (
-    <>
-      <object3D position={[rDFf?.x, rDFf?.y, 0.005]}>
-        <mesh>
-          <circleBufferGeometry args={[min_align_radius, 40]} />
-          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-        </mesh>
-      </object3D>
-      <object3D position={[rDFf?.x, rDFf?.y, 0.006]}>
-        <mesh>
-          <circleBufferGeometry args={[max_align_radius, 40]} />
-          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-        </mesh>
-      </object3D>
-      <object3D position={[rTFf?.x, rTFf?.y, 0.008]}>
-        <mesh rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
-          <circleBufferGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
-          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-        </mesh>
-      </object3D>
-      <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
-        <mesh rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
-          <circleBufferGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
-          <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
-        </mesh>
-      </object3D>
-      <object3D position={[rTFf?.x, rTFf?.y, 0.01]}>
+    <object3D>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.005]}>
+        <circleBufferGeometry args={[min_align_radius, 40]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.006]}>
+        <circleBufferGeometry args={[max_align_radius, 40]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh>
+      <mesh position={[rTFf?.x, rTFf?.y, 0.007]} rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
+        <circleBufferGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh>
+      <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
+        <circleBufferGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
+        <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
+      </mesh >
+      <mesh position={[rTFf?.x, rTFf?.y, 0.009]}>
         <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
         </mesh>
-      </object3D>
-      <object3D position={[rDFf?.x, rDFf?.y, 0.01]}>
+      </mesh>
+      <mesh position={[rDFf?.x, rDFf?.y, 0.010]}>
         <mesh geometry={arrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
-      </object3D>
-      <object3D position={[rTFf?.x, rTFf?.y, 0.01]}>
+      </mesh>
+      <mesh position={[rTFf?.x, rTFf?.y, 0.011]}>
         <mesh geometry={arrowGeometry(speed * 5)} rotation={[0, 0, heading]}>
           <meshBasicMaterial color="rgb(0, 255, 0)" opacity={0.5} transparent={true} />
         </mesh>
-      </object3D>
-    </>
+      </mesh>
+    </object3D >
   );
 };
 
