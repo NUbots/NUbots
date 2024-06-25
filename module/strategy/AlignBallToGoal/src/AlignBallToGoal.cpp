@@ -59,16 +59,11 @@ namespace module::strategy {
             cfg.angle_threshold         = config["angle_threshold"].as<Expression>();
         });
 
-        on<Provide<AlignBallToGoalTask>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>,
-           With<FieldDescription>,
-           Every<30, Per<std::chrono::seconds>>>()
-            .then([this](const Ball& ball,
-                         const Field& field,
-                         const Sensors& sensors,
-                         const FieldDescription& field_description) {
+        on<Provide<AlignBallToGoalTask>, With<Ball>, With<Field>, With<Sensors>, With<FieldDescription>>().then(
+            [this](const Ball& ball,
+                   const Field& field,
+                   const Sensors& sensors,
+                   const FieldDescription& field_description) {
                 // If the ball is close, align towards the goal
                 Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
                 double distance_to_ball = rBRr.head(2).norm();

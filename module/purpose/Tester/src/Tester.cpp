@@ -87,7 +87,7 @@ namespace module::purpose {
             cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
         });
 
-        on<Startup>().then([this] {
+        on<Every<10, Per<std::chrono::seconds>>>().then([this] {
             // Emit all the tasks with priorities higher than 0
             if (cfg.find_ball_priority > 0) {
                 emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);

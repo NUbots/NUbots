@@ -52,12 +52,8 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<KickToGoalTask>,
-           With<Field>,
-           With<Sensors>,
-           With<FieldDescription>,
-           Every<30, Per<std::chrono::seconds>>>()
-            .then([this](const Field& field, const Sensors& sensors, const FieldDescription& field_description) {
+        on<Provide<KickToGoalTask>, With<Field>, With<Sensors>, With<FieldDescription>>().then(
+            [this](const Field& field, const Sensors& sensors, const FieldDescription& field_description) {
                 // Get the robot's position (pose) on the field
                 Eigen::Isometry3d Hrf =
                     Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse().cast<double>());
