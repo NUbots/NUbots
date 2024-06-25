@@ -66,9 +66,10 @@ namespace module::strategy {
 
             // Desired position of robot on field
             Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
-            // Check if the ball is in the bounding box
+            // Check if we have a recent ball measurement
             if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
                 log<NUClear::DEBUG>("Recent ball measurement");
+                // Check if the ball is in the bounding box
                 if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
                     && rBFf.y() > cfg.bounded_region_y_min && rBFf.y() < cfg.bounded_region_y_max) {
                     // Do nothing as ball is inside of defending region, play normally
