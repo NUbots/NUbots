@@ -66,26 +66,25 @@ namespace module::strategy {
 
             // Desired position of robot on field
             Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
-            log<NUClear::INFO>("WalkInsideBoundedBoxTask");
             // Check if the ball is in the bounding box
             if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                log<NUClear::INFO>("WalkInsideBoundedBoxTask: Ball is recent");
+                log<NUClear::DEBUG>("Recent ball measurement");
                 if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
                     && rBFf.y() > cfg.bounded_region_y_min && rBFf.y() < cfg.bounded_region_y_max) {
                     // Do nothing as ball is inside of defending region, play normally
-                    log<NUClear::INFO>("Ball is inside of bounding box");
+                    log<NUClear::DEBUG>("Ball is inside of bounding box");
                 }
                 else {
                     // If ball is in a region parallel and outside own bounding box of robot we clamp in the y
                     // direction and move to 1m behind ball
                     if (rBFf.x() >= 0 && rBFf.y() > cfg.bounded_region_y_min) {
-                        log<NUClear::INFO>("Ball is in own half and outside bounding box");
+                        log<NUClear::DEBUG>("Ball is in own half and outside bounding box");
                         // Clamp desired position to bounding box and try stay 1m behind ball
                         rDFf.x() = std::clamp(rBFf.x() + 1.0, cfg.bounded_region_x_min, cfg.bounded_region_x_max);
                         rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
                     }
                     else {
-                        log<NUClear::INFO>("Ball is in opponents half and outside bounding box");
+                        log<NUClear::DEBUG>("Ball is in opponents half and outside bounding box");
                         // Clamp desired position to bounding box
                         rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
                         rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
@@ -96,7 +95,7 @@ namespace module::strategy {
                 }
             }
             else {
-                log<NUClear::INFO>("Ball timeout. Returning to start position");
+                log<NUClear::DEBUG>("Ball timeout. Returning to start position");
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
                     Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                     cfg.ready_position.z()));
