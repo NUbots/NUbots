@@ -68,6 +68,7 @@ namespace module::purpose {
             Position position{};
         } cfg;
 
+        /// @brief The rate the find purpose provider will run, to drive the rest of the system
         const int BEHAVIOUR_UPDATE_RATE = 10;
 
     public:

@@ -72,6 +72,7 @@ namespace module::purpose {
             int audiogpt_listen_duration = 0;
         } cfg;
 
+        /// @brief The rate the tasks will emit, to drive the rest of the system
         const int BEHAVIOUR_UPDATE_RATE = 10;
 
     public:
