@@ -34,6 +34,8 @@
 
 namespace module::purpose {
 
+    struct StartTester {};
+
     class Tester : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
@@ -72,6 +74,8 @@ namespace module::purpose {
             std::string chatgpt_prompt = "";
             /// @brief Duration to listen for audio when emitting AudioGPT task
             int audiogpt_listen_duration = 0;
+            /// @brief Delay in seconds before creating director tree
+            int start_delay = 0;
         } cfg;
 
     public:

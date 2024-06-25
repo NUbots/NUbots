@@ -42,31 +42,30 @@ message TurnOnSpot {
     bool clockwise = 1;
 }
 
-message WalkDirect {
-    /// Transform from desired robot pose {d} to robot {r} space
-    iso3 Hrd = 1;
-    /// Aproach radius, distance to target at which the robot will start slowing down
-    double approach_radius = 2;
-    /// Don't align with the target heading
-    bool dont_align_towards_target = 3;
+/// Turn around the ball in the given direction
+message PivotAroundPoint {
+    /// Direction to turn
+    bool clockwise = 1;
 }
 
 /// Debug information for walk to planning
 message WalkToDebug {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 1;
-    /// Requested walk velocity
-    vec3 velocity_target = 2;
-    double translational_error = 3;
-    double angle_to_target = 4;
+    /// Requested walk velocity (vx, vy, w)
+    vec3   velocity_target          = 2;
+    /// Error between robot and target point
+    double translational_error      = 3;
+    /// Angle between the robot unit x and the target point
+    double angle_to_target          = 4;
+    /// Angle between the robot unit x and the desired heading
     double angle_to_desired_heading = 5;
-    double align_radius = 6;
-    double min_angle_error = 7;
-    double max_angle_error = 8;
-}
-
-/// Turn around the ball in the given direction
-message PivotAroundPoint {
-    /// Direction to turn
-    bool clockwise = 1;
+    /// Distance to start aligning with the desired heading
+    double max_align_radius         = 6;
+    /// Distance to remain aligning with the desired heading
+    double min_align_radius         = 7;
+    /// Maximum angle error to only turn in place
+    double max_angle_error          = 9;
+    /// Minimum angle error to start walking at full speed
+    double min_angle_error          = 8;
 }

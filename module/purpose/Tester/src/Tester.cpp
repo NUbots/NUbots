@@ -91,9 +91,14 @@ namespace module::purpose {
             cfg.walk_to_field_position_position = config["walk_to_field_position_position"].as<Expression>();
             cfg.say_text                        = config["say_text"].as<std::string>();
             cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
+
+            cfg.start_delay = config["start_delay"].as<int>();
         });
 
-        on<Startup>().then([this] {
+        on<Startup>().then(
+            [this] { emit<Scope::DELAY>(std::make_unique<StartTester>(), std::chrono::seconds(cfg.start_delay)); });
+
+        on<Trigger<StartTester>>().then([this] {
             emit(std::make_unique<Stability>(Stability::STANDING));
             // Emit all the tasks with priorities higher than 0
             if (cfg.find_ball_priority > 0) {

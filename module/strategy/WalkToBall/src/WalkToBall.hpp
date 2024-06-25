@@ -43,14 +43,18 @@ namespace module::strategy {
             /// @brief Offset to align the ball with the robot's foot
             double ball_y_offset = 0.0;
 
-            /// @brief The distance from ball to walk to
-            double ball_kick_distance = 0.0;
 
             /// @brief The offset on goal target
             double goal_target_offset = 0.0;
 
-            /// @brief The distance when walking to the ball directly to start slowing down
-            double approach_ball_radius = 0.0;
+            /// @brief The distance from ball to walk to if the ball is in a good position
+            double ball_kick_distance = 0.0;
+
+            /// @brief The distance from ball to walk to if the ball is in a tricky position
+            double ball_approach_distance = 0.0;
+
+            double max_angle_error = 0.0;
+            double min_angle_error = 0.0;
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space

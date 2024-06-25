@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react'
+import React, { useLayoutEffect, useRef } from "react";
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -23,7 +23,7 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { Vector } from '../../../shared/math/vector';
+import { Vector } from "../../../shared/math/vector";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -60,8 +60,9 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
-                } bg-white`}
+              className={`${style.fieldOption} ${
+                this.props.model.field.fieldType === option.value ? style.selected : ""
+              } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -344,11 +345,9 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
   );
 });
 
-
 // Props
 interface DistanceCircleProps {
   model: LocalisationRobotModel;
-
 }
 
 const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
@@ -356,8 +355,10 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
   const rDFf = model.Hfd?.decompose().translation;
   const rTFf = model.Hft.decompose().translation;
   const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
+  const target_rotation = new THREE.Euler().setFromQuaternion(model.Hfd.decompose().rotation.toThree(), "XYZ");
   const angle_to_target = model.angle_to_target + robot_rotation.z;
-  const align_radius = model.align_radius;
+  const min_align_radius = model.min_align_radius;
+  const max_align_radius = model.max_align_radius;
   const min_angle_error = model.min_angle_error;
   const max_angle_error = model.max_angle_error;
 
@@ -382,31 +383,31 @@ const DistanceCircle = ({ model }: { model: LocalisationRobotModel }) => {
     <>
       <object3D position={[rDFf?.x, rDFf?.y, 0.005]}>
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <circleBufferGeometry args={[align_radius, 40]} />
+          <circleBufferGeometry args={[min_align_radius, 40]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
       <object3D position={[rDFf?.x, rDFf?.y, 0.006]}>
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <circleBufferGeometry args={[align_radius + 1, 40]} />
+          <circleBufferGeometry args={[max_align_radius, 40]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
       <object3D position={[rTFf?.x, rTFf?.y, 0.008]}>
-        <mesh rotation={[0, 0, angle_to_target - 0.5 * min_angle_error]}>
+        <mesh rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, min_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
       <object3D position={[rTFf?.x, rTFf?.y, 0.009]}>
-        <mesh rotation={[0, 0, angle_to_target - 0.5 * max_angle_error]}>
+        <mesh rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
           <circleBufferGeometry args={[1, 40, 0, max_angle_error]} />
           <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
         </mesh>
       </object3D>
-      <object3D position={[rTFf?.x, rTFf?.y, 0.010]}>
+      <object3D position={[rTFf?.x, rTFf?.y, 0.01]}>
         <mesh geometry={arrowGeometry()} scale={0.001} rotation={[0, 0, robot_rotation.z]}>
-          <meshBasicMaterial color="rgb(255, 255, 255)" opacity={.5} transparent={true} />
+          <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
         </mesh>
       </object3D>
     </>
