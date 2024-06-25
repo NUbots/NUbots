@@ -161,9 +161,8 @@ namespace module::purpose {
         // Second argument is priority - higher number means higher priority
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
-        emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<WalkToKickBall>(), 4);  // try to walk to the lead up kicking position
-        emit<Task>(std::make_unique<KickToGoal>(), 5);      // kick the ball if possible
+        emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
+        emit<Task>(std::make_unique<KickToGoal>(), 4);      // kick the ball if possible
     }
 
 }  // namespace module::purpose
