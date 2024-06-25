@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "extension/Behaviour.hpp"
+
 #include "message/input/RoboCup.hpp"
 
 namespace module::purpose {
@@ -81,12 +82,15 @@ namespace module::purpose {
         } cfg;
 
         struct RobotInfo {
-            uint8_t robot_id = 0;
-            NUClear::clock::time_point startup_time = NUClear::clock::now();
+            uint8_t robot_id                            = 0;
+            NUClear::clock::time_point startup_time     = NUClear::clock::now();
             NUClear::clock::time_point last_update_time = NUClear::clock::now();
-            Position position = Position("DEFENDER");
+            Position position                           = Position("DEFENDER");
 
             bool operator<(const RobotInfo& other) const {
+                if (startup_time == other.startup_time) {
+                    return robot_id < other.robot_id;
+                }
                 return startup_time < other.startup_time;
             }
         };
