@@ -1,9 +1,4 @@
-robot_alias:
-  - hostname: "nugus1"
-    name: "kevin"
-  - hostname: "nugus2"
-    name: "frankie"
-  - hostname: "nugus3"
-    name: "billie"
-  - hostname: "nugus4"
-    name: "sarah"
+nugus1: "kevin"
+nugus2: "frankie"
+nugus3: "billie"
+nugus4: "sarah"

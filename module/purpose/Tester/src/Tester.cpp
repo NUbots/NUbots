@@ -90,7 +90,7 @@ namespace module::purpose {
             cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
         });
 
-        on<Startup>().then([this] {
+        on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
             // Emit all the tasks with priorities higher than 0
             if (cfg.start_safely_priority > 0) {
                 emit<Task>(std::make_unique<StartSafely>(), cfg.start_safely_priority);
