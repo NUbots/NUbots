@@ -1,4 +1,4 @@
 log_level: INFO
 
-confidence_threshold: 0.95 # How confident do we need to be that this is a green horizon point
+confidence_threshold: 0.9 # How confident do we need to be that this is a green horizon point
 cluster_points: 50 # How many points do we need to claim this cluster is a viable part of the green horizon
