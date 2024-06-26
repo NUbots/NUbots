@@ -2,7 +2,7 @@
 log_level: INFO
 
 # How long to tell the servo to move for in seconds
-move_time: 5
+move_time: 2
 # Servo gain
 servo_gain: 4
 # Allowed servo error
