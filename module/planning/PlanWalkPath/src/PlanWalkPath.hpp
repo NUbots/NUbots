@@ -98,7 +98,7 @@ namespace module::planning {
          */
         Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v, double vx_max, double vy_max, double w_max) {
             Eigen::Vector2d translational_velocity = v.head<2>();
-            // If either tranlsational component exceeds the limit, scale the vector to fit within the limits
+            // If either translational component exceeds the limit, scale the vector to fit within the limits
             if (std::abs(v.x()) >= vx_max || std::abs(v.y()) >= vy_max) {
                 double sx = v.x() != 0 ? vx_max / std::abs(v.x()) : 0;
                 double sy = v.y() != 0 ? vy_max / std::abs(v.y()) : 0;
