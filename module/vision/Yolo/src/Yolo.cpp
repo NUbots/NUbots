@@ -205,9 +205,6 @@ namespace module::vision {
 
 
                     if (objects[class_id].name == "ball") {
-                        Ball b;
-                        b.uBCc = ray_to_camera_space(centre_ray).normalized();
-
                         // Get the vector in world space to check if it is in the field
                         Eigen::Vector3d rBWw = img.Hcw.inverse() * ray_to_camera_space(centre_ray);
                         // Only consider vision measurements within the green horizon, if it exists
@@ -215,6 +212,8 @@ namespace module::vision {
                             continue;  // skip this run of the loop and continue the for loop
                         }
 
+                        Ball b;
+                        b.uBCc = ray_to_camera_space(centre_ray).normalized();
                         b.measurements.emplace_back();
                         b.measurements.back().type = Ball::MeasurementType::PROJECTION;
                         b.measurements.back().rBCc = ray_to_camera_space(centre_ray);
@@ -242,6 +241,13 @@ namespace module::vision {
                     }
 
                     if (objects[class_id].name == "robot") {
+                        // Get the vector in world space to check if it is in the field
+                        Eigen::Vector3d rRWw = img.Hcw.inverse() * ray_to_camera_space(bottom_centre_ray);
+                        // Only consider vision measurements within the green horizon, if it exists
+                        if (horizon != nullptr && !point_in_convex_hull(horizon->horizon, rRWw)) {
+                            continue;  // skip this run of the loop and continue the for loop
+                        }
+
                         Robot r;
                         r.rRCc   = ray_to_camera_space(bottom_centre_ray);
                         r.radius = bottom_centre_ray.dot(bottom_left_ray);
@@ -256,7 +262,13 @@ namespace module::vision {
                         // Project the centre ray onto the ground plane in world {w} space
                         Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
                         Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
-                        i.rIWw               = rIWw;
+
+                        // Only consider vision measurements within the green horizon, if it exists
+                        if (horizon != nullptr && !point_in_convex_hull(horizon->horizon, rIWw)) {
+                            continue;  // skip this run of the loop and continue the for loop
+                        }
+
+                        i.rIWw = rIWw;
                         if (objects[class_id].name == "L-intersection") {
                             i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
                             bbox->colour = objects[class_id].colour;
