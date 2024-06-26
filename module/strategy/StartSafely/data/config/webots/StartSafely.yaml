@@ -1,0 +1,2 @@
+# How long to tell the servo to move for in seconds
+move_time: 2
