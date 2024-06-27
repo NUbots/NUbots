@@ -4,6 +4,7 @@ log_level: INFO
 # Tasks to emit on startup. Note: 0 priority will not emit the task.
 tasks:
   # Strategies
+  start_safely_priority: 0
   align_ball_to_goal_priority: 0
   find_ball_priority: 0
   look_at_ball_priority: 0

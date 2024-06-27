@@ -39,6 +39,7 @@
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/StartSafely.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -59,6 +60,7 @@ namespace module::purpose {
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
+    using message::strategy::StartSafely;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
 
@@ -69,6 +71,7 @@ namespace module::purpose {
         on<Configuration>("Tester.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Tester.yaml
             this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
+            cfg.start_safely_priority           = config["tasks"]["start_safely_priority"].as<int>();
             cfg.find_ball_priority              = config["tasks"]["find_ball_priority"].as<int>();
             cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
             cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
@@ -89,6 +92,9 @@ namespace module::purpose {
 
         on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
             // Emit all the tasks with priorities higher than 0
+            if (cfg.start_safely_priority > 0) {
+                emit<Task>(std::make_unique<StartSafely>(), cfg.start_safely_priority);
+            }
             if (cfg.find_ball_priority > 0) {
                 emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
             }
