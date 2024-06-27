@@ -40,53 +40,53 @@ namespace module::planning {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Maximum walk command velocity x for walking
-            double max_translational_velocity_x = 0;
+            double max_translational_velocity_x = 0.0;
             /// @brief Maximum walk command velocity y for walking
-            double max_translational_velocity_y = 0;
+            double max_translational_velocity_y = 0.0;
             /// @brief Maximum angular velocity command for walking
-            double max_angular_velocity = 0;
+            double max_angular_velocity = 0.0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
-            double acceleration = 0;
+            double acceleration = 0.0;
             // Distance to target point to begin decelerating and aligning with target heading
-            double max_align_radius = 0;
+            double max_align_radius = 0.0;
             // Distance to target point to begin decelerating
-            double min_align_radius = 0;
+            double min_align_radius = 0.0;
             // Maximum error in orientation to target heading for no translational velocity
-            double max_angle_error = 0;
+            double max_angle_error = 0.0;
             // Minimum error in orientation to target heading for maximum translational velocity
-            double min_angle_error = 0;
+            double min_angle_error = 0.0;
             // Proportional gain for strafing to target point
-            double strafe_gain = 0;
+            double strafe_gain = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
-            double rotate_velocity = 0;
+            double rotate_velocity = 0.0;
             /// @brief Rotate on spot walk command forward velocity
-            double rotate_velocity_x = 0;
+            double rotate_velocity_x = 0.0;
             /// @brief Rotate on spot walk command side velocity
-            double rotate_velocity_y = 0;
+            double rotate_velocity_y = 0.0;
 
             /// @brief Pivot ball command angular velocity
-            double pivot_ball_velocity = 0;
+            double pivot_ball_velocity = 0.0;
             /// @brief Pivot ball forward velocity
-            double pivot_ball_velocity_x = 0;
+            double pivot_ball_velocity_x = 0.0;
             /// @brief Pivot ball side velocity
-            double pivot_ball_velocity_y = 0;
+            double pivot_ball_velocity_y = 0.0;
         } cfg;
 
         /// @brief Current magnitude of the translational velocity of the walk command
-        double velocity_magnitude = 0;
+        double velocity_magnitude = 0.0;
 
         /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
-        double max_velocity_magnitude = 0;
+        double max_velocity_magnitude = 0.0;
 
         /// @brief Norm of translational error from robot to target
-        double translational_error = 0;
+        double translational_error = 0.0;
 
         /// @brief Angle between robot and target point
-        double angle_to_target = 0;
+        double angle_to_target = 0.0;
 
         /// @brief Angle between robot and target heading
-        double angle_to_desired_heading = 0;
+        double angle_to_desired_heading = 0.0;
 
         /**
          * @brief Constrain a velocity vector to ensure it is within the limits
