@@ -7,7 +7,7 @@ min_translational_velocity_x: -0.1
 max_translational_velocity_y: 0.1
 min_translational_velocity_y: -0.1
 max_angular_velocity: 0.4
-acceleration: 0.001 # maximum increment in walk command velocity
+max_acceleration: 0.001 # maximum increment in walk command velocity
 
 # Rotate on the spot tuning values
 rotate_velocity: 0.4
@@ -24,3 +24,9 @@ min_align_radius: 0.4 # Radius [m] to stay aligning with the target heading
 max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
 min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
 strafe_gain: 0.4
+
+# Vector field tuning values
+target_strength: 20
+heading_strength: 0.1
+obstacle_strength: 0.3
+bounds_strength: 0.1

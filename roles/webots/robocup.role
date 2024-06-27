@@ -28,10 +28,11 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
-  vision::RobotDetector
+  vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos

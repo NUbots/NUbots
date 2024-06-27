@@ -46,7 +46,7 @@ namespace module::planning {
             /// @brief Maximum angular velocity command for walking
             double max_angular_velocity = 0.0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
-            double acceleration = 0.0;
+            double max_acceleration = 0.0;
             // Distance to target point to begin decelerating and aligning with target heading
             double max_align_radius = 0.0;
             // Distance to target point to begin decelerating
@@ -71,10 +71,18 @@ namespace module::planning {
             double pivot_ball_velocity_x = 0.0;
             /// @brief Pivot ball side velocity
             double pivot_ball_velocity_y = 0.0;
+            /// @brief Strength of the target position in the vector field
+            double target_strength = 0.0;
+            /// @brief Strength of the heading repulsion in the vector field
+            double heading_strength = 0.0;
+            /// @brief Strength of the obsticle repulsion in the vector field
+            double obstacle_strength = 0.0;
+            /// @brief Strength of the field bounds repulsion in the vector field
+            double bounds_strength = 0.0;
         } cfg;
 
-        /// @brief Current magnitude of the translational velocity of the walk command
-        double velocity_magnitude = 0.0;
+        /// @brief Current walk command velocity
+        Eigen::Vector3d velocity_command = Eigen::Vector3d::Zero();
 
         /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
         double max_velocity_magnitude = 0.0;
@@ -110,6 +118,11 @@ namespace module::planning {
             double angular_velocity = std::clamp(v.z(), -w_max, w_max);
             return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
         }
+
+        /// @brief Vector field function for the walk command
+        Eigen::Vector2d vector_field(const Eigen::Vector2d& target_position,
+                                     const double heading,
+                                     std::vector<Eigen::Vector2d> obstacles);
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
