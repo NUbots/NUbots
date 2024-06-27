@@ -334,17 +334,22 @@ namespace module::extension {
             }
         }
 
-        // Create a message with the state of the Director for NUsight visualisation
-        auto msg = std::make_unique<message::behaviour::Director>();
-        for (auto& [key, group] : groups) {
-            auto provider    = std::make_unique<message::behaviour::Director::ProviderGroup>();
-            provider->name   = NUClear::util::demangle(group.type.name());
-            provider->active = group.active_task != nullptr;
-            provider->done   = group.done;
+        // Restrict how often a director message is sent
+        if (debug_emit_count == 100) {
+            // Create a message with the state of the Director for NUsight visualisation
+            auto msg = std::make_unique<message::behaviour::Director>();
+            for (auto& [key, group] : groups) {
+                auto provider    = std::make_unique<message::behaviour::Director::ProviderGroup>();
+                provider->name   = NUClear::util::demangle(group.type.name());
+                provider->active = group.active_task != nullptr;
+                provider->done   = group.done;
 
-            msg->providers.push_back(*provider);
+                msg->providers.push_back(*provider);
+            }
+            emit(msg);
+            debug_emit_count = 0;
         }
-        emit(msg);
+        debug_emit_count++;
     }
 
 }  // namespace module::extension
