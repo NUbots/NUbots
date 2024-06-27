@@ -23,7 +23,6 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { Vector } from "../../../shared/math/vector";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
