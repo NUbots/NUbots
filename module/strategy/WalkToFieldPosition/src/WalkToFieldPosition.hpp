@@ -34,11 +34,6 @@
 namespace module::strategy {
 
     class WalkToFieldPosition : public ::extension::behaviour::BehaviourReactor {
-    private:
-        /// @brief Stores configuration values
-        struct Config {
-        } cfg;
-
     public:
         /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.
         explicit WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment);
