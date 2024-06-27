@@ -53,19 +53,19 @@ message WalkToDebug {
     /// Transform from desired robot pose {d} to robot {r} space
     iso3 Hrd = 1;
     /// Requested walk velocity (vx, vy, w)
-    vec3 velocity_target          = 2;
+    vec3 velocity_target = 2;
     /// Error between robot and target point
-    double translational_error      = 3;
+    double translational_error = 3;
     /// Angle between the robot unit x and the target point
-    double angle_to_target          = 4;
+    double angle_to_target = 4;
     /// Angle between the robot unit x and the desired final heading
     double angle_to_final_heading = 5;
     /// Distance to start aligning with the desired heading
-    double max_align_radius         = 6;
+    double max_align_radius = 6;
     /// Distance to remain aligning with the desired heading
-    double min_align_radius         = 7;
+    double min_align_radius = 7;
     /// Maximum angle error to only turn in place
-    double max_angle_error          = 9;
+    double max_angle_error = 9;
     /// Minimum angle error to start walking at full speed
-    double min_angle_error          = 8;
+    double min_angle_error = 8;
 }

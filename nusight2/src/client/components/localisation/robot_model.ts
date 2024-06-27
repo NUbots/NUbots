@@ -6,7 +6,6 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
-import { ivec3, vec, vec3 } from "../../../shared/messages";
 
 class ServoMotor {
   @observable angle: number;
