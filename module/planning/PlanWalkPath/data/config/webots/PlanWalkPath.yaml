@@ -26,7 +26,7 @@ min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translati
 strafe_gain: 0.4
 
 # Vector field tuning values
-target_strength: 20
+target_strength: 1.5
 heading_strength: 0.1
-obstacle_strength: 0.3
+obstacle_strength: 0.1
 bounds_strength: 0.1

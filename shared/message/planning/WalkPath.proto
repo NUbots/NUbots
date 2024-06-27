@@ -48,6 +48,15 @@ message PivotAroundPoint {
     bool clockwise = 1;
 }
 
+message VectorFieldVector {
+    /// Vector start position
+    vec3 rVRr = 1;
+    /// Vector direction
+    double direction = 2;
+    /// Vector magnitude
+    double magnitude = 3;
+}
+
 /// Debug information for walk to planning
 message WalkToDebug {
     /// Transform from desired robot pose {d} to robot {r} space
@@ -68,4 +77,6 @@ message WalkToDebug {
     double max_angle_error = 9;
     /// Minimum angle error to start walking at full speed
     double min_angle_error = 8;
+    /// Vector field
+    repeated VectorFieldVector vector_field = 10;
 }

@@ -419,6 +419,20 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
+
+      {/* Vector field */}
+      {model.vector_field?.map((vector, i) => {
+        const vector_direction = vector.direction + robot_rotation.z;
+        const vector_position = vector.rVRr.applyMatrix4(model.Hfr);
+
+        return (
+          <mesh key={i} position={[vector_position?.x, vector_position?.y, 0.011]}>
+            <mesh geometry={arrowGeometry(0.2)} rotation={[0, 0, vector_direction]}>
+              <meshBasicMaterial color="rgb(0, 0, 255)" opacity={0.5} transparent={true} />
+            </mesh>
+          </mesh>
+        );
+      })}
     </object3D>
   );
 };

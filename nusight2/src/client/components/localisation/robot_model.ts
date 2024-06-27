@@ -120,6 +120,17 @@ export class FieldIntersection {
   }
 }
 
+export class VectorFieldVector {
+  @observable rVRr: Vector3;
+  @observable direction: number;
+  @observable magnitude: number;
+  constructor({ rVRr, direction, magnitude }: { rVRr: Vector3; direction: number; magnitude: number }) {
+    this.rVRr = rVRr;
+    this.direction = direction;
+    this.magnitude = magnitude;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -145,6 +156,7 @@ export class LocalisationRobotModel {
   @observable min_angle_error: number;
   @observable max_angle_error: number;
   @observable velocity_target: Vector3;
+  @observable vector_field?: VectorFieldVector[];
   constructor({
     model,
     name,
@@ -169,6 +181,7 @@ export class LocalisationRobotModel {
     min_angle_error,
     max_angle_error,
     velocity_target,
+    vector_field,
   }: {
     model: RobotModel;
     name: string;
@@ -193,6 +206,7 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    vector_field?: VectorFieldVector[];
   }) {
     this.model = model;
     this.name = name;
@@ -217,6 +231,7 @@ export class LocalisationRobotModel {
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
     this.velocity_target = velocity_target;
+    this.vector_field = vector_field;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {

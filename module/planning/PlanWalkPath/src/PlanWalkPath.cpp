@@ -47,10 +47,10 @@ namespace module::planning {
 
     using message::input::Sensors;
     using message::localisation::Ball;
-    using message::localisation::Field;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
+    using message::planning::VectorFieldVector;
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
     using message::skill::Walk;
@@ -85,17 +85,17 @@ namespace module::planning {
                            (target_position.x() - x) * g_target(x, y, target_position.x(), target_position.y()),
                            (target_position.y() - y) * g_target(x, y, target_position.x(), target_position.y()));
 
-        // Create point next to target position at given heading
-        double x_target = target_position.x() + std::cos(heading);
-        double y_target = target_position.y() + std::sin(heading);
+        // // Create point next to target position at given heading
+        // double x_target = target_position.x() + std::cos(heading);
+        // double y_target = target_position.y() + std::sin(heading);
 
-        // Repulse the heading point
-        vector_field_direction.x() += ((x - x_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
-        vector_field_direction.y() += ((y - y_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
+        // // Repulse the heading point
+        // vector_field_direction.x() += ((x - x_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
+        // vector_field_direction.y() += ((y - y_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
 
-        log<NUClear::INFO>("Heading difference",
-                           (x - x_target) * g(x, y, x_target, y_target),
-                           (y - y_target) * g(x, y, x_target, y_target));
+        // log<NUClear::INFO>("Heading difference",
+        //                    (x - x_target) * g(x, y, x_target, y_target),
+        //                    (y - y_target) * g(x, y, x_target, y_target));
 
         // Repulsion of the obstacles
         for (const auto& obstacle : obstacles) {
@@ -195,6 +195,7 @@ namespace module::planning {
 
                 // Get the vector field desired velocity
                 Eigen::Vector2d desired_velocity_target = vector_field(rDRr, angle_to_final_heading, obstacles);
+                desired_velocity_target                 = desired_velocity_target.normalized();
                 emit(graph("desired_velocity_target ", desired_velocity_target.x(), desired_velocity_target.y()));
 
                 // Calculate the angle between the robot and the target velocity (x, y)
@@ -222,10 +223,12 @@ namespace module::planning {
                         (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
                         0.0,
                         1.0);
-                    velocity_command.x() = std::min(angle_error_gain * desired_velocity_target.x(),
-                                                    velocity_command.x() + cfg.max_acceleration);
-                    velocity_command.y() = std::min(angle_error_gain * desired_velocity_target.y(),
-                                                    velocity_command.y() + cfg.max_acceleration);
+                    velocity_command.x() =
+                        std::min(angle_error_gain * desired_velocity_target.x() * cfg.max_translational_velocity_x,
+                                 velocity_command.x() + cfg.max_acceleration);
+                    velocity_command.y() =
+                        std::min(angle_error_gain * desired_velocity_target.y() * cfg.max_translational_velocity_y,
+                                 velocity_command.y() + cfg.max_acceleration);
                 }
                 else {
                     // "Proportional control" to strafe towards the target inside align radius
@@ -262,9 +265,15 @@ namespace module::planning {
                 // Create vector field for visualization
                 for (int i = -5; i < 5; i++) {
                     for (int j = -5; j < 5; j++) {
-                        Eigen::Vector2d rDRr                    = Eigen::Vector2d(i / 10.0, j / 10.0);
-                        Eigen::Vector2d desired_velocity_target = vector_field(rDRr, angle_to_final_heading, obstacles);
-                        debug_information->vector_field.push_back(desired_velocity_target);
+                        Eigen::Vector2d rVRr = Eigen::Vector2d(i / 2.5, j / 2.5);
+                        Eigen::Vector2d desired_velocity_target =
+                            vector_field(rDRr - rVRr, angle_to_final_heading, obstacles);
+                        VectorFieldVector vector_field_vector;
+                        vector_field_vector.rVRr = Eigen::Vector3d(rVRr.x(), rVRr.y(), 0);
+                        vector_field_vector.direction =
+                            std::atan2(desired_velocity_target.y(), desired_velocity_target.x());
+                        vector_field_vector.magnitude = desired_velocity_target.norm();
+                        debug_information->vector_field.push_back(vector_field_vector);
                     }
                 }
 

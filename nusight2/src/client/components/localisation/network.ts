@@ -55,6 +55,12 @@ export class LocalisationNetwork {
     robot.min_angle_error = walk_to_debug.minAngleError;
     robot.max_angle_error = walk_to_debug.maxAngleError;
     robot.velocity_target = Vector3.from(walk_to_debug.velocityTarget);
+
+    robot.vector_field = walk_to_debug.vectorField.map((vectorField) => ({
+      rVRr: Vector3.from(vectorField.rVRr),
+      direction: vectorField.direction,
+      magnitude: vectorField.magnitude,
+    }));
   };
 
   @action.bound
