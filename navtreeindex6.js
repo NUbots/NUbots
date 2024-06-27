@@ -132,6 +132,7 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[2,0,3,15,4,2],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64":[2,0,3,15,4,0],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a9c5c9eec6d34bf88bf80c61c08b1ec48":[2,0,3,15,4,1],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#ac4a510f2298038c54f5e015c550e1f5a":[2,0,3,15,4,4],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#ad5f2264ce6dbfd90e8be2bb076c283d2":[2,0,3,15,4,3],
 "classmodule_1_1vision_1_1RobotDetector.html":[2,0,3,15,5],
 "classmodule_1_1vision_1_1RobotDetector.html#a12135a036c8a25caba5be2838abdd58e":[2,0,3,15,5,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "classnsga2_1_1NSGA2.html#abcfb1c3149b7c03895aae8e3c2b11dd4":[2,0,4,2,52],
 "classnsga2_1_1NSGA2.html#abeb3f3d705bf32749c8690c9a42746a9":[2,0,4,2,22],
 "classnsga2_1_1NSGA2.html#ac4791d14d7e583e77188b3032d65a176":[2,0,4,2,18],
-"classnsga2_1_1NSGA2.html#ac6454d37d2dd3da167072bca1c627cbb":[2,0,4,2,71],
-"classnsga2_1_1NSGA2.html#ac70f0fb651b024d47c2d4ac575bf1c05":[2,0,4,2,28]
+"classnsga2_1_1NSGA2.html#ac6454d37d2dd3da167072bca1c627cbb":[2,0,4,2,71]
 };

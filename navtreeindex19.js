@@ -1,5 +1,6 @@
 var NAVTREEINDEX19 =
 {
+"structutility_1_1nbs_1_1IndexItem.html#a24ad36421839d2e30b63b6a25af74f26":[2,0,7,7,3,1],
 "structutility_1_1nbs_1_1IndexItem.html#a2cd152894d42103d6a5d9d2e0344a370":[2,0,7,7,3,4],
 "structutility_1_1nbs_1_1IndexItem.html#a8998861ab27e5b00fd583b5da852cd51":[2,0,7,7,3,3],
 "structutility_1_1nbs_1_1IndexItem.html#acd64bcad3b74e7076768404c0cd427b6":[2,0,7,7,3,0],
@@ -198,12 +199,12 @@ var NAVTREEINDEX19 =
 "structutility_1_1support_1_1Expression.html#a85557b6cbcf5c7fb2465415956552b74":[2,0,7,13,2,2],
 "structutility_1_1support_1_1Expression.html#aa98ac82792d5e9302f95c379ba772372":[2,0,7,13,2,1],
 "structutility_1_1support_1_1Expression.html#acb87986fbdf5badbb3e40e983187887c":[2,0,7,13,2,9],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,8],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,7],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,5],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,3],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,8],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,6],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,4],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,5],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,13,2,7],
 "structutility_1_1support_1_1LazyEvaluation.html":[2,0,7,13,3],
 "structutility_1_1support_1_1LazyEvaluation.html#a405f3e6a7d2f4a3630296a9a291b7c46":[2,0,7,13,3,1],
 "structutility_1_1support_1_1LazyEvaluation.html#a6fc2eba1f57246dd848e823a211111ba":[2,0,7,13,3,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX19 =
 "structutility_1_1type__traits_1_1is__iterable.html#a646c0785c7190b2ade16008452c5a05f":[2,0,7,14,2,2],
 "structutility_1_1type__traits_1_1is__iterable.html#aa2462ded2e0a7709e9d9a3a059dcfdc7":[2,0,7,14,2,3],
 "structutility_1_1type__traits_1_1is__iterable.html#ad23b3f287d01137c771cf5bc827cfbee":[2,0,7,14,2,1],
-"structutility_1_1type__traits_1_1is__iterable.html#afe4ea4ff90ba8a6c179a0d4378cd0406":[2,0,7,14,2,5],
-"structutility_1_1vision_1_1Colour.html":[2,0,7,15,0]
+"structutility_1_1type__traits_1_1is__iterable.html#afe4ea4ff90ba8a6c179a0d4378cd0406":[2,0,7,14,2,5]
 };

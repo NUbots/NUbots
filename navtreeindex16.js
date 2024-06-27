@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafda3cdaaa60f6c6b7d95ae2c5fbadfa4":[2,0,3,9,1,1,0,191],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafe4624cc906d618eeb8ccfbf5cfd8161":[2,0,3,9,1,1,0,5],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafec5cc3fbea01e9dc369c369c8a74fef":[2,0,3,9,1,1,0,227],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daffd2e280250afd1ffda16c33a8dcd90c":[2,0,3,9,1,1,0,10],
@@ -248,6 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a68f8a14b5e22198e6c0f0b26c8ec153e":[2,0,3,12,11,0,1],
 "structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a6d11097fdace879ea88840444cf25a3e":[2,0,3,12,11,0,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[2,0,3,13,1,1,0],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[2,0,3,13,1,1,0,5],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[2,0,3,13,1,1,0,3]
+"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[2,0,3,13,1,1,0,5]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX9 =
 {
+"classutility_1_1openai_1_1__detail_1_1Session.html#ae9bed6c3400a303343edc9d806a7459e":[2,0,7,8,0,13,2],
 "classutility_1_1openai_1_1__detail_1_1Session.html#af1b482cde37da8a30447c0f5d29fb8e4":[2,0,7,8,0,13,6],
 "classutility_1_1openai_1_1__detail_1_1Session.html#af3ecaad4b2e15fc1102e7b8b510ec27e":[2,0,7,8,0,13,12],
 "classutility_1_1reactor_1_1StreamReactor.html":[2,0,7,9,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX9 =
 "functions_vars_w.html":[2,3,2,22],
 "functions_vars_x.html":[2,3,2,23],
 "functions_vars_y.html":[2,3,2,24],
-"functions_vars_z.html":[2,3,2,25],
-"functions_w.html":[2,3,0,23]
+"functions_vars_z.html":[2,3,2,25]
 };
