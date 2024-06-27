@@ -256,6 +256,7 @@ var annotated_dup =
         [ "KickToGoal", "classmodule_1_1strategy_1_1KickToGoal.html", "classmodule_1_1strategy_1_1KickToGoal" ],
         [ "Ready", "classmodule_1_1strategy_1_1Ready.html", "classmodule_1_1strategy_1_1Ready" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
+        [ "StartSafely", "classmodule_1_1strategy_1_1StartSafely.html", "classmodule_1_1strategy_1_1StartSafely" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
         [ "WalkInsideBoundedBox", "classmodule_1_1strategy_1_1WalkInsideBoundedBox.html", "classmodule_1_1strategy_1_1WalkInsideBoundedBox" ],
         [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],

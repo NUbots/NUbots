@@ -627,6 +627,7 @@ var namespaces_dup =
         [ "KickToGoal", "classmodule_1_1strategy_1_1KickToGoal.html", "classmodule_1_1strategy_1_1KickToGoal" ],
         [ "Ready", "classmodule_1_1strategy_1_1Ready.html", "classmodule_1_1strategy_1_1Ready" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
+        [ "StartSafely", "classmodule_1_1strategy_1_1StartSafely.html", "classmodule_1_1strategy_1_1StartSafely" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
         [ "WalkInsideBoundedBox", "classmodule_1_1strategy_1_1WalkInsideBoundedBox.html", "classmodule_1_1strategy_1_1WalkInsideBoundedBox" ],
         [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],
@@ -638,6 +639,7 @@ var namespaces_dup =
         [ "KickToGoalTask", "KickToGoal_8cpp.html#a8dace6d4cd5eb5796162806619aceb92", null ],
         [ "ReadyTask", "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f", null ],
         [ "StandStillTask", "StandStill_8cpp.html#a34f0cf0c4ada0c7e001c5f278b773f79", null ],
+        [ "StartSafelyTask", "StartSafely_8cpp.html#ada395fc35f6d7855041b195b96c40e6c", null ],
         [ "WalkInsideBoundedBoxTask", "WalkInsideBoundedBox_8cpp.html#ab5c7f719a906c4e9f02d64835a154c24", null ],
         [ "WalkToBallTask", "WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b", null ],
         [ "WalkToFieldPositionTask", "WalkToFieldPosition_8cpp.html#a7b5f1c28072d68b1b9d5da47a55645f8", null ]

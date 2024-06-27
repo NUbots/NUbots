@@ -197,6 +197,10 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 </li>
 <li>script
 : <a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#ac81cabe2775737f6ddb8c55b08d9342a">module::purpose::ScriptTuner</a>
+, <a class="el" href="classmodule_1_1strategy_1_1StartSafely.html#a10648fb30fdb094f9b77b2356fca9b19">module::strategy::StartSafely</a>
+</li>
+<li>script_name
+: <a class="el" href="structmodule_1_1strategy_1_1StartSafely_1_1Config.html#aa572a5c140b104188e69ace973ca8618">module::strategy::StartSafely::Config</a>
 </li>
 <li>script_path
 : <a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#abc8fa2ed65ebe13655d2fd0ddbc951ae">module::purpose::ScriptTuner</a>
@@ -263,6 +267,12 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 : <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a4dcbcc22ca81ee7ac6b298f115e83afc">module::platform::NUSense::NUgus</a>
 , <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a294f24d6e5f4922b024a9e61756c65ba">module::platform::OpenCR::NUgus</a>
 </li>
+<li>servo_error
+: <a class="el" href="structmodule_1_1strategy_1_1StartSafely_1_1Config.html#ab9902856185b4b7e9f4094bc22a249b7">module::strategy::StartSafely::Config</a>
+</li>
+<li>servo_gain
+: <a class="el" href="structmodule_1_1strategy_1_1StartSafely_1_1Config.html#a26446ee0d94afcbcd2919fd1ff8ec319">module::strategy::StartSafely::Config</a>
+</li>
 <li>servo_ids()
 : <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216">module::platform::OpenCR::NUgus</a>
 </li>
@@ -278,6 +288,9 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 , <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c">module::platform::OpenCR::HardwareIO</a>
 , <a class="el" href="structmodule_1_1skill_1_1SplineKick_1_1Config.html#a694f1827ae796ad5c6a94c3c4dd9d94e">module::skill::SplineKick::Config</a>
 , <a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#ae7ba1c4e2415aa67e85d22c4fc1c6252">module::skill::Walk::Config</a>
+</li>
+<li>servo_targets
+: <a class="el" href="classmodule_1_1strategy_1_1StartSafely.html#aaf15554dca09f05322be782c1c4d2ac9">module::strategy::StartSafely</a>
 </li>
 <li>servo_waiting()
 : <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9aa9639e522a3420a51b1cca915ccd23">module::platform::OpenCR::HardwareIO</a>
@@ -296,9 +309,6 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 </li>
 <li>set_foot_distance()
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1Footstep.html#ad5d8d9e665d128a0179dc2d305fd33f1">utility::motion::splines::Footstep</a>
-</li>
-<li>set_gain_delay
-: <a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a1b29dbf8f43adf58fe0213e46cad615d">module::actuation::FootController::Config</a>
 </li>
 <li>set_parameters()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#a1285e56c352e64e2ebba2ed350c7204f">utility::skill::QuinticWalkEngine</a>
@@ -412,6 +422,9 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 <li>start_ready_time
 : <a class="el" href="classmodule_1_1strategy_1_1Ready.html#a7684339621ed30c895e079aaedef8f68">module::strategy::Ready</a>
 </li>
+<li>start_safely_priority
+: <a class="el" href="structmodule_1_1purpose_1_1Tester_1_1Config.html#aa92cc6b52d1e08d0f3568da5262ad522">module::purpose::Tester::Config</a>
+</li>
 <li>start_time
 : <a class="el" href="classmodule_1_1nbs_1_1Player.html#a0ea741f91c18048deb19b6503402d2f1">module::nbs::Player</a>
 , <a class="el" href="classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html#abd33d3973a073f1067d3f58bb4b272f2">module::support::optimisation::OnboardWalkOptimisation</a>
@@ -434,27 +447,26 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 : <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ad058f69ba5667093c7ec93c001e95500">module::localisation::FieldLocalisation::Config</a>
 , <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af05fc536f295c707122c1f567f7ba1d4">module::localisation::FieldLocalisationNLopt::Config</a>
 </li>
+<li>StartSafely()
+: <a class="el" href="classmodule_1_1strategy_1_1StartSafely.html#aae5a37d3b535348e7b14311547d46b23">module::strategy::StartSafely</a>
+</li>
 <li>startup
 : <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3e09b70de20f23332c5e947d0b6fd658">module::localisation::FieldLocalisationNLopt</a>
 , <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58412c43be7c2197ce8a595596f2a650">module::platform::OpenCR::HardwareIO</a>
-</li>
-<li>startup_gain
-: <a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#adbbcc34ccc45dc005c323ac7479b2b32">module::actuation::FootController::Config</a>
 </li>
 <li>startup_text
 : <a class="el" href="structmodule_1_1skill_1_1Say_1_1Config.html#adc2ef9a30368b30476d16f5dbfa4f595">module::skill::Say::Config</a>
 </li>
 <li>startup_time
 : <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a6b219938714c034f0697574533a13585">module::localisation::FieldLocalisation</a>
-</li>
-<li>state
-: <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a401358e52210d88121edf063cd493649">module::extension::Director::Solution::Option</a>
+, <a class="el" href="classmodule_1_1strategy_1_1StartSafely.html#a14a3964f4d03bf3743b775092bd88c51">module::strategy::StartSafely</a>
 </li>
 <li>State
 : <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eec">module::extension::Director::Solution::Option</a>
 </li>
 <li>state
-: <a class="el" href="structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84">module::extension::StateUpdate</a>
+: <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a401358e52210d88121edf063cd493649">module::extension::Director::Solution::Option</a>
+, <a class="el" href="structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84">module::extension::StateUpdate</a>
 , <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a929290aa229515b6dae227829bd91489">module::localisation::FieldLocalisationNLopt</a>
 </li>
 <li>State
@@ -541,7 +553,7 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Jun 25 2024 06:07:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jun 27 2024 05:49:45 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

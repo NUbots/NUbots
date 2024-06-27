@@ -1,5 +1,5 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,944,347,985"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,969,347,1011"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="439,5,587,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="439,71,587,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="439,136,587,177"/>
@@ -31,10 +31,11 @@
 <area shape="rect" id="node31" href="$classmodule_1_1strategy_1_1KickToGoal.html" title=" " alt="" coords="407,1499,619,1526"/>
 <area shape="rect" id="node32" href="$classmodule_1_1strategy_1_1Ready.html" title=" " alt="" coords="423,1550,604,1577"/>
 <area shape="rect" id="node33" href="$classmodule_1_1strategy_1_1StandStill.html" title=" " alt="" coords="412,1601,615,1627"/>
-<area shape="rect" id="node34" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,1651,632,1678"/>
-<area shape="rect" id="node35" href="$classmodule_1_1strategy_1_1WalkInsideBoundedBox.html" title=" " alt="" coords="408,1703,619,1744"/>
-<area shape="rect" id="node36" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1769,619,1795"/>
-<area shape="rect" id="node37" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1820,607,1861"/>
-<area shape="rect" id="node38" href="$classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html" title=" " alt="" coords="404,1885,623,1927"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,951,140,978"/>
+<area shape="rect" id="node34" href="$classmodule_1_1strategy_1_1StartSafely.html" title=" " alt="" coords="407,1651,619,1678"/>
+<area shape="rect" id="node35" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,1702,632,1729"/>
+<area shape="rect" id="node36" href="$classmodule_1_1strategy_1_1WalkInsideBoundedBox.html" title=" " alt="" coords="408,1753,619,1795"/>
+<area shape="rect" id="node37" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1819,619,1846"/>
+<area shape="rect" id="node38" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1871,607,1912"/>
+<area shape="rect" id="node39" href="$classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html" title=" " alt="" coords="404,1936,623,1977"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,977,140,1003"/>
 </map>
