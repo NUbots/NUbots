@@ -358,16 +358,9 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
     return new TextGeometry(x, {
       font: font,
       size: 0.1,
-      height: 0.01,
+      height: 0,
     }).center();
   };
-
-  const ref = React.useRef<THREE.Mesh>(null);
-  React.useLayoutEffect(() => {
-    if (ref.current) {
-      ref.current.rotation.z = props.robotModel.Hft.decompose().rotation.z + props.model.camera.yaw;
-    }
-  }, [props.cameraPosition]);
 
   return (
     <object3D position={rTFf?.x, rTFf?.y, 0.5}>
