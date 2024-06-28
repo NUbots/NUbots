@@ -351,16 +351,8 @@ interface PurposeTextProps {
 const PurposeText = ({ props }: { props: PurposeTextProps }) => {
   console.log(props.cameraPosition);
   console.log(props.model.camera)
-  // Camera position as quaternion
-  // Camera rotation
-  const cameraQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler([Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]));
-
-  // Find rotation needed to face camera
-  // const cameraPosition = new Vector3(props.cameraPosition[0], props.cameraPosition[1], props.cameraPosition[2]);
-  // const robotPosition = props.model.Hft.decompose().translation;
-  // const distance = new Vector3()
-
-  // Function to return text geometry
+  const rTFf = props.robotModel.Hft.decompose().translation;
+  console.log(rTFf)
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
     return new TextGeometry(x, {
@@ -373,17 +365,14 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
   const ref = React.useRef<THREE.Mesh>(null);
   React.useLayoutEffect(() => {
     if (ref.current) {
-      ref.current.lookAt(new THREE.Vector3(...props.cameraPosition.toArray()));
-      // ref.current.quaternion.copy(cameraQuaternion);
+      ref.current.rotation.z = props.robotModel.Hft.decompose().rotation.z + props.model.camera.yaw;
     }
   }, [props.cameraPosition]);
 
-  // console.log(props.model.purpose);
   return (
-    <object3D position={[0, 0, 1]}>
-      <mesh ref={ref} geometry={textGeometry("Striker")}>
+    <object3D position={rTFf?.x, rTFf?.y, 0.5}>
+      <mesh rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]} geometry={textGeometry("Striker")}>
         <meshBasicMaterial color="blue" transparent opacity={1} />
-        {/* <sphereBufferGeometry args={[1, 32, 32]} /> */}
       </mesh>
     </object3D>
   );
