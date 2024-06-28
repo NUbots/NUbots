@@ -93,7 +93,6 @@ namespace module::purpose {
             cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
 
             cfg.start_delay = config["start_delay"].as<int>();
-            main_loop.disable();
         });
 
         on<Startup>().then([this] {
@@ -101,56 +100,56 @@ namespace module::purpose {
             emit(std::make_unique<Stability>(Stability::STANDING));
         });
 
-        on<Trigger<StartTester>>().then([this] { main_loop.enable(); });
-
-        main_loop = on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
-            // Emit all the tasks with priorities higher than 0
-            if (cfg.find_ball_priority > 0) {
-                emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
-            }
-            if (cfg.look_at_ball_priority > 0) {
-                emit<Task>(std::make_unique<LookAtBall>(), cfg.look_at_ball_priority);
-            }
-            if (cfg.walk_to_ball_priority > 0) {
-                emit<Task>(std::make_unique<WalkToBall>(), cfg.walk_to_ball_priority);
-            }
-            if (cfg.walk_to_kick_ball_priority > 0) {
-                log<NUClear::INFO>("Walk to kick ball");
-                emit<Task>(std::make_unique<WalkToKickBall>(), cfg.walk_to_kick_ball_priority);
-            }
-            if (cfg.align_ball_to_goal_priority > 0) {
-                emit<Task>(std::make_unique<AlignBallToGoal>(), cfg.align_ball_to_goal_priority);
-            }
-            if (cfg.kick_to_goal_priority > 0) {
-                emit<Task>(std::make_unique<KickToGoal>(), cfg.kick_to_goal_priority);
-            }
-            if (cfg.walk_to_field_position_priority > 0) {
-                emit<Task>(std::make_unique<WalkToFieldPosition>(
-                               pos_rpy_to_transform(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
-                                                                    cfg.walk_to_field_position_position.y(),
-                                                                    0),
-                                                    Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z()))),
-                           cfg.walk_to_field_position_priority);
-            }
-            if (cfg.kick_to_priority > 0) {
-                emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);
-            }
-            if (cfg.look_around_priority > 0) {
-                emit<Task>(std::make_unique<LookAround>(), cfg.look_around_priority);
-            }
-            if (cfg.stand_still_priority > 0) {
-                emit<Task>(std::make_unique<StandStill>(), cfg.stand_still_priority);
-            }
-            if (cfg.say_priority > 0) {
-                emit<Task>(std::make_unique<Say>(cfg.say_text, true), cfg.say_priority);
-            }
-            if (cfg.chatgpt_priority > 0) {
-                emit<Task>(std::make_unique<GPTChatRequest>(cfg.chatgpt_prompt, true), cfg.chatgpt_priority);
-            }
-            if (cfg.audiogpt_priority > 0) {
-                emit<Task>(std::make_unique<GPTAudioRequest>(true, true, cfg.audiogpt_listen_duration),
-                           cfg.audiogpt_priority);
-            }
+        on<Trigger<StartTester>>().then([this] {
+            on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
+                // Emit all the tasks with priorities higher than 0
+                if (cfg.find_ball_priority > 0) {
+                    emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
+                }
+                if (cfg.look_at_ball_priority > 0) {
+                    emit<Task>(std::make_unique<LookAtBall>(), cfg.look_at_ball_priority);
+                }
+                if (cfg.walk_to_ball_priority > 0) {
+                    emit<Task>(std::make_unique<WalkToBall>(), cfg.walk_to_ball_priority);
+                }
+                if (cfg.walk_to_kick_ball_priority > 0) {
+                    log<NUClear::INFO>("Walk to kick ball");
+                    emit<Task>(std::make_unique<WalkToKickBall>(), cfg.walk_to_kick_ball_priority);
+                }
+                if (cfg.align_ball_to_goal_priority > 0) {
+                    emit<Task>(std::make_unique<AlignBallToGoal>(), cfg.align_ball_to_goal_priority);
+                }
+                if (cfg.kick_to_goal_priority > 0) {
+                    emit<Task>(std::make_unique<KickToGoal>(), cfg.kick_to_goal_priority);
+                }
+                if (cfg.walk_to_field_position_priority > 0) {
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
+                                   Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
+                                                   cfg.walk_to_field_position_position.y(),
+                                                   0),
+                                   Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z()))),
+                               cfg.walk_to_field_position_priority);
+                }
+                if (cfg.kick_to_priority > 0) {
+                    emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);
+                }
+                if (cfg.look_around_priority > 0) {
+                    emit<Task>(std::make_unique<LookAround>(), cfg.look_around_priority);
+                }
+                if (cfg.stand_still_priority > 0) {
+                    emit<Task>(std::make_unique<StandStill>(), cfg.stand_still_priority);
+                }
+                if (cfg.say_priority > 0) {
+                    emit<Task>(std::make_unique<Say>(cfg.say_text, true), cfg.say_priority);
+                }
+                if (cfg.chatgpt_priority > 0) {
+                    emit<Task>(std::make_unique<GPTChatRequest>(cfg.chatgpt_prompt, true), cfg.chatgpt_priority);
+                }
+                if (cfg.audiogpt_priority > 0) {
+                    emit<Task>(std::make_unique<GPTAudioRequest>(true, true, cfg.audiogpt_listen_duration),
+                               cfg.audiogpt_priority);
+                }
+            });
         });
     }
 
