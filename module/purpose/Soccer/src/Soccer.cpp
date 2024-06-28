@@ -110,9 +110,18 @@ namespace module::purpose {
         on<Provide<FindPurpose>, Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
-                case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
-                case Position::GOALIE: emit<Task>(std::make_unique<Goalie>(cfg.force_playing)); break;
-                case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
+                case Position::STRIKER:
+                    emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                    soccer_position = Position("STRIKER");
+                    break;
+                case Position::GOALIE:
+                    emit<Task>(std::make_unique<Goalie>(cfg.force_playing));
+                    soccer_position = Position("GOALIE");
+                    break;
+                case Position::DEFENDER:
+                    emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                    soccer_position = Position("DEFENDER");
+                    break;
                 case Position::DYNAMIC: manage_active_robots(robocup); break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
@@ -173,6 +182,15 @@ namespace module::purpose {
 
             log<NUClear::DEBUG>("active robots length ", int(active_robots.size()));
         });
+
+        // Emit our own Purpose for NUsight debugging
+        on<Every<2, Per<std::chrono::seconds>>>().then([this] {
+            auto purposes_msg = std::make_unique<Purposes>();
+            purposes_msg->purpose.purpose = soccer_position.toSoccerPosition();
+            purposes_msg->purpose.player_id = player_id;
+            log<NUClear::DEBUG>("Current soccer position ", soccer_position);
+            emit(purposes_msg);
+        });
     }
 
     void Soccer::find_purpose() {
@@ -186,7 +204,7 @@ namespace module::purpose {
             msg->current_pose.player_id = player_id;
             // Reset the startup time, to redetermine leader
             auto now                   = NUClear::clock::now();
-            msg->purposes.startup_time = now;
+            msg->purpose_commands.startup_time = now;
             startup_time               = now;
             emit(msg);
         }
@@ -202,7 +220,7 @@ namespace module::purpose {
 
     void Soccer::manage_active_robots(const RoboCup& robocup) {
         // Do not manage penalised robots, or robots that are not dynamic
-        if (robocup.state == State::PENALISED || (robocup.current_pose.player_id != player_id && robocup.purposes.purposes.empty())) {
+        if (robocup.state == State::PENALISED || (robocup.current_pose.player_id != player_id && robocup.purpose_commands.purpose_commands.empty())) {
             return;
         }
 
@@ -220,7 +238,7 @@ namespace module::purpose {
             // Add more data here
         } else {
             // Add new robot's info, and re-assign positions
-            RobotInfo new_robot{incoming_robot_id, robocup.purposes.startup_time, now};
+            RobotInfo new_robot{incoming_robot_id, robocup.purpose_commands.startup_time, now};
             add_robot(new_robot);
             give_directions();
         }
@@ -254,10 +272,10 @@ namespace module::purpose {
                 for (int i = 0; i < int(active_robots.size()); ++i) {
                     if (i == striker_idx) {
                         active_robots[i].position = Position("STRIKER");
-                        purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
+                        purposes_msg->purpose_commands.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
                     } else {
                         active_robots[i].position = Position("DEFENDER");
-                        purposes_msg->purposes.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
+                        purposes_msg->purpose_commands.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
                     }
                 }
 
@@ -275,9 +293,9 @@ namespace module::purpose {
         bool other_is_leader = active_robots.front().robot_id == incoming_robot_id;
         uint8_t striker_id   = 0;
 
-        if (other_is_leader && !robocup.purposes.purposes.empty()) {
+        if (other_is_leader && !robocup.purpose_commands.purpose_commands.empty()) {
             // Find the striker by id
-            for (const auto& purpose : robocup.purposes.purposes) {
+            for (const auto& purpose : robocup.purpose_commands.purpose_commands) {
                 if (purpose.purpose == SoccerPosition::STRIKER) {
                     striker_id = purpose.player_id;
                     break;

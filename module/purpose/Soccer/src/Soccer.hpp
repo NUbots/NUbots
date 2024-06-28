@@ -34,10 +34,12 @@
 #include "extension/Behaviour.hpp"
 
 #include "message/input/RoboCup.hpp"
+#include "message/input/Purposes.hpp"
 
 namespace module::purpose {
 
     using message::input::RoboCup;
+    using message::input::SoccerPosition;
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -64,6 +66,19 @@ namespace module::purpose {
                 else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
                 else { throw std::runtime_error("Invalid robot position"); }
                 // clang-format on
+            }
+
+            SoccerPosition toSoccerPosition() const {
+                switch (value) {
+                    case Value::STRIKER:
+                        return SoccerPosition::STRIKER;
+                    case Value::GOALIE:
+                        return SoccerPosition::GOALIE;
+                    case Value::DEFENDER:
+                        return SoccerPosition::DEFENDER;
+                    default:
+                        throw std::runtime_error("Invalid Position conversion");
+                }
             }
 
             operator int() const {

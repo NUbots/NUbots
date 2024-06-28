@@ -32,6 +32,7 @@ import "google/protobuf/timestamp.proto";
 enum SoccerPosition {
     DEFENDER = 0;
     STRIKER  = 1;
+    GOALIE   = 2;
 }
 
 message Purposes {
@@ -40,9 +41,12 @@ message Purposes {
         SoccerPosition purpose = 2;
     }
 
-    // List of robot positions
-    repeated Purpose purposes = 1;
+    // Prospective soccer positions
+    repeated Purpose purpose_commands = 1;
 
     // The sending robot's startup time
     google.protobuf.Timestamp startup_time = 2;
+
+    // Current robot purpose
+    Purpose purpose = 3;
 }
