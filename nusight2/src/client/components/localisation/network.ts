@@ -36,6 +36,11 @@ export class LocalisationNetwork {
     this.network.off();
   }
 
+  // Reverse lookup for protobuf enums
+  getKey(enumType: any, enumValue: number){
+    return Object.keys(enumType).find((key) => enumType[key] === enumValue);
+  }
+
   @action
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
@@ -47,8 +52,12 @@ export class LocalisationNetwork {
   private onPurposes(robotModel: RobotModel, purposes: message.input.Purposes) {
     console.log("MESSAGE RECEIVED")
     const robot = LocalisationRobotModel.of(robotModel);
+    const purpose = purposes.purpose?.purpose;
+    console.log(purpose)
+    console.log(message.input.SoccerPosition)
+    console.log(this.getKey(message.input.SoccerPosition, purpose!))
     // console.log(purposes.purposes[0].purpose!)
-    robot.purpose = "goalie";
+    robot.purpose = this.getKey(message.input.SoccerPosition, purpose!)!;
   }
 
   @action.bound

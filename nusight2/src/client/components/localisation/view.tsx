@@ -349,11 +349,7 @@ interface PurposeTextProps {
   model: LocalisationModel;
 }
 const PurposeText = ({ props }: { props: PurposeTextProps }) => {
-  console.log(props.cameraPosition);
-  console.log(props.model.camera)
   const rTFf = props.robotModel.Hft.decompose().translation;
-  console.log(rTFf)
-
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
     return new TextGeometry(x, {
@@ -384,14 +380,14 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
     return geometry;
   };
 
-  const labelTextGeometry = textGeometry("Striker");
+  const labelTextGeometry = textGeometry(props.robotModel.purpose);
   const textWidth = labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x;
   const textHeight = labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y;
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
     <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]}>
-      <mesh position={[0, 0, 0.001]} geometry={textGeometry("Striker")}>
+      <mesh position={[0, 0, 0.001]} geometry={textGeometry(props.robotModel.purpose)}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
       <mesh geometry={backdropGeometry} >
