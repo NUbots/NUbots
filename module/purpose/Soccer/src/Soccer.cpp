@@ -107,7 +107,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>, Trigger<RoboCup>>().then([this](const RoboCup robocup) {
+        on<Provide<FindPurpose>, Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
@@ -151,7 +151,6 @@ namespace module::purpose {
             if (!cfg.force_playing) {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
-                emit<Task>(std::make_unique<FindPurpose>(), 1);
                 find_purpose();
             }
         });
@@ -276,7 +275,7 @@ namespace module::purpose {
         bool other_is_leader = active_robots.front().robot_id == incoming_robot_id;
         uint8_t striker_id   = 0;
 
-        if (other_is_leader) {
+        if (other_is_leader && !robocup.purposes.purposes.empty()) {
             // Find the striker by id
             for (const auto& purpose : robocup.purposes.purposes) {
                 if (purpose.purpose == SoccerPosition::STRIKER) {
