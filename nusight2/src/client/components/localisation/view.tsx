@@ -363,7 +363,7 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
     model.Hfr?.decompose().rotation.z,
     model.Hfr?.decompose().rotation.w,
   );
-  var vRf = model.velocity_target.toThree().applyQuaternion(Rfr);
+  const vRf = model.velocity_target.toThree().applyQuaternion(Rfr);
 
   const velocity_direction = Math.atan2(vRf.y, vRf.x);
   const speed = Math.sqrt(vRf.x ** 2 + vRf.y ** 2) * 1.5;
