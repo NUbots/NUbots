@@ -332,7 +332,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.goalVisible && <Goals model={model} />}
       {model.robots.map((robot) => {
         // if (robot.visible && robot.Hft && robot.purpose) {
-        if (robot.visible && robot.Hft) {
+        if (robot.visible && robot.Hft && robot.purpose) {
           // return <PurposeText key={robot.id} model={robot} cameraPosition={model.camera.position.toArray()} />;
           return <PurposeText key={robot.id} props={{ robotModel: robot, cameraPosition: model.camera.position, model: model }} />;
         }
