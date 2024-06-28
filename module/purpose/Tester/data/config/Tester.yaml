@@ -34,4 +34,4 @@ chatgpt_prompt: "Hello!"
 audiogpt_listen_duration: 5
 
 # Delay in seconds before creating director tree
-start_delay: 10
+start_delay: 5
