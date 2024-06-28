@@ -95,6 +95,8 @@ namespace module::planning {
 
         Eigen::Vector3d velocity_command = Eigen::Vector3d::Zero();
 
+        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
+
         /**
          * @brief Get the target state from the WalkTo message
          * @param walk_to The WalkTo message

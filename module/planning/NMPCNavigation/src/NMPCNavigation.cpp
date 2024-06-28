@@ -210,23 +210,17 @@ namespace module::planning {
                                                             void* data) -> double {
             (void) data;  // Unused in this case
             (void) grad;  // Unused in this case
-
-            double cost = cost_function(x, grad, initial_state, target_state, obstacles);
-
-            return cost;
+            return cost_function(x, grad, initial_state, target_state, obstacles);
         };
 
         // Set up NLopt optimizer
-        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
         nlopt::opt opt(algorithm, n_opt_vars);
-
-        // Set objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n_opt_vars>, &obj_fun);
 
         // Set bounds
         std::vector<double> lb(n_opt_vars, -std::numeric_limits<double>::infinity());
         std::vector<double> ub(n_opt_vars, std::numeric_limits<double>::infinity());
-        for (int i = 0; i < horizon; ++i) {
+        for (size_t i = 0; i < horizon; ++i) {
             lb[i * 3]     = -cfg.max_velocity_x;
             lb[i * 3 + 1] = -cfg.max_velocity_y;
             lb[i * 3 + 2] = -cfg.max_angular_velocity;
@@ -237,22 +231,15 @@ namespace module::planning {
         opt.set_lower_bounds(lb);
         opt.set_upper_bounds(ub);
 
-        // // Set acceleration constraints
-        // for (int i = 1; i < horizon; ++i) {
-        //     opt.add_inequality_constraint(acceleration_constraint, this, 1e-8);
-        // }
-
         // Set stopping criteria
-        opt.set_xtol_rel(1e-4);
-        opt.set_ftol_rel(1e-4);
-        opt.set_maxeval(100);
+        opt.set_xtol_rel(1e-6);
+        opt.set_ftol_rel(1e-6);
+        opt.set_maxeval(500);
 
         // Optimize
         double min_cost;
-        // std::vector<double> optimal_action_sequence(n_opt_vars);
         std::vector<double> optimal_action_sequence = std::vector<double>(n_opt_vars, 0.0);
-
-        nlopt::result result = opt.optimize(optimal_action_sequence, min_cost);
+        opt.optimize(optimal_action_sequence, min_cost);
 
         // Convert result to Eigen vector
         Eigen::VectorXd optimal_actions =
@@ -271,7 +258,7 @@ namespace module::planning {
         double cost           = 0.0;
         Eigen::Vector3d state = initial_state;
 
-        for (int i = 0; i < horizon; ++i) {
+        for (size_t i = 0; i < horizon; ++i) {
             Eigen::Vector3d action = x.segment<3>(i * 3);
 
             // State cost
@@ -311,7 +298,7 @@ namespace module::planning {
 
         // Predicted trajectory
         Eigen::Vector3d state = initial_state;
-        for (int i = 0; i < horizon;) {
+        for (size_t i = 0; i < horizon;) {
             Eigen::Vector3d action = optimal_actions.segment<3>(i * 3);
             double dx              = action(0) * std::cos(state(2)) - action(1) * std::sin(state(2));
             double dy              = action(0) * std::sin(state(2)) + action(1) * std::cos(state(2));
