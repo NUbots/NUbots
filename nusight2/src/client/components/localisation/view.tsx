@@ -353,6 +353,7 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
   console.log(props.model.camera)
   const rTFf = props.robotModel.Hft.decompose().translation;
   console.log(rTFf)
+
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
     return new TextGeometry(x, {
@@ -362,10 +363,35 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
     }).center();
   };
 
+  const textBackdropGeometry = () => {
+    const shape = new THREE.Shape();
+    let width = 0.50; let height = 0.250; let radius = 0.05
+    let x = width * -0.5; let y = height * -0.5;
+
+    shape.moveTo(x, y + radius);
+    shape.lineTo(x, y + height - radius);
+    shape.quadraticCurveTo(x, y + height, x + radius, y + height);
+    shape.lineTo(x + width - radius, y + height);
+    shape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+    shape.lineTo(x + width, y + radius);
+    shape.quadraticCurveTo(x + width, y, x + width - radius, y);
+    shape.lineTo(x + radius, y);
+    shape.quadraticCurveTo(x, y, x, y + radius);
+
+    const geometry = new THREE.ShapeGeometry(shape);
+
+    return geometry;
+  };
+
   return (
-    <mesh position={[rTFf?.x, rTFf?.y, 1]} rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]} geometry={textGeometry("Striker")}>
-      <meshBasicMaterial color="blue" transparent opacity={1} />
-    </mesh>
+    <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]}>
+      <mesh position={[0, 0, 0.001]} geometry={textGeometry("Striker")}>
+        <meshBasicMaterial color="white" transparent opacity={1} />
+      </mesh>
+      <mesh geometry={textBackdropGeometry()} >
+        <meshBasicMaterial color="black" transparent opacity={0.2} />
+      </mesh>
+    </object3D >
   );
 };
 
