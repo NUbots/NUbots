@@ -52,8 +52,6 @@ export class LocalisationNetwork {
   private onPurposes(robotModel: RobotModel, purposes: message.input.Purposes) {
     const robot = LocalisationRobotModel.of(robotModel);
     const purpose = purposes.purpose?.purpose;
-    console.log(purpose)
-    console.log(this.getKey(message.input.SoccerPosition, purpose!))
     robot.purpose = this.getKey(message.input.SoccerPosition, purpose!)!;
   }
 
