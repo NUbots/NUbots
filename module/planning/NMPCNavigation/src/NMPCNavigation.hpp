@@ -70,10 +70,15 @@ namespace module::planning {
             double max_angular_velocity = 0.0;
             /// @brief Weight for obstacle avoidance
             double obstacle_weight = 0.0;
+            /// @brief Robot radius
+            double robot_radius = 0.0;
+            /// @brief Obstacle radius
+            double obstacle_radius = 0.0;
         } cfg;
 
-        static constexpr size_t horizon    = 10;
+        static constexpr size_t horizon    = 20;
         static constexpr size_t n_opt_vars = 3 * horizon;
+
 
         /**
          * @brief Get the current state of the robot

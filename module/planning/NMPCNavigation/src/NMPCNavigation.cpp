@@ -135,6 +135,8 @@ namespace module::planning {
             cfg.max_velocity_y       = config["max_velocity_y"].as<double>();
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
             cfg.obstacle_weight      = config["obstacle_weight"].as<double>();
+            cfg.robot_radius         = config["robot_radius"].as<double>();
+            cfg.obstacle_radius      = config["obstacle_radius"].as<double>();
         });
 
         on<Provide<WalkTo>, With<Sensors>, Optional<With<Robots>>>().then(
@@ -228,15 +230,14 @@ namespace module::planning {
         opt.set_ftol_rel(1e-4);
         opt.set_maxeval(100);
 
-        // Initialize optimization vector
-        std::vector<double> x(n_opt_vars, 0.0);
-
         // Optimize
         double min_cost;
-        nlopt::result result = opt.optimize(x, min_cost);
+        std::vector<double> optimal_action_sequence = std::vector<double>(n_opt_vars, 0.0);
+        nlopt::result result                        = opt.optimize(optimal_action_sequence, min_cost);
 
         // Convert result to Eigen vector
-        Eigen::VectorXd optimal_actions = Eigen::Map<Eigen::VectorXd>(x.data(), x.size());
+        Eigen::VectorXd optimal_actions =
+            Eigen::Map<Eigen::VectorXd>(optimal_action_sequence.data(), optimal_action_sequence.size());
 
         return optimal_actions;
     }
@@ -261,11 +262,13 @@ namespace module::planning {
             // Control cost
             cost += action.transpose() * cfg.R * action;
 
-            // // Obstacle cost
-            // for (const auto& obstacle : obstacles) {
-            //     double distance = (state.head<2>() - obstacle).norm();
-            //     cost += cfg.obstacle_weight / (distance * distance);
-            // }
+            // Obstacle cost
+            for (const auto& obstacle : obstacles) {
+                double distance = (state.head<2>() - obstacle).norm() - cfg.robot_radius - cfg.obstacle_radius;
+                if (distance < 0) {
+                    cost += cfg.obstacle_weight * std::pow(distance, 2);
+                }
+            }
 
             // Update state (simple kinematic model)
             double dx = action(0) * std::cos(state(2)) - action(1) * std::sin(state(2));
@@ -275,6 +278,8 @@ namespace module::planning {
             state(2)  = state(2) + action(2) * cfg.dt;
         }
 
+        emit(graph("NMPC Final State", state(0), state(1), state(2)));
+        log<NUClear::INFO>("NMPC cost: ", cost);
         return cost;
     }
 
@@ -288,19 +293,19 @@ namespace module::planning {
 
         debug->velocity_target = optimal_actions.segment<3>(0);
 
-        // Predicted trajectory
-        Eigen::Vector3d state = initial_state;
-        for (int i = 0; i < horizon; ++i) {
-            Eigen::Vector3d action = optimal_actions.segment<3>(i * 3);
-            state.head<2>() += action.head<2>() * cfg.dt;
-            state(2) += action(2) * cfg.dt;
+        // // Predicted trajectory
+        // Eigen::Vector3d state = initial_state;
+        // for (int i = 0; i < horizon; ++i) {
+        //     Eigen::Vector3d action = optimal_actions.segment<3>(i * 3);
+        //     state.head<2>() += action.head<2>() * cfg.dt;
+        //     state(2) += action(2) * cfg.dt;
 
-            VectorFieldVector vector;
-            vector.rVRr      = state;
-            vector.direction = std::atan2(action(1), action(0));
-            vector.magnitude = action.head<2>().norm();
-            debug->vector_field.push_back(vector);
-        }
+        //     VectorFieldVector vector;
+        //     vector.rVRr      = state;
+        //     vector.direction = std::atan2(action(1), action(0));
+        //     vector.magnitude = action.head<2>().norm();
+        //     debug->vector_field.push_back(vector);
+        // }
 
         emit(debug);
 
