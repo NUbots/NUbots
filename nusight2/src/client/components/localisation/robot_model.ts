@@ -135,6 +135,7 @@ export class LocalisationRobotModel {
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
+  @observable purpose: string;
 
   constructor({
     model,
@@ -150,6 +151,7 @@ export class LocalisationRobotModel {
     fieldIntersections,
     goals,
     robots,
+    purpose,
   }: {
     model: RobotModel;
     name: string;
@@ -164,6 +166,7 @@ export class LocalisationRobotModel {
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
+    purpose: string;
   }) {
     this.model = model;
     this.name = name;
@@ -178,6 +181,7 @@ export class LocalisationRobotModel {
     this.fieldIntersections = fieldIntersections;
     this.goals = goals;
     this.robots = robots;
+    this.purpose = purpose;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -192,6 +196,7 @@ export class LocalisationRobotModel {
       particles: { particle: [] },
       goals: { points: [] },
       robots: [],
+      purpose: "",
     });
   });
 

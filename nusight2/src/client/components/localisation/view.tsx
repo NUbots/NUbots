@@ -8,6 +8,10 @@ import { now } from "mobx-utils";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import roboto from './Roboto Medium_Regular.json';
+
 import { Vector3 } from "../../../shared/math/vector3";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
@@ -59,9 +63,8 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
+                } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -327,10 +330,64 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
+      {model.robots.map((robot) => {
+        // if (robot.visible && robot.Hft && robot.purpose) {
+        if (robot.visible && robot.Hft) {
+          // return <PurposeText key={robot.id} model={robot} cameraPosition={model.camera.position.toArray()} />;
+          return <PurposeText key={robot.id} props={{ robotModel: robot, cameraPosition: model.camera.position, model: model }} />;
+        }
+        return null;
+      })}
       <Robots model={model} />
     </object3D>
   );
 });
+
+interface PurposeTextProps {
+  robotModel: LocalisationRobotModel;
+  cameraPosition: Vector3;
+  model: LocalisationModel;
+}
+const PurposeText = ({ props }: { props: PurposeTextProps }) => {
+  console.log(props.cameraPosition);
+  console.log(props.model.camera)
+  // Camera position as quaternion
+  // Camera rotation
+  const cameraQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler([Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]));
+
+  // Find rotation needed to face camera
+  // const cameraPosition = new Vector3(props.cameraPosition[0], props.cameraPosition[1], props.cameraPosition[2]);
+  // const robotPosition = props.model.Hft.decompose().translation;
+  // const distance = new Vector3()
+
+  // Function to return text geometry
+  const textGeometry = (x: string) => {
+    const font = new FontLoader().parse(roboto);
+    return new TextGeometry(x, {
+      font: font,
+      size: 0.1,
+      height: 0.01,
+    }).center();
+  };
+
+  const ref = React.useRef<THREE.Mesh>(null);
+  React.useLayoutEffect(() => {
+    if (ref.current) {
+      ref.current.lookAt(new THREE.Vector3(...props.cameraPosition.toArray()));
+      // ref.current.quaternion.copy(cameraQuaternion);
+    }
+  }, [props.cameraPosition]);
+
+  // console.log(props.model.purpose);
+  return (
+    <object3D position={[0, 0, 1]}>
+      <mesh ref={ref} geometry={textGeometry("Striker")}>
+        <meshBasicMaterial color="blue" transparent opacity={1} />
+        {/* <sphereBufferGeometry args={[1, 32, 32]} /> */}
+      </mesh>
+    </object3D>
+  );
+};
 
 const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   <>

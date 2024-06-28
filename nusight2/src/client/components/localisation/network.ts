@@ -24,6 +24,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.input.Purposes, this.onPurposes);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -41,6 +42,14 @@ export class LocalisationNetwork {
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
   };
+
+  @action.bound
+  private onPurposes(robotModel: RobotModel, purposes: message.input.Purposes) {
+    console.log("MESSAGE RECEIVED")
+    const robot = LocalisationRobotModel.of(robotModel);
+    // console.log(purposes.purposes[0].purpose!)
+    robot.purpose = "goalie";
+  }
 
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {

@@ -39,3 +39,6 @@ targets:
     # Log messages
     message.nuclear.LogMessage: true
     message.nuclear.ReactionStatistics: false
+
+    # Purpose
+    message.input.Purposes: true
