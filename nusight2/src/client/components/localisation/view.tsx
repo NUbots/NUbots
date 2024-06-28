@@ -363,9 +363,10 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
     }).center();
   };
 
-  const textBackdropGeometry = () => {
+  const textBackdropGeometry = (width: number, height: number) => {
     const shape = new THREE.Shape();
-    let width = 0.50; let height = 0.250; let radius = 0.05
+    width += 0.1; height += 0.1;
+    let radius = 0.05
     let x = width * -0.5; let y = height * -0.5;
 
     shape.moveTo(x, y + radius);
@@ -383,13 +384,18 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
     return geometry;
   };
 
+  const labelTextGeometry = textGeometry("Striker");
+  const textWidth = labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x;
+  const textHeight = labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y;
+  const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
+
   return (
     <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]}>
       <mesh position={[0, 0, 0.001]} geometry={textGeometry("Striker")}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
-      <mesh geometry={textBackdropGeometry()} >
-        <meshBasicMaterial color="black" transparent opacity={0.2} />
+      <mesh geometry={backdropGeometry} >
+        <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
     </object3D >
   );
