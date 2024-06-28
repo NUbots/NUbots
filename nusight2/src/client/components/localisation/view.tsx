@@ -334,8 +334,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.robots.map((robot) => {
         // if (robot.visible && robot.Hft && robot.purpose) {
         if (robot.visible && robot.Hft && robot.purpose) {
-          // return <PurposeText key={robot.id} model={robot} cameraPosition={model.camera.position.toArray()} />;
-          return <PurposeText key={robot.id} robotModel={robot} model={model} />;
+          return <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />;
         }
         return null;
       })}
@@ -344,7 +343,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
   );
 });
 
-const PurposeText = ({ robotModel, model }: { robotModel: LocalisationRobotModel, model: LocalisationModel }) => {
+const PurposeLabel = ({ robotModel, cameraPitch, cameraYaw }: { robotModel: LocalisationRobotModel, cameraPitch: number, cameraYaw: number }) => {
   const rTFf = robotModel.Hft.decompose().translation;
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
@@ -382,7 +381,7 @@ const PurposeText = ({ robotModel, model }: { robotModel: LocalisationRobotModel
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
-    <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}>
+    <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
       <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
