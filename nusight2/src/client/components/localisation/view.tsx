@@ -363,11 +363,9 @@ const PurposeText = ({ props }: { props: PurposeTextProps }) => {
   };
 
   return (
-    <object3D position={rTFf?.x, rTFf?.y, 0.5}>
-      <mesh rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]} geometry={textGeometry("Striker")}>
-        <meshBasicMaterial color="blue" transparent opacity={1} />
-      </mesh>
-    </object3D>
+    <mesh position={[rTFf?.x, rTFf?.y, 1]} rotation={[Math.PI / 2 + props.model.camera.pitch, 0, -Math.PI / 2 + props.model.camera.yaw, "ZXY"]} geometry={textGeometry("Striker")}>
+      <meshBasicMaterial color="blue" transparent opacity={1} />
+    </mesh>
   );
 };
 
