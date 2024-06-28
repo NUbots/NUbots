@@ -121,62 +121,74 @@ namespace module::planning {
 
         on<Configuration>("NMPCNavigation.yaml").then([this](const Configuration& config) {
             // Load configuration parameters
-            cfg.dt = config["dt"].as<double>();
-            cfg.Q  = Eigen::Vector3d(config["Q"].as<Expression>()).asDiagonal();
-            cfg.R  = Eigen::Vector3d(config["R"].as<Expression>()).asDiagonal();
-            log<NUClear::INFO>("NMPCNavigation configuration loaded",
-                               "dt: ",
-                               cfg.dt,
-                               "\n Q: \n",
-                               cfg.Q,
-                               "\n R: \n",
-                               cfg.R);
-            cfg.max_velocity_x       = config["max_velocity_x"].as<double>();
-            cfg.max_velocity_y       = config["max_velocity_y"].as<double>();
-            cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
-            cfg.obstacle_weight      = config["obstacle_weight"].as<double>();
-            cfg.robot_radius         = config["robot_radius"].as<double>();
-            cfg.obstacle_radius      = config["obstacle_radius"].as<double>();
+            cfg.dt                       = config["dt"].as<double>();
+            cfg.Q                        = Eigen::Vector3d(config["Q"].as<Expression>()).asDiagonal();
+            cfg.R                        = Eigen::Vector3d(config["R"].as<Expression>()).asDiagonal();
+            cfg.max_velocity_x           = config["max_velocity_x"].as<double>();
+            cfg.max_velocity_y           = config["max_velocity_y"].as<double>();
+            cfg.max_angular_velocity     = config["max_angular_velocity"].as<double>();
+            cfg.max_acceleration_x       = config["max_acceleration_x"].as<double>();
+            cfg.max_acceleration_y       = config["max_acceleration_y"].as<double>();
+            cfg.max_angular_acceleration = config["max_angular_acceleration"].as<double>();
+            cfg.max_align_radius         = config["max_align_radius"].as<double>();
+            cfg.min_align_radius         = config["min_align_radius"].as<double>();
+            cfg.max_angle_error          = config["max_angle_error"].as<Expression>();
+            cfg.min_angle_error          = config["min_angle_error"].as<Expression>();
+            cfg.obstacle_weight          = config["obstacle_weight"].as<double>();
+            cfg.robot_radius             = config["robot_radius"].as<double>();
+            cfg.obstacle_radius          = config["obstacle_radius"].as<double>();
         });
 
         on<Provide<WalkTo>, With<Sensors>, Optional<With<Robots>>>().then(
             [this](const WalkTo& walk_to, const Sensors& sensors, const std::shared_ptr<const Robots>& robots) {
-                // Get current state
-                Eigen::Vector3d initial_state = Eigen::Vector3d::Zero();  // get_current_state(sensors);
-
-                // Get target state
-                Eigen::Vector3d target_state = get_target_state(walk_to);
-
                 // Get obstacles
                 std::vector<Eigen::Vector2d> obstacles = get_obstacles(robots, sensors);
 
-                // Solve NMPC problem
-                Eigen::VectorXd optimal_actions = solve_nmpc(initial_state, target_state, obstacles);
+                // Decompose the target pose into position and orientation
+                Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
 
-                // Extract first action and apply it
-                Eigen::Vector3d velocity_command = optimal_actions.segment<3>(0);
+                // Calculate the angle between the robot and the final desired heading
+                double angle_to_final_heading =
+                    std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+
+                // Calculate the angle between the robot and the target velocity (x, y)
+                double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
+
+                // Calculate the translational error between the robot and the target point (x, y)
+                double translational_error = rDRr.norm();
+
+                // Linearly interpolate between angle to the target and desired heading when inside the align radius
+                // region
+                double translation_progress = std::clamp(
+                    (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
+                    0.0,
+                    1.0);
+                double desired_heading =
+                    (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
+
+                // Get target state
+                Eigen::Vector3d target_state;
+                target_state.head<2>() = walk_to.Hrd.translation().head<2>();
+                target_state(2)        = desired_heading;
+
+                // Solve NMPC problem
+                Eigen::Vector3d initial_state           = Eigen::Vector3d::Zero();
+                Eigen::VectorXd optimal_actions         = solve_nmpc(initial_state, target_state, obstacles);
+                Eigen::Vector3d desired_velocity_target = optimal_actions.segment<3>(0);
+
+                // Limit acceleration
+                velocity_command.x() =
+                    std::min(desired_velocity_target.x(), velocity_command.x() + cfg.max_acceleration_x);
+                velocity_command.y() =
+                    std::min(desired_velocity_target.y(), velocity_command.y() + cfg.max_acceleration_y);
+                velocity_command.z() = desired_velocity_target.z();
+                std::max(-cfg.max_angular_velocity, std::min(cfg.max_angular_velocity, desired_heading));
+
                 emit<Task>(std::make_unique<Walk>(velocity_command));
 
                 // Emit debug information
                 emit_debug_info(initial_state, target_state, optimal_actions);
             });
-    }
-
-    // Eigen::Vector3d NMPCNavigation::get_current_state(const Sensors& sensors) {
-    //     // Extract current position and orientation from sensors
-    //     Eigen::Vector3d current_state;
-    //     Eigen::Isometry3d Hwr   = sensors.Hrw.inverse();
-    //     current_state.head<2>() = Hwr.translation().head<2>();
-    //     current_state(2)        = std::atan2(Hwr.linear.col(0).y(), Hwr.linear.col(0).x());
-    //     return current_state;
-    // }
-
-    Eigen::Vector3d NMPCNavigation::get_target_state(const WalkTo& walk_to) {
-        // Extract target position and orientation from WalkTo message
-        Eigen::Vector3d target_state;
-        target_state.head<2>() = walk_to.Hrd.translation().head<2>();
-        target_state(2)        = std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
-        return target_state;
     }
 
     std::vector<Eigen::Vector2d> NMPCNavigation::get_obstacles(const std::shared_ptr<const Robots>& robots,
@@ -211,7 +223,7 @@ namespace module::planning {
         // Set objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n_opt_vars>, &obj_fun);
 
-        // // Set bounds
+        // Set bounds
         std::vector<double> lb(n_opt_vars, -std::numeric_limits<double>::infinity());
         std::vector<double> ub(n_opt_vars, std::numeric_limits<double>::infinity());
         for (int i = 0; i < horizon; ++i) {
@@ -225,6 +237,11 @@ namespace module::planning {
         opt.set_lower_bounds(lb);
         opt.set_upper_bounds(ub);
 
+        // // Set acceleration constraints
+        // for (int i = 1; i < horizon; ++i) {
+        //     opt.add_inequality_constraint(acceleration_constraint, this, 1e-8);
+        // }
+
         // Set stopping criteria
         opt.set_xtol_rel(1e-4);
         opt.set_ftol_rel(1e-4);
@@ -232,8 +249,10 @@ namespace module::planning {
 
         // Optimize
         double min_cost;
+        // std::vector<double> optimal_action_sequence(n_opt_vars);
         std::vector<double> optimal_action_sequence = std::vector<double>(n_opt_vars, 0.0);
-        nlopt::result result                        = opt.optimize(optimal_action_sequence, min_cost);
+
+        nlopt::result result = opt.optimize(optimal_action_sequence, min_cost);
 
         // Convert result to Eigen vector
         Eigen::VectorXd optimal_actions =
@@ -277,35 +296,37 @@ namespace module::planning {
             state(1)  = state(1) + dy * cfg.dt;
             state(2)  = state(2) + action(2) * cfg.dt;
         }
-
-        emit(graph("NMPC Final State", state(0), state(1), state(2)));
-        log<NUClear::INFO>("NMPC cost: ", cost);
         return cost;
     }
 
     void NMPCNavigation::emit_debug_info(const Eigen::Vector3d& initial_state,
                                          const Eigen::Vector3d& target_state,
                                          const Eigen::VectorXd& optimal_actions) {
-        auto debug               = std::make_unique<WalkToDebug>();
-        debug->Hrd               = Eigen::Isometry3d::Identity();
-        debug->Hrd.translation() = target_state.head<3>();
-        debug->Hrd.linear()      = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, target_state(2)));
+        auto debug                         = std::make_unique<WalkToDebug>();
+        debug->Hrd                         = Eigen::Isometry3d::Identity();
+        debug->Hrd.translation().head<2>() = target_state.head<2>();
+        debug->Hrd.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, target_state(2)));
 
         debug->velocity_target = optimal_actions.segment<3>(0);
 
-        // // Predicted trajectory
-        // Eigen::Vector3d state = initial_state;
-        // for (int i = 0; i < horizon; ++i) {
-        //     Eigen::Vector3d action = optimal_actions.segment<3>(i * 3);
-        //     state.head<2>() += action.head<2>() * cfg.dt;
-        //     state(2) += action(2) * cfg.dt;
+        // Predicted trajectory
+        Eigen::Vector3d state = initial_state;
+        for (int i = 0; i < horizon;) {
+            Eigen::Vector3d action = optimal_actions.segment<3>(i * 3);
+            double dx              = action(0) * std::cos(state(2)) - action(1) * std::sin(state(2));
+            double dy              = action(0) * std::sin(state(2)) + action(1) * std::cos(state(2));
+            state(0)               = state(0) + dx * cfg.dt;
+            state(1)               = state(1) + dy * cfg.dt;
+            state(2)               = state(2) + action(2) * cfg.dt;
 
-        //     VectorFieldVector vector;
-        //     vector.rVRr      = state;
-        //     vector.direction = std::atan2(action(1), action(0));
-        //     vector.magnitude = action.head<2>().norm();
-        //     debug->vector_field.push_back(vector);
-        // }
+            VectorFieldVector vector;
+            vector.rVRr      = state;
+            vector.direction = std::atan2(action(1), action(0));
+            vector.magnitude = action.head<2>().norm();
+            debug->vector_field.push_back(vector);
+            i++;
+            i++;
+        }
 
         emit(debug);
 

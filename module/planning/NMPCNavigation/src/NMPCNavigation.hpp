@@ -68,6 +68,20 @@ namespace module::planning {
             double max_velocity_y = 0.0;
             /// @brief Maximum angular velocity
             double max_angular_velocity = 0.0;
+            /// @brief Maximum acceleration in x direction
+            double max_acceleration_x = 0.0;
+            /// @brief Maximum acceleration in y direction
+            double max_acceleration_y = 0.0;
+            // Distance to target point to begin decelerating and aligning with target heading
+            double max_align_radius = 0.0;
+            // Distance to target point to begin decelerating
+            double min_align_radius = 0.0;
+            // Maximum error in orientation to target heading for no translational velocity
+            double max_angle_error = 0.0;
+            // Minimum error in orientation to target heading for maximum translational velocity
+            double min_angle_error = 0.0;
+            /// @brief Maximum angular acceleration
+            double max_angular_acceleration = 0.0;
             /// @brief Weight for obstacle avoidance
             double obstacle_weight = 0.0;
             /// @brief Robot radius
@@ -79,13 +93,7 @@ namespace module::planning {
         static constexpr size_t horizon    = 20;
         static constexpr size_t n_opt_vars = 3 * horizon;
 
-
-        /**
-         * @brief Get the current state of the robot
-         * @param sensors The current sensor readings
-         * @return Current state vector [x, y, theta]
-         */
-        Eigen::Vector3d get_current_state(const message::input::Sensors& sensors);
+        Eigen::Vector3d velocity_command = Eigen::Vector3d::Zero();
 
         /**
          * @brief Get the target state from the WalkTo message
@@ -138,6 +146,30 @@ namespace module::planning {
         void emit_debug_info(const Eigen::Vector3d& initial_state,
                              const Eigen::Vector3d& target_state,
                              const Eigen::VectorXd& optimal_actions);
+
+        /**
+         * @brief Constrain a velocity vector to ensure it is within the limits
+         * @param v velocity vector to constrain
+         * @param vx_max maximum translational velocity in the x direction
+         * @param vy_max maximum translational velocity in the y direction
+         * @param w_max maximum angular velocity
+         * @return Constrained velocity vector
+         */
+        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v, double vx_max, double vy_max, double w_max) {
+            Eigen::Vector2d translational_velocity = v.head<2>();
+            // If either translational component exceeds the limit, scale the vector to fit within the limits
+            if (std::abs(v.x()) >= vx_max || std::abs(v.y()) >= vy_max) {
+                double sx = v.x() != 0 ? vx_max / std::abs(v.x()) : 0;
+                double sy = v.y() != 0 ? vy_max / std::abs(v.y()) : 0;
+                // Select the minimum scale factor to ensure neither limit is exceeded but direction is maintained
+                double s               = std::min(sx, sy);
+                translational_velocity = v.head<2>() * s;
+            }
+            // Ensure the angular velocity is within the limits
+            double angular_velocity = std::clamp(v.z(), -w_max, w_max);
+            return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
+        }
+
 
     public:
         /// @brief Called by the powerplant to build and setup the NMPCNavigation reactor.

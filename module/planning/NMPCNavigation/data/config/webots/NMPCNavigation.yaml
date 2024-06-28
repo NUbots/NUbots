@@ -3,21 +3,27 @@ log_level: INFO
 
 # NMPC parameters
 horizon: 20 # Prediction horizon
-dt: 0.1 # Time step for NMPC
+dt: 0.25 # Time step for NMPC
 
 # Cost matrices
-Q: [100, 100, 1] # State cost matrix (3x3)
-R: [1, 1, 0.1] # Control cost matrix (3x3)
+Q: [100, 100, 100] # State cost matrix (3x3)
+R: [1, 1, 1] # Control cost matrix (3x3)
+S: [1, 1, 1] # Control change cost matrix
 
 # Obstacle avoidance
 obstacle_weight: 1000
 
 # Velocity constraints
 max_velocity_x: 0.175
-min_velocity_x: -0.175
-max_velocity_y: 0.1
-min_velocity_y: -0.1
-max_angular_velocity: 0.4
+max_velocity_y: 0.0
+max_angular_velocity: 0.5
+max_acceleration_x: 0.01
+max_acceleration_y: 0.01
+max_angular_acceleration: 0.001
+max_align_radius: 0.3 # Radius [m] to begin aligning with target heading
+min_align_radius: 0.2 # Radius [m] to stay aligning with the target heading
+max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
+min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
 
 robot_radius: 0.3
 obstacle_radius: 0.4
