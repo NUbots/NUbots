@@ -190,7 +190,7 @@ namespace module::network {
 
                 // Current purposes (soccer positions) of the Robots
                 if (purposes) {
-                    msg->purposes = *purposes;
+                    msg->purpose_commands = *purposes;
                 }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);

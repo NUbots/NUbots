@@ -114,5 +114,5 @@ message RoboCup {
     /// IDs 1-100 are reserved for official use
 
     /// The purposes of the robots
-    Purposes purposes = 101;
+    Purposes purpose_commands = 101;
 }
