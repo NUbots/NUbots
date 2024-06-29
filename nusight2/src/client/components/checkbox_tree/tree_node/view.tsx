@@ -72,7 +72,7 @@ export class TreeNode extends Component<TreeNodeProps> {
               ) : null}
             </div>
 
-            <div className={"mr-2"}>
+            <div className={"mr-2 flex items-center"}>
               <input
                 type="checkbox"
                 ref={this.onRef}
