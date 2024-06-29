@@ -26,7 +26,7 @@ start_time_delay: 2
 use_ground_truth_localisation: false
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 0
+field_line_distance_weight: 1
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 0
