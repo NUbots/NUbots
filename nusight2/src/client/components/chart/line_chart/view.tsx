@@ -32,7 +32,7 @@ export class LineChart extends Component<
 
     return (
       <>
-        <div className="bg-auto-surface-2 shadow shadow-md py-2 px-3">
+        <div className="bg-auto-surface-2 border-y border-auto py-2 px-3">
           <label className="pr-4 shrink-0">
             Minimum Value
             <input
