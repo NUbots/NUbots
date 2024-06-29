@@ -41,7 +41,7 @@ export const RobotPanel = (props: RobotPanelProps) => {
   });
   return (
     <div>
-      <header className="bg-gray-700 text-white rounded-t-md">
+      <header className="bg-auto-surface-1 rounded-t-md">
         <div className="items-center flex text-sm h-7 px-2">
           <span className={connectionStatusClassName} title={props.connected ? "Connected" : "Disconnected"} />
           <span className="flex-1">{props.title}</span>

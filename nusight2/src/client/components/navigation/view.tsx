@@ -26,7 +26,7 @@ const NavigationItemView = ({ url, Icon, children }: NavigationItemViewProps) =>
 );
 
 export const NavigationView = ({ nav }: { nav: NavigationConfiguration }) => (
-  <div className="bg-auto-surface-2 border-r border-auto text-center flex flex-col justify-between items-center">
+  <div className="bg-auto-surface-1 border-r border-auto text-center flex flex-col justify-between items-center">
     <header>
       <h1 className="flex justify-center items-center text-nusight-500 text-xl font-medium h-[60px]">NUsight</h1>
       <ul>
