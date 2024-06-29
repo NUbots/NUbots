@@ -124,7 +124,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-auto rounded bg-auto-surface-1 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+        className="pl-8 pr-2 h-7 w-80 border border-auto rounded bg-auto-surface-1 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
         placeholder="Filter logs"
         value={model.filters.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -142,9 +142,8 @@ interface ToggleButtonProps {
 function ToggleButton(props: ToggleButtonProps) {
   return (
     <button
-      className={`h-7 px-2 inline-flex items-center border rounded ${
-        props.on ? "bg-blue-600 border-blue-700 text-gray-100" : "bg-white dark:bg-gray-600 border-auto"
-      } `}
+      className={`h-7 px-2 inline-flex items-center border rounded ${props.on ? "bg-blue-600 border-blue-700 text-gray-100" : "bg-white dark:bg-gray-600 border-auto"
+        } `}
       onClick={() => props.onClick(props.on)}
     >
       {props.children}
@@ -208,9 +207,8 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
 
   return (
     <div
-      className={`flex gap-3 items-center py-0.5 bg-auto-surface-1 border-b border-auto ${
-        logLevelToTextColor[message.level]
-      }`}
+      className={`flex gap-3 items-center py-0.5 bg-auto-surface-1 border-b border-auto ${logLevelToTextColor[message.level]
+        }`}
     >
       <div className="inline-flex items-end self-start gap-1">
         <div className="w-12 uppercase text-right">{message.level}</div>

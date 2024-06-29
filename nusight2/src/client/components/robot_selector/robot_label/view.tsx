@@ -25,7 +25,7 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
   const toggleStats = action(() => (model.statsOpen = !model.statsOpen));
 
   const dropdownButtonClassNames = classNames(
-    " outline-none cursor-pointer flex-shrink-0 h-[50px] transition-transform duration-300 ease-in-out ",
+    " outline-none cursor-pointer flex-shrink-0 h-14 transition-transform duration-300 ease-in-out ",
     {
       ["rotate-180 "]: model.statsOpen,
     },
@@ -33,7 +33,7 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
 
   return (
     <>
-      <div className="flex min-w-[256px] hover:bg-auto-contrast-1 pr-4">
+      <div className="flex min-w-64 hover:bg-auto-contrast-1 pr-4">
         <label className="flex items-center flex-grow h-12 px-4 cursor-pointer">
           <StatusIndicator className="mr-3" connected={robot.connected} />
           <span className="mr-auto whitespace-nowrap">{robot.name}</span>

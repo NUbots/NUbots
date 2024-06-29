@@ -148,7 +148,7 @@ export const Default: Story = {
     };
 
     return (
-      <div className="max-w-[320px]">
+      <div className="max-w-80">
         <CheckboxTree model={model} onCheck={onNodeCheck} onExpand={onNodeExpand} renderLabel={renderLabel} />
       </div>
     );

@@ -145,7 +145,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] bg-auto-surface-1 border border-auto rounded-md rounded focus:outline-none focus:border-transparent focus:ring-2 ring-auto"
+        className="pl-8 pr-2 h-7 w-80 bg-auto-surface-1 border border-auto rounded-md rounded focus:outline-none focus:border-transparent focus:ring-2 ring-auto"
         placeholder="Filter profiles"
         value={model.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}

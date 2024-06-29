@@ -73,7 +73,7 @@ export function Button(props: ButtonProps) {
     <button
       {...buttonProps}
       className={classNames(
-        "gap-2 inline-flex items-center rounded disabled:opacity-40 pt-[1px]",
+        "gap-2 inline-flex items-center rounded disabled:opacity-40 pt-px",
         SizeToClassName[size],
         ColorToClassName[color],
         ContentAlignToClassName[contentAlign],

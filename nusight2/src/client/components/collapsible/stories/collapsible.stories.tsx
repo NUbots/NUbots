@@ -15,7 +15,7 @@ const meta: Meta<typeof Collapsible> = {
     lightAndDarkDecorator({ className: "max-w-3xl" }),
     (Story) => {
       return (
-        <div className="max-w-[320px]">
+        <div className="max-w-80">
           <Story />
         </div>
       );
@@ -129,7 +129,7 @@ export const WithOverflow: Story = {
               { id: 1, label: "Option 2" },
               { id: 2, label: "Option 3" },
             ]}
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </Collapsible>
       </>

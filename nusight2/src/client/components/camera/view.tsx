@@ -106,7 +106,7 @@ export class CameraView extends Component<CameraViewProps> {
         ) : null}
         <div
           className={classNames("absolute bg-[rgba(0,0,0,0.6)] text-white text-sm leading-none", {
-            "top-0 left-0 rounded-br px-2 pt-2 pb-[6px] text-sm": viewType === "thumbnail",
+            "top-0 left-0 rounded-br px-2 pt-2 pb-1.5 text-sm": viewType === "thumbnail",
             "top-2 left-[50%] translate-x-[-50%] rounded p-2": viewType === "full",
           })}
         >
