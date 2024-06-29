@@ -582,6 +582,7 @@ var namespaces_dup =
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
+        [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ],
         [ "DefenderTask", "Defender_8cpp.html#a9e1ada0b8d36136bf59c5c65d675c46c", null ],
@@ -636,13 +637,15 @@ var namespaces_dup =
         [ "Ball", "WalkInsideBoundedBox_8cpp.html#abe47dc7712b7af7eeed6add937ef1f18", null ],
         [ "DiveToBallTask", "DiveToBall_8cpp.html#a13d9363b2f126b9b014996b9c6938906", null ],
         [ "FallRecoveryTask", "FallRecovery_8cpp.html#a4a627b96cd02d6e31d1c95f7671b327c", null ],
+        [ "FieldDescription", "WalkToBall_8cpp.html#a90a5a47fca75d83de632f1e24543dbc4", null ],
         [ "KickToGoalTask", "KickToGoal_8cpp.html#a8dace6d4cd5eb5796162806619aceb92", null ],
         [ "ReadyTask", "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f", null ],
         [ "StandStillTask", "StandStill_8cpp.html#a34f0cf0c4ada0c7e001c5f278b773f79", null ],
         [ "StartSafelyTask", "StartSafely_8cpp.html#ada395fc35f6d7855041b195b96c40e6c", null ],
         [ "WalkInsideBoundedBoxTask", "WalkInsideBoundedBox_8cpp.html#ab5c7f719a906c4e9f02d64835a154c24", null ],
         [ "WalkToBallTask", "WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b", null ],
-        [ "WalkToFieldPositionTask", "WalkToFieldPosition_8cpp.html#a7b5f1c28072d68b1b9d5da47a55645f8", null ]
+        [ "WalkToFieldPositionTask", "WalkToFieldPosition_8cpp.html#a7b5f1c28072d68b1b9d5da47a55645f8", null ],
+        [ "WalkToKickBallTask", "WalkToBall_8cpp.html#a39a15de68ccd1f7f99ade88780a3af1a", null ]
       ] ],
       [ "support", null, [
         [ "configuration", null, [
@@ -857,6 +860,7 @@ var namespaces_dup =
           [ "eul_to_mat", "euler_8hpp.html#a367fd71e844bdd6387273f5ec8c3a43a", null ],
           [ "mat_to_eul", "euler_8hpp.html#a22862eb7c5c15af692cd93b38c840686", null ],
           [ "mat_to_rpy_intrinsic", "euler_8hpp.html#a6d265b25e381876c0c143be10ce44124", null ],
+          [ "pos_rpy_to_transform", "euler_8hpp.html#a9e930e9048e3f15ce53a98f22666528d", null ],
           [ "rpy_intrinsic_to_mat", "euler_8hpp.html#ae87216cf1fb407dbfe1b7d6f09ca879d", null ]
         ] ],
         [ "filter", null, [

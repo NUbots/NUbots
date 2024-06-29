@@ -234,6 +234,7 @@ var annotated_dup =
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
+        [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ]
       ] ],

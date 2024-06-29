@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['yolo_1845',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision']]],
-  ['yolococo_1846',['YoloCoco',['../classmodule_1_1vision_1_1YoloCoco.html',1,'module::vision']]]
+  ['yolo_1853',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision']]],
+  ['yolococo_1854',['YoloCoco',['../classmodule_1_1vision_1_1YoloCoco.html',1,'module::vision']]]
 ];
