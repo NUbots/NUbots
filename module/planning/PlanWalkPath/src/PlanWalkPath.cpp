@@ -162,13 +162,13 @@ namespace module::planning {
                         // Scale the perpendicular vector by obstacle_radius to ensure clearance
                         rDRr = leftmost_distance < rightmost_distance ? leftmost_position : rightmost_position;
 
+                        // Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
 
                 // Calculate the translational error between the robot and the target point (x, y)
                 double translational_error = rDRr.norm();
-
 
                 // Linearly interpolate between angle to the target and desired heading when inside the align radius
                 // region
