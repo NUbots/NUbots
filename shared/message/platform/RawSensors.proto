@@ -178,13 +178,14 @@ message RawSensors {
     Buttons  buttons       = 6;
     fvec3    accelerometer = 7;
     fvec3    gyroscope     = 8;
-    Servos   servo         = 9;
-    float    battery       = 10;
-    FSRs     fsr           = 11;
+    fvec3    rpy_subctrl   = 9;  // Roll, pitch, yaw calculated by the subcontroller (if available)
+    Servos   servo         = 10;
+    float    battery       = 11;
+    FSRs     fsr           = 12;
 
     /// Ground truth from a simulator
-    webots.OdometryGroundTruth     odometry_ground_truth     = 12;
-    webots.LocalisationGroundTruth localisation_ground_truth = 13;
+    webots.OdometryGroundTruth     odometry_ground_truth     = 13;
+    webots.LocalisationGroundTruth localisation_ground_truth = 14;
 }
 
 message ButtonLeftDown {}

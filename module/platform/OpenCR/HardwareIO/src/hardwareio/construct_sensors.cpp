@@ -46,6 +46,7 @@ namespace module::platform::OpenCR {
         sensors.buttons             = opencr_state.buttons;
         sensors.accelerometer       = opencr_state.acc;
         sensors.gyroscope           = opencr_state.gyro;
+        sensors.rpy_subctrl         = opencr_state.rpy;
 
         /* Battery data */
         sensors.battery = battery_state.current_voltage;
