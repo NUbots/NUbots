@@ -71,9 +71,9 @@ namespace module::planning {
             // WalkTo tuning
             cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
             cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
-            max_velocity_magnitude   = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
-            cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
-            cfg.acceleration         = config["acceleration"].as<double>();
+            cfg.max_velocity_magnitude = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
+            cfg.max_angular_velocity   = config["max_angular_velocity"].as<double>();
+            cfg.acceleration           = config["acceleration"].as<double>();
 
             cfg.max_align_radius = config["max_align_radius"].as<double>();
             cfg.min_align_radius = config["min_align_radius"].as<double>();
@@ -98,7 +98,7 @@ namespace module::planning {
             log<NUClear::DEBUG>("Starting walk to task");
 
             // Reset the velocity magnitude to zero
-            velocity_magnitude = 0;
+            velocity_magnitude = 0.0;
         });
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
@@ -106,7 +106,7 @@ namespace module::planning {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
-                double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
+                const double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
                 // Calculate the angle between the robot and the final desired heading
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
@@ -124,12 +124,14 @@ namespace module::planning {
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
 
                     // Get the obstacles in the way of the current path
-                    std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
+                    const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
 
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
+                        log<NUClear::DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+
                         // Calculate a perpendicular vector to the direction of the target point
-                        Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
+                        const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
 
                         // Find leftmost and rightmost and see which is a better path
                         Eigen::Vector2d leftmost  = obstacles[0];
@@ -144,8 +146,8 @@ namespace module::planning {
                         rightmost = rightmost - perp_direction * cfg.obstacle_radius;
 
                         // Determine if leftmost or rightmost position has a quicker path
-                        double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
-                        double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
+                        const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
+                        const double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
 
                         // Scale the perpendicular vector by obstacle_radius to ensure clearance
                         rDRr = left_distance < right_distance ? leftmost : rightmost;
@@ -156,26 +158,26 @@ namespace module::planning {
                 }
 
                 // Calculate the translational error between the robot and the target point (x, y)
-                double translational_error = rDRr.norm();
+                const double translational_error = rDRr.norm();
 
                 // Linearly interpolate between angle to the target and desired heading when inside the align radius
                 // region
-                double translation_progress = std::clamp(
+                const double translation_progress = std::clamp(
                     (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
                     0.0,
                     1.0);
-                double desired_heading =
+                const double desired_heading =
                     (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
 
-                double desired_velocity_magnitude = 0;
+                double desired_velocity_magnitude = 0.0;
                 if (translational_error > cfg.max_align_radius) {
                     // "Accelerate"
                     velocity_magnitude += cfg.acceleration;
                     // Limit the velocity magnitude to the maximum velocity
-                    velocity_magnitude = std::min(velocity_magnitude, max_velocity_magnitude);
+                    velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
                     // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
                     // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
-                    double angle_error_gain = std::clamp(
+                    const double angle_error_gain = std::clamp(
                         (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
                         0.0,
                         1.0);
@@ -187,21 +189,18 @@ namespace module::planning {
                     // Limit the velocity to zero
                     velocity_magnitude = std::max(velocity_magnitude, 0.0);
                     // Normalise error between [0, 1] inside align radius
-                    double error = translational_error / cfg.max_align_radius;
+                    const double error = translational_error / cfg.max_align_radius;
                     // "Proportional control" to strafe towards the target inside align radius
                     desired_velocity_magnitude = cfg.strafe_gain * error;
                 }
 
                 // Calculate the target velocity
-                Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
+                const Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
                 Eigen::Vector3d velocity_target;
                 velocity_target << desired_translational_velocity, desired_heading;
 
                 // Limit the velocity to the maximum translational and angular velocity
-                velocity_target = constrain_velocity(velocity_target,
-                                                     cfg.max_translational_velocity_x,
-                                                     cfg.max_translational_velocity_y,
-                                                     cfg.max_angular_velocity);
+                velocity_target = constrain_velocity(velocity_target);
 
                 // Emit the walk task with the calculated velocities
                 emit<Task>(std::make_unique<Walk>(velocity_target));
@@ -210,7 +209,7 @@ namespace module::planning {
                 auto debug_information              = std::make_unique<WalkToDebug>();
                 Eigen::Isometry3d Hrd               = Eigen::Isometry3d::Identity();
                 Hrd.translation().head(2)           = rDRr;
-                Hrd.linear()                        = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, desired_heading));
+                Hrd.linear()                        = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
                 debug_information->Hrd              = Hrd;
                 debug_information->min_align_radius = cfg.min_align_radius;
                 debug_information->max_align_radius = cfg.max_align_radius;
@@ -242,33 +241,31 @@ namespace module::planning {
         });
     }
 
-    Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v,
-                                                     double vx_max,
-                                                     double vy_max,
-                                                     double w_max) {
+    Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
         Eigen::Vector2d translational_velocity = v.head<2>();
         // If either translational component exceeds the limit, scale the vector to fit within the limits
-        if (std::abs(v.x()) >= vx_max || std::abs(v.y()) >= vy_max) {
-            double sx = v.x() != 0 ? vx_max / std::abs(v.x()) : 0;
-            double sy = v.y() != 0 ? vy_max / std::abs(v.y()) : 0;
+        if (std::abs(v.x()) >= cfg.max_translational_velocity_x
+            || std::abs(v.y()) >= cfg.max_translational_velocity_y) {
+            double sx = v.x() != 0.0 ? cfg.max_translational_velocity_x / std::abs(v.x()) : 0.0;
+            double sy = v.y() != 0.0 ? cfg.max_translational_velocity_y / std::abs(v.y()) : 0.0;
             // Select the minimum scale factor to ensure neither limit is exceeded but direction is maintained
             double s               = std::min(sx, sy);
             translational_velocity = v.head<2>() * s;
         }
         // Ensure the angular velocity is within the limits
-        double angular_velocity = std::clamp(v.z(), -w_max, w_max);
+        double angular_velocity = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
         return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
     }
 
-    std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(std::vector<Eigen::Vector2d> all_obstacles,
-                                                             Eigen::Vector2d rDRr) {
+    const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
+                                                                   const Eigen::Vector2d& rDRr) {
         // The obstacles in the way of our current path
         std::vector<Eigen::Vector2d> avoid_obstacles{};
 
         // Find the first obstacle in the way
         for (const auto& obstacle : all_obstacles) {
             // Check if the obstacle is in front of the robot
-            bool in_front = rDRr.normalized().dot(obstacle.normalized()) > 0;
+            bool in_front = rDRr.normalized().dot(obstacle.normalized()) > 0.0;
             // Check if the obstacle is closer than the target point
             bool closer = obstacle.norm() < rDRr.norm();
             // Check if the obstacle intersects with the path
@@ -292,6 +289,7 @@ namespace module::planning {
         // Find any obstacles close to our first obstacle, as the robot needs to go around the whole group
         for (const auto& obstacle : all_obstacles) {
             // If the obstacle is close to the group, add it to the group
+            // 3 represents two obstacles and the robot
             for (const auto& avoid_obstacle : avoid_obstacles) {
                 if ((obstacle - avoid_obstacle).norm() < cfg.obstacle_radius * 3) {
                     avoid_obstacles.push_back(obstacle);

@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # General playing tuning values for walking
 max_translational_velocity_x: 0.175

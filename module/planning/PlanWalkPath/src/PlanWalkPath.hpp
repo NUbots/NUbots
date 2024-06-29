@@ -45,6 +45,8 @@ namespace module::planning {
             double max_translational_velocity_y = 0.0;
             /// @brief Maximum angular velocity command for walking
             double max_angular_velocity = 0.0;
+            /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
+            double max_velocity_magnitude = 0.0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0.0;
             // Distance to target point to begin decelerating and aligning with target heading
@@ -79,35 +81,17 @@ namespace module::planning {
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
 
-        /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
-        double max_velocity_magnitude = 0.0;
+        /// @brief Constrain a velocity vector to ensure it is within the limits
+        /// @param v velocity vector to constrain
+        /// @return Constrained velocity vector
+        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v);
 
-        /// @brief Norm of translational error from robot to target
-        double translational_error = 0.0;
-
-        /// @brief Angle between robot and target point
-        double angle_to_target = 0.0;
-
-        /// @brief Angle between robot and target heading
-        double angle_to_desired_heading = 0.0;
-
-        /**
-         * @brief Constrain a velocity vector to ensure it is within the limits
-         * @param v velocity vector to constrain
-         * @param vx_max maximum translational velocity in the x direction
-         * @param vy_max maximum translational velocity in the y direction
-         * @param w_max maximum angular velocity
-         * @return Constrained velocity vector
-         */
-        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v, double vx_max, double vy_max, double w_max);
-
-        /*
-         * @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
-         * @param all_obstacles vector of all obstacles in the world
-         * @param rDRr vector from robot to final target
-         * @return vector of closest obstacle in the path to avoid and its neighbours
-         */
-        std::vector<Eigen::Vector2d> get_obstacles(std::vector<Eigen::Vector2d> all_obstacles, Eigen::Vector2d rDRr);
+        /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
+        /// @param all_obstacles vector of all obstacles in the world
+        /// @param rDRr vector from robot to final target
+        /// @return vector of closest obstacle in the path to avoid and its neighbours
+        const std::vector<Eigen::Vector2d> get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
+                                                         const Eigen::Vector2d& rDRr);
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
