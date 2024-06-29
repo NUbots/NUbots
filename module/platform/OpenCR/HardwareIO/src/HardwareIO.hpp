@@ -96,6 +96,9 @@ namespace module::platform::OpenCR {
             /// @brief Gyroscope value of the OpenCR IMU
             Eigen::Vector3f gyro = Eigen::Vector3f::Zero();
 
+            /// @brief Internal Roll, Pitch and Yaw of the OpenCR device
+            Eigen::Vector3f rpy = Eigen::Vector3f::Zero();
+
             /// @brief Buzzer sound level of the OpenCR device
             uint16_t buzzer = 0;
 

@@ -236,6 +236,7 @@ namespace module::platform::OpenCR {
         uint8_t voltage;
         int16_t gyro[3];
         int16_t acc[3];
+        int16_t rpy[3];
     } __attribute__((packed));
 
     /// @brief Document addresses used for read/writing to dynamixel devices, especially

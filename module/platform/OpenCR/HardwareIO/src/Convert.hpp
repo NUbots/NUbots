@@ -55,6 +55,11 @@ namespace module::platform::OpenCR {
         /// @return The dynamixel accelerometer value
         int16_t acc(float acc);
 
+        /// @brief Converts a roll, pitch or yaw value from the dynamixel to radians
+        /// @param rpy The dynamixel value to convert
+        /// @return The roll, pitch or yaw value in radians
+        float rpy(int16_t rpy);
+
         /// @brief Clamps the pulse width modulation value to the range of -885 to +885
         /// @param pwm The raw dynamixel pwm value
         /// @return The stored clamped pwm value

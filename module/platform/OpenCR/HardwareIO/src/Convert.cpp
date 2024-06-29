@@ -90,6 +90,14 @@ namespace module::platform::OpenCR {
             return int16_t(gs * INT16_MAX / 2);
         }
 
+        float rpy(int16_t rpy) {
+            // Base unit: 0.1 degrees = 0.001745329 rad
+            // Range: -32768 - +32767 = -1800 - +1800 = -pi - +pi
+
+            // divide by 10 and convert to radians
+            return utility::math::angle::normalizeAngle(rpy * 0.001745329f);
+        }
+
         int16_t PWM(int16_t pwm) {
             // Range: -885 - +885
             return utility::math::clamp(int16_t(-885), pwm, int16_t(885));
