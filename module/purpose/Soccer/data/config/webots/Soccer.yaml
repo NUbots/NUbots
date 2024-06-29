@@ -2,7 +2,7 @@
 log_level: INFO
 
 # For the robot playing without listening to GameController
-force_playing: false
+force_playing: true
 
 # The position of the robot
 # GOALIE, STRIKER, DEFENDER

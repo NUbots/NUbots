@@ -5,7 +5,7 @@ log_level: DEBUG
 grid_size: 1e-2
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
-starting_side: EITHER
+starting_side: CUSTOM
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
@@ -23,7 +23,7 @@ min_field_line_intersections: 3
 start_time_delay: 2
 
 # Bool to use ground truth for localisation
-use_ground_truth_localisation: false
+use_ground_truth_localisation: true
 
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 1
