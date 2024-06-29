@@ -129,9 +129,8 @@ const FileDialogNavButton = observer((props: FileDialogNavButtonProps) => {
   const { icon, disabled, onClick } = props;
   return (
     <button
-      className={`px-2 py-1 rounded inline-flex items-center text-auto-icon-button ${
-        disabled ? "opacity-40" : "hover:bg-auto-contrast-1 focus-visible:bg-auto-contrast-1"
-      }`}
+      className={`px-2 py-1 rounded inline-flex items-center text-auto-icon-button ${disabled ? "opacity-40" : "hover:bg-auto-contrast-1 focus-visible:bg-auto-contrast-1"
+        }`}
       disabled={disabled}
       onClick={onClick}
     >
@@ -267,11 +266,10 @@ const FileDialogPathEditor = observer((props: FileDialogPathEditorProps) => {
       />
       <button
         data-id="filepicker-go-button"
-        className={`bg-auto-contrast-1 text-auto-secondary rounded-r h-full px-2 ml-0.5 inline-flex items-center ${
-          goButtonDisabled
-            ? "opacity-40"
-            : "hover:bg-auto-contrast-2 hover:text-auto-primary focus-visible:bg-blue-100 focus-visible:text-black"
-        }`}
+        className={`bg-auto-contrast-1 text-auto-secondary rounded-r h-full px-2 ml-0.5 inline-flex items-center ${goButtonDisabled
+          ? "opacity-40"
+          : "hover:bg-auto-contrast-2 hover:text-auto-primary focus-visible:bg-blue-100 focus-visible:text-black"
+          }`}
         title="Go to path entered"
         disabled={goButtonDisabled}
         onClick={() => {
@@ -333,9 +331,10 @@ const FileDialogSidebarGroup = observer((props: FileDialogSidebarGroupProps) => 
             <button
               key={path}
               title={path}
-              className={`flex text-auto-primary text-left items-center px-3 py-1 min-w-0 w-full ${
-                path === props.dialogCurrentPath ? "bg-blue-500" : "hover:bg-auto-contrast-1"
-              }`}
+              className={`flex text-auto-primary text-left items-center px-3 py-1 min-w-0 w-full ${path === props.dialogCurrentPath
+                ? "bg-blue-200 dark:bg-blue-900"
+                : "hover:bg-blue-100 dark:hover:bg-blue-900/25"
+                }`}
               onClick={() => props.onPathChange(path)}
             >
               <Icon className="mr-2 shrink-0" size={20} weight={400} fill>
@@ -387,9 +386,8 @@ const FileDialogList = observer((props: FileDialogListProps) => {
         {fileDialogListColumns.map(({ label, key }) => (
           <button
             key={key}
-            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-auto-contrast-1 text-auto-secondary hover:text-auto-primary ${
-              key === "size" ? "justify-end" : ""
-            }`}
+            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-auto-contrast-1 text-auto-secondary hover:text-auto-primary ${key === "size" ? "justify-end" : ""
+              }`}
             onClick={() => controller.changeSort(key)}
           >
             {label}
@@ -458,9 +456,9 @@ const FileDialogListItems = observer((props: FileDialogListItemsProps) => {
           <button
             key={entry.name}
             className={classNames("grid gap-1 w-full items-center text-left py-2 mt-0.5", {
-              "bg-blue-500": entryIsSelected,
-              "hover:bg-auto-contrast-1": !entryIsSelected,
-              "bg-auto-contrast-2": isParentOfPreviousPath,
+              "bg-blue-200 dark:bg-blue-900": entryIsSelected,
+              "hover:bg-blue-100 dark:hover:bg-blue-900/25": !entryIsSelected,
+              "bg-auto-contrast-1": isParentOfPreviousPath,
             })}
             style={{ gridTemplateColumns }}
             data-focus-container-autofocus={index === 0 ? true : null}
