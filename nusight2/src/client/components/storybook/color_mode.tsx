@@ -16,8 +16,10 @@ function ColorMode({ mode, children, className, onToggle }: ModeProps & { mode: 
     "absolute top-0 left-0 bg-auto-contrast-1 py-1.5 px-2.5 rounded-br border-r border-b border-auto flex text-auto-primary";
 
   return (
-    <div className={classNames("rounded-lg ", mode === "dark" ? "dark" : "border border-auto", className)}>
-      <div className="h-full relative px-14 py-10 bg-gray-50 dark:bg-gray-800 text-auto-primary">
+    <div
+      className={classNames("rounded-lg overflow-hidden ", mode === "dark" ? "dark" : "border border-auto", className)}
+    >
+      <div className="h-full relative px-14 py-10 overflow-hidden bg-auto-surface-2 text-auto-primary">
         {toggleable ? (
           <button
             className={classNames(indicatorClassName, toggleable ? "hover:bg-auto-contrast-2" : "")}
