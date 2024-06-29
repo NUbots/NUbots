@@ -16,7 +16,7 @@ Include this module in the role and emit the provide Task for either reaction. T
 
 - `message::planning::WalkTo` Task requesting to walk towards a given point.
 - `message::planning::TurnOnSpot` Task requesting to turn on the spot.
-- `message::planning::TurnAroundBall` Task requesting to rotate around the ball, to align with a direction.
+- `message::planning::PivotAroundPoint` Task requesting to rotate around the ball, to align with a direction.
 
 ## Emits
 

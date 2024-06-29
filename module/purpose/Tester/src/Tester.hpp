@@ -34,6 +34,8 @@
 
 namespace module::purpose {
 
+    struct StartTester {};
+
     class Tester : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
@@ -46,6 +48,8 @@ namespace module::purpose {
             int look_at_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_ball_priority = 0;
+            /// @brief Priority of StandStill task
+            int walk_to_kick_ball_priority = 0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task
@@ -72,6 +76,8 @@ namespace module::purpose {
             std::string chatgpt_prompt = "";
             /// @brief Duration to listen for audio when emitting AudioGPT task
             int audiogpt_listen_duration = 0;
+            /// @brief Delay in seconds before creating director tree
+            int start_delay = 0;
         } cfg;
 
         /// @brief The rate the tasks will emit, to drive the rest of the system

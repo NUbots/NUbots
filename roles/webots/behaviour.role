@@ -11,18 +11,18 @@ nuclear_role(
   # Network (output)
   network::NUClearNet
   network::NetworkForwarder
+  network::PlotJuggler
   output::Overview
   output::ImageCompressor
   # Sensors and network input
-  input::GameController
-  network::RobotCommunication
   input::SensorFilter
   platform::Webots
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::BallDetector
   vision::FieldLineDetector
+  vision::BallDetector
+  vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
@@ -37,7 +37,7 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
-  skill::Say
+  # skill::Say
   skill::GPT
   # Planners
   planning::PlanWalkPath

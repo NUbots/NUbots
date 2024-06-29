@@ -29,22 +29,29 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/localisation/Ball.hpp"
 #include "message/planning/WalkPath.hpp"
-#include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
+#include "message/strategy/StandStill.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::planning {
 
     using extension::Configuration;
 
-    using message::localisation::Ball;
-    using message::planning::TurnAroundBall;
+    using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
+    using message::planning::WalkToDebug;
     using message::skill::Walk;
+    using message::strategy::StandStill;
+
+    using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::nusight::graph;
+    using utility::support::Expression;
 
     PlanWalkPath::PlanWalkPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -53,51 +60,113 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.max_translational_velocity_magnitude = config["max_translational_velocity_magnitude"].as<double>();
-            cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
-            cfg.acceleration                         = config["acceleration"].as<double>();
-            cfg.approach_radius                      = config["approach_radius"].as<double>();
-
+            // WalkTo tuning
+            cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
+            cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
+            max_velocity_magnitude   = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
-            cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
+            cfg.acceleration         = config["acceleration"].as<double>();
 
+            cfg.max_align_radius = config["max_align_radius"].as<double>();
+            cfg.min_align_radius = config["min_align_radius"].as<double>();
+            cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
+            cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
+            cfg.strafe_gain      = config["strafe_gain"].as<double>();
+
+            // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
             cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
             cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
 
+            // PivotAroundPoint tuning
             cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
             cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
         });
 
-        // Path to walk to a particular point
-        on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
-            // If we haven't got an active walk task, then reset the velocity to minimum velocity
-            if (walk.run_state == GroupInfo::RunState::NO_TASK) {
-                velocity_magnitude = cfg.min_translational_velocity_magnitude;
-            }
+        on<Start<WalkTo>>().then([this] {
+            log<NUClear::DEBUG>("Starting walk to task");
 
-            // If robot getting close to the point, begin to decelerate to minimum velocity
-            if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
-                velocity_magnitude -= cfg.acceleration;
-                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
+            // Reset the velocity magnitude to zero
+            velocity_magnitude = 0;
+        });
+
+        on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
+            // Decompose the target pose into position and orientation
+            Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
+
+            // Calculate the translational error between the robot and the target point (x, y)
+            double translational_error = rDRr.norm();
+
+            // Calculate the angle between the robot and the target point (x, y)
+            double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
+
+            // Calculate the angle between the robot and the final desired heading
+            double angle_to_final_heading =
+                std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+
+            // Linearly interpolate between angle to the target and desired heading when inside the align radius region
+            double translation_progress =
+                std::clamp((cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
+                           0.0,
+                           1.0);
+            double desired_heading =
+                (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
+
+            double desired_velocity_magnitude = 0;
+            if (translational_error > cfg.max_align_radius) {
+                // "Accelerate"
+                velocity_magnitude += cfg.acceleration;
+                // Limit the velocity magnitude to the maximum velocity
+                velocity_magnitude = std::min(velocity_magnitude, max_velocity_magnitude);
+                // Scale the velocity by angle error to have robot rotate on spot when far away and not facing target
+                // [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
+                double angle_error_gain = std::clamp(
+                    (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
+                    0.0,
+                    1.0);
+                desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
             }
             else {
-                // If robot is far away from the point, accelerate to max velocity
-                velocity_magnitude += cfg.acceleration;
-                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
-                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
+                // "Decelerate"
+                velocity_magnitude -= cfg.acceleration;
+                // Limit the velocity to zero
+                velocity_magnitude = std::max(velocity_magnitude, 0.0);
+                // Normalise error between [0, 1] inside align radius
+                double error = translational_error / cfg.max_align_radius;
+                // "Proportional control" to strafe towards the target inside align radius
+                desired_velocity_magnitude = cfg.strafe_gain * error;
             }
 
-            // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            // Calculate the target velocity
+            Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
+            Eigen::Vector3d velocity_target;
+            velocity_target << desired_translational_velocity, desired_heading;
 
-            // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
-            // value cfg.max_angular_velocity
-            velocity_target.z() =
-                utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
+            // Limit the velocity to the maximum translational and angular velocity
+            velocity_target = constrain_velocity(velocity_target,
+                                                 cfg.max_translational_velocity_x,
+                                                 cfg.max_translational_velocity_y,
+                                                 cfg.max_angular_velocity);
 
+            // Emit the walk task with the calculated velocities
             emit<Task>(std::make_unique<Walk>(velocity_target));
+
+            // Emit debugging information for visualization and monitoring
+            auto debug_information                    = std::make_unique<WalkToDebug>();
+            Eigen::Isometry3d Hrd                     = Eigen::Isometry3d::Identity();
+            Hrd.translation().head(2)                 = rDRr;
+            Hrd.linear()                              = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, desired_heading));
+            debug_information->Hrd                    = Hrd;
+            debug_information->min_align_radius       = cfg.min_align_radius;
+            debug_information->max_align_radius       = cfg.max_align_radius;
+            debug_information->min_angle_error        = cfg.min_angle_error;
+            debug_information->max_angle_error        = cfg.max_angle_error;
+            debug_information->angle_to_target        = angle_to_target;
+            debug_information->angle_to_final_heading = angle_to_final_heading;
+            debug_information->translational_error    = translational_error;
+            debug_information->velocity_target        = velocity_target;
+            emit(debug_information);
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
@@ -109,9 +178,9 @@ namespace module::planning {
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
         });
 
-        on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
+        on<Provide<PivotAroundPoint>>().then([this](const PivotAroundPoint& pivot_around_point) {
             // Determine the direction of rotation
-            int sign = turn_around_ball.clockwise ? -1 : 1;
+            int sign = pivot_around_point.clockwise ? -1 : 1;
             // Turn around the ball
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
                                                               sign * cfg.pivot_ball_velocity_y,
