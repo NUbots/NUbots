@@ -15,7 +15,7 @@ const NavigationItemView = ({ url, Icon, children }: NavigationItemViewProps) =>
     <NavLink
       className={({ isActive }) => {
         return `p-4 flex flex-col items-center text-primary-auto text-xs hover:bg-auto-contrast-1 ${
-          isActive ? "!bg-nusight-500" : ""
+          isActive ? "!bg-nusight-600" : ""
         }`;
       }}
       to={url}
