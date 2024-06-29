@@ -13,14 +13,12 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
+  network::PlotJuggler
   output::Overview
   output::ImageCompressor
   # Input
   input::Camera
   input::SensorFilter
-  # Network
-  network::NUClearNet
-  network::PlotJuggler
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
