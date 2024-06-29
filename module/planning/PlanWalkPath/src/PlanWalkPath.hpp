@@ -99,25 +99,14 @@ namespace module::planning {
          * @param w_max maximum angular velocity
          * @return Constrained velocity vector
          */
-        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v, double vx_max, double vy_max, double w_max) {
-            Eigen::Vector2d translational_velocity = v.head<2>();
-            // If either translational component exceeds the limit, scale the vector to fit within the limits
-            if (std::abs(v.x()) >= vx_max || std::abs(v.y()) >= vy_max) {
-                double sx = v.x() != 0 ? vx_max / std::abs(v.x()) : 0;
-                double sy = v.y() != 0 ? vy_max / std::abs(v.y()) : 0;
-                // Select the minimum scale factor to ensure neither limit is exceeded but direction is maintained
-                double s               = std::min(sx, sy);
-                translational_velocity = v.head<2>() * s;
-            }
-            // Ensure the angular velocity is within the limits
-            double angular_velocity = std::clamp(v.z(), -w_max, w_max);
-            return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
-        }
+        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v, double vx_max, double vy_max, double w_max);
 
-        /// @brief
-        /// @param all_obstacles
-        /// @param rDRr
-        /// @return
+        /*
+         * @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
+         * @param all_obstacles vector of all obstacles in the world
+         * @param rDRr vector from robot to final target
+         * @return vector of closest obstacle in the path to avoid and its neighbours
+         */
         std::vector<Eigen::Vector2d> get_obstacles(std::vector<Eigen::Vector2d> all_obstacles, Eigen::Vector2d rDRr);
 
     public:
