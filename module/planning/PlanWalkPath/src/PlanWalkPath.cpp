@@ -263,13 +263,19 @@ namespace module::planning {
         // Find the first obstacle in the way
         for (const auto& obstacle : all_obstacles) {
             // Check if the obstacle is in front of the robot
-            if (rDRr.normalized().dot(obstacle.normalized()) > 0 && obstacle.norm() < rDRr.norm()) {
-                // Check if obstacle intersects with the path
-                if (obstacle.norm() > cfg.obstacle_radius
-                    && intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius)) {
-                    avoid_obstacles.push_back(obstacle);
-                    break;
-                }
+            bool in_front = rDRr.normalized().dot(obstacle.normalized()) > 0;
+            // Check if the obstacle is closer than the target point
+            bool closer = obstacle.norm() < rDRr.norm();
+            // Check if the obstacle intersects with the path
+            bool intersects =
+                intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
+            // Check if the obstacle is close to the target position
+            bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
+
+            // Check if obstacle intersects with the path
+            if (in_front && closer && intersects && !close_to_target) {
+                avoid_obstacles.push_back(obstacle);
+                break;
             }
         }
 
