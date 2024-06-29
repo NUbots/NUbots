@@ -114,6 +114,12 @@ namespace module::planning {
             return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
         }
 
+        /// @brief
+        /// @param all_obstacles
+        /// @param rDRr
+        /// @return
+        std::vector<Eigen::Vector2d> get_obstacles(std::vector<Eigen::Vector2d> all_obstacles, Eigen::Vector2d rDRr);
+
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
         explicit PlanWalkPath(std::unique_ptr<NUClear::Environment> environment);

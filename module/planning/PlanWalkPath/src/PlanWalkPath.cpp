@@ -105,50 +105,54 @@ namespace module::planning {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 log<NUClear::DEBUG>("Plan path");
-                std::vector<Eigen::Vector2d> obstacles{};
+
                 if (robots != nullptr) {
+                    std::vector<Eigen::Vector2d> all_obstacles{};
                     for (const auto& robot : robots->robots) {
-                        Eigen::Vector2d rORr = (sensors.Hrw * robot.rRWw).head(2);
-
-                        // Check if the obstacle intersects our path
-                        // If the obstacle is close to us do not attempt to avoid it
-                        if (rORr.norm() > cfg.obstacle_radius
-                            && intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, rORr, cfg.obstacle_radius)) {
-                            log<NUClear::DEBUG>("1 Obstacle detected");
-                            obstacles.push_back(rORr);
-                        }
+                        all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
                     }
-                }
+                    // Sort obstacles based on distance from the robot
+                    std::sort(all_obstacles.begin(),
+                              all_obstacles.end(),
+                              [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
 
-                while (!obstacles.empty()) {
+                    std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
+
+                    // change from here
                     // Calculate direction vector from robot to target
-                    Eigen::Vector2d direction = rDRr - Eigen::Vector2d::Zero();  // Assuming robot's position is (0,0)
+                    Eigen::Vector2d direction = rDRr.normalized();
                     // Calculate a perpendicular vector to the direction
                     Eigen::Vector2d perp_direction(-direction.y(), direction.x());
-                    perp_direction.normalize();
-                    // Scale the perpendicular vector by obstacle_radius to ensure clearance
-                    Eigen::Vector2d avoid_vector = perp_direction * cfg.obstacle_radius * 2;
-                    // Adjust rDRr to navigate around the obstacle
-                    rDRr = obstacles.front() + avoid_vector;
 
-                    log<NUClear::DEBUG>("Avoiding obstacle");
+                    double min_projection              = std::numeric_limits<double>::max();
+                    double max_projection              = std::numeric_limits<double>::lowest();
+                    Eigen::Vector2d leftmost_obstacle  = Eigen::Vector2d::Zero();
+                    Eigen::Vector2d rightmost_obstacle = Eigen::Vector2d::Zero();
 
-                    // Clear obstacles and reevaluate
-                    obstacles.clear();
-                    if (robots != nullptr) {
-                        for (const auto& robot : robots->robots) {
-                            Eigen::Vector2d rORr = (sensors.Hrw * robot.rRWw).head(2);
-                            if (rORr.norm() > cfg.obstacle_radius
-                                && intersection_line_and_circle(Eigen::Vector2d::Zero(),
-                                                                rDRr,
-                                                                rORr,
-                                                                cfg.obstacle_radius)) {
-                                log<NUClear::DEBUG>("2 Obstacle detected", rORr.transpose(), rDRr.transpose());
+                    for (const auto& pos : obstacles) {
+                        double projection = pos.dot(perp_direction);
 
-                                obstacles.push_back(rORr);
-                            }
+                        if (projection < min_projection) {
+                            min_projection    = projection;
+                            leftmost_obstacle = pos;
+                        }
+
+                        if (projection > max_projection) {
+                            max_projection     = projection;
+                            rightmost_obstacle = pos;
                         }
                     }
+
+                    // Get the leftmost and rightmost position to walk to with the obstacle radius
+                    Eigen::Vector2d leftmost_position  = leftmost_obstacle + perp_direction * cfg.obstacle_radius;
+                    Eigen::Vector2d rightmost_position = rightmost_obstacle - perp_direction * cfg.obstacle_radius;
+
+                    // Determine if leftmost or rightmost position is closer to the target
+                    double leftmost_distance  = (leftmost_position - rDRr).norm();
+                    double rightmost_distance = (rightmost_position - rDRr).norm();
+
+                    // Scale the perpendicular vector by obstacle_radius to ensure clearance
+                    rDRr = leftmost_distance < rightmost_distance ? leftmost_position : rightmost_position;
                 }
 
                 // Calculate the translational error between the robot and the target point (x, y)
@@ -244,4 +248,37 @@ namespace module::planning {
                                                               sign * cfg.pivot_ball_velocity)));
         });
     }
+
+    std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(std::vector<Eigen::Vector2d> all_obstacles,
+                                                             Eigen::Vector2d rDRr) {
+        // The obstacles in the way of our current path
+        std::vector<Eigen::Vector2d> avoid_obstacles{};
+
+        // Find the first obstacle in the way
+        for (const auto& obstacle : all_obstacles) {
+            if (obstacle.norm() > cfg.obstacle_radius
+                && intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius)) {
+                avoid_obstacles.push_back(obstacle);
+                break;
+            }
+        }
+
+        if (avoid_obstacles.empty()) {
+            return avoid_obstacles;
+        }
+
+        // Find any obstacles close to our first obstacle
+        for (const auto& obstacle : all_obstacles) {
+            // If the obstacle is close to the group, add it to the group
+            for (const auto& avoid_obstacle : avoid_obstacles) {
+                if ((obstacle - avoid_obstacle).norm() < cfg.obstacle_radius * 3) {
+                    avoid_obstacles.push_back(obstacle);
+                    break;
+                }
+            }
+        }
+
+        return avoid_obstacles;
+    }
+
 }  // namespace module::planning
