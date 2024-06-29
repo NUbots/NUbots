@@ -71,6 +71,9 @@ namespace module::planning {
             double pivot_ball_velocity_x = 0.0;
             /// @brief Pivot ball side velocity
             double pivot_ball_velocity_y = 0.0;
+
+            /// @brief Radius to avoid obstacles
+            double obstacle_radius = 0.0;
         } cfg;
 
         /// @brief Current magnitude of the translational velocity of the walk command
