@@ -37,20 +37,27 @@
 
 namespace utility::math::geometry {
 
-    bool intersection_line_and_circle(const Eigen::Vector2d& line_start,
-                                      const Eigen::Vector2d& line_end,
-                                      const Eigen::Vector2d& circle_center,
-                                      double circle_radius) {
-        // Calculate the distance between the circle center and the line
+    /// @brief Determines if the line between the two points given intersects the circle with given radius and centre
+    /// The points are used to define the line, the line extends beyond the points given
+    /// @param line_start The start point of the line
+    /// @param line_end The end point of the line
+    /// @param circle_centre The centre of the circle
+    /// @param circle_radius The radius of the circle
+    /// @return True if the line intersects the circle, false otherwise
+    const bool intersection_line_and_circle(const Eigen::Vector2d& line_start,
+                                            const Eigen::Vector2d& line_end,
+                                            const Eigen::Vector2d& circle_centre,
+                                            const double circle_radius) {
+        // Calculate the distance between the circle centre and the line
         const Eigen::Vector2d line_vector   = line_end - line_start;
-        const Eigen::Vector2d circle_vector = circle_center - line_start;
+        const Eigen::Vector2d circle_vector = circle_centre - line_start;
         const double line_length            = line_vector.norm();
         const double circle_distance        = circle_vector.norm();
 
         // Calculate the dot product of the line and circle vectors
         const double dot_product = line_vector.dot(circle_vector) / (line_length * circle_distance);
 
-        // Calculate the distance between the circle center and the line
+        // Calculate the distance between the circle centre and the line
         const double distance_to_line = circle_distance * std::sqrt(1 - dot_product * dot_product);
 
         // Check if the distance is less than the circle radius
