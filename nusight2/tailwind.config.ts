@@ -75,13 +75,13 @@ const config: Config = {
         // Use for background color of UI surfaces including panels, cards, modals, etc
         surface: {
           0: colors.neutral[200],
-          "0-inverse": "#333333ff",
+          "0-inverse": colors.neutral[950],
 
           1: colors.neutral[100],
-          "1-inverse": "#424242",
+          "1-inverse": colors.neutral[900],
 
-          2: colors.neutral[50],
-          "2-inverse": "#4a4a4a",
+          2: colors.white,
+          "2-inverse": colors.neutral[800],
         },
 
         // Use to create contrast against the current background for indicating states like hovered, pressed, and selected.
