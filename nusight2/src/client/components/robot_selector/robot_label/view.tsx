@@ -48,7 +48,7 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
       <Collapsible
         open={model.statsOpen}
         className={
-          "grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 border-0 border-t border-b border-gray-300 dark:border-gray-650 bg-auto-surface-1"
+          "grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 border-0 border-y border-auto bg-auto-surface-1 text-left"
         }
       >
         <div className="box-border width-full text-left">

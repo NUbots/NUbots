@@ -71,7 +71,7 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
   const { model, controller } = props;
 
   return (
-    <div className="bg-auto-surface-2 px-2 py-1.5 flex border-t border-b border-auto dark:border-transparent">
+    <div className="bg-auto-surface-2 px-2 py-1.5 flex border-y border-auto">
       <SearchBox model={model} controller={controller} />
 
       <div className="flex gap-1 border-x border-auto px-2 mx-2">
@@ -124,7 +124,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-auto rounded bg-white dark:bg-gray-600 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-auto"
+        className="pl-8 pr-2 h-7 w-[320px] border border-auto rounded bg-auto-surface-1 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
         placeholder="Filter logs"
         value={model.filters.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}

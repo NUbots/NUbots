@@ -19,8 +19,7 @@ const meta: Meta<typeof Select> = {
   title: "components/Select",
   component: Select,
   decorators: [
-    lightAndDarkDecorator({ className: "max-w-3xl" }),
-    (story) => <div style={{ maxWidth: "350px" }}>{story()}</div>,
+    lightAndDarkDecorator({ className: "max-w-[350px]" }),
   ],
 };
 
