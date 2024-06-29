@@ -18,7 +18,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
 
   const dropdownToggle = (
-    <button className="items-center justify-center cursor-pointer flex flex-col fill-auto-primary">
+    <button className="items-center justify-center cursor-pointer flex flex-col">
       <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out" />
       Select robots
     </button>

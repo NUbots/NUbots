@@ -56,7 +56,7 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
           onChange={this.onChange}
           placeholder="Select a robot..."
           empty={this.renderEmpty}
-          icon={<IconRobot className="h-5 w-5 fill-auto-primary" />}
+          icon={<IconRobot className="h-5 w-5" />}
           dropDirection={dropDirection}
         />
       </div>

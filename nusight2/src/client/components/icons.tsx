@@ -40,7 +40,6 @@ export function IconNbsFilled(props: { className?: string }) {
       width="32"
       height="32"
       viewBox="0 0 108 108"
-      fill="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
