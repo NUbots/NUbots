@@ -24,7 +24,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const ColorToClassName = {
   default:
-    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-gray-600 dark:text-white dark:ring-gray-700 dark:enabled:hover:bg-gray-700 dark:enabled:hover:ring-gray-600 dark:enabled:active:bg-gray-800",
+    "shadow-sm bg-white text-gray-600 ring-1 ring-inset ring-gray-300 enabled:hover:bg-gray-50 enabled:active:bg-gray-200 dark:bg-gray-800 dark:text-white dark:ring-gray-700 dark:enabled:hover:bg-gray-700 dark:enabled:hover:ring-gray-600 dark:enabled:active:bg-gray-800",
   primary: "shadow-sm bg-blue-500 text-white enabled:hover:bg-blue-400 enabled:active:bg-blue-600",
   transparent:
     "bg-transparent text-blue-500 ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:text-blue-500 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
