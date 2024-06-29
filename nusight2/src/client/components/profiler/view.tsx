@@ -169,7 +169,7 @@ export const RobotStats = (props: RobotStatsProps) => {
             <div className="text-3xl">{(props.totalTime / 1e3).toFixed(1)}</div>
           </div>
 
-          <div className="px-12 py-4 bg-auto-surface-1 border border-auto rounded-md ">
+          <div className="px-12 py-4 bg-auto-surface-1 border border-auto rounded-md">
             <div className="text-lg text-auto-secondary">Total Reactions</div>
             <div className="text-3xl">{props.totalCount.toLocaleString()}</div>
           </div>
