@@ -216,6 +216,9 @@ namespace module::platform::OpenCR {
         /// @brief Runs the setup for the devices
         void startup();
 
+        /// @brief Emit StatusReturn message from the most recent response
+        void emit_status_return();
+
         /// @brief handles a response packet from the device
         void handle_response();
 
