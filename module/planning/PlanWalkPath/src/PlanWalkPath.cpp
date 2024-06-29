@@ -52,6 +52,7 @@ namespace module::planning {
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
     using message::skill::Walk;
+    using message::strategy::StandStill;
 
     using message::strategy::StandStill;
 
