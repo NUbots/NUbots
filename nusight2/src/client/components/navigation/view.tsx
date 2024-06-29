@@ -37,6 +37,6 @@ export const NavigationView = ({ nav }: { nav: NavigationConfiguration }) => (
         ))}
       </ul>
     </header>
-    <ThemeSwitcherButton className="m-8"></ThemeSwitcherButton>
+    <ThemeSwitcherButton className="mb-8"></ThemeSwitcherButton>
   </div>
 );
