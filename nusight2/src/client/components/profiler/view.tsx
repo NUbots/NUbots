@@ -36,7 +36,7 @@ export class ProfilerView extends React.Component<{
           </div>
         </Menu>
         {selectedRobot && (
-          <div className="overflow-x-auto p-8">
+          <div className="overflow-x-auto p-8 border-t border-auto">
             <div>
               <RobotStats totalCount={selectedRobot.totalCount} totalTime={selectedRobot.totalTime} />
             </div>
