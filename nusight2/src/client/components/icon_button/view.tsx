@@ -7,7 +7,7 @@ export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   /** The size of the button */
   size?: "normal" | "large";
   /** The color of the button */
-  color?: "default" | "primary" | "transparent";
+  color?: "default" | "primary" | "transparent" | "semitransparent";
   /** Props to pass to the `<Icon>` rendered in the button */
   iconProps?: Pick<IconProps, "fill" | "weight" | "flip" | "rotate">;
 };
