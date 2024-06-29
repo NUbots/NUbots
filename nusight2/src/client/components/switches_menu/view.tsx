@@ -32,11 +32,11 @@ export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
   return (
     <div>
       <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
-        <div className={"bg-auto-surface-1 shadow-md rounded-md"}>
-          {options.length === 0 && <div className={"bg-300 dark:bg-gray-700 p-4 rounded-md"}>No options</div>}
+        <div className="bg-auto-surface-1 shadow-md rounded-md">
+          {options.length === 0 && <div className="bg-300 dark:bg-gray-700 p-4 rounded-md">No options</div>}
           {options.map((option) => {
             return (
-              <label key={option.label} className={"items-center flex justify-between p-4 hover:bg-auto-contrast-1 "}>
+              <label key={option.label} className="items-center flex justify-between p-4 hover:bg-auto-contrast-1 ">
                 <span className={style.optionLabel}>{option.label}</span>
                 <Switch on={option.enabled} onChange={option.toggle} />
               </label>

@@ -31,7 +31,7 @@ export class Dashboard extends Component<DashboardProps> {
     const showPanels = model.robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
-      <div className={"flex flex-col w-full"}>
+      <div className="flex flex-col w-full">
         <Menu>
           <ul className="list-none h-full flex items-center">
             <li className="flex px-4">
@@ -39,7 +39,7 @@ export class Dashboard extends Component<DashboardProps> {
             </li>
           </ul>
         </Menu>
-        <div className="flex flex-col flex-1 bg-auto-surface-0">
+        <div className="flex flex-col flex-1 bg-auto-surface-0 border-t border-auto">
           <div className="flex-1 relative">
             <Field />
           </div>

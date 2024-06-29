@@ -25,14 +25,14 @@ export const Switch = (props: SwitchProps) => {
     },
   );
   return (
-    <span className={"flex items-center cursor-pointer h-[1.6em] relative w-[2.85em]"}>
+    <span className="flex items-center cursor-pointer h-[1.6em] relative w-[2.85em]">
       <span className={trackClassName} />
       <span role="thumb" className={thumbClassName} />
       <input
         type="checkbox"
         checked={on}
         disabled={disabled}
-        className={"cursor-inherit h-inherit opacity-0 w-inherit absolute"}
+        className="cursor-inherit h-inherit opacity-0 w-inherit absolute"
         onChange={props.onChange}
       />
     </span>

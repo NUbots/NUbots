@@ -31,8 +31,8 @@ export class SelectOption extends React.Component<SelectOptionProps> {
         onClick={this.onSelect}
       >
         {showIconPadding || icon ? (
-          <span className={"w-[20px] h-[20px] mr-[8px]"}>
-            <div className={"w-full h-full inline"}>{icon}</div>
+          <span className="w-[20px] h-[20px] mr-[8px]">
+            <div className="w-full h-full inline">{icon}</div>
           </span>
         ) : null}
         {option.label}

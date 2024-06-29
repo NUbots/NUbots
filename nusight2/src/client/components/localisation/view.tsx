@@ -54,15 +54,14 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        <div className={"bg-auto-surface-2"}>
+        <div className="bg-auto-surface-2">
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${"flex p-2 "}${
-                this.props.model.field.fieldType === option.value
-                  ? "hover:bg-auto-contrast-1 "
-                  : "hover:bg-auto-contrast-1 "
-              }`}
+              className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1 "
+                : "hover:bg-auto-contrast-1 "
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -125,7 +124,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
-        <div className={"flex-grow relative"}>
+        <div className="flex-grow relative">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
@@ -232,8 +231,8 @@ interface LocalisationMenuBarProps {
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
-    <li className={"flex m-0 p-0"}>
-      <button className={"px-4"} onClick={props.onClick}>
+    <li className="flex m-0 p-0">
+      <button className="px-4" onClick={props.onClick}>
         <div className="flex items-center justify-center">
           <div className="flex items-center rounded">
             <span className="mx-2">{props.label}</span>
@@ -249,13 +248,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <ul className={"flex h-full items-center"}>
-        <li className={"flex px-4"}>
-          <Button className={"px-7"} onClick={props.onHawkEyeClick}>
+      <ul className="flex h-full items-center">
+        <li className="flex px-4">
+          <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
           </Button>
         </li>
-        <li className={"flex px-4"}>
+        <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
@@ -292,9 +291,9 @@ const StatusBar = observer((props: StatusBarProps) => {
         "bg-[rgba(0,0,0,0.3)] rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
       }
     >
-      <span className={"text-left w-1/3"}>&#160;</span>
-      <span className={"w-1/3"}>{target}</span>
-      <span className={"text-right w-1/3"}>{viewModeString(props.model.viewMode)}</span>
+      <span className="text-left w-1/3">&#160;</span>
+      <span className="w-1/3">{target}</span>
+      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });

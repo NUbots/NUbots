@@ -24,9 +24,9 @@ export class ProfilerView extends React.Component<{
     } = this.props;
 
     return (
-      <div className={"flex flex-grow flex-shrink flex-col text-center relative w-full h-full"}>
+      <div className="flex flex-grow flex-shrink flex-col text-center relative w-full h-full">
         <Menu>
-          <div className={"h-full flex items-center justify-end"}>
+          <div className="h-full flex items-center justify-end">
             <RobotSelectorSingle
               autoSelect={true}
               robots={robots}

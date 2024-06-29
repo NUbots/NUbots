@@ -58,13 +58,13 @@ export class TreeNode extends Component<TreeNodeProps> {
       <ul className={classes}>
         <li>
           <div
-            className={"flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer hover:bg-auto-contrast-1"}
+            className="flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer hover:bg-auto-contrast-1"
             style={headerInlineStyle}
             onClick={this.props.onExpand ? this.onClick : undefined}
             onMouseEnter={this.props.onMouseEnter ? this.onMouseEnter : undefined}
             onMouseLeave={this.props.onMouseLeave ? this.onMouseLeave : undefined}
           >
-            <div className={"w-[18px] h-[18px] mr-2 shrink-0"}>
+            <div className="w-[18px] h-[18px] mr-2 shrink-0">
               {hasChildren ? (
                 <Icon size={20} rotate={this.props.node.expanded ? 90 : 0}>
                   chevron_right
@@ -72,17 +72,17 @@ export class TreeNode extends Component<TreeNodeProps> {
               ) : null}
             </div>
 
-            <div className={"mr-2 flex items-center"}>
+            <div className="mr-2 flex items-center">
               <input
                 type="checkbox"
                 ref={this.onRef}
                 onClick={this.onCheckboxClick}
                 onChange={this.onCheckboxChange}
-                className={"accent-blue-600"}
+                className="accent-blue-600"
               />
             </div>
 
-            <div className={"grow leading-4 min-w-0"}>
+            <div className="grow leading-4 min-w-0">
               {renderLabel ? renderLabel(this.props.node) : this.props.node.label}
             </div>
           </div>

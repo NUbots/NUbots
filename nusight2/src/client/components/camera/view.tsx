@@ -83,19 +83,19 @@ export class CameraView extends Component<CameraViewProps> {
             {allowPanAndZoom ? (
               <div className="flex flex-col">
                 <IconButton
-                  className={"hover:text-gray-400 py-2"}
+                  className="hover:text-gray-400 py-2"
                   Icon={IconZoomIn}
                   title="Zoom In"
                   onClick={() => controller.zoomCenter(1)}
                 />
                 <IconButton
-                  className={"hover:text-gray-400 py-2"}
+                  className="hover:text-gray-400 py-2"
                   Icon={IconZoomOut}
                   title="Zoom Out"
                   onClick={() => controller.zoomCenter(-1)}
                 />
                 <IconButton
-                  className={"hover:text-gray-400 py-2"}
+                  className="hover:text-gray-400 py-2"
                   Icon={IconZoomReset}
                   title="Zoom Reset"
                   onClick={controller.resetCamera}

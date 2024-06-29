@@ -33,11 +33,11 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
 
   return (
     <>
-      <div className={"box-border flex min-w-[256px] hover:bg-auto-contrast-1 pr-4"}>
-        <label className={"flex items-center flex-grow h-12 px-4 cursor-pointer"}>
-          <StatusIndicator className={"mr-3"} connected={robot.connected} />
-          <span className={"mr-auto whitespace-nowrap"}>{robot.name}</span>
-          <span className={"px-2 mr-1"}>
+      <div className="box-border flex min-w-[256px] hover:bg-auto-contrast-1 pr-4">
+        <label className="flex items-center flex-grow h-12 px-4 cursor-pointer">
+          <StatusIndicator className="mr-3" connected={robot.connected} />
+          <span className="mr-auto whitespace-nowrap">{robot.name}</span>
+          <span className="px-2 mr-1">
             <Switch on={robot.enabled} onChange={toggleRobot(robot)} />
           </span>
         </label>
@@ -51,21 +51,21 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
           "grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 border-0 border-t border-b border-gray-300 dark:border-gray-650 bg-auto-surface-1"
         }
       >
-        <div className={"box-border width-full text-left"}>
-          <div className={"uppercase text-sm text-gray-600 dark:text-gray-200"}>Packets</div>
-          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packets)}</div>
+        <div className="box-border width-full text-left">
+          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Packets</div>
+          <div className="box-border width-full text-left text-lg">{formatSI(model.stats.packets)}</div>
         </div>
-        <div className={"border-box w-full text-left"}>
-          <div className={"uppercase text-sm text-gray-600 dark:text-gray-200"}>Packets/s</div>
-          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packetsPerSecond.rate)}</div>
+        <div className="border-box w-full text-left">
+          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Packets/s</div>
+          <div className="box-border width-full text-left text-lg">{formatSI(model.stats.packetsPerSecond.rate)}</div>
         </div>
-        <div className={"border-box w-full text-left"}>
-          <div className={"uppercase text-sm text-gray-600 dark:text-gray-200"}>Bytes</div>
-          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytes)}</div>
+        <div className="border-box w-full text-left">
+          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Bytes</div>
+          <div className="box-border width-full text-left text-lg">{formatSI(model.stats.bytes)}</div>
         </div>
-        <div className={"border-box w-full text-left"}>
-          <div className={"uppercase text-sm text-gray-600 dark:text-gray-200"}>Bytes/s</div>
-          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytesPerSecond.rate)}</div>
+        <div className="border-box w-full text-left">
+          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Bytes/s</div>
+          <div className="box-border width-full text-left text-lg">{formatSI(model.stats.bytesPerSecond.rate)}</div>
         </div>
       </Collapsible>
     </>

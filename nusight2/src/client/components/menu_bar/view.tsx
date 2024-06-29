@@ -9,7 +9,7 @@ import { RobotSelector } from "../robot_selector/view";
 
 export function withRobotSelectorMenuBar(appModel: AppModel, toggleRobotEnabled: (robot: RobotModel) => void) {
   const robotSelector = () => (
-    <RobotSelector dropdownMenuPosition={"right"} robots={appModel.robots} selectRobot={toggleRobotEnabled} />
+    <RobotSelector dropdownMenuPosition="right" robots={appModel.robots} selectRobot={toggleRobotEnabled} />
   );
 
   const { NbsScrubbers, NbsScrubbersToggle } = withNbsScrubbers(appModel);

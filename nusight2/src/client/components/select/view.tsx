@@ -76,7 +76,7 @@ export class Select extends React.Component<SelectProps> {
           onToggleClick={this.onToggleClick}
         >
           <div className="bg-auto-surface-2 shadow-md">
-            {options.length === 0 && <div className={"p-6 text-center"}>{empty || "No options"}</div>}
+            {options.length === 0 && <div className="p-6 text-center">{empty || "No options"}</div>}
             {options.length > 0 && (
               <div>
                 {options.map((option) => {

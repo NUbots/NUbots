@@ -38,7 +38,7 @@ export const Collapsible = observer((props: CollapsibleProps) => {
         onExiting={onExiting}
         unmountOnExit
       >
-        <div className={"overflow-hidden transition-all duration-200 ease"}>
+        <div className="overflow-hidden transition-all duration-200 ease">
           <div
             className={classNames(
               "box-border border border-gray-300 dark:border-gray-700 py-[12px] px-[8px]",
