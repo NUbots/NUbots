@@ -44,10 +44,10 @@ namespace utility::math::geometry {
     /// @param circle_centre The centre of the circle
     /// @param circle_radius The radius of the circle
     /// @return True if the line intersects the circle, false otherwise
-    const bool intersection_line_and_circle(const Eigen::Vector2d& line_start,
-                                            const Eigen::Vector2d& line_end,
-                                            const Eigen::Vector2d& circle_centre,
-                                            const double circle_radius) {
+    bool intersection_line_and_circle(const Eigen::Vector2d& line_start,
+                                      const Eigen::Vector2d& line_end,
+                                      const Eigen::Vector2d& circle_centre,
+                                      const double circle_radius) {
         // Calculate the distance between the circle centre and the line
         const Eigen::Vector2d line_vector   = line_end - line_start;
         const Eigen::Vector2d circle_vector = circle_centre - line_start;
