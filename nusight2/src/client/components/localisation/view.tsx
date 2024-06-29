@@ -58,9 +58,9 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${"flex p-2 "}${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1 "
-                : "hover:bg-auto-contrast-1 "
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
                 }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
@@ -107,7 +107,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     return (
       <div
         className={
-          "flex flex-grow flex-shrink flex-col relative bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100"
+          "flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"
         }
       >
         <LocalisationMenuBar
@@ -288,7 +288,7 @@ const StatusBar = observer((props: StatusBarProps) => {
   return (
     <div
       className={
-        "bg-[rgba(0,0,0,0.3)] rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
       }
     >
       <span className="text-left w-1/3">&#160;</span>
