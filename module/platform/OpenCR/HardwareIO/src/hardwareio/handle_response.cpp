@@ -227,7 +227,7 @@ namespace module::platform::OpenCR {
                                 // If we decide to ignore a stuffed byte, we have to decrement the packet length.
                                 --payload_length;
                                 // We will still have to include the stuffing in the crc calculation.
-                                crc = dynamixel::v2::update_crc(crc, byte);
+                                crc           = dynamixel::v2::update_crc(crc, byte);
                                 current_phase = Phases::DATA;
                                 break;
 
