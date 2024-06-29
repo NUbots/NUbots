@@ -68,6 +68,9 @@ namespace module::purpose {
             Position position{};
         } cfg;
 
+        /// @brief The rate the find purpose provider will run, to drive the rest of the system
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
+
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
         explicit Soccer(std::unique_ptr<NUClear::Environment> environment);

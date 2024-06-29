@@ -42,6 +42,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/StartSafely.hpp"
 
 namespace module::purpose {
 
@@ -54,6 +55,7 @@ namespace module::purpose {
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
+    using message::strategy::StartSafely;
     using NUClear::message::LogMessage;
     using utility::input::LimbID;
 
@@ -73,7 +75,10 @@ namespace module::purpose {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 4);
+            emit<Task>(std::make_unique<FallRecovery>(), 5);
+
+            // Start up safely with low gains
+            emit<Task>(std::make_unique<StartSafely>(), 4);
 
             // Stand Still on startup
             emit<Task>(std::make_unique<StandStill>());

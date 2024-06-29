@@ -55,7 +55,7 @@ namespace module::strategy {
             cfg.resume_tolerance = config["resume_tolerance"].as<double>();
         });
 
-        on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
+        on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
                 // Get the transformation from robot {r} space to field {f} space
                 const Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();

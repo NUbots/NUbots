@@ -38,6 +38,8 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Priority of StartSafely task
+            int start_safely_priority = 0;
             /// @brief Priority of FindBall task
             int find_ball_priority = 0;
             /// @brief Priority of LookAtBall task
@@ -71,6 +73,9 @@ namespace module::purpose {
             /// @brief Duration to listen for audio when emitting AudioGPT task
             int audiogpt_listen_duration = 0;
         } cfg;
+
+        /// @brief The rate the tasks will emit, to drive the rest of the system
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
 
     public:
         /// @brief Called by the powerplant to build and setup the Tester reactor.

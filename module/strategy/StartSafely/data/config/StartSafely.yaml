@@ -1,0 +1,13 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# How long to tell the servo to move for in seconds
+move_time: 2
+# Servo gain
+servo_gain: 4
+# Allowed servo error
+servo_error: 0.09
+# The name of the script to load and use for the start pose
+script_name: "Stand.yaml"
+# The maximum time the module can run for, from startup, so it doesn't get the system stuck
+max_timeout: 10

@@ -55,17 +55,16 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToBallTask>, With<Ball>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
-            [this](const Ball& ball, const Sensors& sensors) {
-                // If we have a ball, walk to it
-                if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                    Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
-                    // Add an offset to account for walking with the foot in front of the ball
-                    rBRr.y() += cfg.ball_y_offset;
-                    const double heading = std::atan2(rBRr.y(), rBRr.x());
-                    emit<Task>(std::make_unique<WalkTo>(rBRr, heading));
-                }
-            });
+        on<Provide<WalkToBallTask>, With<Ball>, With<Sensors>>().then([this](const Ball& ball, const Sensors& sensors) {
+            // If we have a ball, walk to it
+            if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
+                Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+                // Add an offset to account for walking with the foot in front of the ball
+                rBRr.y() += cfg.ball_y_offset;
+                const double heading = std::atan2(rBRr.y(), rBRr.x());
+                emit<Task>(std::make_unique<WalkTo>(rBRr, heading));
+            }
+        });
     }
 
 }  // namespace module::strategy
