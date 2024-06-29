@@ -5,7 +5,7 @@ log_level: DEBUG
 grid_size: 1e-2
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
-starting_side: EITHER
+starting_side: CUSTOM
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
@@ -34,11 +34,17 @@ field_line_intersection_weight: 0
 # Weighting associated with change between last solution result
 state_change_weight: 0.5
 
+# Weighting associated with goal post distance error
+goal_post_distance_weight: 1
+
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.1, 0.1, 0.1]
+change_limit: [0.5, 0.5, 0.5]
 
 # Minimum distance an associated landmark needs to be for measurement update
 min_association_distance: 0.5
+
+# Goal post error tolerance [m]
+goal_post_error_tolerance: 0.5
 
 opt:
   # Relative tolerance on the optimization parameters
@@ -67,7 +73,6 @@ kalman:
     - [1e-2, 0, 0]
     - [0, 1e-2, 0]
     - [0, 0, 1e-2]
-
   # Measurement model noise
   R:
     - [1, 0, 0]

@@ -37,6 +37,7 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldIntersections.hpp"
 #include "message/vision/FieldLines.hpp"
+#include "message/vision/Goal.hpp"
 
 #include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
@@ -50,6 +51,8 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
+    using message::vision::Goal;
+    using message::vision::Goals;
 
     using utility::localisation::Landmark;
     using utility::localisation::OccupancyMap;
@@ -165,6 +168,11 @@ namespace module::localisation {
         return result;
     }
 
+    struct GoalPost {
+        Eigen::Vector3d left;
+        Eigen::Vector3d right;
+    };
+
     class FieldLocalisationNLopt : public NUClear::Reactor {
     private:
         // Define the model dimensions
@@ -210,6 +218,9 @@ namespace module::localisation {
             /// @brief Scalar weighting of cost associated with change in state
             double state_change_weight = 0.0;
 
+            /// @brief Scalar weighting of cost associated with distance to goal posts
+            double goal_post_distance_weight = 0.0;
+
             double min_association_distance = 0.0;
 
             /// @brief Constraint on the maximum change in state
@@ -241,6 +252,9 @@ namespace module::localisation {
 
             /// @brief initial covariance
             Eigen::Matrix<double, n_states, n_states> P0 = Eigen::Matrix<double, n_states, n_states>::Identity();
+
+            /// @brief Goal error tolerance [m]
+            double goal_post_error_tolerance = 0.0;
         } cfg;
 
 
@@ -255,6 +269,13 @@ namespace module::localisation {
 
         /// @brief List of landmarks (field intersections rLFf) in field space
         std::vector<Landmark> landmarks{};
+
+        /// @brief Goal posts
+        GoalPost own_goal_posts;
+        GoalPost opp_goal_posts;
+
+        /// @brief Expected goal post width
+        double expected_goal_post_distance = 0.0;
 
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
@@ -292,9 +313,11 @@ namespace module::localisation {
          * @param field_intersections The field intersections
          * @return Pair <optimisation solution (x,y,theta), final cost>
          */
-        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(const Eigen::Vector3d& initial_guess,
-                                                                       const std::vector<Eigen::Vector3d>& observations,
-                                                                       const FieldIntersections& field_intersections);
+        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
+            const Eigen::Vector3d& initial_guess,
+            const std::vector<Eigen::Vector3d>& field_lines,
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const std::shared_ptr<const Goals>& goals);
 
         /**
          * @brief Setup field line distance map
