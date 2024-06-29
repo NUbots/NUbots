@@ -25,9 +25,9 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   );
   return (
     <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
-      <div className="bg-auto-surface-2 shadow-md text-black dark:text-white">
+      <div className="bg-auto-surface-2 shadow-md text-auto-primary">
         {robots.length === 0 && (
-          <div className="bg-gray-600 p-[1em] text-center">
+          <div className="p-[1em] text-center">
             <IconPlug className="bg-nusight-500 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
             <div className="text-lg p-1 whitespace-nowrap">No connected robots</div>
             <span className="text-base whitespace-nowrap text-nusight-500">Run yarn start:sim to simulate robots</span>
