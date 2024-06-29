@@ -51,21 +51,21 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
           "grid grid-cols-2 grid-rows-2 gap-x-2 gap-y-2 border-0 border-y border-auto bg-auto-surface-1 text-left"
         }
       >
-        <div className=" width-full text-left">
-          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Packets</div>
-          <div className="width-full text-left text-lg">{formatSI(model.stats.packets)}</div>
+        <div>
+          <div className="uppercase text-sm text-auto-secondary">Packets</div>
+          <div className="text-lg">{formatSI(model.stats.packets)}</div>
         </div>
-        <div className="border-box w-full text-left">
-          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Packets/s</div>
-          <div className="width-full text-left text-lg">{formatSI(model.stats.packetsPerSecond.rate)}</div>
+        <div>
+          <div className="uppercase text-sm text-auto-secondary">Packets/s</div>
+          <div className="text-lg">{formatSI(model.stats.packetsPerSecond.rate)}</div>
         </div>
-        <div className="border-box w-full text-left">
-          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Bytes</div>
-          <div className="width-full text-left text-lg">{formatSI(model.stats.bytes)}</div>
+        <div>
+          <div className="uppercase text-sm text-auto-secondary">Bytes</div>
+          <div className="text-lg">{formatSI(model.stats.bytes)}</div>
         </div>
-        <div className="border-box w-full text-left">
-          <div className="uppercase text-sm text-gray-600 dark:text-gray-200">Bytes/s</div>
-          <div className="width-full text-left text-lg">{formatSI(model.stats.bytesPerSecond.rate)}</div>
+        <div>
+          <div className="uppercase text-sm text-auto-secondary">Bytes/s</div>
+          <div className="text-lg">{formatSI(model.stats.bytesPerSecond.rate)}</div>
         </div>
       </Collapsible>
     </>
