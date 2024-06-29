@@ -18,9 +18,7 @@ const IconColoredCircle = (props: { color: string }) => (
 const meta: Meta<typeof Select> = {
   title: "components/Select",
   component: Select,
-  decorators: [
-    lightAndDarkDecorator({ className: "max-w-[350px]" }),
-  ],
+  decorators: [lightAndDarkDecorator({ className: "max-w-[350px]" })],
 };
 
 export default meta;

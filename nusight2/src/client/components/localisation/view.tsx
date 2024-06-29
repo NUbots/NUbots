@@ -58,10 +58,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1"
-                : "hover:bg-auto-contrast-1"
-                }`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -105,11 +106,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div
-        className={
-          "flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"
-        }
-      >
+      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
         <LocalisationMenuBar
           model={this.props.model}
           Menu={this.props.Menu}

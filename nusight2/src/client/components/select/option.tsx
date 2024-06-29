@@ -24,9 +24,7 @@ export class SelectOption extends React.Component<SelectOptionProps> {
         className={classNames([
           className,
           "items-center p-2 text left cursor-pointer",
-          isSelected
-            ? "bg-blue-600 text-white"
-            : "hover:bg-auto-contrast-2",
+          isSelected ? "bg-blue-600 text-white" : "hover:bg-auto-contrast-2",
         ])}
         onClick={this.onSelect}
       >

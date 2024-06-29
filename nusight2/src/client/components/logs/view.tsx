@@ -142,8 +142,9 @@ interface ToggleButtonProps {
 function ToggleButton(props: ToggleButtonProps) {
   return (
     <button
-      className={`h-7 px-2 inline-flex items-center border rounded ${props.on ? "bg-blue-600 border-blue-700 text-gray-100" : "bg-white dark:bg-gray-600 border-auto"
-        } `}
+      className={`h-7 px-2 inline-flex items-center border rounded ${
+        props.on ? "bg-blue-600 border-blue-700 text-gray-100" : "bg-white dark:bg-gray-600 border-auto"
+      } `}
       onClick={() => props.onClick(props.on)}
     >
       {props.children}
@@ -207,8 +208,9 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
 
   return (
     <div
-      className={`flex gap-3 items-center py-0.5 bg-auto-surface-1 border-b border-auto ${logLevelToTextColor[message.level]
-        }`}
+      className={`flex gap-3 items-center py-0.5 bg-auto-surface-1 border-b border-auto ${
+        logLevelToTextColor[message.level]
+      }`}
     >
       <div className="inline-flex items-end self-start gap-1">
         <div className="w-12 uppercase text-right">{message.level}</div>

@@ -23,7 +23,13 @@ export function IconZoomOut(props: { className?: string }) {
 
 export function IconZoomReset(props: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" stroke="currentColor" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      className={props.className}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         fillRule="evenodd"
         clipRule="evenodd"

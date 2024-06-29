@@ -204,9 +204,7 @@ const config: Config = {
       );
 
       // Add the `outline-auto-...` utilities
-      addUtilities(
-        generateAutoColorUtilities(pick(themeColors, ["divider"]), "outline-color", "outline"),
-      );
+      addUtilities(generateAutoColorUtilities(pick(themeColors, ["divider"]), "outline-color", "outline"));
 
       // Add the `fill-auto-...` utilities
       addUtilities(generateAutoColorUtilities(pick(themeColors, ["primary"]), "fill", "fill"));

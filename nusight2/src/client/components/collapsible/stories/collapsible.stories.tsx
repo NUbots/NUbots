@@ -129,7 +129,7 @@ export const WithOverflow: Story = {
               { id: 1, label: "Option 2" },
               { id: 2, label: "Option 3" },
             ]}
-            onChange={() => { }}
+            onChange={() => {}}
           />
         </Collapsible>
       </>

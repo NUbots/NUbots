@@ -97,7 +97,7 @@ export const OutlineAutoUtility: StoryObj<StoryComponent> = {
             <OutlineBox className="outline outline-auto-divider" />
           </ColorRow>
         </ColorTable>
-      </div >
+      </div>
     );
   },
 };
@@ -252,8 +252,9 @@ export const DivideAutoUtility: StoryObj<StoryComponent> = {
     function DivideItems({ className, horizontal }: { className: string; horizontal?: boolean }) {
       return (
         <div
-          className={`bg-auto-contrast-1 h-24 rounded-md overflow-hidden text-auto-primary text-center flex ${horizontal ? "flex-col" : "flex-row"
-            } ${className}`}
+          className={`bg-auto-contrast-1 h-24 rounded-md overflow-hidden text-auto-primary text-center flex ${
+            horizontal ? "flex-col" : "flex-row"
+          } ${className}`}
         >
           <div className="flex-grow flex items-center justify-center">A</div>
           <div className="flex-grow flex items-center justify-center" data-compute-color-here>
@@ -425,7 +426,7 @@ function useComputedStyle(colorClassName: string, ref: React.RefObject<HTMLEleme
               const index = colorIndexOfPrefix[prefix] ?? -1;
               setColor(
                 colorsFromTailwindRingBoxShadow?.[index] ??
-                "<colorNotFound: failed to parse color from box-shadow value>",
+                  "<colorNotFound: failed to parse color from box-shadow value>",
               );
             } else {
               setColor(computedValue);
