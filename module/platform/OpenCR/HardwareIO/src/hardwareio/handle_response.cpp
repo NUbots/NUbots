@@ -224,8 +224,10 @@ namespace module::platform::OpenCR {
                     if (NUClear::clock::now() < (packet_start_time + timeout)) {
                         switch (byte) {
                             case 0xFD:
+                                // If we decide to ignore a stuffed byte, we have to decrement the packet length.
                                 --payload_length;
-                                crc = dynamixel::v2::update_crc(crc, byte);  // We will still have to crc the stuffing
+                                // We will still have to include the stuffing in the crc calculation.
+                                crc = dynamixel::v2::update_crc(crc, byte);
                                 current_phase = Phases::DATA;
                                 break;
 
