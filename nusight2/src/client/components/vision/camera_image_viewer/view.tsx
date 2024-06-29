@@ -25,7 +25,7 @@ export const CameraImageViewer = observer(
     children?: React.ReactNode;
   }) => {
     return (
-      <ResizeContainer horizontal className="w-full h-full flex dark">
+      <ResizeContainer horizontal className="w-full h-full flex">
         <ResizePanel minSize={250}>
           <CameraImageViewerMain
             CameraView={props.CameraView}
@@ -65,7 +65,7 @@ const CameraImageViewerMain = observer(
       [props.selectedCamera, props.selectedRobot],
     );
     return (
-      <div className="flex-grow h-full relative dark">
+      <div className="flex-grow h-full relative">
         <props.CameraView
           key={props.selectedCamera.id}
           model={props.selectedCamera}
