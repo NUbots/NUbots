@@ -36,7 +36,7 @@ export class LineChart extends Component<
           <label className="pr-4 shrink-0">
             Minimum Value
             <input
-              className="bg-auto-surface-1 placeholder-auto-secondary shadow-inner focus:outline-none focus:outline-auto-divider px-2 py-1 rounded-sm ml-2 w-24"
+              className="bg-auto-surface-1 placeholder-auto-secondary shadow-inner focus:outline-none focus:outline-blue-500 px-2 py-1 rounded-sm ml-2 w-24"
               type="number"
               onChange={this.onChangeMin}
               placeholder={`(${minValue.toPrecision(3)})`}
