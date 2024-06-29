@@ -23,25 +23,21 @@ export type RobotPanelProps = {
 };
 
 export const RobotPanel = (props: RobotPanelProps) => {
-  const connectionStatusClassName = classNames({
-    "w-3 h-3 rounded-full border mr-2": true,
+  const connectionStatusClassName = classNames("w-3 h-3 rounded-full border mr-2", {
     "bg-green-500 border-green-800": props.connected,
     "bg-red-500 border-red-800": !props.connected,
   });
-  const cameraClassName = classNames({
-    "items-center flex justify-around": true,
-    ["text-orange-400"]: props.lastCameraImage === "warning",
-    ["text-red-500"]: props.lastCameraImage === "danger",
+  const cameraClassName = classNames("items-center flex justify-around", {
+    "text-orange-400": props.lastCameraImage === "warning",
+    "text-red-500": props.lastCameraImage === "danger",
   });
-  const ballClassName = classNames({
-    "items-center flex justify-around": true,
-    ["text-orange-400"]: props.lastSeenBall === "warning",
-    ["text-red-500"]: props.lastSeenBall === "danger",
+  const ballClassName = classNames("items-center flex justify-around", {
+    "text-orange-400": props.lastSeenBall === "warning",
+    "text-red-500": props.lastSeenBall === "danger",
   });
-  const goalClassName = classNames({
-    "items-center flex justify-around h-6 w-6": true,
-    ["fill-orange-400"]: props.lastSeenGoal === "warning",
-    ["fill-red-500"]: props.lastSeenGoal === "danger",
+  const goalClassName = classNames("items-center flex justify-around h-6 w-6", {
+    "fill-orange-400": props.lastSeenGoal === "warning",
+    "fill-red-500": props.lastSeenGoal === "danger",
   });
   return (
     <div>
