@@ -24,7 +24,7 @@ const ColorToClassName = {
   transparent:
     "bg-transparent text-blue-500 ring-transparent enabled:hover:bg-black/10 enabled:active:bg-black/20 dark:text-blue-500 dark:enabled:hover:bg-white/10 dark:enabled:active:bg-black/20",
   semitransparent:
-    "bg-black/30 text-black dark:text-white dark:enabled:hover:bg-black/20 dark:enabled:active:bg-black/30",
+    "bg-black/30 text-white enabled:hover:bg-black/40 enabled:active:bg-black/50",
 } as const;
 
 export function IconButton(props: IconButtonProps) {

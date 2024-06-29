@@ -120,6 +120,9 @@ export const AllVariants: Story = {
             <ButtonRow label="Primary, Disabled">
               <IconButtons color="primary" disabled />
             </ButtonRow>
+            <ButtonRow label="Semitransparent">
+              <IconButtons color="semitransparent" />
+            </ButtonRow>
           </div>
         </LightMode>
 
@@ -142,6 +145,9 @@ export const AllVariants: Story = {
             </ButtonRow>
             <ButtonRow label="Primary, Disabled">
               <IconButtons color="primary" disabled />
+            </ButtonRow>
+            <ButtonRow label="Semitransparent">
+              <IconButtons color="semitransparent" />
             </ButtonRow>
           </div>
         </DarkMode>
