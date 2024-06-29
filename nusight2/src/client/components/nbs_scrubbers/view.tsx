@@ -53,7 +53,7 @@ interface NbsScrubbersProps {
 
 const NbsScrubbers = observer(({ viewModel, onScrubberFocused }: NbsScrubbersProps) => {
   return (
-    <div className="shadow">
+    <div className="divide-y divide-auto border-y border-auto">
       {viewModel.scrubberList.map((scrubber) => (
         <NbsScrubberView key={scrubber.id} model={scrubber} onFocus={() => onScrubberFocused(scrubber)} />
       ))}
