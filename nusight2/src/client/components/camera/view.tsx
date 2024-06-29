@@ -94,7 +94,12 @@ export class CameraView extends Component<CameraViewProps> {
                   title="Zoom Out"
                   onClick={() => controller.zoomCenter(-1)}
                 />
-                <IconButton className="hover:text-gray-300 py-2" Icon={IconZoomReset} title="Zoom Reset" onClick={controller.resetCamera} />
+                <IconButton
+                  className="hover:text-gray-300 py-2"
+                  Icon={IconZoomReset}
+                  title="Zoom Reset"
+                  onClick={controller.resetCamera}
+                />
               </div>
             ) : null}
           </div>
