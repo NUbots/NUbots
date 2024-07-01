@@ -455,6 +455,10 @@ namespace module::input {
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
         emit(
             graph("Accelerometer", sensors->accelerometer.x(), sensors->accelerometer.y(), sensors->accelerometer.z()));
+        emit(graph("OpenCR Filter (rpy)",
+                   raw_sensors.rpy_subctrl.x(),
+                   raw_sensors.rpy_subctrl.y(),
+                   raw_sensors.rpy_subctrl.z()));
 
         // Foot down sensors state for each foot
         emit(graph(fmt::format("Foot Down/{}/Left", std::string(cfg.foot_down.method)),
