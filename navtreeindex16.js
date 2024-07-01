@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97e8fea5a480f4c0e34b5c3d5f63200c":[2,0,3,9,1,1,0,223],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da999657f701c18c08e27ff5cfa9fd8a6d":[2,0,3,9,1,1,0,20],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da99ac19fa571639297d784be64faffc67":[2,0,3,9,1,1,0,250],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9a6d8b5bf34e2777b3eb8b87581869be":[2,0,3,9,1,1,0,16],
@@ -248,6 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a033860e0019e22b3473990451ae1cd3c":[2,0,3,10,4,0,0],
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a60e9926ee255ef901e35453f9508eabe":[2,0,3,10,4,0,1],
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html":[2,0,3,10,7,0],
-"structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3531788a0bcc3a269ed43d2ec3768b4b":[2,0,3,10,7,0,1],
-"structmodule_1_1purpose_1_1Soccer_1_1Config.html#a7ee256be4be71c5a8c29f258b7dca2f0":[2,0,3,10,7,0,0]
+"structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3531788a0bcc3a269ed43d2ec3768b4b":[2,0,3,10,7,0,1]
 };

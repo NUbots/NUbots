@@ -140,7 +140,8 @@ var NAVTREEINDEX5 =
 "classmodule_1_1strategy_1_1FallRecovery.html":[2,0,3,12,2],
 "classmodule_1_1strategy_1_1FallRecovery.html#aa6579a63e2954fbd0dfae9fc5c00658d":[2,0,3,12,2,0],
 "classmodule_1_1strategy_1_1FindObject.html":[2,0,3,12,3],
-"classmodule_1_1strategy_1_1FindObject.html#a1040dfc599b78e068143f58eaf460e6b":[2,0,3,12,3,0],
+"classmodule_1_1strategy_1_1FindObject.html#a1040dfc599b78e068143f58eaf460e6b":[2,0,3,12,3,1],
+"classmodule_1_1strategy_1_1FindObject.html#a1288931e60b85a31ddf4072993be2d71":[2,0,3,12,3,2],
 "classmodule_1_1strategy_1_1KickToGoal.html":[2,0,3,12,4],
 "classmodule_1_1strategy_1_1KickToGoal.html#a63e424eaf0bb4b80fc08f28e03026c1e":[2,0,3,12,4,0],
 "classmodule_1_1strategy_1_1Ready.html":[2,0,3,12,5],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a1fbb850c93c2f8fddb1d830bf4108bce":[2,0,3,13,2,2,15],
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a330e573ce34368c04f2f37a043934053":[2,0,3,13,2,2,8],
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a5bd56b85954484fd1994d14cc34bb055":[2,0,3,13,2,2,21],
-"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a7c0bda860a98e914c0fbe80298f94b33":[2,0,3,13,2,2,16],
-"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a8c4e447269cf002d39ad7d711049e981":[2,0,3,13,2,2,9]
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a7c0bda860a98e914c0fbe80298f94b33":[2,0,3,13,2,2,16]
 };

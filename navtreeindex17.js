@@ -1,5 +1,6 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1purpose_1_1Soccer_1_1Config.html#a7ee256be4be71c5a8c29f258b7dca2f0":[2,0,3,10,7,0,0],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html":[2,0,3,10,7,1],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#a5063fd2579fd049281e45c4b5ef6a263":[2,0,3,10,7,1,1],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#aaff0518977d19cf09fff633a83ad64cd":[2,0,3,10,7,1,2],
@@ -72,6 +73,8 @@ var NAVTREEINDEX17 =
 "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#ac3dd980a1fcaa21eba31f847444b67b4":[2,0,3,12,0,0,0],
 "structmodule_1_1strategy_1_1DiveToBall_1_1Config.html":[2,0,3,12,1,0],
 "structmodule_1_1strategy_1_1DiveToBall_1_1Config.html#a2a56d24a41c350422ace2d47a9f94c64":[2,0,3,12,1,0,0],
+"structmodule_1_1strategy_1_1FindObject_1_1Config.html":[2,0,3,12,3,0],
+"structmodule_1_1strategy_1_1FindObject_1_1Config.html#a76245341420b126ec22af604d4bf9973":[2,0,3,12,3,0,0],
 "structmodule_1_1strategy_1_1Ready_1_1Config.html":[2,0,3,12,5,0],
 "structmodule_1_1strategy_1_1Ready_1_1Config.html#a3e16972542bbda9ad1c1a9ef59e88682":[2,0,3,12,5,0,1],
 "structmodule_1_1strategy_1_1Ready_1_1Config.html#aae62a517555280a88d9403f5faad84ee":[2,0,3,12,5,0,2],
@@ -246,8 +249,5 @@ var NAVTREEINDEX17 =
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a167cffd6e28f48671b10c3d6f59bf79e":[2,0,3,15,0,3,4],
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a61c6f3662eba6bb9cdb799caa57492f0":[2,0,3,15,0,3,0],
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a8443a288523719a479adb9c6a908ad6c":[2,0,3,15,0,3,2],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#ae02020dab43777b0543326357d04633f":[2,0,3,15,0,3,3],
-"structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine.html":[2,0,3,15,0,0,0],
-"structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html":[2,0,3,15,0,0,1],
-"structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html#a9b0684dede7b4bfccc84a4c5cddd7237":[2,0,3,15,0,0,1,0]
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#ae02020dab43777b0543326357d04633f":[2,0,3,15,0,3,3]
 };

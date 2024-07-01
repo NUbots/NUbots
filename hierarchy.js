@@ -243,6 +243,7 @@ var hierarchy =
     [ "module::skill::Walk::Config", "structmodule_1_1skill_1_1Walk_1_1Config.html", null ],
     [ "module::strategy::AlignBallToGoal::Config", "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html", null ],
     [ "module::strategy::DiveToBall::Config", "structmodule_1_1strategy_1_1DiveToBall_1_1Config.html", null ],
+    [ "module::strategy::FindObject::Config", "structmodule_1_1strategy_1_1FindObject_1_1Config.html", null ],
     [ "module::strategy::Ready::Config", "structmodule_1_1strategy_1_1Ready_1_1Config.html", null ],
     [ "module::strategy::StartSafely::Config", "structmodule_1_1strategy_1_1StartSafely_1_1Config.html", null ],
     [ "module::strategy::StrategiseLook::Config", "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html", null ],

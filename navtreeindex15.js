@@ -1,5 +1,6 @@
 var NAVTREEINDEX15 =
 {
+"structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html":[2,0,3,8,0,0],
 "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a4b4e3ff14513a5753b536ae878021e1f":[2,0,3,8,0,0,4],
 "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a672f7ea74be4ab7081da8d02e8007018":[2,0,3,8,0,0,1],
 "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a94a80598f4abf8b70ed76f25aec2593d":[2,0,3,8,0,0,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX15 =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9627fef257bf9f0b579536e8679bf8e3":[2,0,3,9,1,1,0,238],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9759681bd808f5f6a8b8c1f6f8a26cd3":[2,0,3,9,1,1,0,256],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97a9d5b486b6fcfffcf9947e65bc8781":[2,0,3,9,1,1,0,253],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97c8132ec550742c0e0369afc2605c72":[2,0,3,9,1,1,0,50],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97e8fea5a480f4c0e34b5c3d5f63200c":[2,0,3,9,1,1,0,223]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97c8132ec550742c0e0369afc2605c72":[2,0,3,9,1,1,0,50]
 };
