@@ -18,6 +18,7 @@ import { installOdometry } from "./components/odometry/install";
 import { installProfiler } from "./components/profiler/install";
 import { installVision } from "./components/vision/install";
 import { installVisualMesh } from "./components/visual_mesh/install";
+import { installDirector } from "./components/director/install";
 import { NavigationConfiguration } from "./navigation";
 import { NUsightNetwork } from "./network/nusight_network";
 
@@ -40,6 +41,7 @@ installVision({ nav, appModel, nusightNetwork, Menu });
 installVisualMesh({ nav, appModel, nusightNetwork, Menu });
 installProfiler({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
+installDirector({ nav, appModel, nusightNetwork, Menu });
 
 configure({ enforceActions: "observed" });
 createRoot(document.getElementById("root")!).render(<AppView nav={nav} />);
