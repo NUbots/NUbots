@@ -141,7 +141,7 @@ namespace module::purpose {
 
 
         // Trigger when stdin has something to read
-        on<IO>(STDIN_FILENO, IO::READ).then([this] {
+        on<Always>().then([this] {
             // Get the character the user has typed
             switch (getch()) {
                 case KEY_UP:  // Change selection up
