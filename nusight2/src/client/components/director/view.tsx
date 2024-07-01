@@ -21,6 +21,8 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
 
     const { robots, selectedDirectorRobot } = model;
 
+    const messageTypes = ["skill", "planning"]
+
     console.log("DirectorView", selectedDirectorRobot)
     // console.log("Provider", selectedDirectorRobot?.providers[0])
 
@@ -38,70 +40,134 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                 </div>
             </Menu>
             <div className="m-10">
-                Providers:
-                {selectedDirectorRobot?.providers
-                    .filter(provider => provider.name.startsWith("message::skill") && provider.active)
-                    .map(provider => (
-                        <div key={provider.id} className="bg-green-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
-                            {provider.name}
+                <div className="my-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
+                    <div className="text-lg bg-gray-200 py-1 px-4 w-fit rounded mb-4 mx-1">message::skill</div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Active, Not Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::skill") && provider.active && !provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::skill::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
                         </div>
-                    ))}
-                <div className="my-4 bg-blue-50 p-4 border border-2 border-blue-400 rounded">
-                    <h1 className="text-lg">Skill</h1>
-                    <div className="flex-wrap flex">
-                        <div className="my-4 bg-blue-100 p-4 border border-2 border-blue-400 rounded">
-                            <h2 className="text-md">Active</h2>
-                            <div className="flex-wrap flex">
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-green-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-green-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessasdfgeName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> Mesdf sad fssageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                            </div>
-
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Active, Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::skill") && provider.active && provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::skill::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
                         </div>
-                        <div className="my-4 bg-blue-100 p-4 border border-2 border-gray-400 rounded">
-                            <h2 className="text-md">Inactive</h2>
-                            <div className="flex-wrap flex">
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> Mesdf sad fssageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                                <div className="bg-gray-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                            </div>
-
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Inactive, Not Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::skill") && !provider.active && !provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::skill::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
+                        </div>
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Inactive, Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::skill") && !provider.active && provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::skill::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
                         </div>
                     </div>
                 </div>
-                <div className="my-4 bg-blue-100 p-4 border border-2 border-blue-400 rounded">
-                    <h1 className="text-lg">Planning</h1>
-                    <div className="flex-wrap flex">
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessasdfgeName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> Mesdf sad fssageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> sdfa</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessaadgeName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> Messsadf saageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessaadfgeName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
-                        <div className="bg-blue-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500"> MessageName</div>
+                <div className="my-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
+                    <div className="text-lg bg-gray-200 py-1 px-4 w-fit rounded mb-4 mx-1">message::actuation</div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Active, Not Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::actuation") && provider.active && !provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::actuation::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
+                        </div>
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Active, Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::actuation") && provider.active && provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::actuation::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
+                        </div>
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Inactive, Not Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::actuation") && !provider.active && !provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::actuation::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
+                        </div>
+                        <div className="bg-gray-200 border-gray-400 border border-2 p-3 rounded ">
+                            Inactive, Done
+                            <div className="flex flex-wrap">
+                                {selectedDirectorRobot?.providers
+                                    .filter(provider => provider.name.startsWith("message::actuation") && !provider.active && provider.done)
+                                    .map(provider => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name.replace("message::actuation::", "")}
+                                            </div>
+                                        </div>
+                                    ))}</div>
+                        </div>
                     </div>
                 </div>
+                {/* <div className="my-4 bg-blue-50 p-4 border border-2 border-blue-400 rounded">
+                    <div className="text-lg bg-blue-100 p-1 w-fit rounded mb-4 mx-1">message::planning</div>
+                    <div className="bg-green-200 w-50% flex">
+                        {selectedDirectorRobot?.providers
+                            .filter(provider => provider.name.startsWith("message::planning") && provider.active)
+                            .map(provider => (
+                                <div key={provider.id} className="bg-green-200 flex w-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                    <div>
+                                        {provider.name.replace("message::skill", "")}
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+                </div> */}
             </div>
         </div >
     );
