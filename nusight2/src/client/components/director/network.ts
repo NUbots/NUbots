@@ -26,26 +26,23 @@ export class DirectorNetwork {
   @action.bound
   private onDirectorMessage(robotModel: RobotModel, message: DirectorMessage) {
     const robot = DirectorRobotModel.of(robotModel);
-    // console.log("Received director message: ", message);
-    // console.log("Robot: ", robot);
-    // Set a robot parameter from the message
-    robot.providers = [];
+
+    robot.providers.clear();
     message.providers.forEach((provider) => {
       const newProvider = {
-        name: provider.name ?? "",
-        active: provider.active ?? false,
-        done: provider.done ?? false,
+      layer: provider.name?.match(/message::(.*?)::/)?.[1] ?? "",
+      name: provider.name?.match(/message::.*::(.*)/)?.[1] ?? "",
+      active: provider.active ?? false,
+      done: provider.done ?? false,
       };
-      robot.providers.push(newProvider);
+
+      if (!robot.providers.has(newProvider.layer)) {
+        robot.providers.set(newProvider.layer, []);
+      }
+      robot.providers.get(newProvider.layer)?.push(newProvider);
+
+
     });
-    // console.log(robot.providers)
-    // for (const provider of message.providers) {
-    //   robot.providers.push({
-    //     name: provider.name ?? "",
-    //     active: provider.active ?? false,
-    //     done: provider.done ?? false,
-    //   });
-    // console.log(robot.providers[1])
-    // }
+    console.log(robot.providers.keys());
   }
 }

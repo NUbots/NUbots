@@ -37,10 +37,6 @@ export class DirectorModel {
       return this.selectedRobot ? DirectorRobotModel.of(this.selectedRobot) : undefined;
     }
 
-    // @computed get robots(): DirectorRobotModel[] {
-    //     return this.appModel.robots.map((robot) => DirectorRobotModel.of(robot));
-    //   }
-    // }
 }
 export interface Provider {
     name: string;
@@ -52,14 +48,7 @@ export class DirectorRobotModel {
     robotModel: RobotModel;
 
     @observable.shallow messages: DirectorMessage[] = [];
-    @observable.shallow providers: Provider[] = [];
-
-    // @computed
-    // get skills(): string[] {
-    //     return this.providers
-    //         .filter((provider: Provider) => provider.active)
-    //         .map((provider: Provider) => provider.name);
-    // }
+    @observable.shallow providers: Map<string, Provider[]> = new Map();
 
     constructor(robotModel: RobotModel) {
         this.robotModel = robotModel;
