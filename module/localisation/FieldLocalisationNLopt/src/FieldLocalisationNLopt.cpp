@@ -318,14 +318,11 @@ namespace module::localisation {
 
             // Only consider goal post cost if there are two goals
             if (goals && goals->goals.size() == 2) {
-                // log<NUClear::DEBUG>("Goal posts detected");
-                // log<NUClear::DEBUG>("Goal post expected distance apart: ", expected_goal_post_distance);
                 // Ensure the goal posts are roughly correct distance apart
                 auto Hwc              = Eigen::Isometry3d(goals->Hcw).inverse();
                 auto rGWw_1           = Hwc * (goals->goals[0].post.bottom * goals->goals[0].post.distance);
                 auto rGWw_2           = Hwc * (goals->goals[1].post.bottom * goals->goals[1].post.distance);
                 double distance_apart = (rGWw_1 - rGWw_2).norm();
-                // log<NUClear::DEBUG>("Goal post distance apart: ", distance_apart);
                 if (std::abs(distance_apart - expected_goal_post_distance) < cfg.goal_post_error_tolerance) {
 
                     auto rGFf_left  = Hfw * rGWw_1;
@@ -338,9 +335,6 @@ namespace module::localisation {
                     // Calculate the distance between the goal posts
                     double left_distance  = (rGFf_left - expected_goal_post_postions.left).norm();
                     double right_distance = (rGFf_right - expected_goal_post_postions.right).norm();
-
-                    // log<NUClear::DEBUG>("Goal post distance left: ", left_distance);
-                    // log<NUClear::DEBUG>("Goal post distance right: ", right_distance);
 
                     // Add the cost of the distance between the goal posts
                     cost += cfg.goal_post_distance_weight * std::pow(left_distance, 2);

@@ -51,7 +51,6 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
-    using message::vision::Goal;
     using message::vision::Goals;
 
     using utility::localisation::Landmark;
