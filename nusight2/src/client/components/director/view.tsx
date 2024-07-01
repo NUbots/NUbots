@@ -44,41 +44,53 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                     <div className="my-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
                         <div className="text-lg bg-gray-200 py-1 px-4 w-fit h-fit rounded mb-4 mx-1">{layerName}</div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-wrap bg-gray-200 p-2 rounded ">
-                                {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => provider.active && !provider.done).map((provider) => (
-                                    <div key={provider.id} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
-                                        <div>
-                                            {provider.name}
+                            <div className="bg-gray-200 p-2 rounded ">
+                                Active, Not Done
+                                <div className="flex flex-wrap">
+                                    {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => provider.active && !provider.done).map((provider) => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex flex-wrap bg-gray-200 p-2 rounded ">
-                                {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => provider.active && provider.done).map((provider) => (
-                                    <div key={provider.id} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
-                                        <div>
-                                            {provider.name}
+                            <div className="bg-gray-200 p-2 rounded ">
+                                Active, Done
+                                <div className="flex flex-wrap">
+                                    {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => provider.active && provider.done).map((provider) => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex flex-wrap bg-gray-200 p-2 rounded ">
-                                {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => !provider.active && !provider.done).map((provider) => (
-                                    <div key={provider.id} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
-                                        <div>
-                                            {provider.name}
+                            <div className="bg-gray-200 p-2 rounded ">
+                                Not Active, Not Done
+                                <div className="flex flex-wrap">
+                                    {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => !provider.active && !provider.done).map((provider) => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex flex-wrap bg-gray-200 p-2 rounded ">
-                                {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => !provider.active && provider.done).map((provider) => (
-                                    <div key={provider.id} className="bg-gray-100 flex w-fit h-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
-                                        <div>
-                                            {provider.name}
+                            <div className="bg-gray-200 p-2 rounded ">
+                                Not Active, Done
+                                <div className="flex flex-wrap">
+                                    {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => !provider.active && provider.done).map((provider) => (
+                                        <div key={provider.id} className="bg-gray-100 flex w-fit h-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                            <div>
+                                                {provider.name}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </div>
 

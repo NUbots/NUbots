@@ -28,12 +28,13 @@ export class DirectorNetwork {
     const robot = DirectorRobotModel.of(robotModel);
 
     robot.providers.clear();
+    // console.log("Message", message.providers)
     message.providers.forEach((provider) => {
       const newProvider = {
-      layer: provider.name?.match(/message::(.*?)::/)?.[1] ?? "",
-      name: provider.name?.match(/message::.*::(.*)/)?.[1] ?? "",
-      active: provider.active ?? false,
-      done: provider.done ?? false,
+        layer: provider.name?.match(/^message::(.*?)::/)?.[1] ?? "",
+        name: provider.name?.match(/^message::.*::(.*)/)?.[1] ?? "",
+        active: provider.active ?? false,
+        done: provider.done ?? false,
       };
 
       if (!robot.providers.has(newProvider.layer)) {
@@ -43,6 +44,5 @@ export class DirectorNetwork {
 
 
     });
-    console.log(robot.providers.keys());
   }
 }
