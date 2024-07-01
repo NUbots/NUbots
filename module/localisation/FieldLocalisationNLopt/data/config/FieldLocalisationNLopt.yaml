@@ -38,7 +38,7 @@ state_change_weight: 0.5
 goal_post_distance_weight: 1
 
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.5, 0.5, 0.5]
+change_limit: [0.1, 0.1, 0.05]
 
 # Minimum distance an associated landmark needs to be for measurement update
 min_association_distance: 0.5
