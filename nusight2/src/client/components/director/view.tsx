@@ -18,14 +18,7 @@ interface DirectorViewProps {
 
 export const DirectorView = observer(function DirectorView(props: DirectorViewProps) {
     const { Menu, model, controller } = props;
-
     const { robots, selectedDirectorRobot } = model;
-
-    const messageTypes = ["skill", "planning"]
-
-    // console.log("DirectorView", selectedDirectorRobot)
-    // // console.log("Provider", selectedDirectorRobot?.providers[0])
-
 
     return (
         <div className="w-full flex flex-col">

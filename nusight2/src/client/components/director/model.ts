@@ -49,6 +49,7 @@ export class DirectorRobotModel {
 
     @observable.shallow messages: DirectorMessage[] = [];
     @observable.shallow providers: Map<string, Provider[]> = new Map();
+    @observable.shallow rootTasks: string[] = [];
 
     constructor(robotModel: RobotModel) {
         this.robotModel = robotModel;

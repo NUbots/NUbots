@@ -28,11 +28,15 @@ export class DirectorNetwork {
     const robot = DirectorRobotModel.of(robotModel);
 
     robot.providers.clear();
-    // console.log("Message", message.providers)
     message.providers.forEach((provider) => {
+      if (provider.name?.startsWith("extension::behaviour::commands::RootType")) {
+        // console.log("RootType", provider.name);
+        // // What to do here?
+        return;
+      }
       const newProvider = {
-        layer: provider.name?.match(/^message::(.*?)::/)?.[1] ?? "",
-        name: provider.name?.match(/^message::.*::(.*)/)?.[1] ?? "",
+        layer: provider.name?.match(/^message::(.*?)::(.*)/)?.[1] ?? "",
+        name: provider.name?.match(/^message::(.*?)::(.*)/)?.[2] ?? "",
         active: provider.active ?? false,
         done: provider.done ?? false,
       };
