@@ -41,23 +41,11 @@ namespace module::actuation {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.mode        = config["mode"].as<std::string>();
 
-            cfg.desired_gains = config["servo_gains"].as<std::map<std::string, double>>();
-
-            // Set gains of servo to startup phase values
+            // Clear the values in case this isn't the first trigger of configuration
             cfg.servo_states.clear();
-            cfg.startup_gain = config["startup"]["servo_gain"].as<double>();
-            for (const auto& servo : cfg.desired_gains) {
-                utility::input::ServoID servo_id(servo.first);
-                cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
-            }
 
-            // Emit request to set desired gains after a delay
-            cfg.set_gain_delay = std::chrono::seconds(config["startup"]["duration"].as<int>());
-            emit<Scope::DELAY>(std::make_unique<SetGains>(), cfg.set_gain_delay);
-        });
-
-        on<Trigger<SetGains>>().then([this] {
-            for (const auto& [key, gain] : cfg.desired_gains) {
+            auto gains = config["servo_gains"].as<std::map<std::string, double>>();
+            for (const auto& [key, gain] : gains) {
                 utility::input::ServoID servo_id(key);
                 cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
             }

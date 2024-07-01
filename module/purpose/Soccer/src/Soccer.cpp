@@ -46,6 +46,7 @@
 #include "message/skill/Look.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/StartSafely.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::purpose {
@@ -70,6 +71,7 @@ namespace module::purpose {
     using message::skill::Look;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
+    using message::strategy::StartSafely;
     using message::support::GlobalConfig;
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -94,20 +96,24 @@ namespace module::purpose {
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without these emis, modules that need a Stability and WalkState messages may not run
+            // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Idle stand if not doing anything
             emit<Task>(std::make_unique<StandStill>());
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
-            // Emit find purpose and create robocup message with necessary info
-            find_purpose();
+            // Create robocup message with necessary info
+            find_purpose_message();
+            // This emit starts the tree to play soccer
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
+            // When starting, we want to safely move to the stand position
+            emit<Task>(std::make_unique<StartSafely>(), 2);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 2);
+            emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
 
-        on<Provide<FindPurpose>, Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, Optional<With<Robocup>>>().then([this] {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER:
@@ -150,7 +156,7 @@ namespace module::purpose {
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
-                find_purpose();
+                find_purpose_message();
             }
         });
 
@@ -160,7 +166,7 @@ namespace module::purpose {
             if (!cfg.force_playing) {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
-                find_purpose();
+                find_purpose_message();
             }
         });
 
@@ -193,7 +199,7 @@ namespace module::purpose {
         });
     }
 
-    void Soccer::find_purpose() {
+    void Soccer::find_purpose_message() {
         // This emit starts the tree to play soccer
         emit<Task>(std::make_unique<FindPurpose>(), 1);
 

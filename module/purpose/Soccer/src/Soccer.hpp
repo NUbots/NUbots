@@ -117,7 +117,7 @@ namespace module::purpose {
         Position soccer_position;
 
         /// @brief Utility to set up robocup message to find purpose
-        void find_purpose();
+        void find_purpose_message();
 
         /// @brief Add and update active robots
         /// @param robocup A robocup message sent by another robot
@@ -138,6 +138,8 @@ namespace module::purpose {
         /// @param incoming_robot_id The id of the robot that send the robocup message
         void follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id);
 
+        /// @brief The rate the find purpose provider will run, to drive the rest of the system
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.

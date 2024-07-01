@@ -67,11 +67,8 @@ namespace module::localisation {
                     // Position of robot {r} in world {w} space
                     auto rRWw = Hwc * vision_robot.rRCc;
 
-                    // Only consider vision measurements within the green horizon
-                    if (point_in_convex_hull(horizon.horizon, rRWw)) {
-                        // Data association: find tracked robot which is associated with the vision measurement
-                        data_association(rRWw);
-                    }
+                    // Data association: find tracked robot which is associated with the vision measurement
+                    data_association(rRWw);
                 }
             }
 
