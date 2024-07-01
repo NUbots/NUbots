@@ -116,8 +116,11 @@ namespace module::purpose {
         /// @brief Store's the robot's current soccer position
         Position soccer_position;
 
+        /// @brief Last Robocup message sent by the leader
+        RoboCup leader_message;
+
         /// @brief Utility to set up robocup message to find purpose
-        void find_purpose_message();
+        void find_purpose();
 
         /// @brief Add and update active robots
         /// @param robocup A robocup message sent by another robot
@@ -132,6 +135,7 @@ namespace module::purpose {
 
         /// @brief Decide the correct soccer positions
         void give_directions();
+
 
         /// @brief Emit purpose based on leader's instructions
         /// @param robocup A robocup message sent by another robot
