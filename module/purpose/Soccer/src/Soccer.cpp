@@ -191,13 +191,17 @@ namespace module::purpose {
             log<NUClear::DEBUG>("active robots length ", int(active_robots.size()));
         });
 
+        // TODO: this is causing a bug on "unpenalisation"
+        // Robots are emitting a stale purpose, causing them to be in other robot's active robot's out of order
+        // Fix me...
+
         // Emit our own Purpose for NUsight debugging
-        on<Every<2, Per<std::chrono::seconds>>, With<Purposes>>().then([this](const Purposes& purposes) {
-            log<NUClear::DEBUG>("Current soccer position ", soccer_position);
-            auto purposes_msg = std::make_unique<Purposes>(purposes);
-            purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
-            emit(std::move(purposes_msg));
-        });
+        // on<Every<2, Per<std::chrono::seconds>>, With<Purposes>>().then([this](const Purposes& purposes) {
+        //     log<NUClear::DEBUG>("Current soccer position ", soccer_position);
+        //     auto purposes_msg = std::make_unique<Purposes>(purposes);
+        //     purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
+        //     emit(std::move(purposes_msg));
+        // });
 
         // Capture leader's last message in case of bad timing
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
@@ -274,35 +278,33 @@ namespace module::purpose {
     void Soccer::give_directions() {
         bool self_is_leader = !active_robots.empty() && active_robots.front().robot_id == player_id;
         if (cfg.position == Position::DYNAMIC && self_is_leader) {
-            if (self_is_leader) {
-                auto purposes_msg   = std::make_unique<Purposes>();
-                uint8_t striker_idx = find_striker();
+            auto purposes_msg   = std::make_unique<Purposes>();
+            uint8_t striker_idx = find_striker();
 
-                // Leader assigns own position
-                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                soccer_position = Position("STRIKER");
-                log<NUClear::INFO>("Leader made striker");
+            // Leader assigns own position
+            emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+            soccer_position = Position("STRIKER");
+            log<NUClear::INFO>("Leader made striker");
 
-                // Decide soccer positions
-                for (int i = 0; i < int(active_robots.size()); ++i) {
-                    if (i == striker_idx) {
-                        active_robots[i].position = Position("STRIKER");
-                        purposes_msg->purpose_commands.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
-                    } else {
-                        active_robots[i].position = Position("DEFENDER");
-                        purposes_msg->purpose_commands.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
-                    }
+            // Decide soccer positions
+            for (int i = 0; i < int(active_robots.size()); ++i) {
+                if (i == striker_idx) {
+                    active_robots[i].position = Position("STRIKER");
+                    purposes_msg->purpose_commands.push_back({active_robots[i].robot_id, SoccerPosition::STRIKER});
+                } else {
+                    active_robots[i].position = Position("DEFENDER");
+                    purposes_msg->purpose_commands.push_back({active_robots[i].robot_id, SoccerPosition::DEFENDER});
                 }
-
-                // Emit the startup time of the module to claim leadership
-                purposes_msg->startup_time = startup_time;
-
-                // Emit info for NUsight
-                purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
-                purposes_msg->purpose.player_id = player_id;
-
-                emit(purposes_msg);
             }
+
+            // Emit the startup time of the module to claim leadership
+            purposes_msg->startup_time = startup_time;
+
+            // Emit info for NUsight
+            purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
+            purposes_msg->purpose.player_id = player_id;
+
+            emit(purposes_msg);
         }
     };
 
