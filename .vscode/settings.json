@@ -18,24 +18,13 @@
   "files.associations": {
     "*.role": "cmake",
     ".clang-tidy": "yaml",
-    ".Doxyfile": "properties",
-    "*.tcc": "cpp",
-    "optional": "cpp",
-    "ratio": "cpp",
-    "system_error": "cpp",
-    "array": "cpp",
-    "functional": "cpp",
-    "regex": "cpp",
-    "tuple": "cpp",
-    "type_traits": "cpp",
-    "utility": "cpp",
-    "variant": "cpp"
+    ".Doxyfile": "properties"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
   "[python]": {
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
+      "source.organizeImports": true
     }
   },
   "[jsonc]": {
