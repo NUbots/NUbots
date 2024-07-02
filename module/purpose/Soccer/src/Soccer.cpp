@@ -53,6 +53,7 @@ namespace module::purpose {
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::ButtonLeftDown;
     using message::input::ButtonMiddleDown;
     using message::input::GameEvents;
     using message::localisation::ResetFieldLocalisation;
@@ -75,6 +76,8 @@ namespace module::purpose {
 
             // Get the soccer position, if not valid option then default to striker
             cfg.position = Position(config["position"].as<std::string>());
+
+            cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
         });
 
         // Start the Director graph for the soccer scenario!
@@ -122,13 +125,33 @@ namespace module::purpose {
             }
         });
 
+        // Left button pauses the soccer scenario
+        on<Trigger<ButtonLeftDown>, Single>().then([this] {
+            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
+            emit<Scope::DIRECT>(std::make_unique<EnableIdle>());
+            idle = true;
+        });
+
+        on<Trigger<EnableIdle>, Single>().then([this] {
+            // Stop all tasks and stand still
+            emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            log<NUClear::INFO>("Idle mode enabled");
+        });
+
+        // Middle button resumes the soccer scenario
         on<Trigger<ButtonMiddleDown>, Single>().then([this] {
-            // Middle button forces playing
-            log<NUClear::INFO>("Middle button pressed!");
-            if (!cfg.force_playing) {
-                log<NUClear::INFO>("Force playing started.");
-                cfg.force_playing = true;
+            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
+            // Restart the Director graph for the soccer scenario after a delay
+            emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
+            idle = false;
+        });
+
+        on<Trigger<DisableIdle>, Single>().then([this] {
+            // If the robot is not idle, restart the Director graph for the soccer scenario!
+            if (!idle) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                log<NUClear::INFO>("Idle mode disabled");
             }
         });
     }
