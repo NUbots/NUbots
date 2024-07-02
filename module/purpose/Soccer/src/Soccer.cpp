@@ -198,7 +198,7 @@ namespace module::purpose {
         on<Every<2, Per<std::chrono::seconds>>, With<Purposes>>().then([this](const Purposes& purposes) {
             log<NUClear::DEBUG>("Current soccer position ", soccer_position);
             auto purposes_msg = std::make_unique<Purposes>(purposes);
-            purposes_msg->purpose.purpose = soccer_position.toSoccerPosition();
+            purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
             emit(std::move(purposes_msg));
         });
 
@@ -304,7 +304,7 @@ namespace module::purpose {
                 purposes_msg->startup_time = startup_time;
 
                 // Emit info for NUsight
-                purposes_msg->purpose.purpose = soccer_position.toSoccerPosition();
+                purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
                 purposes_msg->purpose.player_id = player_id;
 
                 emit(purposes_msg);

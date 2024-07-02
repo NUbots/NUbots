@@ -68,7 +68,7 @@ namespace module::purpose {
                 // clang-format on
             }
 
-            SoccerPosition toSoccerPosition() const {
+            SoccerPosition to_soccer_position() const {
                 switch (value) {
                     case Value::STRIKER:
                         return SoccerPosition::STRIKER;
@@ -135,7 +135,6 @@ namespace module::purpose {
 
         /// @brief Decide the correct soccer positions
         void give_directions();
-
 
         /// @brief Emit purpose based on leader's instructions
         /// @param robocup A robocup message sent by another robot
