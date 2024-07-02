@@ -237,7 +237,6 @@ namespace module::purpose {
     }
 
     void Soccer::manage_active_robots(const RoboCup& robocup) {
-        //TODO: segafault around here somewhere on startup I think
         // Do not manage penalised robots, or robots that are not dynamic
         if (robocup.state == State::PENALISED || (robocup.current_pose.player_id != player_id && robocup.purpose_commands.purpose_commands.empty())) {
             return;
