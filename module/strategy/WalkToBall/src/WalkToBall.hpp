@@ -55,6 +55,10 @@ namespace module::strategy {
 
             /// @brief Maximum angle error to the ball before we need to walk to approach distance point
             double max_angle_error = 0.0;
+
+            /// @brief Offset from ball in field space to walk to when approaching the ball from in "front"
+            Eigen::Vector3d avoid_ball_offset = Eigen::Vector3d::Zero();
+
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space
