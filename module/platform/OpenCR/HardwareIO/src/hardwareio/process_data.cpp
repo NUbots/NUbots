@@ -31,6 +31,7 @@
 
 #include "message/output/Buzzer.hpp"
 
+#include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
 
 namespace module::platform::OpenCR {
@@ -84,9 +85,10 @@ namespace module::platform::OpenCR {
                                            -convert::acc(data.acc[1]),   // Y
                                            -convert::acc(data.acc[2]));  // Z
 
-        opencr_state.rpy = Eigen::Vector3f(convert::rpy(data.rpy[0]),   // Roll
-                                           convert::rpy(data.rpy[1]),   // Pitch
-                                           convert::rpy(data.rpy[2]));  // Yaw
+        opencr_state.rpy =
+            Eigen::Vector3f(utility::math::angle::normalizeAngle(convert::rpy(data.rpy[0]) + M_PI),  // Roll
+                            convert::rpy(data.rpy[1]),                                               // Pitch
+                            convert::rpy(data.rpy[2]));                                              // Yaw
 
         // Command send/receive errors only
         opencr_state.packet_error = packet.error;
