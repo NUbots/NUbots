@@ -24,10 +24,10 @@ The resulting filtered data will then be outputted as `message::input::Sensors` 
 ## Emits
 
 - `message::input::Sensors` with filtered data from the input.
-- `message::platform::ButtonLeftDown` when button pressed.
-- `message::platform::ButtonLeftUp` when button released.
-- `message::platform::ButtonMiddleDown` when button pressed.
-- `message::platform::ButtonMiddleUp` when button released.
+- `message::input::ButtonLeftDown` when button pressed.
+- `message::input::ButtonLeftUp` when button released.
+- `message::input::ButtonMiddleDown` when button pressed.
+- `message::input::ButtonMiddleUp` when button released.
 - `message::eye::DataPoint` if log_level >= DEBUG, indicating if feet are down.
 
 ## Dependencies
