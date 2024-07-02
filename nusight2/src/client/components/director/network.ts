@@ -35,6 +35,7 @@ export class DirectorNetwork {
         return;
       }
       const newProvider = {
+        id: provider.name ?? "",
         layer: provider.name?.match(/^message::(.*?)::(.*)/)?.[1] ?? "",
         name: provider.name?.match(/^message::(.*?)::(.*)/)?.[2] ?? "",
         active: provider.active ?? false,

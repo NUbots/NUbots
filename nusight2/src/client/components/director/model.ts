@@ -40,6 +40,7 @@ export class DirectorModel {
 }
 export interface Provider {
     name: string;
+    id: string;
     active: boolean;
     done: boolean;
 }
