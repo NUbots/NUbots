@@ -6,10 +6,12 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { DirectorController } from "./controller";
 import { DirectorModel } from "./model";
+import { DirectorNetwork } from "./network";
 
 interface DirectorViewProps {
   controller: DirectorController;
   model: DirectorModel;
+  network: DirectorNetwork;
   Menu: React.ComponentType<PropsWithChildren<any>>;
 }
 
@@ -57,9 +59,8 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                     .map((provider) => (
                       <div
                         key={provider.id}
-                        className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 ${
-                          provider.done ? "bg-green-100" : ""
-                        }`}
+                        className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 ${provider.done ? "bg-green-100" : ""
+                          }`}
                       >
                         <div>
                           <div className="font-semibold">{provider.name}</div>
@@ -78,9 +79,8 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                     .map((provider) => (
                       <div
                         key={provider.id}
-                        className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 border-dashed ${
-                          provider.done ? "bg-green-100" : ""
-                        }`}
+                        className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 border-dashed ${provider.done ? "bg-green-100" : ""
+                          }`}
                       >
                         <div>
                           <div className="font-semibold">{provider.name}</div>
