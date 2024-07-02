@@ -36,6 +36,7 @@
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
@@ -54,9 +55,12 @@ namespace module::purpose {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::ButtonLeftDown;
+    using message::input::ButtonLeftUp;
     using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
     using message::localisation::ResetFieldLocalisation;
+    using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
@@ -129,8 +133,11 @@ namespace module::purpose {
         on<Trigger<ButtonLeftDown>, Single>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             emit<Scope::DIRECT>(std::make_unique<EnableIdle>());
+            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
             idle = true;
         });
+
+        on<Trigger<ButtonLeftUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<EnableIdle>, Single>().then([this] {
             // Stop all tasks and stand still
@@ -144,8 +151,11 @@ namespace module::purpose {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             // Restart the Director graph for the soccer scenario after a delay
             emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
+            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
             idle = false;
         });
+
+        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<DisableIdle>, Single>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!

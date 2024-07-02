@@ -66,19 +66,18 @@ namespace module::localisation {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("FieldLocalisation.yaml").then([this](const Configuration& config) {
-            this->log_level                         = config["log_level"].as<NUClear::LogLevel>();
-            cfg.grid_size                           = config["grid_size"].as<double>();
-            cfg.save_map                            = config["save_map"].as<bool>();
-            cfg.n_particles                         = config["n_particles"].as<int>();
-            cfg.initial_state                       = Eigen::Vector3d(config["initial_state"].as<Expression>());
-            cfg.initial_covariance.diagonal()       = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
-            cfg.process_noise.diagonal()            = Eigen::Vector3d(config["process_noise"].as<Expression>());
-            cfg.starting_side                       = config["starting_side"].as<std::string>();
-            cfg.start_time_delay                    = config["start_time_delay"].as<double>();
-            cfg.use_ground_truth_localisation       = config["use_ground_truth_localisation"].as<bool>();
-            filter.model.process_noise_diagonal     = config["process_noise"].as<Expression>();
-            filter.model.n_particles                = config["n_particles"].as<int>();
-            cfg.buzzer.localisation_reset_frequency = config["buzzer"]["localisation_reset_frequency"].as<float>();
+            this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
+            cfg.grid_size                       = config["grid_size"].as<double>();
+            cfg.save_map                        = config["save_map"].as<bool>();
+            cfg.n_particles                     = config["n_particles"].as<int>();
+            cfg.initial_state                   = Eigen::Vector3d(config["initial_state"].as<Expression>());
+            cfg.initial_covariance.diagonal()   = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
+            cfg.process_noise.diagonal()        = Eigen::Vector3d(config["process_noise"].as<Expression>());
+            cfg.starting_side                   = config["starting_side"].as<std::string>();
+            cfg.start_time_delay                = config["start_time_delay"].as<double>();
+            cfg.use_ground_truth_localisation   = config["use_ground_truth_localisation"].as<bool>();
+            filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
+            filter.model.n_particles            = config["n_particles"].as<int>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -116,16 +115,6 @@ namespace module::localisation {
             last_time_update_time = NUClear::clock::now();
             startup_time          = NUClear::clock::now();
         });
-
-        // When the left (black) button is pressed, reset localisation and ring the buzzer after
-        on<Trigger<ButtonLeftDown>>().then([this]() {
-            // Reset localisation and ring the buzzer
-            emit(std::make_unique<ResetFieldLocalisation>());
-            emit(std::make_unique<Buzzer>(cfg.buzzer.localisation_reset_frequency));
-        });
-
-        // Silence the buzzer after the user lets go of the left (black) pin
-        on<Trigger<ButtonLeftUp>>().then([this]() { emit(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             filter.set_state(cfg.initial_hypotheses);

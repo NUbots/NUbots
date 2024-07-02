@@ -30,7 +30,3 @@ start_time_delay: 5
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
-
-# Buzzer fields for when the left (black) button is pressed
-buzzer:
-  localisation_reset_frequency: 1280

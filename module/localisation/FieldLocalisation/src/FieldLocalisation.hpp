@@ -123,13 +123,6 @@ namespace module::localisation {
 
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
-            /// @brief Struct to store buzzer fields
-            struct {
-                /// @brief Container for the buzzer frequency when localisation is reset
-                float localisation_reset_frequency = 0.0;
-                /// @brief Container for the buzzer duration (milliseconds)
-                int duration = 0;
-            } buzzer;
         } cfg;
 
         /// @brief Last time filter was updated
