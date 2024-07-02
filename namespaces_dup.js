@@ -885,6 +885,7 @@ var namespaces_dup =
           [ "find_lower_tangent", "ConvexHull_8hpp.html#a3834008ae24c0efe35b215f35de1fb0b", null ],
           [ "find_upper_tangent", "ConvexHull_8hpp.html#abdca9af2b646b9e2da4cc64bb9942c5d", null ],
           [ "graham_scan", "ConvexHull_8hpp.html#aee1c31cd032fa65f68c83674699d416c", null ],
+          [ "intersection_line_and_circle", "intersection_8hpp.html#ae2df90154f61445fe0c96d0c56e15753", null ],
           [ "lower_point", "ConvexHull_8hpp.html#a16089399363842b2fe986f8718dd55fc", null ],
           [ "merge_hulls", "ConvexHull_8hpp.html#a8a8d6a936864652ba6eb38b16176fc8e", null ],
           [ "partition_points", "ConvexHull_8hpp.html#a05545cab3af6457a484a4d4fbfe74102", null ],

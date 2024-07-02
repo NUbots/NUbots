@@ -213,31 +213,18 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a15b130c66da3bb2a655369f3e6758356"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a15b130c66da3bb2a655369f3e6758356">constrain_velocity</a> (const Eigen::Vector3d &amp;v, double vx_max, double vy_max, double w_max)</td></tr>
-<tr class="memdesc:a15b130c66da3bb2a655369f3e6758356"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrain a velocity vector to ensure it is within the limits.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#a15b130c66da3bb2a655369f3e6758356">More...</a><br /></td></tr>
-<tr class="separator:a15b130c66da3bb2a655369f3e6758356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b6595e47f523bc2454793cc02d86345"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a9b6595e47f523bc2454793cc02d86345">constrain_velocity</a> (const Eigen::Vector3d &amp;v)</td></tr>
+<tr class="memdesc:a9b6595e47f523bc2454793cc02d86345"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrain a velocity vector to ensure it is within the limits.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#a9b6595e47f523bc2454793cc02d86345">More...</a><br /></td></tr>
+<tr class="separator:a9b6595e47f523bc2454793cc02d86345"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; Eigen::Vector2d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#afc0aa37ffad11d1c6b0820b1012bcf47">get_obstacles</a> (const std::vector&lt; Eigen::Vector2d &gt; &amp;all_obstacles, const Eigen::Vector2d &amp;rDRr)</td></tr>
+<tr class="memdesc:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the closest obstacle in the path to the target, including obstacles close to that obstacle.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#afc0aa37ffad11d1c6b0820b1012bcf47">More...</a><br /></td></tr>
+<tr class="separator:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:ae03419aae8391c252278d9b6133e49a6"><td class="memItemLeft" align="right" valign="top"><a id="ae03419aae8391c252278d9b6133e49a6"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#ae03419aae8391c252278d9b6133e49a6">angle_to_desired_heading</a> = 0.0</td></tr>
-<tr class="memdesc:ae03419aae8391c252278d9b6133e49a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Angle between robot and target heading. <br /></td></tr>
-<tr class="separator:ae03419aae8391c252278d9b6133e49a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fa5c8d676b9425d43b12836ae10acac"><td class="memItemLeft" align="right" valign="top"><a id="a4fa5c8d676b9425d43b12836ae10acac"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a4fa5c8d676b9425d43b12836ae10acac">angle_to_target</a> = 0.0</td></tr>
-<tr class="memdesc:a4fa5c8d676b9425d43b12836ae10acac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Angle between robot and target point. <br /></td></tr>
-<tr class="separator:a4fa5c8d676b9425d43b12836ae10acac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e84da1d1dc1c917d65ec5e6fda7aa5c"><td class="memItemLeft" align="right" valign="top"><a id="a6e84da1d1dc1c917d65ec5e6fda7aa5c"></a>
 struct <a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html">module::planning::PlanWalkPath::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a6e84da1d1dc1c917d65ec5e6fda7aa5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad206bacf0d40a8311288635d1ddfce27"><td class="memItemLeft" align="right" valign="top"><a id="ad206bacf0d40a8311288635d1ddfce27"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#ad206bacf0d40a8311288635d1ddfce27">max_velocity_magnitude</a> = 0.0</td></tr>
-<tr class="memdesc:ad206bacf0d40a8311288635d1ddfce27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum velocity magnitude of the walk command to clamp "acceleration". <br /></td></tr>
-<tr class="separator:ad206bacf0d40a8311288635d1ddfce27"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb892204ab52be34ebf1539e8fd40dd5"><td class="memItemLeft" align="right" valign="top"><a id="abb892204ab52be34ebf1539e8fd40dd5"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#abb892204ab52be34ebf1539e8fd40dd5">translational_error</a> = 0.0</td></tr>
-<tr class="memdesc:abb892204ab52be34ebf1539e8fd40dd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Norm of translational error from robot to target. <br /></td></tr>
-<tr class="separator:abb892204ab52be34ebf1539e8fd40dd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2642739bb0ad2e7220a8261e4d04009f"><td class="memItemLeft" align="right" valign="top"><a id="a2642739bb0ad2e7220a8261e4d04009f"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a2642739bb0ad2e7220a8261e4d04009f">velocity_magnitude</a> = 0.0</td></tr>
 <tr class="memdesc:a2642739bb0ad2e7220a8261e4d04009f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current magnitude of the translational velocity of the walk command. <br /></td></tr>
@@ -292,8 +279,8 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <tr class="separator:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a15b130c66da3bb2a655369f3e6758356"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15b130c66da3bb2a655369f3e6758356">&#9670;&nbsp;</a></span>constrain_velocity()</h2>
+<a id="a9b6595e47f523bc2454793cc02d86345"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b6595e47f523bc2454793cc02d86345">&#9670;&nbsp;</a></span>constrain_velocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -305,25 +292,48 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
           <td class="memname">Eigen::Vector3d module::planning::PlanWalkPath::constrain_velocity </td>
           <td>(</td>
           <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
+          <td class="paramname"><em>v</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constrain a velocity vector to ensure it is within the limits. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>velocity vector to constrain </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Constrained velocity vector </dd></dl>
+
+</div>
+</div>
+<a id="afc0aa37ffad11d1c6b0820b1012bcf47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc0aa37ffad11d1c6b0820b1012bcf47">&#9670;&nbsp;</a></span>get_obstacles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; Eigen::Vector2d &gt; module::planning::PlanWalkPath::get_obstacles </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; Eigen::Vector2d &gt; &amp;&#160;</td>
+          <td class="paramname"><em>all_obstacles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>vx_max</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>vy_max</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>w_max</em>&#160;</td>
+          <td class="paramtype">const Eigen::Vector2d &amp;&#160;</td>
+          <td class="paramname"><em>rDRr</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -333,22 +343,20 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Constrain a velocity vector to ensure it is within the limits. </p>
+<p>Gets the closest obstacle in the path to the target, including obstacles close to that obstacle. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">v</td><td>velocity vector to constrain </td></tr>
-    <tr><td class="paramname">vx_max</td><td>maximum translational velocity in the x direction </td></tr>
-    <tr><td class="paramname">vy_max</td><td>maximum translational velocity in the y direction </td></tr>
-    <tr><td class="paramname">w_max</td><td>maximum angular velocity </td></tr>
+    <tr><td class="paramname">all_obstacles</td><td>vector of all obstacles in the world </td></tr>
+    <tr><td class="paramname">rDRr</td><td>vector from robot to final target </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Constrained velocity vector </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>vector of closest obstacle in the path to avoid and its neighbours </dd></dl>
 
 </div>
 </div>
@@ -362,7 +370,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html">PlanWalkPath</a></li>
-    <li class="footer">Generated on Tue Jul 2 2024 06:49:01 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jul 2 2024 07:23:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
