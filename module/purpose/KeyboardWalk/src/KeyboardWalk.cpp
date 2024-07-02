@@ -95,7 +95,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<StartSafely>(), 4);
 
             // Stand Still on startup
-            emit<Task>(std::make_unique<StandStill>());
+            // emit<Task>(std::make_unique<StandStill>());
 
             // Ensure UTF-8 is enabled
             std::setlocale(LC_ALL, "en_US.UTF-8");
