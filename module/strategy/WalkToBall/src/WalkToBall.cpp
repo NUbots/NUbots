@@ -72,6 +72,7 @@ namespace module::strategy {
             cfg.ball_approach_distance = config["ball_approach_distance"].as<double>();
             cfg.goal_target_offset     = config["goal_target_offset"].as<double>();
             cfg.max_angle_error        = config["max_angle_error"].as<Expression>();
+            cfg.avoid_ball_offset      = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -135,19 +136,42 @@ namespace module::strategy {
                     // Compute position to kick
                     Eigen::Vector3d rKFf = Eigen::Vector3d::Zero();
 
-                    // If the ball is closer to the goal than the robot and robot is not facing the goal, walk to
-                    // approach point
-                    if (rBFf.x() > rRFf.x() || std::abs(angle_error) > cfg.max_angle_error) {
+                    // If the robot is approaching ball from in front, move to the side of the ball
+                    auto Hfk = Eigen::Isometry3d::Identity();
+                    if (rBFf.x() > rRFf.x()) {
+                        Eigen::Vector3d offset_left  = cfg.avoid_ball_offset;
+                        Eigen::Vector3d offset_right = cfg.avoid_ball_offset.cwiseProduct(Eigen::Vector3d(1, -1, 1));
+                        Eigen::Vector3d rArFf        = rBFf + offset_right;
+                        Eigen::Vector3d rAlFf        = rBFf + offset_left;
+
+                        // Select point closest to robot to avoid ball
+                        if ((rRFf - rArFf).norm() < (rRFf - rAlFf).norm()) {
+                            // Compute desired heading to face the final approach point
+                            rKFf = rBFf - uGBf * cfg.ball_kick_distance - uGBf * cfg.ball_approach_distance;
+                            Eigen::Vector3d rKRf = rKFf - rArFf;
+                            double heading       = std::atan2(rKRf.y(), rKRf.x());
+                            Hfk                  = pos_rpy_to_transform(rArFf, Eigen::Vector3d(0, 0, heading));
+                        }
+                        else {
+                            // Compute desired heading to face the final approach point
+                            rKFf = rBFf - uGBf * cfg.ball_kick_distance - uGBf * cfg.ball_approach_distance;
+                            Eigen::Vector3d rKLf = rKFf - rAlFf;
+                            double heading       = std::atan2(rKLf.y(), rKLf.x());
+                            Hfk                  = pos_rpy_to_transform(rAlFf, Eigen::Vector3d(0, 0, heading));
+                        }
+                    }
+                    else if (std::abs(angle_error) > cfg.max_angle_error) {
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance - uGBf * cfg.ball_approach_distance;
+                        Hfk  = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
                     }
                     else {
                         // Move towards kick distance, where ball_approach_distance is scaled by angle error
                         // to ensure robot is facing the desired heading before reaching kick distance
                         rKFf = rBFf - uGBf * cfg.ball_kick_distance
                                - uGBf * cfg.ball_approach_distance * angle_error_scaling_factor;
+                        Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
                     }
 
-                    auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
 
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk));
                 }
