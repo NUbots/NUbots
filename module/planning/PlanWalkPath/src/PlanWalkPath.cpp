@@ -142,8 +142,8 @@ namespace module::planning {
                         }
 
                         // Add on the obstacle radius
-                        leftmost  = leftmost + perp_direction * cfg.obstacle_radius;
-                        rightmost = rightmost - perp_direction * cfg.obstacle_radius;
+                        leftmost  = leftmost - perp_direction * cfg.obstacle_radius;
+                        rightmost = rightmost + perp_direction * cfg.obstacle_radius;
 
                         // Determine if leftmost or rightmost position has a quicker path
                         const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
