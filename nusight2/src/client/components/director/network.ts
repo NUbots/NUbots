@@ -1,6 +1,6 @@
 import { action } from "mobx";
 
-import { google, message } from "../../../shared/messages";
+import { message } from "../../../shared/messages";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";

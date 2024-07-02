@@ -1,14 +1,11 @@
 import React from "react";
 import { PropsWithChildren } from "react";
-import { action } from "mobx";
 import { observer } from "mobx-react";
 
-import { Icon } from "../icon/view";
-import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { DirectorController } from "./controller";
-import { DirectorModel, DirectorRobotModel } from "./model";
+import { DirectorModel } from "./model";
 
 interface DirectorViewProps {
     controller: DirectorController;
@@ -86,7 +83,6 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 ))}
             </div>
