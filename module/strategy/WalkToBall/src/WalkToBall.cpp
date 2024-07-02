@@ -173,17 +173,7 @@ namespace module::strategy {
 
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk));
             }
-            else {
-                // Move towards kick distance, where ball_approach_distance is scaled by angle error
-                // to ensure robot is facing the desired heading before reaching kick distance
-                rKFf = rBFf - uGBf * cfg.ball_kick_distance
-                       - uGBf * cfg.ball_approach_distance * angle_error_scaling_factor;
-            }
-
-            auto Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
-            emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk));
-            }
-    });
-}
+        });
+    }
 
 }  // namespace module::strategy
