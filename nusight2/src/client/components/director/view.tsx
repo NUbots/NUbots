@@ -68,7 +68,7 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                                 Not Active
                                 <div className="flex flex-wrap">
                                     {selectedDirectorRobot?.providers.get(layerName)?.filter(provider => !provider.active).map((provider) => (
-                                        <div key={provider.id} className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 ${provider.done ? 'bg-green-100' : ''}`}>
+                                        <div key={provider.id} className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 border-dashed ${provider.done ? 'bg-green-100' : ''}`}>
                                             <div>
                                                 <div className="font-semibold">
                                                     {provider.name}
