@@ -38,6 +38,8 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Buttons.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -51,6 +53,8 @@ namespace module::purpose {
     using extension::behaviour::Task;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::ButtonMiddleDown;
+    using message::localisation::ResetFieldLocalisation;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -80,6 +84,9 @@ namespace module::purpose {
             attr.c_lflag &= ~(ICANON | ECHO);
             tcsetattr(STDIN_FILENO, TCSANOW, &attr);
         });
+
+        on<Trigger<ButtonMiddleDown>, Single>().then(
+            [this] { emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>()); });
 
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
