@@ -10,18 +10,18 @@ import { DirectorNetwork } from "./network";
 import { DirectorView } from "./view";
 
 export function createDirectorView({
-    appModel,
-    nusightNetwork,
-    Menu,
+  appModel,
+  nusightNetwork,
+  Menu,
 }: {
-    appModel: AppModel;
-    nusightNetwork: NUsightNetwork;
-    Menu: ComponentType;
+  appModel: AppModel;
+  nusightNetwork: NUsightNetwork;
+  Menu: ComponentType;
 }) {
-    const model = DirectorModel.of(appModel);
-    return () => {
-        const network = DirectorNetwork.of(nusightNetwork);
-        const controller = DirectorController.of(model);
-        return <DirectorView controller={controller} model={model} Menu={Menu} network={network} />;
-    }
+  const model = DirectorModel.of(appModel);
+  return () => {
+    const network = DirectorNetwork.of(nusightNetwork);
+    const controller = DirectorController.of(model);
+    return <DirectorView controller={controller} model={model} Menu={Menu} network={network} />;
+  };
 }
