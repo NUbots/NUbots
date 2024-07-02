@@ -31,7 +31,9 @@ export class DirectorNetwork {
     robot.rootTasks = [];
     message.providers.forEach((provider) => {
       if (provider.name?.startsWith("extension::behaviour::commands::RootType")) {
-        robot.rootTasks.push(provider.name?.match(/^extension::behaviour::commands::RootType<message::(.*)>/)?.[1] ?? "");
+        robot.rootTasks.push(
+          provider.name?.match(/^extension::behaviour::commands::RootType<message::(.*)>/)?.[1] ?? "",
+        );
         return;
       }
       const newProvider = {

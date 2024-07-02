@@ -1,6 +1,7 @@
 import { action } from "mobx";
 
 import { RobotModel } from "../robot/model";
+
 import { DirectorModel } from "./model";
 
 export class DirectorController {

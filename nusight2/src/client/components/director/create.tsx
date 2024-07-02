@@ -22,6 +22,6 @@ export function createDirectorView({
     return () => {
         const network = DirectorNetwork.of(nusightNetwork);
         const controller = DirectorController.of(model);
-        return <DirectorView controller={controller} model={model} Menu={Menu} />;
+        return <DirectorView controller={controller} model={model} Menu={Menu} network={network} />;
     }
 }
