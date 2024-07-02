@@ -23,7 +23,6 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::GoalDetector
   vision::BallDetector
   vision::FieldLineDetector
   vision::Yolo
