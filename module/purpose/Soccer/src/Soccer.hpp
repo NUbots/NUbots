@@ -138,7 +138,7 @@ namespace module::purpose {
 
         /// @brief Emit purpose based on leader's instructions
         /// @param robocup A robocup message sent by another robot
-        void follow_directions(const RoboCup& robocup);
+        void follow_directions();
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;

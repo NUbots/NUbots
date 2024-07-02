@@ -113,7 +113,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
 
-        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, Optional<With<RoboCup>>>().then([this](const std::shared_ptr<const RoboCup>& robocup) {
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER:
@@ -129,10 +129,7 @@ namespace module::purpose {
                     soccer_position = Position("DEFENDER");
                     break;
                 case Position::DYNAMIC:
-                    if (robocup) {
-                        const RoboCup& robocup_ref = *robocup;
-                        manage_active_robots(robocup_ref);
-                    }
+                    follow_directions();
                     break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
@@ -204,6 +201,8 @@ namespace module::purpose {
 
         // Capture leader's last message in case of bad timing
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
+            manage_active_robots(robocup);
+
             // A robot may emit leader messages mistakenly. Only listen to real leader
             bool other_is_leader = !active_robots.empty() && active_robots.front().robot_id == robocup.current_pose.player_id;
 
@@ -262,10 +261,6 @@ namespace module::purpose {
             add_robot(new_robot);
             give_directions();
         }
-
-        if (leader_message != nullptr) {
-            follow_directions(*leader_message, leader_message->current_pose.player_id);
-        }
     };
 
     // Find which robot should be our striker
@@ -278,8 +273,8 @@ namespace module::purpose {
 
     // Give directions if I am the leader
     void Soccer::give_directions() {
-        if (cfg.position == Position::DYNAMIC) {
-            bool self_is_leader = active_robots.front().robot_id == player_id;
+        bool self_is_leader = !active_robots.empty() && active_robots.front().robot_id == player_id;
+        if (cfg.position == Position::DYNAMIC && self_is_leader) {
             if (self_is_leader) {
                 auto purposes_msg   = std::make_unique<Purposes>();
                 uint8_t striker_idx = find_striker();
@@ -313,11 +308,12 @@ namespace module::purpose {
     };
 
     // Listen to directions if they are the leader
-    void Soccer::follow_directions(const RoboCup& robocup) {
+    void Soccer::follow_directions() {
+        if (active_robots.empty() || active_robots.front().robot_id == player_id) { return; }
         uint8_t striker_id   = 0;
 
         // Find the striker by id
-        for (const auto& purpose : robocup.purpose_commands.purpose_commands) {
+        for (const auto& purpose : leader_message->purpose_commands.purpose_commands) {
             if (purpose.purpose == SoccerPosition::STRIKER) {
                 striker_id = purpose.player_id;
                 break;

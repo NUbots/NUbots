@@ -191,7 +191,6 @@ namespace module::network {
                 // Current purposes (soccer positions) of the Robots
                 if (purposes) {
                     msg->purpose_commands = *purposes;
-                    log<NUClear::DEBUG>("Purpose commands present");
                 }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
