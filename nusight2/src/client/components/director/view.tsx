@@ -30,6 +30,19 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                 </div>
             </Menu>
             <div className="m-2">
+                <div className="m-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
+                    <div className="text-lg bg-gray-200 py-1 px-4 w-fit h-fit rounded mb-4">Root Tasks</div>
+                    <div className="flex flex-wrap">
+                        {Array.from(selectedDirectorRobot?.rootTasks || []).map((rootTask) => (
+                            <div key={rootTask} className="bg-gray-100 flex w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500">
+                                <div>
+                                    {rootTask}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {Array.from(selectedDirectorRobot?.providers.keys() || []).map((layerName: string) => (
                     <div key={layerName} className="m-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
                         <div className="text-lg bg-gray-200 py-1 px-4 w-fit h-fit rounded mb-4">{layerName}</div>

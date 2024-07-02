@@ -28,10 +28,10 @@ export class DirectorNetwork {
     const robot = DirectorRobotModel.of(robotModel);
 
     robot.providers.clear();
+    robot.rootTasks = [];
     message.providers.forEach((provider) => {
       if (provider.name?.startsWith("extension::behaviour::commands::RootType")) {
-        // console.log("RootType", provider.name);
-        // // What to do here?
+        robot.rootTasks.push(provider.name?.match(/^extension::behaviour::commands::RootType<message::(.*)>/)?.[1] ?? "");
         return;
       }
       const newProvider = {
@@ -46,8 +46,6 @@ export class DirectorNetwork {
         robot.providers.set(newProvider.layer, []);
       }
       robot.providers.get(newProvider.layer)?.push(newProvider);
-
-
     });
   }
 }
