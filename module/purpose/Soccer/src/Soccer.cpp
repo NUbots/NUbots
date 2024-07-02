@@ -138,6 +138,7 @@ namespace module::purpose {
             }
         });
 
+        // TODO: might not need
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
             bool other_is_leader = active_robots.front().robot_id == robocup.current_pose.player_id;
 
@@ -205,7 +206,10 @@ namespace module::purpose {
         // Emit our own Purpose for NUsight debugging
         on<Every<2, Per<std::chrono::seconds>>, With<Purposes>>().then([this](const Purposes& purposes) {
             log<NUClear::DEBUG>("Current soccer position ", soccer_position);
-            emit(purposes);
+            auto purposes_msg = std::make_unique<Purposes>(purposes);
+            purposes_msg->purpose.purpose = soccer_position.toSoccerPosition();
+            purposes_msg->purpose.player_id = player_id;
+            emit(std::move(purposes_msg));
         });
     }
 
@@ -234,15 +238,11 @@ namespace module::purpose {
     }
 
     void Soccer::manage_active_robots(const RoboCup& robocup) {
-        log<NUClear::DEBUG>("Robocup player id", robocup.current_pose.player_id);
-        if (robocup.purpose_commands.purpose_commands.empty()) {
-            log<NUClear::DEBUG>("Robocup empty?");
-        }
+        //TODO: segafault around here somewhere on startup I think
         // Do not manage penalised robots, or robots that are not dynamic
         if (robocup.state == State::PENALISED || (robocup.current_pose.player_id != player_id && robocup.purpose_commands.purpose_commands.empty())) {
             return;
         }
-        log<NUClear::DEBUG>("Manage active robots");
 
         uint8_t incoming_robot_id = robocup.current_pose.player_id;
         auto now = NUClear::clock::now();
@@ -263,6 +263,7 @@ namespace module::purpose {
             give_directions();
         }
 
+        // TODO: might not need leader_msg
         follow_directions(leader_message, leader_message.current_pose.player_id);
     };
 
