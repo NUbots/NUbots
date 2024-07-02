@@ -31,11 +31,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
-#include "message/input/Buttons.hpp"
-#include "message/localisation/Field.hpp"
-#include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/support/FieldDescription.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -47,16 +43,9 @@ namespace module::localisation {
     using message::behaviour::state::Stability;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
-    using message::support::FieldDescription;
     using message::vision::FieldLines;
 
-    using message::input::ButtonLeftDown;
-    using message::input::ButtonLeftUp;
-    using message::localisation::ResetFieldLocalisation;
-    using message::output::Buzzer;
     using utility::math::euler::mat_to_rpy_intrinsic;
-
-    using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -116,10 +105,7 @@ namespace module::localisation {
             startup_time          = NUClear::clock::now();
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this] {
-            filter.set_state(cfg.initial_hypotheses);
-            log<NUClear::WARN>("Field localisation reset completed.");
-        });
+        on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
 
         on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
             "Particle Filter",
