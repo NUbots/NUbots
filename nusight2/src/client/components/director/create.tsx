@@ -20,7 +20,7 @@ export function createDirectorView({
 }) {
     const model = DirectorModel.of(appModel);
     return () => {
-        React.useEffect(() => DirectorNetwork.of(nusightNetwork).destroy);
+        const network = DirectorNetwork.of(nusightNetwork);
         const controller = DirectorController.of(model);
         return <DirectorView controller={controller} model={model} Menu={Menu} />;
     }
