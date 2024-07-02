@@ -117,7 +117,7 @@ namespace module::purpose {
         Position soccer_position;
 
         /// @brief Last Robocup message sent by the leader
-        RoboCup leader_message;
+        std::unique_ptr<RoboCup> leader_message = nullptr;
 
         /// @brief Utility to set up robocup message to find purpose
         void find_purpose();
@@ -139,8 +139,7 @@ namespace module::purpose {
 
         /// @brief Emit purpose based on leader's instructions
         /// @param robocup A robocup message sent by another robot
-        /// @param incoming_robot_id The id of the robot that send the robocup message
-        void follow_directions(const RoboCup& robocup, const uint8_t incoming_robot_id);
+        void follow_directions(const RoboCup& robocup);
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
