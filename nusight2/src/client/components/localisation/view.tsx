@@ -8,6 +8,10 @@ import { now } from "mobx-utils";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import roboto from './Roboto Medium_Regular.json';
+
 import { Vector3 } from "../../../shared/math/vector3";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
@@ -23,6 +27,7 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
+import { RobotModel } from "../robot/model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -59,9 +64,8 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
+                } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -327,10 +331,66 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
+      {model.robots.map((robot) => {
+        // if (robot.visible && robot.Hft && robot.purpose) {
+        if (robot.visible && robot.Hft && robot.purpose) {
+          return <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />;
+        }
+        return null;
+      })}
       <Robots model={model} />
     </object3D>
   );
 });
+
+const PurposeLabel = ({ robotModel, cameraPitch, cameraYaw }: { robotModel: LocalisationRobotModel, cameraPitch: number, cameraYaw: number }) => {
+  const rTFf = robotModel.Hft.decompose().translation;
+  const textGeometry = (x: string) => {
+    const font = new FontLoader().parse(roboto);
+    return new TextGeometry(x, {
+      font: font,
+      size: 0.1,
+      height: 0,
+    }).center();
+  };
+
+  const textBackdropGeometry = (width: number, height: number) => {
+    const shape = new THREE.Shape();
+    width += 0.1; height += 0.1;
+    let radius = 0.05
+    let x = width * -0.5; let y = height * -0.5;
+
+    shape.moveTo(x, y + radius);
+    shape.lineTo(x, y + height - radius);
+    shape.quadraticCurveTo(x, y + height, x + radius, y + height);
+    shape.lineTo(x + width - radius, y + height);
+    shape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+    shape.lineTo(x + width, y + radius);
+    shape.quadraticCurveTo(x + width, y, x + width - radius, y);
+    shape.lineTo(x + radius, y);
+    shape.quadraticCurveTo(x, y, x, y + radius);
+
+    const geometry = new THREE.ShapeGeometry(shape);
+
+    return geometry;
+  };
+
+  const labelTextGeometry = textGeometry(robotModel.purpose);
+  const textWidth = labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x;
+  const textHeight = labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y;
+  const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
+
+  return (
+    <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
+      <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
+        <meshBasicMaterial color="white" transparent opacity={1} />
+      </mesh>
+      <mesh geometry={backdropGeometry} >
+        <meshBasicMaterial color="black" transparent opacity={0.5} />
+      </mesh>
+    </object3D >
+  );
+};
 
 const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   <>
