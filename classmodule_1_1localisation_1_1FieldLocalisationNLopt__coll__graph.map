@@ -1,8 +1,9 @@
 <map id="module::localisation::FieldLocalisationNLopt" name="module::localisation::FieldLocalisationNLopt">
-<area shape="rect" id="node1" title=" " alt="" coords="703,94,880,135"/>
+<area shape="rect" id="node1" title=" " alt="" coords="703,159,880,201"/>
 <area shape="rect" id="node2" title=" " alt="" coords="331,5,466,32"/>
 <area shape="rect" id="node3" href="$classutility_1_1math_1_1filter_1_1KalmanFilter.html" title=" " alt="" coords="311,57,487,127"/>
 <area shape="rect" id="node4" href="$structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html" title="Stores configuration values." alt="" coords="310,152,487,208"/>
 <area shape="rect" id="node5" href="$structmodule_1_1localisation_1_1StartingSide.html" title=" " alt="" coords="5,159,160,201"/>
-<area shape="rect" id="node6" href="$classutility_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,233,500,274"/>
+<area shape="rect" id="node6" href="$structmodule_1_1localisation_1_1GoalPost.html" title=" " alt="" coords="321,233,476,274"/>
+<area shape="rect" id="node7" href="$classutility_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,298,500,339"/>
 </map>

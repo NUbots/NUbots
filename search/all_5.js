@@ -32,7 +32,8 @@ var searchData=
   ['executekick_335',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
   ['exist_336',['exist',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b',1,'utility::motion::splines::SplineContainer']]],
   ['expandbinomial_337',['expandBinomial',['../classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c',1,'utility::motion::splines::Polynom']]],
-  ['exportdata_338',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]],
-  ['expression_339',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]],
-  ['eye_5fled_340',['eye_led',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]]
+  ['expected_5fgoal_5fpost_5fdistance_338',['expected_goal_post_distance',['../classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e540cd6107e3a69f0b6672c92359f7e',1,'module::localisation::FieldLocalisationNLopt']]],
+  ['exportdata_339',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]],
+  ['expression_340',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]],
+  ['eye_5fled_341',['eye_led',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]]
 ];

@@ -190,12 +190,13 @@ Collaboration diagram for module::localisation::FieldLocalisationNLopt:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1localisation_1_1FieldLocalisationNLopt__coll__graph.png" border="0" usemap="#amodule_1_1localisation_1_1FieldLocalisationNLopt_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1localisation_1_1FieldLocalisationNLopt_coll__map" id="amodule_1_1localisation_1_1FieldLocalisationNLopt_coll__map">
-<area shape="rect" title=" " alt="" coords="703,94,880,135"/>
+<area shape="rect" title=" " alt="" coords="703,159,880,201"/>
 <area shape="rect" title=" " alt="" coords="331,5,466,32"/>
 <area shape="rect" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html" title=" " alt="" coords="311,57,487,127"/>
 <area shape="rect" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html" title="Stores configuration values." alt="" coords="310,152,487,208"/>
 <area shape="rect" href="structmodule_1_1localisation_1_1StartingSide.html" title=" " alt="" coords="5,159,160,201"/>
-<area shape="rect" href="classutility_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,233,500,274"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1GoalPost.html" title=" " alt="" coords="321,233,476,274"/>
+<area shape="rect" href="classutility_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,298,500,339"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -220,9 +221,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4fc1160c4cb18d64161bfafd169bfade"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4fc1160c4cb18d64161bfafd169bfade">position_in_map</a> (const Eigen::Vector3d &amp;particle, const Eigen::Vector3d &amp;rPWw)</td></tr>
 <tr class="memdesc:a4fc1160c4cb18d64161bfafd169bfade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a field line point from world {w} to position in the distance map {m}.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4fc1160c4cb18d64161bfafd169bfade">More...</a><br /></td></tr>
 <tr class="separator:a4fc1160c4cb18d64161bfafd169bfade"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1737a856fe81e77247ed8b8fb1addde"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Eigen::Vector3d, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#af1737a856fe81e77247ed8b8fb1addde">run_field_line_optimisation</a> (const Eigen::Vector3d &amp;initial_guess, const std::vector&lt; Eigen::Vector3d &gt; &amp;observations, const FieldIntersections &amp;field_intersections)</td></tr>
-<tr class="memdesc:af1737a856fe81e77247ed8b8fb1addde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the field line optimisation.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#af1737a856fe81e77247ed8b8fb1addde">More...</a><br /></td></tr>
-<tr class="separator:af1737a856fe81e77247ed8b8fb1addde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c6211882d65b38aab49915399034d7c"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Eigen::Vector3d, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c">run_field_line_optimisation</a> (const Eigen::Vector3d &amp;initial_guess, const std::vector&lt; Eigen::Vector3d &gt; &amp;field_lines, const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const std::shared_ptr&lt; const Goals &gt; &amp;goals)</td></tr>
+<tr class="memdesc:a2c6211882d65b38aab49915399034d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the field line optimisation.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c">More...</a><br /></td></tr>
+<tr class="separator:a2c6211882d65b38aab49915399034d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b3a6fbfcde12d569b0e9762b423fd6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0b3a6fbfcde12d569b0e9762b423fd6a">setup_field_landmarks</a> (const FieldDescription &amp;fd)</td></tr>
 <tr class="memdesc:a0b3a6fbfcde12d569b0e9762b423fd6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup field landmarks.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0b3a6fbfcde12d569b0e9762b423fd6a">More...</a><br /></td></tr>
 <tr class="separator:a0b3a6fbfcde12d569b0e9762b423fd6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -235,6 +236,10 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:acba2abc63250fe7776dd0dc61b993ee5"><td class="memItemLeft" align="right" valign="top"><a id="acba2abc63250fe7776dd0dc61b993ee5"></a>
 struct <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html">module::localisation::FieldLocalisationNLopt::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:acba2abc63250fe7776dd0dc61b993ee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e540cd6107e3a69f0b6672c92359f7e"><td class="memItemLeft" align="right" valign="top"><a id="a4e540cd6107e3a69f0b6672c92359f7e"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e540cd6107e3a69f0b6672c92359f7e">expected_goal_post_distance</a> = 0.0</td></tr>
+<tr class="memdesc:a4e540cd6107e3a69f0b6672c92359f7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expected goal post width. <br /></td></tr>
+<tr class="separator:a4e540cd6107e3a69f0b6672c92359f7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e9d7249be471dc74ffe9828208b7e89"><td class="memItemLeft" align="right" valign="top"><a id="a4e9d7249be471dc74ffe9828208b7e89"></a>
 <a class="el" href="classutility_1_1localisation_1_1OccupancyMap.html">OccupancyMap</a>&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e9d7249be471dc74ffe9828208b7e89">fieldline_distance_map</a> {}</td></tr>
 <tr class="memdesc:a4e9d7249be471dc74ffe9828208b7e89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Field line distance map (encodes the minimum distance to a field line) <br /></td></tr>
@@ -246,6 +251,13 @@ struct <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLop
 std::vector&lt; <a class="el" href="structutility_1_1localisation_1_1Landmark.html">Landmark</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3d929cfe1f495eeceb7d24a098ce1c6b">landmarks</a> {}</td></tr>
 <tr class="memdesc:a3d929cfe1f495eeceb7d24a098ce1c6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of landmarks (field intersections rLFf) in field space. <br /></td></tr>
 <tr class="separator:a3d929cfe1f495eeceb7d24a098ce1c6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e537a3bbbd2926d513d2459fa50c983"><td class="memItemLeft" align="right" valign="top"><a id="a2e537a3bbbd2926d513d2459fa50c983"></a>
+<a class="el" href="structmodule_1_1localisation_1_1GoalPost.html">GoalPost</a>&#160;</td><td class="memItemRight" valign="bottom"><b>opp_goal_posts</b></td></tr>
+<tr class="separator:a2e537a3bbbd2926d513d2459fa50c983"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04c08d68e8f0daffc06a813c5cba0145"><td class="memItemLeft" align="right" valign="top"><a id="a04c08d68e8f0daffc06a813c5cba0145"></a>
+<a class="el" href="structmodule_1_1localisation_1_1GoalPost.html">GoalPost</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145">own_goal_posts</a></td></tr>
+<tr class="memdesc:a04c08d68e8f0daffc06a813c5cba0145"><td class="mdescLeft">&#160;</td><td class="mdescRight">Goal posts. <br /></td></tr>
+<tr class="separator:a04c08d68e8f0daffc06a813c5cba0145"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e09b70de20f23332c5e947d0b6fd658"><td class="memItemLeft" align="right" valign="top"><a id="a3e09b70de20f23332c5e947d0b6fd658"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3e09b70de20f23332c5e947d0b6fd658">startup</a> = true</td></tr>
 <tr class="memdesc:a3e09b70de20f23332c5e947d0b6fd658"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool indicating where or not this is the first update. <br /></td></tr>
@@ -370,8 +382,8 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 </div>
 </div>
-<a id="af1737a856fe81e77247ed8b8fb1addde"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af1737a856fe81e77247ed8b8fb1addde">&#9670;&nbsp;</a></span>run_field_line_optimisation()</h2>
+<a id="a2c6211882d65b38aab49915399034d7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c6211882d65b38aab49915399034d7c">&#9670;&nbsp;</a></span>run_field_line_optimisation()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -386,13 +398,19 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::vector&lt; Eigen::Vector3d &gt; &amp;&#160;</td>
-          <td class="paramname"><em>observations</em>, </td>
+          <td class="paramname"><em>field_lines</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const FieldIntersections &amp;&#160;</td>
-          <td class="paramname"><em>field_intersections</em>&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; const FieldIntersections &gt; &amp;&#160;</td>
+          <td class="paramname"><em>field_intersections</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::shared_ptr&lt; const Goals &gt; &amp;&#160;</td>
+          <td class="paramname"><em>goals</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -477,7 +495,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li>
-    <li class="footer">Generated on Tue Jul 2 2024 05:48:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jul 2 2024 06:49:01 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

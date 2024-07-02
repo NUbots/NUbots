@@ -1,12 +1,12 @@
 var searchData=
 [
-  ['emitreflector_1489',['EmitReflector',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html',1,'module::platform::NUSense']]],
-  ['emitreflector_3c_20void_20_3e_1490',['EmitReflector&lt; void &gt;',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html',1,'module::platform::NUSense']]],
-  ['encoder_1491',['Encoder',['../classutility_1_1nbs_1_1Encoder.html',1,'utility::nbs']]],
-  ['enginecontext_1492',['EngineContext',['../structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html',1,'module::vision::VisualMesh']]],
-  ['enumerate_1493',['enumerate',['../structutility_1_1support_1_1enumerate.html',1,'utility::support']]],
-  ['evaluatortask_1494',['EvaluatorTask',['../classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html',1,'module::support::optimisation']]],
-  ['event_1495',['Event',['../structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1Event.html',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['executekick_1496',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
-  ['expression_1497',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]]
+  ['emitreflector_1494',['EmitReflector',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html',1,'module::platform::NUSense']]],
+  ['emitreflector_3c_20void_20_3e_1495',['EmitReflector&lt; void &gt;',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html',1,'module::platform::NUSense']]],
+  ['encoder_1496',['Encoder',['../classutility_1_1nbs_1_1Encoder.html',1,'utility::nbs']]],
+  ['enginecontext_1497',['EngineContext',['../structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html',1,'module::vision::VisualMesh']]],
+  ['enumerate_1498',['enumerate',['../structutility_1_1support_1_1enumerate.html',1,'utility::support']]],
+  ['evaluatortask_1499',['EvaluatorTask',['../classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html',1,'module::support::optimisation']]],
+  ['event_1500',['Event',['../structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1Event.html',1,'module::support::optimisation::NSGA2Evaluator']]],
+  ['executekick_1501',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
+  ['expression_1502',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]]
 ];

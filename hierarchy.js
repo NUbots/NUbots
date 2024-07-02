@@ -145,6 +145,7 @@ var hierarchy =
     [ "module::localisation::FieldLocalisation::Config", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html", null ],
     [ "module::localisation::FieldLocalisationNLopt::Config", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html", null ],
     [ "module::localisation::FieldModel< Scalar >", "classmodule_1_1localisation_1_1FieldModel.html", null ],
+    [ "module::localisation::GoalPost", "structmodule_1_1localisation_1_1GoalPost.html", null ],
     [ "module::localisation::MeasurementType::BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ],
     [ "module::localisation::MeasurementType::ROBOT_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1ROBOT__POSITION.html", null ],
     [ "module::localisation::RobotLocalisation::Config", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html", null ],
