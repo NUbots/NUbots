@@ -19,7 +19,7 @@ export function installDirector({
 }) {
     nav.addRoute({
         path: "/director",
-        Icon: () => <Icon>article</Icon>,
+        Icon: () => <Icon>account_tree</Icon>,
         label: "Director",
         Content: React.lazy(async () => {
             const { createDirectorView } = await import("./create");
