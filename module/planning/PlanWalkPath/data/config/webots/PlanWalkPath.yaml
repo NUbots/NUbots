@@ -24,3 +24,6 @@ min_align_radius: 0.4 # Radius [m] to stay aligning with the target heading
 max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
 min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
 strafe_gain: 0.4
+
+# Radius around obstacles to avoid
+obstacle_radius: 0.5
