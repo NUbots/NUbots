@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -98,7 +98,7 @@ namespace {
 
 TEST_CASE("Test that a watcher can take over from another provider", "[director][remove][watcher]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

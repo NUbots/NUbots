@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -33,7 +33,9 @@ extern "C" {
 }
 
 #include <cstdio>
+#include <fcntl.h>
 #include <sstream>
+#include <termios.h>
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -54,7 +56,7 @@ namespace module::purpose {
 
     using NUClear::message::CommandLineArguments;
 
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::behaviour::state::Stability;
@@ -82,6 +84,19 @@ namespace module::purpose {
         on<Configuration>("ScriptTuner.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KeyboardWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            // Set STDIN to non-blocking
+            int flags  = fcntl(STDIN_FILENO, F_GETFL, 0);
+            auto error = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+            if (error == -1) {
+                log<NUClear::ERROR>("Failed to set STDIN to non-blocking");
+            }
+
+            // Set up our terminal to not require EOF
+            struct termios attr;
+            tcgetattr(STDIN_FILENO, &attr);
+            attr.c_lflag &= ~(ICANON | ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &attr);
         });
 
         on<Startup>().then([this] {
@@ -123,7 +138,7 @@ namespace module::purpose {
 
             Frame::Target target;
             target.id       = id;
-            target.position = utility::platform::getRawServo(target.id, sensors).present_position;
+            target.position = utility::platform::get_raw_servo(target.id, sensors).present_position;
             target.gain     = default_gain;
             target.torque   = 100;
 
@@ -140,9 +155,7 @@ namespace module::purpose {
         });
 
 
-        // Trigger when stdin has something to read
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
-            // Get the character the user has typed
             switch (getch()) {
                 case KEY_UP:  // Change selection up
                     selection = selection == 0 ? 19 : selection - 1;
@@ -203,7 +216,6 @@ namespace module::purpose {
                     powerplant.shutdown();
                     break;
             }
-
             // Update whatever visual changes we made
             refresh_view();
         });
@@ -433,8 +445,8 @@ namespace module::purpose {
         // Load the YAML file
         YAML::Node node = YAML::LoadFile(path);
 
-        // Decode the YAML node into a Script<LimbsSequence> object
-        if (!YAML::convert<Script<LimbsSequence>>::decode(node, this->script)) {
+        // Decode the YAML node into a Script<BodySequence> object
+        if (!YAML::convert<Script<BodySequence>>::decode(node, this->script)) {
             throw std::runtime_error("Failed to load script from " + path);
         }
 
@@ -598,7 +610,7 @@ namespace module::purpose {
     }
 
     void ScriptTuner::play_script() {
-        emit<Task>(utility::skill::load_script<LimbsSequence>(script));
+        emit<Task>(utility::skill::load_script<BodySequence>(script));
     }
 
     void ScriptTuner::jump_to_frame() {

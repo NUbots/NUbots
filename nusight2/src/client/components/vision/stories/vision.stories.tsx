@@ -3,7 +3,6 @@ import { Meta, StoryObj } from "@storybook/react";
 
 import { Matrix4 } from "../../../../shared/math/matrix4";
 import { Projection } from "../../../../shared/math/projection";
-import { NUsightNetwork } from "../../../network/nusight_network";
 import { AppController } from "../../app/controller";
 import { AppModel } from "../../app/model";
 import { CameraParams } from "../../camera/camera_params";
@@ -41,6 +40,7 @@ export const Default: StoryObj<StoryProps> = {
           connected: true,
           address: "127.0.0.1",
           port: 1,
+          type: "nuclearnet-peer",
         }),
         RobotModel.of({
           id: "2",
@@ -49,6 +49,7 @@ export const Default: StoryObj<StoryProps> = {
           connected: true,
           address: "127.0.0.2",
           port: 2,
+          type: "nuclearnet-peer",
         }),
         RobotModel.of({
           id: "3",
@@ -57,6 +58,7 @@ export const Default: StoryObj<StoryProps> = {
           connected: true,
           address: "127.0.0.3",
           port: 3,
+          type: "nuclearnet-peer",
         }),
         RobotModel.of({
           id: "4",
@@ -65,6 +67,7 @@ export const Default: StoryObj<StoryProps> = {
           connected: true,
           address: "127.0.0.4",
           port: 4,
+          type: "nuclearnet-peer",
         }),
       ],
     });
@@ -108,11 +111,7 @@ export const Default: StoryObj<StoryProps> = {
       );
     });
     const appController = AppController.of();
-    const Menu = withRobotSelectorMenuBar(
-      appModel.robots,
-      appController.toggleRobotEnabled,
-      NUsightNetwork.of(appModel),
-    );
+    const Menu = withRobotSelectorMenuBar(appModel, appController.toggleRobotEnabled);
     const CameraView = (props: VisionCameraViewProps) => (
       <div
         style={{

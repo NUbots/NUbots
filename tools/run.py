@@ -64,7 +64,7 @@ def run(args, use_gdb, **kwargs):
 
     # Make sure default log path exists
     if use_asan:
-        log_path = os.path.join(os.sep, "home", "NUbots", "NUbots", "log")
+        log_path = os.path.join(os.sep, "home", "nubots", "NUbots", "log")
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     # Add necessary ASAN environment variables

@@ -1,20 +1,21 @@
+# This module is used to manually move the real robot with the keyboard. It is commonly used for motion testing and
+# tuning. It is commonly used during outreach events.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
-  extension::FileWatcher
-  support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  # Config
-  actuation::KinematicsConfiguration
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
   network::PlotJuggler
   # Sensors
   input::SensorFilter
-  platform::${SUBCONTROLLER}::HardwareIO
   # Director
   extension::Director
   # Servos
-  actuation::Kinematics
   actuation::Servos
+  actuation::Kinematics
   actuation::FootController
   # Skills
   skill::Walk
@@ -25,8 +26,11 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
+  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

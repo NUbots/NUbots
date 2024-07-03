@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2014 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <fmt/format.h>
 #include <string>
+#include <termios.h>
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -42,6 +43,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/StartSafely.hpp"
 
 namespace module::purpose {
 
@@ -54,6 +56,7 @@ namespace module::purpose {
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
+    using message::strategy::StartSafely;
     using NUClear::message::LogMessage;
     using utility::input::LimbID;
 
@@ -63,6 +66,19 @@ namespace module::purpose {
         on<Configuration>("KeyboardWalk.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KeyboardWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            // Set STDIN to non-blocking
+            int flags  = fcntl(STDIN_FILENO, F_GETFL, 0);
+            auto error = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+            if (error == -1) {
+                log<NUClear::ERROR>("Failed to set STDIN to non-blocking");
+            }
+
+            // Set up our terminal to not require EOF
+            struct termios attr;
+            tcgetattr(STDIN_FILENO, &attr);
+            attr.c_lflag &= ~(ICANON | ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &attr);
         });
 
         // Start the Director graph for the KeyboardWalk.
@@ -73,10 +89,13 @@ namespace module::purpose {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 4);
+            emit<Task>(std::make_unique<FallRecovery>(), 5);
+
+            // Start up safely with low gains
+            emit<Task>(std::make_unique<StartSafely>(), 4);
 
             // Stand Still on startup
-            emit<Task>(std::make_unique<StandStill>());
+            // emit<Task>(std::make_unique<StandStill>());
 
             // Ensure UTF-8 is enabled
             std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -137,36 +156,40 @@ namespace module::purpose {
             }
         });
 
-        on<Trigger<LogMessage>>().then([this](const LogMessage& packet) {
+        on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            // Only display messages that are above the display level of the reactor that made the log
+            if (message.level < message.display_level) {
+                return;
+            };
             // Where this message came from
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (packet.task != nullptr) {
+            if (message.task != nullptr) {
                 // Get our reactor name
-                std::string reactor = packet.task->identifier[1];
+                std::string reactor = message.task->identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
                 reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
                 // This is our source
-                source =
-                    reactor + " " + (packet.task->identifier[0].empty() ? "" : "- " + packet.task->identifier[0] + " ");
+                source = reactor + " "
+                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
             }
 
             LogColours colours;
-            switch (packet.level) {
-                default:
+            switch (message.level) {
                 case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
                 case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
                 case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
                 case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
                 case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                case NUClear::UNKNOWN:;
                 case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
             }
 
-            update_window(log_window, colours, source, packet.message, true);
+            update_window(log_window, colours, source, message.message, true);
         });
 
         on<Shutdown>().then(endwin);

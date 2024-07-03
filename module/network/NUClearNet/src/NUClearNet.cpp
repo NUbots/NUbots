@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 NUbots
+ * Copyright (c) 2013 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -29,7 +29,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 
 namespace module::network {
 
@@ -41,7 +41,7 @@ namespace module::network {
             log_level                   = config["log_level"].as<NUClear::LogLevel>();
             auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
             auto name                   = config["name"].as<std::string>();
-            netConfig->name             = name.empty() ? utility::support::getHostname() : name;
+            netConfig->name             = name.empty() ? utility::support::get_hostname() : name;
             netConfig->announce_address = config["address"].as<std::string>();
             netConfig->announce_port    = config["port"].as<uint16_t>();
             emit<Scope::DIRECT>(netConfig);

@@ -72,6 +72,7 @@ function getRobots(): RobotModel[] {
       enabled: true,
       address: "",
       port: 0,
+      type: "nuclearnet-peer",
     },
     {
       id: "2",
@@ -80,6 +81,7 @@ function getRobots(): RobotModel[] {
       enabled: true,
       address: "",
       port: 0,
+      type: "nuclearnet-peer",
     },
     {
       id: "3",
@@ -88,6 +90,7 @@ function getRobots(): RobotModel[] {
       enabled: true,
       address: "",
       port: 0,
+      type: "nuclearnet-peer",
     },
   ];
 }

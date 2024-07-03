@@ -54,16 +54,17 @@ namespace module::skill {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkState;
+    using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using WalkTask = message::skill::Walk;
     using message::input::Sensors;
+    using WalkState = message::behaviour::state::WalkState;
 
     using utility::input::FrameID;
     using utility::input::LimbID;
     using utility::input::ServoID;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -88,6 +89,8 @@ namespace module::skill {
             cfg.walk_generator_parameters.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
             walk_generator.set_parameters(cfg.walk_generator_parameters);
+            cfg.walk_generator_parameters.only_switch_when_planted =
+                config["walk"]["only_switch_when_planted"].as<bool>();
 
             // Reset the walk engine and last update time
             walk_generator.reset();
@@ -128,6 +131,9 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+
+            // Since walk needs a Stability message to run, emit one at the beginning
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
         // Start - Runs every time the Walk provider starts (wasn't running)
@@ -148,11 +154,12 @@ namespace module::skill {
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
            With<Sensors>,
+           With<Stability>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
+            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -167,13 +174,18 @@ namespace module::skill {
                 cfg.walk_generator_parameters.torso_pitch = cfg.walk_generator_parameters.torso_pitch + pitch_offset;
                 walk_generator.set_parameters(cfg.walk_generator_parameters);
 
-                // Update the walk engine and emit the stability state
-                switch (walk_generator.update(time_delta, walk_task.velocity_target).value) {
-                    case WalkState::State::WALKING:
-                    case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
-                    case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkState::State::UNKNOWN:
-                    default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+
+                // Update the walk engine and emit the stability state, only if not falling/fallen
+                if (stability >= Stability::DYNAMIC) {
+                    switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
+                                .value) {
+                        case WalkState::State::STARTING:
+                        case WalkState::State::WALKING:
+                        case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
+                        case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                        case WalkState::State::UNKNOWN:
+                        default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                    }
                 }
 
                 // Compute the goal position time
@@ -192,9 +204,9 @@ namespace module::skill {
                     right_leg->servos[id] = ServoState(cfg.leg_servo_gain, 100);
                 }
 
-                // Get desired and measured feet poses in the torso {t} frame from the walk engine
-                Eigen::Isometry3d Htl_desired = walk_generator.get_foot_pose(LimbID::LEFT_LEG);
-                Eigen::Isometry3d Htr_desired = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
+                // Construct ControlFoot tasks
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
 
                 const Eigen::Isometry3d Htl_measured(sensors.Htx[FrameID::L_FOOT_BASE]);
                 const Eigen::Isometry3d Htr_measured(sensors.Htx[FrameID::R_FOOT_BASE]);
@@ -228,35 +240,32 @@ namespace module::skill {
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
                 // Emit the walk state
-                WalkState::SupportPhase phase = walk_generator.is_left_foot_planted() ? WalkState::SupportPhase::LEFT
-                                                                                      : WalkState::SupportPhase::RIGHT;
-                auto walk_state =
-                    std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase);
+                auto walk_state = std::make_unique<WalkState>(walk_generator.get_state(),
+                                                              walk_task.velocity_target,
+                                                              walk_generator.get_phase());
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
-                    Eigen::Vector3d thetaTL = MatrixToEulerIntrinsic(Htl_desired.linear());
-                    Eigen::Vector3d thetaTR = MatrixToEulerIntrinsic(Htr_desired.linear());
-                    Eigen::Isometry3d Hpt   = walk_generator.get_torso_pose();
-                    Eigen::Vector3d thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
-                    emit(graph("Left foot desired position (x,y,z)",
-                               Htl_desired(0, 3),
-                               Htl_desired(1, 3),
-                               Htl_desired(2, 3)));
+                    Eigen::Vector3d thetaTL = mat_to_rpy_intrinsic(Htl.linear());
+                    emit(graph("Left foot desired position rLTt (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
                     emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
-                    emit(graph("Right foot desired position (x,y,z)",
-                               Htr_desired(0, 3),
-                               Htr_desired(1, 3),
-                               Htr_desired(2, 3)));
+                    Eigen::Vector3d thetaTR = mat_to_rpy_intrinsic(Htr.linear());
+                    emit(graph("Right foot desired position rRTt (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
                     emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
-                    emit(graph("Torso desired position (x,y,z)",
+                    Eigen::Isometry3d Hpt   = walk_generator.get_torso_pose();
+                    Eigen::Vector3d thetaPT = mat_to_rpy_intrinsic(Hpt.linear());
+                    emit(graph("Torso desired position rTPt (x,y,z)",
                                Hpt.translation().x(),
                                Hpt.translation().y(),
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
-                    emit(graph("Measured torso pitch : ", measured_pitch));
-                    emit(graph("Desired torso pitch : ", cfg.desired_torso_pitch));
-                    emit(graph("Pitch offset : ", pitch_offset));
+                    emit(graph("Walk state", int(walk_state->state)));
+                    emit(graph("Walk velocity target",
+                               walk_task.velocity_target.x(),
+                               walk_task.velocity_target.y(),
+                               walk_task.velocity_target.z()));
+                    emit(graph("Walk phase", int(walk_generator.get_phase())));
+                    emit(graph("Walk time", walk_generator.get_time()));
 
                     // Generate a set of swing foot poses for visually debugging
                     if (walk_task.velocity_target.norm() > 0) {
@@ -270,7 +279,6 @@ namespace module::skill {
                         }
                     }
                 }
-
                 emit(walk_state);
             });
     };

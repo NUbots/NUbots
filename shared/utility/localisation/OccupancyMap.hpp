@@ -30,7 +30,7 @@
 #include <Eigen/Core>
 #include <queue>
 
-namespace module::localisation {
+namespace utility::localisation {
 
     template <typename Scalar>
     class OccupancyMap {
@@ -124,7 +124,11 @@ namespace module::localisation {
          */
         void add_rectangle(int x0, int y0, int width, int height, int inner_width) {
             for (int i = 0; i < inner_width; i++) {
-                add_rectangle(x0 + i, y0 + i, width - (2 * i), height - (2 * i));
+                int new_width  = width - (2 * i);
+                int new_height = height - (2 * i);
+                if (new_width > 0 && new_height > 0) {
+                    add_rectangle(x0 + i, y0 + i, new_width, new_height);
+                }
             }
         }
 
@@ -248,6 +252,6 @@ namespace module::localisation {
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> map;
     };
 
-}  // namespace module::localisation
+}  // namespace utility::localisation
 
-#endif  // MODULE_LOCALISATION_MAP_HPP
+#endif  // UTILITY_LOCALISATION_OCCUPANCYMAP_HPP

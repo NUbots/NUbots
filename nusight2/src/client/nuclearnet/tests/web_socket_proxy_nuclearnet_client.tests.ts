@@ -34,27 +34,27 @@ describe("WebSocketProxyNUClearNetClient", () => {
     it("forwards onJoin add listener requests to socket", () => {
       const cb = jest.fn();
       client.onJoin(cb);
-      expect(mockWebSocket.on).toHaveBeenCalledWith("nuclear_join", cb);
+      expect(mockWebSocket.on).toHaveBeenCalledWith("nuclear_join", expect.any(Function));
     });
 
     it("forwards onJoin remove listener requests to socket", () => {
       const cb = jest.fn();
       const off = client.onJoin(cb);
       off();
-      expect(mockWebSocket.off).toHaveBeenCalledWith("nuclear_join", cb);
+      expect(mockWebSocket.off).toHaveBeenCalledWith("nuclear_join", expect.any(Function));
     });
 
     it("forwards onLeave add listener requests to socket", () => {
       const cb = jest.fn();
       client.onLeave(cb);
-      expect(mockWebSocket.on).toHaveBeenCalledWith("nuclear_leave", cb);
+      expect(mockWebSocket.on).toHaveBeenCalledWith("nuclear_leave", expect.any(Function));
     });
 
     it("forwards onLeave remove listener requests to socket", () => {
       const cb = jest.fn();
       const off = client.onLeave(cb);
       off();
-      expect(mockWebSocket.off).toHaveBeenCalledWith("nuclear_leave", cb);
+      expect(mockWebSocket.off).toHaveBeenCalledWith("nuclear_leave", expect.any(Function));
     });
 
     it("forwards generic event add listener requests to socket", () => {

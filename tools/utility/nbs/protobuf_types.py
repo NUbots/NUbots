@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2019 NUbots
+# Copyright (c) 2017 NUbots
 #
 # This file is part of the NUbots codebase.
 # See https://github.com/NUbots/NUbots for further info.
@@ -59,7 +59,7 @@ with tempfile.TemporaryDirectory() as protobuf_path:
 
     proto_files = [
         *glob.glob(os.path.join(nuclear_proto_dir, "**", "*.proto"), recursive=True),
-        *glob.glob(os.path.join(user_proto_dir, "**", "*.proto"), recursive=True),
+        *glob.glob(os.path.join(user_proto_dir, "message", "**", "*.proto"), recursive=True),
     ]
 
     # Build the protocol buffers

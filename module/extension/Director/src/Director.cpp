@@ -286,7 +286,7 @@ namespace module::extension {
             }
             else {
                 auto& p = providers.at(task->requester_id);
-                auto id = p->reaction->identifier[0];
+                auto id = p->reaction->identifiers.name;
                 if (p->classification == Provider::Classification::START) {
                     log<NUClear::WARN>("The task",
                                        task->name,

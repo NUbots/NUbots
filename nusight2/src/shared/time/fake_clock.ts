@@ -84,9 +84,9 @@ export class FakeClock implements Clock {
     const limit = 1000;
     let i = 0;
 
-    const lastTastTime = this.tasks.length > 0 && this.tasks[this.tasks.length - 1].nextTime;
+    const lastTaskTime = this.tasks.length > 0 ? this.tasks[this.tasks.length - 1].nextTime : undefined;
 
-    while (this.tasks.length > 0 && this.tasks[0].nextTime <= lastTastTime) {
+    while (this.tasks.length > 0 && lastTaskTime !== undefined && this.tasks[0].nextTime <= lastTaskTime) {
       if (i > limit) {
         throw new Error(`Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`);
       }

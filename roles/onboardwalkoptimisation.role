@@ -1,0 +1,24 @@
+# This role is used to run the NSGA2 walk optimiser on the real robot.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  # Sensors
+  platform::${SUBCONTROLLER}::HardwareIO
+  input::SensorFilter
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  # Optimisation
+  support::optimisation::NSGA2Evaluator
+  support::optimisation::NSGA2Optimiser
+  support::optimisation::OnboardWalkOptimisation
+)

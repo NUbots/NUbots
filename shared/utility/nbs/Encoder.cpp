@@ -37,15 +37,15 @@ namespace utility::nbs {
                        const uint64_t& message_timestamp,
                        const uint64_t& hash,
                        const uint32_t& id,
-                       const std::vector<char>& data) {
+                       const std::vector<uint8_t>& data) {
         // NBS File Format
-        // Name      | Type               |  Description
+        // Name      | Type                  |  Description
         // ------------------------------------------------------------
-        // header    | char[3]            | NBS packet header ☢ { 0xE2, 0x98, 0xA2 }
-        // length    | uint32_t           | Length of this packet after this value
-        // timestamp | uint64_t           | Timestamp the data was emitted in microseconds
-        // hash      | uint64_t           | the 64bit hash for the payload type
-        // payload   | char[length - 16]  | the data payload
+        // header    | char[3]               | NBS packet header ☢ { 0xE2, 0x98, 0xA2 }
+        // length    | uint32_t              | Length of this packet after this value
+        // timestamp | uint64_t              | Timestamp the data was emitted in microseconds
+        // hash      | uint64_t              | the 64bit hash for the payload type
+        // payload   | uint8_t[length - 16]  | the data payload
 
         // Convert the timestamp to a 64bit microsecond timestamp
         uint64_t timestamp_us =
@@ -70,7 +70,7 @@ namespace utility::nbs {
         output_file.write(reinterpret_cast<const char*>(&hash), sizeof(hash));
 
         // Write the actual packet data
-        output_file.write(data.data(), data.size());
+        output_file.write(reinterpret_cast<const char*>(data.data()), data.size());
         output_file.flush();
 
         // NBS Index File Format

@@ -8,7 +8,7 @@ import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { Vector4 } from "../../../shared/math/vector4";
 import { message } from "../../../shared/messages";
-import { toSeconds } from "../../../shared/time/timestamp";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { CameraParams } from "../camera/camera_params";
@@ -27,7 +27,9 @@ export class VisionNetwork {
     this.network.on(message.vision.VisualMesh, this.onMesh);
     this.network.on(message.vision.Balls, this.onBalls);
     this.network.on(message.vision.Goals, this.onGoals);
+    this.network.on(message.vision.Robots, this.onRobots);
     this.network.on(message.vision.GreenHorizon, this.onGreenHorizon);
+    this.network.on(message.vision.BoundingBoxes, this.onBoundingBoxes);
   }
 
   static of(nusightNetwork: NUsightNetwork): VisionNetwork {
@@ -82,14 +84,14 @@ export class VisionNetwork {
   @action
   onMesh(robotModel: RobotModel, packet: message.vision.VisualMesh) {
     const robot = VisionRobotModel.of(robotModel);
-    const { id, neighbourhood, rays, classifications } = packet;
+    const { id, neighbourhood, uPCw, classifications } = packet;
     const camera = robot.cameras.get(id);
     if (!camera) {
       return;
     }
     camera.visualMesh = {
       neighbours: neighbourhood?.v!,
-      rays: rays?.v!,
+      rays: uPCw?.v!,
       classifications: { dim: classifications?.rows!, values: classifications?.v! },
     };
   }
@@ -103,14 +105,33 @@ export class VisionNetwork {
       return;
     }
     camera.balls = balls.map((ball) => ({
-      timestamp: toSeconds(timestamp),
+      timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       cone: {
         axis: Vector3.from(ball.uBCc),
         radius: ball.radius!,
       },
-      distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
+      distance: Math.hypot(
+        ball.measurements?.[0].rBCc?.x!,
+        ball.measurements?.[0].rBCc?.y!,
+        ball.measurements?.[0].rBCc?.z!,
+      ),
       colour: Vector4.from(ball.colour),
+    }));
+  }
+
+  @action
+  private onRobots(robotModel: RobotModel, packet: message.vision.Robots) {
+    const robot = VisionRobotModel.of(robotModel);
+    const { id, timestamp, Hcw, robots } = packet;
+    const camera = robot.cameras.get(id);
+    if (!camera) {
+      return;
+    }
+    camera.robots = robots.map((robot) => ({
+      timestamp: TimestampObject.toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      rRCc: Vector3.from(robot.rRCc),
     }));
   }
 
@@ -123,7 +144,7 @@ export class VisionNetwork {
       return;
     }
     camera.goals = goals.map((goal) => ({
-      timestamp: toSeconds(timestamp),
+      timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       side:
         goal.side === message.vision.Goal.Side.LEFT
@@ -140,6 +161,24 @@ export class VisionNetwork {
   }
 
   @action
+  private onBoundingBoxes(robotModel: RobotModel, packet: message.vision.BoundingBoxes) {
+    const robot = VisionRobotModel.of(robotModel);
+    const { id, timestamp, Hcw, boundingBoxes } = packet;
+    const camera = robot.cameras.get(id);
+    if (!camera) {
+      return;
+    }
+    camera.boundingBoxes = boundingBoxes.map((boundingBox) => ({
+      timestamp: TimestampObject.toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      name: boundingBox.name!,
+      confidence: boundingBox.confidence!,
+      corners: boundingBox.corners?.map((corner) => Vector3.from(corner))!,
+      colour: Vector4.from(boundingBox.colour),
+    }));
+  }
+
+  @action
   private onGreenHorizon(robotModel: RobotModel, packet: message.vision.GreenHorizon) {
     const robot = VisionRobotModel.of(robotModel);
     const { horizon, Hcw, id } = packet;
@@ -148,7 +187,7 @@ export class VisionNetwork {
       return;
     }
     const greenHorizon = new GreenHorizonModel({
-      horizon: horizon?.map((v) => Vector3.from(v)),
+      horizon: horizon?.map((v) => Matrix4.from(Hcw).invert().decompose().translation.subtract(Vector3.from(v))),
       Hcw: Matrix4.from(Hcw),
     });
     camera.greenHorizon = camera.greenHorizon?.copy(greenHorizon) || greenHorizon;

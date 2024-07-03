@@ -1,21 +1,28 @@
-/*
- * This file is part of the NUbots Codebase.
- *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2013 NUbots <nubots@nubots.net>
- */
+// MIT License
+//
+// Copyright (c) 2013 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 
 syntax = "proto3";
 
@@ -26,6 +33,8 @@ import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
 import "Transform.proto";
+
+import "message/behaviour/state/WalkState.proto";
 
 message Sensors {
     /// Full set of information to use a given servo.
@@ -40,29 +49,29 @@ message Sensors {
         bool enabled = 3;
         /// Proportional gain. In proportion to the servo's position error. Gain
         /// values are in range 0~254. K_p : p_gain / 8
-        float p_gain = 4;
+        double p_gain = 4;
         /// Integral gain. Increases in relation to the error, and how long the
         /// error has persisted. Gain values are in range 0~254.
         /// K_i : i_gain * 1000 / 2048
-        float i_gain = 5;
+        double i_gain = 5;
         /// Derivative gain. Does not consider error, just dampens forces to reduce
         /// derivatives. Gain values are in range 0~254. K_d : d_gain * 4 / 1000
-        float d_gain = 6;
+        double d_gain = 6;
         /// It is a position value of destination. 0 to 4,095 (0xFFF) is available.
         /// The unit is 0.088 [°]. (FROM
         /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#specifications): If
         /// Goal Position is out of the range, Angle Limit Error Bit (Bit1) of
         /// Status Packet is returned as ‘1’ and Alarm is triggered as set in Alarm
         /// LED/Shutdown
-        float goal_position = 7;
-        float goal_velocity = 8;
+        double goal_position = 7;
+        double goal_velocity = 8;
         /// The range of the value is 0~4095 (0xFFF), and the unit is 0.088 [°]
-        float present_position = 9;
+        double present_position = 9;
         /// 0 ~ 2,047 (0x000 ~ 0x7FF) can be used. The value unit is about 0.11rpm.
         /// If a value is in the range of 0 ~ 1,023 then the motor rotates to the
         /// counter-clockwise direction. else the motor rotates to the clockwise
         /// direction
-        float present_velocity = 10;
+        double present_velocity = 10;
         /// The range of the value is 0~2047, and the unit is about 0.1%
         /// If the value is 0~1,023, it means the load works to the CCW direction.
         /// If the value is 1,024~2,047, it means the load works to the CW
@@ -70,15 +79,15 @@ message Sensors {
         /// the direction, and 1,024 is equal to 0. For example, the value is 512,
         /// it means the load is detected in the direction of CCW about 50% of the
         /// maximum torque
-        float load = 11;
+        double load = 11;
         /// Present voltage. This value is 10 times larger than the actual voltage.
         /// For example, when 10V is supplied, the data value is 100 (0x64).
         /// If Present Voltage(42) value is out of range, Voltage Range Error Bit
         /// (Bit0) of Status Packet is returned as ‘1’ and Alarm is triggered and
         /// set the address 17 and set 1 to the Bit 0 of the address 18
-        float voltage = 12;
+        double voltage = 12;
         /// Data value is identical to the actual temperature in Celsius
-        float temperature = 13;
+        double temperature = 13;
     }
 
     /// Button information
@@ -139,15 +148,17 @@ message Sensors {
     /// A set of transforms; one for each frame (All the joints, cameras and base of feet)
     repeated mat4 Htx = 12 [(array_size) = 24];
 
-    /// Homogeneous transform: torso {t} to ground {g}
-    iso3 Hgt = 13;
-
     /// Homogeneous transform: world {w} to robot {r}
-    iso3 Hrw = 14;
+    iso3 Hrw = 13;
 
     /// Homogeneous transform: world {w} to torso {t}
-    iso3 Htw = 15;
+    iso3 Htw = 14;
 
-    /// Homogeneous transform: planted foot point {p} to world {w}
-    iso3 Hwp = 16;
+    /// Homogeneous transform: planted foot {p} to world {w}
+    iso3 Hwp = 15;
+
+    /// Translational velocity of torso {t} in world {w} space
+    vec3 vTw = 16;
+
+    behaviour.state.WalkState.Phase planted_foot_phase = 17;
 }

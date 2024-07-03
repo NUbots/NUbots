@@ -34,16 +34,22 @@
 
 namespace module::purpose {
 
+    struct StartTester {};
+
     class Tester : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Priority of StartSafely task
+            int start_safely_priority = 0;
             /// @brief Priority of FindBall task
             int find_ball_priority = 0;
             /// @brief Priority of LookAtBall task
             int look_at_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_ball_priority = 0;
+            /// @brief Priority of StandStill task
+            int walk_to_kick_ball_priority = 0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task
@@ -56,10 +62,26 @@ namespace module::purpose {
             int look_around_priority = 0;
             /// @brief Priority of StandStill task
             int stand_still_priority = 0;
-
+            /// @brief Priority of Say task
+            int say_priority = 0;
+            /// @brief Priority of ChatGPT task
+            int chatgpt_priority = 0;
+            /// @brief Priority of AudioGPT task
+            int audiogpt_priority = 0;
             /// @brief Position to walk to when emitting WalkToFieldPosition task
             Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
+            /// @brief Text to say when emitting Say task
+            std::string say_text = "";
+            /// @brief Text to prompt ChatGPT with
+            std::string chatgpt_prompt = "";
+            /// @brief Duration to listen for audio when emitting AudioGPT task
+            int audiogpt_listen_duration = 0;
+            /// @brief Delay in seconds before creating director tree
+            int start_delay = 0;
         } cfg;
+
+        /// @brief The rate the tasks will emit, to drive the rest of the system
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
 
     public:
         /// @brief Called by the powerplant to build and setup the Tester reactor.

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013 NUbots
+ * Copyright (c) 2014 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -55,7 +55,7 @@ namespace module::input {
         uint send_port;
         uint TEAM_ID;
         uint PLAYER_ID;
-        uint BROADCAST_IP = 0xFFFFFFFF;
+        std::string BROADCAST_IP;
         std::string udp_filter_address;
         std::set<std::string> ignored_ip_addresses;
 

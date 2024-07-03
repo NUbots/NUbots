@@ -86,6 +86,7 @@ namespace module::skill {
 
             /// @brief Torso pitch anti-windup limits
             Eigen::Vector2d pitch_antiwindup = Eigen::Vector2d::Zero();
+            utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};
         } cfg;
 
         /// @brief Last time we updated the walk engine

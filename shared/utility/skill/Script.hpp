@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2022 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -37,7 +37,8 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/platform/aliases.hpp"
+#include "utility/support/network.hpp"
 
 
 /**
@@ -112,12 +113,19 @@ namespace utility::skill {
     /// @throws Runtime error when the script doesn't exist.
     static YAML::Node load(const std::string& script) {
         // Set paths to the script files.
-        auto hostname      = utility::support::getHostname();
+        auto hostname      = utility::support::get_hostname();
         auto robot_path    = "scripts/" + hostname + "/" + script;
         auto platform_path = "scripts/" + get_platform(hostname) + "/" + script;
+        auto robot_name    = utility::platform::get_robot_alias(hostname);
+        auto name_path     = "scripts/" + robot_name + "/" + script;
 
-        // Try getting the robot-specific script first
-        if (utility::file::exists(robot_path)) {
+        // If robot name script exists, use it
+        if (!robot_name.empty() && utility::file::exists(name_path)) {
+            NUClear::log<NUClear::INFO>("Parsing name specific script:", script);
+            return YAML::LoadFile(name_path);
+        }
+        // If robot name script doesn't exist, try to use the robot-specific script
+        else if (utility::file::exists(robot_path)) {
             NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
             return YAML::LoadFile(robot_path);
         }

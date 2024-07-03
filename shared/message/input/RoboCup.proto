@@ -1,0 +1,114 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+syntax = "proto3";
+
+package message.input;
+
+import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+import "Matrix.proto";
+
+/// The detected team of the robot
+enum Team {
+    UNKNOWN_TEAM = 0;
+    BLUE         = 1;
+    RED          = 2;
+}
+
+message Robot {
+    /// ID of the robot, 0 if not known
+    uint32 player_id = 1;
+
+    /// The position of the robot on the field according to the following convention
+    /// x meters along the field with 0 at the centre of the field and positive towards opponent goals
+    /// y meters across the field with 0 at the centre of the field and positive to the left
+    /// θ orientation of the robot (anti-clockwise from the x axis from above the field)
+    fvec3 position = 2;
+
+    /// The covariance measure of the robots [x, y, θ] values
+    /// If this is unavailable leave this unset
+    fmat3 covariance = 3;
+
+    /// Robot team, if known
+    Team team = 4;
+}
+
+message Ball {
+    /// The position of the ball on the field according to the following convention
+    /// x meters along the field with 0 at the centre of the field and positive towards opponent goals
+    /// y meters across the field with 0 at the centre of the field and positive to the left
+    /// z meters above the field with 0 at the surface of the field and positive up
+    fvec3 position = 1;
+
+    /// The velocity of the ball
+    /// x m/s along the field with 0 at the centre of the field and positive towards opponent goals
+    /// y m/s across the field with 0 at the centre of the field and positive to the left
+    /// z m/s above the field with 0 at the surface of the field and positive up
+    /// Set to 0 if not available
+    fvec3 velocity = 2;
+
+    /// The covariance measure of the balls [x, y, z] values
+    /// If this is unavailable leave this unset
+    fmat3 covariance = 3;
+}
+
+/// The current playing state of the robot
+enum State {
+    UNKNOWN_STATE = 0;
+    UNPENALISED   = 1;
+    PENALISED     = 2;
+}
+
+message RoboCup {
+    /// Timestamp of message creation
+    google.protobuf.Timestamp timestamp = 1;
+
+    /// The robots current state
+    State state = 2;
+
+    /// Position, orientation, and covariance of the player on the field
+    Robot current_pose = 3;
+
+    /// The current walk speed of the robot in it's local [x, y, θ] coordinates
+    /// x and y in m/s and θ in rad/s
+    /// positive x being forwards, positive y being strafing to the left, and positive θ being anti-clockwise
+    fvec3 walk_command = 4;
+
+    /// Position and orientation of the players target on the field specified
+    Robot target_pose = 5;
+
+    /// Position that the robot is aiming to kick the ball to
+    /// If no kick is planned set to [0, 0]
+    /// Vector has origin on the ground between the robots feet
+    fvec2 kick_target = 6;
+
+    /// Position, velocity, and covariance of the ball on the field
+    Ball ball = 7;
+
+    /// Position, orientation, and covariance of detected robots on the field
+    repeated Robot others = 8;
+
+    /// IDs 1-100 are reserved for official use
+}
