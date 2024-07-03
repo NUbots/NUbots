@@ -66,19 +66,6 @@ namespace module::purpose {
         on<Configuration>("KeyboardWalk.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KeyboardWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            // Set STDIN to non-blocking
-            int flags  = fcntl(STDIN_FILENO, F_GETFL, 0);
-            auto error = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-            if (error == -1) {
-                log<NUClear::ERROR>("Failed to set STDIN to non-blocking");
-            }
-
-            // Set up our terminal to not require EOF
-            struct termios attr;
-            tcgetattr(STDIN_FILENO, &attr);
-            attr.c_lflag &= ~(ICANON | ECHO);
-            tcsetattr(STDIN_FILENO, TCSANOW, &attr);
         });
 
         // Start the Director graph for the KeyboardWalk.
