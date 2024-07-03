@@ -18,7 +18,7 @@ walk:
     # Torso height (in meters)
     height: 0.46
     # Torso pitch (in radians)
-    pitch: 18 * pi / 180
+    pitch: 10 * pi / 180
     # Torso constant position offset
     position_offset: [0.01, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
@@ -32,6 +32,14 @@ walk:
 
 gains:
   arms: 1
+
+pitch_controller:
+  # Whether or not to use the pitch controller
+  enabled: true
+  # Gain
+  gain: 0.0025
+  # Maximum pitch offset (in radians), acts as both controller limit and range where active
+  max_offset: 15 * pi / 180
 
 # Fixed position of the arm joints during walking
 arms:
