@@ -48,6 +48,7 @@
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/StartSafely.hpp"
 #include "message/support/GlobalConfig.hpp"
+#include "message/support/nusight/Purposes.hpp"
 
 namespace module::purpose {
 
@@ -73,6 +74,7 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::StartSafely;
     using message::support::GlobalConfig;
+    using message::support::nusight::Purposes;
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -178,7 +180,9 @@ namespace module::purpose {
             auto timeout = std::chrono::seconds(int(cfg.timeout));
 
             // Remove inactive robots
+            log<NUClear::DEBUG>("Active robots:");
             for (auto it = active_robots.begin(); it != active_robots.end();) {
+                log<NUClear::DEBUG>("Player ", int(it->robot_id));
                 if (it->robot_id != player_id && now - it->last_update_time > timeout) {
                     log<NUClear::DEBUG>("remove player ", int(it->robot_id));
                     it = active_robots.erase(it);
@@ -187,21 +191,21 @@ namespace module::purpose {
                     ++it;
                 }
             }
+            log<NUClear::DEBUG>("END");
 
             log<NUClear::DEBUG>("active robots length ", int(active_robots.size()));
         });
 
-        // TODO: this is causing a bug on "unpenalisation"
-        // Robots are emitting a stale purpose, causing them to be in other robot's active robot's out of order
-        // Fix me...
-
         // Emit our own Purpose for NUsight debugging
-        // on<Every<2, Per<std::chrono::seconds>>, With<Purposes>>().then([this](const Purposes& purposes) {
-        //     log<NUClear::DEBUG>("Current soccer position ", soccer_position);
-        //     auto purposes_msg = std::make_unique<Purposes>(purposes);
-        //     purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
-        //     emit(std::move(purposes_msg));
-        // });
+        // TODO: emit nusight purposes
+        on<Every<2, Per<std::chrono::seconds>>>().then([this](const Purposes& purposes) {
+            // If the robot has just booted up or just unpenalised, don't emit
+            log<NUClear::DEBUG>("Current soccer position ", soccer_position);
+            auto purposes_msg = std::make_unique<Purposes>(purposes);
+            purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
+            purposes_msg->startup_time = startup_time;
+            emit(std::move(purposes_msg));
+        });
 
         // Capture leader's last message in case of bad timing
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
@@ -217,8 +221,6 @@ namespace module::purpose {
     }
 
     void Soccer::find_purpose() {
-        emit<Task>(std::make_unique<FindPurpose>(), 1);
-
         if (cfg.position == Position::DYNAMIC) {
             // Trigger FindPurpose by emitting Robocup message
             auto msg = std::make_unique<RoboCup>();
@@ -230,6 +232,8 @@ namespace module::purpose {
             startup_time               = now;
             emit(msg);
         }
+
+        emit<Task>(std::make_unique<FindPurpose>(), 1);
     }
 
     void Soccer::add_robot(RobotInfo new_robot) {
