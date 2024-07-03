@@ -34,12 +34,12 @@
 #include "extension/Behaviour.hpp"
 
 #include "message/input/RoboCup.hpp"
-#include "message/input/Purposes.hpp"
+#include "message/support/nusight/Purposes.hpp"
 
 namespace module::purpose {
 
     using message::input::RoboCup;
-    using message::input::SoccerPosition;
+    using NusightPosition = message::support::nusight::SoccerPosition;
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -68,14 +68,14 @@ namespace module::purpose {
                 // clang-format on
             }
 
-            SoccerPosition to_soccer_position() const {
+            NusightPosition to_soccer_position() const {
                 switch (value) {
                     case Value::STRIKER:
-                        return SoccerPosition::STRIKER;
+                        return NusightPosition::STRIKER;
                     case Value::GOALIE:
-                        return SoccerPosition::GOALIE;
+                        return NusightPosition::GOALIE;
                     case Value::DEFENDER:
-                        return SoccerPosition::DEFENDER;
+                        return NusightPosition::DEFENDER;
                     default:
                         throw std::runtime_error("Invalid Position conversion");
                 }

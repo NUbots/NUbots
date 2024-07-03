@@ -74,7 +74,7 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::StartSafely;
     using message::support::GlobalConfig;
-    using message::support::nusight::Purposes;
+    using NusightPurposes = message::support::nusight::Purposes;
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -198,10 +198,9 @@ namespace module::purpose {
 
         // Emit our own Purpose for NUsight debugging
         // TODO: emit nusight purposes
-        on<Every<2, Per<std::chrono::seconds>>>().then([this](const Purposes& purposes) {
-            // If the robot has just booted up or just unpenalised, don't emit
+        on<Every<2, Per<std::chrono::seconds>>>().then([this]() {
             log<NUClear::DEBUG>("Current soccer position ", soccer_position);
-            auto purposes_msg = std::make_unique<Purposes>(purposes);
+            auto purposes_msg = std::make_unique<NusightPurposes>();
             purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
             purposes_msg->startup_time = startup_time;
             emit(std::move(purposes_msg));
@@ -303,9 +302,6 @@ namespace module::purpose {
 
             // Emit the startup time of the module to claim leadership
             purposes_msg->startup_time = startup_time;
-
-            // Emit info for NUsight
-            purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
             purposes_msg->purpose.player_id = player_id;
 
             emit(purposes_msg);
