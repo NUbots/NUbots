@@ -38,6 +38,9 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Buttons.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -51,6 +54,10 @@ namespace module::purpose {
     using extension::behaviour::Task;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
+    using message::localisation::ResetFieldLocalisation;
+    using message::output::Buzzer;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -67,6 +74,13 @@ namespace module::purpose {
             // Use configuration here from file KeyboardWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
+
+        on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
+            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
+        });
+
+        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {

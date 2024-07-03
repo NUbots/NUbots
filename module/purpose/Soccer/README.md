@@ -15,7 +15,7 @@ Include this in your role to start the Director tree to play soccer.
 - `message::purpose::FindPurpose` to find the right purpose to emit
 - `message::input::GameEvents::Penalisation` to find out if the robot has been penalised and should stop moving
 - `message::input::GameEvents::Unpenalisation` to find out if the robot has been unpenalised and can play again
-- `message::platform::ButtonMiddleDown` to force play with a middle button press
+- `message::input::ButtonMiddleDown` to force play with a middle button press
 
 ## Emits
 
