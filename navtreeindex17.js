@@ -16,12 +16,13 @@ var NAVTREEINDEX17 =
 "structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html#adeaff2caf5b9efc7d412984afa0a070a":[2,0,3,12,9,0,3],
 "structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html#ae3f2db2fa6f24da1c79b86b874f50910":[2,0,3,12,9,0,0],
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html":[2,0,3,12,10,0],
-"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb":[2,0,3,12,10,0,2],
-"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a6f9a4e27b7b5e6dd268747482a19d66b":[2,0,3,12,10,0,5],
-"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a8c1f65493a26e6dc05d1ca9393386fa6":[2,0,3,12,10,0,0],
-"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a958bcdb230880540d2662b7bd4f33779":[2,0,3,12,10,0,3],
-"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#abb8208e99cfc7559c5f74c275fb08c46":[2,0,3,12,10,0,1],
-"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#ae78d1a0a643cad341f63f9104243d32e":[2,0,3,12,10,0,4],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a1e0b880b17611b6f8e950e6e3f090aa5":[2,0,3,12,10,0,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb":[2,0,3,12,10,0,3],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a6f9a4e27b7b5e6dd268747482a19d66b":[2,0,3,12,10,0,6],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a8c1f65493a26e6dc05d1ca9393386fa6":[2,0,3,12,10,0,1],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a958bcdb230880540d2662b7bd4f33779":[2,0,3,12,10,0,4],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#abb8208e99cfc7559c5f74c275fb08c46":[2,0,3,12,10,0,2],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#ae78d1a0a643cad341f63f9104243d32e":[2,0,3,12,10,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[2,0,3,13,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[2,0,3,13,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[2,0,3,13,1,1,0,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1input_1_1FrameID.html#a4ec9632c8a2f5c41c0a9caf143d59005":[2,0,7,2,0,24],
 "structutility_1_1input_1_1FrameID.html#a5f2c3ed7a4015ec555f69b97a390de0f":[2,0,7,2,0,7],
 "structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27":[2,0,7,2,0,0],
-"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a028525e6443f1a46956b4154b74770d7":[2,0,7,2,0,0,16],
-"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a09050b7016f0cecfef5e22a278f8a240":[2,0,7,2,0,0,18]
+"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a028525e6443f1a46956b4154b74770d7":[2,0,7,2,0,0,16]
 };

@@ -66,5 +66,6 @@ var searchData=
   ['attempt_66',['attempt',['../structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516',1,'utility::reactor::StreamReactor::PostConnect']]],
   ['audiogpt_5flisten_5fduration_67',['audiogpt_listen_duration',['../structmodule_1_1purpose_1_1Tester_1_1Config.html#ab9401797c800beacc4ca93e9ef50c2ff',1,'module::purpose::Tester::Config']]],
   ['audiogpt_5fpriority_68',['audiogpt_priority',['../structmodule_1_1purpose_1_1Tester_1_1Config.html#ac2540d0526e64abee4bbf03452d6bb02',1,'module::purpose::Tester::Config']]],
-  ['available_69',['available',['../classutility_1_1file_1_1FileDescriptor.html#a3ea2220f21d18bc73b3e739d1bb5d064',1,'utility::file::FileDescriptor::available()'],['../classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6',1,'utility::io::uart::available()']]]
+  ['available_69',['available',['../classutility_1_1file_1_1FileDescriptor.html#a3ea2220f21d18bc73b3e739d1bb5d064',1,'utility::file::FileDescriptor::available()'],['../classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6',1,'utility::io::uart::available()']]],
+  ['avoid_5fball_5foffset_70',['avoid_ball_offset',['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a1e0b880b17611b6f8e950e6e3f090aa5',1,'module::strategy::WalkToBall::Config']]]
 ];
