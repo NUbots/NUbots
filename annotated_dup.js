@@ -228,6 +228,8 @@ var annotated_dup =
       ] ],
       [ "purpose", null, [
         [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
+        [ "DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
+        [ "EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "LockServo", "structmodule_1_1purpose_1_1LockServo.html", null ],
