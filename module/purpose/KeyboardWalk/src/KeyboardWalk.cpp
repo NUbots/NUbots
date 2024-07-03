@@ -88,14 +88,11 @@ namespace module::purpose {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 5);
-
             // Start up safely with low gains
             emit<Task>(std::make_unique<StartSafely>(), 4);
 
-            // Stand Still on startup
-            // emit<Task>(std::make_unique<StandStill>());
+            // The robot should always try to recover from falling, if applicable, regardless of purpose
+            emit<Task>(std::make_unique<FallRecovery>(), 5);
 
             // Ensure UTF-8 is enabled
             std::setlocale(LC_ALL, "en_US.UTF-8");
