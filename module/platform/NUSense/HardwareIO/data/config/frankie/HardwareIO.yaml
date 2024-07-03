@@ -33,7 +33,7 @@ servos:
     simulated: false
   - # [8]  R_HIP_ROLL
     direction: 1
-    offset: 0.0
+    offset: -0.098
     simulated: false
   - # [9]  L_HIP_ROLL
     direction: 1
@@ -41,27 +41,27 @@ servos:
     simulated: false
   - # [10] R_HIP_PITCH
     direction: 1
-    offset: 0.23
+    offset: 0.0
     simulated: false
   - # [11] L_HIP_PITCH
     direction: -1
-    offset: 0.066
+    offset: -0.080
     simulated: false
   - # [12] R_KNEE
     direction: -1
-    offset: pi / 4
+    offset: pi / 4 + 0.156
     simulated: false
   - # [13] L_KNEE
     direction: 1
-    offset: pi / 4
+    offset: pi / 4 + 0.054
     simulated: false
   - # [14] R_ANKLE_PITCH
     direction: -1
-    offset: 0.0
+    offset: -0.026
     simulated: false
   - # [15] L_ANKLE_PITCH
     direction: 1
-    offset: 0.0
+    offset: -0.017
     simulated: false
   - # [16] R_ANKLE_ROLL
     direction: -1
@@ -77,5 +77,5 @@ servos:
     simulated: false
   - # [19] HEAD_PITCH
     direction: 1
-    offset: -0.167
+    offset: -0.046
     simulated: false
