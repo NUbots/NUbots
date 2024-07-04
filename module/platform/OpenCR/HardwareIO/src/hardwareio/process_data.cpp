@@ -164,6 +164,9 @@ namespace module::platform::OpenCR {
         // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
         for (const auto& servo : servo_states) {
             if (servo.temperature > cfg.alarms.temperature.level) {
+                log<NUClear::WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
+                                   packet.id,
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)));
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
