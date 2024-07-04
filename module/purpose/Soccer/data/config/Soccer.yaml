@@ -10,3 +10,6 @@ position: DYNAMIC
 
 # The number of seconds to wait before assuming a teammate is inactive
 timeout: 8
+
+# The largest robot id number
+max_robots: 4

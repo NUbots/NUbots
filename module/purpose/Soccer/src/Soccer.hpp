@@ -43,9 +43,17 @@ namespace module::purpose {
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief The id of the robot
         uint player_id = 0;
 
+        /// @brief The point at which the robot becomes active
         NUClear::clock::time_point startup_time = NUClear::clock::now();
+
+        /// @brief Robot's active status
+        bool is_active = false;
+
+        /// @brief Last Robocup message sent by the leader
+        std::unique_ptr<RoboCup> leader_message = nullptr;
 
         /// @brief Smart enum for the robot's position
         struct Position {
@@ -94,30 +102,25 @@ namespace module::purpose {
             Position position{};
             /// @brief The number of seconds to wait before assuming a teammate is inactive
             uint8_t timeout = 0;
+            /// @brief The largest id of a robot
+            uint8_t max_robots = 0;
         } cfg;
 
         struct RobotInfo {
-            uint8_t robot_id                            = 0;
+            bool is_active                              = false;
             NUClear::clock::time_point startup_time     = NUClear::clock::now();
             NUClear::clock::time_point last_update_time = NUClear::clock::now();
-            Position position                           = Position("DEFENDER");
 
             bool operator<(const RobotInfo& other) const {
-                if (startup_time == other.startup_time) {
-                    return robot_id < other.robot_id;
-                }
                 return startup_time < other.startup_time;
             }
         };
 
-        /// @brief Store robots that can currently play
-        std::vector<RobotInfo> active_robots{};
-
         /// @brief Store's the robot's current soccer position
         Position soccer_position;
 
-        /// @brief Last Robocup message sent by the leader
-        std::unique_ptr<RoboCup> leader_message = nullptr;
+        /// @brief Store robots that could possibly play
+        std::vector<RobotInfo> active_robots;
 
         /// @brief Utility to set up robocup message to find purpose
         void find_purpose();
@@ -133,12 +136,15 @@ namespace module::purpose {
         /// @brief Return the index of the future striker
         uint8_t find_striker();
 
+        /// @brief Return the index of the current leader
+        uint8_t find_leader();
+
         /// @brief Decide the correct soccer positions
         void give_directions();
 
         /// @brief Emit purpose based on leader's instructions
         /// @param robocup A robocup message sent by another robot
-        void follow_directions();
+        void follow_directions(const RoboCup& robocup);
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;

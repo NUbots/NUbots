@@ -38,7 +38,6 @@ enum SoccerPosition {
 
 message Purposes {
     message Purpose {
-        uint32 player_id = 1;
         SoccerPosition purpose = 2;
     }
 
@@ -48,6 +47,9 @@ message Purposes {
     // The sending robot's startup time
     google.protobuf.Timestamp startup_time = 2;
 
+    // The sending robot's active status
+    bool is_active = 3;
+
     // Current robot purpose
-    Purpose purpose = 3;
+    Purpose purpose = 4;
 }
