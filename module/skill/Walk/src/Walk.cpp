@@ -93,7 +93,7 @@ namespace module::skill {
             if (config["pitch_controller"]["enabled"].as<bool>()) {
                 pitch_controller_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
                     double measured_pitch = mat_to_rpy_intrinsic(sensors.Htw.linear().inverse()).y();
-                    double error = cfg.walk_generator_parameters.torso_pitch - measured_pitch;
+                    double error          = cfg.walk_generator_parameters.torso_pitch - measured_pitch;
 
                     // Disable the controller outside of the threshold
                     if (std::abs(error) > cfg.pitch_max_offset) {
@@ -101,14 +101,16 @@ namespace module::skill {
                         return;
                     }
 
-                    // Integrate the error
+                    // Update the pitch offset
                     pitch_offset += cfg.pitch_gain * error;
                     pitch_offset = std::clamp(pitch_offset, -cfg.pitch_max_offset, cfg.pitch_max_offset);
+
                     emit(graph("Pitch offset", pitch_offset));
                     emit(graph("Measured pitch", measured_pitch));
                     emit(graph("Error", error));
                 });
-            } else {
+            }
+            else {
                 pitch_controller_reaction.unbind();
             }
 
@@ -141,6 +143,9 @@ namespace module::skill {
             walk_generator.reset();
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
+
+            // Reset pitch controller
+            pitch_offset = 0;
         });
 
         // Stop - Runs every time the Walk task is removed from the director tree
