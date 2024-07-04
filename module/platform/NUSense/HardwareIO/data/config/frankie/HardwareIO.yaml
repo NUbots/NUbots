@@ -1,7 +1,7 @@
 servos:
   - # [0]  R_SHOULDER_PITCH
     direction: -1
-    offset: pi / 4
+    offset: pi / 4 + 0.162
     simulated: false
   - # [1]  L_SHOULDER_PITCH
     direction: 1
