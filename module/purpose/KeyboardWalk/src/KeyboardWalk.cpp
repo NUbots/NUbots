@@ -78,7 +78,6 @@ namespace module::purpose {
         on<Trigger<ButtonMiddleDown>, Single>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
-            log<NUClear::DEBUG>("Bzzzzzzzzzzz resetting field localisation.");
         });
 
         on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
