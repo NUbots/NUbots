@@ -118,7 +118,20 @@ namespace module::purpose {
         });
 
         // Normal PLAYING state
-        on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+        on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // If it's not our kickoff and timer is going, stand still
+                // The secondary timer will only happen for kickoff here
+                log<NUClear::INFO>(game_state.data.our_kick_off,
+                                   (game_state.data.secondary_time - NUClear::clock::now()).count());
+                if (!game_state.data.our_kick_off
+                    && (game_state.data.secondary_time - NUClear::clock::now()).count() > 0) {
+                    emit<Task>(std::make_unique<StandStill>());
+                }
+                else {
+                    play();
+                }
+            });
 
         // Normal UNKNOWN state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
