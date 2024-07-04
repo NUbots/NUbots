@@ -170,10 +170,6 @@ namespace module::platform::OpenCR {
             }
         }
 
-        if (!any_servo_hot) {
-            emit(std::make_unique<Buzzer>(0));
-        }
-
         // If this servo has not been initialised yet, set the goal states to the current states
         if (!servo_states[servo_index].initialised) {
             servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
