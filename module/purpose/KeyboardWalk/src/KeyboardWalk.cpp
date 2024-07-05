@@ -93,10 +93,10 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 5);
 
             // Start up safely with low gains
-            emit<Task>(std::make_unique<StartSafely>(), 4);
+            // emit<Task>(std::make_unique<StartSafely>(), 4);
 
             // Stand Still on startup
-            // emit<Task>(std::make_unique<StandStill>());
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
 
             // Ensure UTF-8 is enabled
             std::setlocale(LC_ALL, "en_US.UTF-8");
