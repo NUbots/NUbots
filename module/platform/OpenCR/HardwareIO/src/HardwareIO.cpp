@@ -34,6 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"

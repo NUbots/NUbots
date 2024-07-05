@@ -84,19 +84,6 @@ namespace module::purpose {
         on<Configuration>("ScriptTuner.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KeyboardWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            // Set STDIN to non-blocking
-            int flags  = fcntl(STDIN_FILENO, F_GETFL, 0);
-            auto error = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-            if (error == -1) {
-                log<NUClear::ERROR>("Failed to set STDIN to non-blocking");
-            }
-
-            // Set up our terminal to not require EOF
-            struct termios attr;
-            tcgetattr(STDIN_FILENO, &attr);
-            attr.c_lflag &= ~(ICANON | ECHO);
-            tcsetattr(STDIN_FILENO, TCSANOW, &attr);
         });
 
         on<Startup>().then([this] {
@@ -155,7 +142,7 @@ namespace module::purpose {
         });
 
 
-        on<IO>(STDIN_FILENO, IO::READ).then([this] {
+        on<Always>().then([this] {
             switch (getch()) {
                 case KEY_UP:  // Change selection up
                     selection = selection == 0 ? 19 : selection - 1;
@@ -1004,7 +991,7 @@ namespace module::purpose {
                     }  // end KEY_ENTER else
                     mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                     break;  // end case KEY_ENTER
-            }  // switch
+            }               // switch
 
         }  // while
 
