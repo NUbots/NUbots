@@ -9,4 +9,4 @@ force_playing: false
 position: DYNAMIC
 
 # The number of seconds to wait before assuming a teammate is inactive
-timeout: 8
+timeout: 4
