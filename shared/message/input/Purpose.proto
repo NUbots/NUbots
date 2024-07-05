@@ -26,8 +26,6 @@ syntax = "proto3";
 
 package message.input;
 
-import "google/protobuf/timestamp.proto";
-
 /// The detected purpose of the robot
 enum SoccerPosition {
     STRIKER  = 0;
