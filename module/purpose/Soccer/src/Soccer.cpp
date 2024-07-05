@@ -302,6 +302,7 @@ namespace module::purpose {
     void Soccer::follow_directions(const RoboCup& robocup) {
         uint8_t striker_id   = 0;
 
+        // TODO: find by the index of the striker...
         // Find the striker by id
         for (const auto& purpose : robocup.purpose_commands.purpose_commands) {
             if (purpose.purpose == SoccerPosition::STRIKER) {

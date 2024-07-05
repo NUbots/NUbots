@@ -38,6 +38,7 @@ enum SoccerPosition {
 
 message Purposes {
     message Purpose {
+        uint32 player_id = 1;
         SoccerPosition purpose = 2;
     }
 
