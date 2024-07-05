@@ -11,6 +11,7 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
+  network::PlotJuggler
   output::Overview
   output::ImageCompressor
   # Sensors
@@ -19,12 +20,13 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::BallDetector
   vision::FieldLineDetector
+  vision::BallDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos

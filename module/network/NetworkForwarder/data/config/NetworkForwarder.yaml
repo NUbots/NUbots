@@ -39,3 +39,5 @@ targets:
     # Log messages
     message.nuclear.LogMessage: true
     message.nuclear.ReactionStatistics: false
+
+    message.planning.WalkToDebug: true
