@@ -4,7 +4,7 @@
 
 Starts the Director graph for the soccer scenario. If the robot is penalised, it will make it stand still. Otherwise, it will emit the Task corresponding to the soccer position specified in configuration.
 
-If the configuration is set to "dynamic" it will choose the appropriate position out of Defender and Striker. We have one Striker, which is our leader. This is our oldest active robot (alive and unpenalised).
+If the configuration is set to "dynamic" it will choose the appropriate position out of Defender and Striker. The robot listens for the positions of other robots and makes its decision.
 
 Possible positions are Striker, Goalie and Defender.
 
