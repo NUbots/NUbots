@@ -59,24 +59,24 @@ namespace module::input {
         std::string udp_filter_address;
         std::set<std::string> ignored_ip_addresses;
 
-        bool selfPenalised = true;
-        ReactionHandle listenHandle;
+        bool self_penalised = true;
+        ReactionHandle listen_handle;
 
         gamecontroller::GameControllerPacket packet;
         gamecontroller::Mode mode;
 
-        void resetState();
-        void process(const message::input::GameState& oldGameState,
-                     const gamecontroller::GameControllerPacket& oldPacket,
-                     const gamecontroller::GameControllerPacket& newPacket);
-        void sendReplyMessage(const gamecontroller::ReplyMessage& message);
-        [[nodiscard]] const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& state) const;
-        [[nodiscard]] const gamecontroller::Team& getOpponentTeam(
+        void reset_state();
+        void process(const message::input::GameState& old_game_state,
+                     const gamecontroller::GameControllerPacket& old_packet,
+                     const gamecontroller::GameControllerPacket& new_packet);
+        void send_reply_message(const gamecontroller::ReplyMessage& message);
+        [[nodiscard]] const gamecontroller::Team& get_own_team(const gamecontroller::GameControllerPacket& state) const;
+        [[nodiscard]] const gamecontroller::Team& get_opponent_team(
             const gamecontroller::GameControllerPacket& state) const;
-        [[nodiscard]] static message::input::GameState::Data::PenaltyReason getPenaltyReason(
-            const gamecontroller::PenaltyState& penaltyState);
+        [[nodiscard]] static message::input::GameState::Data::PenaltyReason get_penalty_reason(
+            const gamecontroller::PenaltyState& penalty_state);
 
-        [[nodiscard]] static std::string ipAddressIntToString(const uint32_t& ipAddr);
+        [[nodiscard]] static std::string ip_address_int_to_string(const uint32_t& ip_addr);
 
     public:
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);

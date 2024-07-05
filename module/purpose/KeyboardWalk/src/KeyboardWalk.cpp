@@ -38,6 +38,9 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Buttons.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -51,6 +54,10 @@ namespace module::purpose {
     using extension::behaviour::Task;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
+    using message::localisation::ResetFieldLocalisation;
+    using message::output::Buzzer;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -66,25 +73,19 @@ namespace module::purpose {
         on<Configuration>("KeyboardWalk.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KeyboardWalk.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            // Set STDIN to non-blocking
-            int flags  = fcntl(STDIN_FILENO, F_GETFL, 0);
-            auto error = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-            if (error == -1) {
-                log<NUClear::ERROR>("Failed to set STDIN to non-blocking");
-            }
-
-            // Set up our terminal to not require EOF
-            struct termios attr;
-            tcgetattr(STDIN_FILENO, &attr);
-            attr.c_lflag &= ~(ICANON | ECHO);
-            tcsetattr(STDIN_FILENO, TCSANOW, &attr);
         });
+
+        on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
+            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
+        });
+
+        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without these emis, modules that need a Stability and WalkState messages may not run
+            // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
