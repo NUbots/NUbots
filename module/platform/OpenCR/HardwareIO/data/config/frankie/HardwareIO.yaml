@@ -13,7 +13,7 @@ servos:
     simulated: false
   - # [3]  L_SHOULDER_ROLL
     direction: -1
-    offset: pi / 4
+    offset: pi / 4 - 0.087
     simulated: false
   - # [4]  R_ELBOW
     direction: -1
