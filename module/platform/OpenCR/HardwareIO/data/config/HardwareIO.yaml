@@ -98,4 +98,4 @@ servos:
 alarms:
   temperature:
     level: 60
-    buzzer_frequency: 880 # Hz
+    buzzer_frequency: 2666 # Hz
