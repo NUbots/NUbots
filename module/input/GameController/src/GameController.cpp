@@ -49,7 +49,7 @@ namespace module::input {
     using GoalScored      = GameEvents::GoalScored;
     using Penalisation    = GameEvents::Penalisation;
     using Unpenalisation  = GameEvents::Unpenalisation;
-    using CoachMessage    = GameEvents::CoachMessage;
+    using Coach_message   = GameEvents::CoachMessage;
     using HalfTime        = GameEvents::HalfTime;
     using BallKickedOut   = GameEvents::BallKickedOut;
     using KickOffTeam     = GameEvents::KickOffTeam;
@@ -64,11 +64,11 @@ namespace module::input {
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
-                  [this](const Configuration& config, const GlobalConfig& globalConfig) {
+                  [this](const Configuration& config, const GlobalConfig& global_config) {
                       log_level = config["log_level"].as<NUClear::LogLevel>();
 
-                      PLAYER_ID = globalConfig.player_id;
-                      TEAM_ID   = globalConfig.team_id;
+                      PLAYER_ID = global_config.player_id;
+                      TEAM_ID   = global_config.team_id;
                       send_port = config["send_port"].as<uint>();
 
                       udp_filter_address = config["udp_filter_address"].as<std::string>("");
@@ -79,27 +79,27 @@ namespace module::input {
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
                           if (receive_port != 0) {
-                              listenHandle.unbind();
+                              listen_handle.unbind();
                           }
 
                           // Update our port
                           receive_port = config["receive_port"].as<uint>();
 
                           // Bind our new handle
-                          std::tie(listenHandle, std::ignore, std::ignore) =
+                          std::tie(listen_handle, std::ignore, std::ignore) =
                               on<UDP::Broadcast, With<GameState>, Single>(receive_port)
-                                  .then([this](const UDP::Packet& p, const GameState& gameState) {
-                                      std::string remoteAddr = p.remote.address;
+                                  .then([this](const UDP::Packet& p, const GameState& game_state) {
+                                      std::string remote_addr = p.remote.address;
 
                                       // Apply filtering of packets if udp_filter_address is set in config
-                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
+                                      if (!udp_filter_address.empty() && remote_addr != udp_filter_address) {
                                           if (std::find(ignored_ip_addresses.begin(),
                                                         ignored_ip_addresses.end(),
-                                                        remoteAddr)
+                                                        remote_addr)
                                               == ignored_ip_addresses.end()) {
-                                              ignored_ip_addresses.insert(remoteAddr);
+                                              ignored_ip_addresses.insert(remote_addr);
                                               log<NUClear::INFO>("Ignoring UDP packet from",
-                                                                 remoteAddr,
+                                                                 remote_addr,
                                                                  "as it doesn't match configured filter address",
                                                                  udp_filter_address);
                                           }
@@ -108,34 +108,34 @@ namespace module::input {
                                       }
 
                                       // Get our packet contents
-                                      const GameControllerPacket& newPacket =
+                                      const GameControllerPacket& new_packet =
                                           *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
 
                                       // Get the IP we are getting this packet from
                                       // Store it and use it to send back to the game controller using emit UDP
                                       BROADCAST_IP = p.local.address;
 
-                                      if (newPacket.version == SUPPORTED_VERSION) {
+                                      if (new_packet.version == SUPPORTED_VERSION) {
                                           try {
-                                              process(gameState, packet, newPacket);
+                                              process(game_state, packet, new_packet);
                                           }
                                           catch (std::runtime_error& err) {
                                               log(err.what());
                                           }
 
-                                          packet = newPacket;
+                                          packet = new_packet;
                                       }
                                   });
                       }
 
-                      resetState();
+                      reset_state();
                   });
 
         on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply",
-                                                       [this] { sendReplyMessage(ReplyMessage::ALIVE); });
+                                                       [this] { send_reply_message(ReplyMessage::ALIVE); });
     }
 
-    void GameController::sendReplyMessage(const ReplyMessage& message) {
+    void GameController::send_reply_message(const ReplyMessage& message) {
         auto packet     = std::make_unique<GameControllerReplyPacket>();
         packet->header  = {gamecontroller::RETURN_HEADER[0],
                            gamecontroller::RETURN_HEADER[1],
@@ -149,104 +149,105 @@ namespace module::input {
         emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
     }
 
-    void GameController::resetState() {
+    void GameController::reset_state() {
 
         mode = static_cast<gamecontroller::Mode>(-1);
 
         std::copy(std::begin(gamecontroller::RECEIVE_HEADER),
                   std::end(gamecontroller::RECEIVE_HEADER),
                   std::begin(packet.header));
-        packet.version        = SUPPORTED_VERSION;
-        packet.packetNumber   = 0;
-        packet.playersPerTeam = PLAYERS_PER_TEAM;
-        packet.state          = static_cast<gamecontroller::State>(-1);
-        packet.firstHalf      = true;
-        packet.kickOffTeam    = -1;
-        packet.mode           = static_cast<gamecontroller::Mode>(-1);
-        packet.dropInTeam     = static_cast<gamecontroller::TeamColour>(-1);
-        packet.dropInTime     = -1;
-        packet.secsRemaining  = 0;
-        packet.secondaryTime  = 0;
+        packet.version          = SUPPORTED_VERSION;
+        packet.packet_number    = 0;
+        packet.players_per_team = PLAYERS_PER_TEAM;
+        packet.state            = static_cast<gamecontroller::State>(-1);
+        packet.first_half       = true;
+        packet.kick_off_team    = -1;
+        packet.mode             = static_cast<gamecontroller::Mode>(-1);
+        packet.drop_in_team     = static_cast<gamecontroller::TeamColour>(-1);
+        packet.drop_in_time     = -1;
+        packet.secs_remaining   = 0;
+        packet.secondary_time   = 0;
         for (uint i = 0; i < NUM_TEAMS; i++) {
-            auto& ownTeam       = packet.teams[i];
-            ownTeam.teamId      = (i == 0 ? TEAM_ID : 0);
-            ownTeam.teamColour  = static_cast<gamecontroller::TeamColour>(-1);
-            ownTeam.score       = 0;
-            ownTeam.penaltyShot = 0;
-            ownTeam.singleShots = 0;
-            ownTeam.coachMessage.fill(0);
-            auto& coach             = ownTeam.coach;
-            coach.penaltyState      = gamecontroller::PenaltyState::UNPENALISED;
-            coach.penalisedTimeLeft = 0;
+            auto& own_team        = packet.teams[i];
+            own_team.team_id      = (i == 0 ? TEAM_ID : 0);
+            own_team.team_colour  = static_cast<gamecontroller::TeamColour>(-1);
+            own_team.score        = 0;
+            own_team.penalty_shot = 0;
+            own_team.single_shots = 0;
+            own_team.coach_message.fill(0);
+            auto& coach               = own_team.coach;
+            coach.penalty_state       = gamecontroller::PenaltyState::UNPENALISED;
+            coach.penalised_time_left = 0;
             for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
-                auto& player = ownTeam.players[i];
+                auto& player = own_team.players[i];
                 if (i <= ACTIVE_PLAYERS_PER_TEAM) {
-                    player.penaltyState      = gamecontroller::PenaltyState::UNPENALISED;
-                    player.penalisedTimeLeft = 0;
+                    player.penalty_state       = gamecontroller::PenaltyState::UNPENALISED;
+                    player.penalised_time_left = 0;
                 }
                 else {
-                    player.penaltyState      = gamecontroller::PenaltyState::SUBSTITUTE;
-                    player.penalisedTimeLeft = 0;
+                    player.penalty_state       = gamecontroller::PenaltyState::SUBSTITUTE;
+                    player.penalised_time_left = 0;
                 }
             }
         }
 
-        auto initialState = std::make_unique<GameState>();
+        auto initial_state = std::make_unique<GameState>();
         // default to reasonable values for initial state
-        initialState->data.phase            = GameState::Data::Phase::INITIAL;
-        initialState->data.mode             = GameState::Data::Mode::NORMAL;
-        initialState->data.first_half       = true;
-        initialState->data.kicked_out_by_us = false;
-        initialState->data.our_kick_off     = false;
+        initial_state->data.phase            = GameState::Data::Phase::INITIAL;
+        initial_state->data.mode             = GameState::Data::Mode::NORMAL;
+        initial_state->data.first_half       = true;
+        initial_state->data.kicked_out_by_us = false;
+        initial_state->data.our_kick_off     = false;
 
-        initialState->data.team.team_id     = TEAM_ID;
-        initialState->data.opponent.team_id = 0;
+        initial_state->data.team.team_id     = TEAM_ID;
+        initial_state->data.opponent.team_id = 0;
 
-        emit(std::move(initialState));
+        emit(std::move(initial_state));
         emit(std::make_unique<GameState::Data::Phase>(GameState::Data::Phase::INITIAL));
     }
 
-    void GameController::process(const GameState& oldGameState,
-                                 const GameControllerPacket& oldPacket,
-                                 const GameControllerPacket& newPacket) {
+    void GameController::process(const GameState& old_game_state,
+                                 const GameControllerPacket& old_packet,
+                                 const GameControllerPacket& new_packet) {
 
-        auto state = std::make_unique<GameState>(oldGameState);
+        auto state = std::make_unique<GameState>(old_game_state);
 
-        std::vector<std::function<void()>> stateChanges;
+        std::vector<std::function<void()>> state_changes;
 
         // game score
-        const auto& oldOwnTeam = getOwnTeam(oldPacket);
-        const auto& newOwnTeam = getOwnTeam(newPacket);
+        const auto& old_own_team = get_own_team(old_packet);
+        const auto& new_own_team = get_own_team(new_packet);
 
-        const auto& oldOpponentTeam = getOpponentTeam(oldPacket);
-        const auto& newOpponentTeam = getOpponentTeam(newPacket);
+        const auto& old_opponent_team = get_opponent_team(old_packet);
+        const auto& new_opponent_team = get_opponent_team(new_packet);
 
         /*******************************************************************************************
          * Process score updates
          ******************************************************************************************/
-        if (oldOwnTeam.score != newOwnTeam.score || oldOpponentTeam.score != newOpponentTeam.score) {
+        if (old_own_team.score != new_own_team.score || old_opponent_team.score != new_opponent_team.score) {
             // score update
-            emit(std::make_unique<GameEvents::Score>(GameEvents::Score{newOwnTeam.score, newOpponentTeam.score}));
+            emit(std::make_unique<GameEvents::Score>(GameEvents::Score{new_own_team.score, new_opponent_team.score}));
 
 
-            if (oldOwnTeam.score < newOwnTeam.score) {
+            if (old_own_team.score < new_own_team.score) {
                 // we scored! :D
 
                 // Set the team scores in the state packet
-                state->data.team.score = newOwnTeam.score;
-                stateChanges.emplace_back([this, newOwnTeam] {
-                    emit(std::make_unique<GoalScored>(GoalScored{GameEvents::Context::Value::TEAM, newOwnTeam.score}));
+                state->data.team.score = new_own_team.score;
+                state_changes.emplace_back([this, new_own_team] {
+                    emit(
+                        std::make_unique<GoalScored>(GoalScored{GameEvents::Context::Value::TEAM, new_own_team.score}));
                 });
             }
 
-            if (oldOpponentTeam.score < newOpponentTeam.score) {
+            if (old_opponent_team.score < new_opponent_team.score) {
                 // they scored :( boo
 
                 // Set the team scores in the state packet
-                state->data.opponent.score = newOpponentTeam.score;
-                stateChanges.emplace_back([this, newOpponentTeam] {
+                state->data.opponent.score = new_opponent_team.score;
+                state_changes.emplace_back([this, new_opponent_team] {
                     emit(std::make_unique<GoalScored>(
-                        GoalScored{GameEvents::Context::Value::OPPONENT, newOpponentTeam.score}));
+                        GoalScored{GameEvents::Context::Value::OPPONENT, new_opponent_team.score}));
                 });
             }
         }
@@ -258,86 +259,87 @@ namespace module::input {
         state->data.team.players.clear();
         state->data.opponent.players.clear();
 
-        // Note: assumes playersPerTeam never changes
-        for (uint i = 0; i < newPacket.playersPerTeam; i++) {
-            uint playerId            = i + 1;
-            const auto& oldOwnPlayer = oldOwnTeam.players[i];
-            const auto& newOwnPlayer = newOwnTeam.players[i];
+        // Note: assumes players_per_team never changes
+        for (uint i = 0; i < new_packet.players_per_team; i++) {
+            uint player_id             = i + 1;
+            const auto& old_own_player = old_own_team.players[i];
+            const auto& new_own_player = new_own_team.players[i];
 
-            const auto& oldOpponentPlayer = oldOpponentTeam.players[i];
-            const auto& newOpponentPlayer = newOpponentTeam.players[i];
+            const auto& old_opponent_player = old_opponent_team.players[i];
+            const auto& new_opponent_player = new_opponent_team.players[i];
 
             // Update our state
-            GameState::Data::Robot ownPlayer =
-                GameState::Data::Robot(playerId,
-                                       getPenaltyReason(newOwnPlayer.penaltyState),
-                                       NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft));
-            state->data.team.players.push_back(ownPlayer);
-            if (playerId == PLAYER_ID) {
-                state->data.self = ownPlayer;
+            GameState::Data::Robot own_player = GameState::Data::Robot(
+                player_id,
+                get_penalty_reason(new_own_player.penalty_state),
+                NUClear::clock::now() + std::chrono::seconds(new_own_player.penalised_time_left));
+            state->data.team.players.push_back(own_player);
+            if (player_id == PLAYER_ID) {
+                state->data.self = own_player;
             }
 
             state->data.opponent.players.emplace_back(
-                playerId,
-                getPenaltyReason(newOpponentPlayer.penaltyState),
-                NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft));
+                player_id,
+                get_penalty_reason(new_opponent_player.penalty_state),
+                NUClear::clock::now() + std::chrono::seconds(new_opponent_player.penalised_time_left));
 
-            // check if player on own team is penalised
-            if (newOwnPlayer.penaltyState != oldOwnPlayer.penaltyState
-                && newOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
+            // Check if player on own team is penalised
+            if (new_own_player.penalty_state != old_own_player.penalty_state
+                && new_own_player.penalty_state != gamecontroller::PenaltyState::UNPENALISED) {
 
-                auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
-                auto reason          = getPenaltyReason(newOwnPlayer.penaltyState);
-                stateChanges.emplace_back([this, playerId, unpenalisedTime, reason] {
-                    if (playerId == PLAYER_ID) {
-                        // self penalised :@
+                auto unpenalised_time =
+                    NUClear::clock::now() + std::chrono::seconds(new_own_player.penalised_time_left);
+                auto reason = get_penalty_reason(new_own_player.penalty_state);
+                state_changes.emplace_back([this, player_id, unpenalised_time, reason] {
+                    if (player_id == PLAYER_ID) {
+                        // Self penalised :@
                         emit(std::make_unique<Penalisation>(
-                            Penalisation{GameEvents::Context::Value::SELF, playerId, unpenalisedTime, reason}));
-                        sendReplyMessage(ReplyMessage::PENALISED);
-                        selfPenalised = true;
+                            Penalisation{GameEvents::Context::Value::SELF, player_id, unpenalised_time, reason}));
+                        send_reply_message(ReplyMessage::PENALISED);
+                        self_penalised = true;
                     }
                     else {
-                        // team mate penalised :'(
+                        // Team mate penalised :'(
                         emit(std::make_unique<Penalisation>(
-                            Penalisation{GameEvents::Context::Value::TEAM, playerId, unpenalisedTime, reason}));
+                            Penalisation{GameEvents::Context::Value::TEAM, player_id, unpenalised_time, reason}));
                     }
                 });
             }
-            else if (newOwnPlayer.penaltyState == gamecontroller::PenaltyState::UNPENALISED
-                     && oldOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
-                stateChanges.emplace_back([this, playerId] {
-                    if (playerId == PLAYER_ID) {
-                        // self unpenalised :)
+            else if (new_own_player.penalty_state == gamecontroller::PenaltyState::UNPENALISED
+                     && old_own_player.penalty_state != gamecontroller::PenaltyState::UNPENALISED) {
+                state_changes.emplace_back([this, player_id] {
+                    if (player_id == PLAYER_ID) {
+                        // Self unpenalised :)
                         emit(std::make_unique<Unpenalisation>(
-                            Unpenalisation{GameEvents::Context::Value::SELF, playerId}));
-                        sendReplyMessage(ReplyMessage::UNPENALISED);
-                        selfPenalised = false;
+                            Unpenalisation{GameEvents::Context::Value::SELF, player_id}));
+                        send_reply_message(ReplyMessage::UNPENALISED);
+                        self_penalised = false;
                     }
                     else {
-                        // team mate unpenalised :)
+                        // Team mate unpenalised :)
                         emit(std::make_unique<Unpenalisation>(
-                            Unpenalisation{GameEvents::Context::Value::TEAM, playerId}));
+                            Unpenalisation{GameEvents::Context::Value::TEAM, player_id}));
                     }
                 });
             }
 
-            if (newOpponentPlayer.penaltyState != oldOpponentPlayer.penaltyState
-                && newOpponentPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
-                auto unpenalisedTime =
-                    NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft);
-                auto reason = getPenaltyReason(newOpponentPlayer.penaltyState);
-                // opponent penalised :D
-                stateChanges.emplace_back([this, playerId, unpenalisedTime, reason] {
+            if (new_opponent_player.penalty_state != old_opponent_player.penalty_state
+                && new_opponent_player.penalty_state != gamecontroller::PenaltyState::UNPENALISED) {
+                auto unpenalised_time =
+                    NUClear::clock::now() + std::chrono::seconds(new_opponent_player.penalised_time_left);
+                auto reason = get_penalty_reason(new_opponent_player.penalty_state);
+                // Opponent penalised :D
+                state_changes.emplace_back([this, player_id, unpenalised_time, reason] {
                     emit(std::make_unique<Penalisation>(
-                        Penalisation{GameEvents::Context::Value::OPPONENT, playerId, unpenalisedTime, reason}));
+                        Penalisation{GameEvents::Context::Value::OPPONENT, player_id, unpenalised_time, reason}));
                 });
             }
-            else if (newOpponentPlayer.penaltyState == gamecontroller::PenaltyState::UNPENALISED
-                     && oldOpponentPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
-                // opponent unpenalised D:
-                stateChanges.emplace_back([this, playerId] {
+            else if (new_opponent_player.penalty_state == gamecontroller::PenaltyState::UNPENALISED
+                     && old_opponent_player.penalty_state != gamecontroller::PenaltyState::UNPENALISED) {
+                // Opponent unpenalised D:
+                state_changes.emplace_back([this, player_id] {
                     emit(std::make_unique<Unpenalisation>(
-                        Unpenalisation{GameEvents::Context::Value::OPPONENT, playerId}));
+                        Unpenalisation{GameEvents::Context::Value::OPPONENT, player_id}));
                 });
             }
         }
@@ -346,27 +348,27 @@ namespace module::input {
         /*******************************************************************************************
          * Process coach messages
          ******************************************************************************************/
-        if (oldOwnTeam.coachMessage != newOwnTeam.coachMessage) {
+        if (old_own_team.coach_message != new_own_team.coach_message) {
 
             // Update the coach message in the state
-            state->data.team.coach_message = newOwnTeam.coachMessage.data();
+            state->data.team.coach_message = new_own_team.coach_message.data();
 
-            // listen to the coach? o_O
-            stateChanges.emplace_back([this, newOwnTeam] {
-                emit(std::make_unique<CoachMessage>(
-                    CoachMessage{GameEvents::Context::Value::TEAM, newOwnTeam.coachMessage.data()}));
+            // Listen to the coach? o_O
+            state_changes.emplace_back([this, new_own_team] {
+                emit(std::make_unique<Coach_message>(
+                    Coach_message{GameEvents::Context::Value::TEAM, new_own_team.coach_message.data()}));
             });
         }
 
-        if (oldOpponentTeam.coachMessage != newOpponentTeam.coachMessage) {
+        if (old_opponent_team.coach_message != new_opponent_team.coach_message) {
 
             // Update the opponent coach message in the state
-            state->data.opponent.coach_message = newOpponentTeam.coachMessage.data();
+            state->data.opponent.coach_message = new_opponent_team.coach_message.data();
 
-            // listen in on the enemy! >:D
-            stateChanges.emplace_back([this, newOpponentTeam] {
-                emit(std::make_unique<CoachMessage>(
-                    CoachMessage{GameEvents::Context::Value::OPPONENT, newOpponentTeam.coachMessage.data()}));
+            // Listen in on the enemy! >:D
+            state_changes.emplace_back([this, new_opponent_team] {
+                emit(std::make_unique<Coach_message>(
+                    Coach_message{GameEvents::Context::Value::OPPONENT, new_opponent_team.coach_message.data()}));
             });
         }
 
@@ -374,40 +376,40 @@ namespace module::input {
         /*******************************************************************************************
          * Process half changes
          ******************************************************************************************/
-        if (oldPacket.firstHalf != newPacket.firstHalf) {
+        if (old_packet.first_half != new_packet.first_half) {
 
             // Update the half time in the state
-            state->data.first_half = newPacket.firstHalf;
+            state->data.first_half = new_packet.first_half;
 
-            // half time
-            stateChanges.emplace_back(
-                [this, newPacket] { emit(std::make_unique<HalfTime>(HalfTime{newPacket.firstHalf})); });
+            // Half time
+            state_changes.emplace_back(
+                [this, new_packet] { emit(std::make_unique<HalfTime>(HalfTime{new_packet.first_half})); });
         }
 
         /*******************************************************************************************
          * Process ball kicked out
          ******************************************************************************************/
         // Woo boolean algebra!
-        if ((newPacket.dropInTime != -1
-             && ((newPacket.dropInTime < oldPacket.dropInTime) == (oldPacket.dropInTime != -1)))
-            || newPacket.dropInTeam != oldPacket.dropInTeam) {
+        if ((new_packet.drop_in_time != -1
+             && ((new_packet.drop_in_time < old_packet.drop_in_time) == (old_packet.drop_in_time != -1)))
+            || new_packet.drop_in_team != old_packet.drop_in_team) {
 
-            // ball was kicked out by dropInTeam
-            auto time = NUClear::clock::now() - std::chrono::seconds(newPacket.dropInTime);
+            // Ball was kicked out by drop_in_team
+            auto time = NUClear::clock::now() - std::chrono::seconds(new_packet.drop_in_time);
 
             // Update the ball kicked out time and player in the state
-            state->data.kicked_out_by_us = newPacket.dropInTeam == newOwnTeam.teamColour;
+            state->data.kicked_out_by_us = new_packet.drop_in_team == new_own_team.team_colour;
             state->data.kicked_out_time  = time;
 
-            if (newPacket.dropInTeam == newOwnTeam.teamColour) {
-                // we kicked the ball out :S
-                stateChanges.emplace_back([this, time] {
+            if (new_packet.drop_in_team == new_own_team.team_colour) {
+                // We kicked the ball out :S
+                state_changes.emplace_back([this, time] {
                     emit(std::make_unique<BallKickedOut>(BallKickedOut{GameEvents::Context::Value::TEAM, time}));
                 });
             }
             else {
-                // they kicked the ball out! ^_^
-                stateChanges.emplace_back([this, time] {
+                // They kicked the ball out! ^_^
+                state_changes.emplace_back([this, time] {
                     emit(std::make_unique<BallKickedOut>(BallKickedOut{GameEvents::Context::Value::OPPONENT, time}));
                 });
             }
@@ -417,27 +419,27 @@ namespace module::input {
         /*******************************************************************************************
          * Process kick off team
          ******************************************************************************************/
-        if (oldPacket.kickOffTeam != newPacket.kickOffTeam) {
+        if (old_packet.kick_off_team != new_packet.kick_off_team) {
 
             // Update the kickoff team (us or them)
-            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamId;
+            state->data.our_kick_off = new_packet.kick_off_team == new_own_team.team_id;
 
             // Get the new kick off team to emit the team change
-            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamId
+            GameEvents::Context team = new_packet.kick_off_team == new_own_team.team_id
                                            ? GameEvents::Context::Value::TEAM
                                            : GameEvents::Context::Value::OPPONENT;
 
-            stateChanges.emplace_back([this, team] { emit(std::make_unique<KickOffTeam>(KickOffTeam{team})); });
+            state_changes.emplace_back([this, team] { emit(std::make_unique<KickOffTeam>(KickOffTeam{team})); });
         }
 
 
         /*******************************************************************************************
          * Process our team colour
          ******************************************************************************************/
-        if (oldOwnTeam.teamColour != newOwnTeam.teamColour) {
+        if (old_own_team.team_colour != new_own_team.team_colour) {
             TeamColour colour =
-                newOwnTeam.teamColour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
-            stateChanges.emplace_back([this, colour] { emit(std::make_unique<TeamColour>(colour)); });
+                new_own_team.team_colour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
+            state_changes.emplace_back([this, colour] { emit(std::make_unique<TeamColour>(colour)); });
         }
 
 
@@ -445,56 +447,56 @@ namespace module::input {
          * Process state/mode changes
          ******************************************************************************************/
 
-        if (newPacket.mode != mode && oldPacket.mode != gamecontroller::Mode::TIMEOUT
-            && newPacket.mode != gamecontroller::Mode::TIMEOUT) {
+        if (new_packet.mode != mode && old_packet.mode != gamecontroller::Mode::TIMEOUT
+            && new_packet.mode != gamecontroller::Mode::TIMEOUT) {
 
-            mode = newPacket.mode;
+            mode = new_packet.mode;
 
             // Changed modes but not to timeout
-            switch (newPacket.mode) {
+            switch (new_packet.mode) {
                 case gamecontroller::Mode::NORMAL:
                     state->data.mode = GameState::Data::Mode::NORMAL;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::NORMAL)); });
                     break;
                 case gamecontroller::Mode::PENALTY_SHOOTOUT:
                     state->data.mode = GameState::Data::Mode::PENALTY_SHOOTOUT;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::PENALTY_SHOOTOUT)); });
                     break;
                 case gamecontroller::Mode::OVERTIME:
                     state->data.mode = GameState::Data::Mode::OVERTIME;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::OVERTIME)); });
                     break;
                 case gamecontroller::Mode::DIRECT_FREEKICK:
                     state->data.mode = GameState::Data::Mode::DIRECT_FREEKICK;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::DIRECT_FREEKICK)); });
                     break;
                 case gamecontroller::Mode::INDIRECT_FREEKICK:
                     state->data.mode = GameState::Data::Mode::INDIRECT_FREEKICK;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::INDIRECT_FREEKICK)); });
                     break;
                 case gamecontroller::Mode::PENALTYKICK:
                     state->data.mode = GameState::Data::Mode::PENALTYKICK;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::PENALTYKICK)); });
                     break;
                 case gamecontroller::Mode::CORNER_KICK:
                     state->data.mode = GameState::Data::Mode::CORNER_KICK;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::CORNER_KICK)); });
                     break;
                 case gamecontroller::Mode::GOAL_KICK:
                     state->data.mode = GameState::Data::Mode::GOAL_KICK;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::GOAL_KICK)); });
                     break;
                 case gamecontroller::Mode::THROW_IN:
                     state->data.mode = GameState::Data::Mode::THROW_IN;
-                    stateChanges.emplace_back(
+                    state_changes.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::THROW_IN)); });
                     break;
                 default:
@@ -506,43 +508,42 @@ namespace module::input {
         if ((state->data.mode != GameState::Data::Mode::NORMAL
              && state->data.mode != GameState::Data::Mode::PENALTY_SHOOTOUT
              && state->data.mode != GameState::Data::Mode::OVERTIME)
-            && (newPacket.secondaryStateInfo[0] != state->data.secondary_state.team_performing
-                || newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode)
-            && newPacket.secondaryStateInfo[0] != 0) {
-            if (newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode) {
-                stateChanges.emplace_back([] {});
+            && (new_packet.secondary_state_info[0] != state->data.secondary_state.team_performing
+                || new_packet.secondary_state_info[1] != state->data.secondary_state.sub_mode)
+            && new_packet.secondary_state_info[0] != 0) {
+            if (new_packet.secondary_state_info[1] != state->data.secondary_state.sub_mode) {
+                state_changes.emplace_back([] {});
             }
-            state->data.secondary_state.team_performing = newPacket.secondaryStateInfo[0];
-            state->data.secondary_state.sub_mode        = newPacket.secondaryStateInfo[1];
+            state->data.secondary_state.team_performing = new_packet.secondary_state_info[0];
+            state->data.secondary_state.sub_mode        = new_packet.secondary_state_info[1];
         }
 
-        if (oldPacket.mode != gamecontroller::Mode::TIMEOUT && newPacket.mode == gamecontroller::Mode::TIMEOUT) {
+        if (old_packet.mode != gamecontroller::Mode::TIMEOUT && new_packet.mode == gamecontroller::Mode::TIMEOUT) {
 
             // Change the game state to timeout
-            auto time = NUClear::clock::now() + std::chrono::seconds(newPacket.secondaryTime);
+            auto time = NUClear::clock::now() + std::chrono::seconds(new_packet.secondary_time);
 
             state->data.phase          = GameState::Data::Phase::Value::TIMEOUT;
             state->data.secondary_time = time;
 
-            stateChanges.emplace_back([this, time] {
+            state_changes.emplace_back([this, time] {
                 auto msg   = std::make_unique<GamePhase>();
                 msg->phase = GameState::Data::Phase::Value::TIMEOUT;
                 msg->ends  = time;
                 emit(msg);
             });
         }
-        else if (oldPacket.state != newPacket.state
-                 || (oldPacket.mode == gamecontroller::Mode::TIMEOUT
-                     && newPacket.mode != gamecontroller::Mode::TIMEOUT)) {
+        else if (old_packet.state != new_packet.state
+                 || (old_packet.mode == gamecontroller::Mode::TIMEOUT
+                     && new_packet.mode != gamecontroller::Mode::TIMEOUT)) {
 
             // State has changed, process it
-
-            switch (newPacket.state) {
+            switch (new_packet.state) {
                 case gamecontroller::State::INITIAL: {
 
                     state->data.phase = GameState::Data::Phase::Value::INITIAL;
 
-                    stateChanges.emplace_back([this] {
+                    state_changes.emplace_back([this] {
                         auto msg   = std::make_unique<GamePhase>();
                         msg->phase = GameState::Data::Phase::Value::INITIAL;
                         emit(msg);
@@ -554,15 +555,15 @@ namespace module::input {
                      * was not needed, but in the case that it is, this is how and
                      * where you would emit it:
                      */
-                    // if (oldPacket.state == State::PLAYING) {
+                    // if (old_packet.state == State::PLAYING) {
                     //     // DROPPED BALL
                     // }
-                    auto time = NUClear::clock::now() + std::chrono::seconds(newPacket.secondaryTime);
+                    auto time = NUClear::clock::now() + std::chrono::seconds(new_packet.secondary_time);
 
                     state->data.phase          = GameState::Data::Phase::Value::READY;
                     state->data.secondary_time = time;
 
-                    stateChanges.emplace_back([this, time] {
+                    state_changes.emplace_back([this, time] {
                         auto msg        = std::make_unique<GamePhase>();
                         msg->phase      = GameState::Data::Phase::Value::READY;
                         msg->ready_time = time;
@@ -574,7 +575,7 @@ namespace module::input {
 
                     state->data.phase = GameState::Data::Phase::Value::SET;
 
-                    stateChanges.emplace_back([this] {
+                    state_changes.emplace_back([this] {
                         auto msg   = std::make_unique<GamePhase>();
                         msg->phase = GameState::Data::Phase::Value::SET;
                         emit(msg);
@@ -582,33 +583,33 @@ namespace module::input {
                     break;
                 }
                 case gamecontroller::State::PLAYING: {
-                    auto endHalf  = NUClear::clock::now() + std::chrono::seconds(newPacket.secsRemaining);
-                    auto ballFree = NUClear::clock::now() + std::chrono::seconds(newPacket.secondaryTime);
+                    auto end_half  = NUClear::clock::now() + std::chrono::seconds(new_packet.secs_remaining);
+                    auto ball_free = NUClear::clock::now() + std::chrono::seconds(new_packet.secondary_time);
 
-                    state->data.primary_time   = endHalf;
-                    state->data.secondary_time = ballFree;
+                    state->data.primary_time   = end_half;
+                    state->data.secondary_time = ball_free;
                     state->data.phase          = GameState::Data::Phase::Value::PLAYING;
 
-                    stateChanges.emplace_back([this, endHalf, ballFree] {
+                    state_changes.emplace_back([this, end_half, ball_free] {
                         auto msg       = std::make_unique<GamePhase>();
                         msg->phase     = GameState::Data::Phase::Value::PLAYING;
-                        msg->end_half  = endHalf;
-                        msg->ball_free = ballFree;
+                        msg->end_half  = end_half;
+                        msg->ball_free = ball_free;
                         emit(msg);
                     });
                     break;
                 }
                 case gamecontroller::State::FINISHED: {
 
-                    auto nextHalf = NUClear::clock::now() + std::chrono::seconds(newPacket.secsRemaining);
+                    auto next_half = NUClear::clock::now() + std::chrono::seconds(new_packet.secs_remaining);
 
-                    state->data.primary_time = nextHalf;
+                    state->data.primary_time = next_half;
                     state->data.phase        = GameState::Data::Phase::Value::FINISHED;
 
-                    stateChanges.emplace_back([this, nextHalf] {
+                    state_changes.emplace_back([this, next_half] {
                         auto msg       = std::make_unique<GamePhase>();
                         msg->phase     = GameState::Data::Phase::Value::FINISHED;
-                        msg->next_half = nextHalf;
+                        msg->next_half = next_half;
                         emit(msg);
                     });
                     break;
@@ -618,20 +619,20 @@ namespace module::input {
             emit(std::make_unique<GameState::Data::Phase>(state->data.phase));
         }
 
-        if (!stateChanges.empty()) {
+        if (!state_changes.empty()) {
             // emit new state
             emit(std::move(state));
 
             // emit individual state change events
-            for (auto& change : stateChanges) {
+            for (auto& change : state_changes) {
                 change();
             }
         }
     }
 
-    PenaltyReason GameController::getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) {
+    PenaltyReason GameController::get_penalty_reason(const gamecontroller::PenaltyState& penalty_state) {
         // ugly incoming
-        switch (penaltyState) {
+        switch (penalty_state) {
             case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
             case gamecontroller::PenaltyState::BALL_MANIPULATION: return PenaltyReason::BALL_MANIPULATION;
             case gamecontroller::PenaltyState::PHYSICAL_CONTACT: return PenaltyReason::PHYSICAL_CONTACT;
@@ -646,10 +647,10 @@ namespace module::input {
         }
     }
 
-    const Team& GameController::getOwnTeam(const GameControllerPacket& state) const {
+    const Team& GameController::get_own_team(const GameControllerPacket& state) const {
 
         for (const auto& team : state.teams) {
-            if (team.teamId == TEAM_ID) {
+            if (team.team_id == TEAM_ID) {
                 return team;
             }
         }
@@ -657,9 +658,9 @@ namespace module::input {
         throw std::runtime_error("Own team not found");
     }
 
-    const Team& GameController::getOpponentTeam(const GameControllerPacket& state) const {
+    const Team& GameController::get_opponent_team(const GameControllerPacket& state) const {
         for (const auto& team : state.teams) {
-            if (team.teamId != TEAM_ID) {
+            if (team.team_id != TEAM_ID) {
                 return team;
             }
         }
@@ -667,13 +668,13 @@ namespace module::input {
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
 
-    std::string GameController::ipAddressIntToString(const uint32_t& ipAddr) {
-        uint32_t ipAddrN = htonl(ipAddr);
+    std::string GameController::ip_address_int_to_string(const uint32_t& ip_addr) {
+        uint32_t ip_addr_n = htonl(ip_addr);
 
         char c[255];
         std::memset(c, 0, sizeof(c));
 
-        std::string addr = inet_ntop(AF_INET, &ipAddrN, c, sizeof(c));
+        std::string addr = inet_ntop(AF_INET, &ip_addr_n, c, sizeof(c));
 
         return addr;
     }
