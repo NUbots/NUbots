@@ -183,16 +183,21 @@ namespace module::purpose {
             // Check if we have heard from robots periodically, and update their status if not
             auto now = NUClear::clock::now();
             for (std::size_t i = 0; i < robots.size(); ++i) {
-                if ((i + 1) != player_id && (now - robots[i].last_update_time).count() > cfg.timeout) {
-                    log<NUClear::DEBUG>("Update player to inactive: ", int(i + 1));
+                if ((i + 1) != player_id
+                    && std::chrono::duration_cast<std::chrono::seconds>(now - robots[i].last_update_time).count()
+                           > cfg.timeout) {
+                    log<NUClear::DEBUG>(
+                        "Update player to inactive: ",
+                        int(i + 1),
+                        std::chrono::duration_cast<std::chrono::seconds>(now - robots[i].last_update_time).count());
                     robots[i].is_active = false;
                 }
             }
 
-            if (robots[player_id].is_active) {
+            if (robots[player_id - 1].is_active) {
                 log<NUClear::DEBUG>("Is active true");
             }
-            if (!robots[player_id].is_active) {
+            if (!robots[player_id - 1].is_active) {
                 log<NUClear::DEBUG>("Is active false");
             }
         });
@@ -227,7 +232,7 @@ namespace module::purpose {
     void Soccer::find_purpose() {
 
         if (cfg.position == Position::DYNAMIC) {
-            robots[player_id - 1].is_active = true;
+            robots[player_id - 1].is_active    = true;
             robots[player_id - 1].startup_time = NUClear::clock::now();
         }
 
@@ -246,8 +251,14 @@ namespace module::purpose {
                     leader_idx = i;
                 }
                 // The leader should be the robot alive the longest
-                else if (robots[i].startup_time < robots[leader_idx].startup_time) {
-                    log<NUClear::WARN>("Leader", int(leader_idx + 1), "is not as cool as us", int(i + 1));
+                else if ((robots[i].startup_time - robots[leader_idx].startup_time).count() > 0) {
+                    log<NUClear::WARN>("Leader",
+                                       int(leader_idx + 1),
+                                       "is not as cool as us",
+                                       int(i + 1),
+                                       std::chrono::duration_cast<std::chrono::seconds>(
+                                           robots[i].startup_time - robots[leader_idx].startup_time)
+                                           .count());
                     leader_idx = i;
                 }
             }
