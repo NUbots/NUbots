@@ -154,6 +154,7 @@ namespace module::purpose {
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
+                give_directions();
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
