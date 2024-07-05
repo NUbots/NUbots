@@ -94,10 +94,10 @@ namespace module::purpose {
                 this->log_level   = config["log_level"].as<NUClear::LogLevel>();
                 cfg.force_playing = config["force_playing"].as<bool>();
 
-            // Get the soccer position, if not valid option then default to striker
-            cfg.position = Position(config["position"].as<std::string>());
+                // Get the soccer position, if not valid option then default to striker
+                cfg.position = Position(config["position"].as<std::string>());
 
-            cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
+                cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
 
                 // Get the number of seconds until we assume a teammate is inactive
                 cfg.timeout = config["timeout"].as<int>();
@@ -126,14 +126,17 @@ namespace module::purpose {
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
             // This emit starts the tree to play soccer
-            emit<Task>(std::make_unique<FindPurpose>(), 1);
+            emit<Task>(std::make_unique<FindPurpose>(), 2);
             // Stand still
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
+            robots[player_id - 1].active     = true;
+            robots[player_id - 1].last_heard = NUClear::clock::now();
+
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER:
@@ -152,6 +155,7 @@ namespace module::purpose {
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
 
+
             // Emit the purpose
             emit(std::make_unique<Purpose>(SoccerPosition(robots[player_id - 1].position),
                                            robots[player_id - 1].dynamic,
@@ -160,6 +164,7 @@ namespace module::purpose {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // Set penalised robot to inactive
+            log<NUClear::INFO>("Penalised robot ", self_penalisation.robot_id);
             robots[self_penalisation.robot_id - 1].active   = false;
             robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
 
@@ -247,12 +252,6 @@ namespace module::purpose {
             }
         }
 
-        // Make sure we're active
-        if (!robots[player_id - 1].active) {
-            log<NUClear::ERROR>("Inactive but finding purpose.");
-            return;
-        }
-
         // Check if we have a purpose
         if (robots[player_id - 1].position == Position::DYNAMIC) {
             // Set ourselves to defender
@@ -305,9 +304,11 @@ namespace module::purpose {
         }
 
         if (robots[player_id - 1].position == Position::STRIKER) {
+            log<NUClear::INFO>("I am a striker");
             emit<Task>(std::make_unique<Striker>(cfg.force_playing));
         }
         else {
+            log<NUClear::INFO>("I am a defender");
             emit<Task>(std::make_unique<Defender>(cfg.force_playing));
         }
     }
