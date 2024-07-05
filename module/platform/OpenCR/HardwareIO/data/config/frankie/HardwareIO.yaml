@@ -1,7 +1,7 @@
 servos:
   - # [0]  R_SHOULDER_PITCH
     direction: -1
-    offset: pi / 4 - 0.162
+    offset: pi / 4 + 0.162
     simulated: false
   - # [1]  L_SHOULDER_PITCH
     direction: 1
@@ -41,15 +41,15 @@ servos:
     simulated: false
   - # [10] R_HIP_PITCH
     direction: 1
-    offset: 0.23
+    offset: 0.0
     simulated: false
   - # [11] L_HIP_PITCH
     direction: -1
-    offset: 0.066
+    offset: 0.0
     simulated: false
   - # [12] R_KNEE
     direction: -1
-    offset: pi / 4
+    offset: pi / 4 + pi / 16
     simulated: false
   - # [13] L_KNEE
     direction: 1
