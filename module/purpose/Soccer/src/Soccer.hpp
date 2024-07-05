@@ -39,6 +39,9 @@ namespace module::purpose {
 
     using message::input::RoboCup;
 
+    struct EnableIdle {};
+    struct DisableIdle {};
+
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief The id of the robot
@@ -70,6 +73,8 @@ namespace module::purpose {
         struct Config {
             /// @brief Whether or not to force the robot to ignore GameController and play
             bool force_playing = false;
+            /// @brief Delay in seconds before the robot starts playing after button press
+            int disable_idle_delay = 0;
             /// @brief The soccer position of the robot
             Position position{};
             /// @brief The number of seconds to wait before assuming a teammate is inactive
@@ -96,6 +101,9 @@ namespace module::purpose {
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
+
+        /// @brief Idle state of the robot
+        bool idle = false;
 
         void determine_purpose();
 

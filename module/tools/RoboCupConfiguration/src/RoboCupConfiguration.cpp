@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <ranges>
 #include <sstream>
+#include <termios.h>
 
 #include "extension/Configuration.hpp"
 

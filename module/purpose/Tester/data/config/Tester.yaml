@@ -9,6 +9,7 @@ tasks:
   find_ball_priority: 0
   look_at_ball_priority: 0
   walk_to_ball_priority: 0
+  walk_to_kick_ball_priority: 0
   walk_to_field_position_priority: 0
   kick_to_goal_priority: 0
   stand_still_priority: 0
@@ -23,7 +24,7 @@ tasks:
   audiogpt_priority: 0
 
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
-walk_to_field_position_position: [0, 0, 0]
+walk_to_field_position_position: [0, 0, -3.14]
 
 # What to have the robot say when speaking
 say_text: "Hello!"
@@ -31,3 +32,6 @@ say_text: "Hello!"
 # What to prompt openai chatgpt with
 chatgpt_prompt: "Hello!"
 audiogpt_listen_duration: 5
+
+# Delay in seconds before creating director tree
+start_delay: 5

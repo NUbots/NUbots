@@ -42,3 +42,5 @@ targets:
 
     # Purpose
     message.input.Purposes: true
+
+    message.planning.WalkToDebug: true

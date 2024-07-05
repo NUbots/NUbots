@@ -4,6 +4,9 @@ log_level: INFO
 # For the robot playing without listening to GameController
 force_playing: false
 
+# Delay in seconds before the robot starts playing after button press
+disable_idle_delay: 5
+
 # The position of the robot
 # GOALIE, STRIKER, DEFENDER
 position: DYNAMIC
