@@ -17,6 +17,6 @@ Add this module to align the ball to the goal.
 
 ## Emits
 
-- `message::planning::TurnAroundBall` Task requesting to rotate around the ball.
+- `message::planning::PivotAroundPoint` Task requesting to rotate around the ball.
 
 ## Dependencies

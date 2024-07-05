@@ -39,6 +39,7 @@
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
@@ -64,6 +65,7 @@ namespace module::purpose {
 
     using extension::Configuration;
 
+    using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
     Goalie::Goalie(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -102,8 +104,8 @@ namespace module::purpose {
         // Normal READY state
         on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
 
         // Normal PLAYING state
@@ -148,9 +150,11 @@ namespace module::purpose {
     void Goalie::play() {
         // Stop the ball!
         // Second argument is priority - higher number means higher priority
-        Eigen::Vector3f position(cfg.ready_position.x(), cfg.ready_position.y(), 0);
-        emit<Task>(std::make_unique<WalkToFieldPosition>(position), cfg.ready_position.z(), 1);
-        emit<Task>(std::make_unique<FindBall>(), 2);    // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<WalkToFieldPosition>(
+                       pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                            Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
+                   1);
+        emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 4);  // try to walk to the ball
         emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 5);  // Patrol bounded box region

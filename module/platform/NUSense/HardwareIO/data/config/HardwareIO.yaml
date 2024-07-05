@@ -8,7 +8,7 @@ battery:
 
 nusense:
   device: "/dev/nusense"
-  baud: 1000000
+  baud: 3000000
   byte_wait: 1200
   packet_wait: 100000
   bus_reset_wait_time_us: 0
