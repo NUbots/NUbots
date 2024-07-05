@@ -133,10 +133,7 @@ namespace module::purpose {
                     soccer_position = Position("DEFENDER");
                     break;
                 case Position::DYNAMIC:
-                    if (!is_active) {
-                        startup_time = NUClear::clock::now();
-                        give_directions();
-                    }
+                    give_directions();
                     break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
@@ -153,9 +150,8 @@ namespace module::purpose {
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-            } else {
-                give_directions();
             }
+            give_directions();
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
@@ -185,8 +181,14 @@ namespace module::purpose {
                 if ((i + 1) != player_id && now - active_robots[i].last_update_time > timeout) {
                     log<NUClear::DEBUG>("Update player to inactive: ", int(i + 1));
                     active_robots[i].is_active = false;
-                    give_directions();
                 }
+            }
+
+            if (is_active) {
+                log<NUClear::DEBUG>("Is active true");
+            }
+            if (!is_active) {
+                log<NUClear::DEBUG>("Is active false");
             }
         });
 
@@ -206,9 +208,10 @@ namespace module::purpose {
     }
 
     void Soccer::find_purpose() {
+        is_active = true;
+
         if (cfg.position == Position::DYNAMIC) {
             startup_time = NUClear::clock::now();
-            give_directions();
         }
 
         emit<Task>(std::make_unique<FindPurpose>(), 1);
@@ -243,18 +246,25 @@ namespace module::purpose {
     };
 
     // Find which robot should be our leader
-    // TODO: messed this up
     uint8_t Soccer::find_leader() {
         uint8_t leader_idx = 0;
 
         for (uint8_t i = 0; i < active_robots.size(); ++i) {
             if (active_robots[i].is_active) {
-                if (active_robots[i] < active_robots[leader_idx]) {
+                // If the current prospective leader is not active, take the first active robot
+                if (!active_robots[leader_idx].is_active) {
+                    log<NUClear::WARN>("Leader is now inactive", leader_idx);
+                    leader_idx = i;
+                }
+                // The leader should be the robot alive the longest
+                else if (active_robots[i] < active_robots[leader_idx]) {
+                    log<NUClear::WARN>("Leader", leader_idx, "is not as cool as us", i);
                     leader_idx = i;
                 }
             }
         }
 
+        log<NUClear::DEBUG>("Leader is ", int(leader_idx + 1));
         return leader_idx + 1;
     }
 
