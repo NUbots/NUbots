@@ -132,6 +132,7 @@ namespace module::purpose {
         });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
+            // We are alive!
             robots[player_id - 1].active     = true;
             robots[player_id - 1].last_heard = NUClear::clock::now();
 
