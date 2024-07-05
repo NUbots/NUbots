@@ -43,6 +43,7 @@
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/skill/Look.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/StartSafely.hpp"
@@ -67,6 +68,7 @@ namespace module::purpose {
     using message::purpose::Goalie;
     using message::purpose::Striker;
     using message::skill::Look;
+    using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
     using message::strategy::StartSafely;
@@ -96,8 +98,8 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // When starting, we want to safely move to the stand position
-            emit<Task>(std::make_unique<StartSafely>(), 2);
+            // Stand still
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
@@ -143,6 +145,7 @@ namespace module::purpose {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             log<NUClear::INFO>("Idle mode enabled");
         });
 
@@ -160,6 +163,7 @@ namespace module::purpose {
         on<Trigger<DisableIdle>, Single>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
             if (!idle) {
+                emit<Task>(std::unique_ptr<Walk>(nullptr));
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 log<NUClear::INFO>("Idle mode disabled");
             }
