@@ -34,6 +34,9 @@
 
 namespace module::purpose {
 
+    struct EnableIdle {};
+    struct DisableIdle {};
+
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Smart enum for the robot's position
@@ -64,9 +67,17 @@ namespace module::purpose {
         struct Config {
             /// @brief Whether or not to force the robot to ignore GameController and play
             bool force_playing = false;
+            /// @brief Delay in seconds before the robot starts playing after button press
+            int disable_idle_delay = 0;
             /// @brief The soccer position of the robot
             Position position{};
         } cfg;
+
+        /// @brief The rate the find purpose provider will run, to drive the rest of the system
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
+
+        /// @brief Idle state of the robot
+        bool idle = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.

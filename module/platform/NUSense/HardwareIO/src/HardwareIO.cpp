@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -145,6 +145,28 @@ namespace module::platform::NUSense {
                 servo.temperature           = val.temperature;
                 servo.profile_acceleration  = 0;  // not present in NUSense message
                 servo.profile_velocity      = 0;  // not present in NUSense message
+
+                // Log any errors and timeouts from the servo.
+                if (val.packet_counts.packet_errors != 0) {
+                    log<NUClear::WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
+                                                   val.packet_counts.packet_errors,
+                                                   val.id,
+                                                   nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.packet_counts.crc_errors != 0) {
+                    // For now, the CRC is set to debug until terminating-resistors are gotten since there are many when
+                    // the robot is walking.
+                    log<NUClear::DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
+                                                    val.packet_counts.crc_errors,
+                                                    val.id,
+                                                    nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.packet_counts.timeouts != 0) {
+                    log<NUClear::WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
+                                                   val.packet_counts.timeouts,
+                                                   val.id,
+                                                   nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
 
                 // Add the offsets and switch the direction.
                 servo.present_position *= nugus.servo_direction[val.id - 1];

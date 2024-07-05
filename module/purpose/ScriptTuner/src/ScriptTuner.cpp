@@ -33,7 +33,9 @@ extern "C" {
 }
 
 #include <cstdio>
+#include <fcntl.h>
 #include <sstream>
+#include <termios.h>
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -140,9 +142,7 @@ namespace module::purpose {
         });
 
 
-        // Trigger when stdin has something to read
-        on<IO>(STDIN_FILENO, IO::READ).then([this] {
-            // Get the character the user has typed
+        on<Always>().then([this] {
             switch (getch()) {
                 case KEY_UP:  // Change selection up
                     selection = selection == 0 ? 19 : selection - 1;
@@ -203,7 +203,6 @@ namespace module::purpose {
                     powerplant.shutdown();
                     break;
             }
-
             // Update whatever visual changes we made
             refresh_view();
         });
@@ -308,23 +307,23 @@ namespace module::purpose {
         const char* MOTOR_NAMES[] = {"Head Pan",
                                      "Head Tilt",
                                      "Right Shoulder Pitch",
-                                     "Left Shoulder Pitch",
+                                     "Left  Shoulder Pitch",
                                      "Right Shoulder Roll",
-                                     "Left Shoulder Roll",
+                                     "Left  Shoulder Roll",
                                      "Right Elbow",
-                                     "Left Elbow",
+                                     "Left  Elbow",
                                      "Right Hip Yaw",
-                                     "Left Hip Yaw",
+                                     "Left  Hip Yaw",
                                      "Right Hip Roll",
-                                     "Left Hip Roll",
+                                     "Left  Hip Roll",
                                      "Right Hip Pitch",
-                                     "Left Hip Pitch",
+                                     "Left  Hip Pitch",
                                      "Right Knee",
-                                     "Left Knee",
+                                     "Left  Knee",
                                      "Right Ankle Pitch",
-                                     "Left Ankle Pitch",
+                                     "Left  Ankle Pitch",
                                      "Right Ankle Roll",
-                                     "Left Ankle Roll"};
+                                     "Left  Ankle Roll"};
 
         // Loop through all our motors
         for (size_t i = 0; i < 20; ++i) {

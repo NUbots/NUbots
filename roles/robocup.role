@@ -29,6 +29,7 @@ nuclear_role(
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos
@@ -49,6 +50,7 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
+  strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::StrategiseLook
