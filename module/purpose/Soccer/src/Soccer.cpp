@@ -145,7 +145,6 @@ namespace module::purpose {
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
-                is_active = false;
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
@@ -184,10 +183,10 @@ namespace module::purpose {
                 }
             }
 
-            if (is_active) {
+            if (active_robots[player_id].is_active) {
                 log<NUClear::DEBUG>("Is active true");
             }
-            if (!is_active) {
+            if (!active_robots[player_id].is_active) {
                 log<NUClear::DEBUG>("Is active false");
             }
         });
@@ -197,7 +196,7 @@ namespace module::purpose {
             log<NUClear::DEBUG>("Current soccer position ", soccer_position);
             auto purposes_msg = std::make_unique<NusightPurposes>();
             purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
-            purposes_msg->startup_time = startup_time;
+            purposes_msg->startup_time = active_robots[player_id-1].startup_time;
             emit(std::move(purposes_msg));
         });
 
@@ -208,21 +207,12 @@ namespace module::purpose {
     }
 
     void Soccer::find_purpose() {
-        is_active = true;
-
         if (cfg.position == Position::DYNAMIC) {
-            startup_time = NUClear::clock::now();
+            active_robots[player_id-1].startup_time = NUClear::clock::now();
+            active_robots[player_id-1].is_active = true;
         }
 
         emit<Task>(std::make_unique<FindPurpose>(), 1);
-    }
-
-    void Soccer::add_robot(RobotInfo new_robot) {
-        // Find the correct insertion point by robot startup time
-        auto insertPos = std::lower_bound(active_robots.begin(), active_robots.end(), new_robot);
-
-        // Insert the new robot at the found position to maintain order
-        active_robots.insert(insertPos, new_robot);
     }
 
     void Soccer::manage_active_robots(const RoboCup& robocup) {
@@ -249,16 +239,16 @@ namespace module::purpose {
     uint8_t Soccer::find_leader() {
         uint8_t leader_idx = 0;
 
-        for (uint8_t i = 0; i < active_robots.size(); ++i) {
+        for (uint8_t i = 1; i < active_robots.size() - 1; ++i) {
             if (active_robots[i].is_active) {
                 // If the current prospective leader is not active, take the first active robot
                 if (!active_robots[leader_idx].is_active) {
-                    log<NUClear::WARN>("Leader is now inactive", leader_idx);
+                    log<NUClear::WARN>("Leader is now inactive", int(leader_idx+1));
                     leader_idx = i;
                 }
                 // The leader should be the robot alive the longest
-                else if (active_robots[i] < active_robots[leader_idx]) {
-                    log<NUClear::WARN>("Leader", leader_idx, "is not as cool as us", i);
+                else if (active_robots[i].startup_time < active_robots[leader_idx].startup_time) {
+                    log<NUClear::WARN>("Leader", int(leader_idx+1), "is not as cool as us", int(i+1));
                     leader_idx = i;
                 }
             }
@@ -301,8 +291,8 @@ namespace module::purpose {
             }
 
             // Emit the startup time of the module to claim leadership
-            purposes_msg->startup_time = startup_time;
-            purposes_msg->is_active = is_active;
+            purposes_msg->startup_time = active_robots[player_id-1].startup_time;
+            purposes_msg->is_active = active_robots[player_id-1].is_active;
 
             emit(purposes_msg);
         }

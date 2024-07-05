@@ -49,9 +49,6 @@ namespace module::purpose {
         /// @brief The point at which the robot becomes active
         NUClear::clock::time_point startup_time = NUClear::clock::now();
 
-        /// @brief Robot's active status
-        bool is_active = false;
-
         /// @brief Last Robocup message sent by the leader
         std::unique_ptr<RoboCup> leader_message = nullptr;
 
@@ -110,10 +107,6 @@ namespace module::purpose {
             bool is_active                              = false;
             NUClear::clock::time_point startup_time     = NUClear::clock::now();
             NUClear::clock::time_point last_update_time = NUClear::clock::now();
-
-            bool operator<(const RobotInfo& other) const {
-                return startup_time < other.startup_time;
-            }
         };
 
         /// @brief Store's the robot's current soccer position
@@ -128,10 +121,6 @@ namespace module::purpose {
         /// @brief Add and update active robots
         /// @param robocup A robocup message sent by another robot
         void manage_active_robots(const RoboCup& robocup);
-
-        /// @brief Add RobotInfo ordered by id to active_robots
-        /// @param new_robot The new robot's information, to be added to active_robots
-        void add_robot(RobotInfo new_robot);
 
         /// @brief Return the index of the future striker
         uint8_t find_striker();
