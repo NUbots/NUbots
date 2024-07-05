@@ -35,6 +35,7 @@
 #include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::strategy {
@@ -45,6 +46,8 @@ namespace module::strategy {
     using Ball = message::localisation::Ball;
     using message::localisation::Field;
     using message::strategy::WalkToFieldPosition;
+
+    using utility::math::euler::pos_rpy_to_transform;
 
     WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -92,7 +95,8 @@ namespace module::strategy {
                     }
 
                     // Emit task to walk to desired position with heading facing opponents side of field
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                        pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0), Eigen::Vector3d(0, 0, -M_PI))));
                 }
             }
             else {

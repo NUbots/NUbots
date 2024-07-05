@@ -43,6 +43,7 @@ namespace module::vision {
         struct {
             double confidence_threshold = 0.0;
             uint cluster_points         = 0;
+            double max_distance         = 0.0;
         } cfg{};
     };
 

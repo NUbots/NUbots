@@ -35,6 +35,13 @@ namespace module::strategy {
 
     class FindObject : public ::extension::behaviour::BehaviourReactor {
 
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Length of time before the ball detection is too old and we should search for the ball
+            NUClear::clock::duration ball_search_timeout{};
+        } cfg;
+
     public:
         /// @brief Called by the powerplant to build and setup the FindObject reactor.
         explicit FindObject(std::unique_ptr<NUClear::Environment> environment);
