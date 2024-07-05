@@ -142,14 +142,12 @@ namespace module::purpose {
                         play();
                         return;
                     }
-                    log<NUClear::INFO>("Waiting for kickoff.");
                     // Walk to ready so we are ready to play when kickoff finishes
                     emit<Task>(std::make_unique<WalkToFieldPosition>(
                         pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                                              Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
                     return;
                 }
-                log<NUClear::INFO>("Playing.");
                 play();
             });
 
