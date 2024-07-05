@@ -67,6 +67,16 @@ namespace module::purpose {
             operator int() const {
                 return value;
             }
+
+            operator std::string() const {
+                switch (value) {
+                    case Value::STRIKER: return "Striker";
+                    case Value::GOALIE: return "Goalie";
+                    case Value::DEFENDER: return "Defender";
+                    case Value::DYNAMIC: return "Dynamic";
+                    default: return "Unknown";
+                }
+            }
         };
 
         /// @brief Stores configuration values

@@ -26,6 +26,7 @@
  */
 #include "Soccer.hpp"
 
+#include <fmt/format.h>
 #include <string>
 #include <vector>
 
@@ -157,7 +158,7 @@ namespace module::purpose {
 
         on<Every<5, Per<std::chrono::seconds>>>().then([this] {
             // Emit the purpose
-            emit(std::make_unique<Purpose>(SoccerPosition(robots[player_id - 1].position),
+            emit(std::make_unique<Purpose>(SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
         });
@@ -243,6 +244,18 @@ namespace module::purpose {
     }
 
     void Soccer::determine_purpose() {
+        // Print all robots if in debug
+        if (log_level <= NUClear::DEBUG) {
+            log<NUClear::DEBUG>("\nRobot positions:");
+            for (size_t i = 0; i < robots.size(); i++) {
+                log<NUClear::DEBUG>(fmt::format("Robot {}\tPosition: {}\tActive: {}\tDynamic: {}",
+                                                i + 1,
+                                                std::string(robots[i].position),
+                                                robots[i].active ? "Yes" : "No",
+                                                robots[i].dynamic ? "Yes" : "No"));
+            }
+        }
+
         // Update active robots
         for (auto& robot : robots) {
             if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - robot.last_heard).count()
@@ -303,11 +316,9 @@ namespace module::purpose {
         }
 
         if (robots[player_id - 1].position == Position::STRIKER) {
-            log<NUClear::INFO>("I am a striker");
             emit<Task>(std::make_unique<Striker>(cfg.force_playing));
         }
         else {
-            log<NUClear::INFO>("I am a defender");
             emit<Task>(std::make_unique<Defender>(cfg.force_playing));
         }
     }

@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # For the robot playing without listening to GameController
 force_playing: false
@@ -9,4 +9,4 @@ force_playing: false
 position: DYNAMIC
 
 # The number of seconds to wait before assuming a teammate is inactive
-timeout: 8
+timeout: 4

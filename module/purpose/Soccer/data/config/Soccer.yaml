@@ -15,4 +15,4 @@ position: DYNAMIC
 timeout: 4
 
 # The largest robot id number
-max_robots: 4
+max_robots: 5
