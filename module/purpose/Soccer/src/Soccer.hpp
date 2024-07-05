@@ -46,23 +46,9 @@ namespace module::purpose {
         /// @brief The id of the robot
         uint player_id = 0;
 
-        /// @brief The point at which the robot becomes active
-        NUClear::clock::time_point startup_time = NUClear::clock::now();
-
-        /// @brief Robot's active status
-        bool is_active = false;
-
-        /// @brief Last Robocup message sent by the leader
-        std::unique_ptr<RoboCup> leader_message = nullptr;
-
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value {
-                STRIKER,
-                GOALIE,
-                DEFENDER,
-                DYNAMIC
-            };
+            enum Value { STRIKER, GOALIE, DEFENDER, DYNAMIC };
             Value value = Value::STRIKER;
 
             Position() = default;
@@ -78,14 +64,10 @@ namespace module::purpose {
 
             NusightPosition to_soccer_position() const {
                 switch (value) {
-                    case Value::STRIKER:
-                        return NusightPosition::STRIKER;
-                    case Value::GOALIE:
-                        return NusightPosition::GOALIE;
-                    case Value::DEFENDER:
-                        return NusightPosition::DEFENDER;
-                    default:
-                        throw std::runtime_error("Invalid Position conversion");
+                    case Value::STRIKER: return NusightPosition::STRIKER;
+                    case Value::GOALIE: return NusightPosition::GOALIE;
+                    case Value::DEFENDER: return NusightPosition::DEFENDER;
+                    default: throw std::runtime_error("Invalid Position conversion");
                 }
             }
 
@@ -101,7 +83,7 @@ namespace module::purpose {
             /// @brief The soccer position of the robot
             Position position{};
             /// @brief The number of seconds to wait before assuming a teammate is inactive
-            uint8_t timeout = 0;
+            int timeout = 0;
             /// @brief The largest id of a robot
             uint8_t max_robots = 0;
         } cfg;
@@ -120,18 +102,10 @@ namespace module::purpose {
         Position soccer_position;
 
         /// @brief Store robots that could possibly play
-        std::vector<RobotInfo> active_robots;
+        std::vector<RobotInfo> robots;
 
         /// @brief Utility to set up robocup message to find purpose
         void find_purpose();
-
-        /// @brief Add and update active robots
-        /// @param robocup A robocup message sent by another robot
-        void manage_active_robots(const RoboCup& robocup);
-
-        /// @brief Add RobotInfo ordered by id to active_robots
-        /// @param new_robot The new robot's information, to be added to active_robots
-        void add_robot(RobotInfo new_robot);
 
         /// @brief Return the index of the future striker
         uint8_t find_striker();

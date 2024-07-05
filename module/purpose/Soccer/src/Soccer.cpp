@@ -88,11 +88,11 @@ namespace module::purpose {
                 cfg.position = Position(config["position"].as<std::string>());
 
                 // Get the number of seconds until we assume a teammate is inactive
-                cfg.timeout = config["timeout"].as<uint>();
+                cfg.timeout = config["timeout"].as<int>();
 
                 cfg.max_robots = config["max_robots"].as<uint>();
                 // Resize the vector based on cfg.max_robots
-                active_robots.resize(cfg.max_robots);
+                robots.resize(cfg.max_robots);
 
                 // Decide which player we are
                 player_id = global_config.player_id;
@@ -134,6 +134,15 @@ namespace module::purpose {
                     break;
                 case Position::DYNAMIC:
                     give_directions();
+                    if (soccer_position == Position::STRIKER) {
+                        emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                    }
+                    else if (soccer_position == Position::DEFENDER) {
+                        emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                    }
+                    else {
+                        log<NUClear::ERROR>("Invalid robot position");
+                    }
                     break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
@@ -141,17 +150,16 @@ namespace module::purpose {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // Set penalised robot to inactive
-            active_robots[self_penalisation.robot_id - 1].is_active = false;
+            robots[self_penalisation.robot_id - 1].is_active = false;
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
-                is_active = false;
+                robots[player_id - 1].is_active = false;
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             }
-            give_directions();
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
@@ -173,14 +181,12 @@ namespace module::purpose {
 
         // Heartbeat
         on<Every<2, Per<std::chrono::seconds>>>().then([this] {
-            auto now = NUClear::clock::now();
-            auto timeout = std::chrono::seconds(int(cfg.timeout));
-
             // Check if we have heard from robots periodically, and update their status if not
-            for (std::size_t i = 0; i < active_robots.size(); ++i) {
-                if ((i + 1) != player_id && now - active_robots[i].last_update_time > timeout) {
+            auto now = NUClear::clock::now();
+            for (std::size_t i = 0; i < robots.size(); ++i) {
+                if ((i + 1) != player_id && now - robots[i].last_update_time > cfg.timeout) {
                     log<NUClear::DEBUG>("Update player to inactive: ", int(i + 1));
-                    active_robots[i].is_active = false;
+                    robots[i].is_active = false;
                 }
             }
 
@@ -195,70 +201,54 @@ namespace module::purpose {
         // Emit our own Purpose for NUsight debugging
         on<Every<2, Per<std::chrono::seconds>>>().then([this]() {
             log<NUClear::DEBUG>("Current soccer position ", soccer_position);
-            auto purposes_msg = std::make_unique<NusightPurposes>();
+            auto purposes_msg             = std::make_unique<NusightPurposes>();
             purposes_msg->purpose.purpose = soccer_position.to_soccer_position();
-            purposes_msg->startup_time = startup_time;
+            purposes_msg->startup_time    = robots[player_id - 1].startup_time;
             emit(std::move(purposes_msg));
         });
 
-        // Capture leader's last message in case of bad timing
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
-            manage_active_robots(robocup);
+            // Save info from incoming robocup message
+            uint8_t incoming_robot_id                      = robocup.current_pose.player_id;
+            robots[incoming_robot_id - 1].last_update_time = now;
+            robots[incoming_robot_id - 1].is_active        = robocup.purpose_commands.is_active;
+            robots[incoming_robot_id - 1].startup_time     = robocup.purpose_commands.startup_time;
+
+            // If this robot we just heard from is the leader, listen to them
+            bool is_leader = find_leader() == robocup.current_pose.player_id;
+            if (is_leader) {
+                follow_directions(robocup);
+            }
+
+            // All robots can give directions to speed up switch over time
+            give_directions();
         });
     }
 
     void Soccer::find_purpose() {
-        is_active = true;
+        robots[player_id - 1].is_active = true;
 
         if (cfg.position == Position::DYNAMIC) {
-            startup_time = NUClear::clock::now();
+            robots[player_id - 1].startup_time = NUClear::clock::now();
         }
 
         emit<Task>(std::make_unique<FindPurpose>(), 1);
     }
 
-    void Soccer::add_robot(RobotInfo new_robot) {
-        // Find the correct insertion point by robot startup time
-        auto insertPos = std::lower_bound(active_robots.begin(), active_robots.end(), new_robot);
-
-        // Insert the new robot at the found position to maintain order
-        active_robots.insert(insertPos, new_robot);
-    }
-
-    void Soccer::manage_active_robots(const RoboCup& robocup) {
-        uint8_t incoming_robot_id = robocup.current_pose.player_id;
-        auto now = NUClear::clock::now();
-
-        active_robots[incoming_robot_id - 1].last_update_time = now;
-        active_robots[incoming_robot_id - 1].is_active = robocup.purpose_commands.is_active;
-        active_robots[incoming_robot_id - 1].startup_time = robocup.purpose_commands.startup_time;
-
-        // Check if leader
-        bool other_is_leader = find_leader() == robocup.current_pose.player_id;
-
-        // All robots can give directions to speed up switchover time
-        give_directions();
-
-        // Only listen to real leader
-        if (other_is_leader) {
-            follow_directions(robocup);
-        }
-    };
-
     // Find which robot should be our leader
     uint8_t Soccer::find_leader() {
         uint8_t leader_idx = 0;
 
-        for (uint8_t i = 0; i < active_robots.size(); ++i) {
-            if (active_robots[i].is_active) {
+        for (uint8_t i = 0; i < robots.size(); ++i) {
+            if (robots[i].is_active) {
                 // If the current prospective leader is not active, take the first active robot
-                if (!active_robots[leader_idx].is_active) {
-                    log<NUClear::WARN>("Leader is now inactive", leader_idx);
+                if (!robots[leader_idx].is_active) {
+                    log<NUClear::WARN>("Leader is now inactive", int(leader_idx + 1));
                     leader_idx = i;
                 }
                 // The leader should be the robot alive the longest
-                else if (active_robots[i] < active_robots[leader_idx]) {
-                    log<NUClear::WARN>("Leader", leader_idx, "is not as cool as us", i);
+                else if (robots[i] < robots[leader_idx]) {
+                    log<NUClear::WARN>("Leader", int(leader_idx + 1), "is not as cool as us", int(i + 1));
                     leader_idx = i;
                 }
             }
@@ -279,40 +269,33 @@ namespace module::purpose {
 
     // Give directions if I am dynamic
     void Soccer::give_directions() {
-        if (cfg.position == Position::DYNAMIC) {
-            bool self_is_leader = find_leader() == player_id;
-            auto purposes_msg   = std::make_unique<Purposes>();
-            uint8_t striker_idx = find_striker();
+        bool self_is_leader = find_leader() == player_id;
+        auto purposes_msg   = std::make_unique<Purposes>();
+        uint8_t striker_idx = find_striker();
 
-            // Leader assigns own position
-            if (self_is_leader) {
-                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                soccer_position = Position("STRIKER");
-                log<NUClear::INFO>("Leader made striker");
-            }
-
-            // Decide soccer positions
-            for (int i = 0; i < int(active_robots.size()); ++i) {
-                if (i == striker_idx) {
-                    purposes_msg->purpose_commands.push_back({SoccerPosition::STRIKER});
-                } else {
-                    purposes_msg->purpose_commands.push_back({SoccerPosition::DEFENDER});
-                }
-            }
-
-            // Emit the startup time of the module to claim leadership
-            purposes_msg->startup_time = startup_time;
-            purposes_msg->is_active = is_active;
-
-            emit(purposes_msg);
+        // Leader assigns own position
+        if (self_is_leader) {
+            soccer_position = Position("STRIKER");
+            log<NUClear::INFO>("Leader made striker");
         }
+
+        // Decide soccer positions
+        for (int i = 0; i < int(robots.size()); ++i) {
+            purposes_msg->purpose_commands.push_back(
+                {i == striker_idx ? SoccerPosition::STRIKER : SoccerPosition::DEFENDER});
+        }
+
+        // Emit the startup time of the module to claim leadership
+        purposes_msg->startup_time = robots[player_id - 1].startup_time;
+        purposes_msg->is_active    = robots[player_id - 1].is_active;
+
+        emit(purposes_msg);
     };
 
     // Listen to directions if they are the leader
     void Soccer::follow_directions(const RoboCup& robocup) {
-        uint8_t striker_id   = 0;
-
         // Find the striker by id
+        uint8_t striker_id = 0;
         for (const auto& purpose : robocup.purpose_commands.purpose_commands) {
             if (purpose.purpose == SoccerPosition::STRIKER) {
                 striker_id = robocup.current_pose.player_id;
@@ -320,19 +303,15 @@ namespace module::purpose {
             }
         }
 
-        // Start our soccer position's task
-        if (striker_id == player_id) {
-            if (soccer_position != Position::STRIKER) {
-                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                soccer_position = Position("STRIKER");
-                log<NUClear::INFO>("Robot made striker");
-            }
-        } else {
-            if (soccer_position != Position::DEFENDER) {
-                emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-                soccer_position = Position("DEFENDER");
-                log<NUClear::INFO>("Robot made defender");
-            }
+        // If we are now the striker and we don't know it, make us a striker
+        if (striker_id == player_id && soccer_position != Position::STRIKER) {
+            soccer_position = Position("STRIKER");
+            log<NUClear::INFO>("Robot made striker");
+        }
+        // If we are not now the striker and we don't know it, make us a defender
+        else if (striker_id != player_id && soccer_position != Position::DEFENDER) {
+            soccer_position = Position("DEFENDER");
+            log<NUClear::INFO>("Robot made defender");
         }
     }
 
