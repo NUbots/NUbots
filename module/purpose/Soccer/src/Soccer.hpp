@@ -34,12 +34,10 @@
 #include "extension/Behaviour.hpp"
 
 #include "message/input/RoboCup.hpp"
-#include "message/support/nusight/Purposes.hpp"
 
 namespace module::purpose {
 
     using message::input::RoboCup;
-    using NusightPosition = message::support::nusight::SoccerPosition;
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -52,6 +50,7 @@ namespace module::purpose {
             Value value = Value::STRIKER;
 
             Position() = default;
+            Position(Value value) : value(value) {}
             Position(std::string const& str) {
                 // clang-format off
                 if (str == "STRIKER") { value = Value::STRIKER; }
@@ -97,6 +96,8 @@ namespace module::purpose {
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
+
+        void determine_purpose();
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.

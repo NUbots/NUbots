@@ -33,7 +33,7 @@
 
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
-#include "message/input/Purposes.hpp"
+#include "message/input/Purpose.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
@@ -50,7 +50,7 @@ namespace module::network {
     using extension::Configuration;
     using message::behaviour::state::WalkState;
     using message::input::GameState;
-    using message::input::Purposes;
+    using message::input::Purpose;
     using message::input::RoboCup;
     using message::input::Sensors;
     using message::input::SoccerPosition;
@@ -188,9 +188,9 @@ namespace module::network {
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
 
-                // Current purposes (soccer positions) of the Robots
-                if (purposes) {
-                    msg->purpose_commands = *purposes;
+                // Current purpose (soccer position) of the Robot
+                if (purpose) {
+                    msg->purpose = *purpose;
                 }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);

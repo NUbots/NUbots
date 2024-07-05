@@ -35,8 +35,10 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameEvents.hpp"
-#include "message/input/Purposes.hpp"
+#include "message/input/Purpose.hpp"
 #include "message/input/RoboCup.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/Defender.hpp"
@@ -48,7 +50,6 @@
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/StartSafely.hpp"
 #include "message/support/GlobalConfig.hpp"
-#include "message/support/nusight/Purposes.hpp"
 
 namespace module::purpose {
 
@@ -58,10 +59,12 @@ namespace module::purpose {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::GameEvents;
-    using message::input::Purposes;
+    using message::input::Purpose;
     using message::input::RoboCup;
+    using message::input::Sensors;
     using message::input::SoccerPosition;
     using message::input::State;
+    using message::localisation::Ball;
     using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
@@ -74,7 +77,6 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::StartSafely;
     using message::support::GlobalConfig;
-    using NusightPurposes = message::support::nusight::Purposes;
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -124,30 +126,30 @@ namespace module::purpose {
             switch (cfg.position) {
                 case Position::STRIKER:
                     emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                    soccer_position = Position("STRIKER");
+                    robots[player_id - 1].position = Position("STRIKER");
                     break;
                 case Position::GOALIE:
                     emit<Task>(std::make_unique<Goalie>(cfg.force_playing));
-                    soccer_position = Position("GOALIE");
+                    robots[player_id - 1].position = Position("GOALIE");
                     break;
                 case Position::DEFENDER:
                     emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-                    soccer_position = Position("DEFENDER");
+                    robots[player_id - 1].position = Position("DEFENDER");
                     break;
                 case Position::DYNAMIC: determine_purpose(); break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
 
             // Emit the purpose
-            emit(std::make_unique<Purposes>(robots[player_id - 1].position,
-                                            robots[player_id - 1].dynamic,
-                                            robots[player_id - 1].active));
+            emit(std::make_unique<Purpose>(SoccerPosition(robots[player_id - 1].position),
+                                           robots[player_id - 1].dynamic,
+                                           robots[player_id - 1].active));
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // Set penalised robot to inactive
-            robots[self_penalisation.robot_id - 1].active  = false;
-            robots[self_penalisation.robot_id - 1].purpose = Position::DYNAMIC;
+            robots[self_penalisation.robot_id - 1].active   = false;
+            robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
@@ -159,7 +161,7 @@ namespace module::purpose {
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
-            robots[self_penalisation.robot_id - 1].active = true;
+            robots[self_unpenalisation.robot_id - 1].active = true;
 
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
@@ -173,16 +175,16 @@ namespace module::purpose {
             if (!cfg.force_playing) {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
-                find_purpose();
+                emit<Task>(std::unique_ptr<FindPurpose>(), 1);
             }
         });
 
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
             // Save info from this robot
-            robots[robocup.current_pose.player_id].position        = robocup.purpose.purpose;
-            robots[robocup.current_pose.player_id].active          = robocup.purpose.active;
-            robots[robocup.current_pose.player_id].last_heard_time = NUClear::clock::now();
-            robots[robocup.current_pose.player_id].dynamic         = robocup.purpose.dynamic;
+            robots[robocup.current_pose.player_id].position   = Position(robocup.purpose.purpose);
+            robots[robocup.current_pose.player_id].active     = robocup.purpose.active;
+            robots[robocup.current_pose.player_id].last_heard = NUClear::clock::now();
+            robots[robocup.current_pose.player_id].dynamic    = robocup.purpose.dynamic;
 
             // Determine distance to ball
             Eigen::Vector2d rBFf(robocup.ball.position.x(), robocup.ball.position.y());
@@ -196,10 +198,10 @@ namespace module::purpose {
         });
     }
 
-    void determine_purpose() {
+    void Soccer::determine_purpose() {
         // Update active robots
         for (auto& robot : robots) {
-            if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - robot.last_heard_time).count()
+            if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - robot.last_heard).count()
                 > cfg.timeout) {
                 robot.active = false;
             }
@@ -212,15 +214,15 @@ namespace module::purpose {
         }
 
         // Check if we have a purpose
-        if (robots[player_id - 1].purpose == Position::DYNAMIC) {
+        if (robots[player_id - 1].position == Position::DYNAMIC) {
             // Set ourselves to defender
-            robots[player_id - 1].purpose = Position::DEFENDER;
+            robots[player_id - 1].position = Position::DEFENDER;
         }
 
         // Check if there are any strikers
         int number_strikers = false;
         for (auto& robot : robots) {
-            if (robot.purpose == Position::STRIKER) {
+            if (robot.position == Position::STRIKER) {
                 number_strikers++;
             }
         }
@@ -229,24 +231,24 @@ namespace module::purpose {
         if (number_strikers == 0) {
             bool waiting_on_robot = false;
             for (auto& robot : robots) {
-                if (robot.active && robot.purpose == Position::DYNAMIC) {
+                if (robot.active && robot.position == Position::DYNAMIC) {
                     waiting_on_robot = true;
                     break;
                 }
             }
             // If there are no strikers and everyone has a purpose, we will be the striker
             if (!waiting_on_robot) {
-                robots[player_id - 1].purpose = Position::STRIKER;
+                robots[player_id - 1].position = Position::STRIKER;
             }
         }
         // If there are too many strikers, and we are one of them, see if we should be a defender
-        else if (number_strikers > 1 && robots[player_id - 1].purpose == Position::STRIKER) {
+        else if (number_strikers > 1 && robots[player_id - 1].position == Position::STRIKER) {
             // Battle it out for striker position
             // If we are the closest to the ball, we will be the striker
             bool striker = true;
             for (auto& robot : robots) {
                 // Ignore inactive robots and robots that are not strikers
-                if (!robot.active || robot.purpose != Position::STRIKER) {
+                if (!robot.active || robot.position != Position::STRIKER) {
                     continue;
                 }
 
@@ -258,11 +260,11 @@ namespace module::purpose {
             }
             // We lost, be a defender
             if (!striker) {
-                robots[player_id - 1].purpose = Position::DEFENDER;
+                robots[player_id - 1].position = Position::DEFENDER;
             }
         }
 
-        if (robots[player_id - 1].purpose == Position::STRIKER) {
+        if (robots[player_id - 1].position == Position::STRIKER) {
             emit<Task>(std::make_unique<Striker>(cfg.force_playing));
         }
         else {
