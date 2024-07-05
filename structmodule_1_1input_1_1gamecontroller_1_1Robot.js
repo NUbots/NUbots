@@ -1,9 +1,9 @@
 var structmodule_1_1input_1_1gamecontroller_1_1Robot =
 [
-    [ "goalKeeper", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a7f7b55a68a1bcd12e5ddc6e6cca73002", null ],
-    [ "numberOfWarnings", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5af89d7f8025ae236d65a8e93f7754aa", null ],
-    [ "penalisedTimeLeft", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a4b78874185cc755f80ac661b3620bfb2", null ],
-    [ "penaltyState", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5c6a1a3cb7800d2f719adf73c42b7b31", null ],
-    [ "redCardCount", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#aa88fd24f59543e583a9f37653e0c4aae", null ],
-    [ "yellowCardCount", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a8c519d4aff13dda9d7e404e50d393141", null ]
+    [ "goal_keeper", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a9e7517e0d155b408e2903fab5efb807b", null ],
+    [ "number_of_warnings", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a55eea3b4cbaf072bfbdadacf8a6b1376", null ],
+    [ "penalised_time_left", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#afd0e0e5c97e1e230a79bc4d171803127", null ],
+    [ "penalty_state", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a3b7b43d90eee54e249c0452336522637", null ],
+    [ "red_card_count", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#aaaf22bf50d065768ef0e8f6813d2c16a", null ],
+    [ "yellow_card_count", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#ae8e5debb3a0ba3f998d7349ccdc50773", null ]
 ];

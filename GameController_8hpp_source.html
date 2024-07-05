@@ -231,24 +231,24 @@ $(document).ready(function(){initNavTree('GameController_8hpp_source.html',''); 
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        std::string udp_filter_address;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        std::set&lt;std::string&gt; ignored_ip_addresses;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keywordtype">bool</span> selfPenalised = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        ReactionHandle listenHandle;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keywordtype">bool</span> self_penalised = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        ReactionHandle listen_handle;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> packet;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        gamecontroller::Mode mode;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keywordtype">void</span> resetState();</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordtype">void</span> process(<span class="keyword">const</span> message::input::GameState&amp; oldGameState,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; oldPacket,</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; newPacket);</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keywordtype">void</span> sendReplyMessage(<span class="keyword">const</span> gamecontroller::ReplyMessage&amp; message);</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; getOwnTeam(<span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; getOpponentTeam(</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keywordtype">void</span> reset_state();</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordtype">void</span> process(<span class="keyword">const</span> message::input::GameState&amp; old_game_state,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; old_packet,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; new_packet);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keywordtype">void</span> send_reply_message(<span class="keyword">const</span> gamecontroller::ReplyMessage&amp; message);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; get_own_team(<span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; get_opponent_team(</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;            <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        [[nodiscard]] <span class="keyword">static</span> message::input::GameState::Data::PenaltyReason getPenaltyReason(</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;            <span class="keyword">const</span> gamecontroller::PenaltyState&amp; penaltyState);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        [[nodiscard]] <span class="keyword">static</span> message::input::GameState::Data::PenaltyReason get_penalty_reason(</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;            <span class="keyword">const</span> gamecontroller::PenaltyState&amp; penalty_state);</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        [[nodiscard]] <span class="keyword">static</span> std::string ipAddressIntToString(<span class="keyword">const</span> uint32_t&amp; ipAddr);</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        [[nodiscard]] <span class="keyword">static</span> std::string ip_address_int_to_string(<span class="keyword">const</span> uint32_t&amp; ip_addr);</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1input_1_1GameController.html">GameController</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
@@ -265,7 +265,7 @@ $(document).ready(function(){initNavTree('GameController_8hpp_source.html',''); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_4d10c6a6480147e17a39ec31ce05eab6.html">input</a></li><li class="navelem"><a class="el" href="dir_0963710d67a5dff2eb9a67dd21d0ed1f.html">GameController</a></li><li class="navelem"><a class="el" href="dir_05850918ca416851b8e368145e1c8638.html">src</a></li><li class="navelem"><b>GameController.hpp</b></li>
-    <li class="footer">Generated on Thu Jul 4 2024 01:29:29 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Jul 5 2024 00:46:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

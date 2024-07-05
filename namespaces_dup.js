@@ -222,7 +222,7 @@ var namespaces_dup =
         [ "SettingsFunctions< ArvGcFloat >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4" ],
         [ "SettingsFunctions< ArvGcInteger >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4" ],
         [ "BallKickedOut", "GameController_8cpp.html#ae0f29ffd8b2d3111f112fe87c2d34ca1", null ],
-        [ "CoachMessage", "GameController_8cpp.html#a3bc1c01e45d01179878a01c28205418b", null ],
+        [ "Coach_message", "GameController_8cpp.html#af34c0224ad6ed63aac5c40752a94136f", null ],
         [ "Device", "Parse_8hpp.html#aa65603961328a2fabede3c79195ea028", null ],
         [ "ForcePlate", "Parse_8hpp.html#ac1f71f1a76fde732ec47a6deadb6e70d", null ],
         [ "GameMode", "GameController_8cpp.html#a21e73993b501d83acd594a66cf88e193", null ],
