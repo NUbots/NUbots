@@ -153,8 +153,9 @@ namespace module::purpose {
                 case Position::DYNAMIC: determine_purpose(); break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
+        });
 
-
+        on<Every<5, Per<std::chrono::seconds>>>().then([this] {
             // Emit the purpose
             emit(std::make_unique<Purpose>(SoccerPosition(robots[player_id - 1].position),
                                            robots[player_id - 1].dynamic,
