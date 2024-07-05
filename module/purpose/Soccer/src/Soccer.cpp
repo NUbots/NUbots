@@ -224,15 +224,15 @@ namespace module::purpose {
 
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
             // Save info from this robot
-            robots[robocup.current_pose.player_id].position   = Position(robocup.purpose.purpose);
-            robots[robocup.current_pose.player_id].active     = robocup.purpose.active;
-            robots[robocup.current_pose.player_id].last_heard = NUClear::clock::now();
-            robots[robocup.current_pose.player_id].dynamic    = robocup.purpose.dynamic;
+            robots[robocup.current_pose.player_id - 1].position   = Position(robocup.purpose.purpose);
+            robots[robocup.current_pose.player_id - 1].active     = robocup.purpose.active;
+            robots[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
+            robots[robocup.current_pose.player_id - 1].dynamic    = robocup.purpose.dynamic;
 
             // Determine distance to ball
             Eigen::Vector2d rBFf(robocup.ball.position.x(), robocup.ball.position.y());
             Eigen::Vector2d rRFf(robocup.current_pose.position.x(), robocup.current_pose.position.y());
-            robots[robocup.current_pose.player_id].distance_to_ball = (rRFf - rBFf).norm();
+            robots[robocup.current_pose.player_id - 1].distance_to_ball = (rRFf - rBFf).norm();
         });
 
         on<Trigger<Ball>, With<Sensors>>().then([this](const Ball& ball, const Sensors& sensors) {
@@ -259,7 +259,7 @@ namespace module::purpose {
         // Check if there are any strikers
         int number_strikers = false;
         for (auto& robot : robots) {
-            if (robot.position == Position::STRIKER) {
+            if (robot.active && robot.position == Position::STRIKER) {
                 number_strikers++;
             }
         }
