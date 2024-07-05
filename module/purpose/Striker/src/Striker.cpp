@@ -138,7 +138,6 @@ namespace module::purpose {
                     // Check if the ball has moved, if so start playing
                     if (ball != nullptr && field != nullptr
                         && (field->Hfw * ball->rBWw).norm() > cfg.ball_kickoff_outside_radius) {
-                        log<NUClear::INFO>("Ball has moved, starting to play.");
                         play();
                         return;
                     }
