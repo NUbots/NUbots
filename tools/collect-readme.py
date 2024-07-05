@@ -1,10 +1,7 @@
 #NOTES:
 
 # In the networking md there is a image that it tries to display,
-#this is the only working image and you will need to manually move it into the same folder as the .md file.
-
-# In the Nuclear .md file you will need to remove the banner from the code
-# as it is corrupt/not displaying as an image.
+#this is the only working image and you will need to manually move it into the same folder as the .mdx file.
 
 import glob, os
 from pathlib import Path
@@ -52,25 +49,18 @@ def check_for_readmes(path):
 def find_readmes(parent_path):
     global counter, results, item_path, processed, main_path, parent_found, folder_num
     paths = []
-    #results.append(check_for_readmes(parent_path+'*'))
     for item in glob.glob(parent_path+'*/'):
         check_for_readmes(item+'*')
         if item.endswith('/'):
             item_path = list((Path(item)).parts)[-1]
             main_path = list((Path(item)).parts)[-2]
-            #print(list((Path(item)).parts))
-            try:
-                pass
-                #os.makedirs('/home/nubots/NUbook/src/book/04-readmes/'+folder_num+'-'+main_path+'/'+item_path+'/')
-            except: pass
             for item2 in glob.glob(item+'*/'):
                 try:
                     item_path = list((Path(item)).parts)[-1]
                     main_path = list((Path(item)).parts)[-2]
-                    #os.makedirs('/home/nubots/NUbook/src/book/04-readmes/'+folder_num+'-'+main_path+'/'+item_path+'/')
                 except: pass
                 check_for_readmes(item2+'*')
-                if item2.endswith('/'): # Goes and checks all files for readme in their name, running i through the check_for_readmes function
+                if item2.endswith('/'): # Goes and checks all files for readme in their name, running it through the check_for_readmes function
                     for item3 in glob.glob(item2+'*/'):
                         check_for_readmes(item3+'*')
                         if item3.endswith('/'):
@@ -104,7 +94,6 @@ def file_maker(input_f, output_f):
         if file == 'None' or file in processed:
             pass
         else:
-            #print(file)
             processed.append(file)
             with open(results[0], 'r', encoding='utf-8') as f:
                 md_content = f.read()
@@ -121,7 +110,6 @@ def file_maker(input_f, output_f):
             markdown_content = md_content_first+parent_folder.title()+md_content_second+list(slug_obj.parts)[-3].title()+md_content_third+list(slug_obj.parts)[-3]+' '+folder4+md_content_fourth+slug+md_content_fifth
             file_path = Path(file)
             item_path2 = list((Path(file)).parts)
-            #print(list(file_path.parts))
 
             name_no_md = list(file_path.parts)[5].removesuffix('.md')
             with open(file,'r') as firstfile, open('/home/nubots/NUbook/src/book/04-readmes/'+list(slug_obj.parts)[4]+'/'+name_no_md+'.mdx','a+') as secondfile:
@@ -144,26 +132,18 @@ def file_maker(input_f, output_f):
                     for each_line in filelines:
                         counter += 1
                         if each_line.find('your own banner') != -1:
-                            print(each_line)
                             secondfile.write('If you do not set your own banner file, !the default banner will be used')
                         else:
                             secondfile.write(each_line)
 
                 except:
-                    print('nah')
-                '''
-                # read content from first file
-                for lines in firstfile:
-                    # append content to second file
-                    secondfile.write(lines)'''
+                    pass
+
                 firstfile.close()
                 secondfile.close()
     return
 
 list_of_dirs = ['/home/nubots/NUbots/module', '/home/nubots/NUbots/nuclear', '/home/nubots/NUbots/nusight2', '/home/nubots/NUbots/tools', '/home/nubots/NUbots/roles']
-'''results.append('/home/nubots/NUbots/nuclear/README.md')
-parent_folder = ''
-file_maker('', '')'''
+# List of Direcotries to search for README.md files in
 for o in list_of_dirs:
     find_readmes(o) #Runs the find_readmes function on the directories with README files in them
-print('YAY')
