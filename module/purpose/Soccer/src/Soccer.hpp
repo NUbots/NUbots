@@ -105,6 +105,7 @@ namespace module::purpose {
         /// @brief Idle state of the robot
         bool idle = false;
 
+        /// @brief Determines what purpose the robot shall play as and emits the Task for that purpose
         void determine_purpose();
 
     public:

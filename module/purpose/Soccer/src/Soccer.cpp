@@ -121,16 +121,14 @@ namespace module::purpose {
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
-            // Idle stand if not doing anything
-            emit<Task>(std::make_unique<StandStill>());
+            // Stand still in idle
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
             // This emit starts the tree to play soccer
-            emit<Task>(std::make_unique<FindPurpose>(), 2);
-            // Stand still
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 3);
+            emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
@@ -164,7 +162,6 @@ namespace module::purpose {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // Set penalised robot to inactive
-            log<NUClear::INFO>("Penalised robot ", self_penalisation.robot_id);
             robots[self_penalisation.robot_id - 1].active   = false;
             robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
 
@@ -182,7 +179,7 @@ namespace module::purpose {
 
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
-                emit<Task>(std::unique_ptr<FindPurpose>(), 1);
+                emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
 
