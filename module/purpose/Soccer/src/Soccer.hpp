@@ -62,15 +62,6 @@ namespace module::purpose {
                 // clang-format on
             }
 
-            NusightPosition to_soccer_position() const {
-                switch (value) {
-                    case Value::STRIKER: return NusightPosition::STRIKER;
-                    case Value::GOALIE: return NusightPosition::GOALIE;
-                    case Value::DEFENDER: return NusightPosition::DEFENDER;
-                    default: throw std::runtime_error("Invalid Position conversion");
-                }
-            }
-
             operator int() const {
                 return value;
             }
@@ -89,32 +80,20 @@ namespace module::purpose {
         } cfg;
 
         struct RobotInfo {
-            bool is_active                              = false;
-            NUClear::clock::time_point startup_time     = NUClear::clock::now();
-            NUClear::clock::time_point last_update_time = NUClear::clock::now();
+            /// @brief If this robot has been heard within the timeout
+            bool active = false;
+            /// @brief The time when we last heard this robot
+            NUClear::clock::time_point last_heard = NUClear::clock::now();
+            /// @brief Whether or not this robot is deciding what position its in dynamically
+            bool dynamic = false;
+            /// @brief The current position of this robot
+            Position position = Position::DYNAMIC;
+            /// @brief The distance of the robot to the ball
+            double distance_to_ball = std::numeric_limits<double>::max();
         };
 
-        /// @brief Store's the robot's current soccer position
-        Position soccer_position;
-
         /// @brief Store robots that could possibly play
-        std::vector<RobotInfo> robots;
-
-        /// @brief Utility to set up robocup message to find purpose
-        void find_purpose();
-
-        /// @brief Return the index of the future striker
-        uint8_t find_striker();
-
-        /// @brief Return the index of the current leader
-        uint8_t find_leader();
-
-        /// @brief Decide the correct soccer positions
-        void give_directions();
-
-        /// @brief Emit purpose based on leader's instructions
-        /// @param robocup A robocup message sent by another robot
-        void follow_directions(const RoboCup& robocup);
+        std::vector<RobotInfo> robots{};
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;

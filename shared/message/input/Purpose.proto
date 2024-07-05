@@ -36,21 +36,11 @@ enum SoccerPosition {
     DYNAMIC  = 3;
 }
 
-message Purposes {
-    message Purpose {
-        uint32 player_id = 1;
-        SoccerPosition purpose = 2;
-    }
-
-    // Prospective soccer positions
-    repeated Purpose purpose_commands = 1;
-
-    // The sending robot's startup time
-    google.protobuf.Timestamp startup_time = 2;
-
-    // The sending robot's active status
-    bool is_active = 3;
-
-    // Current robot purpose
-    Purpose purpose = 4;
+message Purpose {
+    // Robot's purpose
+    SoccerPosition purpose = 1;
+    /// Whether we are dynamically deciding our position
+    bool dynamic = 2;
+    // Whether we are actively in the game
+    bool active = 3;
 }
