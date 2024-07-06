@@ -30,6 +30,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
@@ -50,6 +52,8 @@ namespace module::purpose {
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
+    using message::localisation::Ball;
+    using message::localisation::Field;
     using message::planning::KickTo;
     using message::purpose::CornerKickStriker;
     using message::purpose::DirectFreeKickStriker;
@@ -78,8 +82,9 @@ namespace module::purpose {
 
         on<Configuration>("Striker.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Striker.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ready_position = config["ready_position"].as<Expression>();
+            this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ready_position              = config["ready_position"].as<Expression>();
+            cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
         });
 
         on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
@@ -118,7 +123,32 @@ namespace module::purpose {
         });
 
         // Normal PLAYING state
-        on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+        on<Provide<NormalStriker>,
+           When<Phase, std::equal_to, Phase::PLAYING>,
+           With<GameState>,
+           Optional<With<Ball>>,
+           Optional<With<Field>>>()
+            .then([this](const GameState& game_state,
+                         const std::shared_ptr<const Ball>& ball,
+                         const std::shared_ptr<const Field>& field) {
+                // If it's not our kickoff and timer is going, stand still
+                // The secondary timer will only happen for kickoff here
+                if (!game_state.data.our_kick_off
+                    && (game_state.data.secondary_time - NUClear::clock::now()).count() > 0) {
+                    // Check if the ball has moved, if so start playing
+                    if (ball != nullptr && field != nullptr
+                        && (field->Hfw * ball->rBWw).norm() > cfg.ball_kickoff_outside_radius) {
+                        play();
+                        return;
+                    }
+                    // Walk to ready so we are ready to play when kickoff finishes
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                        pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                             Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+                    return;
+                }
+                play();
+            });
 
         // Normal UNKNOWN state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
