@@ -476,8 +476,13 @@ const PurposeLabel = ({
   };
 
   const labelTextGeometry = textGeometry(robotModel.purpose);
-  const textWidth = labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x;
-  const textHeight = labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y;
+  labelTextGeometry.computeBoundingBox();
+  const textWidth = labelTextGeometry.boundingBox
+    ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
+    : 0;
+  const textHeight = labelTextGeometry.boundingBox
+    ? labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y
+    : 0;
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
