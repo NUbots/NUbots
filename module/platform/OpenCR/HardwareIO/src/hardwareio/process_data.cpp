@@ -33,6 +33,7 @@
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::platform::OpenCR {
 
@@ -40,6 +41,7 @@ namespace module::platform::OpenCR {
     using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::nusight::graph;
 
     /*
         Process the status return packet data
@@ -177,6 +179,20 @@ namespace module::platform::OpenCR {
             servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
             servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
             servo_states[servo_index].initialised   = true;
+        }
+
+        // Emit plot for debugging
+        if (log_level == NUClear::DEBUG) {
+            emit(graph(
+                fmt::format("{} ({}) Packet length", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                packet.length));
+            emit(graph(fmt::format("{} ({}) Present position",
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)),
+                                   packet.id),
+                       data.present_position));
+            emit(graph(
+                fmt::format("{} ({}) Present voltage", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                data.present_voltage));
         }
     }
 
