@@ -264,7 +264,8 @@ namespace module::purpose {
         }
 
         // Check if we have a purpose
-        robots[player_id - 1].position = robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position
+        robots[player_id - 1].position =
+            robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
 
         // Check if there are any strikers
         int number_strikers = false;
@@ -284,9 +285,7 @@ namespace module::purpose {
                 }
             }
             // If there are no strikers and everyone has a purpose, we will be the striker
-            if (!waiting_on_robot) {
-                robots[player_id - 1].position = Position::STRIKER;
-            }
+            robots[player_id - 1].position = waiting_on_robot ? robots[player_id - 1].position : Position::STRIKER;
         }
         // If there are too many strikers, and we are one of them, see if we should be a defender
         else if (number_strikers > 1 && robots[player_id - 1].position == Position::STRIKER) {
@@ -306,9 +305,7 @@ namespace module::purpose {
                 }
             }
             // We lost, be a defender
-            if (!striker) {
-                robots[player_id - 1].position = Position::DEFENDER;
-            }
+            robot_position = striker ? Position::STRIKER : Position::DEFENDER;
         }
 
         if (robots[player_id - 1].position == Position::STRIKER) {
