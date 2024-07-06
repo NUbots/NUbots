@@ -459,7 +459,7 @@ const PurposeLabel = ({ robotModel, cameraPitch, cameraYaw }: { robotModel: Loca
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
-    <object3D position={[rTFf?.x, rTFf?.y, 1.05]} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
+    <object3D position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
       <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
