@@ -16,6 +16,8 @@ Include this in your role to start the Director tree to play soccer.
 
 - `message::purpose::FindPurpose` to find the right purpose to emit
 - `message::input::Robocup` to dynamically determine the robot's purpose
+- `message::localisation::Ball` to determine the robot's distance to the ball, for comparison with other potential strikers
+- `message::input::Sensors` to transform the ball from world to robot space
 - `message::input::GameEvents::Penalisation` to find out if the robot has been penalised and should stop moving
 - `message::input::GameEvents::Unpenalisation` to find out if the robot has been unpenalised and can play again
 - `message::input::ButtonMiddleDown` to force play with a middle button press
