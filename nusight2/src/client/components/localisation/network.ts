@@ -38,7 +38,7 @@ export class LocalisationNetwork {
   }
 
   // Reverse lookup for protobuf enums
-  getKey(enumType: any, enumValue: number){
+  getKey(enumType: any, enumValue: number) {
     return Object.keys(enumType).find((key) => enumType[key] === enumValue);
   }
 

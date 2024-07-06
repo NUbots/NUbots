@@ -6,11 +6,9 @@ import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import URDFLoader, { URDFRobot } from "urdf-loader";
-
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
-import roboto from './fonts/Roboto Medium_Regular.json';
 
 import { Vector3 } from "../../../shared/math/vector3";
 import { dropdownContainer } from "../dropdown_container/view";
@@ -20,6 +18,7 @@ import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
+import roboto from "./fonts/Roboto Medium_Regular.json";
 import { GridView } from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
@@ -63,8 +62,9 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${this.props.model.field.fieldType === option.value ? style.selected : ""
-                } bg-white`}
+              className={`${style.fieldOption} ${
+                this.props.model.field.fieldType === option.value ? style.selected : ""
+              } bg-white`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -321,23 +321,35 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
       {model.fieldVisible && <FieldView model={model.field} />}
       {model.gridVisible && <GridView />}
-      {model.robotVisible && model.robots.filter(robotModel => robotModel.visible).map(robotModel => (
-        <Robot key={robotModel.id} model={robotModel} />
-      ))}
+      {model.robotVisible &&
+        model.robots
+          .filter((robotModel) => robotModel.visible)
+          .map((robotModel) => <Robot key={robotModel.id} model={robotModel} />)}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      {model.robots.filter(robot => robot.visible && robot.Hfd).map(robot => (
-        <WalkPathVisualiser key={robot.id} model={robot} />
-      ))}
-      {model.robots.filter(robot => robot.visible && robot.Hft && robot.purpose).map(robot => (
-        <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />
-      ))}
-      {model.robots.filter(robot => robot.visible && robot.Hfd).map(robot => (
-        <WalkPathGoal key={robot.id} model={robot} />
-      ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathVisualiser key={robot.id} model={robot} />
+        ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hft && robot.purpose)
+        .map((robot) => (
+          <PurposeLabel
+            key={robot.id}
+            robotModel={robot}
+            cameraPitch={model.camera.pitch}
+            cameraYaw={model.camera.yaw}
+          />
+        ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathGoal key={robot.id} model={robot} />
+        ))}
       <Robots model={model} />
     </object3D>
   );
@@ -421,7 +433,15 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   );
 };
 
-const PurposeLabel = ({ robotModel, cameraPitch, cameraYaw }: { robotModel: LocalisationRobotModel, cameraPitch: number, cameraYaw: number }) => {
+const PurposeLabel = ({
+  robotModel,
+  cameraPitch,
+  cameraYaw,
+}: {
+  robotModel: LocalisationRobotModel;
+  cameraPitch: number;
+  cameraYaw: number;
+}) => {
   const rTFf = robotModel.Hft.decompose().translation;
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
@@ -434,9 +454,11 @@ const PurposeLabel = ({ robotModel, cameraPitch, cameraYaw }: { robotModel: Loca
 
   const textBackdropGeometry = (width: number, height: number) => {
     const shape = new THREE.Shape();
-    width += 0.1; height += 0.1;
-    let radius = 0.05
-    let x = width * -0.5; let y = height * -0.5;
+    width += 0.1;
+    height += 0.1;
+    const radius = 0.05;
+    const x = width * -0.5;
+    const y = height * -0.5;
 
     shape.moveTo(x, y + radius);
     shape.lineTo(x, y + height - radius);
@@ -459,14 +481,17 @@ const PurposeLabel = ({ robotModel, cameraPitch, cameraYaw }: { robotModel: Loca
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
-    <object3D position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
+    <object3D
+      position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
+      rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
+    >
       <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
-      <mesh geometry={backdropGeometry} >
+      <mesh geometry={backdropGeometry}>
         <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
-    </object3D >
+    </object3D>
   );
 };
 
