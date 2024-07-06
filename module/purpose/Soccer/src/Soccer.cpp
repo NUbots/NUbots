@@ -264,10 +264,7 @@ namespace module::purpose {
         }
 
         // Check if we have a purpose
-        if (robots[player_id - 1].position == Position::DYNAMIC) {
-            // Set ourselves to defender
-            robots[player_id - 1].position = Position::DEFENDER;
-        }
+        robots[player_id - 1].position = robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position
 
         // Check if there are any strikers
         int number_strikers = false;
