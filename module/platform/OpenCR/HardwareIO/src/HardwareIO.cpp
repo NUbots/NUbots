@@ -397,8 +397,10 @@ namespace module::platform::OpenCR {
         });
 
         on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
+            log<NUClear::DEBUG>("Received Buzzer message");
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = buzzer_msg.frequency;
+            opencr_state.dirty  = true;
         });
     }
 
