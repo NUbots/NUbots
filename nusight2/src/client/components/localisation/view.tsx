@@ -10,7 +10,7 @@ import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
-import roboto from './Roboto Medium_Regular.json';
+import roboto from './fonts/Roboto Medium_Regular.json';
 
 import { Vector3 } from "../../../shared/math/vector3";
 import { dropdownContainer } from "../dropdown_container/view";
@@ -27,7 +27,6 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { RobotModel } from "../robot/model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -322,34 +321,23 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
       {model.fieldVisible && <FieldView model={model.field} />}
       {model.gridVisible && <GridView />}
-      {model.robotVisible &&
-        model.robots.map((robotModel) => {
-          return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
-        })}
+      {model.robotVisible && model.robots.filter(robotModel => robotModel.visible).map(robotModel => (
+        <Robot key={robotModel.id} model={robotModel} />
+      ))}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.Hfd) {
-          return <WalkPathVisualiser key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.Hfd) {
-          return <WalkPathGoal key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
-        // if (robot.visible && robot.Hft && robot.purpose) {
-        if (robot.visible && robot.Hft && robot.purpose) {
-          return <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />;
-        }
-        return null;
-      })}
-      {model.robots.map((robot) => {
+      {model.robots.filter(robot => robot.visible && robot.Hfd).map(robot => (
+        <WalkPathVisualiser key={robot.id} model={robot} />
+      ))}
+      {model.robots.filter(robot => robot.visible && robot.Hft && robot.purpose).map(robot => (
+        <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />
+      ))}
+      {model.robots.filter(robot => robot.visible && robot.Hfd).map(robot => (
+        <WalkPathGoal key={robot.id} model={robot} />
+      ))}
       <Robots model={model} />
     </object3D>
   );
