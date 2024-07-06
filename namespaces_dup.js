@@ -43,7 +43,8 @@ var namespaces_dup =
         ] ],
         [ "__attribute__", "Action_8hpp.html#a9db884af178deddd2b44de7ab12d738b", null ],
         [ "calculate_checksum", "Dynamixel_8hpp.html#a99e3fa93953f0ecb734e831ccb18f0f3", null ],
-        [ "calculate_checksum", "Dynamixel_8hpp.html#adc31a80bc5bc9881bae3297d3d18b0f8", null ]
+        [ "calculate_checksum", "Dynamixel_8hpp.html#adc31a80bc5bc9881bae3297d3d18b0f8", null ],
+        [ "update_crc", "Dynamixel_8hpp.html#a2eb76856c5616c30a08660e9d5640238", null ]
       ] ]
     ] ],
     [ "extension", null, [

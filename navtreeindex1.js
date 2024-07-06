@@ -1,5 +1,6 @@
 var NAVTREEINDEX1 =
 {
+"GameController_8cpp.html#a2372c1a1b7940ae9f2900425594545b9":[1,0,3,2,52],
 "GameController_8cpp.html#a2e96041c2172d7968bdbbbbf5ad879fb":[1,0,3,2,39],
 "GameController_8cpp.html#a4db2f9e6f64be94a968b57eebaf83d58":[1,0,3,2,42],
 "GameController_8cpp.html#a7590774cc2ec9916750561eadd281821":[1,0,3,2,53],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classextension_1_1behaviour_1_1BehaviourReactor.html#a11ff7db6ef7c27ad993fbef780bc98c4":[2,0,1,0,2,4],
 "classextension_1_1behaviour_1_1BehaviourReactor.html#a4513ce7303cfb0ce526bee9d5cf2470b":[2,0,1,0,2,9],
 "classextension_1_1behaviour_1_1BehaviourReactor.html#a5c9bec81a70b4ff798c6507379bfa7ee":[2,0,1,0,2,11],
-"classextension_1_1behaviour_1_1BehaviourReactor.html#a6812db9db23210910859eeb041fbe7e3":[2,0,1,0,2,0],
-"classextension_1_1behaviour_1_1BehaviourReactor.html#a8bbea33283ec03979c745484242719b7":[2,0,1,0,2,10]
+"classextension_1_1behaviour_1_1BehaviourReactor.html#a6812db9db23210910859eeb041fbe7e3":[2,0,1,0,2,0]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0b3a6fbfcde12d569b0e9762b423fd6a":[2,0,3,3,4,6],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c":[2,0,3,3,4,5],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2e537a3bbbd2926d513d2459fa50c983":[2,0,3,3,4,16],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3ceee27c66409dabd78ec22957d8bfc3":[2,0,3,3,4,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1planning_1_1GetUpPlanner.html#a3e4dee515f02f518f38dc2317076db4f":[2,0,3,8,1,2],
 "classmodule_1_1planning_1_1GetUpPlanner.html#afa1511ac9dc5633466274a582382ede2":[2,0,3,8,1,1],
 "classmodule_1_1planning_1_1PlanKick.html":[2,0,3,8,2],
-"classmodule_1_1planning_1_1PlanKick.html#a3259e17f0e10df21165342939f15b482":[2,0,3,8,2,1],
-"classmodule_1_1planning_1_1PlanKick.html#acb7a382203c478cb5bb16a99c22ce0af":[2,0,3,8,2,2]
+"classmodule_1_1planning_1_1PlanKick.html#a3259e17f0e10df21165342939f15b482":[2,0,3,8,2,1]
 };

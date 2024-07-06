@@ -1,5 +1,11 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da8ea7f5c2b8541cf3052397dde60de1db":[2,0,3,9,1,1,0,210],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da8ee2b87e5e13a631c2a86630d5f0c49a":[2,0,3,9,1,1,0,52],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da8f0e5a8594f50576b8a9ad5892f48538":[2,0,3,9,1,1,0,162],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9038e14b2b9170e2afa8859073ff82be":[2,0,3,9,1,1,0,244],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da909e5109da1cc9f4fdddd28e91485cfc":[2,0,3,9,1,1,0,17],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da91003346db17345269ca7eba65b99dd1":[2,0,3,9,1,1,0,236],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9126c552035a02d96a1ca8b3a242a5f1":[2,0,3,9,1,1,0,144],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da917c3c5fd9217a94d97ea0abd6baa83b":[2,0,3,9,1,1,0,232],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da91851315680ccafe92ee60b85ac58650":[2,0,3,9,1,1,0,243],
@@ -243,11 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html":[2,0,3,9,3,1],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a0448d2f30960523b2b091146e7770c1d":[2,0,3,9,3,1,8],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a0807a9b0bdf224810542ea20f5739b6b":[2,0,3,9,3,1,5],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a08faa66defd9c96ea478c27fbf232561":[2,0,3,9,3,1,0],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a5220759ae999984f3b9a54c1edc5fde2":[2,0,3,9,3,1,7],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a70d167e1de57cb3e23051dd742e71624":[2,0,3,9,3,1,6],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a72749a0dc678bd7900acced41403c598":[2,0,3,9,3,1,1],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a837ec6dc2599a5b20807bf8aa0577df8":[2,0,3,9,3,1,9],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9919fe0002c80a18ca07861701279156":[2,0,3,9,3,1,3],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9fc7e19c27a3246634979ef75c0273d0":[2,0,3,9,3,1,2]
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a08faa66defd9c96ea478c27fbf232561":[2,0,3,9,3,1,0]
 };

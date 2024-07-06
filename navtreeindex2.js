@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classextension_1_1behaviour_1_1BehaviourReactor.html#a8bbea33283ec03979c745484242719b7":[2,0,1,0,2,10],
 "classextension_1_1behaviour_1_1BehaviourReactor.html#a90b86ed565ed3d1dfd5311714323b611":[2,0,1,0,2,3],
 "classextension_1_1behaviour_1_1BehaviourReactor.html#a9a0002f2b43d8ade6e6504e84cb47391":[2,0,1,0,2,2],
 "classextension_1_1behaviour_1_1BehaviourReactor.html#ac2ed6b879ec18a39306e88ef73d2549e":[2,0,1,0,2,7],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1FieldLocalisation.html#adf5d1af90cac7a1c998dcaa5f4adbb08":[2,0,3,3,3,7],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html":[2,0,3,3,4],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0225b1d7241a3c8867f5c382eb2b5b4a":[2,0,3,3,4,7],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145":[2,0,3,3,4,17],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0b3a6fbfcde12d569b0e9762b423fd6a":[2,0,3,3,4,6]
+"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145":[2,0,3,3,4,17]
 };

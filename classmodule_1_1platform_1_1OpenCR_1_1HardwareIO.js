@@ -12,6 +12,12 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
       [ "SERVO_DATA", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af04cb3e8545a7bc0b83b390d79d495e1a0229a270e3e90a889076245cf740995d", null ],
       [ "FSR_DATA", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af04cb3e8545a7bc0b83b390d79d495e1a37018668a1a814863d63293ee7c683fb", null ]
     ] ],
+    [ "UnstuffingState", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1", [
+      [ "DATA", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1a2ac0169a75c7c95311c90cd9bb090171", null ],
+      [ "UNSTUFF_1", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1aef1acdb38c84eaac41eb093e1a2b3173", null ],
+      [ "UNSTUFF_2", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1a148396fcb9389d523840ba0761e1791a", null ],
+      [ "UNSTUFF_3", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1a9f8fdd7fa87a8f7d13fbaba1515146be", null ]
+    ] ],
     [ "HardwareIO", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#aef7fadfd7d550e81f4d0c3ac7584ae64", null ],
     [ "construct_sensors", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af08dad8607a22df41da8e011795bcb39", null ],
     [ "handle_response", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9407c70531109f84987d711ca403e4ac", null ],

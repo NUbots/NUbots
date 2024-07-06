@@ -1,5 +1,11 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a0a0883f8676617279d42c2b439f38ef4":[2,0,3,13,2,2,2],
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a15ecfe72650aaa307ff02d9bd5717b8f":[2,0,3,13,2,2,3],
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a1e9e8596edc6181964d760e5452a5137":[2,0,3,13,2,2,6],
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a1fbb850c93c2f8fddb1d830bf4108bce":[2,0,3,13,2,2,15],
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a330e573ce34368c04f2f37a043934053":[2,0,3,13,2,2,8],
+"classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a5bd56b85954484fd1994d14cc34bb055":[2,0,3,13,2,2,21],
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a7c0bda860a98e914c0fbe80298f94b33":[2,0,3,13,2,2,16],
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a8c4e447269cf002d39ad7d711049e981":[2,0,3,13,2,2,9],
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a9218ffd8b912bb392997a1f1a832c98d":[2,0,3,13,2,2,20],
@@ -243,11 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1Yolo.html#a4ce7b2c2301535b1f56f46efe9c6d4a7":[2,0,3,15,7,2],
 "classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79":[2,0,3,15,7,6],
 "classmodule_1_1vision_1_1Yolo.html#a66ed7bc23d9a80df95239954e50d3a80":[2,0,3,15,7,4],
-"classmodule_1_1vision_1_1Yolo.html#a781036abd1a72254c14918c54039764e":[2,0,3,15,7,3],
-"classmodule_1_1vision_1_1YoloCoco.html":[2,0,3,15,8],
-"classmodule_1_1vision_1_1YoloCoco.html#a318ff2c28353f99794d78d11ae7477ae":[2,0,3,15,8,3],
-"classmodule_1_1vision_1_1YoloCoco.html#a8284476a8495f9a661b1a6c27c4386b5":[2,0,3,15,8,4],
-"classmodule_1_1vision_1_1YoloCoco.html#a979e2b29050fd6be4c563faf6eaad044":[2,0,3,15,8,5],
-"classmodule_1_1vision_1_1YoloCoco.html#aaacd052d864f8fd9cdab78b4a419765d":[2,0,3,15,8,2],
-"classmodule_1_1vision_1_1YoloCoco.html#afe9611c3f59724a47f5c2cdcfbae88b3":[2,0,3,15,8,6]
+"classmodule_1_1vision_1_1Yolo.html#a781036abd1a72254c14918c54039764e":[2,0,3,15,7,3]
 };

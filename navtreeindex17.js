@@ -1,5 +1,11 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a5220759ae999984f3b9a54c1edc5fde2":[2,0,3,9,3,1,7],
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a70d167e1de57cb3e23051dd742e71624":[2,0,3,9,3,1,6],
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a72749a0dc678bd7900acced41403c598":[2,0,3,9,3,1,1],
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a837ec6dc2599a5b20807bf8aa0577df8":[2,0,3,9,3,1,9],
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9919fe0002c80a18ca07861701279156":[2,0,3,9,3,1,3],
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9fc7e19c27a3246634979ef75c0273d0":[2,0,3,9,3,1,2],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#aa696d83e83b19c24b7b4627ed37bdf72":[2,0,3,9,3,1,4],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#af6e7f671e77fb21da5fc2098d3335bf6":[2,0,3,9,3,1,10],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html":[2,0,3,10,0,0],
@@ -243,11 +249,5 @@ var NAVTREEINDEX17 =
 "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#ad4cb9b265bd54ab5de8dc260b089598a":[2,0,3,15,0,1,5],
 "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#ad61ae4cdac5de781047d7211c9d466be":[2,0,3,15,0,1,3],
 "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#af2126979dc9a5855e66c03043f6581fd":[2,0,3,15,0,1,4],
-"structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#af5a97b0ce14cd00909044ef73a424c1e":[2,0,3,15,0,1,6],
-"structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#afd1db10ad9472b03282f28a2085702bd":[2,0,3,15,0,1,7],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html":[2,0,3,15,0,2],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a0259ee8f0f5e3a019f5a4834cb78ce05":[2,0,3,15,0,2,9],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a078a3dac048c915b3f9500ce86704c71":[2,0,3,15,0,2,1],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a07d9b4d82d41079cc49b437b4da30228":[2,0,3,15,0,2,11],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a167b3dd51927ce4c4111e32f3dd3070d":[2,0,3,15,0,2,7]
+"structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#af5a97b0ce14cd00909044ef73a424c1e":[2,0,3,15,0,1,6]
 };
