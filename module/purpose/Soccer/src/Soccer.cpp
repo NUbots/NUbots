@@ -71,7 +71,6 @@ namespace module::purpose {
     using message::input::RoboCup;
     using message::input::Sensors;
     using message::input::SoccerPosition;
-    using message::input::State;
     using message::localisation::Ball;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
