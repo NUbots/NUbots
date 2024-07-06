@@ -11,7 +11,7 @@ bounded_region_x_max: 3.8
 bounded_region_y_min: -3.0
 
 # Bounded area on field y max
-bounded_region_y_max: 0.0
+bounded_region_y_max: 3.0
 
 # How long to wait until the ball is lost and we should walk in a search pattern
 ball_search_timeout: 2
