@@ -65,6 +65,16 @@ export class VisionCameraView extends Component<VisionCameraViewProps> {
         enabled: drawOptions.drawGoals,
         toggle: action(() => (drawOptions.drawGoals = !drawOptions.drawGoals)),
       },
+      {
+        label: "Robots",
+        enabled: drawOptions.drawRobots,
+        toggle: action(() => (drawOptions.drawRobots = !drawOptions.drawRobots)),
+      },
+      {
+        label: "Bounding Boxes",
+        enabled: drawOptions.drawBoundingBoxes,
+        toggle: action(() => (drawOptions.drawBoundingBoxes = !drawOptions.drawBoundingBoxes)),
+      },
     ];
   }
 }

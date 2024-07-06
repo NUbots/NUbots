@@ -1,11 +1,8 @@
-import { NUClearNetPacket, NUClearNetPeer } from "nuclearnet.js";
-import path from "path";
+import { NUClearNetPacket } from "nuclearnet.js";
 
-import { message, MessageType } from "../../../shared/messages";
-import { messageTypeToName } from "../../../shared/messages/type_converters";
+import { message } from "../../../shared/messages";
 import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber/tests/test_utils";
 import { sampleFileA } from "../../nbs_scrubber/tests/test_utils";
-import { samplesDir } from "../../nbs_scrubber/tests/test_utils";
 import { scrubberPeerName } from "../../nbs_scrubber/tests/test_utils";
 import { tick } from "../../nbs_scrubber/tests/test_utils";
 import { hashType } from "../../nuclearnet/hash_type";
@@ -14,12 +11,11 @@ import { NUsightSession } from "../session";
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
 
 import Test = message.support.nusight.Test;
-import ScrubberFileEntry = message.eye.ScrubberFileEntry;
-import ScrubberListFilesRequest = message.eye.ScrubberListFilesRequest;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 import ScrubberCloseRequest = message.eye.ScrubberCloseRequest;
 import ScrubberSeekRequest = message.eye.ScrubberSeekRequest;
 import ScrubberClosed = message.eye.ScrubberClosed;
+import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
 
 const testPacketType = "message.support.nusight.Test";
 
@@ -125,10 +121,11 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
     await tick();
 
-    const scrubberPeer = {
+    const scrubberPeer: NUClearNetPeerWithType = {
       name: scrubberPeerName,
       address: "0.0.0.0",
       port: 1,
+      type: "nbs-scrubber",
     };
 
     // a NUClear join message should be sent to the client to present the scrubber as a "peer", ...
@@ -165,13 +162,18 @@ describe("NUsightSession and NUsightSessionClient", () => {
     mockSocketB.emit("listen", "message.eye.ScrubberState", "listen-token-2");
 
     // when client A requests to load a scrubber...
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: [sampleFileA], name: scrubberPeerName });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: [sampleFileA], name: scrubberPeerName });
     mockSocketA.emitMessage(request);
 
     await tick();
 
     const scrubberId = 1;
-    const scrubberPeer = { name: scrubberPeerName, address: "0.0.0.0", port: scrubberId };
+    const scrubberPeer: NUClearNetPeerWithType = {
+      name: scrubberPeerName,
+      address: "0.0.0.0",
+      port: scrubberId,
+      type: "nbs-scrubber",
+    };
     const scrubberState = sampleADefaultState(scrubberPeerName);
 
     // a NUClear join event should be sent to both clients, ...
@@ -205,20 +207,21 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocketA.connection);
 
     // when client A loads a scrubber...
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: [sampleFileA], name: scrubberPeerName });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: [sampleFileA], name: scrubberPeerName });
     mockSocketA.emitMessage(request);
 
     const defaultState = sampleADefaultState(scrubberPeerName);
     const scrubberId = defaultState.id;
-    const scrubberPeer = {
+    const scrubberPeer: NUClearNetPeerWithType = {
       name: scrubberPeerName,
       address: "0.0.0.0",
       port: scrubberId,
+      type: "nbs-scrubber",
     };
 
     // and seeks to a specific time...
     const seekRequest = new ScrubberSeekRequest({
-      rpcToken: 2,
+      rpc: { token: 2 },
       id: scrubberId,
       timestamp: { seconds: 1149, nanos: 0 },
     });
@@ -255,7 +258,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocket.connection);
 
     // when the client requests to load a scrubber for an invalid file...
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: ["/file/that/does/not/exist.nbs"] });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: ["/file/that/does/not/exist.nbs"] });
     mockSocket.emitMessage(request);
 
     // the scrubber load should fail, with an error response sent back to the client.
@@ -263,85 +266,11 @@ describe("NUsightSession and NUsightSessionClient", () => {
       "message.eye.ScrubberLoadRequest.Response",
       createPacketFromServer(
         new ScrubberLoadRequest.Response({
-          rpcToken: 1,
-          ok: false,
-          error: "Error: nbs index not found for file: /file/that/does/not/exist.nbs",
-        }),
-      ),
-    );
-
-    // Clean up
-    session.destroy();
-  });
-
-  it("responds with list of nbs files in a directory on valid request from a browser client", async () => {
-    // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
-    const mockSocket = createMockWebSocket();
-    session.addClient(mockSocket.connection);
-
-    // when the client requests to list scrubber files...
-    const request = new ScrubberListFilesRequest({ rpcToken: 1, directory: samplesDir });
-    mockSocket.emitMessage(request);
-
-    await callTo(mockSocket.connection.send);
-
-    const response = findAndDecodePacketFromCalls(mockSocket.connection.send, ScrubberListFilesRequest.Response);
-
-    // the request files should be listed in a success response sent back to the client.
-    expect(response.payload).toEqual({
-      ok: true,
-      rpcToken: 1,
-      directory: samplesDir,
-      entries: [
-        {
-          type: ScrubberFileEntry.Type.DIRECTORY,
-          name: "sample_folder",
-          path: path.join(samplesDir, "sample_folder"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
-        },
-        {
-          type: ScrubberFileEntry.Type.FILE,
-          name: "sample-000-300.nbs",
-          path: path.join(samplesDir, "sample-000-300.nbs"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
-        },
-        {
-          type: ScrubberFileEntry.Type.FILE,
-          name: "sample-300-600.nbs",
-          path: path.join(samplesDir, "sample-300-600.nbs"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
-        },
-      ],
-    });
-
-    // Clean up
-    session.destroy();
-  });
-
-  it("responds with error on invalid request to list files from a browser client", async () => {
-    // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
-    const mockSocket = createMockWebSocket();
-    session.addClient(mockSocket.connection);
-
-    // when the client requests to list scrubber files in an invalid directory, ...
-    const request = new ScrubberListFilesRequest({ rpcToken: 1, directory: "/invalid/directory" });
-    mockSocket.emitMessage(request);
-
-    await callTo(mockSocket.connection.send);
-
-    // ... an error response should be sent back to the client
-    expect(mockSocket.connection.send).toHaveBeenCalledWith(
-      "message.eye.ScrubberListFilesRequest.Response",
-      createPacketFromServer(
-        new ScrubberListFilesRequest.Response({
-          rpcToken: 1,
-          ok: false,
-          error: "Error: ENOENT: no such file or directory, scandir '/invalid/directory'",
+          rpc: {
+            token: 1,
+            ok: false,
+            error: "Error: nbs index not found for file: /file/that/does/not/exist.nbs",
+          },
         }),
       ),
     );
@@ -361,7 +290,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
     mockSocket.emit("listen", "message.Ping", "listen-token-ping");
 
     // and it loads a scrubber, ...
-    const loadRequest = new ScrubberLoadRequest({ rpcToken: 1, files: [sampleFileA] });
+    const loadRequest = new ScrubberLoadRequest({ rpc: { token: 1 }, files: [sampleFileA] });
     mockSocket.emitMessage(loadRequest);
 
     // (ack the packet sent on scrubber load)
@@ -378,7 +307,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
     // when it requests to seek to a specific time ...
     const updateRequest = new ScrubberSeekRequest({
-      rpcToken: 2,
+      rpc: { token: 2 },
       id: 1,
       timestamp: { seconds: 1149, nanos: 0 },
     });
@@ -406,19 +335,26 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocketB.connection);
 
     // and client A loads a scrubber, ...
-    const loadRequest = new ScrubberLoadRequest({ rpcToken: 1, files: [sampleFileA] });
+    const loadRequest = new ScrubberLoadRequest({ rpc: { token: 1 }, files: [sampleFileA] });
     mockSocketA.emitMessage(loadRequest);
+    await tick();
 
     const scrubberId = 1;
 
     // when client A closes the scrubber ...
-    const stopRequest = new ScrubberCloseRequest({ rpcToken: 2, id: scrubberId });
+    const stopRequest = new ScrubberCloseRequest({ rpc: { token: 2 }, id: scrubberId });
     mockSocketA.emitMessage(stopRequest);
-
     await tick();
 
+    await mockSocketA.connection.send.waitForCall();
+
     // ... a NUClear leave event should be sent to both clients, ...
-    const expectedLeavePeer = { name: "sample-000-300.nbs", address: "0.0.0.0", port: scrubberId };
+    const expectedLeavePeer: NUClearNetPeerWithType = {
+      name: "sample-000-300.nbs",
+      address: "0.0.0.0",
+      port: scrubberId,
+      type: "nbs-scrubber",
+    };
     expect(mockSocketA.connection.send).toHaveBeenCalledWith("nuclear_leave", expectedLeavePeer);
     expect(mockSocketB.connection.send).toHaveBeenCalledWith("nuclear_leave", expectedLeavePeer);
 
@@ -430,12 +366,12 @@ describe("NUsightSession and NUsightSessionClient", () => {
     // ... as well as a success response to the client that requested the scrubber to be closed.
     expect(mockSocketA.connection.send).toHaveBeenCalledWith(
       "message.eye.ScrubberCloseRequest.Response",
-      createPacketFromServer(new ScrubberCloseRequest.Response({ rpcToken: 2, ok: true })),
+      createPacketFromServer(new ScrubberCloseRequest.Response({ rpc: { token: 2, ok: true } })),
     );
 
     // Attempting to seek the closed scrubber...
     const updateRequest = new ScrubberSeekRequest({
-      rpcToken: 3,
+      rpc: { token: 3 },
       id: scrubberId,
       timestamp: { seconds: 1100, nanos: 0 },
     });
@@ -448,9 +384,11 @@ describe("NUsightSession and NUsightSessionClient", () => {
       "message.eye.ScrubberSeekRequest.Response",
       createPacketFromServer(
         new ScrubberSeekRequest.Response({
-          rpcToken: 3,
-          ok: false,
-          error: `scrubber ${scrubberId} not found for update (seek)`,
+          rpc: {
+            token: 3,
+            ok: false,
+            error: `scrubber ${scrubberId} not found for update (seek)`,
+          },
         }),
       ),
     );
@@ -459,46 +397,3 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.destroy();
   });
 });
-
-/**
- * Used to wait for an asynchronous call to a mock function that has an `onCalled()` notifier.
- * A timeout can be set for how long to wait before giving up.
- */
-function callTo<T extends { onCalled(callback: () => void): void }>(
-  mockWithNotifier: T,
-  opts: { timeout?: number } = {},
-) {
-  return new Promise<void>((resolve, reject) => {
-    const timeout = opts.timeout ?? 250;
-
-    // Reject if the mock is not called within the timeout period
-    const waitTimeout = setTimeout(() => {
-      reject("Timed out waiting for mock to be called");
-    }, timeout);
-
-    // Wait for the mock to be called
-    mockWithNotifier.onCalled(() => {
-      // Clear the wait timeout
-      clearTimeout(waitTimeout);
-
-      // Resolve the promise
-      resolve();
-    });
-  });
-}
-
-/** Find the first packet of the given type in the mock function's call arguments, and decode it */
-function findAndDecodePacketFromCalls<T>(
-  mockFn: jest.Mock,
-  packetType: MessageType<T>,
-): {
-  hash: Buffer;
-  reliable: boolean;
-  payload: T;
-  peer: NUClearNetPeer;
-} {
-  const packetTypeName = messageTypeToName(packetType);
-  const response = mockFn.mock.calls.find((call) => call[0] === packetTypeName)?.[1];
-  const payload = packetType.decode(response.payload);
-  return { ...response, payload };
-}

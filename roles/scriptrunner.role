@@ -1,16 +1,18 @@
+# This role is used to run scripts (keyframe animations) on the real robot. Add the script name as an argument when
+# running the binary and press the green button on the robot to play the script.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
-  extension::FileWatcher
-  support::logging::ConsoleLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
-  platform::${SUBCONTROLLER}::HardwareIO
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Sensors
   input::SensorFilter
   # Director
   extension::Director
   # Servos
-  actuation::Kinematics
   actuation::Servos
   # Purpose
   purpose::ScriptRunner
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

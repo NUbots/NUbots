@@ -1,21 +1,17 @@
+# This module is used to manually move the robot around in Webots. It is primarily used for testing motions.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run support::SignalCatcher
-  extension::FileWatcher
-  support::logging::FileLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
-  # Support and Configuration
-  support::configuration::GlobalConfig
-  support::configuration::SoccerConfig
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
-  network::NUClearNet
-  network::PlotJuggler
-  # NUsight
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
-  # Platform
+  network::PlotJuggler
+  # Sensors
   input::SensorFilter
   platform::Webots
   # Director
@@ -33,6 +29,7 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
+  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   # Purpose

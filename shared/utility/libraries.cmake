@@ -28,6 +28,15 @@ target_link_libraries(nuclear_utility PUBLIC tinyrobotics::tinyrobotics)
 find_package(NLopt REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC NLopt::nlopt)
 
+find_package(CURL REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC CURL::libcurl)
+
+find_package(ALSA REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ALSA::ALSA)
+
+find_package(Lame REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
@@ -52,11 +61,20 @@ set(SCRIPT_FILES
     CACHE INTERNAL "A list of all script files" FORCE
 )
 
-# Add the platform models directory to the build directory
-file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/models" DESTINATION ${PROJECT_BINARY_DIR})
-# Add the models to the model files variable for the install script
-file(GLOB_RECURSE models "${PROJECT_BINARY_DIR}/models/*")
+# Copy the robot names config file to the build directory
+file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/robot_names.yaml" DESTINATION ${PROJECT_BINARY_DIR}/config)
+set(ALIAS_CONFIG
+    "${PROJECT_BINARY_DIR}/config/robot_names.yaml"
+    CACHE INTERNAL "Path to the robot names config file" FORCE
+)
+
+# Copy only .urdf files from the platform models directory to the build directory
+file(GLOB_RECURSE urdf_files "${PROJECT_SOURCE_DIR}/shared/utility/platform/models/*.urdf")
+file(COPY ${urdf_files} DESTINATION "${PROJECT_BINARY_DIR}/models")
+
+# Add the .urdf models to the model files variable for the install script
+file(GLOB_RECURSE models "${PROJECT_BINARY_DIR}/models/*.urdf")
 set(MODEL_FILES
     ${models}
-    CACHE INTERNAL "A list of all model files" FORCE
+    CACHE INTERNAL "A list of all model .urdf files" FORCE
 )

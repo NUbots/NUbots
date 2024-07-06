@@ -1,22 +1,28 @@
 /*
- * Particle filter substitute for UKF
+ * MIT License
  *
- * This file is part of the NUbots Codebase.
+ * Copyright (c) 2019 NUbots
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef UTILITY_MATH_FILTER_PARTICLEFILTER_HPP
@@ -304,6 +310,8 @@ namespace utility::math::filter {
             throw std::runtime_error("Invalid setting for resample method.");
         }
 
+
+    public:
         /**
          * @brief Do a weighted resampling of all of the particles in the filter. The model is also asked to provide new
          * rogues. All particle weights are reset to 1.
@@ -336,7 +344,6 @@ namespace utility::math::filter {
             std::fill(weights.begin(), weights.end(), Scalar(1));
         }
 
-    public:
         /**
          * @brief Resample all particles in the filter and set their weights back to 1. The model is asked to give a
          * prediction on what happens to each particle after dt time has elapsed (using model::time).
@@ -417,6 +424,13 @@ namespace utility::math::filter {
         }
 
         /**
+         * @brief Manually set a particles weight.
+         */
+        void set_particle_weight(const Scalar& weight, const int& idx) {
+            weights[idx] = weight;
+        }
+
+        /**
          * @brief Calculates and returns the mean of all particles.
          */
         [[nodiscard]] StateVec get_state() const {
@@ -432,16 +446,35 @@ namespace utility::math::filter {
         }
 
         /**
+         * @brief Returns the particle at the given index.
+         */
+        [[nodiscard]] const Eigen::Matrix<Scalar, Model::size, 1> get_particle(int idx) const {
+            return particles.col(idx);
+        }
+
+        /**
          * @brief Returns the underlying particle list.
          */
-        [[nodiscard]] const ParticleList& getParticles() const {
+        [[nodiscard]] const ParticleList& get_particles() const {
             return particles;
+        }
+
+        /**
+         * @brief Returns the underlying particle list as a vector.
+         */
+        [[nodiscard]] std::vector<Eigen::Matrix<Scalar, Model::size, 1>> get_particles_as_vector() const {
+            std::vector<Eigen::Matrix<Scalar, Model::size, 1>> vec;
+            vec.reserve(particles.cols());
+            for (int i = 0; i < particles.cols(); ++i) {
+                vec.emplace_back(particles.col(i));
+            }
+            return vec;
         }
 
         /**
          * @brief Returns the underlying particle weights.
          */
-        [[nodiscard]] const ParticleWeights& getParticleWeights() const {
+        [[nodiscard]] const ParticleWeights& get_particle_weights() const {
             return weights;
         }
     };

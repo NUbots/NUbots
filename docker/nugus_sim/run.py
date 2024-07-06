@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2021 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 import argparse
 import os
@@ -90,9 +116,9 @@ def update_config_files(args: dict) -> None:
     os.chdir(args["config_dir"])
 
     # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
-    global_config = read_config("GlobalConfig.yaml")
+    global_config = read_config("webots/GlobalConfig.yaml")
     global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
-    write_config("GlobalConfig.yaml", global_config)
+    write_config("webots/GlobalConfig.yaml", global_config)
 
     # Set `player_id` in GameController.yaml from ROBOCUP_ROBOT_ID
     game_controller_config = read_config("GameController.yaml")
@@ -111,9 +137,9 @@ def update_config_files(args: dict) -> None:
 
     # Set `team_id` if it is provided
     if "ROBOCUP_TEAM_ID" in env_vars:
-        global_config = read_config("GlobalConfig.yaml")
+        global_config = read_config("webots/GlobalConfig.yaml")
         global_config["team_id"] = int(env_vars["ROBOCUP_TEAM_ID"])
-        write_config("GlobalConfig.yaml", global_config)
+        write_config("webots/GlobalConfig.yaml", global_config)
 
     # Configure logging to /robocup-logs if it exists
     if os.path.exists("/robocup-logs"):

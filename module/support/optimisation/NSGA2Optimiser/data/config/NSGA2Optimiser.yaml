@@ -1,0 +1,85 @@
+# Larger population encourages wider search
+population_size: 4
+# More generations encourages deeper search
+max_generations: 5
+num_objectives: 2
+num_constraints: 2
+seed: 7777777
+trial_duration_limit: 10 # number of seconds to run a single trial for
+probabilities:
+  real:
+    # Note that simulated binary crossover (SBX) does something like mutation as well
+    crossover: 0.9
+    # recommended nsga2 mutation probability is 1/n, where n is number of parameters
+    mutation: 0.083
+  binary:
+    crossover: 0.9
+    mutation: 0.083
+eta:
+  # eta_c is distribution index for simulated binary crossover (SBX)
+  # higher values of eta_c makes children more similar to parents
+  # Recommended nsga2 value for eta_c is 20
+  C: 20
+  M: 20
+
+task: "walk"
+task_config_path: "config/Walk.yaml"
+
+# Only for multipath
+task_supplied_pop: "false"
+task_supplied_pop_file: ""
+
+initial_translation: [-4.0, -3.0, 0.51] # x, y, z
+intial_rotation: [0, 0, 1, 0] # x, y, z, angle (rads)
+# The following values are setting the initial values and limits for the walk engine parameters.
+# Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
+# values in Walk.yaml for an individual, and then evaluated with the walk.
+walk:
+  # Time for one complete step (in seconds).
+  period: [0.39, 0.1, 1.0]
+  step:
+    # # Maximum step limits in x and y (in meters), and theta (in radians).
+    limits:
+      x: [0.5, 0.1, 1.0]
+      y: [0.2, 0.1, 1.0]
+      theta: [0.4, 0.1, 1.0]
+    # Step height (in meters)
+    height: [0.075, 0.05, 0.1]
+    # Lateral distance in meters between feet (how spread apart the feet should be)
+    width: [0.235, 0.15, 0.24]
+    # Ratio of the step_period where the foot should be at its highest point, between [0 1].
+    apex_ratio: [0.4, 0, 1]
+  torso:
+    # Torso height (in meters)
+    height: [0.46, 0.4, 0.475]
+    # Torso pitch (in radians)
+    pitch: [12 * pi / 180, 0 * pi / 180, 30 * pi / 180]
+    # Torso constant position offset
+    position_offset:
+      x: [0, -0.05, 0.05]
+      y: [0, 0, 0]
+      z: [0, 0, 0]
+    # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
+    sway_offset:
+      x: [0, 0, 0]
+      y: [0.05, -0.05, 0.1]
+      z: [0, 0, 0]
+    # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
+    sway_ratio: [0.5, 0, 1]
+    # Determines where to position the torso at the end of the step using a ratio of the next step placement.
+    # For example, a value of [0.5, 0.5, 1] would position the torso halfway between the planted and swing foot and with
+    # torso yaw rotation equal to swing foot yaw
+    final_position_ratio:
+      x: [0.5, 0.1, 1]
+      y: [0.5, 0.1, 1]
+      z: [1, 0.5, 1]
+
+# Fixed position of the arm joints during walking
+arms:
+  shoulder_pitch: [1.7, 0.5, 2.5]
+  elbow: [-0.7, -2, 0]
+
+# The following values are setting the initial values and limits for the walk engine command.
+walk_command:
+  velocity: [0.15, 0.01, 0.25] #  [-0.2, -1.00, -0.01]
+  rotation: [0.15, -1.57, 0.1] # [0.15, 0.1, 1.57]

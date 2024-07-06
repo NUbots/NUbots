@@ -1,21 +1,29 @@
 
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2014 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "HardwareSimulator.hpp"
@@ -117,7 +125,7 @@ namespace module::platform {
 
         for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::get_raw_servo(i, sensors);
 
             // Error code
             servo.hardware_error = 0;
@@ -177,7 +185,7 @@ namespace module::platform {
                 }
 
                 for (int i = 0; i < 20; ++i) {
-                    auto& servo       = utility::platform::getRawServo(i, sensors);
+                    auto& servo       = utility::platform::get_raw_servo(i, sensors);
                     float movingSpeed = servo.profile_velocity == 0 ? 0.1 : servo.profile_velocity / UPDATE_FREQUENCY;
                     movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
@@ -222,7 +230,7 @@ namespace module::platform {
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(
                     command.position,
-                    utility::platform::getRawServo(command.id, sensors).present_position);
+                    utility::platform::get_raw_servo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed = 0.0f;
@@ -231,7 +239,7 @@ namespace module::platform {
                 }
 
                 // Set our variables
-                auto& servo            = utility::platform::getRawServo(command.id, sensors);
+                auto& servo            = utility::platform::get_raw_servo(command.id, sensors);
                 servo.profile_velocity = speed;
                 servo.goal_position    = utility::math::angle::normalizeAngle(command.position);
             }

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_MOTION_SERVOS_HPP
 #define MODULE_MOTION_SERVOS_HPP
 
@@ -25,25 +51,26 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Trigger<Sensors>>().then([this](const Servo& servo, const RunInfo& info) {
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-                    if (log_level <= NUClear::DEBUG) {
-                        emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
-                                   servo.command.position,
-                                   servo.command.state.gain,
-                                   servo.command.state.torque));
+            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>>().then(
+                [this](const Servo& servo, const RunInfo& info) {
+                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                        if (log_level <= NUClear::DEBUG) {
+                            emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
+                                       servo.command.position,
+                                       servo.command.state.gain,
+                                       servo.command.state.torque));
+                        }
+                        emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                           ID,
+                                                           servo.command.position,
+                                                           servo.command.state.gain,
+                                                           servo.command.state.torque));
                     }
-                    emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                       ID,
-                                                       servo.command.position,
-                                                       servo.command.state.gain,
-                                                       servo.command.state.torque));
-                }
-                // If the time to reach the position is over, then stop requesting the position
-                else if (NUClear::clock::now() >= servo.command.time) {
-                    emit<Task>(std::make_unique<Done>());
-                }
-            });
+                    // If the time to reach the position is over, then stop requesting the position
+                    else if (NUClear::clock::now() >= servo.command.time) {
+                        emit<Task>(std::make_unique<Done>());
+                    }
+                });
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.
