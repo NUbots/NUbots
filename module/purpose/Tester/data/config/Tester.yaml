@@ -6,13 +6,14 @@ tasks:
   # Strategies
   start_safely_priority: 0
   align_ball_to_goal_priority: 0
-  find_ball_priority: 0
-  look_at_ball_priority: 0
+  find_ball_priority: 1
+  look_at_ball_priority: 2
   walk_to_ball_priority: 0
-  walk_to_kick_ball_priority: 0
+  walk_to_kick_ball_priority: 3
   walk_to_field_position_priority: 0
   kick_to_goal_priority: 0
   stand_still_priority: 0
+  walk_inside_bounded_box: 4
 
   # Planners
   kick_to_priority: 0
