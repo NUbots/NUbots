@@ -92,14 +92,12 @@ namespace module::purpose {
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
-            // Idle stand if not doing anything
-            emit<Task>(std::make_unique<StandStill>());
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
+            // Stand still
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // Stand still
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
