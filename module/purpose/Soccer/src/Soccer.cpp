@@ -143,7 +143,7 @@ namespace module::purpose {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             log<NUClear::INFO>("Idle mode enabled");
         });
 
