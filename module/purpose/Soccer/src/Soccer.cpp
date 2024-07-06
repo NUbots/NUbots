@@ -121,10 +121,10 @@ namespace module::purpose {
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
-            // Stand still in idle
+            // Stand idle
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
-            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
@@ -199,10 +199,7 @@ namespace module::purpose {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
-            // Set robot to inactive
-            robots[player_id - 1].active   = false;
-            robots[player_id - 1].position = Position::DYNAMIC;
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             log<NUClear::INFO>("Idle mode enabled");
         });
 
