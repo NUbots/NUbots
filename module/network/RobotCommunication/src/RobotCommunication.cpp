@@ -196,5 +196,4 @@ namespace module::network {
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
     }
-
 }  // namespace module::network

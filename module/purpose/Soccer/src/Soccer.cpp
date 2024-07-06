@@ -201,6 +201,9 @@ namespace module::purpose {
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+            // Set robot to inactive
+            robots[player_id - 1].active   = false;
+            robots[player_id - 1].position = Position::DYNAMIC;
             log<NUClear::INFO>("Idle mode enabled");
         });
 
