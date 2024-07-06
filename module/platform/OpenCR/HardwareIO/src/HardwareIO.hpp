@@ -216,9 +216,6 @@ namespace module::platform::OpenCR {
         /// @brief Runs the setup for the devices
         void startup();
 
-        /// @brief Emit StatusReturn message from the most recent response
-        void emit_status_return();
-
         /// @brief handles a response packet from the device
         void handle_response();
 
@@ -264,6 +261,8 @@ namespace module::platform::OpenCR {
                 } temperature;
             } alarms;
         } cfg;
+
+        enum UnstuffingState : uint8_t { DATA, UNSTUFF_1, UNSTUFF_2, UNSTUFF_3 };
     };
 
 }  // namespace module::platform::OpenCR
