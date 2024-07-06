@@ -131,9 +131,6 @@ namespace module::input {
             });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
-            // Reset the mahony filter
-            mahony_filter.set_state(cfg.initial_Rwt);
-
             // Reset anchor frame
             Hwp                   = Eigen::Isometry3d::Identity();
             Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
