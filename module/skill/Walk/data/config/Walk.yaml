@@ -18,7 +18,7 @@ walk:
     # Torso height (in meters)
     height: 0.46
     # Torso pitch (in radians)
-    pitch: 18 * pi / 180
+    pitch: 14 * pi / 180
     # Torso constant position offset
     position_offset: [0.01, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
