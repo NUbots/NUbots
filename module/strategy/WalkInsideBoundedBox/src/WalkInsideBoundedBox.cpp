@@ -56,6 +56,9 @@ namespace module::strategy {
         });
         on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
             [this](const WalkInsideBoundedBoxTask& box, const Ball& ball, const Field& field) {
+                // Emit self as non-task for debugging
+                emit(std::make_unique<WalkInsideBoundedBoxTask>(box));
+
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;
                 Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
