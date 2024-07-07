@@ -37,7 +37,6 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
-#include "message/input/Purpose.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
@@ -47,6 +46,7 @@
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -67,10 +67,8 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
-    using message::input::Purpose;
     using message::input::RoboCup;
     using message::input::Sensors;
-    using message::input::SoccerPosition;
     using message::localisation::Ball;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
@@ -78,6 +76,9 @@ namespace module::purpose {
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
+    using message::purpose::Purpose;
+    using message::purpose::Purposes;
+    using message::purpose::SoccerPosition;
     using message::purpose::Striker;
     using message::skill::Look;
     using message::skill::Walk;
@@ -160,6 +161,14 @@ namespace module::purpose {
             emit(std::make_unique<Purpose>(SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
+
+            // Emit the current state of all robot purposes
+            auto purposes = std::make_unique<Purposes>();
+            for (size_t i = 0; i < robots.size(); i++) {
+                purposes->purposes[i] =
+                    Purpose(SoccerPosition(int(robots[i].position)), robots[i].dynamic, robots[i].active);
+            }
+            emit(std::move(purposes));
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {

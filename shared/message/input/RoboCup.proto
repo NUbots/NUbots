@@ -29,7 +29,8 @@ package message.input;
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
-import "message/input/Purpose.proto";
+
+import "message/purpose/Purpose.proto";
 
 /// The detected team of the robot
 enum Team {
@@ -114,5 +115,5 @@ message RoboCup {
     /// IDs 1-100 are reserved for official use
 
     /// The purpose of the robot
-    Purpose purpose = 101;
+    purpose.Purpose purpose = 101;
 }

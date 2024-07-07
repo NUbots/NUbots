@@ -33,11 +33,11 @@
 
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
-#include "message/input/Purpose.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
 
@@ -50,12 +50,12 @@ namespace module::network {
     using extension::Configuration;
     using message::behaviour::state::WalkState;
     using message::input::GameState;
-    using message::input::Purpose;
     using message::input::RoboCup;
     using message::input::Sensors;
-    using message::input::SoccerPosition;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
