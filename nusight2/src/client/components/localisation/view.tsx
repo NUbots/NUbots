@@ -533,9 +533,10 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
       <mesh position={[0, -(height / 2 + wallThickness / 2), 0.009]} rotation={[0, 0, 0]}>
         <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
         <primitive object={horizontalWallMaterial} />
-
-
-
+      </mesh>
+    </object3D>
+  );
+};
 
 const PurposeLabel = ({
   robotModel,
