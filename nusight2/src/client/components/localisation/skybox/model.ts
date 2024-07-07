@@ -38,7 +38,7 @@ export class SkyboxModel {
       mieDirectionalG: 0.53, // default 0.8
       luminance: 0.5,
       inclination: 0.49, // elevation / inclination
-      azimuth: 0.25, // Facing front,
+      azimuth: 0.05, // Facing front,
       showSun: false,
     });
   }
