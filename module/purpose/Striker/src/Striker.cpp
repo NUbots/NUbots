@@ -49,8 +49,9 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase    = message::input::GameState::Data::Phase;
-    using GameMode = message::input::GameState::Data::Mode;
+    using Phase          = message::input::GameState::Data::Phase;
+    using GameMode       = message::input::GameState::Data::Mode;
+    using SecondaryState = message::input::GameState::Data::SecondaryState;
     using message::input::GameState;
     using message::localisation::Ball;
     using message::localisation::Field;
@@ -168,7 +169,20 @@ namespace module::purpose {
         on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Direct free kick
-        on<Provide<DirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                else {
+                    play();
+                }
+            });
 
         // Indirect free kick
         on<Provide<InDirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
