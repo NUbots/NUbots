@@ -51,11 +51,11 @@ namespace module::strategy {
 
     WalkInBoundedBox::WalkInBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
-        on<Configuration>("WalkInBoundedBox.yaml").then([this](const Configuration& config) {
+        on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
-        on<Provide<WalkInBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
-            [this](const WalkInBoundedBoxTask& box, const Ball& ball, const Field& field) {
+        on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
+            [this](const WalkInsideBoundedBoxTask& box, const Ball& ball, const Field& field) {
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;
                 Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
