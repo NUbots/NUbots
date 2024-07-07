@@ -64,10 +64,10 @@ export class LocalisationNetwork {
   };
 
   @action.bound
-  private onPurposes(robotModel: RobotModel, purpose: message.input.Purpose) {
+  private onPurposes(robotModel: RobotModel, purpose: message.purpose.Purpose) {
     const robot = LocalisationRobotModel.of(robotModel);
     const position = purpose.purpose;
-    robot.purpose = this.getKey(message.input.SoccerPosition, position!)!;
+    robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
   }
 
   @action.bound
