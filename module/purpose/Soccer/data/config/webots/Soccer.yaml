@@ -1,9 +1,0 @@
-# Controls the minimum log level that NUClear log will display
-log_level: INFO
-
-# For the robot playing without listening to GameController
-force_playing: false
-
-# The position of the robot
-# GOALIE, STRIKER, DEFENDER
-position: STRIKER

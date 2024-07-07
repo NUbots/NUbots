@@ -151,6 +151,8 @@ export class LocalisationRobotModel {
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
+  @observable purpose: string;
+
   @observable max_align_radius: number;
   @observable min_align_radius: number;
   @observable angle_to_final_heading: number;
@@ -177,6 +179,7 @@ export class LocalisationRobotModel {
     fieldIntersections,
     goals,
     robots,
+    purpose,
     max_align_radius,
     min_align_radius,
     angle_to_final_heading,
@@ -202,6 +205,7 @@ export class LocalisationRobotModel {
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
+    purpose: string;
     max_align_radius: number;
     min_align_radius: number;
     angle_to_final_heading: number;
@@ -227,6 +231,7 @@ export class LocalisationRobotModel {
     this.fieldIntersections = fieldIntersections;
     this.goals = goals;
     this.robots = robots;
+    this.purpose = purpose;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
     this.angle_to_final_heading = angle_to_final_heading;
@@ -251,6 +256,7 @@ export class LocalisationRobotModel {
       particles: { particle: [] },
       goals: { points: [] },
       robots: [],
+      purpose: "",
       max_align_radius: 0,
       min_align_radius: 0,
       angle_to_final_heading: 0,

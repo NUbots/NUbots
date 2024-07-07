@@ -29,37 +29,53 @@
 
 #include <nuclear>
 #include <string>
+#include <vector>
 
 #include "extension/Behaviour.hpp"
 
+#include "message/input/RoboCup.hpp"
+
 namespace module::purpose {
+
+    using message::input::RoboCup;
 
     struct EnableIdle {};
     struct DisableIdle {};
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief The id of the robot
+        uint player_id = 0;
+
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value {
-                STRIKER,
-                GOALIE,
-                DEFENDER,
-            };
+            enum Value { STRIKER, GOALIE, DEFENDER, DYNAMIC };
             Value value = Value::STRIKER;
 
             Position() = default;
+            Position(Value value) : value(value) {}
             Position(std::string const& str) {
                 // clang-format off
                 if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
+                else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
                 else { throw std::runtime_error("Invalid robot position"); }
                 // clang-format on
             }
 
             operator int() const {
                 return value;
+            }
+
+            operator std::string() const {
+                switch (value) {
+                    case Value::STRIKER: return "Striker";
+                    case Value::GOALIE: return "Goalie";
+                    case Value::DEFENDER: return "Defender";
+                    case Value::DYNAMIC: return "Dynamic";
+                    default: return "Unknown";
+                }
             }
         };
 
@@ -71,13 +87,36 @@ namespace module::purpose {
             int disable_idle_delay = 0;
             /// @brief The soccer position of the robot
             Position position{};
+            /// @brief The number of seconds to wait before assuming a teammate is inactive
+            int timeout = 0;
+            /// @brief The largest id of a robot
+            uint8_t max_robots = 0;
         } cfg;
+
+        struct RobotInfo {
+            /// @brief If this robot has been heard within the timeout
+            bool active = false;
+            /// @brief The time when we last heard this robot
+            NUClear::clock::time_point last_heard = NUClear::clock::now();
+            /// @brief Whether or not this robot is deciding what position its in dynamically
+            bool dynamic = false;
+            /// @brief The current position of this robot
+            Position position = Position::DYNAMIC;
+            /// @brief The distance of the robot to the ball
+            double distance_to_ball = std::numeric_limits<double>::max();
+        };
+
+        /// @brief Store robots that could possibly play
+        std::vector<RobotInfo> robots{};
 
         /// @brief The rate the find purpose provider will run, to drive the rest of the system
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 10;
 
         /// @brief Idle state of the robot
         bool idle = false;
+
+        /// @brief Determines what purpose the robot shall play as and emits the Task for that purpose
+        void determine_purpose();
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
