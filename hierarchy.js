@@ -234,6 +234,7 @@ var hierarchy =
     [ "module::purpose::PS3Walk::Config", "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html", null ],
     [ "module::purpose::Soccer::Config", "structmodule_1_1purpose_1_1Soccer_1_1Config.html", null ],
     [ "module::purpose::Soccer::Position", "structmodule_1_1purpose_1_1Soccer_1_1Position.html", null ],
+    [ "module::purpose::Soccer::RobotInfo", "structmodule_1_1purpose_1_1Soccer_1_1RobotInfo.html", null ],
     [ "module::purpose::StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
     [ "module::purpose::Striker::Config", "structmodule_1_1purpose_1_1Striker_1_1Config.html", null ],
     [ "module::purpose::Tester::Config", "structmodule_1_1purpose_1_1Tester_1_1Config.html", null ],

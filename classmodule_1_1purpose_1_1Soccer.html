@@ -169,6 +169,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1purpose_1_1Soccer.html'
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classmodule_1_1purpose_1_1Soccer-members.html">List of all members</a>  </div>
@@ -207,6 +208,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1Soccer_1_1Position.html">Position</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smart enum for the robot's position.  <a href="structmodule_1_1purpose_1_1Soccer_1_1Position.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1Soccer_1_1RobotInfo.html">RobotInfo</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -214,6 +217,13 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#a647d6bb40c51b5cda14f6a00aecf3e15">Soccer</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:a647d6bb40c51b5cda14f6a00aecf3e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1purpose_1_1Soccer.html">Soccer</a> reactor. <br /></td></tr>
 <tr class="separator:a647d6bb40c51b5cda14f6a00aecf3e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ae23d22a93d6124650b5292b11856a9ff"><td class="memItemLeft" align="right" valign="top"><a id="ae23d22a93d6124650b5292b11856a9ff"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#ae23d22a93d6124650b5292b11856a9ff">determine_purpose</a> ()</td></tr>
+<tr class="memdesc:ae23d22a93d6124650b5292b11856a9ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines what purpose the robot shall play as and emits the Task for that purpose. <br /></td></tr>
+<tr class="separator:ae23d22a93d6124650b5292b11856a9ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -224,6 +234,14 @@ struct <a class="el" href="structmodule_1_1purpose_1_1Soccer_1_1Config.html">mod
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#a255d4902af8f922e32aa6c5453d6286b">idle</a> = false</td></tr>
 <tr class="memdesc:a255d4902af8f922e32aa6c5453d6286b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Idle state of the robot. <br /></td></tr>
 <tr class="separator:a255d4902af8f922e32aa6c5453d6286b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa415561370e2c9414de80d8c4dfc4c5"><td class="memItemLeft" align="right" valign="top"><a id="aaa415561370e2c9414de80d8c4dfc4c5"></a>
+uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#aaa415561370e2c9414de80d8c4dfc4c5">player_id</a> = 0</td></tr>
+<tr class="memdesc:aaa415561370e2c9414de80d8c4dfc4c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the robot. <br /></td></tr>
+<tr class="separator:aaa415561370e2c9414de80d8c4dfc4c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d04e66e3377468ab960fddcc725af4b"><td class="memItemLeft" align="right" valign="top"><a id="a1d04e66e3377468ab960fddcc725af4b"></a>
+std::vector&lt; <a class="el" href="structmodule_1_1purpose_1_1Soccer_1_1RobotInfo.html">RobotInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#a1d04e66e3377468ab960fddcc725af4b">robots</a> {}</td></tr>
+<tr class="memdesc:a1d04e66e3377468ab960fddcc725af4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Store robots that could possibly play. <br /></td></tr>
+<tr class="separator:a1d04e66e3377468ab960fddcc725af4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
@@ -290,7 +308,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html">Soccer</a></li>
-    <li class="footer">Generated on Sun Jul 7 2024 03:50:42 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jul 7 2024 05:29:42 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
