@@ -97,6 +97,10 @@ namespace module::purpose {
             cfg.say_text                         = config["say_text"].as<std::string>();
             cfg.chatgpt_prompt                   = config["chatgpt_prompt"].as<std::string>();
             cfg.walk_inside_bounded_box_priority = config["tasks"]["walk_inside_bounded_box"].as<int>();
+            cfg.bounded_region_x_min             = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max             = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min             = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max             = config["bounded_region_y_max"].as<Expression>();
 
             cfg.start_delay = config["start_delay"].as<int>();
         });
@@ -140,7 +144,11 @@ namespace module::purpose {
                 }
                 if (cfg.walk_inside_bounded_box_priority > 0) {
                     log<NUClear::INFO>("Walk inside bounded box");
-                    emit<Task>(std::make_unique<WalkInsideBoundedBox>(), cfg.walk_inside_bounded_box_priority);
+                    emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
+                                                                      cfg.bounded_region_x_max,
+                                                                      cfg.bounded_region_y_min,
+                                                                      cfg.bounded_region_y_max),
+                               cfg.walk_inside_bounded_box_priority);
                 }
                 if (cfg.kick_to_priority > 0) {
                     emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);

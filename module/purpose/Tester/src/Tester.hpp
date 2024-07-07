@@ -52,6 +52,15 @@ namespace module::purpose {
             int walk_to_kick_ball_priority = 0;
             /// @brief Walk inside bounding box task
             int walk_inside_bounded_box_priority = 0;
+            /// @brief x minimum bound on field to walk within
+            double bounded_region_x_min = 0.0;
+            /// @brief x maximum bound on field to walk within
+            double bounded_region_x_max = 0.0;
+            /// @brief y minimum bound on field to walk within
+            double bounded_region_y_min = 0.0;
+            /// @brief y maximum bound on field to walk within
+            double bounded_region_y_max = 0.0;
+
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task
