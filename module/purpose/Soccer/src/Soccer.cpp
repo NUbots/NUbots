@@ -263,6 +263,13 @@ namespace module::purpose {
             }
         }
 
+        // If we are the only active robot, we should be an all rounder
+        if (std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
+            robots[player_id - 1].position = Position::ALL_ROUNDER;
+            emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
+            return;
+        }
+
         // Check if we have a purpose
         robots[player_id - 1].position =
             robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
