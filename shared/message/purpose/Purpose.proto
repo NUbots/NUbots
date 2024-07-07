@@ -28,7 +28,7 @@ package message.purpose;
 
 /// The detected purpose of the robot
 enum SoccerPosition {
-    ALLROUNDER = 0;
+    ALL_ROUNDER = 0;
     STRIKER  = 1;
     GOALIE   = 2;
     DEFENDER = 3;

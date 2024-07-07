@@ -49,14 +49,14 @@ namespace module::purpose {
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value { ALLROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
-            Value value = Value::ALLROUNDER;
+            enum Value { ALL_ROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
+            Value value = Value::ALL_ROUNDER;
 
             Position() = default;
             Position(Value value) : value(value) {}
             Position(std::string const& str) {
                 // clang-format off
-                if (str == "ALLROUNDER") { value = Value::ALLROUNDER; }
+                if (str == "ALL_ROUNDER") { value = Value::ALL_ROUNDER; }
                 else if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
@@ -71,7 +71,7 @@ namespace module::purpose {
 
             operator std::string() const {
                 switch (value) {
-                    case Value::ALLROUNDER: return "AllRounder";
+                    case Value::ALL_ROUNDER: return "AllRounder";
                     case Value::STRIKER: return "Striker";
                     case Value::GOALIE: return "Goalie";
                     case Value::DEFENDER: return "Defender";

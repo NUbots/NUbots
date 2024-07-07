@@ -40,6 +40,7 @@
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -69,6 +70,7 @@ namespace module::purpose {
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
+    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
