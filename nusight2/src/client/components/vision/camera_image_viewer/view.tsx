@@ -25,7 +25,7 @@ export const CameraImageViewer = observer(
     children?: React.ReactNode;
   }) => {
     return (
-      <ResizeContainer horizontal className="w-full h-full flex dark">
+      <ResizeContainer horizontal className="w-full h-full flex">
         <ResizePanel minSize={250}>
           <CameraImageViewerMain
             CameraView={props.CameraView}
@@ -65,7 +65,7 @@ const CameraImageViewerMain = observer(
       [props.selectedCamera, props.selectedRobot],
     );
     return (
-      <div className="flex-grow h-full relative dark">
+      <div className="flex-grow h-full relative">
         <props.CameraView
           key={props.selectedCamera.id}
           model={props.selectedCamera}
@@ -77,7 +77,7 @@ const CameraImageViewerMain = observer(
         />
         <IconButton
           className="absolute top-2 left-2"
-          color="transparent"
+          color="semitransparent"
           size="large"
           iconProps={{ weight: 400 }}
           onClick={() => props.onSelectCamera(-1)}
@@ -86,7 +86,7 @@ const CameraImageViewerMain = observer(
         </IconButton>
         <IconButton
           className="absolute top-[50%] left-2"
-          color="transparent"
+          color="semitransparent"
           size="large"
           iconProps={{ weight: 400 }}
           onClick={props.onPreviousCamera}
@@ -95,7 +95,7 @@ const CameraImageViewerMain = observer(
         </IconButton>
         <IconButton
           className="absolute top-[50%] right-2"
-          color="transparent"
+          color="semitransparent"
           size="large"
           iconProps={{ weight: 400 }}
           onClick={props.onNextCamera}

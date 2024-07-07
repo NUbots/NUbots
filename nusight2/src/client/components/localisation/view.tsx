@@ -9,6 +9,7 @@ import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { Button } from "../button/button";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
@@ -22,8 +23,6 @@ import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
-import style from "./style.module.css";
-
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -50,18 +49,20 @@ interface FieldDimensionSelectorProps {
 
 @observer
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
-  private dropdownToggle = (<button className={style.localisation__menuButton}>Field Type</button>);
+  private dropdownToggle = (<Button>Field Type</Button>);
 
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        <div className="bg-white rounded-lg w-28">
+        <div className="bg-auto-surface-2">
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -105,7 +106,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div className={style.localisation}>
+      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
         <LocalisationMenuBar
           model={this.props.model}
           Menu={this.props.Menu}
@@ -120,7 +121,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
-        <div className={style.localisation__canvas}>
+        <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
@@ -227,8 +228,8 @@ interface LocalisationMenuBarProps {
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
-    <li className={style.localisation__menuItem}>
-      <button className={style.localisation__menuButton} onClick={props.onClick}>
+    <li className="flex m-0 p-0">
+      <button className="px-4" onClick={props.onClick}>
         <div className="flex items-center justify-center">
           <div className="flex items-center rounded">
             <span className="mx-2">{props.label}</span>
@@ -244,13 +245,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <ul className={style.localisation__menu}>
-        <li className={style.localisation__menuItem}>
-          <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>
+      <ul className="flex h-full items-center">
+        <li className="flex px-4">
+          <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
-          </button>
+          </Button>
         </li>
-        <li className={style.localisation__menuItem}>
+        <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
@@ -282,10 +283,14 @@ const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div className={style.localisation__status}>
-      <span className={style.localisation__info}>&#160;</span>
-      <span className={style.localisation__target}>{target}</span>
-      <span className={style.localisation__viewMode}>{viewModeString(props.model.viewMode)}</span>
+    <div
+      className={
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+      }
+    >
+      <span className="text-left w-1/3">&#160;</span>
+      <span className="w-1/3">{target}</span>
+      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });
