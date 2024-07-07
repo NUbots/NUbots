@@ -1,4 +1,4 @@
-# WalkInsideBoundedBox
+# WalkInBoundedBox
 
 ## Description
 
@@ -17,7 +17,7 @@ Add this module to keep the robot within a bounding box on the field.
 - `message::input::Sensors` To get sensor information for localisation
 - `message::localisation::Field` Localisation usage for keeping inside bounded box
 - `message::localisation::FilteredBall` Used for ball position
-- `message::strategy::WalkInsideBoundedBox` a Task requesting to stay within a bounding box on the field
+- `message::strategy::WalkInBoundedBox` a Task requesting to stay within a bounding box on the field
 
 ## Emits
 

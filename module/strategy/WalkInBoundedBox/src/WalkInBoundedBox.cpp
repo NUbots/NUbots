@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "WalkInsideBoundedBox.hpp"
+#include "WalkInBoundedBox.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -32,7 +32,7 @@
 #include "message/input/GameState.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/strategy/WalkInsideBoundedBox.hpp"
+#include "message/strategy/WalkInBoundedBox.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/math/euler.hpp"
@@ -41,7 +41,7 @@
 namespace module::strategy {
 
     using extension::Configuration;
-    using WalkInsideBoundedBoxTask = message::strategy::WalkInsideBoundedBox;
+    using WalkInBoundedBoxTask = message::strategy::WalkInBoundedBox;
     using utility::support::Expression;
     using Ball = message::localisation::Ball;
     using message::localisation::Field;
@@ -49,16 +49,16 @@ namespace module::strategy {
 
     using utility::math::euler::pos_rpy_to_transform;
 
-    WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
+    WalkInBoundedBox::WalkInBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
-        on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
+        on<Configuration>("WalkInBoundedBox.yaml").then([this](const Configuration& config) {
             this->log_level          = config["log_level"].as<NUClear::LogLevel>();
             cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
             cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
             cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
             cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
         });
-        on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
+        on<Provide<WalkInBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
             [this](const Ball& ball, const Field& field) {
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;

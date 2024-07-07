@@ -36,7 +36,7 @@
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/strategy/WalkInsideBoundedBox.hpp"
+#include "message/strategy/WalkInBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -61,7 +61,7 @@ namespace module::purpose {
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
-    using message::strategy::WalkInsideBoundedBox;
+    using message::strategy::WalkInBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
@@ -155,7 +155,7 @@ namespace module::purpose {
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
         emit<Task>(std::make_unique<KickToGoal>(), 4);      // kick the ball if possible
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 5);  // Patrol bounded box region
+        emit<Task>(std::make_unique<WalkInBoundedBox>(), 5);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

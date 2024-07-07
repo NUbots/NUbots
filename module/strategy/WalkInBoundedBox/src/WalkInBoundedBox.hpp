@@ -34,7 +34,7 @@
 
 namespace module::strategy {
 
-    class WalkInsideBoundedBox : public ::extension::behaviour::BehaviourReactor {
+    class WalkInBoundedBox : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
@@ -49,7 +49,7 @@ namespace module::strategy {
 
     public:
         /// @brief Called by the powerplant to build and setup the Defend reactor.
-        explicit WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment);
+        explicit WalkInBoundedBox(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::strategy
