@@ -305,7 +305,7 @@ namespace module::purpose {
                 }
             }
             // We lost, be a defender
-            robot_position = striker ? Position::STRIKER : Position::DEFENDER;
+            robots[player_id - 1].position = striker ? Position::STRIKER : Position::DEFENDER;
         }
 
         if (robots[player_id - 1].position == Position::STRIKER) {
