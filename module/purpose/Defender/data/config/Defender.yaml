@@ -6,6 +6,6 @@ ready_position: [2, 0, -3.14]
 
 # Bounded area for WalkInsideBoundedBox to use
 bounded_region_x_min: 1.5
-bounded_region_x_max: 3.4
+bounded_region_x_max: 3.5
 bounded_region_y_min: -4.0
 bounded_region_y_max: 4.0
