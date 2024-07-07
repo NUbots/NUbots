@@ -120,6 +120,20 @@ export class FieldIntersection {
   }
 }
 
+export class BoundingBox {
+  @observable minX: number;
+  @observable minY: number;
+  @observable maxX: number;
+  @observable maxY: number;
+
+  constructor({ minX, minY, maxX, maxY }: { minX: number; minY: number; maxX: number; maxY: number }) {
+    this.minX = minX;
+    this.minY = minY;
+    this.maxX = maxX;
+    this.maxY = maxY;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -145,6 +159,8 @@ export class LocalisationRobotModel {
   @observable min_angle_error: number;
   @observable max_angle_error: number;
   @observable velocity_target: Vector3;
+  @observable boundingBox?: BoundingBox;
+
   constructor({
     model,
     name,
@@ -169,6 +185,7 @@ export class LocalisationRobotModel {
     min_angle_error,
     max_angle_error,
     velocity_target,
+    boundingBox,
   }: {
     model: RobotModel;
     name: string;
@@ -193,6 +210,7 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    boundingBox?: BoundingBox;
   }) {
     this.model = model;
     this.name = name;
@@ -217,6 +235,7 @@ export class LocalisationRobotModel {
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
     this.velocity_target = velocity_target;
+    this.boundingBox = boundingBox;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {

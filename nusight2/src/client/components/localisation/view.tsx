@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -340,6 +340,12 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         return null;
       })}
       <Robots model={model} />
+      {model.robots.map((robot) => {
+        if (robot.visible && robot.boundingBox) {
+          return <BoundingBox key={robot.id} model={robot} />;
+        }
+        return null;
+      })}
     </object3D>
   );
 });
@@ -417,6 +423,100 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
         <mesh geometry={arrowGeometry(min_align_radius)} rotation={[0, 0, robot_rotation.z + angle_to_final_heading]}>
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
+      </mesh>
+    </object3D>
+  );
+};
+
+const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
+  if (!model.boundingBox) return null;
+  const { minX, maxX, minY, maxY } = model.boundingBox;
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const wallThickness = 0.05;
+  const wallHeight = 0.25;
+  const solidBottomHeight = 0.05; // Height of the solid bottom part of each wall
+
+  const vertexShader = `
+    varying vec3 vPosition;
+    void main() {
+      vPosition = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+
+  const fragmentShader = `
+    uniform vec3 color;
+    uniform float wallHeight;
+    uniform float solidBottomHeight;
+    uniform int orientation;
+    varying vec3 vPosition;
+    void main() {
+      float heightFactor;
+      if (orientation == 0) {
+        // Vertical walls (left and right)
+        heightFactor = vPosition.y / wallHeight + 0.5;
+      } else {
+        // Horizontal walls (top and bottom)
+        heightFactor = vPosition.z / wallHeight + 0.5;
+      }
+
+      float normalizedSolidHeight = solidBottomHeight / wallHeight;
+      float opacity;
+
+      if (heightFactor < normalizedSolidHeight) {
+        // Solid bottom part
+        opacity = 0.5;
+      } else {
+        // Gradient part
+        opacity = smoothstep(1.0, normalizedSolidHeight, heightFactor) * 0.3;
+      }
+
+      gl_FragColor = vec4(color, opacity);
+    }
+  `;
+
+  const createWallMaterial = (orientation: number) => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        color: { value: new THREE.Color("rgb(0, 100, 100)") },
+        wallHeight: { value: wallHeight },
+        solidBottomHeight: { value: solidBottomHeight },
+        orientation: { value: orientation },
+      },
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+  };
+
+  const verticalWallMaterial = useMemo(() => createWallMaterial(0), []);
+  const horizontalWallMaterial = useMemo(() => createWallMaterial(1), []);
+
+  return (
+    <object3D position={[centerX, centerY, wallHeight / 2]}>
+      {/* Left wall */}
+      <mesh position={[-(width / 2 + wallThickness / 2), 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+        <boxGeometry args={[height + wallThickness * 2, wallHeight, wallThickness]} />
+        <primitive object={verticalWallMaterial} />
+      </mesh>
+      {/* Right wall */}
+      <mesh position={[width / 2 + wallThickness / 2, 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+        <boxGeometry args={[height + wallThickness * 2, wallHeight, wallThickness]} />
+        <primitive object={verticalWallMaterial} />
+      </mesh>
+      {/* Top wall */}
+      <mesh position={[0, height / 2 + wallThickness / 2, 0.009]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
+        <primitive object={horizontalWallMaterial} />
+      </mesh>
+      {/* Bottom wall */}
+      <mesh position={[0, -(height / 2 + wallThickness / 2), 0.009]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
+        <primitive object={horizontalWallMaterial} />
       </mesh>
     </object3D>
   );
