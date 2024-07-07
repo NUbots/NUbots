@@ -44,6 +44,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/purpose/AllRounder.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
@@ -75,6 +76,7 @@ namespace module::purpose {
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
+    using message::purpose::AllRounder;
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
@@ -138,6 +140,10 @@ namespace module::purpose {
 
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
+                case Position::ALL_ROUNDER:
+                    emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("ALL_ROUNDER");
+                    break;
                 case Position::STRIKER:
                     emit<Task>(std::make_unique<Striker>(cfg.force_playing));
                     robots[player_id - 1].position = Position("STRIKER");
