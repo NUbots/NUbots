@@ -46,6 +46,8 @@ namespace module::strategy {
             double bounded_region_y_max = 0.0;
             /// @brief Length of time before the ball detection is too old and we should search for the ball
             NUClear::clock::duration ball_search_timeout{};
+            /// @brief Allow pass y offset
+            double allow_pass_y_offset = 0.0;
 
         } cfg;
 

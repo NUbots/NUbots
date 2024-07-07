@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
@@ -44,6 +45,7 @@ namespace module::strategy {
     using WalkInsideBoundedBoxTask = message::strategy::WalkInsideBoundedBox;
     using utility::support::Expression;
     using Ball = message::localisation::Ball;
+    using message::input::Sensors;
     using message::localisation::Field;
     using message::strategy::WalkToFieldPosition;
 
@@ -55,48 +57,68 @@ namespace module::strategy {
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
+            cfg.allow_pass_y_offset = config["allow_pass_y_offset"].as<double>();
         });
 
-        on<Provide<WalkInsideBoundedBoxTask>, Optional<With<Ball>>, With<Field>>().then(
-            [this](const WalkInsideBoundedBoxTask& box, const std::shared_ptr<const Ball>& ball, const Field& field) {
+        on<Provide<WalkInsideBoundedBoxTask>, Optional<With<Ball>>, With<Field>, With<Sensors>>().then(
+            [this](const WalkInsideBoundedBoxTask& box,
+                   const std::shared_ptr<const Ball>& ball,
+                   const Field& field,
+                   const Sensors& sensors) {
                 // Emit self as non-task for debugging
                 emit(std::make_unique<WalkInsideBoundedBoxTask>(box));
 
-                if(ball == nullptr){
-                                   log<NUClear::DEBUG>("Ball timeout. Returning to default position");
+                if (ball == nullptr || NUClear::clock::now() - ball->time_of_measurement > cfg.ball_search_timeout) {
+                    log<NUClear::DEBUG>("Ball timeout. Returning to default position");
                     emit<Task>(std::make_unique<WalkToFieldPosition>(box.Hfd));
                     return;
                 }
 
-
-
-                // Check if we have a recent ball measurement
-                if (NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout) {
-                    log<NUClear::DEBUG>("Recent ball measurement");
-                    // Get the current position of the ball on the field
-                    Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
-                    // Check if the ball is in the bounding box
-                    if (rBFf.x() > box.x_min && rBFf.x() < box.x_max && rBFf.y() > box.y_min && rBFf.y() < box.y_max) {
-                        // Do nothing as ball is inside of defending region, play normally
-                        log<NUClear::DEBUG>("Ball is inside of bounding box");
-                    }
-                    else {
-                        log<NUClear::DEBUG>("Ball is outside of bounding box");
-                        // Desired position of robot on field
-                        Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
-                        // Clamp desired position to bounding box
-                        rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
-                        rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
-
-                        // Emit task to walk to desired position with heading facing opponents side of field
-                        emit<Task>(std::make_unique<WalkToFieldPosition>(
-                            pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0),
-                                                 Eigen::Vector3d(0, 0, -M_PI))));
-                    }
+                log<NUClear::DEBUG>("Recent ball measurement");
+                // Get the current position of the ball on the field
+                Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
+                // Check if the ball is in the bounding box
+                if (rBFf.x() > box.x_min && rBFf.x() < box.x_max && rBFf.y() > box.y_min && rBFf.y() < box.y_max) {
+                    // Do nothing as ball is inside of defending region, play normally
+                    log<NUClear::DEBUG>("Ball is inside of bounding box");
                 }
                 else {
-                    log<NUClear::DEBUG>("Ball timeout. Returning to default position");
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(box.Hfd));
+                    log<NUClear::DEBUG>("Ball is outside of bounding box");
+                    // Desired position of robot on field
+                    Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
+                    // Clamp desired position to bounding box
+                    rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
+                    rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
+
+                    // If the ball is in a region inbetween the bounding box and our own goal, add a y offset to allow
+                    // pass from another robot
+                    double desired_heading = -M_PI;
+                    if (rBFf.x() > box.x_max) {
+
+                        Eigen::Vector3d rDlFf = rDFf;
+                        rDlFf.y()             = std::clamp(rBFf.y() + cfg.allow_pass_y_offset, box.y_min, box.y_max);
+                        Eigen::Vector3d rDrFf = rDlFf;
+                        rDrFf.y()             = std::clamp(rBFf.y() - cfg.allow_pass_y_offset, box.y_min, box.y_max);
+
+                        // Select the desired position closest to the robot
+                        Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+                        Eigen::Vector3d rRFf  = Hfr.translation();
+                        if ((rDlFf - rRFf).norm() < (rDrFf - rRFf).norm()) {
+                            rDFf = rDlFf;
+                        }
+                        else {
+                            rDFf = rDrFf;
+                        }
+
+                        // Calculate the desired heading to face the ball
+                        desired_heading = std::atan2(rBFf.y() - rDFf.y(), rBFf.x() - rDFf.x());
+                        log<NUClear::DEBUG>("Ball is in pass region. Adding y offset");
+                    }
+
+                    // Emit task to walk to desired position with heading facing opponents side of field
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                        pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0),
+                                             Eigen::Vector3d(0, 0, desired_heading))));
                 }
             });
     }

@@ -3,3 +3,5 @@ log_level: DEBUG
 
 # How long to wait until the ball is lost and we should walk back to default position
 ball_search_timeout: 15
+
+allow_pass_y_offset: 0.75
