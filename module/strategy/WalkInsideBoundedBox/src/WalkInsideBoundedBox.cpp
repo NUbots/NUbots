@@ -52,21 +52,24 @@ namespace module::strategy {
     WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
         on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
         });
-        on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
-            [this](const WalkInsideBoundedBoxTask& box, const Ball& ball, const Field& field) {
+
+        on<Provide<WalkInsideBoundedBoxTask>, Optional<With<Ball>>, With<Field>>().then(
+            [this](const WalkInsideBoundedBoxTask& box, const std::shared_ptr<const Ball>& ball, const Field& field) {
                 // Emit self as non-task for debugging
                 emit(std::make_unique<WalkInsideBoundedBoxTask>(box));
 
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;
-                Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
+                Eigen::Vector3d rBFf  = Hfw * ball->rBWw;
 
                 // Desired position of robot on field
                 Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
                 // Check if we have a recent ball measurement
-                if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
+                if (ball == nullptr || NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout) {
                     log<NUClear::DEBUG>("Recent ball measurement");
                     // Check if the ball is in the bounding box
                     if (rBFf.x() > box.x_min && rBFf.x() < box.x_max && rBFf.y() > box.y_min && rBFf.y() < box.y_max) {
@@ -74,6 +77,7 @@ namespace module::strategy {
                         log<NUClear::DEBUG>("Ball is inside of bounding box");
                     }
                     else {
+                        log<NUClear::DEBUG>("Ball is outside of bounding box");
                         // Clamp desired position to bounding box
                         rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
                         rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
