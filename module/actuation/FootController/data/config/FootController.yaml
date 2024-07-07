@@ -2,6 +2,12 @@ log_level: INFO
 
 mode: IK # Options: IK
 
+startup:
+  # Gain to use in startup phase
+  servo_gain: 2
+  # Startup phase duration before setting desired gains
+  duration: 2
+
 servo_gains:
   L_HIP_YAW: 8
   L_HIP_ROLL: 8

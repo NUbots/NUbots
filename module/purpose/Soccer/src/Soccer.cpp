@@ -43,6 +43,7 @@
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/skill/Look.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/StartSafely.hpp"
@@ -67,6 +68,7 @@ namespace module::purpose {
     using message::purpose::Goalie;
     using message::purpose::Striker;
     using message::skill::Look;
+    using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
     using message::strategy::StartSafely;
@@ -90,14 +92,12 @@ namespace module::purpose {
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
-            // Idle stand if not doing anything
-            emit<Task>(std::make_unique<StandStill>());
+            // Stand idle
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
-            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // When starting, we want to safely move to the stand position
-            emit<Task>(std::make_unique<StartSafely>(), 2);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
@@ -143,6 +143,7 @@ namespace module::purpose {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             log<NUClear::INFO>("Idle mode enabled");
         });
 
@@ -160,6 +161,7 @@ namespace module::purpose {
         on<Trigger<DisableIdle>, Single>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
             if (!idle) {
+                emit<Task>(std::unique_ptr<Walk>(nullptr));
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 log<NUClear::INFO>("Idle mode disabled");
             }
