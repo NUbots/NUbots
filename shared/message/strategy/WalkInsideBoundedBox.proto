@@ -30,8 +30,8 @@ package message.strategy;
 
 /// A task that will tell robot to walk to its position if the ball is not in its bounded box region
 message WalkInsideBoundedBox {
-    double min_x = 1;
-    double max_x = 2;
-    double min_y = 3;
-    double max_y = 4;
+    double x_min = 1;
+    double x_max = 2;
+    double y_min = 3;
+    double y_max = 4;
 }
