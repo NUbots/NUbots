@@ -497,7 +497,7 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   const createWallMaterial = (orientation: number) => {
     return new THREE.ShaderMaterial({
       uniforms: {
-        color: { value: new THREE.Color("rgb(0, 100, 100)") },
+        color: { value: new THREE.Color("rgb(0, 0, 100)") },
         wallHeight: { value: wallHeight },
         solidBottomHeight: { value: solidBottomHeight },
         orientation: { value: orientation },
