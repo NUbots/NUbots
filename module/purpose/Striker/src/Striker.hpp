@@ -33,12 +33,19 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/input/GameState.hpp"
+
 namespace module::purpose {
+    using message::input::GameState;
 
     class Striker : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Calls Tasks to play soccer normally for a striker
         void play();
+
+        /// @brief Calls play if the robot is permitted to play by the secondary game state
+        /// @param state The game state
+        void play_if_allowed(const message::input::GameState& state);
 
         /// @brief Stores configuration values
         struct Config {
