@@ -62,15 +62,19 @@ namespace module::strategy {
                 // Emit self as non-task for debugging
                 emit(std::make_unique<WalkInsideBoundedBoxTask>(box));
 
-                // Get the current position of the ball on the field
-                Eigen::Isometry3d Hfw = field.Hfw;
-                Eigen::Vector3d rBFf  = Hfw * ball->rBWw;
+                if(ball == nullptr){
+                                   log<NUClear::DEBUG>("Ball timeout. Returning to default position");
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(box.Hfd));
+                    return;
+                }
 
-                // Desired position of robot on field
-                Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
+
+
                 // Check if we have a recent ball measurement
-                if (ball == nullptr || NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout) {
+                if (NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout) {
                     log<NUClear::DEBUG>("Recent ball measurement");
+                    // Get the current position of the ball on the field
+                    Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
                     // Check if the ball is in the bounding box
                     if (rBFf.x() > box.x_min && rBFf.x() < box.x_max && rBFf.y() > box.y_min && rBFf.y() < box.y_max) {
                         // Do nothing as ball is inside of defending region, play normally
@@ -78,6 +82,8 @@ namespace module::strategy {
                     }
                     else {
                         log<NUClear::DEBUG>("Ball is outside of bounding box");
+                        // Desired position of robot on field
+                        Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
                         // Clamp desired position to bounding box
                         rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
                         rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
@@ -89,10 +95,8 @@ namespace module::strategy {
                     }
                 }
                 else {
-                    log<NUClear::DEBUG>("Ball timeout. Returning to start position");
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(
-                        pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                             Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+                    log<NUClear::DEBUG>("Ball timeout. Returning to default position");
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(box.Hfd));
                 }
             });
     }

@@ -159,12 +159,14 @@ namespace module::purpose {
                    1);                                  // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
-        emit<Task>(std::make_unique<KickToGoal>(), 4);      // kick the ball if possible
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
-                                                          cfg.bounded_region_x_max,
-                                                          cfg.bounded_region_y_min,
-                                                          cfg.bounded_region_y_max),
-                   5);  // Patrol bounded box region
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(
+                       cfg.bounded_region_x_min,
+                       cfg.bounded_region_x_max,
+                       cfg.bounded_region_y_min,
+                       cfg.bounded_region_y_max,
+                       pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                            Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
+                   4);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

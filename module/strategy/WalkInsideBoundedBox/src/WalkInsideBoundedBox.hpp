@@ -46,8 +46,6 @@ namespace module::strategy {
             double bounded_region_y_max = 0.0;
             /// @brief Length of time before the ball detection is too old and we should search for the ball
             NUClear::clock::duration ball_search_timeout{};
-            /// @brief Ready position to walk to (x, y, theta)
-            Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
 
         } cfg;
 

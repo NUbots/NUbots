@@ -144,11 +144,17 @@ namespace module::purpose {
                 }
                 if (cfg.walk_inside_bounded_box_priority > 0) {
                     log<NUClear::INFO>("Walk inside bounded box");
-                    emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
-                                                                      cfg.bounded_region_x_max,
-                                                                      cfg.bounded_region_y_min,
-                                                                      cfg.bounded_region_y_max),
-                               cfg.walk_inside_bounded_box_priority);
+                    emit<Task>(
+                        std::make_unique<WalkInsideBoundedBox>(
+                            cfg.bounded_region_x_min,
+                            cfg.bounded_region_x_max,
+                            cfg.bounded_region_y_min,
+                            cfg.bounded_region_y_max,
+                            pos_rpy_to_transform(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
+                                                                 cfg.walk_to_field_position_position.y(),
+                                                                 0),
+                                                 Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z()))),
+                        cfg.walk_inside_bounded_box_priority);
                 }
                 if (cfg.kick_to_priority > 0) {
                     emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);
