@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "WalkInBoundedBox.hpp"
+#include "WalkInsideBoundedBox.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -32,7 +32,7 @@
 #include "message/input/GameState.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/strategy/WalkInBoundedBox.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/math/euler.hpp"
@@ -41,7 +41,7 @@
 namespace module::strategy {
 
     using extension::Configuration;
-    using WalkInBoundedBoxTask = message::strategy::WalkInBoundedBox;
+    using WalkInsideBoundedBoxTask = message::strategy::WalkInsideBoundedBox;
     using utility::support::Expression;
     using Ball = message::localisation::Ball;
     using message::localisation::Field;
@@ -49,7 +49,7 @@ namespace module::strategy {
 
     using utility::math::euler::pos_rpy_to_transform;
 
-    WalkInBoundedBox::WalkInBoundedBox(std::unique_ptr<NUClear::Environment> environment)
+    WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
         on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
