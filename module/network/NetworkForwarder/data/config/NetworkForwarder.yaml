@@ -40,4 +40,6 @@ targets:
     message.nuclear.LogMessage: true
     message.nuclear.ReactionStatistics: false
 
+    # Behaviour
+    message.input.Purpose: true
     message.planning.WalkToDebug: true

@@ -25,6 +25,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.input.Purpose, this.onPurposes);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -34,6 +35,11 @@ export class LocalisationNetwork {
 
   destroy() {
     this.network.off();
+  }
+
+  // Reverse lookup for protobuf enums
+  getKey(enumType: any, enumValue: number) {
+    return Object.keys(enumType).find((key) => enumType[key] === enumValue);
   }
 
   @action
@@ -56,6 +62,13 @@ export class LocalisationNetwork {
     robot.max_angle_error = walk_to_debug.maxAngleError;
     robot.velocity_target = Vector3.from(walk_to_debug.velocityTarget);
   };
+
+  @action.bound
+  private onPurposes(robotModel: RobotModel, purpose: message.input.Purpose) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    const position = purpose.purpose;
+    robot.purpose = this.getKey(message.input.SoccerPosition, position!)!;
+  }
 
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {

@@ -6,6 +6,8 @@ import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
@@ -17,6 +19,7 @@ import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
+import roboto from "./fonts/Roboto Medium_Regular.json";
 import { GridView } from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
@@ -324,26 +327,34 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldVisible && <FieldView model={model.field} />}
       {model.gridVisible && <GridView />}
       {model.robotVisible &&
-        model.robots.map((robotModel) => {
-          return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
-        })}
+        model.robots
+          .filter((robotModel) => robotModel.visible)
+          .map((robotModel) => <Robot key={robotModel.id} model={robotModel} />)}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.Hfd) {
-          return <WalkPathVisualiser key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.Hfd) {
-          return <WalkPathGoal key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathVisualiser key={robot.id} model={robot} />
+        ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hft && robot.purpose)
+        .map((robot) => (
+          <PurposeLabel
+            key={robot.id}
+            robotModel={robot}
+            cameraPitch={model.camera.pitch}
+            cameraYaw={model.camera.yaw}
+          />
+        ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathGoal key={robot.id} model={robot} />
+        ))}
       <Robots model={model} />
     </object3D>
   );
@@ -422,6 +433,73 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
         <mesh geometry={arrowGeometry(min_align_radius)} rotation={[0, 0, robot_rotation.z + angle_to_final_heading]}>
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
+      </mesh>
+    </object3D>
+  );
+};
+
+const PurposeLabel = ({
+  robotModel,
+  cameraPitch,
+  cameraYaw,
+}: {
+  robotModel: LocalisationRobotModel;
+  cameraPitch: number;
+  cameraYaw: number;
+}) => {
+  const rTFf = robotModel.Hft.decompose().translation;
+  const textGeometry = (x: string) => {
+    const font = new FontLoader().parse(roboto);
+    return new TextGeometry(x, {
+      font: font,
+      size: 0.1,
+      height: 0,
+    }).center();
+  };
+
+  const textBackdropGeometry = (width: number, height: number) => {
+    const shape = new THREE.Shape();
+    width += 0.1;
+    height += 0.1;
+    const radius = 0.05;
+    const x = width * -0.5;
+    const y = height * -0.5;
+
+    shape.moveTo(x, y + radius);
+    shape.lineTo(x, y + height - radius);
+    shape.quadraticCurveTo(x, y + height, x + radius, y + height);
+    shape.lineTo(x + width - radius, y + height);
+    shape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+    shape.lineTo(x + width, y + radius);
+    shape.quadraticCurveTo(x + width, y, x + width - radius, y);
+    shape.lineTo(x + radius, y);
+    shape.quadraticCurveTo(x, y, x, y + radius);
+
+    const geometry = new THREE.ShapeGeometry(shape);
+
+    return geometry;
+  };
+
+  const labelTextGeometry = textGeometry(robotModel.purpose);
+  labelTextGeometry.computeBoundingBox();
+  const textWidth = labelTextGeometry.boundingBox
+    ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
+    : 0;
+  const textHeight = labelTextGeometry.boundingBox
+    ? labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y
+    : 0;
+  const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
+
+  return (
+    <object3D
+      position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
+      rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
+    >
+      <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
+        <meshBasicMaterial color="white" transparent opacity={1} />
+      </mesh>
+      <mesh geometry={backdropGeometry}>
+        <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
     </object3D>
   );
