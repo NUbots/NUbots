@@ -17,7 +17,7 @@ export const NbsScrubberView = observer(({ model, onFocus }: NbsScrubberViewProp
   const controller = useRpcController((network) => new NbsScrubberController(model, network), [model]);
 
   return (
-    <div className="flex justify-between items-center gap-1 h-12 bg-gray-200 px-2" onFocus={onFocus}>
+    <div className="flex justify-between items-center gap-1 h-12 px-2" onFocus={onFocus}>
       <NbsScrubberLeftControls model={model} controller={controller} />
       {buttonDivider}
       <NbsScrubberRangeSlider model={model} controller={controller} />

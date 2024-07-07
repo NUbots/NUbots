@@ -9,7 +9,7 @@ export default function IconOdometry(props: { className?: string }) {
       viewBox="0 0 512 512"
       //   style={{ "enable-background": "new 0 0 512 512" }}
       //   xml:space="preserve"
-      fill="#fff"
+      fill="currentColor"
     >
       <path
         d="M511.688,454.907l-20.216-112.371c-1.955-10.872-12.358-18.107-23.225-16.143c-10.872,1.955-18.099,12.354-16.143,23.225

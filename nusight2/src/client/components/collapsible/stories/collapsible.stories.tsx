@@ -5,15 +5,17 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { Select } from "../../select/view";
+import { lightAndDarkDecorator } from "../../storybook/color_mode";
 import { Collapsible } from "../view";
 
 const meta: Meta<typeof Collapsible> = {
   title: "components/Collapsible",
   component: Collapsible,
   decorators: [
+    lightAndDarkDecorator({ className: "max-w-3xl" }),
     (Story) => {
       return (
-        <div className="max-w-[320px]">
+        <div className="max-w-80">
           <Story />
         </div>
       );
