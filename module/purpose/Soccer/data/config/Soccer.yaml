@@ -9,4 +9,10 @@ disable_idle_delay: 5
 
 # The position of the robot
 # GOALIE, STRIKER, DEFENDER
-position: STRIKER
+position: DYNAMIC
+
+# The number of seconds to wait before assuming a teammate is inactive
+timeout: 4
+
+# The largest robot id number
+max_robots: 5

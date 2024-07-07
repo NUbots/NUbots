@@ -47,7 +47,6 @@ namespace module::network {
         /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
         ReactionHandle listen_handle;
 
-
     public:
         /// @brief Called by the powerplant to build and setup the RobotCommunication reactor.
         explicit RobotCommunication(std::unique_ptr<NUClear::Environment> environment);
