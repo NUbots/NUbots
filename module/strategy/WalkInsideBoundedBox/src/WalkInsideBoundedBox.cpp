@@ -52,60 +52,42 @@ namespace module::strategy {
     WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
         on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
-            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
-            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
-            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
-            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
-            cfg.ball_search_timeout  = duration_cast<NUClear::clock::duration>(
-                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
-            cfg.ready_position = config["ready_position"].as<Expression>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
-        on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then([this](const Ball& ball,
-                                                                                        const Field& field) {
-            // Get the current position of the ball on the field
-            Eigen::Isometry3d Hfw = field.Hfw;
-            Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
+        on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
+            [this](const WalkInsideBoundedBoxTask& box, const Ball& ball, const Field& field) {
+                // Get the current position of the ball on the field
+                Eigen::Isometry3d Hfw = field.Hfw;
+                Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
 
-            // Desired position of robot on field
-            Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
-            // Check if we have a recent ball measurement
-            if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                log<NUClear::DEBUG>("Recent ball measurement");
-                // Check if the ball is in the bounding box
-                if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
-                    && rBFf.y() > cfg.bounded_region_y_min && rBFf.y() < cfg.bounded_region_y_max) {
-                    // Do nothing as ball is inside of defending region, play normally
-                    log<NUClear::DEBUG>("Ball is inside of bounding box");
-                }
-                else {
-                    // If ball is in a region parallel and outside own bounding box of robot we clamp in the y
-                    // direction and move to 1m behind ball
-                    if (rBFf.x() >= 0 && rBFf.y() > cfg.bounded_region_y_min) {
-                        log<NUClear::DEBUG>("Ball is in own half and outside bounding box");
-                        // Clamp desired position to bounding box and try stay 1m behind ball
-                        rDFf.x() = std::clamp(rBFf.x() + 1.0, cfg.bounded_region_x_min, cfg.bounded_region_x_max);
-                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
+                // Desired position of robot on field
+                Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
+                // Check if we have a recent ball measurement
+                if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
+                    log<NUClear::DEBUG>("Recent ball measurement");
+                    // Check if the ball is in the bounding box
+                    if (rBFf.x() > box.x_min && rBFf.x() < box.x_max && rBFf.y() > box.y_min && rBFf.y() < box.y_max) {
+                        // Do nothing as ball is inside of defending region, play normally
+                        log<NUClear::DEBUG>("Ball is inside of bounding box");
                     }
                     else {
-                        log<NUClear::DEBUG>("Ball is in opponents half and outside bounding box");
                         // Clamp desired position to bounding box
-                        rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
-                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
-                    }
+                        rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
+                        rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
 
-                    // Emit task to walk to desired position with heading facing opponents side of field
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(
-                        pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0), Eigen::Vector3d(0, 0, -M_PI))));
+                        // Emit task to walk to desired position with heading facing opponents side of field
+                        emit<Task>(std::make_unique<WalkToFieldPosition>(
+                            pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0),
+                                                 Eigen::Vector3d(0, 0, -M_PI))));
+                    }
                 }
-            }
-            else {
-                log<NUClear::DEBUG>("Ball timeout. Returning to start position");
-                emit<Task>(std::make_unique<WalkToFieldPosition>(
-                    pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                         Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
-            }
-        });
+                else {
+                    log<NUClear::DEBUG>("Ball timeout. Returning to start position");
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                        pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                             Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+                }
+            });
     }
 
 }  // namespace module::strategy

@@ -3,3 +3,9 @@ log_level: INFO
 
 # Position on field to walk to (x,y,theta)
 ready_position: [2, 0, -3.14]
+
+# Bounded area for defender to stay within
+bounded_region_x_min: -0.5
+bounded_region_x_max: 3.8
+bounded_region_y_min: -3.0
+bounded_region_y_max: 3.0

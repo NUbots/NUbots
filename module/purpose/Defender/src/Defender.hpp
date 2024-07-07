@@ -44,6 +44,14 @@ namespace module::purpose {
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
             Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
+            /// @brief x minimum bound on field to walk within
+            double bounded_region_x_min = 0.0;
+            /// @brief x maximum bound on field to walk within
+            double bounded_region_x_max = 0.0;
+            /// @brief y minimum bound on field to walk within
+            double bounded_region_y_min = 0.0;
+            /// @brief y maximum bound on field to walk within
+            double bounded_region_y_max = 0.0;
         } cfg;
 
 

@@ -29,4 +29,9 @@ syntax = "proto3";
 package message.strategy;
 
 /// A task that will tell robot to walk to its position if the ball is not in its bounded box region
-message WalkInsideBoundedBox {}
+message WalkInsideBoundedBox {
+    double x_min = 1;
+    double x_max = 2;
+    double y_min = 3;
+    double y_max = 4;
+}
