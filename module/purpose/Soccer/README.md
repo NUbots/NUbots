@@ -25,7 +25,7 @@ Include this in your role to start the Director tree to play soccer.
 ## Emits
 
 - `message::purpose::FindPurpose` a Task to request to find the robot's soccer playing purpose, to start the Director graph to play soccer
-- `message::input::Purposes` to inform the other robots of their purposes
+- `message::purpose::Purposes` to inform the other robots of their purposes
 - `message::strategy::StandStill` to make the robot still while penalised
 - `message::platform::ResetWebotsServos` to reset the servos in Webots when penalised
 - `message::behaviour::state::Stability` to set the robot's initial stability state to standing
