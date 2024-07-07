@@ -442,7 +442,7 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   const centerY = (minY + maxY) / 2;
   const wallThickness = 0.05;
   const wallHeight = 0.25;
-  const solidBottomHeight = 0.05; // Height of the solid bottom part of each wall
+  const solidBottomHeight = 0.001; // Height of the solid bottom part of each wall
 
   const vertexShader = `
     varying vec3 vPosition;
@@ -505,12 +505,12 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
     <object3D position={[centerX, centerY, wallHeight / 2]}>
       {/* Left wall */}
       <mesh position={[-(width / 2 + wallThickness / 2), 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
-        <boxGeometry args={[height + wallThickness * 2, wallHeight, wallThickness]} />
+        <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
         <primitive object={verticalWallMaterial} />
       </mesh>
       {/* Right wall */}
       <mesh position={[width / 2 + wallThickness / 2, 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
-        <boxGeometry args={[height + wallThickness * 2, wallHeight, wallThickness]} />
+        <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
         <primitive object={verticalWallMaterial} />
       </mesh>
       {/* Top wall */}
