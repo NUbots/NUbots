@@ -3,3 +3,9 @@ log_level: INFO
 
 # Position on field to walk to (x,y,theta)
 ready_position: [1.5, 0, -3.14]
+
+# Bounded area for striker to stay within
+bounded_region_x_min: -4.5
+bounded_region_x_max: 1.0
+bounded_region_y_min: -3.0
+bounded_region_y_max: 3.0
