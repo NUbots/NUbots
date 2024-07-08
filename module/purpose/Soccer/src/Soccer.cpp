@@ -296,18 +296,6 @@ namespace module::purpose {
             }
         }
 
-        // If we are the only active robot, we should be an all rounder
-        if (std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
-            robots[player_id - 1].position = Position::ALL_ROUNDER;
-            emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
-            return;
-        }
-
-        // If we are an all rounder and there are other active robots, we will be a striker
-        if (robots[player_id - 1].position == Position::ALL_ROUNDER) {
-            robots[player_id - 1].position = Position::STRIKER;
-        }
-
         // If we have no purpose (dynamic) be a defender
         if (robots[player_id - 1].position == Position::DYNAMIC) {
             robots[player_id - 1].position = Position::DEFENDER;
@@ -359,6 +347,18 @@ namespace module::purpose {
                                           robots.end(),
                                           [](const RobotInfo& robot) { return robot.position == Position::GOALIE; })
                             == 1;
+
+        // If you are striker or defender and no one else exists
+        f(std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
+            // Update bounding box to full box
+            emit(std::make_unique<UpdateBoundingBox>(cfg.striker_bounding_box.x_min,
+                                                     cfg.goalie_bounding_box.x_max,
+                                                     cfg.striker_bounding_box.y_min,
+                                                     cfg.striker_bounding_box.y_max));
+            log<NUClear::DEBUG>("Full field player");
+            return;
+        }
+
 
         // If you are striker and defender exists
         if (robots[player_id - 1].position == Position::STRIKER && defender_exist) {
