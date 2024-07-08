@@ -188,13 +188,5 @@ message RawSensors {
     webots.LocalisationGroundTruth localisation_ground_truth = 14;
 }
 
-message ButtonLeftDown {}
-
-message ButtonLeftUp {}
-
-message ButtonMiddleDown {}
-
-message ButtonMiddleUp {}
-
 // Reset sensors and servo targets in Webots
 message ResetWebotsServos {}

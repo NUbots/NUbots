@@ -9,12 +9,12 @@ log_level: INFO
 targets:
   nusight:
     # Overview packets for the overview screen
-    message.support.nusight.Overview: true
-    message.support.FieldDescription: true
-    message.support.nuclear.ReactionProfiles: true
+    message.support.nusight.Overview: false
+    message.support.FieldDescription: false
+    message.support.nuclear.ReactionProfiles: false
 
     # DataPoints power the chart view
-    message.eye.DataPoint: true
+    message.eye.DataPoint: false
 
     # Sensor data
     message.input.Sensors: true
@@ -28,7 +28,7 @@ targets:
     message.vision.GreenHorizon: true
     message.vision.FieldLines: true
     message.vision.VisualMesh: false
-    message.vision.FieldIntersections: true
+    message.vision.FieldIntersections: false
     message.vision.BoundingBoxes: true
 
     # Localisation Messages
@@ -37,7 +37,9 @@ targets:
     message.localisation.Robots: true
 
     # Log messages
-    message.nuclear.LogMessage: true
+    message.nuclear.LogMessage: false
     message.nuclear.ReactionStatistics: false
 
+    # Behaviour
+    message.input.Purpose: true
     message.planning.WalkToDebug: true

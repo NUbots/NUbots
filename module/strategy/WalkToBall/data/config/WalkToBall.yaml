@@ -2,7 +2,7 @@
 log_level: INFO
 
 # How long to wait until the ball is lost and we should walk in a search pattern
-ball_search_timeout: 2
+ball_search_timeout: 5
 
 # Y - Offset for ball position such that ball is approached with foot behind ball
 ball_y_offset: 0.0
@@ -11,10 +11,12 @@ ball_y_offset: 0.0
 goal_target_offset: 0.5
 
 # Distance from ball to walk to if approaching from a "bad" position
-ball_approach_distance: 0.3
+ball_approach_distance: 0.35
 
 # Distance from ball to walk to if approaching from a "good" position
 ball_kick_distance: 0.0
 
 # Maximum angle error which indicates that robot is approaching from a "bad position"
 max_angle_error: 45 * pi / 180
+
+avoid_ball_offset: [0.25, 0.5, 0]

@@ -33,11 +33,11 @@ namespace module::input {
 
     using message::actuation::BodySide;
     using message::behaviour::state::Stability;
+    using message::input::ButtonLeftDown;
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
     using message::localisation::ResetFieldLocalisation;
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::ButtonMiddleUp;
 
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
     using utility::actuation::tinyrobotics::sensors_to_configuration;
@@ -124,16 +124,13 @@ namespace module::input {
                 emit(std::move(sensors));
             });
 
-        on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<20, Trigger<RawSensors>>>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {
                 // Detect wether a button has been pressed or not in the last 20 messages
                 detect_button_press(raw_sensors);
             });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
-            // Reset the mahony filter
-            mahony_filter.set_state(cfg.initial_Rwt);
-
             // Reset anchor frame
             Hwp                   = Eigen::Isometry3d::Identity();
             Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,

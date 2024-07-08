@@ -6,9 +6,12 @@ import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { Button } from "../button/button";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
@@ -16,14 +19,13 @@ import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
+import roboto from "./fonts/Roboto Medium_Regular.json";
 import { GridView } from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
-import style from "./style.module.css";
-
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -50,18 +52,20 @@ interface FieldDimensionSelectorProps {
 
 @observer
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
-  private dropdownToggle = (<button className={style.localisation__menuButton}>Field Type</button>);
+  private dropdownToggle = (<Button>Field Type</Button>);
 
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        <div className="bg-white rounded-lg w-28">
+        <div className="bg-auto-surface-2">
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -105,7 +109,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div className={style.localisation}>
+      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
         <LocalisationMenuBar
           model={this.props.model}
           Menu={this.props.Menu}
@@ -120,7 +124,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
-        <div className={style.localisation__canvas}>
+        <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
@@ -227,8 +231,8 @@ interface LocalisationMenuBarProps {
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
-    <li className={style.localisation__menuItem}>
-      <button className={style.localisation__menuButton} onClick={props.onClick}>
+    <li className="flex m-0 p-0">
+      <button className="px-4" onClick={props.onClick}>
         <div className="flex items-center justify-center">
           <div className="flex items-center rounded">
             <span className="mx-2">{props.label}</span>
@@ -244,13 +248,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <ul className={style.localisation__menu}>
-        <li className={style.localisation__menuItem}>
-          <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>
+      <ul className="flex h-full items-center">
+        <li className="flex px-4">
+          <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
-          </button>
+          </Button>
         </li>
-        <li className={style.localisation__menuItem}>
+        <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
@@ -282,10 +286,14 @@ const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div className={style.localisation__status}>
-      <span className={style.localisation__info}>&#160;</span>
-      <span className={style.localisation__target}>{target}</span>
-      <span className={style.localisation__viewMode}>{viewModeString(props.model.viewMode)}</span>
+    <div
+      className={
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+      }
+    >
+      <span className="text-left w-1/3">&#160;</span>
+      <span className="w-1/3">{target}</span>
+      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });
@@ -319,26 +327,34 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldVisible && <FieldView model={model.field} />}
       {model.gridVisible && <GridView />}
       {model.robotVisible &&
-        model.robots.map((robotModel) => {
-          return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
-        })}
+        model.robots
+          .filter((robotModel) => robotModel.visible)
+          .map((robotModel) => <Robot key={robotModel.id} model={robotModel} />)}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.Hfd) {
-          return <WalkPathVisualiser key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.Hfd) {
-          return <WalkPathGoal key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathVisualiser key={robot.id} model={robot} />
+        ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hft && robot.purpose)
+        .map((robot) => (
+          <PurposeLabel
+            key={robot.id}
+            robotModel={robot}
+            cameraPitch={model.camera.pitch}
+            cameraYaw={model.camera.yaw}
+          />
+        ))}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathGoal key={robot.id} model={robot} />
+        ))}
       <Robots model={model} />
     </object3D>
   );
@@ -417,6 +433,73 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
         <mesh geometry={arrowGeometry(min_align_radius)} rotation={[0, 0, robot_rotation.z + angle_to_final_heading]}>
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
+      </mesh>
+    </object3D>
+  );
+};
+
+const PurposeLabel = ({
+  robotModel,
+  cameraPitch,
+  cameraYaw,
+}: {
+  robotModel: LocalisationRobotModel;
+  cameraPitch: number;
+  cameraYaw: number;
+}) => {
+  const rTFf = robotModel.Hft.decompose().translation;
+  const textGeometry = (x: string) => {
+    const font = new FontLoader().parse(roboto);
+    return new TextGeometry(x, {
+      font: font,
+      size: 0.1,
+      height: 0,
+    }).center();
+  };
+
+  const textBackdropGeometry = (width: number, height: number) => {
+    const shape = new THREE.Shape();
+    width += 0.1;
+    height += 0.1;
+    const radius = 0.05;
+    const x = width * -0.5;
+    const y = height * -0.5;
+
+    shape.moveTo(x, y + radius);
+    shape.lineTo(x, y + height - radius);
+    shape.quadraticCurveTo(x, y + height, x + radius, y + height);
+    shape.lineTo(x + width - radius, y + height);
+    shape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+    shape.lineTo(x + width, y + radius);
+    shape.quadraticCurveTo(x + width, y, x + width - radius, y);
+    shape.lineTo(x + radius, y);
+    shape.quadraticCurveTo(x, y, x, y + radius);
+
+    const geometry = new THREE.ShapeGeometry(shape);
+
+    return geometry;
+  };
+
+  const labelTextGeometry = textGeometry(robotModel.purpose);
+  labelTextGeometry.computeBoundingBox();
+  const textWidth = labelTextGeometry.boundingBox
+    ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
+    : 0;
+  const textHeight = labelTextGeometry.boundingBox
+    ? labelTextGeometry.boundingBox.max.y - labelTextGeometry.boundingBox.min.y
+    : 0;
+  const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
+
+  return (
+    <object3D
+      position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
+      rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
+    >
+      <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
+        <meshBasicMaterial color="white" transparent opacity={1} />
+      </mesh>
+      <mesh geometry={backdropGeometry}>
+        <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
     </object3D>
   );

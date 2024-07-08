@@ -82,7 +82,14 @@ namespace module::actuation {
                 {utility::input::ServoID::R_ANKLE_PITCH, message::actuation::ServoState()},
                 {utility::input::ServoID::R_ANKLE_ROLL, message::actuation::ServoState()},
             };
+            /// @brief Startup gain before setting the desired gains
+            double startup_gain = 0;
+            /// @brief Delay before setting the desired gains
+            std::chrono::seconds set_gain_delay = std::chrono::seconds(0);
+            /// @brief Desired gains for each servo
+            std::map<std::string, double> desired_gains{};
         } cfg;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the FootController reactor.

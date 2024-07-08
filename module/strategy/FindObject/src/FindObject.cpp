@@ -29,6 +29,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/localisation/Ball.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/strategy/FindFeature.hpp"
@@ -36,6 +37,7 @@
 namespace module::strategy {
 
     using extension::Configuration;
+    using message::localisation::Ball;
     using message::planning::LookAround;
     using message::planning::TurnOnSpot;
     using message::strategy::FindBall;
@@ -45,12 +47,16 @@ namespace module::strategy {
 
         on<Configuration>("FindObject.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FindObject.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
         });
 
-        on<Provide<FindBall>>().then([this] {
-            emit<Task>(std::make_unique<LookAround>());
-            emit<Task>(std::make_unique<TurnOnSpot>());
+        on<Provide<FindBall>, Optional<With<Ball>>>().then([this](const std::shared_ptr<const Ball>& ball) {
+            if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                emit<Task>(std::make_unique<LookAround>());
+                emit<Task>(std::make_unique<TurnOnSpot>());
+            }
         });
     }
 

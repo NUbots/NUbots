@@ -76,6 +76,11 @@ namespace module::purpose {
             // Use configuration here from file Defender.yaml
             this->log_level    = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position = config["ready_position"].as<Expression>();
+
+            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
         });
 
         on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
@@ -150,12 +155,15 @@ namespace module::purpose {
     void Defender::play() {
         // Walk to the ball and kick!
         // Second argument is priority - higher number means higher priority
-        emit<Task>(std::make_unique<FindBall>(),
-                   1);                                  // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
         emit<Task>(std::make_unique<KickToGoal>(), 4);      // kick the ball if possible
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 5);  // Patrol bounded box region
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
+                                                          cfg.bounded_region_x_max,
+                                                          cfg.bounded_region_y_min,
+                                                          cfg.bounded_region_y_max),
+                   5);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

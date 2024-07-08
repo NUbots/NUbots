@@ -34,6 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
@@ -205,7 +206,57 @@ namespace module::platform::OpenCR {
                 return;
             }
 
-            /* All good now */
+            // Prepare for unstuffing, start copying fields from the original packet
+            StatusReturn unstuffed_packet;
+
+            unstuffed_packet.magic       = packet.magic;
+            unstuffed_packet.id          = packet.id;
+            unstuffed_packet.length      = packet.length;
+            unstuffed_packet.instruction = packet.instruction;
+            unstuffed_packet.error       = packet.error;
+
+            // We handle the unstuffing here so that we ensure that handle_response() only cares about getting full
+            // packets It is also easier to debug this stuff here if it ever goes wrong again
+            std::vector<uint8_t> unstuffed_data;
+            UnstuffingState unstuffing_state = UnstuffingState::DATA;
+
+            for (const auto& byte : packet.data) {
+                switch (unstuffing_state) {
+                    case DATA:
+                        unstuffing_state = byte == 0xFF ? UnstuffingState::UNSTUFF_1 : UnstuffingState::DATA;
+                        unstuffed_data.push_back(byte);
+                        break;
+
+                    case UNSTUFF_1:
+                        unstuffing_state = byte == 0xFF ? UnstuffingState::UNSTUFF_2 : UnstuffingState::DATA;
+                        unstuffed_data.push_back(byte);
+                        break;
+
+                    case UNSTUFF_2:
+                        // If we see 0xFD, then we have a stuffed byte but we also have to account for long trailing
+                        // 0xFF's e.g. ff ff ff fd fd will not be unstuffed if we dont do another check on the 3rd ff
+                        unstuffing_state = byte == 0xFD
+                                               ? UnstuffingState::UNSTUFF_3
+                                               : (byte == 0xFF ? UnstuffingState::UNSTUFF_2 : UnstuffingState::DATA);
+                        unstuffed_data.push_back(byte);
+                        break;
+
+                    case UNSTUFF_3:
+                        if (byte != 0xFD) {
+                            // Go back to data and ignore the last 0xFD
+                            unstuffed_data.push_back(byte);
+                        }
+                        else {
+                            unstuffed_packet.length--;
+                        }
+                        unstuffing_state = UnstuffingState::DATA;
+                        break;
+                }
+            }
+
+            unstuffed_packet.data      = unstuffed_data;
+            unstuffed_packet.checksum  = packet.checksum;
+            unstuffed_packet.timestamp = packet.timestamp;
 
             // Pop the front of the packet queue
             auto& info = packet_queue[packet_id].front();
@@ -223,7 +274,7 @@ namespace module::platform::OpenCR {
                 case PacketTypes::MODEL_INFORMATION:
                     emit<Scope::WATCHDOG>(ServiceWatchdog<ModelWatchdog>());
                     // call packet handler
-                    process_model_information(packet);
+                    process_model_information(unstuffed_packet);
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
@@ -252,7 +303,7 @@ namespace module::platform::OpenCR {
                 case PacketTypes::OPENCR_DATA:
                     emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());
                     // call packet handler
-                    process_opencr_data(packet);
+                    process_opencr_data(unstuffed_packet);
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
@@ -266,7 +317,7 @@ namespace module::platform::OpenCR {
                 case PacketTypes::SERVO_DATA:
                     emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());
                     // call packet handler
-                    process_servo_data(packet);
+                    process_servo_data(unstuffed_packet);
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
@@ -346,8 +397,10 @@ namespace module::platform::OpenCR {
         });
 
         on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
+            log<NUClear::DEBUG>("Received Buzzer message");
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = buzzer_msg.frequency;
+            opencr_state.dirty  = true;
         });
     }
 

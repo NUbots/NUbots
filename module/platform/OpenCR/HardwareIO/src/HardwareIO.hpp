@@ -264,6 +264,8 @@ namespace module::platform::OpenCR {
                 } temperature;
             } alarms;
         } cfg;
+
+        enum UnstuffingState : uint8_t { DATA, UNSTUFF_1, UNSTUFF_2, UNSTUFF_3 };
     };
 
 }  // namespace module::platform::OpenCR

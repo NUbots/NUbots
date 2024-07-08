@@ -5,6 +5,7 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { Icon } from "../../icon/view";
+import { lightAndDarkDecorator } from "../../storybook/color_mode";
 import { Option, Select } from "../view";
 
 const IconColor = () => <Icon>palette</Icon>;
@@ -17,7 +18,7 @@ const IconColoredCircle = (props: { color: string }) => (
 const meta: Meta<typeof Select> = {
   title: "components/Select",
   component: Select,
-  decorators: [(story) => <div style={{ maxWidth: "350px" }}>{story()}</div>],
+  decorators: [lightAndDarkDecorator({ className: "max-w-[350px]" })],
 };
 
 export default meta;
