@@ -42,6 +42,8 @@
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -73,6 +75,8 @@ namespace module::purpose {
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
+    using message::input::Sensors;
+    using message::localisation::Field;
 
     using StrikerTask = message::purpose::Striker;
 
@@ -86,6 +90,7 @@ namespace module::purpose {
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position              = config["ready_position"].as<Expression>();
             cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
+            cfg.free_kick_radius            = config["free_kick_radius"].as<double>();
         });
 
         on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
@@ -169,17 +174,37 @@ namespace module::purpose {
         on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Direct free kick
-        on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
-            [this](const GameState& game_state) {
+        on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>, With<Ball>, With<Field>, With<Sensors>>().then(
+            [this](const GameState& game_state, const Ball& ball, const Field& field, const Sensors& sensors) {
                 if (game_state.data.secondary_state.sub_mode) {
+                    log<NUClear::INFO>("SUB");
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    emit<Task>(std::make_unique<StandStill>());
+                    // If within 1m of the ball, find the closest position outside that radius, stand still, and look at the ball
+                    log<NUClear::INFO>("Other");
+                    Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
+                    double distance_to_ball = rBRr.head(2).norm();
+                    log<NUClear::INFO>("Distance", distance_to_ball);
+                    log<NUClear::INFO>("Min Dist", cfg.free_kick_radius);
+                    if (distance_to_ball < cfg.free_kick_radius) {
+                        Eigen::Vector3d rDRr = rBRr.normalized() * -cfg.free_kick_radius;
+                        Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+                        Eigen::Vector3d rDRf = Hfr * rDRr;
+                        Eigen::Vector3d rBRf = Hfr * rBRr;
+                        double desired_heading = std::atan2(rBRf.y(), rBRf.x());
+                        log<NUClear::INFO>("Desired Heading", desired_heading);
+
+                        log<NUClear::INFO>("Walking");
+                        emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(Eigen::Vector3d(rDRf.x(), rDRf.y(), 0), Eigen::Vector3d(0, 0, desired_heading))));
+                    } else {
+                        emit<Task>(std::make_unique<StandStill>());
+                    }
                     return;
                 }
                 else {
+                    log<NUClear::INFO>("OWN");
                     play();
                 }
             });
