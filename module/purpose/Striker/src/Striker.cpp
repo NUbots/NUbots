@@ -170,14 +170,25 @@ namespace module::purpose {
 
         // Direct free kick
         on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
-            [this](const GameState& game_state) { play_if_allowed(game_state); });
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                else {
+                    play();
+                }
+            });
 
         // Indirect free kick
         on<Provide<InDirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty kick
-        on<Provide<PenaltyKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
-            [this](const GameState& game_state) { play_if_allowed(game_state); });
+        on<Provide<PenaltyKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Corner kick
         on<Provide<CornerKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
@@ -186,23 +197,7 @@ namespace module::purpose {
         on<Provide<GoalKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Throw in
-        on<Provide<ThrowInStriker>>().then([this] {
-
-        });
-    }
-
-    void Striker::play_if_allowed(const message::input::GameState& state) {
-        if (state.data.secondary_state.sub_mode) {
-            emit<Task>(std::make_unique<StandStill>());
-            return;
-        }
-        if ((int) state.data.secondary_state.team_performing != (int) state.data.team.team_id) {
-            emit<Task>(std::make_unique<StandStill>());
-            return;
-        }
-        else {
-            play();
-        }
+        on<Provide<ThrowInStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Striker::play() {
