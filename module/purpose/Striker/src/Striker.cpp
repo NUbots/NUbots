@@ -183,7 +183,7 @@ namespace module::purpose {
                     return;
                 }
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    // Find position 0.8m away from the ball in the direction of the robot from the ball, rRBf
+                    // Find position 0.8m away from the ball in the direction of the robot from the ball
                     Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                     Eigen::Vector3d rDRr = rBRr.normalized() * 0.8;
                     emit<Task>(std::make_unique<WalkToFieldPosition>(
