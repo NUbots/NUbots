@@ -201,16 +201,16 @@ namespace module::purpose {
         });
 
         // Left button pauses the soccer scenario
-        on<Trigger<ButtonLeftDown>, Single>().then([this] {
+        on<Trigger<ButtonLeftDown>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             emit<Scope::DIRECT>(std::make_unique<EnableIdle>());
             emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
             idle = true;
         });
 
-        on<Trigger<ButtonLeftUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<EnableIdle>, Single>().then([this] {
+        on<Trigger<EnableIdle>>().then([this] {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -219,7 +219,7 @@ namespace module::purpose {
         });
 
         // Middle button resumes the soccer scenario
-        on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+        on<Trigger<ButtonMiddleDown>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             // Restart the Director graph for the soccer scenario after a delay
             emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
@@ -227,7 +227,7 @@ namespace module::purpose {
             idle = false;
         });
 
-        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<DisableIdle>, Single>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
