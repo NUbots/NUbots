@@ -68,10 +68,12 @@ namespace module::network {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
 
-                // need to determine send and receive ports
+                // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
-                // need to determine broadcast ip
+                // Need to determine broadcast ip
                 cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
+                // Need to determine optional filtering packets
+                cfg.udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                 // If we are changing ports (the port starts at 0 so this should start it the first time)
                 if (config["receive_port"].as<uint>() != cfg.receive_port) {
@@ -86,6 +88,22 @@ namespace module::network {
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
+                            std::string remote_addr = p.remote.address;
+
+                            // Apply filtering of packets if udp_filter_address is set in config
+                            if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
+                                if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
+                                    == ignored_ip_addresses.end()) {
+                                    ignored_ip_addresses.insert(remote_addr);
+                                    log<NUClear::INFO>("Ignoring UDP packet from",
+                                                       remote_addr,
+                                                       "as it doesn't match configured filter address",
+                                                       cfg.udp_filter_address);
+                                }
+
+                                return;
+                            }
+
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
