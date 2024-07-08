@@ -134,23 +134,7 @@ namespace module::purpose {
         });
 
         // Direct free kick
-        on<Provide<DirectFreeKickDefender>,
-           When<Phase, std::equal_to, Phase::PLAYING>,
-           With<GameState>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>>()
-            .then([this](const GameState& game_state, const Ball& ball, const Sensors& sensors) {
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    // Find position 1m away from the ball in the direction of the robot from the ball
-                    Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
-                    Eigen::Vector3d rDRr = rBRr.normalized();
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(
-                        pos_rpy_to_transform(Eigen::Vector3d(rDRr.x(), rDRr.y(), 0), Eigen::Vector3d(0, 0, 0))));
-                    log<NUClear::INFO>("Walking to ball", rDRr.x(), rDRr.y());
-                    return;
-                }
-            });
+        on<Provide<DirectFreeKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Indirect free kick
         on<Provide<InDirectFreeKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
