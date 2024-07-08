@@ -211,6 +211,10 @@ namespace module::network {
                     msg->purpose = *purpose;
                 }
 
+
+                // Emit to the local network for debugging
+                emit(std::make_unique<RoboCup>(*msg));
+
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
     }
