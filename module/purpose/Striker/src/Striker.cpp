@@ -181,27 +181,18 @@ namespace module::purpose {
            With<Sensors>>()
             .then([this](const GameState& game_state, const Ball& ball, const Field& field, const Sensors& sensors) {
                 if (game_state.data.secondary_state.sub_mode) {
-                    log<NUClear::INFO>("SUB");
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    // If within 1m of the ball, find the closest position outside that radius, stand still, and look at
-                    // the ball
-                    log<NUClear::INFO>("Other");
                     Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
                     double distance_to_ball = rBRr.head(2).norm();
-                    log<NUClear::INFO>("Distance", distance_to_ball);
-                    log<NUClear::INFO>("Min Dist", cfg.free_kick_radius);
                     if (distance_to_ball < cfg.free_kick_radius) {
                         Eigen::Vector3d rDRr   = rBRr.normalized() * -cfg.free_kick_radius;
                         Eigen::Isometry3d Hfr  = field.Hfw * sensors.Hrw.inverse();
                         Eigen::Vector3d rDRf   = Hfr * rDRr;
                         Eigen::Vector3d rBRf   = Hfr * rBRr;
                         double desired_heading = std::atan2(rBRf.y(), rBRf.x());
-                        log<NUClear::INFO>("Desired Heading", desired_heading);
-
-                        log<NUClear::INFO>("Walking");
                         emit<Task>(std::make_unique<WalkToFieldPosition>(
                             pos_rpy_to_transform(Eigen::Vector3d(rDRf.x(), rDRf.y(), 0),
                                                  Eigen::Vector3d(0, 0, desired_heading))));
@@ -223,27 +214,18 @@ namespace module::purpose {
            With<Sensors>>()
             .then([this](const GameState& game_state, const Ball& ball, const Field& field, const Sensors& sensors) {
                 if (game_state.data.secondary_state.sub_mode) {
-                    log<NUClear::INFO>("SUB");
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    // If within 1m of the ball, find the closest position outside that radius, stand still, and look at
-                    // the ball
-                    log<NUClear::INFO>("Other");
                     Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
                     double distance_to_ball = rBRr.head(2).norm();
-                    log<NUClear::INFO>("Distance", distance_to_ball);
-                    log<NUClear::INFO>("Min Dist", cfg.free_kick_radius);
                     if (distance_to_ball < cfg.free_kick_radius) {
                         Eigen::Vector3d rDRr   = rBRr.normalized() * -cfg.free_kick_radius;
                         Eigen::Isometry3d Hfr  = field.Hfw * sensors.Hrw.inverse();
                         Eigen::Vector3d rDRf   = Hfr * rDRr;
                         Eigen::Vector3d rBRf   = Hfr * rBRr;
                         double desired_heading = std::atan2(rBRf.y(), rBRf.x());
-                        log<NUClear::INFO>("Desired Heading", desired_heading);
-
-                        log<NUClear::INFO>("Walking");
                         emit<Task>(std::make_unique<WalkToFieldPosition>(
                             pos_rpy_to_transform(Eigen::Vector3d(rDRf.x(), rDRf.y(), 0),
                                                  Eigen::Vector3d(0, 0, desired_heading))));
