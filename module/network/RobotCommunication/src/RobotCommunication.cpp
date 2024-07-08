@@ -52,7 +52,6 @@ namespace module::network {
     using message::input::GameState;
     using message::input::RoboCup;
     using message::input::Sensors;
-    using message::input::SoccerPosition;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::purpose::Purpose;
