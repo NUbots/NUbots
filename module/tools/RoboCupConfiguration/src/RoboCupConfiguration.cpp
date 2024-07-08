@@ -388,18 +388,34 @@ namespace module::tools {
 
     std::string RoboCupConfiguration::user_input() {
         // Read characters until we see either esc or enter
-        std::stringstream chars;
+        std::string input;
+        int cursor_pos = 0;
 
         // Keep reading until our termination case is reached
         while (true) {
             auto ch = getch();
             switch (ch) {
-                case 27: return "";
+                case 27: return "";  // Escape key
                 case '\n':
-                case KEY_ENTER: return chars.str(); break;
+                case KEY_ENTER: return input;
+                case KEY_BACKSPACE:
+                case 127:  // ASCII code for backspace
+                    if (!input.empty() && cursor_pos > 0) {
+                        input.erase(cursor_pos - 1, 1);
+                        cursor_pos--;
+                        // Redraw the input
+                        move(getcury(stdscr), display.C1_SEL_POS);
+                        clrtoeol();
+                        addstr(input.c_str());
+                        move(getcury(stdscr), display.C1_SEL_POS + cursor_pos);
+                    }
+                    break;
                 default:
-                    chars << static_cast<char>(ch);
-                    addch(ch);
+                    if (isprint(ch)) {  // Only add printable characters
+                        input.insert(cursor_pos, 1, static_cast<char>(ch));
+                        cursor_pos++;
+                        addch(ch);
+                    }
                     break;
             }
         }
