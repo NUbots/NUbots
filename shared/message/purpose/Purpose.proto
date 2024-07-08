@@ -29,10 +29,10 @@ package message.purpose;
 /// The detected purpose of the robot
 enum SoccerPosition {
     ALL_ROUNDER = 0;
-    STRIKER  = 1;
-    GOALIE   = 2;
-    DEFENDER = 3;
-    DYNAMIC  = 4;
+    STRIKER     = 1;
+    GOALIE      = 2;
+    DEFENDER    = 3;
+    DYNAMIC     = 4;
 }
 
 // The robot's current purpose configuration
