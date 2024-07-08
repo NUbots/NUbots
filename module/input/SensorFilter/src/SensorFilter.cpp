@@ -124,7 +124,7 @@ namespace module::input {
                 emit(std::move(sensors));
             });
 
-        on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<20, Trigger<RawSensors>>>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {
                 // Detect wether a button has been pressed or not in the last 20 messages
                 detect_button_press(raw_sensors);
