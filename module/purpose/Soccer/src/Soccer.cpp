@@ -285,9 +285,11 @@ namespace module::purpose {
             return;
         }
 
-        // Check if we have a purpose
-        robots[player_id - 1].position =
-            robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
+        // If we are an all rounder and there are other active robots, we will be a defender
+        // If we have no purpose (dynamic) be a defender
+        bool set_defender = robots[player_id - 1].position == Position::ALL_ROUNDER
+                            || robots[player_id - 1].position == Position::DYNAMIC;
+        robots[player_id - 1].position = set_defender ? Position::DEFENDER : robots[player_id - 1].position;
 
         // Check if there are any strikers
         int number_strikers = false;
