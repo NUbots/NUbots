@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/KickTo.hpp"
@@ -53,6 +54,7 @@ namespace module::purpose {
     using GameMode       = message::input::GameState::Data::Mode;
     using SecondaryState = message::input::GameState::Data::SecondaryState;
     using message::input::GameState;
+    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::planning::KickTo;
@@ -169,15 +171,42 @@ namespace module::purpose {
         on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Direct free kick
-        on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
-            [this](const GameState& game_state) { play_if_allowed(game_state); });
+        on<Provide<DirectFreeKickStriker>,
+           When<Phase, std::equal_to, Phase::PLAYING>,
+           With<GameState>,
+           With<Ball>,
+           With<Field>,
+           With<Sensors>>()
+            .then([this](const GameState& game_state, const Ball& ball, const Sensors& sensors) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    // Find position 0.8m away from the ball in the direction of the robot from the ball, rRBf
+                    Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+                    Eigen::Vector3d rDRr = rBRr.normalized() * 0.8;
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                        pos_rpy_to_transform(Eigen::Vector3d(rDRr.x(), rDRr.y(), 0), Eigen::Vector3d(0, 0, 0))));
+                    log<NUClear::INFO>("Walking to ball", rDRr.x(), rDRr.y());
+                    return;
+                }
+                else {
+                    play();
+                }
+            });
 
         // Indirect free kick
-        on<Provide<InDirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<InDirectFreeKickStriker>>().then([this] {
+            // "A goal can be scored only if the ball is either kicked and clearly moves as determined by the referee or
+            // has been touched by another player before being kicked into the goal" - Robocup Humanoid League Rules
+            // 2024
+            emit<Task>(std::make_unique<StandStill>());
+        });
 
         // Penalty kick
         on<Provide<PenaltyKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
-            [this](const GameState& game_state) { play_if_allowed(game_state); });
+            [this](const GameState& game_state) { emit<Task>(std::make_unique<StandStill>()); });
 
         // Corner kick
         on<Provide<CornerKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
@@ -192,17 +221,7 @@ namespace module::purpose {
     }
 
     void Striker::play_if_allowed(const message::input::GameState& state) {
-        if (state.data.secondary_state.sub_mode) {
-            emit<Task>(std::make_unique<StandStill>());
-            return;
-        }
-        if ((int) state.data.secondary_state.team_performing != (int) state.data.team.team_id) {
-            emit<Task>(std::make_unique<StandStill>());
-            return;
-        }
-        else {
-            play();
-        }
+        emit<Task>(std::make_unique<StandStill>());
     }
 
     void Striker::play() {
