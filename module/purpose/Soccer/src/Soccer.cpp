@@ -37,16 +37,17 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
-#include "message/input/Purpose.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/purpose/AllRounder.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -67,17 +68,19 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
-    using message::input::Purpose;
     using message::input::RoboCup;
     using message::input::Sensors;
-    using message::input::SoccerPosition;
     using message::localisation::Ball;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
+    using message::purpose::AllRounder;
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
+    using message::purpose::Purpose;
+    using message::purpose::Purposes;
+    using message::purpose::SoccerPosition;
     using message::purpose::Striker;
     using message::skill::Look;
     using message::skill::Walk;
@@ -138,6 +141,10 @@ namespace module::purpose {
 
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
+                case Position::ALL_ROUNDER:
+                    emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("ALL_ROUNDER");
+                    break;
                 case Position::STRIKER:
                     emit<Task>(std::make_unique<Striker>(cfg.force_playing));
                     robots[player_id - 1].position = Position("STRIKER");
@@ -160,6 +167,14 @@ namespace module::purpose {
             emit(std::make_unique<Purpose>(SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
+
+            // Emit the current state of all robot purposes
+            auto purposes = std::make_unique<Purposes>();
+            for (size_t i = 0; i < robots.size(); i++) {
+                purposes->purposes[i] =
+                    Purpose(SoccerPosition(int(robots[i].position)), robots[i].dynamic, robots[i].active);
+            }
+            emit(std::move(purposes));
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
@@ -186,16 +201,16 @@ namespace module::purpose {
         });
 
         // Left button pauses the soccer scenario
-        on<Trigger<ButtonLeftDown>, Single>().then([this] {
+        on<Trigger<ButtonLeftDown>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             emit<Scope::DIRECT>(std::make_unique<EnableIdle>());
             emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
             idle = true;
         });
 
-        on<Trigger<ButtonLeftUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<EnableIdle>, Single>().then([this] {
+        on<Trigger<EnableIdle>>().then([this] {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -204,7 +219,7 @@ namespace module::purpose {
         });
 
         // Middle button resumes the soccer scenario
-        on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+        on<Trigger<ButtonMiddleDown>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             // Restart the Director graph for the soccer scenario after a delay
             emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
@@ -212,7 +227,7 @@ namespace module::purpose {
             idle = false;
         });
 
-        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<DisableIdle>, Single>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
@@ -263,9 +278,18 @@ namespace module::purpose {
             }
         }
 
-        // Check if we have a purpose
-        robots[player_id - 1].position =
-            robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
+        // If we are the only active robot, we should be an all rounder
+        if (std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
+            robots[player_id - 1].position = Position::ALL_ROUNDER;
+            emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
+            return;
+        }
+
+        // If we are an all rounder and there are other active robots, we will be a defender
+        // If we have no purpose (dynamic) be a defender
+        bool set_defender = robots[player_id - 1].position == Position::ALL_ROUNDER
+                            || robots[player_id - 1].position == Position::DYNAMIC;
+        robots[player_id - 1].position = set_defender ? Position::DEFENDER : robots[player_id - 1].position;
 
         // Check if there are any strikers
         int number_strikers = false;

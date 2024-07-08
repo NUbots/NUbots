@@ -26,7 +26,7 @@ export class LocalisationNetwork {
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
-    this.network.on(message.input.Purpose, this.onPurposes);
+    this.network.on(message.purpose.Purpose, this.onPurposes);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -76,10 +76,10 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onPurposes(robotModel: RobotModel, purpose: message.input.Purpose) {
+  private onPurposes(robotModel: RobotModel, purpose: message.purpose.Purpose) {
     const robot = LocalisationRobotModel.of(robotModel);
     const position = purpose.purpose;
-    robot.purpose = this.getKey(message.input.SoccerPosition, position!)!;
+    robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
   }
 
   @action.bound

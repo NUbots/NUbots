@@ -24,39 +24,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_NETWORK_ROBOTCOMMUNICATION_HPP
-#define MODULE_NETWORK_ROBOTCOMMUNICATION_HPP
+#ifndef MODULE_PURPOSE_ALLROUNDER_HPP
+#define MODULE_PURPOSE_ALLROUNDER_HPP
 
+
+#include <Eigen/Core>
 #include <nuclear>
-#include <string>
 
-namespace module::network {
+#include "extension/Behaviour.hpp"
 
-    class RobotCommunication : public NUClear::Reactor {
+namespace module::purpose {
+
+    class AllRounder : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief Calls Tasks to play soccer normally for a all rounder
+        void play();
+
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The port to communicate over
-            uint send_port = 0;
-            /// @brief The port to communicate over (should match receive port)
-            uint receive_port = 0;
-            /// @brief The IP address used for broadcasting data
-            std::string broadcast_ip = "";
-            /// @brief Set this to only receive packets from this IP address
-            std::string udp_filter_address = "";
+            /// @brief Ready position to walk to (x, y, theta)
+            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
         } cfg;
 
-        /// @brief ignore packets from these IP addresses
-        std::set<std::string> ignored_ip_addresses{};
-
-        /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
-        ReactionHandle listen_handle;
 
     public:
-        /// @brief Called by the powerplant to build and setup the RobotCommunication reactor.
-        explicit RobotCommunication(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the AllRounder reactor.
+        explicit AllRounder(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::network
+}  // namespace module::purpose
 
-#endif  // MODULE_NETWORK_ROBOTCOMMUNICATION_HPP
+#endif  // MODULE_PURPOSE_ALLROUNDER_HPP
