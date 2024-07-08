@@ -4,6 +4,9 @@ log_level: INFO
 # Position on field to walk to (x,y,theta)
 ready_position: [1.5, 0, -3.14]
 
+# Position on the field to walk to if the opposing team is awarded a penalty kick
+penalty_defence_position: [4, 0.5, -3.14]
+
 # How far (m) the ball can be away from the centre of the field for it to be deemed as
 # .moved/touched by the other team during kickoff so we can start playing
 ball_kickoff_outside_radius: 1.0
