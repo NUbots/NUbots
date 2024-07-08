@@ -49,6 +49,7 @@
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/purpose/UpdateBoundingBox.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
@@ -82,6 +83,7 @@ namespace module::purpose {
     using message::purpose::Purposes;
     using message::purpose::SoccerPosition;
     using message::purpose::Striker;
+    using message::purpose::UpdateBoundingBox;
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
@@ -116,6 +118,22 @@ namespace module::purpose {
                 if (cfg.position == Position::DYNAMIC) {
                     robots[player_id - 1].dynamic = true;
                 }
+
+                // Load bounding box configs
+                cfg.goalie_bounding_box.x_min = config["goalie"]["x_min"].as<double>();
+                cfg.goalie_bounding_box.x_max = config["goalie"]["x_max"].as<double>();
+                cfg.goalie_bounding_box.y_min = config["goalie"]["y_min"].as<double>();
+                cfg.goalie_bounding_box.y_max = config["goalie"]["y_max"].as<double>();
+
+                cfg.defender_bounding_box.x_min = config["defender"]["x_min"].as<double>();
+                cfg.defender_bounding_box.x_max = config["defender"]["x_max"].as<double>();
+                cfg.defender_bounding_box.y_min = config["defender"]["y_min"].as<double>();
+                cfg.defender_bounding_box.y_max = config["defender"]["y_max"].as<double>();
+
+                cfg.striker_bounding_box.x_min = config["striker"]["x_min"].as<double>();
+                cfg.striker_bounding_box.x_max = config["striker"]["x_max"].as<double>();
+                cfg.striker_bounding_box.y_min = config["striker"]["y_min"].as<double>();
+                cfg.striker_bounding_box.y_max = config["striker"]["y_max"].as<double>();
             });
 
         // Start the Director graph for the soccer scenario!
@@ -337,6 +355,59 @@ namespace module::purpose {
         }
         else {
             emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+        }
+
+        bool defender_exist = std::count_if(robots.begin(),
+                                            robots.end(),
+                                            [](const RobotInfo& robot) { return robot.position == Position::DEFENDER; })
+                              == 1;
+        bool goalie_exist = std::count_if(robots.begin(),
+                                          robots.end(),
+                                          [](const RobotInfo& robot) { return robot.position == Position::GOALIE; })
+                            == 1;
+
+        // If you are striker and defender exists
+        if (robots[player_id - 1].position == Position::STRIKER && defender_exist) {
+            // Update bounding box to default box
+            emit(std::make_unique<UpdateBoundingBox>(cfg.striker_bounding_box.x_min,
+                                                     cfg.striker_bounding_box.x_max,
+                                                     cfg.striker_bounding_box.y_min,
+                                                     cfg.striker_bounding_box.y_max));
+            log<NUClear::DEBUG>("Default striker");
+            return;
+        }
+
+        // If you are striker, but there isn't any defender
+        if (robots[player_id - 1].position == Position::STRIKER && !defender_exist) {
+            // Increase to defender + striker bounding box
+            emit(std::make_unique<UpdateBoundingBox>(cfg.striker_bounding_box.x_min,
+                                                     cfg.defender_bounding_box.x_max,
+                                                     cfg.striker_bounding_box.y_min,
+                                                     cfg.striker_bounding_box.y_max));
+            log<NUClear::DEBUG>("Extended striker");
+            return;
+        }
+
+        // If you are defender and a goalie exists
+        if (robots[player_id - 1].position == Position::DEFENDER && goalie_exist) {
+            // Update bounding box to default box
+            emit(std::make_unique<UpdateBoundingBox>(cfg.defender_bounding_box.x_min,
+                                                     cfg.defender_bounding_box.x_max,
+                                                     cfg.defender_bounding_box.y_min,
+                                                     cfg.defender_bounding_box.y_max));
+            log<NUClear::DEBUG>("Default defender");
+            return;
+        }
+
+        // If you are defender, but there isn't a goalie
+        if (robots[player_id - 1].position == Position::DEFENDER && !goalie_exist) {
+            // Increase to defender + goalie bounding box
+            emit(std::make_unique<UpdateBoundingBox>(cfg.defender_bounding_box.x_min,
+                                                     cfg.goalie_bounding_box.x_max,
+                                                     cfg.defender_bounding_box.y_min,
+                                                     cfg.defender_bounding_box.y_max));
+            log<NUClear::DEBUG>("Extended defender");
+            return;
         }
     }
 
