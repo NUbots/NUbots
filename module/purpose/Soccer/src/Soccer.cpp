@@ -349,7 +349,7 @@ namespace module::purpose {
                             == 1;
 
         // If you are striker or defender and no one else exists
-        f(std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
+        if (std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
             // Update bounding box to full box
             emit(std::make_unique<UpdateBoundingBox>(cfg.striker_bounding_box.x_min,
                                                      cfg.goalie_bounding_box.x_max,
