@@ -26,7 +26,7 @@ export class LocalisationNetwork {
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
-    this.network.on(message.input.RoboCup, this.onRobocup);
+    this.network.on(message.purpose.Purpose, this.onPurpose);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -76,12 +76,12 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onRobocup(robotModel: RobotModel, robocup: message.input.RoboCup) {
+  private onPurpose(robotModel: RobotModel, purpose: message.purpose.Purpose) {
     const robot = LocalisationRobotModel.of(robotModel);
-    const position = robocup.purpose?.purpose;
+    const position = purpose.purpose;
     robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
 
-    robot.player_id = robocup.currentPose?.playerId!;
+    robot.player_id = purpose.playerId!;
 
     // Update colour based on player id
     if (robot.player_id === 1) {
