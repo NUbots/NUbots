@@ -576,6 +576,7 @@ var namespaces_dup =
         [ "sensor_name_to_id", "Webots_8cpp.html#a0c7cfa92ede99edac377afc0de7e5c68", null ]
       ] ],
       [ "purpose", null, [
+        [ "AllRounder", "classmodule_1_1purpose_1_1AllRounder.html", "classmodule_1_1purpose_1_1AllRounder" ],
         [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
         [ "DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
         [ "EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],
@@ -589,12 +590,13 @@ var namespaces_dup =
         [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ],
+        [ "AllRounderTask", "AllRounder_8cpp.html#a5cefd3091055a376975cbd3e3ab4e2aa", null ],
         [ "DefenderTask", "Defender_8cpp.html#a9e1ada0b8d36136bf59c5c65d675c46c", null ],
-        [ "GameMode", "Defender_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
+        [ "GameMode", "AllRounder_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
         [ "GoalieTask", "Goalie_8cpp.html#a0ad4596d701cecf7cd4cc55d022ed6ad", null ],
         [ "LimbID", "ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
-        [ "Phase", "Defender_8cpp.html#a19ac08a0be5f41ccc26e7b0186c14e68", null ],
+        [ "Phase", "AllRounder_8cpp.html#a19ac08a0be5f41ccc26e7b0186c14e68", null ],
         [ "ServoID", "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],

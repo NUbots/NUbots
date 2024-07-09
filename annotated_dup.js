@@ -227,6 +227,7 @@ var annotated_dup =
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],
       [ "purpose", null, [
+        [ "AllRounder", "classmodule_1_1purpose_1_1AllRounder.html", "classmodule_1_1purpose_1_1AllRounder" ],
         [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
         [ "DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
         [ "EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],

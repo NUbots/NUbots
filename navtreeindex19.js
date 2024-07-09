@@ -1,5 +1,13 @@
 var NAVTREEINDEX19 =
 {
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca4d52cbbc35f27d5f3d7976155c1546bf":[2,0,7,6,0,8,0,7],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca52ef05a415d066c376d2b54cf6349cc1":[2,0,7,6,0,8,0,6],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca5ad1b67a42b7c16f27ff66eacb7112a3":[2,0,7,6,0,8,0,9],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca7f37b687fb8070d7c0a9746da3bcf95d":[2,0,7,6,0,8,0,2],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca81bca027b1f8f24af9159fcb0b4862a9":[2,0,7,6,0,8,0,12],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca93fe30d3bb2755dbb5e76358213c78ba":[2,0,7,6,0,8,0,0],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca98fef9cec8a171aa2e6d162af560344d":[2,0,7,6,0,8,0,1],
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704caaa968325d91afbf3810ee917d7b5cd16":[2,0,7,6,0,8,0,11],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704cad73993ba2543fde14518325a4b7a1bbe":[2,0,7,6,0,8,0,3],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704cadc5decb6a30230b808327a5a3c024b9a":[2,0,7,6,0,8,0,14],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704caf3ef03e3fd17f45d3d6c61669fc25081":[2,0,7,6,0,8,0,4],
@@ -241,13 +249,5 @@ var NAVTREEINDEX19 =
 "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html#ab16cef3e067079ba8a0007d0e47fdd40":[2,0,7,12,0,0,1],
 "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html#abcac3234095f75c39977b9e436b0c8d2":[2,0,7,12,0,0,2],
 "structutility_1_1strutil_1_1Colour.html":[2,0,7,12,1],
-"structutility_1_1strutil_1_1Colour.html#a0be52767440b208ca80f1f4cc1d5afbf":[2,0,7,12,1,9],
-"structutility_1_1strutil_1_1Colour.html#a19ad453b3c9b29ce3803c5a36122a6be":[2,0,7,12,1,5],
-"structutility_1_1strutil_1_1Colour.html#a1d6b11af44c21928450598907ce3a01f":[2,0,7,12,1,1],
-"structutility_1_1strutil_1_1Colour.html#a3a79117a95f1191f22fb8697bea6948b":[2,0,7,12,1,15],
-"structutility_1_1strutil_1_1Colour.html#a59dc94d01fbf377d8229b5d3597f3ff8":[2,0,7,12,1,11],
-"structutility_1_1strutil_1_1Colour.html#a5cc536a2b8ad1cc698952d95aade7e42":[2,0,7,12,1,6],
-"structutility_1_1strutil_1_1Colour.html#a7de5cfc85c6a37f79fd1e15bd81f2a25":[2,0,7,12,1,4],
-"structutility_1_1strutil_1_1Colour.html#a884ab721c1c6a8dedf08af7651450da6":[2,0,7,12,1,12],
-"structutility_1_1strutil_1_1Colour.html#a8b9cd3ee3c9d7d94d740a1b4e0046a53":[2,0,7,12,1,13]
+"structutility_1_1strutil_1_1Colour.html#a0be52767440b208ca80f1f4cc1d5afbf":[2,0,7,12,1,9]
 };

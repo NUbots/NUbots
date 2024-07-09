@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1motion_1_1KickBalancer.html#a18859ecc9669110e01b55eefb69c268e":[2,0,3,4,4,5],
 "classmodule_1_1motion_1_1KickBalancer.html#a5ecaf4e071f0eedd212437ab07431760":[2,0,3,4,4,3],
 "classmodule_1_1motion_1_1KickBalancer.html#a888ac374afc2d1a22913f495b0cb2d43":[2,0,3,4,4,4],
 "classmodule_1_1motion_1_1KickBalancer.html#a8f722509dcde319d31299659a8b95a7e":[2,0,3,4,4,6],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1a2ac0169a75c7c95311c90cd9bb090171":[2,0,3,9,1,6,7,0],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1a9f8fdd7fa87a8f7d13fbaba1515146be":[2,0,3,9,1,6,7,3],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1aef1acdb38c84eaac41eb093e1a2b3173":[2,0,3,9,1,6,7,1],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9407c70531109f84987d711ca403e4ac":[2,0,3,9,1,6,10],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9aa9639e522a3420a51b1cca915ccd23":[2,0,3,9,1,6,19]
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9407c70531109f84987d711ca403e4ac":[2,0,3,9,1,6,10]
 };

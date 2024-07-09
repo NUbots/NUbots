@@ -1,5 +1,13 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html":[2,0,7,0,4],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html#a5bf82e187f2a57ad8367efaaab10cf13":[2,0,7,0,4,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html":[2,0,7,0,5],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html#aaa4af5fb3d249fffdaaf8888a7266503":[2,0,7,0,5,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html":[2,0,7,0,6],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html#aeb7afc617038656d8601af36a0be8e1e":[2,0,7,0,6,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4.html":[2,0,7,0,7],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4.html#a26ce962a84b64a6673fef615a048762c":[2,0,7,0,7,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html":[2,0,7,0,8],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html#aa532ae1c025c9a297c003eb302e8cbff":[2,0,7,0,8,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html":[2,0,7,0,9],
@@ -241,13 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca033c902a42ce564f5e69a3b461f9dd14":[2,0,7,6,0,8,0,10],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca0891f1a3b43f353370f4c6947a115308":[2,0,7,6,0,8,0,8],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca164397eac73e6c94c3e629929e41096b":[2,0,7,6,0,8,0,13],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca42ffec145a4a466ba4a35410661e0386":[2,0,7,6,0,8,0,5],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca4d52cbbc35f27d5f3d7976155c1546bf":[2,0,7,6,0,8,0,7],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca52ef05a415d066c376d2b54cf6349cc1":[2,0,7,6,0,8,0,6],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca5ad1b67a42b7c16f27ff66eacb7112a3":[2,0,7,6,0,8,0,9],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca7f37b687fb8070d7c0a9746da3bcf95d":[2,0,7,6,0,8,0,2],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca81bca027b1f8f24af9159fcb0b4862a9":[2,0,7,6,0,8,0,12],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca93fe30d3bb2755dbb5e76358213c78ba":[2,0,7,6,0,8,0,0],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca98fef9cec8a171aa2e6d162af560344d":[2,0,7,6,0,8,0,1],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704caaa968325d91afbf3810ee917d7b5cd16":[2,0,7,6,0,8,0,11]
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca42ffec145a4a466ba4a35410661e0386":[2,0,7,6,0,8,0,5]
 };

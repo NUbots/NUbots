@@ -1,6 +1,7 @@
 var structmodule_1_1purpose_1_1Soccer_1_1Position =
 [
     [ "Value", "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8", [
+      [ "ALL_ROUNDER", "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8a7179d51b24b59d6dc914f8b968d1094f", null ],
       [ "STRIKER", "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8a5bba4daf02b02226b4774078afe1f811", null ],
       [ "GOALIE", "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8a18670232ba34696703a39461af559ff8", null ],
       [ "DEFENDER", "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8aecf65ed2ac54461cf254456c0b2972bb", null ],
