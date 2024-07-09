@@ -20,7 +20,7 @@ min_field_line_points: 75
 min_field_line_intersections: 3
 
 # Delay before the particle filter starts (allows odometry to settle)
-start_time_delay: 2
+start_time_delay: 10
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
