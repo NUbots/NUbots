@@ -97,7 +97,13 @@ namespace module::tools {
 
             /// @brief Increment the enum, for toggle
             void operator++() {
-                value = value == Value::DYNAMIC ? Value::STRIKER : value + 1;
+                switch (value) {
+                    case Value::STRIKER: value = Value::GOALIE; break;
+                    case Value::GOALIE: value = Value::DEFENDER; break;
+                    case Value::DEFENDER: value = Value::DYNAMIC; break;
+                    case Value::DYNAMIC: value = Value::STRIKER; break;
+                    default: value = Value::STRIKER;
+                }
             }
         } robot_position;
 
