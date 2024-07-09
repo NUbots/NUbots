@@ -196,13 +196,6 @@ namespace module::purpose {
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
-            // Reset dynamic robot to no position
-            if (robots[self_penalisation.robot_id - 1].dynamic) {
-                robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
-            }
-            // Set penalised robot to inactive
-            robots[self_penalisation.robot_id - 1].active = false;
-
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
@@ -212,9 +205,12 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
             }
 
+            // Reset dynamic robot to no position
+            if (robots[self_penalisation.robot_id - 1].dynamic) {
+                robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
+            }
             // Set penalised robot to inactive
-            robots[self_penalisation.robot_id - 1].active   = false;
-            robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
+            robots[self_penalisation.robot_id - 1].active = false;
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
