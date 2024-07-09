@@ -10,6 +10,3 @@ penalty_defence_position: [3.5, 1, -3.14]
 # How far (m) the ball can be away from the centre of the field for it to be deemed as
 # .moved/touched by the other team during kickoff so we can start playing
 ball_kickoff_outside_radius: 1.0
-
-# How close we can be to the ball in an opponent's free kick
-free_kick_radius: 0.8

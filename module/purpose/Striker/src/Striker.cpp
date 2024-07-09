@@ -89,7 +89,6 @@ namespace module::purpose {
             cfg.ready_position              = config["ready_position"].as<Expression>();
             cfg.penalty_defence_position    = config["penalty_defence_position"].as<Expression>();
             cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
-            cfg.free_kick_radius            = config["free_kick_radius"].as<double>();
         });
 
         on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
