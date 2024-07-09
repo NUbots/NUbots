@@ -5,7 +5,7 @@ log_level: INFO
 ready_position: [2, -1.5, -3.14]
 
 # Position on the field to walk to if the opposing team is awarded a penalty kick
-penalty_defence_position: [4, 3, -3.14]
+penalty_defence_position: [3.8, 2, -3.14]
 
 # Bounded area for defender to stay within
 bounded_region_x_min: -0.5
