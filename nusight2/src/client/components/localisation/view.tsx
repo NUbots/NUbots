@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -123,6 +123,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+          toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
         ></LocalisationMenuBar>
         <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -209,6 +211,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldIntersectionsVisibility = () => {
     this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
   };
+
+  private toggleWalkToDebugVisibility = () => {
+    this.props.controller.toggleWalkToDebugVisibility(this.props.model);
+  };
+
+  private toggleBoundedBoxVisibility = () => {
+    this.props.controller.toggleBoundedBoxVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -227,6 +237,8 @@ interface LocalisationMenuBarProps {
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
   toggleFieldIntersectionsVisibility(): void;
+  toggleWalkToDebugVisibility(): void;
+  toggleBoundedBoxVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -273,6 +285,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           isVisible={model.fieldIntersectionsVisible}
           onClick={props.toggleFieldIntersectionsVisibility}
         />
+        <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
+        <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
       </ul>
     </Menu>
   );
@@ -335,11 +349,10 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      {model.robots
-        .filter((robot) => robot.visible && robot.Hfd)
-        .map((robot) => (
-          <WalkPathVisualiser key={robot.id} model={robot} />
-        ))}
+      {model.walkToDebugVisible &&
+        model.robots
+          .filter((robot) => robot.visible && robot.Hfd)
+          .map((robot) => <WalkPathVisualiser key={robot.id} model={robot} />)}
       {model.robots
         .filter((robot) => robot.visible && robot.Hft && robot.purpose)
         .map((robot) => (
@@ -350,18 +363,18 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
             cameraYaw={model.camera.yaw}
           />
         ))}
-      {model.robots
-        .filter((robot) => robot.visible && robot.Hfd)
-        .map((robot) => (
-          <WalkPathGoal key={robot.id} model={robot} />
-        ))}
+      {model.walkToDebugVisible &&
+        model.robots
+          .filter((robot) => robot.visible && robot.Hfd)
+          .map((robot) => <WalkPathGoal key={robot.id} model={robot} />)}
       <Robots model={model} />
-      {model.robots.map((robot) => {
-        if (robot.visible && robot.boundingBox) {
-          return <BoundingBox key={robot.id} model={robot} />;
-        }
-        return null;
-      })}
+      {model.boundedBoxVisible &&
+        model.robots.map((robot) => {
+          if (robot.visible && robot.boundingBox) {
+            return <BoundingBox key={robot.id} model={robot} />;
+          }
+          return null;
+        })}
     </object3D>
   );
 });
@@ -453,7 +466,7 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   const centerY = (minY + maxY) / 2;
   const wallThickness = 0.05;
   const wallHeight = 0.25;
-  const solidBottomHeight = 0.001; // Height of the solid bottom part of each wall
+  const solidBottomHeight = 0.001;
 
   const vertexShader = `
     varying vec3 vPosition;
@@ -472,10 +485,8 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
     void main() {
       float heightFactor;
       if (orientation == 0) {
-        // Vertical walls (left and right)
         heightFactor = vPosition.y / wallHeight + 0.5;
       } else {
-        // Horizontal walls (top and bottom)
         heightFactor = vPosition.z / wallHeight + 0.5;
       }
 
@@ -483,10 +494,8 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
       float opacity;
 
       if (heightFactor < normalizedSolidHeight) {
-        // Solid bottom part
-        opacity = 0.5;
+        opacity = 0.9;
       } else {
-        // Gradient part
         opacity = smoothstep(1.0, normalizedSolidHeight, heightFactor) * 0.3;
       }
 
@@ -497,7 +506,7 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   const createWallMaterial = (orientation: number) => {
     return new THREE.ShaderMaterial({
       uniforms: {
-        color: { value: new THREE.Color("rgb(0, 0, 100)") },
+        color: { value: new THREE.Color(model.color) },
         wallHeight: { value: wallHeight },
         solidBottomHeight: { value: solidBottomHeight },
         orientation: { value: orientation },
@@ -511,6 +520,13 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
 
   const verticalWallMaterial = useMemo(() => createWallMaterial(0), []);
   const horizontalWallMaterial = useMemo(() => createWallMaterial(1), []);
+
+  // Update material color when model.color changes
+  useEffect(() => {
+    const newColor = new THREE.Color(model.color);
+    verticalWallMaterial.uniforms.color.value = newColor;
+    horizontalWallMaterial.uniforms.color.value = newColor;
+  }, [model.color, verticalWallMaterial, horizontalWallMaterial]);
 
   return (
     <object3D position={[centerX, centerY, wallHeight / 2]}>
@@ -580,7 +596,8 @@ const PurposeLabel = ({
     return geometry;
   };
 
-  const labelTextGeometry = textGeometry(robotModel.purpose);
+  const label = robotModel.player_id == -1 ? robotModel.purpose : "N" + robotModel.player_id + " " + robotModel.purpose;
+  const labelTextGeometry = textGeometry(label);
   labelTextGeometry.computeBoundingBox();
   const textWidth = labelTextGeometry.boundingBox
     ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
@@ -595,11 +612,11 @@ const PurposeLabel = ({
       position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
       rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
     >
-      <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
+      <mesh position={[0, 0, 0.001]} geometry={labelTextGeometry}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
       <mesh geometry={backdropGeometry}>
-        <meshBasicMaterial color="black" transparent opacity={0.5} />
+        <meshBasicMaterial color={robotModel.color} transparent opacity={0.5} />
       </mesh>
     </object3D>
   );
