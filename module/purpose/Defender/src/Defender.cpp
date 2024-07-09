@@ -164,7 +164,21 @@ namespace module::purpose {
             });
 
         // Penalty kick
-        on<Provide<PenaltyKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<PenaltyKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
+                        Eigen::Vector3d(cfg.penalty_defence_position.x(), cfg.penalty_defence_position.y(), 0),
+                        Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))));
+                    return;
+                }
+                play();
+            });
+
 
         // Corner kick
         on<Provide<CornerKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
