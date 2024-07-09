@@ -185,14 +185,6 @@ namespace module::purpose {
                                            SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
-
-            // Emit the current state of all robot purposes
-            auto purposes = std::make_unique<Purposes>();
-            for (size_t i = 0; i < robots.size(); i++) {
-                purposes->purposes[i] =
-                    Purpose(i + 1, SoccerPosition(int(robots[i].position)), robots[i].dynamic, robots[i].active);
-            }
-            emit(std::move(purposes));
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
