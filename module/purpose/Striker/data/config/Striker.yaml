@@ -7,9 +7,3 @@ ready_position: [1.5, 0, -3.14]
 # How far (m) the ball can be away from the centre of the field for it to be deemed as
 # .moved/touched by the other team during kickoff so we can start playing
 ball_kickoff_outside_radius: 1.0
-
-# Bounded area for striker to stay within
-bounded_region_x_min: -4.5
-bounded_region_x_max: 1.0
-bounded_region_y_min: -3.0
-bounded_region_y_max: 3.0
