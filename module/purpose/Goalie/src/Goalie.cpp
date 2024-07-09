@@ -68,8 +68,9 @@ namespace module::purpose {
 
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ready_position = config["ready_position"].as<Expression>();
+            this->log_level              = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ready_position           = config["ready_position"].as<Expression>();
+            cfg.penalty_defence_position = config["penalty_defence_position"].as<Expression>();
         });
 
         on<Provide<GoalieTask>, Optional<Trigger<GameState>>>().then(
@@ -145,7 +146,20 @@ namespace module::purpose {
             });
 
         // Penalty kick
-        on<Provide<PenaltyKickGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<PenaltyKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
+                        Eigen::Vector3d(cfg.penalty_defence_position.x(), cfg.penalty_defence_position.y(), 0),
+                        Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))));
+                    return;
+                }
+                play();
+            });
 
         // Corner kick
         on<Provide<CornerKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
