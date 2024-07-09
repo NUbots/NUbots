@@ -79,7 +79,6 @@ namespace module::purpose {
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
     using message::purpose::Purpose;
-    using message::purpose::Purposes;
     using message::purpose::SoccerPosition;
     using message::purpose::Striker;
     using message::skill::Look;
@@ -167,14 +166,6 @@ namespace module::purpose {
             emit(std::make_unique<Purpose>(SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
-
-            // Emit the current state of all robot purposes
-            auto purposes = std::make_unique<Purposes>();
-            for (size_t i = 0; i < robots.size(); i++) {
-                purposes->purposes[i] =
-                    Purpose(SoccerPosition(int(robots[i].position)), robots[i].dynamic, robots[i].active);
-            }
-            emit(std::move(purposes));
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
