@@ -182,7 +182,19 @@ namespace module::purpose {
             });
 
         // Goal kick
-        on<Provide<GoalKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<GoalKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
 
         // Throw in
         on<Provide<DirectFreeKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
