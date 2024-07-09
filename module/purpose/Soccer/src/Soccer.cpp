@@ -191,7 +191,7 @@ namespace module::purpose {
             auto purposes = std::make_unique<Purposes>();
             for (size_t i = 0; i < robots.size(); i++) {
                 purposes->purposes[i] =
-                    Purpose(i, SoccerPosition(int(robots[i].position)), robots[i].dynamic, robots[i].active);
+                    Purpose(i + 1, SoccerPosition(int(robots[i].position)), robots[i].dynamic, robots[i].active);
             }
             emit(std::move(purposes));
         });
