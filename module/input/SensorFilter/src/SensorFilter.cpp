@@ -313,22 +313,22 @@ namespace module::input {
             left_down = new_left_down;
             if (new_left_down) {
                 log<NUClear::INFO>("Left Button Down");
-                emit(std::make_unique<ButtonLeftDown>());
+                emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
             }
             else {
                 log<NUClear::INFO>("Left Button Up");
-                emit(std::make_unique<ButtonLeftUp>());
+                emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
             }
         }
         if (new_middle_down != middle_down) {
             middle_down = new_middle_down;
             if (new_middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
-                emit(std::make_unique<ButtonMiddleDown>());
+                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
             }
             else {
                 log<NUClear::INFO>("Middle Button Up");
-                emit(std::make_unique<ButtonMiddleUp>());
+                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
             }
         }
     }
