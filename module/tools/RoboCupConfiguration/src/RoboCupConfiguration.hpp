@@ -55,8 +55,6 @@ namespace module::tools {
         int player_id = 0;
         /// @brief Max player ID
         static const int MAX_PLAYER_ID = 6;
-        /// @brief The position the robot will move to in READY
-        Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
 
         /// @brief Smart enum for the robot's position
         struct Position {
@@ -109,7 +107,7 @@ namespace module::tools {
             /// @brief Enum for options in first column
             enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
             /// @brief Enum for options in second column
-            enum class Column2 { PLAYER_ID, TEAM_ID, POSITION, READY_POSITION, END };
+            enum class Column2 { PLAYER_ID, TEAM_ID, POSITION, END };
             /// @brief Column 1 padding
             static const size_t C1_PAD = 2;
             /// @brief Column 1 selection position
