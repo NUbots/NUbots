@@ -372,8 +372,9 @@ namespace module::input {
             Eigen::Isometry3d Hwt =
                 previous_sensors == nullptr ? Eigen::Isometry3d::Identity() : previous_sensors->Htw.inverse();
             // Htw rotation is combination of Mahony pitch and roll and existing yaw
-            Hwt.linear() = rpy_intrinsic_to_mat(
-                Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), mat_to_rpy_intrinsic(Hwt.rotation()).z()));
+            Hwt.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(raw_sensors.rpy_subctrl.x(),
+                                                                raw_sensors.rpy_subctrl.y(),
+                                                                mat_to_rpy_intrinsic(Hwt.rotation()).z()));
             sensors->Htw = Hwt.inverse();
 
             // Get robot to world
@@ -419,7 +420,8 @@ namespace module::input {
         // Take the translation from the anchor method
         Hwt.translation() = Hwt_anchor.translation();
         // Fuse roll + pitch of mahony filter with yaw of anchor method
-        Hwt.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
+        Hwt.linear() = rpy_intrinsic_to_mat(
+            Eigen::Vector3d(raw_sensors.rpy_subctrl.x(), raw_sensors.rpy_subctrl.y(), rpy_anchor.z()));
         sensors->Htw = Hwt.inverse();
 
         // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
