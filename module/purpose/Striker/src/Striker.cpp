@@ -173,71 +173,34 @@ namespace module::purpose {
         on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Direct free kick
-        on<Provide<DirectFreeKickStriker>,
-           When<Phase, std::equal_to, Phase::PLAYING>,
-           With<GameState>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>>()
-            .then([this](const GameState& game_state, const Ball& ball, const Field& field, const Sensors& sensors) {
+        on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
-                    double distance_to_ball = rBRr.head(2).norm();
-                    if (distance_to_ball < cfg.free_kick_radius) {
-                        Eigen::Vector3d rDRr   = rBRr.normalized() * -cfg.free_kick_radius;
-                        Eigen::Isometry3d Hfr  = field.Hfw * sensors.Hrw.inverse();
-                        Eigen::Vector3d rDRf   = Hfr * rDRr;
-                        Eigen::Vector3d rBRf   = Hfr * rBRr;
-                        double desired_heading = std::atan2(rBRf.y(), rBRf.x());
-                        emit<Task>(std::make_unique<WalkToFieldPosition>(
-                            pos_rpy_to_transform(Eigen::Vector3d(rDRf.x(), rDRf.y(), 0),
-                                                 Eigen::Vector3d(0, 0, desired_heading))));
-                    }
-                    else {
-                        emit<Task>(std::make_unique<StandStill>());
-                    }
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
                 play();
             });
 
         // Indirect free kick
-        on<Provide<InDirectFreeKickStriker>,
-           When<Phase, std::equal_to, Phase::PLAYING>,
-           With<GameState>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>>()
-            .then([this](const GameState& game_state, const Ball& ball, const Field& field, const Sensors& sensors) {
+        on<Provide<InDirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
-                    Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
-                    double distance_to_ball = rBRr.head(2).norm();
-                    if (distance_to_ball < cfg.free_kick_radius) {
-                        Eigen::Vector3d rDRr   = rBRr.normalized() * -cfg.free_kick_radius;
-                        Eigen::Isometry3d Hfr  = field.Hfw * sensors.Hrw.inverse();
-                        Eigen::Vector3d rDRf   = Hfr * rDRr;
-                        Eigen::Vector3d rBRf   = Hfr * rBRr;
-                        double desired_heading = std::atan2(rBRf.y(), rBRf.x());
-                        emit<Task>(std::make_unique<WalkToFieldPosition>(
-                            pos_rpy_to_transform(Eigen::Vector3d(rDRf.x(), rDRf.y(), 0),
-                                                 Eigen::Vector3d(0, 0, desired_heading))));
-                    }
-                    else {
-                        emit<Task>(std::make_unique<StandStill>());
-                    }
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
                 play();
             });
-
 
         // Penalty kick
         on<Provide<PenaltyKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
@@ -256,13 +219,37 @@ namespace module::purpose {
             });
 
         // Corner kick
-        on<Provide<CornerKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<CornerKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
 
         // Goal kick
         on<Provide<GoalKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Throw in
-        on<Provide<ThrowInStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<ThrowInStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
     }
 
     void Striker::play() {
