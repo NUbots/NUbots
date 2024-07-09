@@ -42,6 +42,17 @@ namespace module::purpose {
     struct EnableIdle {};
     struct DisableIdle {};
 
+    struct BoundingBox {
+        /// @brief x minimum bound on field to walk within
+        double x_min = 0.0;
+        /// @brief x maximum bound on field to walk within
+        double x_max = 0.0;
+        /// @brief y minimum bound on field to walk within
+        double y_min = 0.0;
+        /// @brief y maximum bound on field to walk within
+        double y_max = 0.0;
+    };
+
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief The id of the robot
@@ -49,14 +60,15 @@ namespace module::purpose {
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value { STRIKER, GOALIE, DEFENDER, DYNAMIC };
-            Value value = Value::STRIKER;
+            enum Value { ALL_ROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
+            Value value = Value::ALL_ROUNDER;
 
             Position() = default;
             Position(Value value) : value(value) {}
             Position(std::string const& str) {
                 // clang-format off
-                if (str == "STRIKER") { value = Value::STRIKER; }
+                if (str == "ALL_ROUNDER") { value = Value::ALL_ROUNDER; }
+                else if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
                 else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
@@ -70,6 +82,7 @@ namespace module::purpose {
 
             operator std::string() const {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "AllRounder";
                     case Value::STRIKER: return "Striker";
                     case Value::GOALIE: return "Goalie";
                     case Value::DEFENDER: return "Defender";
@@ -91,6 +104,14 @@ namespace module::purpose {
             int timeout = 0;
             /// @brief The largest id of a robot
             uint8_t max_robots = 0;
+            /// Goalie bounding box
+            BoundingBox goalie_bounding_box;
+
+            /// Defender bounding box
+            BoundingBox defender_bounding_box;
+
+            /// Striker bounding box
+            BoundingBox striker_bounding_box;
         } cfg;
 
         struct RobotInfo {

@@ -20,7 +20,8 @@ nuclear_role(
   input::SensorFilter
   input::Camera
   input::GameController
-  # network::RobotCommunication Vision
+  network::RobotCommunication
+  # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
@@ -61,8 +62,9 @@ nuclear_role(
   strategy::DiveToBall
   strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::Defender
+  purpose::AllRounder
   purpose::Striker
+  purpose::Defender
   purpose::Goalie
   purpose::Soccer
   # Platform

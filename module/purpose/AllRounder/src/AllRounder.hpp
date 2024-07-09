@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,40 +24,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_STRATEGY_WALKINSIDEBOUNDEDBOX_HPP
-#define MODULE_STRATEGY_WALKINSIDEBOUNDEDBOX_HPP
+#ifndef MODULE_PURPOSE_ALLROUNDER_HPP
+#define MODULE_PURPOSE_ALLROUNDER_HPP
+
 
 #include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
 
-namespace module::strategy {
+namespace module::purpose {
 
-    class WalkInsideBoundedBox : public ::extension::behaviour::BehaviourReactor {
+    class AllRounder : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief Calls Tasks to play soccer normally for a all rounder
+        void play();
+
         /// @brief Stores configuration values
         struct Config {
-
-            /// @brief Bounded box of region to defend the ball - x min, x max, y max, y min
-            double bounded_region_x_min = 0.0;
-            double bounded_region_x_max = 0.0;
-            double bounded_region_y_min = 0.0;
-            double bounded_region_y_max = 0.0;
-            /// @brief Length of time before the ball detection is too old and we should search for the ball
-            NUClear::clock::duration ball_search_timeout{};
-            /// @brief Allow pass x offset
-            double allow_pass_x_offset = 0.0;
-            /// @brief Allow pass y offset
-            double allow_pass_y_offset = 0.0;
-
+            /// @brief Ready position to walk to (x, y, theta)
+            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
         } cfg;
 
+
     public:
-        /// @brief Called by the powerplant to build and setup the Defend reactor.
-        explicit WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the AllRounder reactor.
+        explicit AllRounder(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::strategy
+}  // namespace module::purpose
 
-#endif  // MODULE_STRATEGY_WALKINSIDEBOUNDED_HPP
+#endif  // MODULE_PURPOSE_ALLROUNDER_HPP

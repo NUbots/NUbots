@@ -25,7 +25,8 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
-    this.network.on(message.input.Purpose, this.onPurposes);
+    this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
+    this.network.on(message.purpose.Purpose, this.onPurpose);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -64,10 +65,38 @@ export class LocalisationNetwork {
   };
 
   @action.bound
-  private onPurposes(robotModel: RobotModel, purpose: message.input.Purpose) {
+  private WalkInsideBoundedBox(robotModel: RobotModel, boundedBox: message.strategy.WalkInsideBoundedBox) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.boundingBox = {
+      minX: boundedBox.xMin,
+      maxX: boundedBox.xMax,
+      minY: boundedBox.yMin,
+      maxY: boundedBox.yMax,
+    };
+  }
+
+  @action.bound
+  private onPurpose(robotModel: RobotModel, purpose: message.purpose.Purpose) {
     const robot = LocalisationRobotModel.of(robotModel);
     const position = purpose.purpose;
-    robot.purpose = this.getKey(message.input.SoccerPosition, position!)!;
+    robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
+
+    robot.player_id = purpose.playerId!;
+
+    // Update colour based on player id
+    if (robot.player_id === 1) {
+      robot.color = "blue";
+    } else if (robot.player_id === 2) {
+      robot.color = "purple";
+    } else if (robot.player_id === 3) {
+      robot.color = "red";
+    } else if (robot.player_id === 4) {
+      robot.color = "orange";
+    } else if (robot.player_id === 5) {
+      robot.color = "yellow";
+    } else {
+      robot.color = "black";
+    }
   }
 
   @action.bound

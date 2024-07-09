@@ -41,5 +41,6 @@ targets:
     message.nuclear.ReactionStatistics: false
 
     # Behaviour
-    message.input.Purpose: true
+    message.purpose.Purpose: true
     message.planning.WalkToDebug: true
+    message.strategy.WalkInsideBoundedBox: true

@@ -6,3 +6,9 @@ ready_position: [4, 0, -3.14]
 # Position on the field to walk to if the opposing team is awarded a penalty kick
 # (Must be at the goal line)
 penalty_defence_position: [4.5, 0, -3.14]
+
+# Bounded area for WalkInsideBoundedBox to use
+bounded_region_x_min: 3.5
+bounded_region_x_max: 5
+bounded_region_y_min: -4.0
+bounded_region_y_max: 4.0

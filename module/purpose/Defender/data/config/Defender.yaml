@@ -2,13 +2,13 @@
 log_level: INFO
 
 # Position on field to walk to (x,y,theta)
-ready_position: [2, -1.5, -3.14]
+ready_position: [2.5, 0, -3.14]
 
 # Position on the field to walk to if the opposing team is awarded a penalty kick
 penalty_defence_position: [4, 2, -3.14]
 
-# Bounded area for defender to stay within
-bounded_region_x_min: -0.5
-bounded_region_x_max: 3.8
-bounded_region_y_min: -3.0
-bounded_region_y_max: 3.0
+# Bounded area for WalkInsideBoundedBox to use
+bounded_region_x_min: 1.5
+bounded_region_x_max: 3.5
+bounded_region_y_min: -4.0
+bounded_region_y_max: 4.0

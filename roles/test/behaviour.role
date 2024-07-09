@@ -51,6 +51,7 @@ nuclear_role(
   strategy::FallRecovery
   strategy::StandStill
   strategy::WalkToFieldPosition
+  strategy::WalkInsideBoundedBox
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject

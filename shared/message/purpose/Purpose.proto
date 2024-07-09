@@ -22,21 +22,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-
 syntax = "proto3";
 
-package message.strategy;
+package message.purpose;
 
-import "Transform.proto";
+/// The detected purpose of the robot
+enum SoccerPosition {
+    ALL_ROUNDER = 0;
+    STRIKER     = 1;
+    GOALIE      = 2;
+    DEFENDER    = 3;
+    DYNAMIC     = 4;
+}
 
-/// A task that will tell robot to walk to its position if the ball is not in its bounded box region
-message WalkInsideBoundedBox {
-    double x_min = 1;
-    double x_max = 2;
-    double y_min = 3;
-    double y_max = 4;
+/// The robot's current purpose configuration
+message Purpose {
+    /// Player id
+    uint32 player_id = 1;
+    /// Robot's purpose
+    SoccerPosition purpose = 2;
+    /// Whether we are dynamically deciding our position
+    bool dynamic = 3;
+    /// Whether we are actively in the game
+    bool active = 4;
+}
 
-    /// Default position to ball back to if ball not visible
-    iso3 Hfd = 5;
+/// The robot's current model for all robot's purposes
+message Purposes {
+    /// Robot id and purpose
+    map<uint32, Purpose> purposes = 1;
 }

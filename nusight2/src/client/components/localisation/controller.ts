@@ -365,4 +365,14 @@ export class LocalisationController {
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
   };
+
+  @action
+  toggleWalkToDebugVisibility = (model: LocalisationModel) => {
+    model.walkToDebugVisible = !model.walkToDebugVisible;
+  };
+
+  @action
+  toggleBoundedBoxVisibility = (model: LocalisationModel) => {
+    model.boundedBoxVisible = !model.boundedBoxVisible;
+  };
 }

@@ -22,21 +22,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-
 syntax = "proto3";
 
-package message.strategy;
+package message.purpose;
 
-import "Transform.proto";
-
-/// A task that will tell robot to walk to its position if the ball is not in its bounded box region
-message WalkInsideBoundedBox {
+/// Bounding box to update to
+message UpdateBoundingBox {
     double x_min = 1;
     double x_max = 2;
     double y_min = 3;
     double y_max = 4;
-
-    /// Default position to ball back to if ball not visible
-    iso3 Hfd = 5;
 }
