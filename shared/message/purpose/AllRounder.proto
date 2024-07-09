@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2024 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -22,23 +22,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
 syntax = "proto3";
 
-package message.input;
+package message.purpose;
 
-/// The detected purpose of the robot
-enum SoccerPosition {
-    STRIKER  = 0;
-    GOALIE   = 1;
-    DEFENDER = 2;
-    DYNAMIC  = 3;
+message AllRounder {
+    bool force_playing = 1;
 }
 
-message Purpose {
-    // Robot's purpose
-    SoccerPosition purpose = 1;
-    /// Whether we are dynamically deciding our position
-    bool dynamic = 2;
-    // Whether we are actively in the game
-    bool active = 3;
-}
+message NormalAllRounder {}
+message PenaltyShootoutAllRounder {}
+message DirectFreeKickAllRounder {}
+message InDirectFreeKickAllRounder {}
+message PenaltyKickAllRounder {}
+message CornerKickAllRounder {}
+message GoalKickAllRounder {}
+message ThrowInAllRounder {}
