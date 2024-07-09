@@ -8,7 +8,7 @@ force_playing: false
 disable_idle_delay: 5
 
 # The position of the robot
-# GOALIE, STRIKER, DEFENDER
+# ALL_ROUNDER, GOALIE, STRIKER, DEFENDER, DYNAMIC
 position: DYNAMIC
 
 # The number of seconds to wait before assuming a teammate is inactive
