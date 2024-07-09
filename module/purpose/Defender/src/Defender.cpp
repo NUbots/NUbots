@@ -134,22 +134,70 @@ namespace module::purpose {
         });
 
         // Direct free kick
-        on<Provide<DirectFreeKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<DirectFreeKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
 
         // Indirect free kick
-        on<Provide<InDirectFreeKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<InDirectFreeKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
 
         // Penalty kick
         on<Provide<PenaltyKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Corner kick
-        on<Provide<CornerKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<CornerKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
 
         // Goal kick
         on<Provide<GoalKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Throw in
-        on<Provide<ThrowInDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<DirectFreeKickDefender>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                play();
+            });
     }
 
     void Defender::play() {
