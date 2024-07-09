@@ -12,7 +12,6 @@ var structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display =
       [ "PLAYER_ID", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a3eb694104fa7862ff2669e6e33a4863d", null ],
       [ "TEAM_ID", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a71c415389b72dc4cfad55dfd85a21204", null ],
       [ "POSITION", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a90b4ba73224408e82ade8a072a3712c1", null ],
-      [ "READY_POSITION", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01add3c66f093e80ba60d72d6423cc68574", null ],
       [ "END", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01ab1a326c06d88bf042f73d70f50197905", null ]
     ] ],
     [ "C1_PAD", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a320045bd1b89f970cd5a3f8f77be0a7d", null ],

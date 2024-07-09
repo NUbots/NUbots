@@ -19,7 +19,6 @@ var classmodule_1_1tools_1_1RoboCupConfiguration =
     [ "MAX_TEAM_ID", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a2e01604cbb34686a3bcdc49123eb2ea6", null ],
     [ "password", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a4c1c6a09aff71ef7eaf295c895c982d8", null ],
     [ "player_id", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a05ecbe1d52668c250262afccbc67d517", null ],
-    [ "ready_position", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a7cad54abb12e8eb0c9d4b31e601dc5dd", null ],
     [ "robot_name", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a202fb766361cfb7232f922a2e677c526", null ],
     [ "robot_position", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a7397fb0ddd9c861967920ba09e7997d1", null ],
     [ "ssid", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a2f6b8494f9360baffa684ba960adcad0", null ],
