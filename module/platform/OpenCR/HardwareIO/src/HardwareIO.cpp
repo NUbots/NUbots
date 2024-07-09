@@ -185,12 +185,12 @@ namespace module::platform::OpenCR {
         // When we receive data back from the OpenCR it will arrive here
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
-        on<IO>(opencr.native_handle(), IO::READ).then([this] {
+        on<IO, MainThread>(opencr.native_handle(), IO::READ).then([this] {
             // Process the response packet and emit a StatusReturn if applicable
             handle_response();
         });
 
-        on<Trigger<StatusReturn>, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
+        on<Trigger<StatusReturn>, Sync<HardwareIO>, MainThread>().then([this](const StatusReturn& packet) {
             const NUgus::ID packet_id = NUgus::ID(packet.id);
             /* Error handling */
 
@@ -333,7 +333,7 @@ namespace module::platform::OpenCR {
 
         // REACTIONS FOR RECEIVING HARDWARE REQUESTS FROM THE SYSTEM
 
-        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+        on<Trigger<ServoTargets>, MainThread>().then([this](const ServoTargets& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
                 // Desired time to reach the goal position (in milliseconds)
