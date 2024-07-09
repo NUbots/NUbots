@@ -37,16 +37,17 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
-#include "message/input/Purpose.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/purpose/AllRounder.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -67,17 +68,18 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
-    using message::input::Purpose;
     using message::input::RoboCup;
     using message::input::Sensors;
-    using message::input::SoccerPosition;
     using message::localisation::Ball;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
+    using message::purpose::AllRounder;
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::purpose::Striker;
     using message::skill::Look;
     using message::skill::Walk;
@@ -138,6 +140,10 @@ namespace module::purpose {
 
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
+                case Position::ALL_ROUNDER:
+                    emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("ALL_ROUNDER");
+                    break;
                 case Position::STRIKER:
                     emit<Task>(std::make_unique<Striker>(cfg.force_playing));
                     robots[player_id - 1].position = Position("STRIKER");
@@ -163,9 +169,12 @@ namespace module::purpose {
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
+            // Reset dynamic robot to no position
+            if (robots[self_penalisation.robot_id - 1].dynamic) {
+                robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
+            }
             // Set penalised robot to inactive
-            robots[self_penalisation.robot_id - 1].active   = false;
-            robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
+            robots[self_penalisation.robot_id - 1].active = false;
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
@@ -263,9 +272,10 @@ namespace module::purpose {
             }
         }
 
-        // Check if we have a purpose
-        robots[player_id - 1].position =
-            robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
+        // If we have no purpose (dynamic) be a defender
+        if (robots[player_id - 1].position == Position::DYNAMIC) {
+            robots[player_id - 1].position = Position::DEFENDER;
+        }
 
         // Check if there are any strikers
         int number_strikers = false;
