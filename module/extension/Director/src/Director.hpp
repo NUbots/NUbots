@@ -480,9 +480,6 @@ namespace module::extension {
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
         std::multimap<uint64_t, std::shared_ptr<component::DirectorTask>> pack_builder;
 
-        /// @brief Count to track when we should next emit a Director message for NUsight visualisation
-        int debug_emit_count = 0;
-
     public:
         friend class InformationSource;
     };
