@@ -80,7 +80,6 @@ namespace module::purpose {
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
     using message::purpose::Purpose;
-    using message::purpose::Purposes;
     using message::purpose::SoccerPosition;
     using message::purpose::Striker;
     using message::purpose::UpdateBoundingBox;
@@ -197,7 +196,12 @@ namespace module::purpose {
         });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
+            // Reset dynamic robot to no position
+            if (robots[self_penalisation.robot_id - 1].dynamic) {
+                robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
+            }
             // Set penalised robot to inactive
+            robots[self_penalisation.robot_id - 1].active = false;
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
