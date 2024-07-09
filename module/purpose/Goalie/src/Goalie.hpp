@@ -43,8 +43,6 @@ namespace module::purpose {
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
             Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
-            /// @brief Penalty defence position to walk to when defending from a penalty kick from the opposing team
-            Eigen::Vector3f penalty_defence_position = Eigen::Vector3f::Zero();
         } cfg;
 
     public:
