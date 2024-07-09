@@ -152,34 +152,33 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, Sync<Soccer>>().then(
-            [this]() {
-                // We are alive!
-                robots[player_id - 1].active     = true;
-                robots[player_id - 1].last_heard = NUClear::clock::now();
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
+            // We are alive!
+            robots[player_id - 1].active     = true;
+            robots[player_id - 1].last_heard = NUClear::clock::now();
 
-                // Make task based on configured purpose/soccer position
-                switch (cfg.position) {
-                    case Position::ALL_ROUNDER:
-                        emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
-                        robots[player_id - 1].position = Position("ALL_ROUNDER");
-                        break;
-                    case Position::STRIKER:
-                        emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                        robots[player_id - 1].position = Position("STRIKER");
-                        break;
-                    case Position::GOALIE:
-                        emit<Task>(std::make_unique<Goalie>(cfg.force_playing));
-                        robots[player_id - 1].position = Position("GOALIE");
-                        break;
-                    case Position::DEFENDER:
-                        emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-                        robots[player_id - 1].position = Position("DEFENDER");
-                        break;
-                    case Position::DYNAMIC: determine_purpose(); break;
-                    default: log<NUClear::ERROR>("Invalid robot position");
-                }
-            });
+            // Make task based on configured purpose/soccer position
+            switch (cfg.position) {
+                case Position::ALL_ROUNDER:
+                    emit<Task>(std::make_unique<AllRounder>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("ALL_ROUNDER");
+                    break;
+                case Position::STRIKER:
+                    emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("STRIKER");
+                    break;
+                case Position::GOALIE:
+                    emit<Task>(std::make_unique<Goalie>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("GOALIE");
+                    break;
+                case Position::DEFENDER:
+                    emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                    robots[player_id - 1].position = Position("DEFENDER");
+                    break;
+                case Position::DYNAMIC: determine_purpose(); break;
+                default: log<NUClear::ERROR>("Invalid robot position");
+            }
+        });
 
         on<Every<5, Per<std::chrono::seconds>>>().then([this] {
             // Emit the purpose
@@ -197,10 +196,8 @@ namespace module::purpose {
             emit(std::move(purposes));
         });
 
-        on<Trigger<Penalisation>, Sync<Soccer>>().then([this](const Penalisation& self_penalisation) {
+        on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // Set penalised robot to inactive
-            robots[self_penalisation.robot_id - 1].active   = false;
-            robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
 
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
@@ -208,20 +205,26 @@ namespace module::purpose {
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
             }
+
+            // Set penalised robot to inactive
+            robots[self_penalisation.robot_id - 1].active   = false;
+            robots[self_penalisation.robot_id - 1].position = Position::DYNAMIC;
         });
 
-        on<Trigger<Unpenalisation>, Sync<Soccer>>().then([this](const Unpenalisation& self_unpenalisation) {
+        on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             robots[self_unpenalisation.robot_id - 1].active = true;
 
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             }
         });
 
         // Left button pauses the soccer scenario
-        on<Trigger<ButtonLeftDown>, Sync<Soccer>>().then([this] {
+        on<Trigger<ButtonLeftDown>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             emit<Scope::DIRECT>(std::make_unique<EnableIdle>());
             emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
@@ -230,7 +233,7 @@ namespace module::purpose {
 
         on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<EnableIdle>, Sync<Soccer>>().then([this] {
+        on<Trigger<EnableIdle>>().then([this] {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -239,7 +242,7 @@ namespace module::purpose {
         });
 
         // Middle button resumes the soccer scenario
-        on<Trigger<ButtonMiddleDown>, Sync<Soccer>>().then([this] {
+        on<Trigger<ButtonMiddleDown>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             // Restart the Director graph for the soccer scenario after a delay
             emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
@@ -249,10 +252,9 @@ namespace module::purpose {
 
         on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<DisableIdle>, Sync<Soccer>>().then([this] {
+        on<Trigger<DisableIdle>>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
             if (!idle) {
-                emit<Task>(std::unique_ptr<Walk>(nullptr));
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 log<NUClear::INFO>("Idle mode disabled");
             }
