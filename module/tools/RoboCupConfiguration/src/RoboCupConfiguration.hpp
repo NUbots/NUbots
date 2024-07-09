@@ -58,13 +58,14 @@ namespace module::tools {
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value { STRIKER, GOALIE, DEFENDER, DYNAMIC };
-            Value value = Value::STRIKER;
+            enum Value { ALL_ROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
+            Value value = Value::ALL_ROUNDER;
 
             Position() = default;
             Position(std::string const& str) {
                 // clang-format off
-                if (str == "STRIKER") { value = Value::STRIKER; }
+                if (str == "ALL_ROUNDER") { value = Value::ALL_ROUNDER; }
+                else if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
                 else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
@@ -75,6 +76,7 @@ namespace module::tools {
             /// @brief Convert the enum to a string
             operator std::string() const {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "ALL_ROUNDER";
                     case Value::STRIKER: return "STRIKER";
                     case Value::DEFENDER: return "DEFENDER";
                     case Value::GOALIE: return "GOALIE";
@@ -87,6 +89,7 @@ namespace module::tools {
             /// @return The full yaml name of the config for the current position
             std::string get_config_name() {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "AllRounder.yaml";
                     case Value::STRIKER: return "Striker.yaml";
                     case Value::DEFENDER: return "Defender.yaml";
                     case Value::GOALIE: return "Goalie.yaml";
@@ -98,10 +101,11 @@ namespace module::tools {
             /// @brief Increment the enum, for toggle
             void operator++() {
                 switch (value) {
+                    case Value::ALL_ROUNDER: value = Value::STRIKER; break;
                     case Value::STRIKER: value = Value::GOALIE; break;
                     case Value::GOALIE: value = Value::DEFENDER; break;
                     case Value::DEFENDER: value = Value::DYNAMIC; break;
-                    case Value::DYNAMIC: value = Value::STRIKER; break;
+                    case Value::DYNAMIC: value = Value::ALL_ROUNDER; break;
                     default: value = Value::STRIKER;
                 }
             }
