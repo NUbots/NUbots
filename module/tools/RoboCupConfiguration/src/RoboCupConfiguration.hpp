@@ -60,11 +60,7 @@ namespace module::tools {
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value {
-                STRIKER,
-                GOALIE,
-                DEFENDER,
-            };
+            enum Value { STRIKER, GOALIE, DEFENDER, DYNAMIC };
             Value value = Value::STRIKER;
 
             Position() = default;
@@ -73,6 +69,7 @@ namespace module::tools {
                 if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
+                else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
                 else { throw std::runtime_error("Invalid robot position"); }
                 // clang-format on
             }
@@ -83,6 +80,7 @@ namespace module::tools {
                     case Value::STRIKER: return "STRIKER";
                     case Value::DEFENDER: return "DEFENDER";
                     case Value::GOALIE: return "GOALIE";
+                    case Value::DYNAMIC: return "DYNAMIC";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
@@ -94,14 +92,14 @@ namespace module::tools {
                     case Value::STRIKER: return "Striker.yaml";
                     case Value::DEFENDER: return "Defender.yaml";
                     case Value::GOALIE: return "Goalie.yaml";
+                    case Value::DYNAMIC: return "Dynamic.yaml";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
 
             /// @brief Increment the enum, for toggle
             void operator++() {
-                value =
-                    value == Value::DEFENDER ? Value::STRIKER : (value == Value::STRIKER ? Value::GOALIE : DEFENDER);
+                value = value == Value::DYNAMIC ? Value::STRIKER : value + 1;
             }
         } robot_position;
 
