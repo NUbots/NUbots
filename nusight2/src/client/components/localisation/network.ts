@@ -89,9 +89,9 @@ export class LocalisationNetwork {
     } else if (robot.player_id === 2) {
       robot.color = "purple";
     } else if (robot.player_id === 3) {
-      robot.color = "black";
-    } else if (robot.player_id === 4) {
       robot.color = "red";
+    } else if (robot.player_id === 4) {
+      robot.color = "orange";
     } else if (robot.player_id === 5) {
       robot.color = "yellow";
     } else {
