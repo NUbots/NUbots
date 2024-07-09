@@ -26,30 +26,10 @@ syntax = "proto3";
 
 package message.purpose;
 
-<<<<<<<< HEAD:shared/message/purpose/UpdateBoundingBox.proto
 /// Bounding box to update to
 message UpdateBoundingBox {
     double x_min = 1;
     double x_max = 2;
     double y_min = 3;
     double y_max = 4;
-========
-/// The detected purpose of the robot
-enum SoccerPosition {
-    ALL_ROUNDER = 0;
-    STRIKER     = 1;
-    GOALIE      = 2;
-    DEFENDER    = 3;
-    DYNAMIC     = 4;
-}
-
-// The robot's current purpose configuration
-message Purpose {
-    // Robot's purpose
-    SoccerPosition purpose = 1;
-    /// Whether we are dynamically deciding our position
-    bool dynamic = 2;
-    // Whether we are actively in the game
-    bool active = 3;
->>>>>>>> origin/main:shared/message/purpose/Purpose.proto
 }
