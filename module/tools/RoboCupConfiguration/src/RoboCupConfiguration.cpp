@@ -178,12 +178,6 @@ namespace module::tools {
             YAML::Node config       = YAML::LoadFile(soccer_file);
             robot_position          = config["position"].as<std::string>();
         }
-        // Ready position
-        {
-            std::string ready_file = get_config_file(robot_position.get_config_name());
-            YAML::Node config      = YAML::LoadFile(ready_file);
-            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-        }
 
         // Check if we have permissions
         if (geteuid() != 0) {
@@ -232,15 +226,6 @@ namespace module::tools {
             YAML::Node config  = YAML::LoadFile(soccer_file);
             config["position"] = std::string(robot_position);
             std::ofstream file(soccer_file);
-            file << config;
-        }
-
-        {
-            // Write ready position to the corresponding config file
-            std::string ready_file   = get_config_file(robot_position.get_config_name());
-            YAML::Node config        = YAML::LoadFile(ready_file);
-            config["ready_position"] = YAML::Node(ready_position);
-            std::ofstream file(ready_file);
             file << config;
         }
 
@@ -335,15 +320,7 @@ namespace module::tools {
         switch (column) {
             case Display::Column2::PLAYER_ID: player_id = player_id == MAX_PLAYER_ID ? 1 : player_id + 1; break;
             case Display::Column2::TEAM_ID: team_id = team_id == MAX_TEAM_ID ? 1 : team_id + 1; break;
-            case Display::Column2::POSITION: {
-                ++robot_position;
-
-                // Get ready position for this position
-                std::string ready_file = get_config_file(robot_position.get_config_name());
-                YAML::Node config      = YAML::LoadFile(ready_file);
-                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-                break;
-            }
+            case Display::Column2::POSITION: ++robot_position; break;
             default: break;
         }
     }
@@ -367,21 +344,7 @@ namespace module::tools {
         switch (column) {
             case Display::Column2::PLAYER_ID: player_id = std::stoi(user_input()); break;
             case Display::Column2::TEAM_ID: team_id = std::stoi(user_input()); break;
-            case Display::Column2::POSITION: {
-                robot_position = user_input();
-
-                // Get ready position for this position
-                std::string ready_file = get_config_file(robot_position.get_config_name());
-                YAML::Node config      = YAML::LoadFile(ready_file);
-                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-
-                break;
-            }
-            case Display::Column2::READY_POSITION: {
-                std::stringstream ss(user_input());
-                ss >> ready_position.x() >> ready_position.y() >> ready_position.z();
-                break;
-            }
+            case Display::Column2::POSITION: robot_position = user_input(); break;
             default: break;
         }
     }
@@ -470,10 +433,6 @@ namespace module::tools {
         mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
         mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
         mvprintw(7, display.C2_PAD, ("Position : " + std::string(robot_position)).c_str());
-
-        std::stringstream ready_string{};
-        ready_string << ready_position.transpose();
-        mvprintw(8, display.C2_PAD, ("Ready    : " + ready_string.str()).c_str());
 
         // Print commands
         // Heading Commands
