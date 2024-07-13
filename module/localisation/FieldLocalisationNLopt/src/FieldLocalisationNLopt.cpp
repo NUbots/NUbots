@@ -134,16 +134,28 @@ namespace module::localisation {
             expected_goal_post_distance = (own_left_goal - own_right_goal).norm();
 
             // Set the initial state as either left, right, both sides of the field or manually specified inital state
-            auto left_side =
-                Eigen::Vector3d((fd.dimensions.field_length / 4), (fd.dimensions.field_width / 2), -M_PI_2);
-            auto right_side =
-                Eigen::Vector3d((fd.dimensions.field_length / 4), (-fd.dimensions.field_width / 2), M_PI_2);
+            auto left_middle_side =
+                Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto left_bottom_side =
+                Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto left_top_side =
+                Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto right__middle_side =
+                Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+            auto right_bottom_side =
+                Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+            auto right_top_side =
+                Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
             switch (cfg.starting_side) {
-                case StartingSide::LEFT: cfg.initial_hypotheses.emplace_back(left_side); break;
-                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right_side); break;
+                case StartingSide::LEFT: cfg.initial_hypotheses.emplace_back(left_middle_side); break;
+                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right__middle_side); break;
                 case StartingSide::EITHER:
-                    cfg.initial_hypotheses.emplace_back(left_side);
-                    cfg.initial_hypotheses.emplace_back(right_side);
+                    cfg.initial_hypotheses.emplace_back(left_middle_side);
+                    cfg.initial_hypotheses.emplace_back(left_bottom_side);
+                    cfg.initial_hypotheses.emplace_back(left_top_side);
+                    cfg.initial_hypotheses.emplace_back(right__middle_side);
+                    cfg.initial_hypotheses.emplace_back(right_bottom_side);
+                    cfg.initial_hypotheses.emplace_back(right_top_side);
                     break;
                 case StartingSide::CUSTOM: cfg.initial_hypotheses.emplace_back(cfg.initial_state); break;
                 default: log<NUClear::ERROR>("Invalid starting_side specified"); break;
@@ -204,7 +216,7 @@ namespace module::localisation {
                     else {
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(state, field_lines.rPWw, field_intersections, goals);
+                            run_field_line_optimisation(kf.get_state(), field_lines.rPWw, field_intersections, goals);
                         state = opt_results.first;
                     }
 
