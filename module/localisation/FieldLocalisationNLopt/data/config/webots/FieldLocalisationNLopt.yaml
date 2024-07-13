@@ -32,7 +32,7 @@ field_line_distance_weight: 1
 field_line_intersection_weight: 0
 
 # Weighting associated with change between last solution result
-state_change_weight: 0.1
+state_change_weight: 1
 
 # Weighting associated with goal post distance error
 goal_post_distance_weight: 0

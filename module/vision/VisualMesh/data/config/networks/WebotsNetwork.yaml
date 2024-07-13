@@ -1,5 +1,5 @@
 class_map: { ball: 0, environment: 5, field: 3, goal: 1, line: 2, robot: 4 }
-geometry: { intersections: 6, radius: 0.07, shape: SPHERE }
+geometry: { intersections: 6, radius: 0.1, shape: SPHERE }
 mesh: RING6
 network:
   - - activation: selu

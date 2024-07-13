@@ -195,6 +195,7 @@ namespace module::localisation {
                     // Don't run an update if there are not enough field line points or the robot is unstable
                     bool unstable = stability <= Stability::FALLING;
                     if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
+                        log<NUClear::DEBUG>("Not enough field line points or robot is unstable");
                         return;
                     }
 
