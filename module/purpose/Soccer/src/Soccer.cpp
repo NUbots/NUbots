@@ -335,6 +335,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Defender>(cfg.force_playing));
         }
 
+        // Update bounding box based on the position of the robot and existence of other robots
         bool defender_exist = std::count_if(robots.begin(),
                                             robots.end(),
                                             [](const RobotInfo& robot) { return robot.position == Position::DEFENDER; })
