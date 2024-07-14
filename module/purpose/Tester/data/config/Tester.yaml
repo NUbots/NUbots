@@ -27,6 +27,12 @@ tasks:
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [3.0, 0.0, -3.14]
 
+# Bounded area for WalkInsideBoundedBox to use
+bounded_region_x_min: 1.5
+bounded_region_x_max: 3.4
+bounded_region_y_min: -4.0
+bounded_region_y_max: 4.0
+
 # What to have the robot say when speaking
 say_text: "Hello!"
 
