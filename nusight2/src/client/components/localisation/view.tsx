@@ -132,7 +132,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             <ThreeFiber ref={this.canvas} onClick={this.onClick}>
               <LocalisationViewModel model={this.props.model} />
             </ThreeFiber>
-            <RobotPanels model={this.props.model} />
+            <SideBar model={this.props.model} />
           </div>
         </div>
       </div>
@@ -283,12 +283,12 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   );
 });
 
-const RobotPanels = observer(({ model }: { model: LocalisationModel }) => {
+const SideBar = observer(({ model }: { model: LocalisationModel }) => {
   const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
 
   return (
     <div className="absolute right-0 bottom-0 top-0 flex flex-col w-1/5 bg-black/30 overflow-auto first:ml gap-2 p-2">
-      <div className="font-bold flex justify-between bg-auto-surface-2 py-2 px-4 rounded-md">
+      <div className="font-bold flex justify-between bg-auto-surface-1 py-2 px-4 rounded-md">
         <Icon>photo_camera</Icon>
         <span>{target}</span>
         <span>{viewModeString(model.viewMode)}</span>
