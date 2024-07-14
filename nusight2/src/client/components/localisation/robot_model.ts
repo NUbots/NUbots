@@ -138,7 +138,6 @@ export class LocalisationRobotModel {
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
   @observable purpose: string;
-
   @observable max_align_radius: number;
   @observable min_align_radius: number;
   @observable angle_to_final_heading: number;
@@ -200,6 +199,7 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    player_id: number;
   }) {
     this.model = model;
     this.name = name;
