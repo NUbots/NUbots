@@ -55,24 +55,20 @@ namespace module::tools {
         int player_id = 0;
         /// @brief Max player ID
         static const int MAX_PLAYER_ID = 6;
-        /// @brief The position the robot will move to in READY
-        Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value {
-                STRIKER,
-                GOALIE,
-                DEFENDER,
-            };
-            Value value = Value::STRIKER;
+            enum Value { ALL_ROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
+            Value value = Value::ALL_ROUNDER;
 
             Position() = default;
             Position(std::string const& str) {
                 // clang-format off
-                if (str == "STRIKER") { value = Value::STRIKER; }
+                if (str == "ALL_ROUNDER") { value = Value::ALL_ROUNDER; }
+                else if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
+                else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
                 else { throw std::runtime_error("Invalid robot position"); }
                 // clang-format on
             }
@@ -80,9 +76,11 @@ namespace module::tools {
             /// @brief Convert the enum to a string
             operator std::string() const {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "ALL_ROUNDER";
                     case Value::STRIKER: return "STRIKER";
                     case Value::DEFENDER: return "DEFENDER";
                     case Value::GOALIE: return "GOALIE";
+                    case Value::DYNAMIC: return "DYNAMIC";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
@@ -91,17 +89,25 @@ namespace module::tools {
             /// @return The full yaml name of the config for the current position
             std::string get_config_name() {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "AllRounder.yaml";
                     case Value::STRIKER: return "Striker.yaml";
                     case Value::DEFENDER: return "Defender.yaml";
                     case Value::GOALIE: return "Goalie.yaml";
+                    case Value::DYNAMIC: return "Dynamic.yaml";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
 
             /// @brief Increment the enum, for toggle
             void operator++() {
-                value =
-                    value == Value::DEFENDER ? Value::STRIKER : (value == Value::STRIKER ? Value::GOALIE : DEFENDER);
+                switch (value) {
+                    case Value::ALL_ROUNDER: value = Value::STRIKER; break;
+                    case Value::STRIKER: value = Value::GOALIE; break;
+                    case Value::GOALIE: value = Value::DEFENDER; break;
+                    case Value::DEFENDER: value = Value::DYNAMIC; break;
+                    case Value::DYNAMIC: value = Value::ALL_ROUNDER; break;
+                    default: value = Value::STRIKER;
+                }
             }
         } robot_position;
 
@@ -111,7 +117,7 @@ namespace module::tools {
             /// @brief Enum for options in first column
             enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
             /// @brief Enum for options in second column
-            enum class Column2 { PLAYER_ID, TEAM_ID, POSITION, READY_POSITION, END };
+            enum class Column2 { PLAYER_ID, TEAM_ID, POSITION, END };
             /// @brief Column 1 padding
             static const size_t C1_PAD = 2;
             /// @brief Column 1 selection position

@@ -1,34 +1,34 @@
-# This role is used for running the full autonomous soccer set up with a real robot. It should be used with a computer
-# on the network running GameController, or set force_playing to true in Soccer.yaml to play without GameController.
-# This is used at the RoboCup competition for real games.
+# This role is similar to keyboard walk where you can manually control the robot with the keyboard. Unlike keyboard
+# walk, this role includes vision and localisation modules. This can be used to move the robot around and test vision
+# and localisation.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
-  support::configuration::SoccerConfig # Field description
   support::configuration::GlobalConfig
+  support::configuration::SoccerConfig # Field description
   # Network
   network::NUClearNet
   network::NetworkForwarder
   network::PlotJuggler
+  # Output
   output::Overview
   output::ImageCompressor
-  # Sensors and network (input)
-  input::SensorFilter
+  # Input
   input::Camera
-  input::GameController
-  # network::RobotCommunication Vision
+  input::SensorFilter
+  # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
   vision::Yolo
   # Localisation
-  localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::FieldLocalisationNLopt
   localisation::RobotLocalisation
   # Director
   extension::Director
@@ -41,32 +41,16 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
-  skill::Dive
   # Planners
-  planning::PlanWalkPath
-  planning::PlanLook
-  planning::PlanKick
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
-  strategy::FallRecovery
   strategy::StartSafely
+  strategy::FallRecovery
   strategy::StandStill
-  strategy::WalkToFieldPosition
-  strategy::StrategiseLook
-  strategy::WalkToBall
-  strategy::FindObject
-  strategy::KickToGoal
-  strategy::AlignBallToGoal
-  strategy::DiveToBall
-  strategy::WalkInsideBoundedBox
-  # Purposes
-  purpose::AllRounder
-  purpose::Striker
-  purpose::Defender
-  purpose::Goalie
-  purpose::Soccer
+  # Purpose
+  purpose::KeyboardWalk
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
-  # Datalogging support::logging::DataLogging
+  support::logging::DataLogging
 )
