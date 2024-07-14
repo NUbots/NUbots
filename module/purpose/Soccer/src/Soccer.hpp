@@ -104,14 +104,12 @@ namespace module::purpose {
             int timeout = 0;
             /// @brief The largest id of a robot
             uint8_t max_robots = 0;
-            /// Goalie bounding box
-            BoundingBox goalie_bounding_box;
-
-            /// Defender bounding box
-            BoundingBox defender_bounding_box;
-
-            /// Striker bounding box
-            BoundingBox striker_bounding_box;
+            /// @brief Goalie bounding box
+            BoundingBox goalie_bounding_box{};
+            /// @brief Defender bounding box
+            BoundingBox defender_bounding_box{};
+            /// @brief Striker bounding box
+            BoundingBox striker_bounding_box{};
         } cfg;
 
         struct RobotInfo {
