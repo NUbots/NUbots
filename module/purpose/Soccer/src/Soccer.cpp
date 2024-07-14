@@ -163,7 +163,8 @@ namespace module::purpose {
 
         on<Every<5, Per<std::chrono::seconds>>>().then([this] {
             // Emit the purpose
-            emit(std::make_unique<Purpose>(SoccerPosition(int(robots[player_id - 1].position)),
+            emit(std::make_unique<Purpose>(player_id,
+                                           SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
         });

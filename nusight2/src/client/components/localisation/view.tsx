@@ -480,7 +480,8 @@ const PurposeLabel = ({
     return geometry;
   };
 
-  const labelTextGeometry = textGeometry(robotModel.purpose);
+  const label = robotModel.player_id == -1 ? robotModel.purpose : "N" + robotModel.player_id + " " + robotModel.purpose;
+  const labelTextGeometry = textGeometry(label);
   labelTextGeometry.computeBoundingBox();
   const textWidth = labelTextGeometry.boundingBox
     ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
@@ -495,11 +496,11 @@ const PurposeLabel = ({
       position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
       rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
     >
-      <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
+      <mesh position={[0, 0, 0.001]} geometry={labelTextGeometry}>
         <meshBasicMaterial color="white" transparent opacity={1} />
       </mesh>
       <mesh geometry={backdropGeometry}>
-        <meshBasicMaterial color="black" transparent opacity={0.5} />
+        <meshBasicMaterial color={robotModel.color} transparent opacity={0.5} />
       </mesh>
     </object3D>
   );
