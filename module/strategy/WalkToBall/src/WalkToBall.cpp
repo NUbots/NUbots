@@ -184,7 +184,7 @@ namespace module::strategy {
                             }
                             auto robot_infront = robot_infront_of_ball(all_obstacles, rBFf.head(2));
                             if (robot_infront.has_value()) {
-                                this->log<NUClear::INFO>("Robot in front of ball", robot_infront.value());
+                                log<NUClear::DEBUG>("Robot in front of ball", robot_infront.value());
                                 // Move to the side of the ball
                                 if (robot_infront.value().y() > rBFf.y()) {
                                     Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading + M_PI_4));
