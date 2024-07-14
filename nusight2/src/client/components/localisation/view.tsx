@@ -623,7 +623,7 @@ const AssociationLines = ({ model }: { model: LocalisationModel }) => {
 
                 return (
                   <line key={index} geometry={geometry}>
-                    <lineBasicMaterial attach="material" color="yellow" linewidth={4} />
+                    <lineBasicMaterial attach="material" color="red" linewidth={4} />
                   </line>
                 );
               })}
