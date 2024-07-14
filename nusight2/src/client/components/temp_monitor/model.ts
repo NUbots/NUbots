@@ -1,4 +1,5 @@
 import { computed, observable } from "mobx";
+
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
