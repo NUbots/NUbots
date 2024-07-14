@@ -1,5 +1,3 @@
-import { action } from "mobx";
-
 import { RobotModel } from "../robot/model";
 
 import { TempMonitorRobotModel } from "./model";

@@ -1,11 +1,12 @@
 import React, { PropsWithChildren } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
-import { Icon } from "../icon/view";
+
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
+
 import { TempMonitorController } from "./controller";
-import { TempMonitorModel, TempMonitorRobotModel, ServoNames } from "./model";
+import { ServoNames, TempMonitorModel } from "./model";
 
 @observer
 export class TempMonitorView extends React.Component<{
@@ -17,7 +18,6 @@ export class TempMonitorView extends React.Component<{
     const {
       model: { selectedRobot, robots },
       Menu,
-      controller,
     } = this.props;
 
     return (
