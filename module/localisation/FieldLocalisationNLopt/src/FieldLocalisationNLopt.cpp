@@ -235,6 +235,14 @@ namespace module::localisation {
                     // Debugging
                     if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
                         debug_field_localisation(field->Hfw, raw_sensors);
+
+                        // Association
+                        auto associations      = data_association(field_intersections, field->Hfw);
+                        auto association_lines = std::make_unique<AssociationLines>();
+                        for (const auto& association : associations) {
+                            association_lines->lines.push_back({association.first, association.second});
+                        }
+                        emit(association_lines);
                     }
                     emit(field);
                 });
@@ -339,22 +347,16 @@ namespace module::localisation {
             auto Hfw = compute_Hfw(x);
 
             // --- Field line intersection cost ---
-            auto association_lines = std::make_unique<AssociationLines>();
             if (field_intersections) {
-
                 auto associations = data_association(field_intersections, Hfw);
                 for (const auto& association : associations) {
                     // Calculate the distance between the observed intersection and the closest landmark
                     double distance = (association.first - association.second).norm();
-                    association_lines->lines.push_back({association.first, association.second});
-
-                    // If the closest landmark is too far away, do not consider it as an association
                     cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
                 }
             }
 
             // --- Goal post cost ---
-
             // Only consider goal post cost if there are two goals
             if (goals && goals->goals.size() == 2) {
                 // Ensure the goal posts are roughly correct distance apart
@@ -387,7 +389,6 @@ namespace module::localisation {
             // Debugging
             if (log_level <= NUClear::DEBUG) {
                 emit(graph("Cost", cost));
-                emit(association_lines);
             }
             return cost;
         };
