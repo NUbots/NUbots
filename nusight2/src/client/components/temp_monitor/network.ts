@@ -23,7 +23,7 @@ export class TempMonitorNetwork {
   private onSensors(robotModel: RobotModel, packet: message.input.Sensors) {
     const robot = TempMonitorRobotModel.of(robotModel);
     packet.servo.forEach((servo) => {
-      robot.servoTemperatures.set(servo.id, servo.temperature);
+      robot.servoTemperatures.set(servo.id!, servo.temperature!);
     });
   }
 }
