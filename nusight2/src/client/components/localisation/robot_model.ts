@@ -6,6 +6,10 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
+import { message } from "../../../shared/messages";
+import { Matrix3 } from "../../../shared/math/matrix3";
+import { Matrix2 } from "../../../shared/math/matrix2";
+import { Vector2 } from "../../../shared/math/vector2";
 
 class ServoMotor {
   @observable angle: number;
@@ -147,6 +151,18 @@ export class LocalisationRobotModel {
   @observable min_angle_error: number;
   @observable max_angle_error: number;
   @observable velocity_target: Vector3;
+  @observable lastOverViewMessageTime: number;
+  @observable playerId: number;
+  @observable roleName: string;
+  @observable battery: number;
+  @observable voltage: number;
+  @observable gameMode: number;
+  @observable gamePhase: number;
+  @observable penaltyReason: number;
+  @observable lastCameraImage: number;
+  @observable lastSeenBall: number;
+  @observable lastSeenGoal: number;
+
   constructor({
     model,
     name,
@@ -172,6 +188,17 @@ export class LocalisationRobotModel {
     min_angle_error,
     max_angle_error,
     velocity_target,
+    lastOverViewMessageTime,
+    playerId,
+    roleName,
+    battery,
+    voltage,
+    gameMode,
+    gamePhase,
+    penaltyReason,
+    lastCameraImage,
+    lastSeenBall,
+    lastSeenGoal
   }: {
     model: RobotModel;
     name: string;
@@ -197,6 +224,17 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    lastOverViewMessageTime: number;
+    playerId: number;
+    roleName: string;
+    battery: number;
+    voltage: number;
+    gameMode: message.input.GameState.Data.Mode;
+    gamePhase: message.input.GameState.Data.Phase;
+    penaltyReason: message.input.GameState.Data.PenaltyReason;
+    lastCameraImage: number;
+    lastSeenBall: number;
+    lastSeenGoal: number;
   }) {
     this.model = model;
     this.name = name;
@@ -222,6 +260,17 @@ export class LocalisationRobotModel {
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
     this.velocity_target = velocity_target;
+    this.lastOverViewMessageTime = lastOverViewMessageTime;
+    this.playerId = playerId;
+    this.roleName = roleName;
+    this.battery = battery;
+    this.voltage = voltage;
+    this.gameMode = gameMode;
+    this.gamePhase = gamePhase;
+    this.penaltyReason = penaltyReason;
+    this.lastCameraImage = lastCameraImage;
+    this.lastSeenBall = lastSeenBall;
+    this.lastSeenGoal = lastSeenGoal;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -246,8 +295,20 @@ export class LocalisationRobotModel {
       min_angle_error: 0,
       max_angle_error: 0,
       velocity_target: Vector3.of(),
+      lastOverViewMessageTime: 0,
+      playerId: -1,
+      roleName: "",
+      battery: -1,
+      voltage: -1,
+      gameMode: message.input.GameState.Data.Mode.UNKNOWN_MODE,
+      gamePhase: message.input.GameState.Data.Phase.UNKNOWN_PHASE,
+      penaltyReason: message.input.GameState.Data.PenaltyReason.UNKNOWN_PENALTY_REASON,
+      lastCameraImage: 0,
+      lastSeenBall: 0,
+      lastSeenGoal: 0,
     });
   });
+
 
   @computed get id() {
     return this.model.id;
@@ -315,4 +376,10 @@ export class LocalisationRobotModel {
       });
     });
   }
+
+  @computed
+  get connected(): boolean {
+    return this.model.connected;
+  }
+
 }

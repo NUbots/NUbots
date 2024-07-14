@@ -26,6 +26,9 @@ import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
+import { RobotPanel } from "./robot_panel/view";
+import { RobotPanelViewModel } from "./robot_panel/view_model";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -124,12 +127,15 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
-        <div className="flex-grow relative border-t border-auto">
-          <ThreeFiber ref={this.canvas} onClick={this.onClick}>
-            <LocalisationViewModel model={this.props.model} />
-          </ThreeFiber>
+        <div className="flex w-full h-full">
+          <div className="flex-grow relative border-t border-auto">
+            <ThreeFiber ref={this.canvas} onClick={this.onClick}>
+              <LocalisationViewModel model={this.props.model} />
+            </ThreeFiber>
+            <StatusBar model={this.props.model} />
+          </div>
+          <RobotPanels model={this.props.model} />
         </div>
-        <StatusBar model={this.props.model} />
       </div>
     );
   }
@@ -282,13 +288,41 @@ interface StatusBarProps {
   model: LocalisationModel;
 }
 
+const RobotPanels = observer(({ model }: { model: LocalisationModel }) => {
+  return (
+    <div className="absolute right-0 flex flex-col w-1/5 bg-black/30 overflow-hidden first:ml gap-2 p-2">
+      {model.robots.map((robot) => {
+        const model = RobotPanelViewModel.of(robot);
+        console.log(model);
+        return (
+          <div className="" key={robot.id}>
+            <RobotPanel
+              connected={true}
+              batteryValue={model.batteryValue}
+              lastCameraImage={model.lastCameraImage}
+              lastSeenBall={model.lastSeenBall}
+              lastSeenGoal={model.lastSeenGoal}
+              mode={model.mode}
+              penalised={model.penalised}
+              penalty={model.penalty}
+              phase={model.phase}
+              title={model.title}
+              walkCommand={new Vector3(0, 0, 0)}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+});
+
 const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
     <div
       className={
-        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-[70%] text-lg font-bold flex justify-between"
       }
     >
       <span className="text-left w-1/3">&#160;</span>

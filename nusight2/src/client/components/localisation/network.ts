@@ -9,6 +9,10 @@ import { Imat4 } from "../../../shared/messages";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
+import { TimestampObject } from "../../../shared/time/timestamp";
+import { Matrix2 } from "../../../shared/math/matrix2";
+import { Matrix3 } from "../../../shared/math/matrix3";
+import { Vector2 } from "../../../shared/math/vector2";
 
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
@@ -26,6 +30,7 @@ export class LocalisationNetwork {
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.purpose.Purpose, this.onPurposes);
+    this.network.on(message.support.nusight.Overview, this.onOverview);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -158,7 +163,42 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
+
+  @action
+  private onOverview = (robotModel: RobotModel, overview: message.support.nusight.Overview) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // console.log("Overview", overview);
+
+    // Timestamp this message was sent (for comparison with last seen)
+    robot.lastOverViewMessageTime = TimestampObject.toSeconds(overview.timestamp);
+
+    // The id number of the robot
+    robot.playerId = overview.robotId;
+
+    // Name of the executing binary
+    robot.roleName = overview.roleName;
+
+    // Battery as a value between 0 and 1 (percentage)
+    robot.battery = overview.battery;
+
+    // Voltage (in volts!)
+    robot.voltage = overview.voltage;
+
+    // The game mode the robot thinks it is
+    robot.gameMode = overview.gameMode;
+    robot.gamePhase = overview.gamePhase;
+    robot.penaltyReason = overview.penaltyReason;
+
+    // The last time we had a camera image, saw a ball/goal
+    robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
+    robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
+    robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
+  };
+
 }
+
+
 
 function decompose(m: THREE.Matrix4): {
   translation: THREE.Vector3;
