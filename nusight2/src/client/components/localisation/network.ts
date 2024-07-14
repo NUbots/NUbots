@@ -25,6 +25,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
   }
 
@@ -62,6 +63,17 @@ export class LocalisationNetwork {
     robot.max_angle_error = walk_to_debug.maxAngleError;
     robot.velocity_target = Vector3.from(walk_to_debug.velocityTarget);
   };
+
+  @action.bound
+  private WalkInsideBoundedBox(robotModel: RobotModel, boundedBox: message.strategy.WalkInsideBoundedBox) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.boundingBox = {
+      minX: boundedBox.xMin,
+      maxX: boundedBox.xMax,
+      minY: boundedBox.yMin,
+      maxY: boundedBox.yMax,
+    };
+  }
 
   @action.bound
   private onPurpose(robotModel: RobotModel, purpose: message.purpose.Purpose) {

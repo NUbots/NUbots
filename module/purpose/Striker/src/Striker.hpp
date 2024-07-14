@@ -47,6 +47,14 @@ namespace module::purpose {
             /// @brief How far (m) the ball can be away from the centre of the field for it to be deemed as
             /// moved/touched by the other team during kickoff so we can start playing
             double ball_kickoff_outside_radius = 0.0;
+            /// @brief x minimum bound on field to walk within
+            double bounded_region_x_min = 0.0;
+            /// @brief x maximum bound on field to walk within
+            double bounded_region_x_max = 0.0;
+            /// @brief y minimum bound on field to walk within
+            double bounded_region_y_min = 0.0;
+            /// @brief y maximum bound on field to walk within
+            double bounded_region_y_max = 0.0;
         } cfg;
 
 

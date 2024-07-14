@@ -31,6 +31,7 @@
 
 #include "message/input/GameState.hpp"
 #include "message/purpose/Defender.hpp"
+#include "message/purpose/UpdateBoundingBox.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
@@ -56,6 +57,7 @@ namespace module::purpose {
     using message::purpose::NormalDefender;
     using message::purpose::PenaltyKickDefender;
     using message::purpose::ThrowInDefender;
+    using message::purpose::UpdateBoundingBox;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
@@ -81,6 +83,21 @@ namespace module::purpose {
             cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
             cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
             cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
+        });
+
+        on<Trigger<UpdateBoundingBox>>().then([this](const UpdateBoundingBox& new_bounding_box) {
+            cfg.bounded_region_x_min = new_bounding_box.x_min;
+            cfg.bounded_region_x_max = new_bounding_box.x_max;
+            cfg.bounded_region_y_min = new_bounding_box.y_min;
+            cfg.bounded_region_y_max = new_bounding_box.y_max;
+            // Debugging
+            emit(std::make_unique<WalkInsideBoundedBox>(
+                cfg.bounded_region_x_min,
+                cfg.bounded_region_x_max,
+                cfg.bounded_region_y_min,
+                cfg.bounded_region_y_max,
+                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
 
         on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
@@ -158,12 +175,14 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
-        emit<Task>(std::make_unique<KickToGoal>(), 4);      // kick the ball if possible
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
-                                                          cfg.bounded_region_x_max,
-                                                          cfg.bounded_region_y_min,
-                                                          cfg.bounded_region_y_max),
-                   5);  // Patrol bounded box region
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(
+                       cfg.bounded_region_x_min,
+                       cfg.bounded_region_x_max,
+                       cfg.bounded_region_y_min,
+                       cfg.bounded_region_y_max,
+                       pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                            Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
+                   4);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose
