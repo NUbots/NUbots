@@ -339,11 +339,11 @@ namespace module::purpose {
         bool defender_exist = std::count_if(robots.begin(),
                                             robots.end(),
                                             [](const RobotInfo& robot) { return robot.position == Position::DEFENDER; })
-                              >= 1;
+                              > 0;
         bool goalie_exist = std::count_if(robots.begin(),
                                           robots.end(),
                                           [](const RobotInfo& robot) { return robot.position == Position::GOALIE; })
-                            >= 1;
+                            > 0;
 
         // If you are striker or defender and no one else exists
         if (std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
