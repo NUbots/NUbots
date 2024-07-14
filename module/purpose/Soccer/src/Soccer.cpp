@@ -343,7 +343,7 @@ namespace module::purpose {
         bool goalie_exist = std::count_if(robots.begin(),
                                           robots.end(),
                                           [](const RobotInfo& robot) { return robot.position == Position::GOALIE; })
-                            == 1;
+                            >= 1;
 
         // If you are striker or defender and no one else exists
         if (std::count_if(robots.begin(), robots.end(), [](const RobotInfo& robot) { return robot.active; }) == 1) {
