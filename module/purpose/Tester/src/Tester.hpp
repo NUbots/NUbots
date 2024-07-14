@@ -60,7 +60,6 @@ namespace module::purpose {
             double bounded_region_y_min = 0.0;
             /// @brief y maximum bound on field to walk within
             double bounded_region_y_max = 0.0;
-
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task

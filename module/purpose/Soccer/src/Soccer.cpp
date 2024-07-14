@@ -194,7 +194,7 @@ namespace module::purpose {
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 3);
             }
 
             // Reset dynamic robot to no position
@@ -206,8 +206,6 @@ namespace module::purpose {
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
-            robots[self_unpenalisation.robot_id - 1].active = true;
-
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
@@ -228,8 +226,8 @@ namespace module::purpose {
         on<Trigger<EnableIdle>>().then([this] {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+            emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             log<NUClear::INFO>("Idle mode enabled");
         });
 
@@ -248,6 +246,7 @@ namespace module::purpose {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
             if (!idle) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                emit<Task>(std::make_unique<FallRecovery>(), 2);
                 log<NUClear::INFO>("Idle mode disabled");
             }
         });
