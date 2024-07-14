@@ -362,23 +362,6 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
   );
 });
 
-const arrowGeometry = (length: number) => {
-  const arrowShape = new THREE.Shape();
-
-  arrowShape.moveTo(0, -0.01);
-  arrowShape.lineTo(0, 0.01);
-  arrowShape.lineTo(length * 0.7, 0.01);
-  arrowShape.lineTo(length * 0.7, 0.02);
-  arrowShape.lineTo(length, 0);
-  arrowShape.lineTo(length * 0.7, -0.02);
-  arrowShape.lineTo(length * 0.7, -0.01);
-  arrowShape.lineTo(0, -0.01);
-
-  const geometry = new THREE.ShapeGeometry(arrowShape);
-
-  return geometry;
-};
-
 const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   if (!model.Hfd || !model.Hfr) {
     return null;
@@ -402,6 +385,23 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
 
   const velocity_direction = Math.atan2(vRf.y, vRf.x);
   const speed = Math.sqrt(vRf.x ** 2 + vRf.y ** 2) * 1.5;
+
+  const arrowGeometry = (length: number) => {
+    const arrowShape = new THREE.Shape();
+
+    arrowShape.moveTo(0, -0.01);
+    arrowShape.lineTo(0, 0.01);
+    arrowShape.lineTo(length * 0.7, 0.01);
+    arrowShape.lineTo(length * 0.7, 0.02);
+    arrowShape.lineTo(length, 0);
+    arrowShape.lineTo(length * 0.7, -0.02);
+    arrowShape.lineTo(length * 0.7, -0.01);
+    arrowShape.lineTo(0, -0.01);
+
+    const geometry = new THREE.ShapeGeometry(arrowShape);
+
+    return geometry;
+  };
 
   return (
     <object3D>
