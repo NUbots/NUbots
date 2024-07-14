@@ -303,14 +303,16 @@ namespace module::localisation {
             Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
 
             for (const auto& landmark : landmarks) {
-                // Calculate Euclidean distance between the observed intersection and the landmark
-                double distance = (landmark.rLFf - rIFf).norm();
+                if (landmark.type == intersection.type) {
+                    // Calculate Euclidean distance between the observed intersection and the landmark
+                    double distance = (landmark.rLFf - rIFf).norm();
 
-                // If this landmark is closer, update the association
-                if (distance < min_distance) {
-                    min_distance      = distance;
-                    closest_landmark  = landmark.rLFf;
-                    found_association = true;
+                    // If this landmark is closer, update the association
+                    if (distance < min_distance) {
+                        min_distance      = distance;
+                        closest_landmark  = landmark.rLFf;
+                        found_association = true;
+                    }
                 }
             }
 
