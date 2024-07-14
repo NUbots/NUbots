@@ -356,7 +356,11 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         .map((robot) => (
           <WalkPathGoal key={robot.id} model={robot} />
         ))}
-      <GoalsLabels cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} fieldLength={model.field.dimensions.fieldLength} />
+      <GoalsLabels
+        cameraPitch={model.camera.pitch}
+        cameraYaw={model.camera.yaw}
+        fieldLength={model.field.dimensions.fieldLength}
+      />
       <Robots model={model} />
     </object3D>
   );
@@ -524,9 +528,17 @@ const PurposeLabel = ({
   });
 };
 
-const GoalsLabels = ({ cameraPitch, cameraYaw, fieldLength }: { cameraPitch: number; cameraYaw: number, fieldLength: number}) => {
-  const ownGoalsLabelPosition = new Vector3((fieldLength / 2), 0, 0.6);
-  const opponentGoalsLabelPosition = new Vector3((-fieldLength / 2), 0, 0.6);
+const GoalsLabels = ({
+  cameraPitch,
+  cameraYaw,
+  fieldLength,
+}: {
+  cameraPitch: number;
+  cameraYaw: number;
+  fieldLength: number;
+}) => {
+  const ownGoalsLabelPosition = new Vector3(fieldLength / 2, 0, 0.6);
+  const opponentGoalsLabelPosition = new Vector3(-fieldLength / 2, 0, 0.6);
   return (
     <object3D>
       {textBillboard({
