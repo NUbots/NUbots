@@ -163,7 +163,8 @@ namespace module::purpose {
 
         on<Every<5, Per<std::chrono::seconds>>>().then([this] {
             // Emit the purpose
-            emit(std::make_unique<Purpose>(SoccerPosition(int(robots[player_id - 1].position)),
+            emit(std::make_unique<Purpose>(player_id,
+                                           SoccerPosition(int(robots[player_id - 1].position)),
                                            robots[player_id - 1].dynamic,
                                            robots[player_id - 1].active));
         });
@@ -273,9 +274,8 @@ namespace module::purpose {
         }
 
         // If we have no purpose (dynamic) be a defender
-        if (robots[player_id - 1].position == Position::DYNAMIC) {
-            robots[player_id - 1].position = Position::DEFENDER;
-        }
+        robots[player_id - 1].position =
+            robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
 
         // Check if there are any strikers
         int number_strikers = false;
@@ -284,21 +284,12 @@ namespace module::purpose {
                 number_strikers++;
             }
         }
-        // If there are no strikers, check if any robots are waiting to tell us their position
-        // If so, we will wait to see if they are a striker
-        if (number_strikers == 0) {
-            bool waiting_on_robot = false;
-            for (auto& robot : robots) {
-                if (robot.active && robot.position == Position::DYNAMIC) {
-                    waiting_on_robot = true;
-                    break;
-                }
-            }
-            // If there are no strikers and everyone has a purpose, we will be the striker
-            robots[player_id - 1].position = waiting_on_robot ? robots[player_id - 1].position : Position::STRIKER;
-        }
+
+        // If there are no strikers, become a striker
+        robots[player_id - 1].position = number_strikers == 0 ? Position::STRIKER : robots[player_id - 1].position;
+
         // If there are too many strikers, and we are one of them, see if we should be a defender
-        else if (number_strikers > 1 && robots[player_id - 1].position == Position::STRIKER) {
+        if (number_strikers > 1 && robots[player_id - 1].position == Position::STRIKER) {
             // Battle it out for striker position
             // If we are the closest to the ball, we will be the striker
             bool striker = true;
@@ -318,6 +309,7 @@ namespace module::purpose {
             robots[player_id - 1].position = striker ? Position::STRIKER : Position::DEFENDER;
         }
 
+        // Emit the Task for our position
         if (robots[player_id - 1].position == Position::STRIKER) {
             emit<Task>(std::make_unique<Striker>(cfg.force_playing));
         }
