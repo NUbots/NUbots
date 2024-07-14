@@ -292,9 +292,8 @@ namespace module::purpose {
         }
 
         // If we have no purpose (dynamic) be a defender
-        if (robots[player_id - 1].position == Position::DYNAMIC) {
-            robots[player_id - 1].position = Position::DEFENDER;
-        }
+        robots[player_id - 1].position =
+            robots[player_id - 1].position == Position::DYNAMIC ? Position::DEFENDER : robots[player_id - 1].position;
 
         // Check if there are any strikers
         int number_strikers = false;
@@ -303,6 +302,7 @@ namespace module::purpose {
                 number_strikers++;
             }
         }
+
         // If there are no strikers, become a striker
         robots[player_id - 1].position = number_strikers == 0 ? Position::STRIKER : robots[player_id - 1].position;
 
@@ -327,6 +327,7 @@ namespace module::purpose {
             robots[player_id - 1].position = striker ? Position::STRIKER : Position::DEFENDER;
         }
 
+        // Emit the Task for our position
         if (robots[player_id - 1].position == Position::STRIKER) {
             emit<Task>(std::make_unique<Striker>(cfg.force_playing));
         }
