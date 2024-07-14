@@ -1,4 +1,5 @@
 <map id="module::purpose::Soccer::Config" name="module::purpose::Soccer::Config">
-<area shape="rect" id="node1" title="Stores configuration values." alt="" coords="5,109,188,151"/>
+<area shape="rect" id="node1" title="Stores configuration values." alt="" coords="119,139,301,180"/>
 <area shape="rect" id="node2" href="$structmodule_1_1purpose_1_1Soccer_1_1Position.html" title="Smart enum for the robot&#39;s position." alt="" coords="5,5,188,47"/>
+<area shape="rect" id="node3" href="$structmodule_1_1purpose_1_1BoundingBox.html" title=" " alt="" coords="212,13,437,39"/>
 </map>

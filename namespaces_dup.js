@@ -577,6 +577,7 @@ var namespaces_dup =
       ] ],
       [ "purpose", null, [
         [ "AllRounder", "classmodule_1_1purpose_1_1AllRounder.html", "classmodule_1_1purpose_1_1AllRounder" ],
+        [ "BoundingBox", "structmodule_1_1purpose_1_1BoundingBox.html", "structmodule_1_1purpose_1_1BoundingBox" ],
         [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
         [ "DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
         [ "EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],

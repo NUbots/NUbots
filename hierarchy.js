@@ -227,6 +227,7 @@ var hierarchy =
     [ "module::platform::Webots::CameraContext", "structmodule_1_1platform_1_1Webots_1_1CameraContext.html", null ],
     [ "module::platform::Webots::ServoState", "structmodule_1_1platform_1_1Webots_1_1ServoState.html", null ],
     [ "module::purpose::AllRounder::Config", "structmodule_1_1purpose_1_1AllRounder_1_1Config.html", null ],
+    [ "module::purpose::BoundingBox", "structmodule_1_1purpose_1_1BoundingBox.html", null ],
     [ "module::purpose::Defender::Config", "structmodule_1_1purpose_1_1Defender_1_1Config.html", null ],
     [ "module::purpose::DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
     [ "module::purpose::EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],
