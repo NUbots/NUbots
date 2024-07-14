@@ -13,6 +13,7 @@ tasks:
   walk_to_field_position_priority: 0
   kick_to_goal_priority: 0
   stand_still_priority: 0
+  walk_inside_bounded_box: 0
 
   # Planners
   kick_to_priority: 0
@@ -24,7 +25,7 @@ tasks:
   audiogpt_priority: 0
 
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
-walk_to_field_position_position: [0, 0, -3.14]
+walk_to_field_position_position: [3.0, 0.0, -3.14]
 
 # What to have the robot say when speaking
 say_text: "Hello!"
