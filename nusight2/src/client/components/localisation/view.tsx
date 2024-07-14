@@ -26,6 +26,7 @@ import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -355,10 +356,28 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         .map((robot) => (
           <WalkPathGoal key={robot.id} model={robot} />
         ))}
+      <GoalsLabels cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} fieldLength={model.field.dimensions.fieldLength} />
       <Robots model={model} />
     </object3D>
   );
 });
+
+const arrowGeometry = (length: number) => {
+  const arrowShape = new THREE.Shape();
+
+  arrowShape.moveTo(0, -0.01);
+  arrowShape.lineTo(0, 0.01);
+  arrowShape.lineTo(length * 0.7, 0.01);
+  arrowShape.lineTo(length * 0.7, 0.02);
+  arrowShape.lineTo(length, 0);
+  arrowShape.lineTo(length * 0.7, -0.02);
+  arrowShape.lineTo(length * 0.7, -0.01);
+  arrowShape.lineTo(0, -0.01);
+
+  const geometry = new THREE.ShapeGeometry(arrowShape);
+
+  return geometry;
+};
 
 const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   if (!model.Hfd || !model.Hfr) {
@@ -383,23 +402,6 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
 
   const velocity_direction = Math.atan2(vRf.y, vRf.x);
   const speed = Math.sqrt(vRf.x ** 2 + vRf.y ** 2) * 1.5;
-
-  const arrowGeometry = (length: number) => {
-    const arrowShape = new THREE.Shape();
-
-    arrowShape.moveTo(0, -0.01);
-    arrowShape.lineTo(0, 0.01);
-    arrowShape.lineTo(length * 0.7, 0.01);
-    arrowShape.lineTo(length * 0.7, 0.02);
-    arrowShape.lineTo(length, 0);
-    arrowShape.lineTo(length * 0.7, -0.02);
-    arrowShape.lineTo(length * 0.7, -0.01);
-    arrowShape.lineTo(0, -0.01);
-
-    const geometry = new THREE.ShapeGeometry(arrowShape);
-
-    return geometry;
-  };
 
   return (
     <object3D>
@@ -438,16 +440,19 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   );
 };
 
-const PurposeLabel = ({
-  robotModel,
+const textBillboard = ({
+  text,
+  position,
   cameraPitch,
   cameraYaw,
+  color = "white",
 }: {
-  robotModel: LocalisationRobotModel;
+  text: string;
+  position: Vector3;
   cameraPitch: number;
   cameraYaw: number;
+  color?: string;
 }) => {
-  const rTFf = robotModel.Hft.decompose().translation;
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
     return new TextGeometry(x, {
@@ -480,7 +485,7 @@ const PurposeLabel = ({
     return geometry;
   };
 
-  const labelTextGeometry = textGeometry(robotModel.purpose);
+  const labelTextGeometry = textGeometry(text);
   labelTextGeometry.computeBoundingBox();
   const textWidth = labelTextGeometry.boundingBox
     ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
@@ -491,16 +496,53 @@ const PurposeLabel = ({
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
-    <object3D
-      position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
-      rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
-    >
-      <mesh position={[0, 0, 0.001]} geometry={textGeometry(robotModel.purpose)}>
-        <meshBasicMaterial color="white" transparent opacity={1} />
+    <object3D position={position.toArray()} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
+      <mesh position={[0, 0, 0.001]} geometry={labelTextGeometry}>
+        <meshBasicMaterial color={color} transparent opacity={1} />
       </mesh>
       <mesh geometry={backdropGeometry}>
         <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
+    </object3D>
+  );
+};
+
+const PurposeLabel = ({
+  robotModel,
+  cameraPitch,
+  cameraYaw,
+}: {
+  robotModel: LocalisationRobotModel;
+  cameraPitch: number;
+  cameraYaw: number;
+}) => {
+  return textBillboard({
+    text: robotModel.purpose,
+    position: robotModel.Hft.decompose().translation.add(new Vector3(0, 0, 0.6)),
+    cameraPitch,
+    cameraYaw,
+  });
+};
+
+const GoalsLabels = ({ cameraPitch, cameraYaw, fieldLength }: { cameraPitch: number; cameraYaw: number, fieldLength: number}) => {
+  const ownGoalsLabelPosition = new Vector3((fieldLength / 2), 0, 0.6);
+  const opponentGoalsLabelPosition = new Vector3((-fieldLength / 2), 0, 0.6);
+  return (
+    <object3D>
+      {textBillboard({
+        text: "Own Goal",
+        color: "deepskyblue",
+        position: ownGoalsLabelPosition,
+        cameraPitch,
+        cameraYaw,
+      })}
+      {textBillboard({
+        text: "Opponent Goal",
+        color: "yellow",
+        position: opponentGoalsLabelPosition,
+        cameraPitch,
+        cameraYaw,
+      })}
     </object3D>
   );
 };
