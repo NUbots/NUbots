@@ -1,10 +1,8 @@
 import { action } from "mobx";
-
 import { message } from "../../../shared/messages";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
-
 import { TempMonitorRobotModel } from "./model";
 
 export class TempMonitorNetwork {
@@ -24,5 +22,8 @@ export class TempMonitorNetwork {
   @action.bound
   private onSensors(robotModel: RobotModel, packet: message.input.Sensors) {
     const robot = TempMonitorRobotModel.of(robotModel);
+    packet.servo.forEach((servo) => {
+      robot.servoTemperatures.set(servo.id, servo.temperature);
+    });
   }
 }
