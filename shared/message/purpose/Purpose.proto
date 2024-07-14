@@ -45,5 +45,4 @@ message Purpose {
     bool dynamic = 3;
     /// Whether we are actively in the game
     bool active = 4;
-
 }
