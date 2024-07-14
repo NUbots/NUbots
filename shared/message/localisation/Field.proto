@@ -40,12 +40,11 @@ message Field {
     double uncertainty = 3;
     /// Vector of particles representing the robots pose hypothesis (x, y, theta)
     repeated vec3 particles = 4;
-
 }
 
 message Line {
     vec3 start = 1;
-    vec3 end = 2;
+    vec3 end   = 2;
 }
 
 message AssociationLines {
