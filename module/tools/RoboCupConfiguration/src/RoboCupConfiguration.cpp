@@ -52,6 +52,8 @@ namespace module::tools {
         on<Configuration>("RoboCupConfiguration.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
         });
 
         on<Startup>().then([this] {
@@ -313,6 +315,21 @@ namespace module::tools {
     void RoboCupConfiguration::toggle_selection() {
         // Networking configuration column
         if (display.column_selection == 0) {
+            if (display.row_selection == int(Display::Column1::SSID) && !cfg.wifi_networks.empty()) {
+                // See if the current SSID is in the cfg.wifi_networks map
+                auto it = cfg.wifi_networks.find(ssid);
+                if (it != cfg.wifi_networks.end()) {
+                    // If it is, set the SSID and password to the next value in the map
+                    auto next = std::next(it);
+                    ssid      = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->first : next->first;
+                    password  = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->second : next->second;
+                }
+                else {
+                    // If it isn't, set the SSID and password to the first value in the map
+                    ssid     = cfg.wifi_networks.begin()->first;
+                    password = cfg.wifi_networks.begin()->second;
+                }
+            }
             return;
         }
         // Game configuration column
