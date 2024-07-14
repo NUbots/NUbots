@@ -220,8 +220,6 @@ namespace module::localisation {
             /// @brief Scalar weighting of cost associated with distance to goal posts
             double goal_post_distance_weight = 0.0;
 
-            double min_association_distance = 0.0;
-
             /// @brief Constraint on the maximum change in state
             Eigen::Vector3d change_limit = Eigen::Vector3d::Zero();
 

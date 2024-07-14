@@ -28,7 +28,7 @@ targets:
     message.vision.GreenHorizon: true
     message.vision.FieldLines: true
     message.vision.VisualMesh: false
-    message.vision.FieldIntersections: false
+    message.vision.FieldIntersections: true
     message.vision.BoundingBoxes: true
 
     # Localisation Messages

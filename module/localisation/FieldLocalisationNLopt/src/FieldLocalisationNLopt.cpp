@@ -68,7 +68,6 @@ namespace module::localisation {
 
             // Field line intersection optimisation parameters
             cfg.field_line_intersection_weight = config["field_line_intersection_weight"].as<double>();
-            cfg.min_association_distance       = config["min_association_distance"].as<double>();
             cfg.min_field_line_intersections   = config["min_field_line_intersections"].as<int>();
 
             // Constraints and weighting on change in state
@@ -321,9 +320,7 @@ namespace module::localisation {
                     }
 
                     // If the closest landmark is too far away, do not consider it as an association
-                    if (min_distance < cfg.min_association_distance) {
-                        cost += cfg.field_line_intersection_weight * std::pow(min_distance, 2);
-                    }
+                    cost += cfg.field_line_intersection_weight * std::pow(min_distance, 2);
                 }
             }
 
