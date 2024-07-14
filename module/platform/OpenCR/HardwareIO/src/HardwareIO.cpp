@@ -56,68 +56,6 @@ namespace module::platform::OpenCR {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
-
-        packet_watchdog =
-            on<Watchdog<PacketWatchdog, 20, std::chrono::milliseconds>, Sync<PacketWatchdog>>()
-                .then([this] {
-                    // This is a hacky fix because the watchdog is not disabled quickly enough at the beginning. This
-                    // may be related to the out of order packets with Sync within NUClear. This should be fixed in a
-                    // later version of NUClear.
-                    if (model_watchdog.enabled()) {
-                        log<NUClear::WARN>(
-                            "Packet watchdog cannot be enabled while model watchdog is enabled. You may see this "
-                            "warning at the start of the program. This is expected as the watchdog reaction may still "
-                            "be disabling.");
-                        packet_watchdog.disable();
-                        return;
-                    }
-
-                    // Check what the hangup was
-
-                    int num_packets_dropped        = 0;                 // keep track of how many we dropped
-                    NUgus::ID first_dropped_packet = NUgus::ID::NO_ID;  // keep track in case we have a chain
-
-                    // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
-                    // any packets, otherwise is the nonzero ID of the timed out device
-                    for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
-
-                        // Delete the packet we're waiting on
-                        packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-
-                        // notify with ID and servo name
-                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
-                                                       int(dropout_id),
-                                                       nugus.device_name(dropout_id)));
-
-                        // if this is the first packet, set our flag
-                        if (num_packets_dropped == 0) {
-                            first_dropped_packet = dropout_id;
-                        }
-
-                        // increment our counter
-                        num_packets_dropped++;
-                    }
-
-                    // if this is the first packet then send a warning
-                    if (num_packets_dropped > 1) {
-                        log<NUClear::WARN>(
-                            fmt::format("NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
-                                        "chain will cause all later packets (of higher ID) to be dropped. Consider "
-                                        "checking cables for ID {} ({})",
-                                        int(first_dropped_packet),
-                                        nugus.device_name(first_dropped_packet)));
-                    }
-
-                    // Send a request for all servo packets, only if there were packets dropped
-                    // In case the system stops for some other reason, we don't want the watchdog
-                    // to make it automatically restart
-                    if (num_packets_dropped > 0) {
-                        log<NUClear::WARN>("Requesting servo packets to restart system");
-                        send_servo_request();
-                    }
-                })
-                .disable();
-
         model_watchdog =
             on<Watchdog<ModelWatchdog, 500, std::chrono::milliseconds>, Sync<ModelWatchdog>>()
                 .then([this] {
@@ -169,10 +107,70 @@ namespace module::platform::OpenCR {
             // The model watchdog is started, which has a longer time than the packet watchdog
             // The packet watchdog is disabled until we start the main loop
             model_watchdog.enable();
-            packet_watchdog.disable();
 
             // The startup function sets up the subcontroller state
             startup();
+
+            packet_watchdog =
+                on<Watchdog<PacketWatchdog, 20, std::chrono::milliseconds>, Sync<PacketWatchdog>>()
+                    .then([this] {
+                        // This is a hacky fix because the watchdog is not disabled quickly enough at the beginning.
+                        // This may be related to the out of order packets with Sync within NUClear. This should be
+                        // fixed in a later version of NUClear.
+                        if (model_watchdog.enabled()) {
+                            log<NUClear::WARN>(
+                                "Packet watchdog cannot be enabled while model watchdog is enabled. You may see this "
+                                "warning at the start of the program. This is expected as the watchdog reaction may "
+                                "still be disabling.");
+                            packet_watchdog.disable();
+                            return;
+                        }
+
+                        // Check what the hangup was
+
+                        int num_packets_dropped        = 0;                 // keep track of how many we dropped
+                        NUgus::ID first_dropped_packet = NUgus::ID::NO_ID;  // keep track in case we have a chain
+
+                        // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
+                        // any packets, otherwise is the nonzero ID of the timed out device
+                        for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
+
+                            // Delete the packet we're waiting on
+                            packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
+
+                            // notify with ID and servo name
+                            log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
+                                                           int(dropout_id),
+                                                           nugus.device_name(dropout_id)));
+
+                            // if this is the first packet, set our flag
+                            if (num_packets_dropped == 0) {
+                                first_dropped_packet = dropout_id;
+                            }
+
+                            // increment our counter
+                            num_packets_dropped++;
+                        }
+
+                        // if this is the first packet then send a warning
+                        if (num_packets_dropped > 1) {
+                            log<NUClear::WARN>(fmt::format(
+                                "NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
+                                "chain will cause all later packets (of higher ID) to be dropped. Consider "
+                                "checking cables for ID {} ({})",
+                                int(first_dropped_packet),
+                                nugus.device_name(first_dropped_packet)));
+                        }
+
+                        // Send a request for all servo packets, only if there were packets dropped
+                        // In case the system stops for some other reason, we don't want the watchdog
+                        // to make it automatically restart
+                        if (num_packets_dropped > 0) {
+                            log<NUClear::WARN>("Requesting servo packets to restart system");
+                            send_servo_request();
+                        }
+                    })
+                    .enable();
         });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {

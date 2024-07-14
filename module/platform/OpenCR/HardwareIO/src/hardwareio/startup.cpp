@@ -167,9 +167,6 @@ namespace module::platform::OpenCR {
             servo_state.initialised = false;
         }
 
-        // Now, enable the packet watchdog before we send anything.
-        packet_watchdog.enable();
-
         // Find OpenCR firmware and model versions
         // This has to be called last, as we need to wait for the response packet before starting
         packet_queue[NUgus::ID::OPENCR].push_back(PacketTypes::MODEL_INFORMATION);
