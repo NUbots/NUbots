@@ -15,6 +15,7 @@ var structmodule_1_1purpose_1_1Tester_1_1Config =
     [ "stand_still_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a270f3d284b16cf82dbb5fb00e59292aa", null ],
     [ "start_delay", "structmodule_1_1purpose_1_1Tester_1_1Config.html#af5705c1ec66420e365ba3784e053c5aa", null ],
     [ "start_safely_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#aa92cc6b52d1e08d0f3568da5262ad522", null ],
+    [ "walk_inside_bounded_box_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a71f84b50961ea5ae60c07f237e956c34", null ],
     [ "walk_to_ball_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a6dbad76fc414f4b24f011b528f1c3023", null ],
     [ "walk_to_field_position_position", "structmodule_1_1purpose_1_1Tester_1_1Config.html#acef4282092c646c746e0fb9e2ffbf77a", null ],
     [ "walk_to_field_position_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a2e1c331f5a6e557ba77ca856f7d24ff9", null ],
