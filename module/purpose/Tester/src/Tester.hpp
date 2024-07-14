@@ -50,6 +50,8 @@ namespace module::purpose {
             int walk_to_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_kick_ball_priority = 0;
+            /// @brief Walk inside bounding box task
+            int walk_inside_bounded_box_priority = 0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task
