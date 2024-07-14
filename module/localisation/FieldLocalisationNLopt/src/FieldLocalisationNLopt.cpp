@@ -41,7 +41,9 @@ namespace module::localisation {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
+    using message::localisation::AssociationLines;
     using message::localisation::Field;
+    using message::localisation::Line;
     using message::localisation::ResetFieldLocalisation;
     using message::vision::FieldLines;
 
@@ -278,6 +280,41 @@ namespace module::localisation {
                                fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }
 
+    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
+        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const Eigen::Isometry3d& Hfw) {
+
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+
+        for (const auto& intersection : field_intersections->intersections) {
+            double min_distance = std::numeric_limits<double>::max();
+            Eigen::Vector3d closest_landmark;
+            bool found_association = false;
+
+            // Transform the observed intersection from world to field coordinates
+            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+
+            for (const auto& landmark : landmarks) {
+                // Calculate Euclidean distance between the observed intersection and the landmark
+                double distance = (landmark.rLFf - rIFf).norm();
+
+                // If this landmark is closer, update the association
+                if (distance < min_distance) {
+                    min_distance      = distance;
+                    closest_landmark  = landmark.rLFf;
+                    found_association = true;
+                }
+            }
+
+            // If we found an association, add it to our list
+            if (found_association) {
+                associations.emplace_back(closest_landmark, rIFf);
+            }
+        }
+
+        return associations;
+    }
+
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
@@ -302,25 +339,17 @@ namespace module::localisation {
             auto Hfw = compute_Hfw(x);
 
             // --- Field line intersection cost ---
+            auto association_lines = std::make_unique<AssociationLines>();
             if (field_intersections) {
-                for (const auto& intersection : field_intersections->intersections) {
-                    double min_distance = std::numeric_limits<double>::max();
 
-                    for (const auto& landmark : landmarks) {
-                        // Check if the landmark is of the same type as the observed intersection
-                        if (landmark.type == intersection.type) {
-                            // Calculate Euclidean distance between the observed intersection and the landmark
-                            double distance = (landmark.rLFf - Hfw * intersection.rIWw).norm();
-
-                            // If this landmark is closer update
-                            if (distance < min_distance) {
-                                min_distance = distance;
-                            }
-                        }
-                    }
+                auto associations = data_association(field_intersections, Hfw);
+                for (const auto& association : associations) {
+                    // Calculate the distance between the observed intersection and the closest landmark
+                    double distance = (association.first - association.second).norm();
+                    association_lines->lines.push_back({association.first, association.second});
 
                     // If the closest landmark is too far away, do not consider it as an association
-                    cost += cfg.field_line_intersection_weight * std::pow(min_distance, 2);
+                    cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
                 }
             }
 
@@ -354,8 +383,11 @@ namespace module::localisation {
 
             // --- State change cost ---
             cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
+
+            // Debugging
             if (log_level <= NUClear::DEBUG) {
                 emit(graph("Cost", cost));
+                emit(association_lines);
             }
             return cost;
         };

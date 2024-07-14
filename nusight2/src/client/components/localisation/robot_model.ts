@@ -120,6 +120,15 @@ export class FieldIntersection {
   }
 }
 
+export class Line {
+  @observable start: Vector3;
+  @observable end: Vector3;
+  constructor({ start, end }: { start: Vector3; end: Vector3 }) {
+    this.start = start;
+    this.end = end;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -138,6 +147,7 @@ export class LocalisationRobotModel {
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
   @observable purpose: string;
+  @observable association_lines?: Line[];
 
   @observable max_align_radius: number;
   @observable min_align_radius: number;
@@ -164,6 +174,7 @@ export class LocalisationRobotModel {
     goals,
     robots,
     purpose,
+    association_lines,
     max_align_radius,
     min_align_radius,
     angle_to_final_heading,
@@ -189,6 +200,7 @@ export class LocalisationRobotModel {
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
     purpose: string;
+    association_lines?: Line[];
     max_align_radius: number;
     min_align_radius: number;
     angle_to_final_heading: number;
@@ -214,6 +226,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.association_lines = association_lines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
     this.angle_to_final_heading = angle_to_final_heading;
@@ -238,6 +251,7 @@ export class LocalisationRobotModel {
       goals: { points: [] },
       robots: [],
       purpose: "",
+      association_lines: [],
       max_align_radius: 0,
       min_align_radius: 0,
       angle_to_final_heading: 0,

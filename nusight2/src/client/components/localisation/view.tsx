@@ -356,6 +356,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
           <WalkPathGoal key={robot.id} model={robot} />
         ))}
       <Robots model={model} />
+      <AssociationLines model={model} />
     </object3D>
   );
 });
@@ -598,6 +599,33 @@ const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
                   }
                 };
                 return createShapeForIntersection(intersection.type, intersection.position);
+              })}
+            </object3D>
+          ),
+      )}
+    </>
+  );
+};
+
+const AssociationLines = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible &&
+          robot.association_lines && (
+            <object3D key={robot.id}>
+              {robot.association_lines.map((line, index) => {
+                const start = new THREE.Vector3(line.start.x, line.start.y, 0.005);
+                const end = new THREE.Vector3(line.end.x, line.end.y, 0.005);
+
+                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+
+                return (
+                  <line key={index} geometry={geometry}>
+                    <lineBasicMaterial attach="material" color="yellow" linewidth={4} />
+                  </line>
+                );
               })}
             </object3D>
           ),

@@ -327,6 +327,13 @@ namespace module::localisation {
          * @param fd The field dimensions
          */
         void setup_field_landmarks(const FieldDescription& fd);
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using nearest neighbour
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
     };
 }  // namespace module::localisation
 
