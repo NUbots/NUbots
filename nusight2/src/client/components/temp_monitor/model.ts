@@ -1,5 +1,4 @@
 import { computed, observable } from "mobx";
-
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
@@ -58,5 +57,22 @@ export class TempMonitorRobotModel {
   get averageTemperature(): number {
     const temps = Array.from(this.servoTemperatures.values());
     return temps.length > 0 ? temps.reduce((a, b) => a + b) / temps.length : 0;
+  }
+
+  @computed
+  get highestTemperature(): number {
+    return Math.max(...Array.from(this.servoTemperatures.values()), 0);
+  }
+
+  @computed
+  get highestTemperatureServo(): { id: number; name: string; temperature: number } | null {
+    if (this.servoTemperatures.size === 0) return null;
+    const entries = Array.from(this.servoTemperatures.entries());
+    const [id, temp] = entries.reduce((max, current) => (current[1] > max[1] ? current : max));
+    return {
+      id,
+      name: ServoNames[id] || `Servo ${id}`,
+      temperature: temp,
+    };
   }
 }

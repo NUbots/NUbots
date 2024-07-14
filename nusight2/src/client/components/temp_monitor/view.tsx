@@ -1,12 +1,11 @@
 import React, { PropsWithChildren } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
-
+import { Icon } from "../icon/view";
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
-
 import { TempMonitorController } from "./controller";
-import { ServoNames, TempMonitorModel } from "./model";
+import { TempMonitorModel, TempMonitorRobotModel, ServoNames } from "./model";
 
 @observer
 export class TempMonitorView extends React.Component<{
@@ -18,6 +17,7 @@ export class TempMonitorView extends React.Component<{
     const {
       model: { selectedRobot, robots },
       Menu,
+      controller,
     } = this.props;
 
     return (
@@ -44,9 +44,24 @@ export class TempMonitorView extends React.Component<{
                 </div>
               ))}
             </div>
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold">Average Temperature</h3>
-              <p className="text-2xl font-bold">{selectedRobot.averageTemperature.toFixed(1)}°C</p>
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="bg-auto-surface-1 p-4 rounded-lg  border border-collapse border-auto">
+                <h3 className="text-lg font-semibold ">Highest Temperature</h3>
+                {selectedRobot.highestTemperatureServo && (
+                  <>
+                    <p className="text-2xl font-bold">
+                      {selectedRobot.highestTemperatureServo.temperature.toFixed(1)}°C
+                    </p>
+                    <p className="">
+                      {selectedRobot.highestTemperatureServo.name} (ID: {selectedRobot.highestTemperatureServo.id})
+                    </p>
+                  </>
+                )}
+              </div>
+              <div className="bg-auto-surface-1 p-4 rounded-lg  border border-collapse border-auto">
+                <h3 className="text-lg font-semibold">Average Temperature</h3>
+                <p className="text-2xl font-bold">{selectedRobot.averageTemperature.toFixed(1)}°C</p>
+              </div>
             </div>
           </div>
         )}
