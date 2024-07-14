@@ -35,12 +35,15 @@ enum SoccerPosition {
     DYNAMIC     = 4;
 }
 
-// The robot's current purpose configuration
+/// The robot's current purpose configuration
 message Purpose {
-    // Robot's purpose
-    SoccerPosition purpose = 1;
+    /// Player ID of this robot
+    uint32 player_id = 1;
+    /// Robot's purpose
+    SoccerPosition purpose = 2;
     /// Whether we are dynamically deciding our position
-    bool dynamic = 2;
-    // Whether we are actively in the game
-    bool active = 3;
+    bool dynamic = 3;
+    /// Whether we are actively in the game
+    bool active = 4;
+
 }
