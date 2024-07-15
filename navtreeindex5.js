@@ -1,5 +1,8 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1purpose_1_1ScriptTuner.html#ae79c06b94af2e712d497c387a00022d6":[2,0,3,10,10,13],
+"classmodule_1_1purpose_1_1ScriptTuner.html#affdf36ab572d8227827132b5b9a15377":[2,0,3,10,10,0],
+"classmodule_1_1purpose_1_1Soccer.html":[2,0,3,10,11],
 "classmodule_1_1purpose_1_1Soccer.html#a1418b5cfbcd8a6b9b3f3914254fb7570":[2,0,3,10,11,6],
 "classmodule_1_1purpose_1_1Soccer.html#a1d04e66e3377468ab960fddcc725af4b":[2,0,3,10,11,9],
 "classmodule_1_1purpose_1_1Soccer.html#a255d4902af8f922e32aa6c5453d6286b":[2,0,3,10,11,7],
@@ -246,8 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a06c79b489f52b6180f427d51dfdc28f9":[2,0,3,13,2,8,13],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a0d032346d1a58d44e948c9b846998919":[2,0,3,13,2,8,7],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a28cd5ccca22b289fc12cc4e783b45610":[2,0,3,13,2,8,14],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a2c4d74f91989ad5bf23aa531bc60222c":[2,0,3,13,2,8,9],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a2c62a9d496522b3e24b3c09bf1da7f7b":[2,0,3,13,2,8,11],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a36096608181dc0b841660a5de1da1ff5":[2,0,3,13,2,8,2],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a4289e98998b8df844b9c81abb7ae1b78":[2,0,3,13,2,8,20]
+"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a2c4d74f91989ad5bf23aa531bc60222c":[2,0,3,13,2,8,9]
 };

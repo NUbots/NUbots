@@ -1,10 +1,13 @@
 var NAVTREEINDEX4 =
 {
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9aa9639e522a3420a51b1cca915ccd23":[2,0,3,9,1,6,19],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#aa768c43bc5e4c40c5d75d71662e18860":[2,0,3,9,1,6,28],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad3a0b428c419d29017e479c12217676e":[2,0,3,9,1,6,15],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad8ea25319d77fd40ac8bba57a77f8cc8":[2,0,3,9,1,6,24],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ade90fc00d6374310b21f057d75bd8753":[2,0,3,9,1,6,32],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1a9f8fdd7fa87a8f7d13fbaba1515146be":[2,0,3,9,1,6,7,3],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a93429552c8637860604f8d668b16bec1aef1acdb38c84eaac41eb093e1a2b3173":[2,0,3,9,1,6,7,1],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9407c70531109f84987d711ca403e4ac":[2,0,3,9,1,6,12],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9aa9639e522a3420a51b1cca915ccd23":[2,0,3,9,1,6,21],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#aa768c43bc5e4c40c5d75d71662e18860":[2,0,3,9,1,6,30],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad3a0b428c419d29017e479c12217676e":[2,0,3,9,1,6,17],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad8ea25319d77fd40ac8bba57a77f8cc8":[2,0,3,9,1,6,26],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ade90fc00d6374310b21f057d75bd8753":[2,0,3,9,1,6,35],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#aef7fadfd7d550e81f4d0c3ac7584ae64":[2,0,3,9,1,6,8],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af04cb3e8545a7bc0b83b390d79d495e1":[2,0,3,9,1,6,6],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af04cb3e8545a7bc0b83b390d79d495e1a0083d95b8137c259375d756bbccf2800":[2,0,3,9,1,6,6,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1purpose_1_1ScriptTuner.html#ac81cabe2775737f6ddb8c55b08d9342a":[2,0,3,10,10,24],
 "classmodule_1_1purpose_1_1ScriptTuner.html#ac93ba3407b55686131335cd8f44bc6cd":[2,0,3,10,10,11],
 "classmodule_1_1purpose_1_1ScriptTuner.html#aca74bd25a5339ba473d81d5f2e9d3cf6":[2,0,3,10,10,2],
-"classmodule_1_1purpose_1_1ScriptTuner.html#ae2c32e85f5044aaf4c26a03cb50d085d":[2,0,3,10,10,22],
-"classmodule_1_1purpose_1_1ScriptTuner.html#ae79c06b94af2e712d497c387a00022d6":[2,0,3,10,10,13],
-"classmodule_1_1purpose_1_1ScriptTuner.html#affdf36ab572d8227827132b5b9a15377":[2,0,3,10,10,0],
-"classmodule_1_1purpose_1_1Soccer.html":[2,0,3,10,11]
+"classmodule_1_1purpose_1_1ScriptTuner.html#ae2c32e85f5044aaf4c26a03cb50d085d":[2,0,3,10,10,22]
 };

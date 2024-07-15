@@ -20,6 +20,8 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
     ] ],
     [ "HardwareIO", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#aef7fadfd7d550e81f4d0c3ac7584ae64", null ],
     [ "construct_sensors", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af08dad8607a22df41da8e011795bcb39", null ],
+    [ "create_model_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6336eb277b0e53a9e1e9733613b4c2ea", null ],
+    [ "create_packet_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a65d7cb92bed3b78243a223ea03d385b2", null ],
     [ "handle_response", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9407c70531109f84987d711ca403e4ac", null ],
     [ "opencr_waiting", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a47a28ef16226a6275efb5a034f692847", null ],
     [ "process_model_information", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a70d30843b39895654a1c4246b7865324", null ],
@@ -42,5 +44,6 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
     [ "packet_wait", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58f19b0d15954f1f93f5b3ccd116cb3f", null ],
     [ "packet_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a28d80e07d1cac02aa2b2d2fb4dbfd260", null ],
     [ "servo_states", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c", null ],
+    [ "thread_count", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a39670cb63b50fe0a6cfda73c6126a3bc", null ],
     [ "UPDATE_FREQUENCY", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ade90fc00d6374310b21f057d75bd8753", null ]
 ];
