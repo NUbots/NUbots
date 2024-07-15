@@ -241,6 +241,14 @@ namespace module::platform::OpenCR {
         /// @returns the number of packets cleared
         int queue_clear_all();
 
+        /// @brief Creates the model watchdog thread
+        /// @return NUClear::threading::ReactionHandle object
+        ReactionHandle create_model_watchdog();
+
+        /// @brief Creates the packet watchdog thread
+        /// @return NUClear::threading::ReactionHandle object
+        ReactionHandle create_packet_watchdog();
+
         struct PacketWatchdog {};
         struct ModelWatchdog {};
 
