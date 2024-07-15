@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: WARN
 
 Units: m
 BallRadius: 0.07
