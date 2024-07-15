@@ -24,13 +24,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "HardwareIO.hpp"
 #include <fmt/format.h>
+
+#include "HardwareIO.hpp"
 
 namespace module::platform::OpenCR {
 
     NUClear::threading::ReactionHandle HardwareIO::create_model_watchdog() {
-        return on<Watchdog<ModelWatchdog, 500, std::chrono::milliseconds>, Sync<ModelWatchdog>>().then([this] {
+        return on<Watchdog<ModelWatchdog, 500, std::chrono::milliseconds>, Single>().then([this] {
             log<NUClear::WARN>(fmt::format("OpenCR model information not received, restarting system"));
             // Clear all packet queues just in case
             queue_clear_all();
@@ -41,7 +42,7 @@ namespace module::platform::OpenCR {
     }
 
     NUClear::threading::ReactionHandle HardwareIO::create_packet_watchdog() {
-        return on<Watchdog<PacketWatchdog, 20, std::chrono::milliseconds>, Sync<PacketWatchdog>>().then([this] {
+        return on<Watchdog<PacketWatchdog, 20, std::chrono::milliseconds>, Single>().then([this] {
             // This is a hacky fix because the watchdog is not disabled quickly enough at the beginning.
             // This may be related to the out of order packets with Sync within NUClear. This should be
             // fixed in a later version of NUClear.
