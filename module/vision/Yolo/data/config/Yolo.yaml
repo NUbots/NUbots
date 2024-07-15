@@ -14,7 +14,7 @@ goalpost_confidence_threshold: 0.2
 robot_confidence_threshold: 0.2
 
 # Minimum confidence required for a field line intersection detection to be accepted
-intersection_confidence_threshold: 0.1
+intersection_confidence_threshold: 0.6
 
 # NMS threshold for filtering out overlapping bounding boxes
 nms_threshold: 0.5

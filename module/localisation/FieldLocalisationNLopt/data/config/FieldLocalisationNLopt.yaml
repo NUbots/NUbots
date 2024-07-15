@@ -38,7 +38,7 @@ state_change_weight: 1
 goal_post_distance_weight: 0
 
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.5, 0.5, 0.5]
+change_limit: [0.25, 0.25, 0.25]
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
@@ -67,9 +67,9 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-1, 0, 0]
-    - [0, 1e-1, 0]
-    - [0, 0, 1e-1]
+    - [5e-2, 0, 0]
+    - [0, 5e-2, 0]
+    - [0, 0, 5e-2]
   # Measurement model noise
   R:
     - [1, 0, 0]
