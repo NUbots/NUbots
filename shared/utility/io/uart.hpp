@@ -118,7 +118,9 @@ namespace utility::io {
          * @note Implementation in header file to stop the compiler from optimising it away
          */
         template <typename T>
-        ssize_t read(T& data) requires std::is_trivially_copyable_v<T> {
+        ssize_t read(T& data)
+            requires std::is_trivially_copyable_v<T>
+        {
             return read(static_cast<void*>(&data), sizeof(T));
         }
 
@@ -142,7 +144,9 @@ namespace utility::io {
          * @note Implementation in header file to stop the compiler from optimising it away
          */
         template <typename T>
-        ssize_t write(const T& data) requires std::is_trivially_copyable_v<T> {
+        ssize_t write(const T& data)
+            requires std::is_trivially_copyable_v<T>
+        {
             return write(static_cast<const void*>(&data), sizeof(T));
         }
 
@@ -164,6 +168,11 @@ namespace utility::io {
          * @return -2 if no current connection, -1 for some other error. Check errno if -1 is returned.
          */
         [[nodiscard]] int available() const;
+
+        /**
+         * @brief Flush the uart buffer.
+         */
+        void flush();
     };
 
 }  // namespace utility::io
