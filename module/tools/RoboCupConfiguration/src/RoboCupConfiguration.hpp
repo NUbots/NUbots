@@ -38,6 +38,8 @@ namespace module::tools {
         struct Config {
             /// @brief Map of ssid and passwords that are possible
             std::map<std::string, std::string> wifi_networks{};
+            /// @brief Common IPs to toggle
+            std::vector<std::string> common_ips{};
         } cfg;
 
         /// @brief The hostname of the robot

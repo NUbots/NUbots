@@ -7,3 +7,5 @@ wifi_networks:
   B_HUMANOID: "rc2024humanoid"
   C_HUMANOID: "rc2024humanoid"
   D_HUMANOID: "rc2024humanoid"
+
+common_ips: ["10.1.1.X", "192.168.1.X", "192.168.31.X", "192.168.32.X"]
