@@ -739,7 +739,8 @@ const AssociationLines = ({ model }: { model: LocalisationModel }) => {
                 const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
 
                 return (
-                  <line key={index} geometry={geometry}>
+                  <line key={index}>
+                    <bufferGeometry attach="geometry" {...geometry} />
                     <lineBasicMaterial attach="material" color="red" linewidth={4} />
                   </line>
                 );
