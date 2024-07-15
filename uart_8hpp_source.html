@@ -336,19 +336,13 @@ $(document).ready(function(){initNavTree('uart_8hpp_source.html',''); initResiza
 <div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">         * @return -2 if no current connection, -1 for some other error. Check errno if -1 is returned.</span></div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="comment">         */</span></div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        [[nodiscard]] <span class="keywordtype">int</span> <a class="code" href="classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6">available</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;<span class="comment">         * @brief Flush the uart buffer.</span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1io_1_1uart.html#a0b4355577526270de9d8daf788a71688">flush</a>();</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    };</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160; </div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;}  <span class="comment">// namespace utility::io</span></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_IO_UART_HPP</span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;    };</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160; </div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;}  <span class="comment">// namespace utility::io</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_IO_UART_HPP</span></div>
 <div class="ttc" id="aclassutility_1_1io_1_1uart_html"><div class="ttname"><a href="classutility_1_1io_1_1uart.html">utility::io::uart</a></div><div class="ttdoc">Class for managing a connection to a serial device.</div><div class="ttdef"><b>Definition:</b> uart.hpp:38</div></div>
 <div class="ttc" id="aclassutility_1_1io_1_1uart_html_a0169a92d12650bf5d6701d7efae3a887"><div class="ttname"><a href="classutility_1_1io_1_1uart.html#a0169a92d12650bf5d6701d7efae3a887">utility::io::uart::operator=</a></div><div class="ttdeci">uart &amp; operator=(uart &amp;&amp;rhs) noexcept</div><div class="ttdoc">Move assign a new uart class.</div><div class="ttdef"><b>Definition:</b> uart.cpp:67</div></div>
-<div class="ttc" id="aclassutility_1_1io_1_1uart_html_a0b4355577526270de9d8daf788a71688"><div class="ttname"><a href="classutility_1_1io_1_1uart.html#a0b4355577526270de9d8daf788a71688">utility::io::uart::flush</a></div><div class="ttdeci">void flush()</div><div class="ttdoc">Flush the uart buffer.</div><div class="ttdef"><b>Definition:</b> uart.cpp:246</div></div>
 <div class="ttc" id="aclassutility_1_1io_1_1uart_html_a191683ecb6d0e0c828b5e77f7b9063c5"><div class="ttname"><a href="classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5">utility::io::uart::connected</a></div><div class="ttdeci">bool connected() const</div><div class="ttdoc">Return true if the connection is valid.</div><div class="ttdef"><b>Definition:</b> uart.cpp:214</div></div>
 <div class="ttc" id="aclassutility_1_1io_1_1uart_html_a4b64a29a05078f63330e0610f78d1025"><div class="ttname"><a href="classutility_1_1io_1_1uart.html#a4b64a29a05078f63330e0610f78d1025">utility::io::uart::uart</a></div><div class="ttdeci">uart()=default</div><div class="ttdoc">Construct a new unconnected uart class.</div></div>
 <div class="ttc" id="aclassutility_1_1io_1_1uart_html_a4cbf406fe4a50cf63c835f470da777e6"><div class="ttname"><a href="classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6">utility::io::uart::available</a></div><div class="ttdeci">int available() const</div><div class="ttdoc">Return the number of bytes available for reading.</div><div class="ttdef"><b>Definition:</b> uart.cpp:229</div></div>
@@ -363,7 +357,7 @@ $(document).ready(function(){initNavTree('uart_8hpp_source.html',''); initResiza
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_44407c01ceaf0c930b7bbb33a4f218a6.html">io</a></li><li class="navelem"><b>uart.hpp</b></li>
-    <li class="footer">Generated on Mon Jul 15 2024 15:37:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jul 15 2024 18:22:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -169,7 +169,6 @@ $(document).ready(function(){initNavTree('classmodule_1_1platform_1_1OpenCR_1_1H
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
@@ -231,13 +230,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aef7fadfd7d550e81f4d0c3ac7584ae64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a> reactor.  <a href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#aef7fadfd7d550e81f4d0c3ac7584ae64">More...</a><br /></td></tr>
 <tr class="separator:aef7fadfd7d550e81f4d0c3ac7584ae64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
-<tr class="memitem:a39670cb63b50fe0a6cfda73c6126a3bc"><td class="memItemLeft" align="right" valign="top"><a id="a39670cb63b50fe0a6cfda73c6126a3bc"></a>
-static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a39670cb63b50fe0a6cfda73c6126a3bc">thread_count</a> = 1</td></tr>
-<tr class="memdesc:a39670cb63b50fe0a6cfda73c6126a3bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a> a threadpool descriptor type. <br /></td></tr>
-<tr class="separator:a39670cb63b50fe0a6cfda73c6126a3bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
 Private Types</h2></td></tr>
 <tr class="memitem:af04cb3e8545a7bc0b83b390d79d495e1"><td class="memItemLeft" align="right" valign="top"><a id="af04cb3e8545a7bc0b83b390d79d495e1"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af04cb3e8545a7bc0b83b390d79d495e1">PacketTypes</a> : uint8_t { <b>MODEL_INFORMATION</b>
@@ -259,12 +251,6 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:af08dad8607a22df41da8e011795bcb39"><td class="memItemLeft" align="right" valign="top">message::platform::RawSensors&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af08dad8607a22df41da8e011795bcb39">construct_sensors</a> ()</td></tr>
 <tr class="memdesc:af08dad8607a22df41da8e011795bcb39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads info from the state variables and processes it into a RawSensors message.  <a href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#af08dad8607a22df41da8e011795bcb39">More...</a><br /></td></tr>
 <tr class="separator:af08dad8607a22df41da8e011795bcb39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6336eb277b0e53a9e1e9733613b4c2ea"><td class="memItemLeft" align="right" valign="top">ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6336eb277b0e53a9e1e9733613b4c2ea">create_model_watchdog</a> ()</td></tr>
-<tr class="memdesc:a6336eb277b0e53a9e1e9733613b4c2ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the model watchdog thread.  <a href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6336eb277b0e53a9e1e9733613b4c2ea">More...</a><br /></td></tr>
-<tr class="separator:a6336eb277b0e53a9e1e9733613b4c2ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65d7cb92bed3b78243a223ea03d385b2"><td class="memItemLeft" align="right" valign="top">ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a65d7cb92bed3b78243a223ea03d385b2">create_packet_watchdog</a> ()</td></tr>
-<tr class="memdesc:a65d7cb92bed3b78243a223ea03d385b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the packet watchdog thread.  <a href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a65d7cb92bed3b78243a223ea03d385b2">More...</a><br /></td></tr>
-<tr class="separator:a65d7cb92bed3b78243a223ea03d385b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9407c70531109f84987d711ca403e4ac"><td class="memItemLeft" align="right" valign="top"><a id="a9407c70531109f84987d711ca403e4ac"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9407c70531109f84987d711ca403e4ac">handle_response</a> ()</td></tr>
 <tr class="memdesc:a9407c70531109f84987d711ca403e4ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">handles a response packet from the device <br /></td></tr>
@@ -412,62 +398,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 <p>Reads info from the state variables and processes it into a RawSensors message. </p>
 <dl class="section return"><dt>Returns</dt><dd>A RawSensors message created from the current state variables </dd></dl>
-
-</div>
-</div>
-<a id="a6336eb277b0e53a9e1e9733613b4c2ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6336eb277b0e53a9e1e9733613b4c2ea">&#9670;&nbsp;</a></span>create_model_watchdog()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">NUClear::threading::ReactionHandle module::platform::OpenCR::HardwareIO::create_model_watchdog </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Creates the model watchdog thread. </p>
-<dl class="section return"><dt>Returns</dt><dd>NUClear::threading::ReactionHandle object </dd></dl>
-
-</div>
-</div>
-<a id="a65d7cb92bed3b78243a223ea03d385b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a65d7cb92bed3b78243a223ea03d385b2">&#9670;&nbsp;</a></span>create_packet_watchdog()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">NUClear::threading::ReactionHandle module::platform::OpenCR::HardwareIO::create_packet_watchdog </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Creates the packet watchdog thread. </p>
-<dl class="section return"><dt>Returns</dt><dd>NUClear::threading::ReactionHandle object </dd></dl>
 
 </div>
 </div>
@@ -690,7 +620,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/platform/OpenCR/HardwareIO/src/<a class="el" href="OpenCR_2HardwareIO_2src_2HardwareIO_8hpp_source.html">HardwareIO.hpp</a></li>
 <li>module/platform/OpenCR/HardwareIO/src/hardwareio/construct_sensors.cpp</li>
-<li>module/platform/OpenCR/HardwareIO/src/hardwareio/create_watchdogs.cpp</li>
 <li>module/platform/OpenCR/HardwareIO/src/hardwareio/handle_response.cpp</li>
 <li>module/platform/OpenCR/HardwareIO/src/hardwareio/packet_queue.cpp</li>
 <li>module/platform/OpenCR/HardwareIO/src/hardwareio/process_data.cpp</li>
@@ -704,7 +633,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a></li>
-    <li class="footer">Generated on Mon Jul 15 2024 15:37:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jul 15 2024 18:22:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
