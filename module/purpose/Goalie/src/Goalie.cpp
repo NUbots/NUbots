@@ -139,40 +139,48 @@ namespace module::purpose {
         // Direct free kick
         on<Provide<DirectFreeKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
             [this](const GameState& game_state) {
+                // Direct free kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                // If the performing team is not us, find the ball and look at it
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
+                // Otherwise, play as normal
                 play();
             });
 
         // Indirect free kick
         on<Provide<InDirectFreeKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
             [this](const GameState& game_state) {
+                // Indirect free kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+               // If the performing team is not us, find the ball and look at it
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
+                // Otherwise, play as normal
                 play();
             });
 
         // Penalty kick
         on<Provide<PenaltyKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
             [this](const GameState& game_state) {
+                // Penalty kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                // If the performing team is not us, stand in the penalty defence position and dive at ball if needed
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(
                         std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
@@ -184,51 +192,61 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<DiveToBall>(), 4);
                     return;
                 }
+                // Otherwise, play as normal
                 play();
             });
 
         // Corner kick
         on<Provide<CornerKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
             [this](const GameState& game_state) {
+                // Corner kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                // If the performing team is not us, find the ball and look at it
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
+                // Otherwise, play as normal
                 play();
             });
 
         // Goal kick
         on<Provide<GoalKickGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
             [this](const GameState& game_state) {
+                // Goal kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                // If the performing team is not us, find the ball and look at it
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
+                // Otherwise, play as normal
                 play();
             });
 
         // Throw in
         on<Provide<ThrowInGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
             [this](const GameState& game_state) {
+                // Throw in sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                // If the performing team is not us, find the ball and look at it
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
+                // Otherwise, play as normal
                 play();
             });
     }
