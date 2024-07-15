@@ -129,10 +129,24 @@ export class Line {
   }
 }
 
+export class BoundingBox {
+  @observable minX: number;
+  @observable minY: number;
+  @observable maxX: number;
+  @observable maxY: number;
+
+  constructor({ minX, minY, maxX, maxY }: { minX: number; minY: number; maxX: number; maxY: number }) {
+    this.minX = minX;
+    this.minY = minY;
+    this.maxX = maxX;
+    this.maxY = maxY;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
-  @observable color?: string;
+  @observable color: string;
   @observable Htw: Matrix4; // World to torso
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
@@ -157,6 +171,9 @@ export class LocalisationRobotModel {
   @observable min_angle_error: number;
   @observable max_angle_error: number;
   @observable velocity_target: Vector3;
+  @observable boundingBox?: BoundingBox;
+  @observable player_id: number;
+
   constructor({
     model,
     name,
@@ -183,10 +200,12 @@ export class LocalisationRobotModel {
     min_angle_error,
     max_angle_error,
     velocity_target,
+    boundingBox,
+    player_id,
   }: {
     model: RobotModel;
     name: string;
-    color?: string;
+    color: string;
     Htw: Matrix4;
     Hrw: Matrix4;
     Hfw: Matrix4;
@@ -209,6 +228,8 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    boundingBox?: BoundingBox;
+    player_id: number;
   }) {
     this.model = model;
     this.name = name;
@@ -235,12 +256,15 @@ export class LocalisationRobotModel {
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
     this.velocity_target = velocity_target;
+    this.boundingBox = boundingBox;
+    this.player_id = player_id;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
     return new LocalisationRobotModel({
       model,
       name: model.name,
+      color: "black",
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
@@ -260,6 +284,7 @@ export class LocalisationRobotModel {
       min_angle_error: 0,
       max_angle_error: 0,
       velocity_target: Vector3.of(),
+      player_id: -1,
     });
   });
 

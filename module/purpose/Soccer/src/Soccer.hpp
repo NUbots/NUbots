@@ -42,6 +42,17 @@ namespace module::purpose {
     struct EnableIdle {};
     struct DisableIdle {};
 
+    struct BoundingBox {
+        /// @brief x minimum bound on field to walk within
+        double x_min = 0.0;
+        /// @brief x maximum bound on field to walk within
+        double x_max = 0.0;
+        /// @brief y minimum bound on field to walk within
+        double y_min = 0.0;
+        /// @brief y maximum bound on field to walk within
+        double y_max = 0.0;
+    };
+
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief The id of the robot
@@ -93,6 +104,12 @@ namespace module::purpose {
             int timeout = 0;
             /// @brief The largest id of a robot
             uint8_t max_robots = 0;
+            /// @brief Goalie bounding box
+            BoundingBox goalie_bounding_box{};
+            /// @brief Defender bounding box
+            BoundingBox defender_bounding_box{};
+            /// @brief Striker bounding box
+            BoundingBox striker_bounding_box{};
         } cfg;
 
         struct RobotInfo {
