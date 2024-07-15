@@ -2,14 +2,14 @@
 log_level: INFO
 
 # Position on field to walk to (x,y,theta)
-ready_position: [1.0, 0.0, -3.14]
+ready_position: [1.75, 0.0, -3.14]
 
 # How far (m) the ball can be away from the centre of the field for it to be deemed as
 # .moved/touched by the other team during kickoff so we can start playing
 ball_kickoff_outside_radius: 1.0
 
 # Bounded area for WalkInsideBoundedBox to use
-bounded_region_x_min: -5
-bounded_region_x_max: 1.5
-bounded_region_y_min: -4.0
-bounded_region_y_max: 4.0
+bounded_region_x_min: -4.5
+bounded_region_x_max: 1.8
+bounded_region_y_min: -3.0
+bounded_region_y_max: 3.0
