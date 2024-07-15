@@ -243,8 +243,4 @@ namespace utility::io {
         return -1;
     }
 
-    void uart::flush() {
-        ::tcflush(fd, TCIFLUSH);
-    }
-
 }  // namespace utility::io

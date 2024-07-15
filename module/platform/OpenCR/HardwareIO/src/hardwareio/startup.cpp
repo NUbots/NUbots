@@ -29,6 +29,9 @@
 namespace module::platform::OpenCR {
 
     void HardwareIO::startup() {
+        // first, disable the packet watchdog as we haven't sent anything yet and don't want it to trigger
+        packet_watchdog.disable();
+
         // Set the OpenCR to not return a status packet when written to (to allow consecutive writes)
         opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
                                                           uint16_t(OpenCR::Address::STATUS_RETURN_LEVEL),
@@ -163,6 +166,9 @@ namespace module::platform::OpenCR {
         for (auto& servo_state : servo_states) {
             servo_state.initialised = false;
         }
+
+        // Now, enable the packet watchdog before we send anything.
+        packet_watchdog.enable();
 
         // Find OpenCR firmware and model versions
         // This has to be called last, as we need to wait for the response packet before starting
