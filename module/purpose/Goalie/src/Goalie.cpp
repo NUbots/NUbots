@@ -143,6 +143,11 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
                 play();
             });
 
@@ -151,6 +156,11 @@ namespace module::purpose {
             [this](const GameState& game_state) {
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
                 play();
@@ -184,6 +194,11 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
                 play();
             });
 
@@ -194,6 +209,11 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
                 play();
             });
 
@@ -202,6 +222,11 @@ namespace module::purpose {
             [this](const GameState& game_state) {
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
                 }
                 play();
