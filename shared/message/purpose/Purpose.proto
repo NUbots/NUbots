@@ -37,7 +37,7 @@ enum SoccerPosition {
 
 /// The robot's current purpose configuration
 message Purpose {
-    /// Player id
+    /// Player ID of this robot
     uint32 player_id = 1;
     /// Robot's purpose
     SoccerPosition purpose = 2;

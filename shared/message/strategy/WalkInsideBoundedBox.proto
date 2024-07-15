@@ -37,6 +37,6 @@ message WalkInsideBoundedBox {
     double y_min = 3;
     double y_max = 4;
 
-    /// Default position to ball back to if ball not visible
+    /// Default position to walk back to if ball not visible
     iso3 Hfd = 5;
 }

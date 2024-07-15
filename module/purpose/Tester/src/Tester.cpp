@@ -143,7 +143,6 @@ namespace module::purpose {
                                cfg.walk_to_field_position_priority);
                 }
                 if (cfg.walk_inside_bounded_box_priority > 0) {
-                    log<NUClear::INFO>("Walk inside bounded box");
                     emit<Task>(
                         std::make_unique<WalkInsideBoundedBox>(
                             cfg.bounded_region_x_min,
