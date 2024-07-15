@@ -30,7 +30,6 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/KickTo.hpp"
@@ -56,7 +55,6 @@ namespace module::purpose {
     using GameMode       = message::input::GameState::Data::Mode;
     using SecondaryState = message::input::GameState::Data::SecondaryState;
     using message::input::GameState;
-    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::planning::KickTo;
