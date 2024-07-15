@@ -50,7 +50,7 @@ namespace module::platform::OpenCR {
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Makes HardwareIO a threadpool descriptor type
-        constexpr int thread_count = 1;
+        static constexpr int thread_count = 1;
 
     private:
         /// @brief Manages the connection with OpenCR
