@@ -9,7 +9,7 @@ ready_position: [1.75, 0.0, -3.14]
 ball_kickoff_outside_radius: 1.0
 
 # Bounded area for WalkInsideBoundedBox to use
-bounded_region_x_min: -4.5
-bounded_region_x_max: 1.8
-bounded_region_y_min: -3.0
-bounded_region_y_max: 3.0
+bounded_region_x_min: -5.0
+bounded_region_x_max: 1.5
+bounded_region_y_min: -4.0
+bounded_region_y_max: 4.0
