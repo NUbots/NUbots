@@ -105,12 +105,12 @@ namespace module::platform::OpenCR {
         // When we receive data back from the OpenCR it will arrive here
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
-        on<IO, MainThread>(opencr.native_handle(), IO::READ).then([this] {
+        on<IO, Pool<HardwareIO>>(opencr.native_handle(), IO::READ).then([this] {
             // Process the response packet and emit a StatusReturn if applicable
             handle_response();
         });
 
-        on<Trigger<StatusReturn>, Sync<HardwareIO>, MainThread>().then([this](const StatusReturn& packet) {
+        on<Trigger<StatusReturn>, Pool<HardwareIO>>().then([this](const StatusReturn& packet) {
             const NUgus::ID packet_id = NUgus::ID(packet.id);
             /* Error handling */
 
@@ -256,7 +256,7 @@ namespace module::platform::OpenCR {
 
         // REACTIONS FOR RECEIVING HARDWARE REQUESTS FROM THE SYSTEM
 
-        on<Trigger<ServoTargets>, MainThread>().then([this](const ServoTargets& commands) {
+        on<Trigger<ServoTargets>, Pool<HardwareIO>>().then([this](const ServoTargets& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
                 // Desired time to reach the goal position (in milliseconds)
@@ -289,7 +289,7 @@ namespace module::platform::OpenCR {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
+        on<Trigger<ServoTarget>, Pool<HardwareIO>>().then([this](const ServoTarget& command) {
             auto command_list = std::make_unique<ServoTargets>();
             command_list->targets.push_back(command);
 
@@ -298,20 +298,20 @@ namespace module::platform::OpenCR {
         });
 
         // If we get a head_led command then write it
-        on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
+        on<Trigger<RawSensors::HeadLED>, Pool<HardwareIO>>().then([this](const RawSensors::HeadLED& led) {
             // Update our internal state
             opencr_state.head_led = led.RGB;
             opencr_state.dirty    = true;
         });
 
         // If we get a EyeLED command then write it
-        on<Trigger<RawSensors::EyeLED>>().then([this](const RawSensors::EyeLED& /*led*/) {
+        on<Trigger<RawSensors::EyeLED>, Pool<HardwareIO>>().then([this](const RawSensors::EyeLED& /*led*/) {
             // Update our internal state
             // OpenCR can only use 1 RGB LED
         });
 
         // If we get an LED panel command then write it
-        on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
+        on<Trigger<RawSensors::LEDPanel>, Pool<HardwareIO>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
             opencr_state.led_panel.led2 = led.led2;
             opencr_state.led_panel.led3 = led.led3;
@@ -319,7 +319,7 @@ namespace module::platform::OpenCR {
             opencr_state.dirty          = true;
         });
 
-        on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
+        on<Trigger<Buzzer>, Pool<HardwareIO>>().then([this](const Buzzer& buzzer_msg) {
             log<NUClear::DEBUG>("Received Buzzer message");
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = buzzer_msg.frequency;
