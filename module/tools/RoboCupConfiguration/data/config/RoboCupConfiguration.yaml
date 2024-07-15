@@ -3,7 +3,7 @@ log_level: INFO
 
 # Map of ssid and passwords that are possible
 wifi_networks:
-  FieldA: "FieldAPassword"
-  FieldB: "FieldBPassword"
-  FieldC: "FieldCPassword"
-  FieldD: "FieldDPassword"
+  A_HUMANOID: "rc2024humanoid"
+  B_HUMANOID: "rc2024humanoid"
+  C_HUMANOID: "rc2024humanoid"
+  D_HUMANOID: "rc2024humanoid"
