@@ -93,7 +93,10 @@ namespace module::platform::OpenCR {
             // In case the system stops for some other reason, we don't want the watchdog
             // to make it automatically restart
             if (num_packets_dropped > 0) {
-                log<NUClear::WARN>("Requesting servo packets to restart system");
+                log<NUClear::WARN>("Flushing buffer and requesting servo packets to restart system");
+                // We *may* have data that we haven't gotten around to processing by the time the watchdog triggers.
+                // if this is a full packet (somehow) it will throw us out of sync unless we flush the buffer.
+                opencr.flush();
                 send_servo_request();
             }
         });
