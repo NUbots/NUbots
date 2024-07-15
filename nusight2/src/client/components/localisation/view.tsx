@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -124,6 +124,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+          toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
         ></LocalisationMenuBar>
         <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -210,6 +212,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldIntersectionsVisibility = () => {
     this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
   };
+
+  private toggleWalkToDebugVisibility = () => {
+    this.props.controller.toggleWalkToDebugVisibility(this.props.model);
+  };
+
+  private toggleBoundedBoxVisibility = () => {
+    this.props.controller.toggleBoundedBoxVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -228,6 +238,8 @@ interface LocalisationMenuBarProps {
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
   toggleFieldIntersectionsVisibility(): void;
+  toggleWalkToDebugVisibility(): void;
+  toggleBoundedBoxVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -274,6 +286,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           isVisible={model.fieldIntersectionsVisible}
           onClick={props.toggleFieldIntersectionsVisibility}
         />
+        <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
+        <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
       </ul>
     </Menu>
   );
@@ -336,11 +350,10 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
-      {model.robots
-        .filter((robot) => robot.visible && robot.Hfd)
-        .map((robot) => (
-          <WalkPathVisualiser key={robot.id} model={robot} />
-        ))}
+      {model.walkToDebugVisible &&
+        model.robots
+          .filter((robot) => robot.visible && robot.Hfd)
+          .map((robot) => <WalkPathVisualiser key={robot.id} model={robot} />)}
       {model.robots
         .filter((robot) => robot.visible && robot.Hft && robot.purpose)
         .map((robot) => (
@@ -362,6 +375,13 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         fieldLength={model.field.dimensions.fieldLength}
       />
       <Robots model={model} />
+      {model.boundedBoxVisible &&
+        model.robots.map((robot) => {
+          if (robot.visible && robot.boundingBox) {
+            return <BoundingBox key={robot.id} model={robot} />;
+          }
+          return null;
+        })}
     </object3D>
   );
 });
@@ -444,6 +464,103 @@ const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
   );
 };
 
+const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
+  if (!model.boundingBox) return null;
+  const { minX, maxX, minY, maxY } = model.boundingBox;
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const wallThickness = 0.05;
+  const wallHeight = 0.25;
+  const solidBottomHeight = 0.001;
+
+  const vertexShader = `
+    varying vec3 vPosition;
+    void main() {
+      vPosition = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+
+  const fragmentShader = `
+    uniform vec3 color;
+    uniform float wallHeight;
+    uniform float solidBottomHeight;
+    uniform int orientation;
+    varying vec3 vPosition;
+    void main() {
+      float heightFactor;
+      if (orientation == 0) {
+        heightFactor = vPosition.y / wallHeight + 0.5;
+      } else {
+        heightFactor = vPosition.z / wallHeight + 0.5;
+      }
+
+      float normalizedSolidHeight = solidBottomHeight / wallHeight;
+      float opacity;
+
+      if (heightFactor < normalizedSolidHeight) {
+        opacity = 0.9;
+      } else {
+        opacity = smoothstep(1.0, normalizedSolidHeight, heightFactor) * 0.3;
+      }
+
+      gl_FragColor = vec4(color, opacity);
+    }
+  `;
+
+  const createWallMaterial = (orientation: number) => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        color: { value: new THREE.Color(model.color) },
+        wallHeight: { value: wallHeight },
+        solidBottomHeight: { value: solidBottomHeight },
+        orientation: { value: orientation },
+      },
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+  };
+
+  const verticalWallMaterial = useMemo(() => createWallMaterial(0), []);
+  const horizontalWallMaterial = useMemo(() => createWallMaterial(1), []);
+
+  // Update material color when model.color changes
+  useEffect(() => {
+    const newColor = new THREE.Color(model.color);
+    verticalWallMaterial.uniforms.color.value = newColor;
+    horizontalWallMaterial.uniforms.color.value = newColor;
+  }, [model.color, verticalWallMaterial, horizontalWallMaterial]);
+
+  return (
+    <object3D position={[centerX, centerY, wallHeight / 2]}>
+      {/* Left wall */}
+      <mesh position={[-(width / 2 + wallThickness / 2), 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+        <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
+        <primitive object={verticalWallMaterial} />
+      </mesh>
+      {/* Right wall */}
+      <mesh position={[width / 2 + wallThickness / 2, 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+        <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
+        <primitive object={verticalWallMaterial} />
+      </mesh>
+      {/* Top wall */}
+      <mesh position={[0, height / 2 + wallThickness / 2, 0.009]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
+        <primitive object={horizontalWallMaterial} />
+      </mesh>
+      {/* Bottom wall */}
+      <mesh position={[0, -(height / 2 + wallThickness / 2), 0.009]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
+        <primitive object={horizontalWallMaterial} />
+      </mesh>
+    </object3D>
+  );
+};
+
 const textBillboard = ({
   text,
   position,
@@ -505,7 +622,7 @@ const textBillboard = ({
         <meshBasicMaterial color={color} transparent opacity={1} />
       </mesh>
       <mesh geometry={backdropGeometry}>
-        <meshBasicMaterial color="black" transparent opacity={0.5} />
+        <meshBasicMaterial color={"black"} transparent opacity={0.5} />
       </mesh>
     </object3D>
   );
@@ -521,7 +638,7 @@ const PurposeLabel = ({
   cameraYaw: number;
 }) => {
   return textBillboard({
-    text: robotModel.purpose,
+    text: robotModel.player_id == -1 ? robotModel.purpose : "N" + robotModel.player_id + " " + robotModel.purpose,
     position: robotModel.Hft.decompose().translation.add(new Vector3(0, 0, 0.6)),
     cameraPitch,
     cameraYaw,
