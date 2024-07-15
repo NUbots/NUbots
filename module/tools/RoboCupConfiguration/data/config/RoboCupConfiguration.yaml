@@ -1,2 +1,11 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Map of ssid and passwords that are possible
+wifi_networks:
+  A_HUMANOID: "rc2024humanoid"
+  B_HUMANOID: "rc2024humanoid"
+  C_HUMANOID: "rc2024humanoid"
+  D_HUMANOID: "rc2024humanoid"
+
+common_ips: ["10.1.1.X", "192.168.1.X", "192.168.31.X", "192.168.32.X"]
