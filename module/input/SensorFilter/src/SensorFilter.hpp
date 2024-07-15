@@ -125,10 +125,12 @@ namespace module::input {
         Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
 
         /// @brief Current state of the left button
-        bool left_down = false;
+        bool left_down            = false;
+        bool left_down_with_error = false;
 
         /// @brief Current state of the middle button
-        bool middle_down = false;
+        bool middle_down            = false;
+        bool middle_down_with_error = false;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.

@@ -298,13 +298,24 @@ namespace module::input {
     void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
         int left_count   = 0;
         int middle_count = 0;
+        // Also keep track of the count when errors are present
+        int left_error_count   = 0;
+        int middle_error_count = 0;
         // If we have any downs in the last 20 frames then we are button pushed
         for (const auto& s : sensors) {
-            if (s->buttons.left && (s->subcontroller_error == 0u)) {
-                ++left_count;
+            if (s->buttons.left) {
+                if (s->subcontroller_error == 0u) {
+                    ++left_count;
+                }
+                // increase error counter either way
+                ++left_error_count;
             }
-            if (s->buttons.middle && (s->subcontroller_error == 0u)) {
-                ++middle_count;
+            if (s->buttons.middle) {
+                if (s->subcontroller_error == 0u) {
+                    ++middle_count;
+                }
+                // increase error counter either way
+                ++middle_error_count;
             }
         }
         bool new_left_down   = left_count > cfg.button_debounce_threshold;
@@ -329,6 +340,29 @@ namespace module::input {
             else {
                 log<NUClear::INFO>("Middle Button Up");
                 emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
+            }
+        }
+
+        // Repeat above for error counts, if we have more errors than non-errors then we are in an error state
+        bool new_left_down_with_error   = left_error_count > cfg.button_debounce_threshold;
+        bool new_middle_down_with_error = middle_error_count > cfg.button_debounce_threshold;
+        if (new_left_down_with_error != left_down_with_error) {
+            left_down_with_error = new_left_down_with_error;
+            if (new_left_down_with_error) {
+
+                log<NUClear::DEBUG>("Left Button Down with Error");
+            }
+            else {
+                log<NUClear::DEBUG>("Left Button Up with Error");
+            }
+        }
+        if (new_middle_down_with_error != middle_down_with_error) {
+            middle_down_with_error = new_middle_down_with_error;
+            if (new_middle_down_with_error) {
+                log<NUClear::DEBUG>("Middle Button Down with Error");
+            }
+            else {
+                log<NUClear::DEBUG>("Middle Button Up with Error");
             }
         }
     }
