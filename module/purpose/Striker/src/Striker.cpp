@@ -34,12 +34,14 @@
 #include "message/localisation/Field.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/purpose/UpdateBoundingBox.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -63,12 +65,14 @@ namespace module::purpose {
     using message::purpose::PenaltyKickStriker;
     using message::purpose::PenaltyShootoutStriker;
     using message::purpose::ThrowInStriker;
+    using message::purpose::UpdateBoundingBox;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
+    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
@@ -85,6 +89,26 @@ namespace module::purpose {
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position              = config["ready_position"].as<Expression>();
             cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
+
+            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
+        });
+
+        on<Trigger<UpdateBoundingBox>>().then([this](const UpdateBoundingBox& new_bounding_box) {
+            cfg.bounded_region_x_min = new_bounding_box.x_min;
+            cfg.bounded_region_x_max = new_bounding_box.x_max;
+            cfg.bounded_region_y_min = new_bounding_box.y_min;
+            cfg.bounded_region_y_max = new_bounding_box.y_max;
+            // Debugging
+            emit(std::make_unique<WalkInsideBoundedBox>(
+                cfg.bounded_region_x_min,
+                cfg.bounded_region_x_max,
+                cfg.bounded_region_y_min,
+                cfg.bounded_region_y_max,
+                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
 
         on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
@@ -192,7 +216,14 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
-        emit<Task>(std::make_unique<KickToGoal>(), 4);      // kick the ball if possible
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(
+                       cfg.bounded_region_x_min,
+                       cfg.bounded_region_x_max,
+                       cfg.bounded_region_y_min,
+                       cfg.bounded_region_y_max,
+                       pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                            Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
+                   4);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

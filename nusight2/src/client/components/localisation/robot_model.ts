@@ -120,6 +120,20 @@ export class FieldIntersection {
   }
 }
 
+export class BoundingBox {
+  @observable minX: number;
+  @observable minY: number;
+  @observable maxX: number;
+  @observable maxY: number;
+
+  constructor({ minX, minY, maxX, maxY }: { minX: number; minY: number; maxX: number; maxY: number }) {
+    this.minX = minX;
+    this.minY = minY;
+    this.maxX = maxX;
+    this.maxY = maxY;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -146,6 +160,7 @@ export class LocalisationRobotModel {
   @observable min_angle_error: number;
   @observable max_angle_error: number;
   @observable velocity_target: Vector3;
+  @observable boundingBox?: BoundingBox;
   @observable player_id: number;
 
   constructor({
@@ -173,6 +188,7 @@ export class LocalisationRobotModel {
     min_angle_error,
     max_angle_error,
     velocity_target,
+    boundingBox,
     player_id,
   }: {
     model: RobotModel;
@@ -199,6 +215,7 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    boundingBox?: BoundingBox;
     player_id: number;
   }) {
     this.model = model;
@@ -225,6 +242,7 @@ export class LocalisationRobotModel {
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
     this.velocity_target = velocity_target;
+    this.boundingBox = boundingBox;
     this.player_id = player_id;
   }
 
