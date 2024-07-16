@@ -164,6 +164,11 @@ namespace utility::io {
          * @return -2 if no current connection, -1 for some other error. Check errno if -1 is returned.
          */
         [[nodiscard]] int available() const;
+
+        /**
+         * @brief Flush the uart buffer.
+         */
+        void flush();
     };
 
 }  // namespace utility::io
