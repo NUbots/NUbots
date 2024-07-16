@@ -1,5 +1,7 @@
 var NAVTREEINDEX18 =
 {
+"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a5ae4ea3e82ae34e5cb394c5908ac68a4":[2,0,3,14,4,0,5],
+"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a5f068e6b05c10c381bb28ca72d71efbe":[2,0,3,14,4,0,8],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01":[2,0,3,14,4,0,1],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a3eb694104fa7862ff2669e6e33a4863d":[2,0,3,14,4,0,1,0],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a71c415389b72dc4cfad55dfd85a21204":[2,0,3,14,4,0,1,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026da":[2,0,7,2,2,0],
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0163e46a6376145647a7ee8988bbe800":[2,0,7,2,2,0,16],
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0a795133771e7ca846037b6cb48f501b":[2,0,7,2,2,0,0],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0e167a9cfd6032f8a88e0d177cd47a74":[2,0,7,2,2,0,17],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa1b33e756021ce4773bd32719b9d8fbdc":[2,0,7,2,2,0,8],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa2078be5587efdf553822e54ff7b8254f":[2,0,7,2,2,0,6]
+"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0e167a9cfd6032f8a88e0d177cd47a74":[2,0,7,2,2,0,17]
 };

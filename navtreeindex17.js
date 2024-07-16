@@ -1,5 +1,7 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html#a185f4e77fd112fa1d8b111c44701cebd":[2,0,3,9,1,12,2],
+"structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html#a6d46ae33c66d86ed599600b2944f30a4":[2,0,3,9,1,12,0],
 "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html#af8398453291c56960e958a0f7397c53f":[2,0,3,9,1,12,1],
 "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html":[2,0,3,9,1,13],
 "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html#a6f863abdd339fd96af6e5ee7981bc596":[2,0,3,9,1,13,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX17 =
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1eaf4ba15a13c3052563bbd06c34a746757":[2,0,3,14,4,0,0,1],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a319e7cd062381facc5f88326f85d5596":[2,0,3,14,4,0,11],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a320045bd1b89f970cd5a3f8f77be0a7d":[2,0,3,14,4,0,2],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a3b43c8a50c119db0ec043a0add0ee9fe":[2,0,3,14,4,0,7],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a5ae4ea3e82ae34e5cb394c5908ac68a4":[2,0,3,14,4,0,5],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a5f068e6b05c10c381bb28ca72d71efbe":[2,0,3,14,4,0,8]
+"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a3b43c8a50c119db0ec043a0add0ee9fe":[2,0,3,14,4,0,7]
 };

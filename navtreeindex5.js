@@ -1,5 +1,7 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1purpose_1_1KeyboardWalk.html#a33f084842b41c692a5f7f38e4a93d5ac":[2,0,3,10,6,11],
+"classmodule_1_1purpose_1_1KeyboardWalk.html#a43219beea928ee1a9bedcb1155283278":[2,0,3,10,6,17],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a4ebe9834663afea49ee4c0c52c3ff87b":[2,0,3,10,6,26],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a59890bcf3c94a08498020a3ef22e57c6":[2,0,3,10,6,18],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a6559da7b05fee32a84dfd98c85e392a4":[2,0,3,10,6,23],
@@ -247,7 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html":[2,0,3,13,2,0],
 "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a08bf8f2c7d9dc951b020ff85fc6b6440":[2,0,3,13,2,0,5],
 "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a644d3350fc96afc1b6fa5d4fdf9abdb8":[2,0,3,13,2,0,2],
-"classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a651276ae9d168cc260f3d0ad4c1911f4":[2,0,3,13,2,0,0],
-"classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a6c54214b790a61e826ee084cc29ca2a4":[2,0,3,13,2,0,3],
-"classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a88ced5993bbfcf37a880e2c671e93c2e":[2,0,3,13,2,0,1]
+"classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a651276ae9d168cc260f3d0ad4c1911f4":[2,0,3,13,2,0,0]
 };

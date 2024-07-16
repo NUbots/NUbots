@@ -1,5 +1,7 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a6c54214b790a61e826ee084cc29ca2a4":[2,0,3,13,2,0,3],
+"classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a88ced5993bbfcf37a880e2c671e93c2e":[2,0,3,13,2,0,1],
 "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#ae2e7b3ae25766420672f104b4f671019":[2,0,3,13,2,0,4],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html":[2,0,3,13,2,1],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a0fe9e4b13109ae8dc3aca409d758d169":[2,0,3,13,2,1,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#ad5f2264ce6dbfd90e8be2bb076c283d2":[2,0,3,15,4,3],
 "classmodule_1_1vision_1_1RobotDetector.html":[2,0,3,15,5],
 "classmodule_1_1vision_1_1RobotDetector.html#a12135a036c8a25caba5be2838abdd58e":[2,0,3,15,5,2],
-"classmodule_1_1vision_1_1RobotDetector.html#ae0ac1f24535772f2f4603251ad3c414f":[2,0,3,15,5,1],
-"classmodule_1_1vision_1_1VisualMesh.html":[2,0,3,15,6],
-"classmodule_1_1vision_1_1VisualMesh.html#a3b7f5004aa21b93143fb21f4d6d1a928":[2,0,3,15,6,5]
+"classmodule_1_1vision_1_1RobotDetector.html#ae0ac1f24535772f2f4603251ad3c414f":[2,0,3,15,5,1]
 };
