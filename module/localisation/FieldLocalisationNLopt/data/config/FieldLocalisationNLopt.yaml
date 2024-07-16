@@ -26,7 +26,7 @@ start_time_delay: 1
 use_ground_truth_localisation: false
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 10
+field_line_distance_weight: 0
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 10
@@ -35,7 +35,7 @@ field_line_intersection_weight: 10
 state_change_weight: 1
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 0
+goal_post_distance_weight: 20
 
 # Box constraints on change in state (x, y, theta)
 change_limit: [0.5, 0.5, 0.5]
