@@ -67,9 +67,9 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-1, 0, 0]
-    - [0, 1e-1, 0]
-    - [0, 0, 1e-1]
+    - [1e-3, 0, 0]
+    - [0, 1e-3, 0]
+    - [0, 0, 1e-3]
   # Measurement model noise
   R:
     - [1, 0, 0]

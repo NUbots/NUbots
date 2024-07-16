@@ -310,11 +310,9 @@ namespace module::localisation {
          * @param field_intersections The field intersections
          * @return Pair <optimisation solution (x,y,theta), final cost>
          */
-        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
-            const Eigen::Vector3d& initial_guess,
-            const std::vector<Eigen::Vector3d>& field_lines,
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
-            const std::shared_ptr<const Goals>& goals);
+        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(const Eigen::Vector3d& initial_guess,
+                                                                       const FieldIntersections& field_intersections,
+                                                                       const std::shared_ptr<const Goals>& goals);
 
         /**
          * @brief Setup field line distance map
@@ -332,7 +330,7 @@ namespace module::localisation {
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const FieldIntersections& field_intersections,
             const Eigen::Isometry3d& Hfw);
     };
 }  // namespace module::localisation

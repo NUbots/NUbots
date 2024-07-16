@@ -173,80 +173,73 @@ namespace module::localisation {
             startup = true;
         });
 
-        on<Trigger<FieldLines>,
-           Optional<With<FieldIntersections>>,
-           Optional<With<Goals>>,
-           With<Stability>,
-           With<RawSensors>>()
-            .then(
-                "NLopt field localisation",
-                [this](const FieldLines& field_lines,
-                       const std::shared_ptr<const FieldIntersections>& field_intersections,
-                       const std::shared_ptr<const Goals>& goals,
-                       const Stability& stability,
-                       const RawSensors& raw_sensors) {
-                    // Emit field message using ground truth if available
-                    if (cfg.use_ground_truth_localisation) {
-                        auto field(std::make_unique<Field>());
-                        field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
-                        emit(field);
-                        return;
-                    }
-
-                    // Don't run an update if there are not enough field line points or the robot is unstable
-                    bool unstable = stability <= Stability::FALLING;
-                    if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
-                        log<NUClear::DEBUG>("Not enough field line points or robot is unstable");
-                        return;
-                    }
-
-                    if (startup && cfg.starting_side == StartingSide::EITHER) {
-                        // Find the best initial state to use based on the optimisation results of each hypothesis
-                        std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
-                        for (auto& hypothesis : cfg.initial_hypotheses) {
-                            opt_results.push_back(
-                                run_field_line_optimisation(hypothesis, field_lines.rPWw, field_intersections, goals));
-                        }
-                        auto best_hypothesis =
-                            std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
-                                return a.second < b.second;
-                            });
-                        state = best_hypothesis->first;
-                        kf.set_state(state);
-                        startup = false;
-                    }
-                    else {
-                        // Run the optimisation routine
-                        std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(kf.get_state(), field_lines.rPWw, field_intersections, goals);
-                        state = opt_results.first;
-                    }
-
-                    // Time update (no process model)
-                    kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
-
-                    // Measurement update
-                    kf.measure(state);
-
-                    // Emit the field message
-                    auto field = std::make_unique<Field>();
-                    field->Hfw = compute_Hfw(kf.get_state());
-
-                    // Debugging
-                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
-                        debug_field_localisation(field->Hfw, raw_sensors);
-                    }
-                    // Association
-                    if (log_level <= NUClear::DEBUG) {
-                        auto associations      = data_association(field_intersections, field->Hfw);
-                        auto association_lines = std::make_unique<AssociationLines>();
-                        for (const auto& association : associations) {
-                            association_lines->lines.push_back({association.first, association.second});
-                        }
-                        emit(association_lines);
-                    }
+        on<Trigger<FieldIntersections>, Optional<With<Goals>>, With<Stability>, With<RawSensors>>().then(
+            "NLopt field localisation",
+            [this](const FieldIntersections& field_intersections,
+                   const std::shared_ptr<const Goals>& goals,
+                   const Stability& stability,
+                   const RawSensors& raw_sensors) {
+                // Emit field message using ground truth if available
+                if (cfg.use_ground_truth_localisation) {
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
                     emit(field);
-                });
+                    return;
+                }
+
+                // Don't run an update if there are not enough field line points or the robot is unstable
+                bool unstable = stability <= Stability::FALLING;
+                if (unstable) {
+                    log<NUClear::DEBUG>("Not enough field line points or robot is unstable");
+                    return;
+                }
+
+                if (startup && cfg.starting_side == StartingSide::EITHER) {
+                    // Find the best initial state to use based on the optimisation results of each hypothesis
+                    std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
+                    for (auto& hypothesis : cfg.initial_hypotheses) {
+                        opt_results.push_back(run_field_line_optimisation(hypothesis, field_intersections, goals));
+                    }
+                    auto best_hypothesis =
+                        std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
+                            return a.second < b.second;
+                        });
+                    state = best_hypothesis->first;
+                    kf.set_state(state);
+                    startup = false;
+                }
+                else {
+                    // Run the optimisation routine
+                    std::pair<Eigen::Vector3d, double> opt_results =
+                        run_field_line_optimisation(kf.get_state(), field_intersections, goals);
+                    state = opt_results.first;
+                }
+
+                // Time update (no process model)
+                kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
+
+                // Measurement update
+                kf.measure(state);
+
+                // Emit the field message
+                auto field = std::make_unique<Field>();
+                field->Hfw = compute_Hfw(kf.get_state());
+
+                // Debugging
+                if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                    debug_field_localisation(field->Hfw, raw_sensors);
+                }
+                // Association
+                if (log_level <= NUClear::DEBUG) {
+                    auto associations      = data_association(field_intersections, field->Hfw);
+                    auto association_lines = std::make_unique<AssociationLines>();
+                    for (const auto& association : associations) {
+                        association_lines->lines.push_back({association.first, association.second});
+                    }
+                    emit(association_lines);
+                }
+                emit(field);
+            });
     }
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
@@ -290,12 +283,12 @@ namespace module::localisation {
     }
 
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
-        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const FieldIntersections& field_intersections,
         const Eigen::Isometry3d& Hfw) {
 
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
 
-        for (const auto& intersection : field_intersections->intersections) {
+        for (const auto& intersection : field_intersections.intersections) {
             double min_distance = std::numeric_limits<double>::max();
             Eigen::Vector3d closest_landmark;
             bool found_association = false;
@@ -328,8 +321,7 @@ namespace module::localisation {
 
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
         const Eigen::Vector3d& initial_guess,
-        const std::vector<Eigen::Vector3d>& field_lines,
-        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const FieldIntersections& field_intersections,
         const std::shared_ptr<const Goals>& goals) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
@@ -337,27 +329,20 @@ namespace module::localisation {
             (void) data;  // Unused in this case
             (void) grad;  // Unused in this case
 
-            // --- Field line point cost ---
-            double cost = 0.0;
-            for (auto rORr : field_lines) {
-                // Get the position [x, y] of the observation in the map for this particle
-                Eigen::Vector2i map_position = position_in_map(x, rORr);
-                cost += cfg.field_line_distance_weight
-                        * std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
-            }
 
             // Compute the cost and gradient
             auto Hfw = compute_Hfw(x);
 
+            double cost = 0;
+
             // --- Field line intersection cost ---
-            if (field_intersections) {
-                auto associations = data_association(field_intersections, Hfw);
-                for (const auto& association : associations) {
-                    // Calculate the distance between the observed intersection and the closest landmark
-                    double distance = (association.first - association.second).norm();
-                    cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
-                }
+            auto associations = data_association(field_intersections, Hfw);
+            for (const auto& association : associations) {
+                // Calculate the distance between the observed intersection and the closest landmark
+                double distance = (association.first - association.second).norm();
+                cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
             }
+
 
             // --- Goal post cost ---
             // Only consider goal post cost if there are two goals
