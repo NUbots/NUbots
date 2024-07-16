@@ -164,7 +164,7 @@ namespace module::localisation {
                 default: log<NUClear::ERROR>("Invalid starting_side specified"); break;
             }
             state = cfg.initial_hypotheses[0];
-            emit<Scope::DELAY>(std::make_unique<ResetFieldLocalisation>(), cfg.start_time_delay);
+            // emit<Scope::DELAY>(std::make_unique<ResetFieldLocalisation>(), cfg.start_time_delay);
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
