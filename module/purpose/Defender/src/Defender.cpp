@@ -199,7 +199,7 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
                         Eigen::Vector3d(cfg.penalty_defence_position.x(), cfg.penalty_defence_position.y(), 0),
                         Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))), 1);
-                        emit<Task>(std::make_unique<LookAround>(), 2);
+                        emit<Task>(std::make_unique<FindBall>(), 2);
                         emit<Task>(std::make_unique<LookAtBall>(), 3);
                     return;
                 }

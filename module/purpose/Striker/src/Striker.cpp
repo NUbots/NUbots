@@ -237,16 +237,12 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
-                // If the bounded region doesn't reach the penalty position, stand at the edge of the bounded region
-                if (cfg.bounded_region_x_max < cfg.penalty_defence_position.x()) {
-                    cfg.penalty_defence_position.x() = cfg.bounded_region_x_max;
-                }
-                // If the performing team is not us, move to our penalty defence position and look at the ball
+                // If the performing team is not us, move to the max of the penalty defence position and bounded box max and look at the ball
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
-                        Eigen::Vector3d(cfg.penalty_defence_position.x(), cfg.penalty_defence_position.y(), 0),
+                        Eigen::Vector3d(std::max(cfg.bounded_region_x_max, (double)cfg.penalty_defence_position.x()), cfg.penalty_defence_position.y(), 0),
                         Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))), 1);
-                        emit<Task>(std::make_unique<LookAround>(), 2);l
+                        emit<Task>(std::make_unique<FindBall>(), 2);
                         emit<Task>(std::make_unique<LookAtBall>(), 3);
                     return;
                 }
