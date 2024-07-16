@@ -100,13 +100,6 @@ namespace module::platform::OpenCR {
             startup();
         });
 
-        on<Shutdown>().then("HardwareIO Shutdown", [this] {
-            // Close our connection to the OpenCR
-            if (opencr.connected()) {
-                opencr.close();
-            }
-        });
-
         // When we receive data back from the OpenCR it will arrive here
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
