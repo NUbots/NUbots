@@ -76,8 +76,9 @@ namespace module::purpose {
     Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
         on<Configuration>("Defender.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defender.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ready_position = config["ready_position"].as<Expression>();
+            this->log_level              = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ready_position           = config["ready_position"].as<Expression>();
+            cfg.penalty_defence_position = config["penalty_defence_position"].as<Expression>();
 
             cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
             cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
