@@ -1,5 +1,6 @@
 var NAVTREEINDEX19 =
 {
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a47357060b51ba3bd4a84fdc1ad97aebb":[2,0,7,5,3,0,1,5],
 "structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a7ad7c28624b01d74e44d535619ed5610":[2,0,7,5,3,0,1,1],
 "structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a8bcd0d821e496fdcc393d9847a892f34":[2,0,7,5,3,0,1,3],
 "structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html":[2,0,7,5,3,0,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX19 =
 "structutility_1_1skill_1_1WalkingParameter.html#a336212cacb05fd25cfda3e8a365a21d3":[2,0,7,11,6,4],
 "structutility_1_1skill_1_1WalkingParameter.html#a34ba9a141809d640202b682599d45e5e":[2,0,7,11,6,24],
 "structutility_1_1skill_1_1WalkingParameter.html#a4a836f9bd949d8aec3d7b7faa98ccfae":[2,0,7,11,6,21],
-"structutility_1_1skill_1_1WalkingParameter.html#a73abc734f78db8c1476b730231bc97b2":[2,0,7,11,6,15],
-"structutility_1_1skill_1_1WalkingParameter.html#a73c3f041ede015d8c8083b61bd6e573d":[2,0,7,11,6,8]
+"structutility_1_1skill_1_1WalkingParameter.html#a73abc734f78db8c1476b730231bc97b2":[2,0,7,11,6,15]
 };

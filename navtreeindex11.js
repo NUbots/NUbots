@@ -1,5 +1,6 @@
 var NAVTREEINDEX11 =
 {
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac79a53612e60468871f9432691620caf":[1,0,3,7,0,1,0,8,48],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac82ec29b727444c92731adaf724ed6fc":[1,0,3,7,0,1,0,8,60],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac9c2f7c1558d5a31a19ba2458aa61bd1":[1,0,3,7,0,1,0,8,21],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eacb3db8889b12b977faaae95bd71a6a76":[1,0,3,7,0,1,0,8,27],
@@ -248,6 +249,5 @@ var NAVTREEINDEX11 =
 "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4":[2,0,1,0,5,0,1],
 "structextension_1_1behaviour_1_1Idle.html":[2,0,1,0,6],
 "structextension_1_1behaviour_1_1Needs.html":[2,0,1,0,7],
-"structextension_1_1behaviour_1_1Needs.html#a52b6a9f257c60c96f2baea9e84bed77e":[2,0,1,0,7,0],
-"structextension_1_1behaviour_1_1Provide.html":[2,0,1,0,8]
+"structextension_1_1behaviour_1_1Needs.html#a52b6a9f257c60c96f2baea9e84bed77e":[2,0,1,0,7,0]
 };

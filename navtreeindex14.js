@@ -1,5 +1,6 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef":[2,0,3,3,7,1,3],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aba1bf61f3c2e9f27bbd265886cf2b1d9":[2,0,3,3,7,1,2],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e":[2,0,3,3,7,1,5],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#acd8aff552e5423ffca06c379e3d826e7":[2,0,3,3,7,1,1],
@@ -33,22 +34,22 @@ var NAVTREEINDEX14 =
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da2b4c8859789d897d3e3d48e7a78e5c21":[2,0,3,3,9,0,5],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da2b4c8859789d897d3e3d48e7a78e5c21":[2,0,3,3,9,1,0],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da2b4c8859789d897d3e3d48e7a78e5c21":[2,0,3,3,9,1,5],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da4203156a2cf8c14fd9fced14b0fafd8c":[2,0,3,3,9,0,2],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da4203156a2cf8c14fd9fced14b0fafd8c":[2,0,3,3,9,1,2],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da4203156a2cf8c14fd9fced14b0fafd8c":[2,0,3,3,9,1,7],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da4203156a2cf8c14fd9fced14b0fafd8c":[2,0,3,3,9,0,7],
+"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da4203156a2cf8c14fd9fced14b0fafd8c":[2,0,3,3,9,0,2],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8339ad52887500382f69ac261c34ff82":[2,0,3,3,9,0,3],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8339ad52887500382f69ac261c34ff82":[2,0,3,3,9,0,8],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8339ad52887500382f69ac261c34ff82":[2,0,3,3,9,1,3],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8339ad52887500382f69ac261c34ff82":[2,0,3,3,9,1,8],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8a867946d3da09bb29a22f9c62954091":[2,0,3,3,9,0,9],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8a867946d3da09bb29a22f9c62954091":[2,0,3,3,9,1,4],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8a867946d3da09bb29a22f9c62954091":[2,0,3,3,9,0,4],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8a867946d3da09bb29a22f9c62954091":[2,0,3,3,9,1,9],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3dafc4bf477e0ece96acd72d247cc1ecc16":[2,0,3,3,9,0,1],
+"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da8a867946d3da09bb29a22f9c62954091":[2,0,3,3,9,0,9],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3dafc4bf477e0ece96acd72d247cc1ecc16":[2,0,3,3,9,0,6],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3dafc4bf477e0ece96acd72d247cc1ecc16":[2,0,3,3,9,1,1],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3dafc4bf477e0ece96acd72d247cc1ecc16":[2,0,3,3,9,1,6],
+"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3dafc4bf477e0ece96acd72d247cc1ecc16":[2,0,3,3,9,0,1],
 "structmodule_1_1localisation_1_1StartingSide.html#ad36e4980cf704a25b8c331bb9caad940":[2,0,3,3,9,5],
 "structmodule_1_1localisation_1_1StartingSide.html#ad36e4980cf704a25b8c331bb9caad940":[2,0,3,3,9,9],
 "structmodule_1_1localisation_1_1StartingSide.html#ae0bc23d0cb6aff5e828867a8577129b2":[2,0,3,3,9,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#aa4e7f5944f271c9ff3170a403b072f75":[2,0,3,9,0,2,0,0],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html":[2,0,3,9,0,4],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a52549bae4e1626fa2f77c5a657e98fe1":[2,0,3,9,0,4,4],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a6169502c3fccd70da3cb08bf02909ebc":[2,0,3,9,0,4,2],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a73be48c88bf9858741b0ba076038fd02":[2,0,3,9,0,4,1]
+"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a6169502c3fccd70da3cb08bf02909ebc":[2,0,3,9,0,4,2]
 };
