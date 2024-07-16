@@ -262,8 +262,8 @@ namespace utility::localisation {
                              message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
         landmarks.push_back({Eigen::Vector3d(-half_length + fd.dimensions.penalty_mark_distance, 0, 0),
                              message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector3d(0, 0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        // landmarks.push_back(
+        //     {Eigen::Vector3d(0, 0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
         return landmarks;
     }
 
