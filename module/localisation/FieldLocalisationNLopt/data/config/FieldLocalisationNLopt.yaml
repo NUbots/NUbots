@@ -17,7 +17,7 @@ save_map: false
 min_field_line_points: 50
 
 # Minimum number of field line intersections for an update
-min_field_line_intersections: 0
+min_field_line_intersections: 2
 
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 1
@@ -35,16 +35,16 @@ field_line_intersection_weight: 20
 state_change_weight: 1
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 10
+goal_post_distance_weight: 20
 
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.25, 0.25, 0.5]
+change_limit: [0.4, 0.4, 0.1]
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
 
 # Max association distance
-max_association_distance: 4
+max_association_distance: 20
 
 opt:
   # Relative tolerance on the optimization parameters
@@ -72,7 +72,7 @@ kalman:
   Q:
     - [1e-3, 0, 0]
     - [0, 1e-3, 0]
-    - [0, 0, 1e-3]
+    - [0, 0, 1e-2]
   # Measurement model noise
   R:
     - [1, 0, 0]
