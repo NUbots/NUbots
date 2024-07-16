@@ -238,7 +238,7 @@ namespace module::purpose {
                     return;
                 }
                 // If the performing team is not us, move to our penalty defence position
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id && cfg.bounded_region_x_max > cfg.penalty_defence_position.x() ) {
                     emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
                         Eigen::Vector3d(cfg.penalty_defence_position.x(), cfg.penalty_defence_position.y(), 0),
                         Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))));
