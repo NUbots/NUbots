@@ -162,7 +162,7 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
-               // If the performing team is not us, find the ball and look at it
+                // If the performing team is not us, find the ball and look at it
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
