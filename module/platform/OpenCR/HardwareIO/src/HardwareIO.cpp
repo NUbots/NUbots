@@ -56,8 +56,6 @@ namespace module::platform::OpenCR {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
-        model_watchdog = create_model_watchdog();
-
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -96,7 +94,7 @@ namespace module::platform::OpenCR {
             // The first thing to do is get the model information
             // The model watchdog is started, which has a longer time than the packet watchdog
             // The packet watchdog is disabled until we start the main loop
-            model_watchdog.enable();
+            model_watchdog = create_model_watchdog();
 
             // The startup function sets up the subcontroller state
             startup();
@@ -208,7 +206,6 @@ namespace module::platform::OpenCR {
                         log<NUClear::INFO>("Packet watchdog enabled");
 
                         packet_watchdog = create_packet_watchdog();
-                        packet_watchdog.enable();
 
                         // At the start, we want to query the motors so we can store their state internally
                         // This will start the loop of reading and writing to the servos and opencr
