@@ -49,9 +49,6 @@ namespace module::platform::OpenCR {
         /// @brief Called by the powerplant to build and setup the HardwareIO reactor.
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief Makes HardwareIO a threadpool descriptor type
-        static constexpr int thread_count = 1;
-
     private:
         /// @brief Manages the connection with OpenCR
         utility::io::uart opencr{};
