@@ -105,6 +105,8 @@ namespace module::localisation {
                                                                                                  cfg.C,
                                                                                                  cfg.Q,
                                                                                                  cfg.R);
+
+            cfg.max_association_distance = config["max_association_distance"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -282,37 +284,52 @@ namespace module::localisation {
                                fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }
 
+
+    /**
+     * @brief Perform data association between intersection observations and landmarks using unique nearest neighbor
+     * @param field_intersections The observed field intersections
+     * @param Hfw The homogeneous transformation from world to field coordinates
+     * @return Vector of pairs of associated landmarks and observations
+     */
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
         const FieldIntersections& field_intersections,
         const Eigen::Isometry3d& Hfw) {
 
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+        std::vector<bool> landmark_used(landmarks.size(), false);
+        std::vector<bool> observation_used(field_intersections.intersections.size(), false);
 
-        for (const auto& intersection : field_intersections.intersections) {
-            double min_distance = std::numeric_limits<double>::max();
-            Eigen::Vector3d closest_landmark;
-            bool found_association = false;
+        // Create a vector of all possible associations
+        std::vector<std::tuple<double, size_t, size_t>> all_associations;
 
-            // Transform the observed intersection from world to field coordinates
-            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+        for (size_t i = 0; i < field_intersections.intersections.size(); ++i) {
+            const auto& intersection = field_intersections.intersections[i];
+            Eigen::Vector3d rIFf     = Hfw * intersection.rIWw;
 
-            for (const auto& landmark : landmarks) {
+            for (size_t j = 0; j < landmarks.size(); ++j) {
+                const auto& landmark = landmarks[j];
                 if (landmark.type == intersection.type) {
-                    // Calculate Euclidean distance between the observed intersection and the landmark
                     double distance = (landmark.rLFf - rIFf).norm();
-
-                    // If this landmark is closer, update the association
-                    if (distance < min_distance) {
-                        min_distance      = distance;
-                        closest_landmark  = landmark.rLFf;
-                        found_association = true;
+                    // Only consider associations within the maximum distance
+                    if (distance <= cfg.max_association_distance) {
+                        all_associations.emplace_back(distance, i, j);
                     }
                 }
             }
+        }
 
-            // If we found an association, add it to our list
-            if (found_association) {
-                associations.emplace_back(closest_landmark, rIFf);
+        // Sort associations by distance
+        std::sort(all_associations.begin(), all_associations.end());
+
+        // Assign unique associations
+        for (const auto& [distance, intersection_idx, landmark_idx] : all_associations) {
+            if (!landmark_used[landmark_idx] && !observation_used[intersection_idx]) {
+                const auto& intersection = field_intersections.intersections[intersection_idx];
+                const auto& landmark     = landmarks[landmark_idx];
+                Eigen::Vector3d rIFf     = Hfw * intersection.rIWw;
+                associations.emplace_back(landmark.rLFf, rIFf);
+                landmark_used[landmark_idx]        = true;
+                observation_used[intersection_idx] = true;
             }
         }
 
