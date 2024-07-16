@@ -237,7 +237,7 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
-                // If the performing team is not us, move to the max of the penalty defence position and bounded box max and look at the ball
+                // If the performing team is not us, move to the penalty defence position (or bounded box edge) and look at the ball
                 if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
                         Eigen::Vector3d(std::max(cfg.bounded_region_x_max, (double)cfg.penalty_defence_position.x()), cfg.penalty_defence_position.y(), 0),
