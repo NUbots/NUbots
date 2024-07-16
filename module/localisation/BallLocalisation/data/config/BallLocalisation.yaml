@@ -5,9 +5,9 @@ log_level: INFO
 ukf:
   noise:
     measurement:
-      ball_position: [0.1, 0.1]
+      ball_position: [1, 1]
     process:
-      position: [1e-2, 1e-2]
+      position: [1e-1, 1e-1]
       velocity: [1e-2, 1e-2]
 
   initial:
@@ -23,3 +23,7 @@ acceptance_radius: 2
 
 # Maximum number of ball rejections before acceptance
 max_rejections: 25
+
+required_measurements: 3
+cluster_time_window: 1.0
+cluster_distance_threshold: 0.5

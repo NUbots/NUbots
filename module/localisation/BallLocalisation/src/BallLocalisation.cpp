@@ -31,11 +31,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/eye/DataPoint.hpp"
-#include "message/localisation/Ball.hpp"
-#include "message/support/FieldDescription.hpp"
-#include "message/vision/Ball.hpp"
-
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -98,79 +93,157 @@ namespace module::localisation {
             last_time_update = NUClear::clock::now();
         });
 
-        /* To run whenever a ball has been detected */
+
         on<Trigger<VisionBalls>, With<FieldDescription>>().then(
             [this](const VisionBalls& balls, const FieldDescription& fd) {
                 if (!balls.balls.empty()) {
                     Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
-                    auto state            = BallModel<double>::StateVec(ukf.get_state());
 
-                    // Data association: find the ball closest to our current estimate
-                    Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
-                    double lowest_distance = std::numeric_limits<double>::max();
+                    // Process all ball measurements
                     for (const auto& ball : balls.balls) {
-                        Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
-                        double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
-                        if (current_distance < lowest_distance) {
-                            lowest_distance = current_distance;
-                            rBWw            = current_rBWw;
-                        }
+                        Eigen::Vector3d rBWw     = Hwc * ball.measurements[0].rBCc.cast<double>();
+                        Eigen::Vector2d ball_pos = rBWw.head<2>();
+
+                        // Add the measurement to recent_measurements
+                        recent_measurements.emplace_back(ball_pos, NUClear::clock::now());
                     }
 
-                    // Data association: ensure the ball is within the acceptance radius
-                    bool accept_ball = true;
-                    if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
-                        accept_ball = false;
-                        rejection_count++;
-                    }
-                    else {
-                        first_ball_seen = true;
-                        rejection_count = 0;
-                    }
-                    log<NUClear::DEBUG>("Rejection count: ", rejection_count);
-                    log<NUClear::DEBUG>("Accept ball: ", accept_ball);
+                    // Remove old measurements
+                    auto now = NUClear::clock::now();
+                    recent_measurements.erase(
+                        std::remove_if(
+                            recent_measurements.begin(),
+                            recent_measurements.end(),
+                            [&](const auto& m) {
+                                return std::chrono::duration_cast<std::chrono::duration<double>>(now - m.second).count()
+                                       > cfg.cluster_time_window;
+                            }),
+                        recent_measurements.end());
 
-                    // Data association: if we have rejected too many balls, accept the closest one
-                    if (rejection_count > cfg.max_rejections) {
-                        accept_ball     = true;
-                        rejection_count = 0;
+                    if (!ball_estimate_initialized) {
+                        cluster_and_initialize();
                     }
 
-                    if (accept_ball) {
-                        // Compute the time since the last update (in seconds)
-                        const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
-                                                                                                  - last_time_update)
-                                            .count();
-                        last_time_update = NUClear::clock::now();
-
-                        // Time update
-                        ukf.time(dt);
-
-                        // Measurement update
-                        ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
-                                    cfg.ukf.noise.measurement.position,
-                                    MeasurementType::BALL_POSITION());
-
-                        // Get the new state, here we are assuming ball is on the ground
-                        state = BallModel<double>::StateVec(ukf.get_state());
-
-                        // Generate and emit message
-                        auto ball                 = std::make_unique<Ball>();
-                        ball->rBWw                = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
-                        ball->vBw                 = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
-                        ball->time_of_measurement = last_time_update;
-                        ball->Hcw                 = balls.Hcw;
-                        if (log_level <= NUClear::DEBUG) {
-                            log<NUClear::DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
-                            log<NUClear::DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
-                            emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
-                            emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
-                        }
-
-                        emit(ball);
+                    if (ball_estimate_initialized) {
+                        update_ball_estimate(balls, fd);
                     }
                 }
             });
+    }
+
+    void BallLocalisation::cluster_and_initialize() {
+        if (recent_measurements.size() < cfg.required_measurements) {
+            return;
+        }
+
+        // Simple clustering algorithm
+        std::vector<std::vector<Eigen::Vector2d>> clusters;
+        for (const auto& measurement : recent_measurements) {
+            bool added_to_cluster = false;
+            for (auto& cluster : clusters) {
+                if ((cluster[0] - measurement.first).norm() < cfg.cluster_distance_threshold) {
+                    cluster.push_back(measurement.first);
+                    added_to_cluster = true;
+                    break;
+                }
+            }
+            if (!added_to_cluster) {
+                clusters.push_back({measurement.first});
+            }
+        }
+
+        // Check if any cluster has enough measurements
+        for (const auto& cluster : clusters) {
+            if (cluster.size() >= cfg.required_measurements) {
+                // Initialize the ball estimate with the average position of the cluster
+                Eigen::Vector2d avg_pos = Eigen::Vector2d::Zero();
+                for (const auto& pos : cluster) {
+                    avg_pos += pos;
+                }
+                avg_pos /= cluster.size();
+
+                // Set the initial state and covariance
+                BallModel<double>::StateVec initial_state;
+                initial_state.rBWw = avg_pos;
+                initial_state.vBw  = Eigen::Vector2d::Zero();  // Initialize velocity to zero
+
+                ukf.set_state(initial_state.getStateVec(), cfg.initial_covariance.asDiagonal());
+
+                ball_estimate_initialized = true;
+                log<NUClear::INFO>("Ball estimate initialized at position: ", avg_pos.x(), ", ", avg_pos.y());
+                break;
+            }
+        }
+    }
+
+    void BallLocalisation::update_ball_estimate(const VisionBalls& balls, const FieldDescription& fd) {
+        auto state            = BallModel<double>::StateVec(ukf.get_state());
+        Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
+
+        // Data association: find the ball closest to our current estimate
+        Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
+        double lowest_distance = std::numeric_limits<double>::max();
+        for (const auto& ball : balls.balls) {
+            Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+            double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+            if (current_distance < lowest_distance) {
+                lowest_distance = current_distance;
+                rBWw            = current_rBWw;
+            }
+        }
+
+        // Data association: ensure the ball is within the acceptance radius
+        bool accept_ball = true;
+        if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
+            accept_ball = false;
+            rejection_count++;
+        }
+        else {
+            first_ball_seen = true;
+            rejection_count = 0;
+        }
+        log<NUClear::DEBUG>("Rejection count: ", rejection_count);
+        log<NUClear::DEBUG>("Accept ball: ", accept_ball);
+
+        // Data association: if we have rejected too many balls, accept the closest one
+        if (rejection_count > cfg.max_rejections) {
+            accept_ball     = true;
+            rejection_count = 0;
+        }
+
+        if (accept_ball) {
+            // Compute the time since the last update (in seconds)
+            const auto dt =
+                std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
+                    .count();
+            last_time_update = NUClear::clock::now();
+
+            // Time update
+            ukf.time(dt);
+
+            // Measurement update
+            ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
+                        cfg.ukf.noise.measurement.position,
+                        MeasurementType::BALL_POSITION());
+
+            // Get the new state, here we are assuming ball is on the ground
+            state = BallModel<double>::StateVec(ukf.get_state());
+
+            // Generate and emit message
+            auto ball                 = std::make_unique<Ball>();
+            ball->rBWw                = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
+            ball->vBw                 = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+            ball->time_of_measurement = last_time_update;
+            ball->Hcw                 = balls.Hcw;
+            if (log_level <= NUClear::DEBUG) {
+                log<NUClear::DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
+                log<NUClear::DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
+                emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
+                emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
+            }
+
+            emit(ball);
+        }
     }
 
 }  // namespace module::localisation

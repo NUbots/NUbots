@@ -32,7 +32,10 @@
 
 #include "BallModel.hpp"
 
+#include "message/eye/DataPoint.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
 #include "utility/math/filter/UKF.hpp"
@@ -80,6 +83,15 @@ namespace module::localisation {
             /// @brief Maximum number of detections of a ball not being accepted before it is accepted
             int max_rejections = 0;
 
+            /// @brief Number of consistent measurements required to initialize the ball estimate
+            int required_measurements = 3;
+
+            /// @brief Maximum time window for clustering measurements (in seconds)
+            double cluster_time_window = 1.0;
+
+            /// @brief Maximum distance for clustering measurements (in meters)
+            double cluster_distance_threshold = 0.5;
+
         } cfg;
 
         /// @brief Rejection count
@@ -87,6 +99,12 @@ namespace module::localisation {
 
         /// @brief Whether or not this is the first time we have seen a ball
         bool first_ball_seen = true;
+
+        /// @brief Vector to store recent ball measurements for clustering
+        std::vector<std::pair<Eigen::Vector2d, NUClear::clock::time_point>> recent_measurements;
+
+        /// @brief Flag to indicate if the ball estimate has been initialized
+        bool ball_estimate_initialized = false;
 
         /// @brief The time of the last time update
         NUClear::clock::time_point last_time_update;
@@ -97,6 +115,12 @@ namespace module::localisation {
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.
         explicit BallLocalisation(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Function to cluster recent measurements and initialize the ball estimate if criteria are met
+        void cluster_and_initialize();
+
+        /// @brief Function to update the ball estimate using the UKF
+        void update_ball_estimate(const message::vision::Balls& balls, const message::support::FieldDescription& fd);
     };
 }  // namespace module::localisation
 
