@@ -155,11 +155,11 @@ namespace utility::localisation {
                                              line_width);
 
             // Add centre cross in centre of field
-            int centre_cross_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / grid_size + line_width / 2;
-            int centre_cross_y0    = left_penalty_cross_y0;
-            int centre_cross_width = 0.1 / grid_size;
-            fieldline_distance_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
+            // int centre_cross_x0 =
+            //     (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / grid_size + line_width / 2;
+            // int centre_cross_y0    = left_penalty_cross_y0;
+            // int centre_cross_width = 0.1 / grid_size;
+            // fieldline_distance_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
         }
 
 

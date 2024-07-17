@@ -43,9 +43,6 @@ change_limit: [0.5, 0.5, 0.5]
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
 
-# Max association distance
-max_association_distance: 5
-
 opt:
   # Relative tolerance on the optimization parameters
   xtol_rel: 1e-6
