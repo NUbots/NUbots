@@ -10,7 +10,7 @@
 cameras:
   Left:
     concurrent: 1
-    network: config/networks/LabNetwork.yaml
+    network: config/networks/robot_300.yaml
     engine: opencl
     cache_directory: "./vision_cache/"
     classifier:
