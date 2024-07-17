@@ -28,7 +28,6 @@ import { LocalisationRobotModel } from "./robot_model";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
 import { SkyboxView } from "./skybox/view";
-import { ModelVisualiser } from "./nugus_robot/stories/model_visualizer";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -220,7 +219,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleSidebarVisibility = () => {
     this.props.controller.toggleSidebarVisibility(this.props.model);
   };
-
 }
 
 interface LocalisationMenuBarProps {

@@ -369,5 +369,5 @@ export class LocalisationController {
   @action
   toggleSidebarVisibility = (model: LocalisationModel) => {
     model.sideBarVisible = !model.sideBarVisible;
-  }
+  };
 }

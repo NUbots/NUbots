@@ -4,9 +4,9 @@ import { computed } from "mobx";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
+import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
-import { message } from "../../../shared/messages";
 
 class ServoMotor {
   @observable angle: number;
@@ -197,7 +197,7 @@ export class LocalisationRobotModel {
     lastCameraImage,
     lastSeenBall,
     lastSeenGoal,
-    walkCommand
+    walkCommand,
   }: {
     model: RobotModel;
     name: string;
@@ -307,10 +307,9 @@ export class LocalisationRobotModel {
       lastCameraImage: 0,
       lastSeenBall: 0,
       lastSeenGoal: 0,
-      walkCommand: Vector3.of()
+      walkCommand: Vector3.of(),
     });
   });
-
 
   @computed get id() {
     return this.model.id;
@@ -383,5 +382,4 @@ export class LocalisationRobotModel {
   get connected(): boolean {
     return this.model.connected;
   }
-
 }

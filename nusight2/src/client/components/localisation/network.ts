@@ -6,10 +6,10 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
-import { TimestampObject } from "../../../shared/time/timestamp";
 
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
@@ -193,10 +193,7 @@ export class LocalisationNetwork {
     // The walk command
     robot.walkCommand = Vector3.from(overview.walkCommand);
   };
-
 }
-
-
 
 function decompose(m: THREE.Matrix4): {
   translation: THREE.Vector3;
