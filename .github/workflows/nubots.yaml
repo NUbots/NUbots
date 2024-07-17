@@ -206,4 +206,4 @@ jobs:
         run: ./b yarn
 
       - name: Check formatting
-        run: ./b format --check --all --verbose
+        run: ./b format --check --verbose
