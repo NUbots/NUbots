@@ -300,6 +300,10 @@ namespace module::input {
         int left_count   = 0;
         int middle_count = 0;
         // Count the number of downs in all messages we have
+        //     we used to discount sensors messages with subcontroller errors here, but that
+        //     ignored too many and ultimately led to unresponsive buttons. subcontroller errors
+        //     are unlikely to cause phantom button presses, and if they do, the debounce routine
+        //     would require that we have N_thresh > N errors causing the _same_ phantom button press
         for (const auto& s : sensors) {
             if (s->buttons.left)
                 ++left_count;
