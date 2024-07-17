@@ -52,7 +52,7 @@ opt:
   # Relative tolerance on the optimization function value
   ftol_rel: 1e-6
   # Maximum number of evaluations for the optimization
-  maxeval: 1000
+  maxeval: 10000
 
 kalman:
   # Continuous time process model:
