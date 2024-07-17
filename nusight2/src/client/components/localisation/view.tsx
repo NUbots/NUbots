@@ -16,6 +16,7 @@ import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
+import { IconButton, IconButtonProps } from "../icon_button/view";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
@@ -28,6 +29,7 @@ import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
+
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -84,10 +86,17 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 }
 
 const EnhancedDropdown = dropdownContainer();
-
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
+  state = {
+    isSidebarVisible: true,
+    activeTab: "options",
+  };
+
+  setActiveTab = (tab: string) => {
+    this.setState({ activeTab: tab });
+  };
 
   componentDidMount(): void {
     document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
@@ -118,22 +127,34 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           Menu={this.props.Menu}
           controller={this.props.controller}
           onHawkEyeClick={this.onHawkEyeClick}
-          toggleGridVisibility={this.toggleGridVisibility}
-          toggleFieldVisibility={this.toggleFieldVisibility}
-          toggleRobotVisibility={this.toggleRobotVisibility}
-          toggleBallVisibility={this.toggleBallVisibility}
-          toggleParticleVisibility={this.toggleParticleVisibility}
-          toggleGoalVisibility={this.toggleGoalVisibility}
-          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
-          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
-        ></LocalisationMenuBar>
-        <div className="flex w-full h-full">
-          <div className="flex-grow relative border-t border-auto">
+          toggleSidebarVisibility={this.toggleSidebarVisibility}
+        />
+        <div className="flex-grow relative border-t border-auto">
+          <div>
             <ThreeFiber ref={this.canvas} onClick={this.onClick}>
               <LocalisationViewModel model={this.props.model} />
             </ThreeFiber>
-            <SideBar model={this.props.model} />
+            <IconButton className="absolute right-0">dark_mode</IconButton>
           </div>
+          {this.state.isSidebarVisible && (
+            <SideBar
+              model={this.props.model}
+              toggleOptions={{
+                onHawkEyeClick: this.onHawkEyeClick,
+                toggleGridVisibility: this.toggleGridVisibility,
+                toggleFieldVisibility: this.toggleFieldVisibility,
+                toggleRobotVisibility: this.toggleRobotVisibility,
+                toggleBallVisibility: this.toggleBallVisibility,
+                toggleParticleVisibility: this.toggleParticleVisibility,
+                toggleGoalVisibility: this.toggleGoalVisibility,
+                toggleFieldLinePointsVisibility: this.toggleFieldLinePointsVisibility,
+                toggleFieldIntersectionsVisibility: this.toggleFieldIntersectionsVisibility,
+              }}
+              controller={this.props.controller}
+              activeTab={this.state.activeTab}
+              setActiveTab={this.setActiveTab}
+            />
+          )}
         </div>
       </div>
     );
@@ -161,6 +182,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   private onMouseMove = (e: MouseEvent) => {
     this.props.controller.onMouseMove(this.props.model, e.movementX, e.movementY);
+  };
+
+  private toggleSidebarVisibility = () => {
+    this.setState((prevState) => ({ isSidebarVisible: !prevState.isSidebarVisible }));
   };
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -224,6 +249,69 @@ interface LocalisationMenuBarProps {
   controller: LocalisationController;
 
   onHawkEyeClick(): void;
+  toggleSidebarVisibility(): void;
+}
+
+type ToggleButtonProps = {
+  on: boolean;
+  onClick: (on: boolean) => void;
+  children: React.ReactNode;
+};
+
+function ToggleButton(props: ToggleButtonProps) {
+  return (
+    <button
+      className={`h-7 px-2 inline-flex items-center border rounded ${
+        props.on ? "bg-blue-600 border-blue-700 text-gray-100" : "bg-white dark:bg-gray-600 border-auto"
+      } `}
+      onClick={() => props.onClick(props.on)}
+    >
+      {props.children}
+    </button>
+  );
+}
+
+const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
+  const { Menu, model, controller } = props;
+  return (
+    <Menu>
+      <div className="flex h-full items-center space-x-2">
+        <Button className="px-7" onClick={props.onHawkEyeClick}>
+          Hawk Eye
+        </Button>
+        <div className="w-full flex justify-end">
+          <ToggleButton on={true} onClick={props.toggleSidebarVisibility}>
+            Sidebar
+          </ToggleButton>
+        </div>
+      </div>
+    </Menu>
+  );
+});
+
+type TabButtonProps = {
+  isActive: boolean;
+  label: string;
+  onClick: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+};
+
+function TabButton({ isActive, label, onClick, isFirst, isLast }: TabButtonProps) {
+  return (
+    <button
+      className={`px-4 py-2 w-full ${isActive ? "bg-auto-contrast-2 text-white" : "bg-auto-contrast-1"} ${
+        isFirst ? "rounded-l-md" : ""
+      } ${isLast ? "rounded-r-md" : ""} ${!isFirst && !isLast ? "border-l-0" : ""}`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+interface ToggleOptions {
+  onHawkEyeClick(): void;
   toggleGridVisibility(): void;
   toggleFieldVisibility(): void;
   toggleRobotVisibility(): void;
@@ -234,89 +322,115 @@ interface LocalisationMenuBarProps {
   toggleFieldIntersectionsVisibility(): void;
 }
 
-const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
-  return (
-    <li className="flex m-0 p-0">
-      <button className="px-4" onClick={props.onClick}>
-        <div className="flex items-center justify-center">
-          <div className="flex items-center rounded">
-            <span className="mx-2">{props.label}</span>
-            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
-          </div>
+const SideBar = observer(
+  ({
+    model,
+    toggleOptions,
+    controller,
+    activeTab,
+    setActiveTab,
+  }: {
+    model: LocalisationModel;
+    toggleOptions: ToggleOptions;
+    controller: LocalisationController;
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
+  }) => {
+    const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
+
+    const renderTabContent = () => {
+      switch (activeTab) {
+        case "options":
+          return (
+            <div className="flex flex-wrap gap-2 justify-center">
+              <ToggleButton on={model.gridVisible} onClick={toggleOptions.toggleGridVisibility}>
+                Grid
+              </ToggleButton>
+              <ToggleButton on={model.fieldVisible} onClick={toggleOptions.toggleFieldVisibility}>
+                Field
+              </ToggleButton>
+              <ToggleButton on={model.robotVisible} onClick={toggleOptions.toggleRobotVisibility}>
+                Robots
+              </ToggleButton>
+              <ToggleButton on={model.ballVisible} onClick={toggleOptions.toggleBallVisibility}>
+                Balls
+              </ToggleButton>
+              <ToggleButton on={model.particlesVisible} onClick={toggleOptions.toggleParticleVisibility}>
+                Particles
+              </ToggleButton>
+              <ToggleButton on={model.goalVisible} onClick={toggleOptions.toggleGoalVisibility}>
+                Goals
+              </ToggleButton>
+              <ToggleButton on={model.fieldLinePointsVisible} onClick={toggleOptions.toggleFieldLinePointsVisibility}>
+                Field Line Points
+              </ToggleButton>
+              <ToggleButton
+                on={model.fieldIntersectionsVisible}
+                onClick={toggleOptions.toggleFieldIntersectionsVisibility}
+              >
+                Field Intersections
+              </ToggleButton>
+            </div>
+          );
+        case "overview":
+          return (
+            <div className="flex flex-col gap-2">
+              <div className="font-bold flex justify-between bg-auto-surface-2 py-2 px-4 rounded-md">
+                <Icon>photo_camera</Icon>
+                <span>{target}</span>
+                <span>{viewModeString(model.viewMode)}</span>
+              </div>
+              {model.robots.map((robot) => {
+                const model = RobotPanelViewModel.of(robot);
+                console.log(model);
+                return (
+                  <div key={robot.id}>
+                    <RobotPanel
+                      connected={true}
+                      batteryValue={model.batteryValue}
+                      lastCameraImage={model.lastCameraImage}
+                      lastSeenBall={model.lastSeenBall}
+                      lastSeenGoal={model.lastSeenGoal}
+                      mode={model.mode}
+                      penalised={model.penalised}
+                      penalty={model.penalty}
+                      phase={model.phase}
+                      title={model.title}
+                      walkCommand={new Vector3(0, 0, 0)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="absolute right-0 bottom-0 top-0 flex flex-col w-1/5 bg-auto-surface-1 overflow-hidden gap-2 p-2">
+        <div className="flex">
+          <TabButton
+            isFirst={true}
+            isLast={false}
+            label="Options"
+            isActive={activeTab === "options"}
+            onClick={() => setActiveTab("options")}
+          />
+          <TabButton
+            isFirst={false}
+            isLast={true}
+            label="Overview"
+            isActive={activeTab === "overview"}
+            onClick={() => setActiveTab("overview")}
+          />
         </div>
-      </button>
-    </li>
-  );
-};
-
-const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
-  const { Menu, model, controller } = props;
-  return (
-    <Menu>
-      <ul className="flex h-full items-center">
-        <li className="flex px-4">
-          <Button className="px-7" onClick={props.onHawkEyeClick}>
-            Hawk Eye
-          </Button>
-        </li>
-        <li className="flex px-4">
-          <FieldDimensionSelector controller={controller} model={model} />
-        </li>
-        <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
-        <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
-        <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
-        <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
-        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
-        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
-        <MenuItem
-          label="Field Line Points"
-          isVisible={model.fieldLinePointsVisible}
-          onClick={props.toggleFieldLinePointsVisibility}
-        />
-        <MenuItem
-          label="Field Intersections"
-          isVisible={model.fieldIntersectionsVisible}
-          onClick={props.toggleFieldIntersectionsVisibility}
-        />
-      </ul>
-    </Menu>
-  );
-});
-
-const SideBar = observer(({ model }: { model: LocalisationModel }) => {
-  const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
-
-  return (
-    <div className="absolute right-0 bottom-0 top-0 flex flex-col w-1/5 bg-black/30 overflow-auto first:ml gap-2 p-2">
-      <div className="font-bold flex justify-between bg-auto-surface-1 py-2 px-4 rounded-md">
-        <Icon>photo_camera</Icon>
-        <span>{target}</span>
-        <span>{viewModeString(model.viewMode)}</span>
+        {renderTabContent()}
       </div>
-      {model.robots.map((robot) => {
-        const model = RobotPanelViewModel.of(robot);
-        console.log(model);
-        return (
-          <div className="" key={robot.id}>
-            <RobotPanel
-              connected={true}
-              batteryValue={model.batteryValue}
-              lastCameraImage={model.lastCameraImage}
-              lastSeenBall={model.lastSeenBall}
-              lastSeenGoal={model.lastSeenGoal}
-              mode={model.mode}
-              penalised={model.penalised}
-              penalty={model.penalty}
-              phase={model.phase}
-              title={model.title}
-              walkCommand={new Vector3(0, 0, 0)}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-});
+    );
+  },
+);
 
 function viewModeString(viewMode: ViewMode) {
   switch (viewMode) {

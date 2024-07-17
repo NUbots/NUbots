@@ -40,8 +40,8 @@ export const RobotPanel = (props: RobotPanelProps) => {
     "fill-red-500": props.lastSeenGoal === "danger",
   });
   return (
-    <div>
-      <header className="bg-auto-surface-1 rounded-t-md">
+    <div className="rounded-md border border-auto">
+      <header className="rounded-t-md bg-auto-surface-1">
         <div className="items-center flex text-sm h-7 px-2">
           <span className={connectionStatusClassName} title={props.connected ? "Connected" : "Disconnected"} />
           <span className="flex-1">{props.title}</span>
@@ -68,10 +68,6 @@ export const RobotPanel = (props: RobotPanelProps) => {
                 </Icon>
               )}
             </div>
-          </div>
-          <div className="flex flex-col">
-            <span className="flex-1 font-bold">Walk Command</span>
-            {props.walkCommand.x.toFixed(3)}, {props.walkCommand.y.toFixed(3)}, {props.walkCommand.z.toFixed(3)}
           </div>
         </div>
         <div className="items-center flex justify-around fill-black dark:fill-white">
