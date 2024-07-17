@@ -327,7 +327,7 @@ namespace module::input {
             }
         }
         if (mid_state_change) {
-            if (new_middle_down) {
+            if (middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
             }
