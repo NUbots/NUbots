@@ -35,7 +35,7 @@ gains:
 
 pitch_controller:
   # Whether or not to use the pitch controller
-  enabled: true
+  enabled: false
   # Gain
   gain: 0.005
   # Maximum pitch offset (in radians), acts as both controller limit and range where active
