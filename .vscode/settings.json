@@ -16,11 +16,9 @@
     "options": ["-I${workspaceFolder}/nuclear/message/proto"]
   },
   "files.associations": {
-    "*.m": "matlab",
     "*.role": "cmake",
     ".clang-tidy": "yaml",
-    ".Doxyfile": "properties",
-    "limits": "cpp"
+    ".Doxyfile": "properties"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
