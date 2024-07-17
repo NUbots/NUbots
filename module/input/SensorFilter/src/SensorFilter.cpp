@@ -296,7 +296,7 @@ namespace module::input {
     }
 
     void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-        // Keep track of the number of presses in the last 20 frames for debouncing
+        // Keep track of the number of presses in the last N frames for debouncing
         int left_count   = 0;
         int middle_count = 0;
         // Count the number of downs in all messages we have
