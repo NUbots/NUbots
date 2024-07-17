@@ -7,9 +7,6 @@ import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 import { message } from "../../../shared/messages";
-import { Matrix3 } from "../../../shared/math/matrix3";
-import { Matrix2 } from "../../../shared/math/matrix2";
-import { Vector2 } from "../../../shared/math/vector2";
 
 class ServoMotor {
   @observable angle: number;

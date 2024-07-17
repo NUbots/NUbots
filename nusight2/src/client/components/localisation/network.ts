@@ -10,9 +10,6 @@ import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 import { TimestampObject } from "../../../shared/time/timestamp";
-import { Matrix2 } from "../../../shared/math/matrix2";
-import { Matrix3 } from "../../../shared/math/matrix3";
-import { Vector2 } from "../../../shared/math/vector2";
 
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";

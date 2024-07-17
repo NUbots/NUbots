@@ -28,6 +28,7 @@ import { LocalisationRobotModel } from "./robot_model";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
 import { SkyboxView } from "./skybox/view";
+import { ModelVisualiser } from "./nugus_robot/stories/model_visualizer";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -88,9 +89,6 @@ const EnhancedDropdown = dropdownContainer();
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
-  state = {
-    isSidebarVisible: true,
-  };
 
   componentDidMount(): void {
     document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
@@ -136,7 +134,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             <ThreeFiber ref={this.canvas} onClick={this.onClick}>
               <LocalisationViewModel model={this.props.model} />
             </ThreeFiber>
-            {this.state.isSidebarVisible && <SideBar model={this.props.model} />}
+            {this.props.model.sideBarVisible && <SideBar model={this.props.model} />}
           </div>
         </div>
       </div>
@@ -165,10 +163,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   private onMouseMove = (e: MouseEvent) => {
     this.props.controller.onMouseMove(this.props.model, e.movementX, e.movementY);
-  };
-
-  private toggleSidebarVisibility = () => {
-    this.setState((prevState) => ({ isSidebarVisible: !prevState.isSidebarVisible }));
   };
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -222,6 +216,11 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldIntersectionsVisibility = () => {
     this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
   };
+
+  private toggleSidebarVisibility = () => {
+    this.props.controller.toggleSidebarVisibility(this.props.model);
+  };
+
 }
 
 interface LocalisationMenuBarProps {

@@ -365,4 +365,9 @@ export class LocalisationController {
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
   };
+
+  @action
+  toggleSidebarVisibility = (model: LocalisationModel) => {
+    model.sideBarVisible = !model.sideBarVisible;
+  }
 }
