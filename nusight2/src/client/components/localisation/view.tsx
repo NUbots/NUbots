@@ -88,6 +88,14 @@ const EnhancedDropdown = dropdownContainer();
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
+  state = {
+    isSidebarVisible: true,
+    activeTab: "options",
+  };
+
+  setActiveTab = (tab: string) => {
+    this.setState({ activeTab: tab });
+  };
 
   componentDidMount(): void {
     document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
@@ -126,13 +134,17 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          toggleSideBarVisibility={this.toggleSidebarVisibility}
         ></LocalisationMenuBar>
         <div className="flex w-full h-full">
           <div className="flex-grow relative border-t border-auto">
+
             <ThreeFiber ref={this.canvas} onClick={this.onClick}>
               <LocalisationViewModel model={this.props.model} />
             </ThreeFiber>
-            <SideBar model={this.props.model} />
+            {this.state.isSidebarVisible && (
+              <SideBar model={this.props.model} />
+            )}
           </div>
         </div>
       </div>
@@ -161,6 +173,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   private onMouseMove = (e: MouseEvent) => {
     this.props.controller.onMouseMove(this.props.model, e.movementX, e.movementY);
+  };
+
+  private toggleSidebarVisibility = () => {
+    this.setState((prevState) => ({ isSidebarVisible: !prevState.isSidebarVisible }));
   };
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -232,6 +248,7 @@ interface LocalisationMenuBarProps {
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
   toggleFieldIntersectionsVisibility(): void;
+  toggleSideBarVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -262,6 +279,9 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
+        <li className="flex px-4">
+        <Button onClick={props.toggleSideBarVisibility}>Game Overview</Button>
+        </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
@@ -287,7 +307,7 @@ const SideBar = observer(({ model }: { model: LocalisationModel }) => {
   const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
 
   return (
-    <div className="absolute right-0 bottom-0 top-0 flex flex-col w-1/5 bg-black/30 overflow-auto first:ml gap-2 p-2">
+    <div className="absolute right-0 bottom-0 top-0 flex flex-col w-1/5 bg-auto-surface-0 overflow-hidden first:ml gap-2 p-2">
       <div className="font-bold flex justify-between bg-auto-surface-1 py-2 px-4 rounded-md">
         <Icon>photo_camera</Icon>
         <span>{target}</span>
