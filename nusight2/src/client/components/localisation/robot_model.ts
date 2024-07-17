@@ -121,10 +121,33 @@ export class FieldIntersection {
   }
 }
 
+export class Line {
+  @observable start: Vector3;
+  @observable end: Vector3;
+  constructor({ start, end }: { start: Vector3; end: Vector3 }) {
+    this.start = start;
+    this.end = end;
+  }
+}
+
+export class BoundingBox {
+  @observable minX: number;
+  @observable minY: number;
+  @observable maxX: number;
+  @observable maxY: number;
+
+  constructor({ minX, minY, maxX, maxY }: { minX: number; minY: number; maxX: number; maxY: number }) {
+    this.minX = minX;
+    this.minY = minY;
+    this.maxX = maxX;
+    this.maxY = maxY;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
-  @observable color?: string;
+  @observable color: string;
   @observable Htw: Matrix4; // World to torso
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
@@ -139,6 +162,7 @@ export class LocalisationRobotModel {
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
   @observable purpose: string;
+  @observable association_lines?: Line[];
 
   @observable max_align_radius: number;
   @observable min_align_radius: number;
@@ -148,6 +172,8 @@ export class LocalisationRobotModel {
   @observable min_angle_error: number;
   @observable max_angle_error: number;
   @observable velocity_target: Vector3;
+  @observable boundingBox?: BoundingBox;
+  @observable player_id: number;
   @observable lastOverViewMessageTime: number;
   @observable playerId: number;
   @observable roleName: string;
@@ -178,6 +204,7 @@ export class LocalisationRobotModel {
     goals,
     robots,
     purpose,
+    association_lines,
     max_align_radius,
     min_align_radius,
     angle_to_final_heading,
@@ -186,6 +213,8 @@ export class LocalisationRobotModel {
     min_angle_error,
     max_angle_error,
     velocity_target,
+    boundingBox,
+    player_id,
     lastOverViewMessageTime,
     playerId,
     roleName,
@@ -201,7 +230,7 @@ export class LocalisationRobotModel {
   }: {
     model: RobotModel;
     name: string;
-    color?: string;
+    color: string;
     Htw: Matrix4;
     Hrw: Matrix4;
     Hfw: Matrix4;
@@ -215,6 +244,7 @@ export class LocalisationRobotModel {
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
     purpose: string;
+    association_lines?: Line[];
     max_align_radius: number;
     min_align_radius: number;
     angle_to_final_heading: number;
@@ -223,6 +253,8 @@ export class LocalisationRobotModel {
     min_angle_error: number;
     max_angle_error: number;
     velocity_target: Vector3;
+    boundingBox?: BoundingBox;
+    player_id: number;
     lastOverViewMessageTime: number;
     playerId: number;
     roleName: string;
@@ -252,6 +284,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.association_lines = association_lines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
     this.angle_to_final_heading = angle_to_final_heading;
@@ -260,6 +293,8 @@ export class LocalisationRobotModel {
     this.min_angle_error = min_angle_error;
     this.max_angle_error = max_angle_error;
     this.velocity_target = velocity_target;
+    this.boundingBox = boundingBox;
+    this.player_id = player_id;
     this.lastOverViewMessageTime = lastOverViewMessageTime;
     this.playerId = playerId;
     this.roleName = roleName;
@@ -278,6 +313,7 @@ export class LocalisationRobotModel {
     return new LocalisationRobotModel({
       model,
       name: model.name,
+      color: "black",
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
@@ -288,6 +324,7 @@ export class LocalisationRobotModel {
       goals: { points: [] },
       robots: [],
       purpose: "",
+      association_lines: [],
       max_align_radius: 0,
       min_align_radius: 0,
       angle_to_final_heading: 0,
@@ -296,6 +333,7 @@ export class LocalisationRobotModel {
       min_angle_error: 0,
       max_angle_error: 0,
       velocity_target: Vector3.of(),
+      player_id: -1,
       lastOverViewMessageTime: 0,
       playerId: -1,
       roleName: "",

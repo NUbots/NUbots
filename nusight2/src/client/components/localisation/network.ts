@@ -14,6 +14,7 @@ import { RobotModel } from "../robot/model";
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
+import { Line } from "./robot_model";
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
@@ -26,7 +27,9 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
-    this.network.on(message.purpose.Purpose, this.onPurposes);
+    this.network.on(message.localisation.AssociationLines, this.onAssociationLines);
+    this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
+    this.network.on(message.purpose.Purpose, this.onPurpose);
     this.network.on(message.support.nusight.Overview, this.onOverview);
   }
 
@@ -51,6 +54,16 @@ export class LocalisationNetwork {
     robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
   };
 
+  @action onAssociationLines = (robotModel: RobotModel, associationLines: message.localisation.AssociationLines) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.association_lines = associationLines.lines.map((line) => {
+      return new Line({
+        start: Vector3.from(line.start),
+        end: Vector3.from(line.end),
+      });
+    });
+  };
+
   @action
   private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
     const robot = LocalisationRobotModel.of(robotModel);
@@ -66,10 +79,38 @@ export class LocalisationNetwork {
   };
 
   @action.bound
-  private onPurposes(robotModel: RobotModel, purpose: message.purpose.Purpose) {
+  private WalkInsideBoundedBox(robotModel: RobotModel, boundedBox: message.strategy.WalkInsideBoundedBox) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.boundingBox = {
+      minX: boundedBox.xMin,
+      maxX: boundedBox.xMax,
+      minY: boundedBox.yMin,
+      maxY: boundedBox.yMax,
+    };
+  }
+
+  @action.bound
+  private onPurpose(robotModel: RobotModel, purpose: message.purpose.Purpose) {
     const robot = LocalisationRobotModel.of(robotModel);
     const position = purpose.purpose;
     robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
+
+    robot.player_id = purpose.playerId!;
+
+    // Update colour based on player id
+    if (robot.player_id === 1) {
+      robot.color = "blue";
+    } else if (robot.player_id === 2) {
+      robot.color = "purple";
+    } else if (robot.player_id === 3) {
+      robot.color = "red";
+    } else if (robot.player_id === 4) {
+      robot.color = "orange";
+    } else if (robot.player_id === 5) {
+      robot.color = "yellow";
+    } else {
+      robot.color = "black";
+    }
   }
 
   @action.bound

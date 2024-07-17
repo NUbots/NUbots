@@ -28,13 +28,14 @@ targets:
     message.vision.GreenHorizon: true
     message.vision.FieldLines: true
     message.vision.VisualMesh: false
-    message.vision.FieldIntersections: false
+    message.vision.FieldIntersections: true
     message.vision.BoundingBoxes: true
 
     # Localisation Messages
     message.localisation.Ball: true
     message.localisation.Field: true
     message.localisation.Robots: true
+    message.localisation.AssociationLines: true
 
     # Log messages
     message.nuclear.LogMessage: false
@@ -43,3 +44,4 @@ targets:
     # Behaviour
     message.purpose.Purpose: true
     message.planning.WalkToDebug: true
+    message.strategy.WalkInsideBoundedBox: true

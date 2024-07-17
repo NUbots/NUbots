@@ -199,8 +199,8 @@ namespace utility::localisation {
             {Eigen::Vector3d(0, -half_width, 0), message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
 
         // X intersection at the center
-        landmarks.push_back(
-            {Eigen::Vector3d(0, 0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        // landmarks.push_back(
+        //     {Eigen::Vector3d(0, 0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
         landmarks.push_back({Eigen::Vector3d(0, fd.dimensions.center_circle_diameter / 2, 0),
                              message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
         landmarks.push_back({Eigen::Vector3d(0, -fd.dimensions.center_circle_diameter / 2, 0),

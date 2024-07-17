@@ -367,6 +367,16 @@ export class LocalisationController {
   };
 
   @action
+  toggleWalkToDebugVisibility = (model: LocalisationModel) => {
+    model.walkToDebugVisible = !model.walkToDebugVisible;
+  };
+
+  @action
+  toggleBoundedBoxVisibility = (model: LocalisationModel) => {
+    model.boundedBoxVisible = !model.boundedBoxVisible;
+  };
+
+  @action
   toggleSidebarVisibility = (model: LocalisationModel) => {
     model.sideBarVisible = !model.sideBarVisible;
   };
