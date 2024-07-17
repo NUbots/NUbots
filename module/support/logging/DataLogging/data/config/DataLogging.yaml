@@ -9,28 +9,28 @@ output:
 # You can put any messages that is emitted in the system here and it will be logged
 messages:
   # Input
-  message.platform.RawSensors: false
-  message.input.Image: false
+  message.platform.RawSensors: true
+  message.input.Image: true
   message.output.CompressedImage: true
   # Vision
-  message.vision.Balls: false
-  message.vision.Goals: false
-  message.vision.GreenHorizon: false
-  message.vision.FieldLines: false
-  message.vision.VisualMesh: false
-  message.vision.FieldIntersections: false
-  message.vision.BoundingBoxes: false
+  message.vision.Balls: true
+  message.vision.Goals: true
+  message.vision.GreenHorizon: true
+  message.vision.FieldLines: true
+  message.vision.VisualMesh: true
+  message.vision.FieldIntersections: true
+  message.vision.BoundingBoxes: true
   # Odometry and Localisation
-  message.localisation.Ball: false
-  message.localisation.Field: false
-  message.localisation.Robot: false
-  message.input.Sensors: false
-  message.support.FieldDescription: false
+  message.localisation.Ball: true
+  message.localisation.Field: true
+  message.localisation.Robot: true
+  message.input.Sensors: true
+  message.support.FieldDescription: true
   # Behaviour state
-  message.behaviour.state.WalkState: false
-  message.behaviour.state.Stability: false
+  message.behaviour.state.WalkState: true
+  message.behaviour.state.Stability: true
   # Logging and Support
-  message.support.nusight.Overview: false
-  message.eye.DataPoint: false
-  message.nuclear.LogMessage: false
-  message.nuclear.ReactionStatistics: false
+  message.support.nusight.Overview: true
+  message.eye.DataPoint: true
+  message.nuclear.LogMessage: true
+  message.nuclear.ReactionStatistics: true
