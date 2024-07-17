@@ -300,10 +300,10 @@ namespace module::input {
         int middle_count = 0;
         // If we have any downs in the last 20 frames then we are button pushed
         for (const auto& s : sensors) {
-            if (s->buttons.left && (s->subcontroller_error == 0u)) {
+            if (s->buttons.left) {
                 ++left_count;
             }
-            if (s->buttons.middle && (s->subcontroller_error == 0u)) {
+            if (s->buttons.middle) {
                 ++middle_count;
             }
         }
