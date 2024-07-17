@@ -292,38 +292,55 @@ namespace module::localisation {
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
+        // Initialise a vector to keep track of the best landmark for each intersection
+        std::vector<std::pair<int, double>> best_landmarks(field_intersections->intersections.size(),
+                                                           {-1, std::numeric_limits<double>::max()});
+        // Initialise a vector to keep track of which landmarks have been associated
+        std::vector<bool> landmark_associated(landmarks.size(), false);
 
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+        bool updated = false;
+        do {
+            updated = false;
+            // Iterate through each intersection and landmark to find the closest landmark
+            for (size_t i = 0; i < field_intersections->intersections.size(); ++i) {
+                for (size_t j = 0; j < landmarks.size(); ++j) {
+                    // Skip already associated landmarks
+                    if (landmark_associated[j]) {
+                        continue;
+                    }
 
-        for (const auto& intersection : field_intersections->intersections) {
-            double min_distance = std::numeric_limits<double>::max();
-            Eigen::Vector3d closest_landmark;
-            bool found_association = false;
+                    // Skip if the landmark type does not match the intersection type
+                    if (landmarks[j].type != field_intersections->intersections[i].type) {
+                        continue;
+                    }
 
-            // Transform the observed intersection from world to field coordinates
-            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
-
-            for (const auto& landmark : landmarks) {
-                if (landmark.type == intersection.type) {
-                    // Calculate Euclidean distance between the observed intersection and the landmark
-                    double distance = (landmark.rLFf - rIFf).norm();
-
-                    // If this landmark is closer, update the association
-                    if (distance < min_distance) {
-                        min_distance      = distance;
-                        closest_landmark  = landmark.rLFf;
-                        found_association = true;
+                    // Calculate the distance between the observed intersection and the closest landmark
+                    double distance = (landmarks[j].rLFf - (Hfw * field_intersections->intersections[i].rIWw)).norm();
+                    if (distance < best_landmarks[i].second) {
+                        best_landmarks[i] = {j, distance};
+                        updated           = true;
                     }
                 }
             }
 
-            // If we found an association, add it to our list
-            if (found_association) {
-                associations.emplace_back(closest_landmark, rIFf);
+            // Update landmark associations
+            for (auto& landmark : best_landmarks) {
+                if (landmark.first != -1) {
+                    landmark_associated[landmark.first] = true;
+                }
+            }
+        } while (updated);
+
+        // Convert to final associations
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> final_associations{};
+        for (size_t i = 0; i < best_landmarks.size(); ++i) {
+            if (best_landmarks[i].first != -1) {
+                final_associations.emplace_back(Hfw * field_intersections->intersections[i].rIWw,
+                                                landmarks[best_landmarks[i].first].rLFf);
             }
         }
 
-        return associations;
+        return final_associations;
     }
 
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
