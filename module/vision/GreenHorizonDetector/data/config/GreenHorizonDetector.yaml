@@ -1,7 +1,7 @@
 log_level: INFO
 
 # How confident do we need to be that this is a green horizon point
-confidence_threshold: 0.95
+confidence_threshold: 0.8
 # How many points do we need to claim this cluster is a viable part of the green horizon
 cluster_points: 500
 # How close a field cluster needs to be to the robot to be an accepted cluster
