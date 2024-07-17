@@ -106,9 +106,6 @@ namespace module::platform::OpenCR {
                 // Error code
                 servo.hardware_error = servo_states[i].hardware_error;
 
-                // Accumulate all packet error flags to read at once
-                sensors.subcontroller_error |= servo_states[i].packet_error;
-
                 // Present Data
                 servo.present_position = servo_states[i].present_position;
                 servo.present_velocity = servo_states[i].present_velocity;
