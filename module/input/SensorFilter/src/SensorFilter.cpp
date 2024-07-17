@@ -296,21 +296,21 @@ namespace module::input {
     }
 
     void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
+        // Keep track of the number of presses in the last 20 frames for debouncing
         int left_count   = 0;
         int middle_count = 0;
-        // If we have any downs in the last 20 frames then we are button pushed
+        // Count the number of downs in all messages we have
         for (const auto& s : sensors) {
-            if (s->buttons.left && (s->subcontroller_error == 0u)) {
+            if (s->buttons.left)
                 ++left_count;
-            }
-            if (s->buttons.middle && (s->subcontroller_error == 0u)) {
+            if (s->buttons.middle)
                 ++middle_count;
-            }
         }
+        // Compare to the debounce threshold to determine if we have a down event
         bool new_left_down   = left_count > cfg.button_debounce_threshold;
         bool new_middle_down = middle_count > cfg.button_debounce_threshold;
+        // Check for a state change, i.e. a press or release event
         if (new_left_down != left_down) {
-            left_down = new_left_down;
             if (new_left_down) {
                 log<NUClear::INFO>("Left Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
@@ -319,9 +319,10 @@ namespace module::input {
                 log<NUClear::INFO>("Left Button Up");
                 emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
             }
+            // Update state for next time
+            left_down = new_left_down;
         }
         if (new_middle_down != middle_down) {
-            middle_down = new_middle_down;
             if (new_middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
@@ -330,6 +331,8 @@ namespace module::input {
                 log<NUClear::INFO>("Middle Button Up");
                 emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
             }
+            // Update state for next time
+            middle_down = new_middle_down;
         }
     }
 
