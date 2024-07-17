@@ -25,9 +25,9 @@ import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
-import { SkyboxView } from "./skybox/view";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
+import { SkyboxView } from "./skybox/view";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -90,11 +90,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
   state = {
     isSidebarVisible: true,
-    activeTab: "options",
-  };
-
-  setActiveTab = (tab: string) => {
-    this.setState({ activeTab: tab });
   };
 
   componentDidMount(): void {
@@ -138,13 +133,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
         ></LocalisationMenuBar>
         <div className="flex w-full h-full">
           <div className="flex-grow relative border-t border-auto">
-
             <ThreeFiber ref={this.canvas} onClick={this.onClick}>
               <LocalisationViewModel model={this.props.model} />
             </ThreeFiber>
-            {this.state.isSidebarVisible && (
-              <SideBar model={this.props.model} />
-            )}
+            {this.state.isSidebarVisible && <SideBar model={this.props.model} />}
           </div>
         </div>
       </div>
@@ -280,7 +272,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
         <li className="flex px-4">
-        <Button onClick={props.toggleSideBarVisibility}>Game Overview</Button>
+          <Button onClick={props.toggleSideBarVisibility}>Game Overview</Button>
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
@@ -329,7 +321,7 @@ const SideBar = observer(({ model }: { model: LocalisationModel }) => {
               penalty={model.penalty}
               phase={model.phase}
               title={model.title}
-              walkCommand={new Vector3(0, 0, 0)}
+              walkCommand={model.walkCommand}
             />
           </div>
         );

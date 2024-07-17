@@ -162,6 +162,7 @@ export class LocalisationRobotModel {
   @observable lastCameraImage: number;
   @observable lastSeenBall: number;
   @observable lastSeenGoal: number;
+  @observable walkCommand: Vector3;
 
   constructor({
     model,
@@ -198,7 +199,8 @@ export class LocalisationRobotModel {
     penaltyReason,
     lastCameraImage,
     lastSeenBall,
-    lastSeenGoal
+    lastSeenGoal,
+    walkCommand
   }: {
     model: RobotModel;
     name: string;
@@ -235,6 +237,7 @@ export class LocalisationRobotModel {
     lastCameraImage: number;
     lastSeenBall: number;
     lastSeenGoal: number;
+    walkCommand: Vector3;
   }) {
     this.model = model;
     this.name = name;
@@ -271,6 +274,7 @@ export class LocalisationRobotModel {
     this.lastCameraImage = lastCameraImage;
     this.lastSeenBall = lastSeenBall;
     this.lastSeenGoal = lastSeenGoal;
+    this.walkCommand = walkCommand;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -306,6 +310,7 @@ export class LocalisationRobotModel {
       lastCameraImage: 0,
       lastSeenBall: 0,
       lastSeenGoal: 0,
+      walkCommand: Vector3.of()
     });
   });
 

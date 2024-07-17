@@ -168,8 +168,6 @@ export class LocalisationNetwork {
   private onOverview = (robotModel: RobotModel, overview: message.support.nusight.Overview) => {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    // console.log("Overview", overview);
-
     // Timestamp this message was sent (for comparison with last seen)
     robot.lastOverViewMessageTime = TimestampObject.toSeconds(overview.timestamp);
 
@@ -194,6 +192,9 @@ export class LocalisationNetwork {
     robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
     robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
     robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
+
+    // The walk command
+    robot.walkCommand = Vector3.from(overview.walkCommand);
   };
 
 }

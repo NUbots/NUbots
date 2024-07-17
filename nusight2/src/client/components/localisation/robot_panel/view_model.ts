@@ -68,6 +68,9 @@ export class RobotPanelViewModel {
     return this.model.name;
   }
 
+  get walkCommand(): Vector3 {
+    return this.model.walkCommand;
+  }
 
   private getLastStatus(time: number, threshold: number): LastStatus {
     const value = (this.model.lastOverViewMessageTime - time) / threshold;
