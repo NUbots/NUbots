@@ -75,12 +75,12 @@ namespace module::purpose {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Trigger<ButtonMiddleDown>>().then([this] {
+        on<Trigger<ButtonMiddleDown, Single>>().then([this] {
             emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
             emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
         });
 
-        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonMiddleUp, Single>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
 
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
