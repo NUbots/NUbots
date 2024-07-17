@@ -310,8 +310,11 @@ namespace module::input {
         bool new_left_down   = left_count > cfg.button_debounce_threshold;
         bool new_middle_down = middle_count > cfg.button_debounce_threshold;
         // Check for a state change, i.e. a press or release event
-        if (new_left_down != left_down) {
-            if (new_left_down) {
+        // And set the state variable for next time.
+        bool left_state_change = left_down != (left_down = new_left_down);
+        bool mid_state_change  = middle_down != (middle_down = new_middle_down);
+        if (left_state_change) {
+            if (left_down) {
                 log<NUClear::INFO>("Left Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
             }
@@ -319,10 +322,8 @@ namespace module::input {
                 log<NUClear::INFO>("Left Button Up");
                 emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
             }
-            // Update state for next time
-            left_down = new_left_down;
         }
-        if (new_middle_down != middle_down) {
+        if (mid_state_change) {
             if (new_middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
