@@ -14,7 +14,7 @@ initial_state: [0.0, 0.0, 0.0]
 save_map: false
 
 # Minimum number of field line points for a measurement update
-min_field_line_points: 50
+min_field_line_points: 20
 
 # Minimum number of field line intersections for an update
 min_field_line_intersections: 3
@@ -29,13 +29,13 @@ use_ground_truth_localisation: false
 field_line_distance_weight: 10.0
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 15.0
+field_line_intersection_weight: 20.0
 
 # Weighting associated with change between last solution result
-state_change_weight: 1.0
+state_change_weight: 1.5
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 1.0
+goal_post_distance_weight: 0.5
 
 # Box constraints on change in state (x, y, theta)
 change_limit: [0.5, 0.5, 0.5]
