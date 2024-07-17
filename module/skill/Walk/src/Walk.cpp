@@ -88,6 +88,32 @@ namespace module::skill {
             cfg.walk_generator_parameters.only_switch_when_planted =
                 config["walk"]["only_switch_when_planted"].as<bool>();
 
+            cfg.pitch_gain       = config["pitch_controller"]["gain"].as<double>();
+            cfg.pitch_max_offset = config["pitch_controller"]["max_offset"].as<Expression>();
+            if (config["pitch_controller"]["enabled"].as<bool>()) {
+                pitch_controller_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
+                    double measured_pitch = mat_to_rpy_intrinsic(sensors.Htw.linear().inverse()).y();
+                    double error          = cfg.walk_generator_parameters.torso_pitch - measured_pitch;
+
+                    // Disable the controller outside of the threshold
+                    if (std::abs(error) > cfg.pitch_max_offset) {
+                        pitch_offset = 0;
+                        return;
+                    }
+
+                    // Update the pitch offset
+                    pitch_offset += cfg.pitch_gain * error;
+                    pitch_offset = std::clamp(pitch_offset, -cfg.pitch_max_offset, cfg.pitch_max_offset);
+
+                    emit(graph("Pitch offset", pitch_offset));
+                    emit(graph("Measured pitch", measured_pitch));
+                    emit(graph("Error", error));
+                });
+            }
+            else {
+                pitch_controller_reaction.unbind();
+            }
+
             // Reset the walk engine and last update time
             walk_generator.reset();
             last_update_time = NUClear::clock::now();
@@ -117,6 +143,9 @@ namespace module::skill {
             walk_generator.reset();
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
+
+            // Reset pitch controller
+            pitch_offset = 0;
         });
 
         // Stop - Runs every time the Walk task is removed from the director tree
@@ -140,6 +169,8 @@ namespace module::skill {
                         .count();
                 last_update_time = NUClear::clock::now();
 
+                // Update desired torch pitch
+                walk_generator.set_torso_pitch(cfg.walk_generator_parameters.torso_pitch + pitch_offset);
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability >= Stability::DYNAMIC) {
