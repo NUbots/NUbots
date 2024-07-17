@@ -304,7 +304,6 @@ const SideBar = observer(({ model }: { model: LocalisationModel }) => {
       </div>
       {model.robots.map((robot) => {
         const model = RobotPanelViewModel.of(robot);
-        console.log(model);
         return (
           <div className="" key={robot.id}>
             <RobotPanel
