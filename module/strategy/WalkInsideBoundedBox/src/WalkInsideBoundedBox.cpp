@@ -118,7 +118,7 @@ namespace module::strategy {
                     else {
                         // If the ball is in a region inbetween the bounding box and opp goal, add an x offset to
                         // allow teammate to take ball
-                        rDFf.x() += cfg.allow_pass_x_offset;
+                        // rDFf.x() += cfg.allow_pass_x_offset;
                     }
 
                     // Emit task to walk to desired position with heading facing opponents side of field
