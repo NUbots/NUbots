@@ -17,11 +17,7 @@ settings:
   BalanceRatio: 0.9
 
   GainAuto: Continuous # Options: Off, Once, Continuous
-  Gain: 18
-
-  GammaEnable: true
-  Gamma: 1.2
 
   AcquisitionFrameRateEnable: true
-  DeviceLinkThroughputLimit: 60000000 # Throughput can limit the framerate
   AcquisitionFrameRate: 30.00 # Adjusting frame rate can help remove flickering from lighting
+  DeviceLinkThroughputLimit: 60000000 # Throughput can limit the framerate
