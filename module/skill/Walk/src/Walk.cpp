@@ -140,7 +140,7 @@ namespace module::skill {
         on<Start<WalkTask>>().then([this]() {
             // Reset the last update time and walk engine
             last_update_time = NUClear::clock::now();
-            walk_generator.reset();
+            // walk_generator.reset();
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
 
