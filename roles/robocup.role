@@ -54,6 +54,7 @@ nuclear_role(
   strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
+  strategy::WalkToReadyPosition
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
