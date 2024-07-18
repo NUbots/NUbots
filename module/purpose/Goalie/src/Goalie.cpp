@@ -64,8 +64,8 @@ namespace module::purpose {
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::WalkInsideBoundedBox;
-    using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
+    using message::strategy::WalkToReadyPosition;
 
     using extension::Configuration;
 
@@ -112,7 +112,7 @@ namespace module::purpose {
 
         // Normal READY state
         on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
-            emit<Task>(std::make_unique<WalkToFieldPosition>(
+            emit<Task>(std::make_unique<WalkToReadyPosition>(
                 pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                                      Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
