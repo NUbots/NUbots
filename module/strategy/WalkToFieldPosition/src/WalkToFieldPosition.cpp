@@ -76,16 +76,16 @@ namespace module::strategy {
                 double angle_error = std::abs(desired_heading - measured_heading);
                 // Normalize the angle error to be within the range [-pi, pi]
                 angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
-                log<NUClear::INFO>("angle_error: ", angle_error);
+                // log<NUClear::INFO>("angle_error: ", angle_error);
 
 
                 if (translational_error < current_threshold && std::abs(angle_error) < current_threshold) {
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     current_threshold = cfg.stopped_threshold;
-                    log<NUClear::INFO>("stoped");
+                    // log<NUClear::INFO>("stoped");
                 }
                 else {
-                    log<NUClear::INFO>("waliking to positon");
+                    // log<NUClear::INFO>("waliking to positon");
                     emit<Task>(std::make_unique<WalkTo>(Hrd));
                 }
             });
