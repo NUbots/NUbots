@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
-#define MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
+#ifndef MODULE_STRATEGY_WALKTOREADYPOSITION_HPP
+#define MODULE_STRATEGY_WALKTOREADYPOSITION_HPP
 
 #include <nuclear>
 
@@ -33,7 +33,7 @@
 
 namespace module::strategy {
 
-    class WalkToFieldPosition : public ::extension::behaviour::BehaviourReactor {
+    class WalkToReadyPosition : public ::extension::behaviour::BehaviourReactor {
     private:
         struct Config {
             double stop_threshold    = 0.0;
@@ -43,10 +43,10 @@ namespace module::strategy {
         double current_threshold = 0.0;
 
     public:
-        /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.
-        explicit WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the WalkToReadyPosition reactor.
+        explicit WalkToReadyPosition(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::strategy
 
-#endif  // MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
+#endif  // MODULE_STRATEGY_WALKTOREADYPOSITION_HPP

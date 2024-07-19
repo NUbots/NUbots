@@ -33,6 +33,14 @@ walk:
 gains:
   arms: 1
 
+pitch_controller:
+  # Whether or not to use the pitch controller
+  enabled: false
+  # Gain
+  gain: 0.005
+  # Maximum pitch offset (in radians), acts as both controller limit and range where active
+  max_offset: 15 * pi / 180
+
 # Fixed position of the arm joints during walking
 arms:
   right_shoulder_pitch: 1.7
