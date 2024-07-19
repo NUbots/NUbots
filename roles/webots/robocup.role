@@ -41,7 +41,6 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
-  skill::Dive
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
@@ -50,7 +49,6 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
-  strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::WalkToReadyPosition
@@ -58,8 +56,6 @@ nuclear_role(
   strategy::WalkToBall
   strategy::FindObject
   strategy::KickToGoal
-  strategy::AlignBallToGoal
-  strategy::DiveToBall
   strategy::WalkInsideBoundedBox
   # Purposes
   purpose::AllRounder
@@ -69,5 +65,4 @@ nuclear_role(
   purpose::Soccer
   # Platform
   platform::Webots
-  # Datalogging support::logging::DataLogging
 )
