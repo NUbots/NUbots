@@ -9,6 +9,7 @@ starting_side: EITHER
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
+# (-2.85,0,-3.14) penalty position for striker (penalty position is 1.5m away from the end of the 9m field)
 
 # Bool to save a csv file of the generated occupancy grid map
 save_map: false

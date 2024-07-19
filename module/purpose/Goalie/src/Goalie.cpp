@@ -45,8 +45,9 @@
 
 namespace module::purpose {
     using message::input::GameState;
-    using Phase    = message::input::GameState::Data::Phase;
-    using GameMode = message::input::GameState::Data::Mode;
+    using Phase          = message::input::GameState::Data::Phase;
+    using GameMode       = message::input::GameState::Data::Mode;
+    using SecondaryState = message::input::GameState::Data::SecondaryState;
     using message::planning::LookAround;
     using message::strategy::DiveToBall;
     using message::strategy::LookAtBall;
@@ -126,7 +127,20 @@ namespace module::purpose {
         on<Provide<NormalGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty shootout PLAYING state
-        on<Provide<PenaltyShootoutGoalie>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+        on<Provide<PenaltyShootoutGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                emit<Task>(std::make_unique<LookAround>(), 1);
+                emit<Task>(std::make_unique<LookAtBall>(), 2);
+                emit<Task>(std::make_unique<DiveToBall>(), 3);
+            });
 
         // Penalty shootout UNKNOWN state
         on<Provide<PenaltyShootoutGoalie>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
