@@ -83,8 +83,9 @@ namespace module::strategy {
                 Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
                 Eigen::Vector3d rRFf  = Hfr.translation();
 
-                if (rRFf.x() > box.x_min && rRFf.x() < box.x_max && rRFf.y() > box.y_min && rRFf.y() < box.y_max) {
+                if (rRFf.x() < box.x_min || rRFf.x() > box.x_max || rRFf.y() < box.y_min || rRFf.y() > box.y_max) {
                     emit<Task>(std::make_unique<WalkToReadyPosition>(box.Hfd));
+                    log<NUClear::DEBUG>("Robot outside of bounded box, moving to ready.");
                     return;
                 }
 
