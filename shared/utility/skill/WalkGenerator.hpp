@@ -247,7 +247,7 @@ namespace utility::skill {
                     break;
                 case WalkState::State::STOPPED:
                     // We do not update the time here because we want to remain in the stopped state
-                    generate_walking_trajectories(velocity_target);
+                    reset();
                     break;
                 default: NUClear::log<NUClear::WARN>("Unknown state", engine_state.value);
             }
@@ -278,6 +278,14 @@ namespace utility::skill {
          */
         Scalar get_time() const {
             return t;
+        }
+
+        /**
+         * @brief Set the desired torso pitch
+         * @param pitch Desired torso pitch.
+         */
+        void set_torso_pitch(const Scalar& pitch) {
+            p.torso_pitch = pitch;
         }
 
     private:

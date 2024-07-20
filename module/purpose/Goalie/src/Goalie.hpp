@@ -53,6 +53,8 @@ namespace module::purpose {
             double bounded_region_y_min = 0.0;
             /// @brief y maximum bound on field to walk within
             double bounded_region_y_max = 0.0;
+            /// @brief distance the ball needs to be kicked to begin playing in a penalty shootout
+            double penalty_shootout_kick_detection_threshold = 0.0;
         } cfg;
 
     public:

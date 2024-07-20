@@ -34,6 +34,14 @@
 namespace module::strategy {
 
     class WalkToFieldPosition : public ::extension::behaviour::BehaviourReactor {
+    private:
+        struct Config {
+            double stop_threshold    = 0.0;
+            double stopped_threshold = 0.0;
+        } cfg;
+
+        double current_threshold = 0.0;
+
     public:
         /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.
         explicit WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment);

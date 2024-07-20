@@ -77,6 +77,7 @@ namespace module::purpose {
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
+    using message::strategy::WalkToReadyPosition;
 
     using StrikerTask = message::purpose::Striker;
 
@@ -143,7 +144,7 @@ namespace module::purpose {
         // Normal READY state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // If we are stable, walk to the ready field position
-            emit<Task>(std::make_unique<WalkToFieldPosition>(
+            emit<Task>(std::make_unique<WalkToReadyPosition>(
                 pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                                      Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
@@ -168,7 +169,7 @@ namespace module::purpose {
                         return;
                     }
                     // Walk to ready so we are ready to play when kickoff finishes
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                    emit<Task>(std::make_unique<WalkToReadyPosition>(
                         pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                                              Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
                     return;
@@ -184,7 +185,22 @@ namespace module::purpose {
         on<Provide<NormalStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty shootout PLAYING state
-        on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+        on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if (!game_state.data.our_kick_off) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                emit<Task>(std::make_unique<FindBall>(), 1);
+                emit<Task>(std::make_unique<LookAtBall>(), 2);
+                emit<Task>(std::make_unique<WalkToKickBall>(), 3);
+                emit<Task>(std::make_unique<AlignBallToGoal>(), 4);
+                emit<Task>(std::make_unique<KickToGoal>(), 5);
+            });
 
         // Penalty shootout UNKNOWN state
         on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
@@ -324,6 +340,7 @@ namespace module::purpose {
                        pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                                             Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
                    4);  // Patrol bounded box region
+        // emit<Task>(std::make_unique<KickToGoal>(), 5);
     }
 
 }  // namespace module::purpose
