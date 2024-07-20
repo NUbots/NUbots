@@ -32,6 +32,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 namespace module::strategy {
@@ -41,15 +42,17 @@ namespace module::strategy {
     using message::localisation::Field;
     using message::planning::WalkTo;
     using WalkToFieldPositionTask = message::strategy::WalkToFieldPosition;
+    using message::skill::Walk;
 
     WalkToFieldPosition::WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.stop_threshold    = config["stop_threshold"].as<double>();
+            cfg.stopped_threshold = config["stopped_threshold"].as<double>();
         });
-
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
                 // Transform from desired field position into robot space

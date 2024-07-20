@@ -58,6 +58,15 @@ namespace module::skill {
 
             /// @brief Walk engine parameters
             utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};
+
+            /// @brief Pitch controller gain
+            double pitch_gain{};
+
+            /// @brief Pitch offset maximum
+            double pitch_max_offset{};
+
+            /// @brief Pitch controller enabled
+            bool pitch_controller_enabled{};
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -65,6 +74,12 @@ namespace module::skill {
 
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
         utility::skill::WalkGenerator<double> walk_generator{};
+
+        /// @brief Pitch offset
+        double pitch_offset{};
+
+        /// @brief Pitch controller reaction
+        ReactionHandle pitch_controller_reaction{};
     };
 }  // namespace module::skill
 

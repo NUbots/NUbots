@@ -11,10 +11,10 @@ ball_y_offset: 0.1
 goal_target_offset: 0.5
 
 # Distance from ball to walk to if approaching from a "bad" position
-ball_approach_distance: 0.3
+ball_approach_distance: 0.4
 
 # Distance from ball to walk to if approaching from a "good" position
-ball_kick_distance: 0.0
+ball_kick_distance: -0.2
 
 # Maximum angle error which indicates that robot is approaching from a "bad position"
 max_angle_error: 45 * pi / 180

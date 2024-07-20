@@ -2,7 +2,7 @@
 log_level: INFO
 
 # Position on field to walk to (x,y,theta)
-ready_position: [1.75, 0.0, -3.14]
+ready_position: [1, 0.0, -3.14]
 
 # How far (m) the ball can be away from the centre of the field for it to be deemed as
 # .moved/touched by the other team during kickoff so we can start playing
