@@ -3,6 +3,8 @@ log_level: INFO
 
 ready_position: [4, 0, -3.14]
 
+penalty_shootout_kick_detection_threshold: 0.25
+
 # Bounded area for WalkInsideBoundedBox to use
 bounded_region_x_min: 3.5
 bounded_region_x_max: 5
