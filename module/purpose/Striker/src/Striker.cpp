@@ -198,8 +198,6 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<FindBall>(), 1);
                 emit<Task>(std::make_unique<LookAtBall>(), 2);
                 emit<Task>(std::make_unique<WalkToKickBall>(), 3);
-                emit<Task>(std::make_unique<AlignBallToGoal>(), 4);
-                emit<Task>(std::make_unique<KickToGoal>(), 5);
             });
 
         // Penalty shootout UNKNOWN state
