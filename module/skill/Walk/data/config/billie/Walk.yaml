@@ -1,4 +1,4 @@
-log_level: DEBUG
+log_level: INFO
 
 walk:
   # Time for one complete step (in seconds).
@@ -11,16 +11,16 @@ walk:
     # Step height (in meters)
     height: 0.085
     # Lateral distance in meters between feet (how spread apart the feet should be)
-    width: 0.22
+    width: 0.225
     # Ratio of the step_period where the foot should be at its highest point, between [0 1].
     apex_ratio: 0.4
   torso:
     # Torso height (in meters)
     height: 0.46
     # Torso pitch (in radians)
-    pitch: 12 * pi / 180
+    pitch: 11 * pi / 180
     # Torso constant position offset
-    position_offset: [0.0, 0, 0]
+    position_offset: [0, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
     sway_offset: [0, 0.08, 0]
     # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
@@ -31,15 +31,15 @@ walk:
     final_position_ratio: [0.5, 0.5, 1]
 
 gains:
-  arms: 30
+  arms: 1
 
 pitch_controller:
   # Whether or not to use the pitch controller
-  enabled: true
+  enabled: false
   # Gain
-  gain: 0.001
+  gain: 0.005
   # Maximum pitch offset (in radians), acts as both controller limit and range where active
-  max_offset: 10 * pi / 180
+  max_offset: 15 * pi / 180
 
 # Fixed position of the arm joints during walking
 arms:
@@ -50,5 +50,4 @@ arms:
   right_elbow: -0.7
   left_elbow: -0.7
 
-smoothing_factor: 0.99
-stop_velocity: 0.05
+smoothing_factor: 0.9

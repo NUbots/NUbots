@@ -171,9 +171,11 @@ namespace module::skill {
                 velocity_target =
                     cfg.smoothing_factor * velocity_target + (1 - cfg.smoothing_factor) * walk_task.velocity_target;
 
-                // If received velocity target is zero, set to zero
-                if (velocity_target.isZero()) {
-                    velocity_target = walk_task.velocity_target;
+                // log<NUClear::INFO>("velocity_target: ", velocity_target);
+
+                // If requested velocity target is zero, set to zero if filtered velocity target is low
+                if (velocity_target.norm() < 0.01 && walk_task.velocity_target.isZero()) {
+                    velocity_target = Eigen::Vector3d::Zero();
                 }
 
                 // Compute time since the last update

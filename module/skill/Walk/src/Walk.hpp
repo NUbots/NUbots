@@ -85,7 +85,7 @@ namespace module::skill {
         ReactionHandle pitch_controller_reaction{};
 
         /// @brief Current velocity target
-        Eigen::Vector3d velocity_target{};
+        Eigen::Vector3d velocity_target = Eigen::Vector3d::Zero();
     };
 }  // namespace module::skill
 
