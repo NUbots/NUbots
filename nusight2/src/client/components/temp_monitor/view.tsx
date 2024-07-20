@@ -37,27 +37,28 @@ export class TempMonitorView extends React.Component<{
             <h2 className="text-xl font-bold mb-4">Servo Temperatures</h2>
             <div className="grid grid-cols-4 gap-4">
               {Array.from(selectedRobot.servoTemperatures.entries()).map(([id, temp]) => (
-                <div key={id} className="bg-auto-surface-1 p-4 rounded-lg  border border-collapse border-auto">
+                <div key={id} className={"p-4 rounded-lg border border-collapse " + ((selectedRobot.highestTemperatureServo.temperature > 50) ? "bg-red-700 border-red-900 dark:border-red-500" : "bg-auto-surface-1 border-auto")}>
                   <h3 className="font-semibold">{ServoNames[id] || `Servo ${id}`}</h3>
                   <p>ID: {id}</p>
-                  <p className={`text-lg ${temp > 50 ? "text-red-600" : "text-green-600"}`}>{temp.toFixed(1)}°C</p>
+                  <p className={`text-lg ${temp > 50 ? "text-white" : "text-green-600"}`}>{temp}°C</p>
                 </div>
               ))}
             </div>
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="bg-auto-surface-1 p-4 rounded-lg  border border-collapse border-auto">
-                <h3 className="text-lg font-semibold ">Highest Temperature</h3>
+            <div className="mt-8 grid grid-cols-2 gap-+
+            4">
                 {selectedRobot.highestTemperatureServo && (
                   <>
+              <div className={"text-white p-4 rounded-lg border border-collapse " + ((selectedRobot.highestTemperatureServo.temperature > 50) ? "bg-red-700 border-red-900 dark:border-red-500" : "bg-auto-surface-1 border-auto")}>
+                <h3 className="text-lg font-semibold ">Highest Temperature</h3>
                     <p className="text-2xl font-bold">
                       {selectedRobot.highestTemperatureServo.temperature.toFixed(1)}°C
                     </p>
                     <p className="">
                       {selectedRobot.highestTemperatureServo.name} (ID: {selectedRobot.highestTemperatureServo.id})
                     </p>
+              </div>
                   </>
                 )}
-              </div>
               <div className="bg-auto-surface-1 p-4 rounded-lg  border border-collapse border-auto">
                 <h3 className="text-lg font-semibold">Average Temperature</h3>
                 <p className="text-2xl font-bold">{selectedRobot.averageTemperature.toFixed(1)}°C</p>
