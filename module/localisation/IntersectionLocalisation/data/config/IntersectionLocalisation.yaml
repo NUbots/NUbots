@@ -17,10 +17,10 @@ save_map: false
 min_field_line_points: 50
 
 # Minimum number of field line intersections for an update
-min_field_line_intersections: 2
+min_field_line_intersections: 0
 
 # Delay before the particle filter starts (allows odometry to settle)
-start_time_delay: 1
+start_time_delay: 0
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
