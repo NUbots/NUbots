@@ -8,18 +8,32 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 import { TempMonitorController } from "./controller";
 import { ServoNames, TempMonitorModel } from "./model";
 
+const tempWarningThreshold = 50;
+
 @observer
 export class TempMonitorView extends React.Component<{
   controller: TempMonitorController;
   model: TempMonitorModel;
   Menu: React.ComponentType<PropsWithChildren>;
 }> {
+  prevHighestTemp: number = 0;
+  tempAlert = (highestTemp: number, servoId: string) => {
+    if (highestTemp > tempWarningThreshold && highestTemp > this.prevHighestTemp) {
+      alert(`Temperature of ${servoId} is too high!`);
+    }
+    this.prevHighestTemp = highestTemp;
+  };
+
   render() {
     const {
       model: { selectedRobot, robots },
       Menu,
     } = this.props;
 
+    if (selectedRobot?.highestTemperatureServo) {
+      const { temperature, name } = selectedRobot.highestTemperatureServo;
+      this.tempAlert(temperature, name);
+    }
     return (
       <div className="flex flex-grow flex-shrink flex-col text-center relative w-full h-full">
         <Menu>
@@ -41,14 +55,15 @@ export class TempMonitorView extends React.Component<{
                   key={id}
                   className={
                     "p-4 rounded-lg border border-collapse " +
-                    (selectedRobot.highestTemperatureServo.temperature > 50
+                    (selectedRobot.highestTemperatureServo &&
+                    selectedRobot.highestTemperatureServo.temperature > tempWarningThreshold
                       ? "bg-red-700 border-red-900 dark:border-red-500"
                       : "bg-auto-surface-1 border-auto")
                   }
                 >
                   <h3 className="font-semibold">{ServoNames[id] || `Servo ${id}`}</h3>
                   <p>ID: {id}</p>
-                  <p className={`text-lg ${temp > 50 ? "text-white" : "text-green-600"}`}>{temp}°C</p>
+                  <p className={`text-lg ${temp > tempWarningThreshold ? "text-white" : "text-green-600"}`}>{temp}°C</p>
                 </div>
               ))}
             </div>
@@ -61,7 +76,7 @@ export class TempMonitorView extends React.Component<{
                   <div
                     className={
                       "text-white p-4 rounded-lg border border-collapse " +
-                      (selectedRobot.highestTemperatureServo.temperature > 50
+                      (selectedRobot.highestTemperatureServo.temperature > tempWarningThreshold
                         ? "bg-red-700 border-red-900 dark:border-red-500"
                         : "bg-auto-surface-1 border-auto")
                     }
