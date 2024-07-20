@@ -2,10 +2,10 @@
 log_level: INFO
 
 # Path to the model weights
-model_path: "yolo.onnx"
+model_path: "yolo_new.onnx"
 
 # Minimum confidence required for a ball detection to be accepted
-ball_confidence_threshold: 0.5
+ball_confidence_threshold: 0.2
 
 # Minimum confidence required for a goal detection to be accepted
 goalpost_confidence_threshold: 0.2
