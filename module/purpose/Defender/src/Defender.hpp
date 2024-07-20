@@ -44,6 +44,8 @@ namespace module::purpose {
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
             Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
+            /// @brief Penalty defence position to walk to when defending from a penalty kick from the opposing team
+            Eigen::Vector3f penalty_defence_position = Eigen::Vector3f::Zero();
             /// @brief x minimum bound on field to walk within
             double bounded_region_x_min = 0.0;
             /// @brief x maximum bound on field to walk within

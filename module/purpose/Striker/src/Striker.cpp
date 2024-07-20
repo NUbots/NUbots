@@ -90,6 +90,7 @@ namespace module::purpose {
             // Use configuration here from file Striker.yaml
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position              = config["ready_position"].as<Expression>();
+            cfg.penalty_defence_position    = config["penalty_defence_position"].as<Expression>();
             cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
 
             cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
@@ -209,22 +210,120 @@ namespace module::purpose {
         on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Direct free kick
-        on<Provide<DirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<DirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Direct free kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                // If the performing team is not us, find the ball and look at it
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                // Otherwise, play as normal
+                play();
+            });
 
         // Indirect free kick
-        on<Provide<InDirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<InDirectFreeKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Indirect free kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                // If the performing team is not us, find the ball and look at it
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                // Otherwise, play as normal
+                play();
+            });
 
         // Penalty kick
-        on<Provide<PenaltyKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<PenaltyKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Penalty kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                // If the performing team is not us, move to the penalty defence position (or bounded box edge) and look
+                // at the ball
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
+                                   Eigen::Vector3d(
+                                       std::min(cfg.bounded_region_x_max, (double) cfg.penalty_defence_position.x()),
+                                       cfg.penalty_defence_position.y(),
+                                       cfg.penalty_defence_position.z()),
+                                   Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))),
+                               1);
+                    emit<Task>(std::make_unique<FindBall>(), 2);
+                    emit<Task>(std::make_unique<LookAtBall>(), 3);
+                    return;
+                }
+                // Otherwise, play as normal
+                play();
+            });
 
         // Corner kick
-        on<Provide<CornerKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<CornerKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Corner kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                // If the performing team is not us, find the ball and look at it
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                // Otherwise, play as normal
+                play();
+            });
 
         // Goal kick
-        on<Provide<GoalKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<GoalKickStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Goal kick sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                // If the performing team is not us, find the ball and look at it
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                // Otherwise, play as normal
+                play();
+            });
 
         // Throw in
-        on<Provide<ThrowInStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<ThrowInStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Throw in sub mode: 0 for ready, 1 for freeze/ball repositioning by referee
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                // If the performing team is not us, find the ball and look at it
+                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                    emit<Task>(std::make_unique<FindBall>(), 1);
+                    emit<Task>(std::make_unique<LookAtBall>(), 2);
+                    return;
+                }
+                // Otherwise, play as normal
+                play();
+            });
     }
 
     void Striker::play() {
