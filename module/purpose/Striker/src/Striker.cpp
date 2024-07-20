@@ -51,8 +51,9 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase    = message::input::GameState::Data::Phase;
-    using GameMode = message::input::GameState::Data::Mode;
+    using Phase          = message::input::GameState::Data::Phase;
+    using GameMode       = message::input::GameState::Data::Mode;
+    using SecondaryState = message::input::GameState::Data::SecondaryState;
     using message::input::GameState;
     using message::localisation::Ball;
     using message::localisation::Field;
@@ -183,7 +184,22 @@ namespace module::purpose {
         on<Provide<NormalStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty shootout PLAYING state
-        on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+        on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.data.secondary_state.sub_mode) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                if (!game_state.data.our_kick_off) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+                emit<Task>(std::make_unique<FindBall>(), 1);
+                emit<Task>(std::make_unique<LookAtBall>(), 2);
+                emit<Task>(std::make_unique<WalkToKickBall>(), 3);
+                emit<Task>(std::make_unique<AlignBallToGoal>(), 4);
+                emit<Task>(std::make_unique<KickToGoal>(), 5);
+            });
 
         // Penalty shootout UNKNOWN state
         on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
