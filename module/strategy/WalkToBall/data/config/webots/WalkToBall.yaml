@@ -2,7 +2,7 @@
 log_level: INFO
 
 # How long to wait until the ball is lost and we should walk in a search pattern
-ball_search_timeout: 2
+ball_search_timeout: 5
 
 # Y - Offset for ball position such that ball is approached with foot behind ball
 ball_y_offset: 0.1

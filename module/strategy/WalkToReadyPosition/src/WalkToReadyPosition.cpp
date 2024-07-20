@@ -67,7 +67,6 @@ namespace module::strategy {
 
                 // Get position of robot on field
                 Eigen::Isometry3d Hfr          = field.Hfw * sensors.Hrw.inverse();
-                Eigen::Vector3d rRFf           = Hfr.translation();
                 Eigen::Vector3d robot_unit_x   = Hfr.linear().col(0);
                 Eigen::Vector3d desired_unit_x = walk_to_field_position.Hfd.linear().col(0);
                 double desired_heading         = std::atan2(desired_unit_x.y(), desired_unit_x.x());
@@ -76,16 +75,13 @@ namespace module::strategy {
                 double angle_error = std::abs(desired_heading - measured_heading);
                 // Normalize the angle error to be within the range [-pi, pi]
                 angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
-                // log<NUClear::INFO>("angle_error: ", angle_error);
 
 
                 if (translational_error < current_threshold && std::abs(angle_error) < current_threshold) {
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     current_threshold = cfg.stopped_threshold;
-                    // log<NUClear::INFO>("stoped");
                 }
                 else {
-                    // log<NUClear::INFO>("waliking to positon");
                     emit<Task>(std::make_unique<WalkTo>(Hrd));
                 }
             });

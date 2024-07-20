@@ -24,8 +24,7 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  #vision::BallDetector
-  #vision::FieldLineDetector
+  # vision::BallDetector vision::FieldLineDetector
   vision::Yolo
   # Localisation
   localisation::IntersectionLocalisation
@@ -42,7 +41,6 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
-  skill::Dive
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
@@ -51,7 +49,6 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
-  strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::WalkToReadyPosition
@@ -59,8 +56,6 @@ nuclear_role(
   strategy::WalkToBall
   strategy::FindObject
   strategy::KickToGoal
-  strategy::AlignBallToGoal
-  strategy::DiveToBall
   strategy::WalkInsideBoundedBox
   # Purposes
   purpose::AllRounder
