@@ -33,6 +33,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -47,6 +48,7 @@ namespace module::strategy {
     using Ball = message::localisation::Ball;
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::skill::Walk;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToReadyPosition;
 
@@ -88,44 +90,45 @@ namespace module::strategy {
                 }
                 else {
                     log<NUClear::DEBUG>("Ball is outside of bounding box");
-                    // Clamp desired position to bounding box
-                    rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
-                    rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                    // // Clamp desired position to bounding box
+                    // rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
+                    // rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
 
 
-                    double desired_heading = -M_PI;
-                    if (rBFf.x() > box.x_max) {
-                        // If the ball is in a region inbetween the bounding box and our own goal, add a y offset to
-                        // allow pass from another robot
-                        Eigen::Vector3d rDlFf = rDFf;
-                        rDlFf.y()             = std::clamp(rBFf.y() + cfg.allow_pass_y_offset, box.y_min, box.y_max);
-                        Eigen::Vector3d rDrFf = rDlFf;
-                        rDrFf.y()             = std::clamp(rBFf.y() - cfg.allow_pass_y_offset, box.y_min, box.y_max);
+                    // double desired_heading = -M_PI;
+                    // if (rBFf.x() > box.x_max) {
+                    //     // If the ball is in a region inbetween the bounding box and our own goal, add a y offset to
+                    //     // allow pass from another robot
+                    //     Eigen::Vector3d rDlFf = rDFf;
+                    //     rDlFf.y()             = std::clamp(rBFf.y() + cfg.allow_pass_y_offset, box.y_min, box.y_max);
+                    //     Eigen::Vector3d rDrFf = rDlFf;
+                    //     rDrFf.y()             = std::clamp(rBFf.y() - cfg.allow_pass_y_offset, box.y_min, box.y_max);
 
-                        // Select the desired position closest to the robot
-                        Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
-                        Eigen::Vector3d rRFf  = Hfr.translation();
-                        if ((rDlFf - rRFf).norm() < (rDrFf - rRFf).norm()) {
-                            rDFf = rDlFf;
-                        }
-                        else {
-                            rDFf = rDrFf;
-                        }
+                    //     // Select the desired position closest to the robot
+                    //     Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+                    //     Eigen::Vector3d rRFf  = Hfr.translation();
+                    //     if ((rDlFf - rRFf).norm() < (rDrFf - rRFf).norm()) {
+                    //         rDFf = rDlFf;
+                    //     }
+                    //     else {
+                    //         rDFf = rDrFf;
+                    //     }
 
-                        // Calculate the desired heading to face the ball
-                        desired_heading = std::atan2(rBFf.y() - rDFf.y(), rBFf.x() - rDFf.x());
-                        log<NUClear::DEBUG>("Ball is in pass region. Adding y offset");
-                    }
-                    else {
-                        // If the ball is in a region inbetween the bounding box and opp goal, add an x offset to
-                        // allow teammate to take ball
-                        // rDFf.x() += cfg.allow_pass_x_offset;
-                    }
+                    //     // Calculate the desired heading to face the ball
+                    //     desired_heading = std::atan2(rBFf.y() - rDFf.y(), rBFf.x() - rDFf.x());
+                    //     log<NUClear::DEBUG>("Ball is in pass region. Adding y offset");
+                    // }
+                    // else {
+                    //     // If the ball is in a region inbetween the bounding box and opp goal, add an x offset to
+                    //     // allow teammate to take ball
+                    //     // rDFf.x() += cfg.allow_pass_x_offset;
+                    // }
 
-                    // Emit task to walk to desired position with heading facing opponents side of field
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(
-                        pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0),
-                                             Eigen::Vector3d(0, 0, desired_heading))));
+                    // // Emit task to walk to desired position with heading facing opponents side of field
+                    // emit<Task>(std::make_unique<WalkToFieldPosition>(
+                    //     pos_rpy_to_transform(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0),
+                    //                          Eigen::Vector3d(0, 0, desired_heading))));
                 }
             });
     }
