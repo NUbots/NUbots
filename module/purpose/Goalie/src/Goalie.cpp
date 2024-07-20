@@ -69,6 +69,7 @@ namespace module::purpose {
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::WalkInsideBoundedBox;
+    using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
     using message::strategy::WalkToReadyPosition;
 
