@@ -30,6 +30,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
@@ -40,8 +42,6 @@
 #include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
-#include "message/localisation/Ball.hpp"
-#include "message/localisation/Field.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -56,6 +56,8 @@ namespace module::purpose {
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using GoalieTask = message::purpose::Goalie;
+    using message::localisation::Ball;
+    using message::localisation::Field;
     using message::purpose::CornerKickGoalie;
     using message::purpose::DirectFreeKickGoalie;
     using message::purpose::GoalKickGoalie;
@@ -69,8 +71,6 @@ namespace module::purpose {
     using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToKickBall;
     using message::strategy::WalkToReadyPosition;
-    using message::localisation::Ball;
-    using message::localisation::Field;
 
     using extension::Configuration;
 
@@ -88,7 +88,8 @@ namespace module::purpose {
             cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
             cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
             cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
-            cfg.penalty_shootout_kick_detection_threshold = config["penalty_shootout_kick_detection_threshold"].as<double>();;
+            cfg.penalty_shootout_kick_detection_threshold =
+                config["penalty_shootout_kick_detection_threshold"].as<double>();
         });
 
         on<Provide<GoalieTask>, Optional<Trigger<GameState>>>().then(
@@ -134,15 +135,19 @@ namespace module::purpose {
         on<Provide<NormalGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty shootout PLAYING state
-        on<Provide<PenaltyShootoutGoalie>, When<Phase, std::equal_to, Phase::PLAYING>, With<GameState>, With<Ball>, With<Field>>().then(
-            [this](const GameState& game_state, const Ball& ball, const Field& field) {
+        on<Provide<PenaltyShootoutGoalie>,
+           When<Phase, std::equal_to, Phase::PLAYING>,
+           With<GameState>,
+           With<Ball>,
+           With<Field>>()
+            .then([this](const GameState& game_state, const Ball& ball, const Field& field) {
                 Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
                 if (game_state.data.secondary_state.sub_mode) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
                 // The penalty mark is 3 metres from the center towards our side of the field
-                if (rBFf.x() < (3 + cfg.penalty_shootout_kick_detection_threshold)){
+                if (rBFf.x() < (3 + cfg.penalty_shootout_kick_detection_threshold)) {
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
