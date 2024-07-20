@@ -49,3 +49,5 @@ arms:
   left_shoulder_roll: 0.35
   right_elbow: -0.7
   left_elbow: -0.7
+
+smoothing_factor: 0.99

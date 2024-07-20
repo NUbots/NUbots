@@ -132,6 +132,9 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
 
+
+            cfg.smoothing_factor = config["smoothing_factor"].as<double>();
+
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
@@ -164,6 +167,15 @@ namespace module::skill {
            Single,
            Priority::HIGH>()
             .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
+                // Filter velocity target with a low-pass filter
+                velocity_target =
+                    cfg.smoothing_factor * velocity_target + (1 - cfg.smoothing_factor) * walk_task.velocity_target;
+
+                // If received velocity target is zero, set to zero
+                if (velocity_target.isZero()) {
+                    velocity_target = walk_task.velocity_target;
+                }
+
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -175,8 +187,7 @@ namespace module::skill {
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability >= Stability::DYNAMIC) {
-                    switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
-                                .value) {
+                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase).value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
@@ -214,7 +225,7 @@ namespace module::skill {
 
                 // Emit the walk state
                 auto walk_state = std::make_unique<WalkState>(walk_generator.get_state(),
-                                                              walk_task.velocity_target,
+                                                              velocity_target,
                                                               walk_generator.get_phase());
 
                 // Debugging
@@ -237,6 +248,10 @@ namespace module::skill {
                                walk_task.velocity_target.x(),
                                walk_task.velocity_target.y(),
                                walk_task.velocity_target.z()));
+                    emit(graph("Filtered velocity target",
+                               velocity_target.x(),
+                               velocity_target.y(),
+                               velocity_target.z()));
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
                 }

@@ -67,6 +67,9 @@ namespace module::skill {
 
             /// @brief Pitch controller enabled
             bool pitch_controller_enabled{};
+
+            /// @brief Smoothing factor for velocity target
+            double smoothing_factor{};
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -80,6 +83,9 @@ namespace module::skill {
 
         /// @brief Pitch controller reaction
         ReactionHandle pitch_controller_reaction{};
+
+        /// @brief Current velocity target
+        Eigen::Vector3d velocity_target{};
     };
 }  // namespace module::skill
 
