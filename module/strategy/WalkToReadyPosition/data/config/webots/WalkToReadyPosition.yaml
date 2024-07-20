@@ -3,3 +3,5 @@ log_level: INFO
 
 stop_threshold: 0.2
 stopped_threshold: 0.4
+
+stand_duration: 2

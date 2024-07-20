@@ -3,3 +3,5 @@ log_level: INFO
 
 # How long to wait until the ball is lost and we should look for it
 ball_search_timeout: 4
+
+stand_duration: 2

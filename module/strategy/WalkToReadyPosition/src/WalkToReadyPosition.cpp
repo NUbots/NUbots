@@ -52,17 +52,38 @@ namespace module::strategy {
             this->log_level       = config["log_level"].as<NUClear::LogLevel>();
             cfg.stop_threshold    = config["stop_threshold"].as<double>();
             cfg.stopped_threshold = config["stopped_threshold"].as<double>();
+
+            cfg.stand_duration = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["stand_duration"].as<double>()));
         });
 
         on<Start<WalkToReadyPositionTask>>().then([this] { current_threshold = cfg.stop_threshold; });
 
-        on<Provide<WalkToReadyPositionTask>, With<Field>, With<Sensors>>().then(
-            [this](const WalkToReadyPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
+        on<Provide<WalkToReadyPositionTask>, Uses<WalkTo>, With<Field>, With<Sensors>>().then(
+            [this](const WalkToReadyPositionTask& walk_to_field_position,
+                   const Uses<WalkTo>& walk_to,
+                   const Field& field,
+                   const Sensors& sensors) {
+                log<NUClear::INFO>("Walk to ready");
+                if (!waiting && walk_to.run_state == GroupInfo::RunState::NO_TASK) {
+                    waiting    = true;
+                    start_time = NUClear::clock::now();
+                    log<NUClear::DEBUG>("Start timer");
+                }
+
+                if (NUClear::clock::now() - start_time < cfg.stand_duration) {
+                    log<NUClear::DEBUG>("Stand still");
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                    return;
+                }
+
+                log<NUClear::DEBUG>("Walk to ready");
+                waiting = false;
                 // Transform from desired field position into robot space
                 Eigen::Isometry3d Hrd = sensors.Hrw * field.Hfw.inverse() * walk_to_field_position.Hfd;
 
                 double translational_error = Hrd.translation().norm();
-                log<NUClear::INFO>("translational_error:", translational_error);
+                log<NUClear::DEBUG>("translational_error:", translational_error);
 
 
                 // Get position of robot on field

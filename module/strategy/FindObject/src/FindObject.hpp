@@ -40,7 +40,13 @@ namespace module::strategy {
         struct Config {
             /// @brief Length of time before the ball detection is too old and we should search for the ball
             NUClear::clock::duration ball_search_timeout{};
+
+            NUClear::clock::duration stand_duration{};
         } cfg;
+
+        NUClear::clock::time_point start_time{};
+
+        bool waiting = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the FindObject reactor.

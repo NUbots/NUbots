@@ -38,9 +38,14 @@ namespace module::strategy {
         struct Config {
             double stop_threshold    = 0.0;
             double stopped_threshold = 0.0;
+
+            NUClear::clock::duration stand_duration{};
         } cfg;
 
         double current_threshold = 0.0;
+
+        NUClear::clock::time_point start_time{};
+        bool waiting = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.

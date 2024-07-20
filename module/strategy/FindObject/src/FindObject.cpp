@@ -32,6 +32,7 @@
 #include "message/localisation/Ball.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/planning/WalkPath.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/FindFeature.hpp"
 
 namespace module::strategy {
@@ -40,6 +41,7 @@ namespace module::strategy {
     using message::localisation::Ball;
     using message::planning::LookAround;
     using message::planning::TurnOnSpot;
+    using message::skill::Walk;
     using message::strategy::FindBall;
 
     FindObject::FindObject(std::unique_ptr<NUClear::Environment> environment)
@@ -50,14 +52,33 @@ namespace module::strategy {
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
+            cfg.stand_duration = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["stand_duration"].as<double>()));
         });
 
-        on<Provide<FindBall>, Optional<With<Ball>>>().then([this](const std::shared_ptr<const Ball>& ball) {
-            if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
-                emit<Task>(std::make_unique<LookAround>());
-                emit<Task>(std::make_unique<TurnOnSpot>());
-            }
-        });
+        on<Provide<FindBall>, Uses<TurnOnSpot>, Optional<With<Ball>>>().then(
+            [this](const Uses<TurnOnSpot>& turn_on_spot, const std::shared_ptr<const Ball>& ball) {
+                if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                    // If not requesting turn on spot, but we are going to
+                    if (!waiting && turn_on_spot.run_state == GroupInfo::RunState::NO_TASK) {
+                        log<NUClear::DEBUG>("Start timer");
+                        start_time = NUClear::clock::now();
+                        waiting    = true;
+                    }
+                    emit<Task>(std::make_unique<LookAround>());
+                    if (NUClear::clock::now() - start_time > cfg.stand_duration) {
+                        log<NUClear::DEBUG>("Turn on spot");
+                        emit<Task>(std::make_unique<TurnOnSpot>());
+                    }
+                    else {
+                        log<NUClear::DEBUG>("Stand still");
+                        emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                    }
+                }
+                else {
+                    waiting = false;
+                }
+            });
     }
 
 }  // namespace module::strategy
