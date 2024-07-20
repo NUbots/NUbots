@@ -78,6 +78,16 @@ namespace module::strategy {
                     return;
                 }
 
+                // If the robot is outside the bounded box, walk to the ready position
+                // Current position of the robot on the field
+                Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+                Eigen::Vector3d rRFf  = Hfr.translation();
+
+                if (rRFf.x() > box.x_min && rRFf.x() < box.x_max && rRFf.y() > box.y_min && rRFf.y() < box.y_max) {
+                    emit<Task>(std::make_unique<WalkToReadyPosition>(box.Hfd));
+                    return;
+                }
+
                 log<NUClear::DEBUG>("Recent ball measurement");
                 // Get the current position of the ball on the field
                 Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
