@@ -170,7 +170,7 @@ namespace module::purpose {
                        pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                                             Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
                    4);  // Patrol bounded box region
-        emit<Task>(std::make_unique<KickToGoal>(), 5);
+        // emit<Task>(std::make_unique<KickToGoal>(), 5);
     }
 
 }  // namespace module::purpose
