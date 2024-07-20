@@ -189,7 +189,7 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (!game_state.data.our_kick_off) {
                     emit<Task>(std::make_unique<StandStill>());
                     return;
                 }
