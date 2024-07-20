@@ -24,11 +24,11 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::BallDetector
-  vision::FieldLineDetector
+  #vision::BallDetector
+  #vision::FieldLineDetector
   vision::Yolo
   # Localisation
-  localisation::FieldLocalisationNLopt
+  localisation::IntersectionLocalisation
   localisation::BallLocalisation
   localisation::RobotLocalisation
   # Director
@@ -54,6 +54,7 @@ nuclear_role(
   strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
+  strategy::WalkToReadyPosition
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject

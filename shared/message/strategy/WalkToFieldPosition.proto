@@ -34,3 +34,9 @@ message WalkToFieldPosition {
     /// Transform from desired robot pose {d} to field {f} space
     iso3 Hfd = 1;
 }
+
+/// Robot walks to position on field
+message WalkToReadyPosition {
+    /// Transform from desired robot pose {d} to field {f} space
+    iso3 Hfd = 1;
+}

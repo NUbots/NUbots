@@ -26,6 +26,7 @@ import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -363,11 +364,18 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
             cameraYaw={model.camera.yaw}
           />
         ))}
-      {model.walkToDebugVisible &&
-        model.robots
-          .filter((robot) => robot.visible && robot.Hfd)
-          .map((robot) => <WalkPathGoal key={robot.id} model={robot} />)}
+      {model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => (
+          <WalkPathGoal key={robot.id} model={robot} />
+        ))}
+      <GoalsLabels
+        cameraPitch={model.camera.pitch}
+        cameraYaw={model.camera.yaw}
+        fieldLength={model.field.dimensions.fieldLength}
+      />
       <Robots model={model} />
+      <AssociationLines model={model} />
       {model.boundedBoxVisible &&
         model.robots.map((robot) => {
           if (robot.visible && robot.boundingBox) {
@@ -554,16 +562,19 @@ const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   );
 };
 
-const PurposeLabel = ({
-  robotModel,
+const textBillboard = ({
+  text,
+  position,
   cameraPitch,
   cameraYaw,
+  color = "white",
 }: {
-  robotModel: LocalisationRobotModel;
+  text: string;
+  position: Vector3;
   cameraPitch: number;
   cameraYaw: number;
+  color?: string;
 }) => {
-  const rTFf = robotModel.Hft.decompose().translation;
   const textGeometry = (x: string) => {
     const font = new FontLoader().parse(roboto);
     return new TextGeometry(x, {
@@ -596,8 +607,7 @@ const PurposeLabel = ({
     return geometry;
   };
 
-  const label = robotModel.player_id == -1 ? robotModel.purpose : "N" + robotModel.player_id + " " + robotModel.purpose;
-  const labelTextGeometry = textGeometry(label);
+  const labelTextGeometry = textGeometry(text);
   labelTextGeometry.computeBoundingBox();
   const textWidth = labelTextGeometry.boundingBox
     ? labelTextGeometry.boundingBox.max.x - labelTextGeometry.boundingBox.min.x
@@ -608,16 +618,61 @@ const PurposeLabel = ({
   const backdropGeometry = textBackdropGeometry(textWidth, textHeight);
 
   return (
-    <object3D
-      position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
-      rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}
-    >
+    <object3D position={position.toArray()} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
       <mesh position={[0, 0, 0.001]} geometry={labelTextGeometry}>
-        <meshBasicMaterial color="white" transparent opacity={1} />
+        <meshBasicMaterial color={color} transparent opacity={1} />
       </mesh>
       <mesh geometry={backdropGeometry}>
-        <meshBasicMaterial color={robotModel.color} transparent opacity={0.5} />
+        <meshBasicMaterial color={"black"} transparent opacity={0.5} />
       </mesh>
+    </object3D>
+  );
+};
+
+const PurposeLabel = ({
+  robotModel,
+  cameraPitch,
+  cameraYaw,
+}: {
+  robotModel: LocalisationRobotModel;
+  cameraPitch: number;
+  cameraYaw: number;
+}) => {
+  return textBillboard({
+    text: robotModel.player_id == -1 ? robotModel.purpose : "N" + robotModel.player_id + " " + robotModel.purpose,
+    position: robotModel.Hft.decompose().translation.add(new Vector3(0, 0, 0.6)),
+    cameraPitch,
+    cameraYaw,
+  });
+};
+
+const GoalsLabels = ({
+  cameraPitch,
+  cameraYaw,
+  fieldLength,
+}: {
+  cameraPitch: number;
+  cameraYaw: number;
+  fieldLength: number;
+}) => {
+  const ownGoalsLabelPosition = new Vector3(fieldLength / 2, 0, 0.6);
+  const opponentGoalsLabelPosition = new Vector3(-fieldLength / 2, 0, 0.6);
+  return (
+    <object3D>
+      {textBillboard({
+        text: "Own Goal",
+        color: "deepskyblue",
+        position: ownGoalsLabelPosition,
+        cameraPitch,
+        cameraYaw,
+      })}
+      {textBillboard({
+        text: "Opponent Goal",
+        color: "yellow",
+        position: opponentGoalsLabelPosition,
+        cameraPitch,
+        cameraYaw,
+      })}
     </object3D>
   );
 };
@@ -715,6 +770,34 @@ const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
                   }
                 };
                 return createShapeForIntersection(intersection.type, intersection.position);
+              })}
+            </object3D>
+          ),
+      )}
+    </>
+  );
+};
+
+const AssociationLines = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible &&
+          robot.association_lines && (
+            <object3D key={robot.id}>
+              {robot.association_lines.map((line, index) => {
+                const start = new THREE.Vector3(line.start.x, line.start.y, 0.005);
+                const end = new THREE.Vector3(line.end.x, line.end.y, 0.005);
+
+                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+
+                return (
+                  <line key={index}>
+                    <bufferGeometry attach="geometry" {...geometry} />
+                    <lineBasicMaterial attach="material" color="red" linewidth={4} />
+                  </line>
+                );
               })}
             </object3D>
           ),

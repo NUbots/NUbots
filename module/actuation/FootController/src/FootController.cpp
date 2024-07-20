@@ -62,7 +62,7 @@ namespace module::actuation {
         });
 
 
-        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
+        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>, Priority::HIGH>().then(
             [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
                 auto left_leg = std::make_unique<LeftLegIK>();
 
@@ -72,7 +72,7 @@ namespace module::actuation {
                 emit<Task>(left_leg, 0, false, "Control left foot");
             });
 
-        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>>().then(
+        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>, Priority::HIGH>().then(
             [this](const ControlRightFoot& right_foot, const Sensors& sensors) {
                 auto right_leg = std::make_unique<RightLegIK>();
 

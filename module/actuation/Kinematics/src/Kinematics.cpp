@@ -87,7 +87,7 @@ namespace module::actuation {
         });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>>().then(
+        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>, Priority::HIGH>().then(
             [this](const LeftLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
@@ -129,7 +129,7 @@ namespace module::actuation {
             });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>>().then(
+        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>, Priority::HIGH>().then(
             [this](const RightLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {

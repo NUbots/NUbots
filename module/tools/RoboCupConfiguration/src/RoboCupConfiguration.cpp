@@ -52,6 +52,9 @@ namespace module::tools {
         on<Configuration>("RoboCupConfiguration.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
+            cfg.common_ips    = config["common_ips"].as<std::vector<std::string>>();
         });
 
         on<Startup>().then([this] {
@@ -313,6 +316,43 @@ namespace module::tools {
     void RoboCupConfiguration::toggle_selection() {
         // Networking configuration column
         if (display.column_selection == 0) {
+            if (display.row_selection == int(Display::Column1::SSID) && !cfg.wifi_networks.empty()) {
+                // See if the current SSID is in the cfg.wifi_networks map
+                auto it = cfg.wifi_networks.find(ssid);
+                if (it != cfg.wifi_networks.end()) {
+                    // If it is, set the SSID and password to the next value in the map
+                    auto next = std::next(it);
+                    ssid      = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->first : next->first;
+                    password  = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->second : next->second;
+                }
+                else {
+                    // If it isn't, set the SSID and password to the first value in the map
+                    ssid     = cfg.wifi_networks.begin()->first;
+                    password = cfg.wifi_networks.begin()->second;
+                }
+            }
+
+            if (display.row_selection == int(Display::Column1::IP_ADDRESS) && !cfg.common_ips.empty()) {
+                // Change the IPs to use the player_id in the "X" position
+                std::vector<std::string> player_ips{};
+                for (const auto& ip : cfg.common_ips) {
+                    std::string player_ip = ip;
+                    player_ip.replace(player_ip.find("X"), 1, std::to_string(player_id));
+                    player_ips.push_back(player_ip);
+                }
+
+                // See if the current IP address is in the player_ips vector
+                auto it = std::find(player_ips.begin(), player_ips.end(), ip_address);
+                if (it != player_ips.end()) {
+                    // If it is, set the IP address to the next value in the vector
+                    auto next  = std::next(it);
+                    ip_address = next == player_ips.end() ? player_ips.front() : *next;
+                }
+                else {
+                    // If it isn't, set the IP address to the first value in the vector
+                    ip_address = player_ips.front();
+                }
+            }
             return;
         }
         // Game configuration column

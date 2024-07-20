@@ -48,6 +48,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::strategy::WalkToFieldPosition;
+    using message::strategy::WalkToReadyPosition;
 
     using utility::math::euler::pos_rpy_to_transform;
 
@@ -71,7 +72,7 @@ namespace module::strategy {
 
                 if (ball == nullptr || NUClear::clock::now() - ball->time_of_measurement > cfg.ball_search_timeout) {
                     log<NUClear::DEBUG>("Ball timeout. Returning to default position");
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(box.Hfd));
+                    emit<Task>(std::make_unique<WalkToReadyPosition>(box.Hfd));
                     return;
                 }
 
@@ -118,7 +119,7 @@ namespace module::strategy {
                     else {
                         // If the ball is in a region inbetween the bounding box and opp goal, add an x offset to
                         // allow teammate to take ball
-                        rDFf.x() += cfg.allow_pass_x_offset;
+                        // rDFf.x() += cfg.allow_pass_x_offset;
                     }
 
                     // Emit task to walk to desired position with heading facing opponents side of field
