@@ -1,7 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-ready_position: [4, 0, -3.14]
+ready_position: [4.25, 0, -3.14]
 
 # Bounded area for WalkInsideBoundedBox to use
 bounded_region_x_min: 3.5
