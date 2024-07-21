@@ -20,3 +20,5 @@ ball_kick_distance: 0.0
 max_angle_error: 45 * pi / 180
 
 avoid_ball_offset: [0.15, 0.5, 0]
+
+infront_of_ball_radius: 0.5
