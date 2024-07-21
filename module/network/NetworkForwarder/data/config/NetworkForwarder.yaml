@@ -9,7 +9,7 @@ log_level: INFO
 targets:
   nusight:
     # Overview packets for the overview screen
-    message.support.nusight.Overview: false
+    message.support.nusight.Overview: true
     message.support.FieldDescription: false
     message.support.nuclear.ReactionProfiles: false
 

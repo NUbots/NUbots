@@ -6,6 +6,7 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -29,6 +30,7 @@ export class LocalisationNetwork {
     this.network.on(message.localisation.AssociationLines, this.onAssociationLines);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.support.nusight.Overview, this.onOverview);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -198,6 +200,39 @@ export class LocalisationNetwork {
     robot.motors.leftAnkleRoll.angle = sensors.servo[17].presentPosition!;
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
+  };
+
+  @action
+  private onOverview = (robotModel: RobotModel, overview: message.support.nusight.Overview) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // Timestamp this message was sent (for comparison with last seen)
+    robot.lastOverViewMessageTime = TimestampObject.toSeconds(overview.timestamp);
+
+    // The id number of the robot
+    robot.playerId = overview.robotId;
+
+    // Name of the executing binary
+    robot.roleName = overview.roleName;
+
+    // Battery as a value between 0 and 1 (percentage)
+    robot.battery = overview.battery;
+
+    // Voltage (in volts!)
+    robot.voltage = overview.voltage;
+
+    // The game mode the robot thinks it is
+    robot.gameMode = overview.gameMode;
+    robot.gamePhase = overview.gamePhase;
+    robot.penaltyReason = overview.penaltyReason;
+
+    // The last time we had a camera image, saw a ball/goal
+    robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
+    robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
+    robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
+
+    // The walk command
+    robot.walkCommand = Vector3.from(overview.walkCommand);
   };
 }
 

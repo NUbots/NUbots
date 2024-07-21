@@ -4,6 +4,7 @@ import { computed } from "mobx";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
+import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
@@ -173,6 +174,18 @@ export class LocalisationRobotModel {
   @observable velocity_target: Vector3;
   @observable boundingBox?: BoundingBox;
   @observable player_id: number;
+  @observable lastOverViewMessageTime: number;
+  @observable playerId: number;
+  @observable roleName: string;
+  @observable battery: number;
+  @observable voltage: number;
+  @observable gameMode: number;
+  @observable gamePhase: number;
+  @observable penaltyReason: number;
+  @observable lastCameraImage: number;
+  @observable lastSeenBall: number;
+  @observable lastSeenGoal: number;
+  @observable walkCommand: Vector3;
 
   constructor({
     model,
@@ -202,6 +215,18 @@ export class LocalisationRobotModel {
     velocity_target,
     boundingBox,
     player_id,
+    lastOverViewMessageTime,
+    playerId,
+    roleName,
+    battery,
+    voltage,
+    gameMode,
+    gamePhase,
+    penaltyReason,
+    lastCameraImage,
+    lastSeenBall,
+    lastSeenGoal,
+    walkCommand,
   }: {
     model: RobotModel;
     name: string;
@@ -230,6 +255,18 @@ export class LocalisationRobotModel {
     velocity_target: Vector3;
     boundingBox?: BoundingBox;
     player_id: number;
+    lastOverViewMessageTime: number;
+    playerId: number;
+    roleName: string;
+    battery: number;
+    voltage: number;
+    gameMode: message.input.GameState.Data.Mode;
+    gamePhase: message.input.GameState.Data.Phase;
+    penaltyReason: message.input.GameState.Data.PenaltyReason;
+    lastCameraImage: number;
+    lastSeenBall: number;
+    lastSeenGoal: number;
+    walkCommand: Vector3;
   }) {
     this.model = model;
     this.name = name;
@@ -258,6 +295,18 @@ export class LocalisationRobotModel {
     this.velocity_target = velocity_target;
     this.boundingBox = boundingBox;
     this.player_id = player_id;
+    this.lastOverViewMessageTime = lastOverViewMessageTime;
+    this.playerId = playerId;
+    this.roleName = roleName;
+    this.battery = battery;
+    this.voltage = voltage;
+    this.gameMode = gameMode;
+    this.gamePhase = gamePhase;
+    this.penaltyReason = penaltyReason;
+    this.lastCameraImage = lastCameraImage;
+    this.lastSeenBall = lastSeenBall;
+    this.lastSeenGoal = lastSeenGoal;
+    this.walkCommand = walkCommand;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -285,6 +334,18 @@ export class LocalisationRobotModel {
       max_angle_error: 0,
       velocity_target: Vector3.of(),
       player_id: -1,
+      lastOverViewMessageTime: 0,
+      playerId: -1,
+      roleName: "",
+      battery: -1,
+      voltage: -1,
+      gameMode: message.input.GameState.Data.Mode.UNKNOWN_MODE,
+      gamePhase: message.input.GameState.Data.Phase.UNKNOWN_PHASE,
+      penaltyReason: message.input.GameState.Data.PenaltyReason.UNKNOWN_PENALTY_REASON,
+      lastCameraImage: 0,
+      lastSeenBall: 0,
+      lastSeenGoal: 0,
+      walkCommand: Vector3.of(),
     });
   });
 
@@ -353,5 +414,10 @@ export class LocalisationRobotModel {
         position: intersection.position.applyMatrix4(this.Hfw),
       });
     });
+  }
+
+  @computed
+  get connected(): boolean {
+    return this.model.connected;
   }
 }

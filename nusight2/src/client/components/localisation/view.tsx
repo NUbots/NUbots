@@ -25,6 +25,8 @@ import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
+import { RobotPanel } from "./robot_panel/view";
+import { RobotPanelViewModel } from "./robot_panel/view_model";
 import { SkyboxView } from "./skybox/view";
 
 type LocalisationViewProps = {
@@ -126,13 +128,16 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
           toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
           toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+          toggleSideBarVisibility={this.toggleSidebarVisibility}
         ></LocalisationMenuBar>
-        <div className="flex-grow relative border-t border-auto">
-          <ThreeFiber ref={this.canvas} onClick={this.onClick}>
-            <LocalisationViewModel model={this.props.model} />
-          </ThreeFiber>
+        <div className="flex w-full h-full">
+          <div className="flex-grow relative border-t border-auto">
+            <ThreeFiber ref={this.canvas} onClick={this.onClick}>
+              <LocalisationViewModel model={this.props.model} />
+            </ThreeFiber>
+            {this.props.model.sideBarVisible && <SideBar model={this.props.model} />}
+          </div>
         </div>
-        <StatusBar model={this.props.model} />
       </div>
     );
   }
@@ -220,6 +225,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleBoundedBoxVisibility = () => {
     this.props.controller.toggleBoundedBoxVisibility(this.props.model);
   };
+
+  private toggleSidebarVisibility = () => {
+    this.props.controller.toggleSidebarVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -240,6 +249,7 @@ interface LocalisationMenuBarProps {
   toggleFieldIntersectionsVisibility(): void;
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
+  toggleSideBarVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -270,6 +280,9 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
+        <li className="flex px-4">
+          <Button onClick={props.toggleSideBarVisibility}>Game Overview</Button>
+        </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
@@ -293,22 +306,36 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   );
 });
 
-interface StatusBarProps {
-  model: LocalisationModel;
-}
+const SideBar = observer(({ model }: { model: LocalisationModel }) => {
+  const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
 
-const StatusBar = observer((props: StatusBarProps) => {
-  const target =
-    props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div
-      className={
-        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
-      }
-    >
-      <span className="text-left w-1/3">&#160;</span>
-      <span className="w-1/3">{target}</span>
-      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
+    <div className="absolute right-0 bottom-0 top-0 flex flex-col w-1/5 bg-auto-surface-0 overflow-hidden first:ml gap-2 p-2">
+      <div className="font-bold flex justify-between bg-auto-surface-1 py-2 px-4 rounded-md">
+        <Icon>photo_camera</Icon>
+        <span>{target}</span>
+        <span>{viewModeString(model.viewMode)}</span>
+      </div>
+      {model.robots.map((robot) => {
+        const model = RobotPanelViewModel.of(robot);
+        return (
+          <div className="" key={robot.id}>
+            <RobotPanel
+              connected={true}
+              batteryValue={model.batteryValue}
+              lastCameraImage={model.lastCameraImage}
+              lastSeenBall={model.lastSeenBall}
+              lastSeenGoal={model.lastSeenGoal}
+              mode={model.mode}
+              penalised={model.penalised}
+              penalty={model.penalty}
+              phase={model.phase}
+              title={model.title}
+              walkCommand={model.walkCommand}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 });

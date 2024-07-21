@@ -375,4 +375,9 @@ export class LocalisationController {
   toggleBoundedBoxVisibility = (model: LocalisationModel) => {
     model.boundedBoxVisible = !model.boundedBoxVisible;
   };
+
+  @action
+  toggleSidebarVisibility = (model: LocalisationModel) => {
+    model.sideBarVisible = !model.sideBarVisible;
+  };
 }
