@@ -192,7 +192,7 @@ namespace module::purpose {
             if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
-                emit(std::make_unique<ResetFieldLocalisation>());
+                // emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 3);
             }
