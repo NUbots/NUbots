@@ -72,7 +72,7 @@ namespace module::skill {
                                          sanitized_text.end());
                 }
                 log<NUClear::DEBUG>("Saying: ", sanitized_text);
-                system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
+                system(std::string("echo '" + sanitized_text + "' | piper --model en_US-lessac-medium | aplay -D "
                                    + cfg.device_name)
                            .c_str());
 
