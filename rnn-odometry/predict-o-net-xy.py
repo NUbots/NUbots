@@ -7,17 +7,17 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 
 # Load data
-test_data = np.load('datasets/input_data_test.npy')
-test_targets = np.load('datasets/input_targets_test.npy')
+test_data = np.load('datasets/input_data_train.npy')
+test_targets = np.load('datasets/input_targets_train.npy')
 
 # Load model
-model = load_model('models/model-20240613-194721')
+model = load_model('models/model-20240730-193204')
 
 system_sample_rate = 115
 sequence_length = system_sample_rate * 1
 sequence_stride = 1
 sampling_rate = 1
-batch_size = 115
+batch_size = 65
 
 test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
     data=test_data,
@@ -50,7 +50,7 @@ test_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
 )
 
 # test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
-test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_x))
+test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_y))
 
 # Predict
 predictions = model.predict(test_dataset)
@@ -78,6 +78,6 @@ print('loaded target set shape y:', test_targets_y.shape)
 plt.figure(figsize=(10, 6))
 # Directly use the predictions array without additional indexing
 plt.plot(predictions[:, -1], label='Predictions')  # Assuming you want to plot the last prediction for each sequence
-plt.plot(test_targets_x[:predictions.shape[0]], label='Targets x')  # Adjusted for correct length, matching the number of sequences
+plt.plot(test_targets_y[:predictions.shape[0]], label='Targets y')  # Adjusted for correct length, matching the number of sequences
 plt.legend()
 plt.show()
