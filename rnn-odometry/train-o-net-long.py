@@ -102,11 +102,11 @@ def main():
     # servos_joined = servos_joined[:, 6:18]
 
     # Plot and inspect each joined array
-    # num_channels = truth_all_joined.shape[1]
+    # num_channels = imu_joined.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_all_joined[0:10000, i], label=f'truth {i+1}')
+    #     plt.plot(imu_joined[0:10000, i], label=f'imu {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -205,14 +205,14 @@ def main():
     print(f"Test set size: {test_arr.shape}")
 
     # Plot and inspect after normalising
-    num_channels = train_arr.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(train_arr[0:80000, i], label=f'Channel {i+1}')
-    # Add a legend
-    plt.legend()
-    plt.show()
+    # num_channels = train_arr.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(train_arr[0:80000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
 
     #### End of normalisation ####
 
@@ -249,14 +249,14 @@ def main():
     # input_targets_test = convert_to_relative(input_targets_test)
 
     # Plot and inspect after splitting
-    num_channels = input_targets_train.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(input_targets_train[0:100000, i], label=f'Target {i+1}')
-    # Add a legend
-    plt.legend()
-    plt.show()
+    # num_channels = input_targets_train.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(input_targets_train[0:100000, i], label=f'Target {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
 
     #### End of splitting ####
 
@@ -330,220 +330,220 @@ def main():
     # Reshape target data due to return_sequences=True (prediction per timestep)
 
 
-    # train_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=input_data_train,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
+    train_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
+        data=input_data_train,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
 
-    # train_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=targets_train_x,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
-    # train_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=targets_train_y,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
-    # # train_dataset = tf.data.Dataset.zip((train_dataset_features, (train_dataset_targets_x, train_dataset_targets_y)))
+    train_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_train_x,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    train_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_train_y,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    train_dataset = tf.data.Dataset.zip((train_dataset_features, (train_dataset_targets_x, train_dataset_targets_y)))
     # train_dataset = tf.data.Dataset.zip((train_dataset_features, train_dataset_targets_x))
     # train_dataset = tf.data.Dataset.zip((train_dataset_features, train_dataset_targets_y))
 
-    # validate_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=input_data_validate,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
+    validate_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
+        data=input_data_validate,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
 
-    # validate_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=targets_validate_x,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
-    # validate_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=targets_validate_y,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
-    # # validate_dataset = tf.data.Dataset.zip((validate_dataset_features, (validate_dataset_targets_x, validate_dataset_targets_y)))
-    # # validate_dataset = tf.data.Dataset.zip((validate_dataset_features, validate_dataset_targets_x))
+    validate_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_validate_x,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    validate_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_validate_y,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    validate_dataset = tf.data.Dataset.zip((validate_dataset_features, (validate_dataset_targets_x, validate_dataset_targets_y)))
+    # validate_dataset = tf.data.Dataset.zip((validate_dataset_features, validate_dataset_targets_x))
     # validate_dataset = tf.data.Dataset.zip((validate_dataset_features, validate_dataset_targets_y))
 
 
-    # test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=input_data_test,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
+    test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
+        data=input_data_test,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
 
-    # test_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=targets_test_x,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
-    # test_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
-    #     data=targets_test_y,
-    #     targets=None,
-    #     sequence_length=sequence_length,
-    #     sequence_stride=sequence_stride,
-    #     sampling_rate=sampling_rate,
-    #     batch_size=batch_size
-    # )
-    # # test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
-    # # test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_x))
+    test_dataset_targets_x = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_test_x,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    test_dataset_targets_y = tf.keras.utils.timeseries_dataset_from_array(
+        data=targets_test_y,
+        targets=None,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    test_dataset = tf.data.Dataset.zip((test_dataset_features, (test_dataset_targets_x, test_dataset_targets_y)))
+    # test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_x))
     # test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_y))
 
-    # # Model parameters
-    # learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    # epochs = 200
+    # Model parameters
+    learning_rate = 0.00096   # Controls how much to change the model in response to error.
+    epochs = 200
 
-    # # Scheduler function keeps the initial learning rate for the first ten epochs
-    # # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
-    # # def scheduler(epoch, lr):
-    # #     if epoch < 10:
-    # #         return lr
-    # #     else:
-    # #         return lr * tf.exp(-0.1)
-    # # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
+    # Scheduler function keeps the initial learning rate for the first ten epochs
+    # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
+    # def scheduler(epoch, lr):
+    #     if epoch < 10:
+    #         return lr
+    #     else:
+    #         return lr * tf.exp(-0.1)
+    # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
 
-    # # ** Loss functions **
-    # # loss_function = keras.losses.MeanAbsoluteError()
-    # # loss_function = keras.losses.MeanSquaredError()
-    # loss_function = keras.losses.LogCosh()
-    # # loss_function = quantile_loss????
-    # # loss_function = keras.losses.Huber(delta=0.5)
+    # ** Loss functions **
+    # loss_function = keras.losses.MeanAbsoluteError()
+    # loss_function = keras.losses.MeanSquaredError()
+    loss_function = keras.losses.LogCosh()
+    # loss_function = quantile_loss????
+    # loss_function = keras.losses.Huber(delta=0.5)
 
-    # # ** Optimizers **
-    # # LR schedules
-    # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 25                                         # Number of epochs for learning rate to decay over before it resets
-    # steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
-    # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
-    # print(f"Decay to epoch: {decay_to_epoch}")
-    # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.000001)
+    # ** Optimizers **
+    # LR schedules
+    size_of_dataset = input_data_train.shape[0]
+    decay_to_epoch = 25                                         # Number of epochs for learning rate to decay over before it resets
+    steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
+    decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    print(f"Decay to epoch: {decay_to_epoch}")
+    print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.000001)
 
-    # # standard optimisers
-    # # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
-    # # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
-    # # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    # standard optimisers
+    # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
+    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
-    # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
-    # # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
-    # # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.1)
+    optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
+    # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.1)
 
-    # # Scheduled
-    # # lr_schedule = keras.optimizers.schedules.ExponentialDecay(
-    # #     initial_learning_rate=0.5,
-    # #     decay_steps=500000,
-    # #     decay_rate=0.0001)
-    # # lr_schedule = keras.optimizers.schedules.CosineDecay(
-    # #     initial_learning_rate=0.0005,
-    # #     decay_steps=5000000,
-    # #     alpha=0.000001
-    # # )
-
-    # # optimizer = keras.optimizers.RMSprop(learning_rate=learning_rate)
-
-    # # ** Activation functions **
-    # # activation = tf.keras.activations.leaky_relu(negative_slope=0.01)
-    # # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
-
-    # # Tensorboard
-    # timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    # log_dir = "logs/fit/" + timestamp
-    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-
-    # # Model Layers
-    # inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    # dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    # lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
-    # normalise = keras.layers.LayerNormalization()(lstm)
-
-    # # dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
-    # # lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
-    # # normalise2 = keras.layers.LayerNormalization()(lstm2)
-
-    # # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
-    # # lstm3 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
-    # # normalise3 = keras.layers.LayerNormalization()(lstm3)
-
-    # # dropout4 = keras.layers.Dropout(rate=0.47)(normalise3)
-    # # lstm4 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout4)    # 32 originally
-    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
-
-    # # Apply attention layer that considers lstm outputs
-    # attention = keras.layers.Attention()([normalise, normalise])
-
-    # # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
-    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
-
-    # # # Compute dot product between attention weights and last LSTM layer
-    # # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
-
-    # # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
-    # # normalise4 = keras.layers.LayerNormalization()(lstm4)
-    # # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
-    # # NOTE: Changed dense layer units to 2 due to removing z component
-    # # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
-    # # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    # dense2 = keras.layers.TimeDistributed(keras.layers.Dense(1, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
-    # # output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
-    # # output_y = keras.layers.Lambda(lambda y: y[:, :, 1], name='output_y')(dense2)
-    # # NOTE: Test to predict a single component. This requires that the datasets be adjusted above where they are zipped.
-    # output_y = keras.layers.Lambda(lambda y: y[:, :, 0], name='output_y')(dense2)
-    # # model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
-    # # model = keras.Model(inputs=inputs, outputs=[output_x])
-    # model = keras.Model(inputs=inputs, outputs=[output_y])
-    # # model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0, 'output_y': 1.0},loss=loss_function)
-    # # model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0},loss=loss_function)
-    # model.compile(optimizer=optimizer, loss_weights={'output_y': 1.0},loss=loss_function)
-    # model.summary()
-
-    # # Examples
-    # # lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
-    # # lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
-    # # dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
-
-    # # lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
-    # # dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
-
-    # model.fit(
-    #     train_dataset,
-    #     validation_data=validate_dataset,
-    #     epochs=epochs,
-    #     callbacks=[tensorboard_callback]
+    # Scheduled
+    # lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+    #     initial_learning_rate=0.5,
+    #     decay_steps=500000,
+    #     decay_rate=0.0001)
+    # lr_schedule = keras.optimizers.schedules.CosineDecay(
+    #     initial_learning_rate=0.0005,
+    #     decay_steps=5000000,
+    #     alpha=0.000001
     # )
 
-    # # Note add back the model save
-    # model.save("models/model-" + timestamp)
-    # # Save the scaler object
-    # # joblib.dump(scaler, 'scalers/scaler-' + timestamp)
+    # optimizer = keras.optimizers.RMSprop(learning_rate=learning_rate)
+
+    # ** Activation functions **
+    # activation = tf.keras.activations.leaky_relu(negative_slope=0.01)
+    # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
+
+    # Tensorboard
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = "logs/fit/" + timestamp
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+    # Model Layers
+    inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
+    dropout = keras.layers.Dropout(rate=0.30)(inputs)
+    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
+    normalise = keras.layers.LayerNormalization()(lstm)
+
+    # dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
+    # lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
+    # normalise2 = keras.layers.LayerNormalization()(lstm2)
+
+    # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
+    # lstm3 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
+    # normalise3 = keras.layers.LayerNormalization()(lstm3)
+
+    # dropout4 = keras.layers.Dropout(rate=0.47)(normalise3)
+    # lstm4 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout4)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+
+    # Apply attention layer that considers lstm outputs
+    attention = keras.layers.Attention()([normalise, normalise])
+
+    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+
+    # # Compute dot product between attention weights and last LSTM layer
+    # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
+
+    # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
+    # NOTE: Changed dense layer units to 2 due to removing z component
+    # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
+    # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(1, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
+    output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
+    output_y = keras.layers.Lambda(lambda y: y[:, :, 1], name='output_y')(dense2)
+    # NOTE: Test to predict a single component. This requires that the datasets be adjusted above where they are zipped.
+    # output_y = keras.layers.Lambda(lambda y: y[:, :, 0], name='output_y')(dense2)
+    model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
+    # model = keras.Model(inputs=inputs, outputs=[output_x])
+    # model = keras.Model(inputs=inputs, outputs=[output_y])
+    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0, 'output_y': 1.0},loss=loss_function)
+    # model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0},loss=loss_function)
+    # model.compile(optimizer=optimizer, loss_weights={'output_y': 1.0},loss=loss_function)
+    model.summary()
+
+    # Examples
+    # lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
+    # lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
+    # dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
+
+    # lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
+    # dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
+
+    model.fit(
+        train_dataset,
+        validation_data=validate_dataset,
+        epochs=epochs,
+        callbacks=[tensorboard_callback]
+    )
+
+    # Note add back the model save
+    model.save("models/model-" + timestamp)
+    # Save the scaler object
+    # joblib.dump(scaler, 'scalers/scaler-' + timestamp)
 
 
 if __name__ == "__main__":
