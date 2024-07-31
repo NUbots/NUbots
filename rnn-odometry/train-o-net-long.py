@@ -56,7 +56,7 @@ def main():
     num_files = 22  # Number of files to load
     prefix = "s"  # s for servo, h for head, a for arm
     imu = []
-    servos = []
+    # servos = []
     truth_all = []
     truth_start_end_indicator = []
 
@@ -64,8 +64,8 @@ def main():
         imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
         imu.append(imu_data)
 
-        servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
-        servos.append(servos_data)
+        # servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
+        # servos.append(servos_data)
 
         truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
         truth_all.append(truth_data)
@@ -88,18 +88,18 @@ def main():
 
     # Loop through each array and concatenate into a numpy array
     imu_joined = np.concatenate(imu, axis=0)
-    servos_joined = np.concatenate(servos, axis=0)
+    # servos_joined = np.concatenate(servos, axis=0)
     truth_all_joined = np.concatenate(truth_all, axis=0)
     truth_start_end_indicator_joined = np.array(truth_start_end_indicator)
 
     # Print the shape of the joined arrays
     print("IMU s joined: ", imu_joined.shape)
-    print("Servos s joined: ", servos_joined.shape)
+    # print("Servos s joined: ", servos_joined.shape)
     print("Truth s joined: ", truth_all_joined.shape)
     print("Truth start/end indicator: ", truth_start_end_indicator_joined.shape)
 
     # Slice out the arm and head servos
-    servos_joined = servos_joined[:, 6:18]
+    # servos_joined = servos_joined[:, 6:18]
 
     # Plot and inspect each joined array
     # num_channels = truth_all_joined.shape[1]
@@ -133,7 +133,11 @@ def main():
 
 
     # Join the data
-    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
+    # joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
+
+    # Testing without the servos
+    joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
+
     print("Total joined data shape: ", joined_data.shape)
 
     # Split the training data into training, validation and test sets
@@ -201,14 +205,14 @@ def main():
     print(f"Test set size: {test_arr.shape}")
 
     # Plot and inspect after normalising
-    # num_channels = train_arr.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(train_arr[0:80000, i], label=f'Channel {i+1}')
-    # # Add a legend
-    # plt.legend()
-    # plt.show()
+    num_channels = train_arr.shape[1]
+    plt.figure(figsize=(10, 5))
+    # Plot each channel
+    for i in range(num_channels):
+        plt.plot(train_arr[0:80000, i], label=f'Channel {i+1}')
+    # Add a legend
+    plt.legend()
+    plt.show()
 
     #### End of normalisation ####
 
@@ -216,9 +220,12 @@ def main():
 
     #### Split into data and targets ####
     # NOTE: Remember to reshape if adding or removing features
+    # NOTE: Just using IMU data, so changing index slice from 18 to 6
     # Training
-    input_data_train = train_arr[:, :18]  # imu and servos
-    input_targets_train = train_arr[:, 18:]  # truth
+    input_data_train = train_arr[:, :6]  # imu and servos
+    input_targets_train = train_arr[:, 6:]  # truth
+    print("input_data_train shape: ", input_data_train.shape)
+    print("input_targets_train shape: ", input_targets_train.shape)
     # Split targets into x and y
     targets_train_x = input_targets_train[:, 0]
     targets_train_y = input_targets_train[:, 1]
@@ -226,30 +233,30 @@ def main():
     # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
-    input_data_validate = validate_arr[:, :18]  # imu and servos
-    input_targets_validate = validate_arr[:, 18:]  # truth
+    input_data_validate = validate_arr[:, :6]  # imu and servos
+    input_targets_validate = validate_arr[:, 6:]  # truth
     targets_validate_x = input_targets_validate[:, 0]
     targets_validate_y = input_targets_validate[:, 1]
     # Convert sliced targets to relative position
     # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
-    input_data_test= test_arr[:, :18]  # imu and servos
-    input_targets_test = test_arr[:, 18:]  # truth
+    input_data_test= test_arr[:, :6]  # imu and servos
+    input_targets_test = test_arr[:, 6:]  # truth
     targets_test_x = input_targets_test[:, 0]
     targets_test_y = input_targets_test[:, 1]
     # Convert sliced targets to relative position
     # input_targets_test = convert_to_relative(input_targets_test)
 
     # Plot and inspect after splitting
-    # num_channels = input_targets_train.shape[1]
-    # plt.figure(figsize=(10, 5))
-    # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(input_targets_train[0:100000, i], label=f'Target {i+1}')
-    # # Add a legend
-    # plt.legend()
-    # plt.show()
+    num_channels = input_targets_train.shape[1]
+    plt.figure(figsize=(10, 5))
+    # Plot each channel
+    for i in range(num_channels):
+        plt.plot(input_targets_train[0:100000, i], label=f'Target {i+1}')
+    # Add a legend
+    plt.legend()
+    plt.show()
 
     #### End of splitting ####
 
@@ -267,7 +274,7 @@ def main():
     input_data_test = np.concatenate((input_data_test, test_indicator.reshape(-1, 1)), axis=1)
     #### End of adding indicator ####
 
-    # print dataset shapes
+    # print dataset shapes (will have an extra column for the indicator)
     print(f"input_data_train: {input_data_train.shape}")
     print(f"input_targets_train: {input_targets_train.shape}")
     print(f"input_data_validate: {input_data_validate.shape}")
