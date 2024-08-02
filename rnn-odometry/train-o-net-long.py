@@ -52,7 +52,7 @@ def main():
         return smoothed_data
 
     # numpy arrays
-    first_file = 7
+    first_file = 10
     num_files = 22  # Number of files to load
     prefix = "s"  # s for servo, h for head, a for arm
     imu = []
@@ -80,7 +80,7 @@ def main():
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
     # NOTE: Htw is already relative to the starting point!! But the starting point can vary if not converted
-    # truth_all = [convert_to_relative(truth) for truth in truth_all]
+    truth_all = [convert_to_relative(truth) for truth in truth_all]
 
     # Smoothing should be done here
     # Loop through each truth array and smooth
@@ -230,7 +230,7 @@ def main():
     targets_train_x = input_targets_train[:, 0]
     targets_train_y = input_targets_train[:, 1]
     # Convert sliced targets to relative position
-    # input_targets_train = convert_to_relative(input_targets_train)
+    input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     input_data_validate = validate_arr[:, :6]  # imu and servos
@@ -238,7 +238,7 @@ def main():
     targets_validate_x = input_targets_validate[:, 0]
     targets_validate_y = input_targets_validate[:, 1]
     # Convert sliced targets to relative position
-    # input_targets_validate = convert_to_relative(input_targets_validate)
+    input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     input_data_test= test_arr[:, :6]  # imu and servos
@@ -246,7 +246,7 @@ def main():
     targets_test_x = input_targets_test[:, 0]
     targets_test_y = input_targets_test[:, 1]
     # Convert sliced targets to relative position
-    # input_targets_test = convert_to_relative(input_targets_test)
+    input_targets_test = convert_to_relative(input_targets_test)
 
     # Plot and inspect after splitting
     # num_channels = input_targets_train.shape[1]
@@ -317,10 +317,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 1   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 115                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 345                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Sequence lengths (for return sequences)
     # train_seq_length = input_data_train.shape[0]
@@ -450,10 +450,10 @@ def main():
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
-    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
     # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
-    optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
+    # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
     # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.1)
 
@@ -482,7 +482,7 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(128, activation=keras.activations.relu, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
     # dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
