@@ -52,7 +52,7 @@ def main():
         return smoothed_data
 
     # numpy arrays
-    first_file = 10
+    first_file = 7
     num_files = 22  # Number of files to load
     prefix = "s"  # s for servo, h for head, a for arm
     imu = []
@@ -230,7 +230,7 @@ def main():
     targets_train_x = input_targets_train[:, 0]
     targets_train_y = input_targets_train[:, 1]
     # Convert sliced targets to relative position
-    input_targets_train = convert_to_relative(input_targets_train)
+    # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     input_data_validate = validate_arr[:, :6]  # imu and servos
@@ -238,7 +238,7 @@ def main():
     targets_validate_x = input_targets_validate[:, 0]
     targets_validate_y = input_targets_validate[:, 1]
     # Convert sliced targets to relative position
-    input_targets_validate = convert_to_relative(input_targets_validate)
+    # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     input_data_test= test_arr[:, :6]  # imu and servos
@@ -246,7 +246,7 @@ def main():
     targets_test_x = input_targets_test[:, 0]
     targets_test_y = input_targets_test[:, 1]
     # Convert sliced targets to relative position
-    input_targets_test = convert_to_relative(input_targets_test)
+    # input_targets_test = convert_to_relative(input_targets_test)
 
     # Plot and inspect after splitting
     # num_channels = input_targets_train.shape[1]
@@ -512,7 +512,7 @@ def main():
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
     # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(1, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
     output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
     output_y = keras.layers.Lambda(lambda y: y[:, :, 1], name='output_y')(dense2)
     # NOTE: Test to predict a single component. This requires that the datasets be adjusted above where they are zipped.
