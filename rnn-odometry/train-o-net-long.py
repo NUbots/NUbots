@@ -54,7 +54,7 @@ def main():
     # numpy arrays
     first_file = 7
     num_files = 22  # Number of files to load
-    prefix = "s"  # s for servo, h for head, a for arm
+    prefix = "s"  # s for straight path
     imu = []
     # servos = []
     truth_all = []
@@ -168,14 +168,14 @@ def main():
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
-    # mean = train_arr.mean(axis=0)
-    # std = train_arr.std(axis=0)
-    # print("mean: ", mean)
-    # print("std: ", std)
+    mean = train_arr.mean(axis=0)
+    std = train_arr.std(axis=0)
+    print("mean: ", mean)
+    print("std: ", std)
 
-    # train_arr = (train_arr - mean) / std
-    # validate_arr = (validate_arr - mean) / std
-    # test_arr = (test_arr - mean) / std
+    train_arr = (train_arr - mean) / std
+    validate_arr = (validate_arr - mean) / std
+    test_arr = (test_arr - mean) / std
     # # # #
 
     # # clip the outliers in the data
@@ -187,13 +187,13 @@ def main():
 
     ## Min/Max Scaling ##
 
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    # Fit scaler to training data only
-    scaler.fit(train_arr)
-    # Transform the data
-    train_arr = scaler.transform(train_arr)
-    validate_arr = scaler.transform(validate_arr)
-    test_arr = scaler.transform(test_arr)
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    # # Fit scaler to training data only
+    # scaler.fit(train_arr)
+    # # Transform the data
+    # train_arr = scaler.transform(train_arr)
+    # validate_arr = scaler.transform(validate_arr)
+    # test_arr = scaler.transform(test_arr)
 
     ## End of Min/Max Scaling ##
 
@@ -317,10 +317,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = system_sample_rate * 1   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 345                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 150                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Sequence lengths (for return sequences)
     # train_seq_length = input_data_train.shape[0]
@@ -419,8 +419,8 @@ def main():
     # test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_y))
 
     # Model parameters
-    learning_rate = 0.00096   # Controls how much to change the model in response to error.
-    epochs = 200
+    learning_rate = 0.000011   # Controls how much to change the model in response to error.
+    epochs = 50
 
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
@@ -433,8 +433,8 @@ def main():
 
     # ** Loss functions **
     # loss_function = keras.losses.MeanAbsoluteError()
-    # loss_function = keras.losses.MeanSquaredError()
-    loss_function = keras.losses.LogCosh()
+    loss_function = keras.losses.MeanSquaredError()
+    # loss_function = keras.losses.LogCosh()
     # loss_function = quantile_loss????
     # loss_function = keras.losses.Huber(delta=0.5)
 
@@ -482,12 +482,12 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(128, activation=keras.activations.relu, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(32, activation=keras.activations.relu, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    # dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
-    # lstm2 = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
-    # normalise2 = keras.layers.LayerNormalization()(lstm2)
+    dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
+    lstm2 = keras.layers.LSTM(32,activation=keras.activations.relu, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
+    normalise2 = keras.layers.LayerNormalization()(lstm2)
 
     # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
     # lstm3 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
@@ -497,8 +497,8 @@ def main():
     # lstm4 = keras.layers.LSTM(150, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout4)    # 32 originally
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
 
-    # Apply attention layer that considers lstm outputs
-    attention = keras.layers.Attention()([normalise, normalise])
+    # # Apply attention layer that considers lstm outputs
+    # attention = keras.layers.Attention()([normalise, normalise2])
 
     # lstm4 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(attention)    # 32 originally
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
@@ -512,7 +512,7 @@ def main():
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
     # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(normalise2)
     output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
     output_y = keras.layers.Lambda(lambda y: y[:, :, 1], name='output_y')(dense2)
     # NOTE: Test to predict a single component. This requires that the datasets be adjusted above where they are zipped.
@@ -520,7 +520,7 @@ def main():
     model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
     # model = keras.Model(inputs=inputs, outputs=[output_x])
     # model = keras.Model(inputs=inputs, outputs=[output_y])
-    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0, 'output_y': 1.0},loss=loss_function)
+    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.25, 'output_y': 1.0},loss=loss_function)
     # model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0},loss=loss_function)
     # model.compile(optimizer=optimizer, loss_weights={'output_y': 1.0},loss=loss_function)
     model.summary()
