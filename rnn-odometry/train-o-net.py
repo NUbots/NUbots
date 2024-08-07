@@ -342,8 +342,8 @@ def main():
 
 
     # Model parameters
-    learning_rate = 0.000018   # Controls how much to change the model in response to error.
-    epochs = 50
+    learning_rate = 0.000025   # Controls how much to change the model in response to error.
+    epochs = 200
     loss_function = keras.losses.MeanSquaredError()
     optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
@@ -354,8 +354,11 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
-    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
-    outputs = keras.layers.Dense(2)(lstm)
+    dropout = keras.layers.Dropout(rate=0.30)(inputs)
+    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001), return_sequences=False)(dropout)    # 32 originally
+    normalise = keras.layers.LayerNormalization()(lstm)
+    outputs = keras.layers.Dense(2)(normalise)
+
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)

@@ -22,13 +22,13 @@ def partition_dataset(features, targets, window_size):
 
 
 # Load data
-test_data = np.load('datasets/input_data_train.npy')
-test_targets = np.load('datasets/input_targets_train.npy')
+test_data = np.load('datasets/input_data_test.npy')
+test_targets = np.load('datasets/input_targets_test.npy')
 # test_data = test_data[:4000]
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20240807-201541')
+model = load_model('models/model-20240807-203901')
 
 # Partition dataset
 window_size = 100
