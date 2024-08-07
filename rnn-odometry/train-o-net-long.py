@@ -86,7 +86,7 @@ def main():
     # Loop through each truth array and smooth
     # truth_all = [gaussian_smooth(truth, 50) for truth in truth_all]
 
-    # Loop through each array and concatenate into a numpy array
+    # Concatenate the loaded arrays
     imu_joined = np.concatenate(imu, axis=0)
     # servos_joined = np.concatenate(servos, axis=0)
     truth_all_joined = np.concatenate(truth_all, axis=0)
@@ -213,10 +213,7 @@ def main():
     # # Add a legend
     # plt.legend()
     # plt.show()
-
     #### End of normalisation ####
-
-
 
     #### Split into data and targets ####
     # NOTE: Remember to reshape if adding or removing features
@@ -226,7 +223,7 @@ def main():
     input_targets_train = train_arr[:, 6:]  # truth
     print("input_data_train shape: ", input_data_train.shape)
     print("input_targets_train shape: ", input_targets_train.shape)
-    # Split targets into x and y
+    # Split targets into x and y for weighted losses
     targets_train_x = input_targets_train[:, 0]
     targets_train_y = input_targets_train[:, 1]
     # Convert sliced targets to relative position
