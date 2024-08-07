@@ -11,13 +11,13 @@ test_data = np.load('datasets/input_data_test.npy')
 test_targets = np.load('datasets/input_targets_test.npy')
 
 # Load model
-model = load_model('models/model-20240801-205111')
+model = load_model('models/model-20240806-203054')
 
 system_sample_rate = 115
-sequence_length = system_sample_rate * 2
+sequence_length = system_sample_rate * 1
 sequence_stride = 1
 sampling_rate = 1
-batch_size = 345
+batch_size = 150
 
 test_dataset_features = tf.keras.utils.timeseries_dataset_from_array(
     data=test_data,

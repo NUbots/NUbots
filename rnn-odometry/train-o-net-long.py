@@ -52,9 +52,9 @@ def main():
         return smoothed_data
 
     # numpy arrays
-    first_file = 7
-    num_files = 22  # Number of files to load
-    prefix = "s"  # s for straight path
+    first_file = 3
+    num_files = 5  # Number of files to load
+    prefix = "long"  # s for straight path
     imu = []
     # servos = []
     truth_all = []
@@ -416,8 +416,8 @@ def main():
     # test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets_y))
 
     # Model parameters
-    learning_rate = 0.000011   # Controls how much to change the model in response to error.
-    epochs = 50
+    learning_rate = 0.000018   # Controls how much to change the model in response to error.
+    epochs = 500
 
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
@@ -479,12 +479,12 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(32, activation=keras.activations.relu, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
-    lstm2 = keras.layers.LSTM(32,activation=keras.activations.relu, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
-    normalise2 = keras.layers.LayerNormalization()(lstm2)
+    # dropout2 = keras.layers.Dropout(rate=0.30)(normalise)
+    # lstm2 = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00008, l2=0.0008), return_sequences=True)(dropout2)    # 32 originally
+    # normalise2 = keras.layers.LayerNormalization()(lstm2)
 
     # dropout3 = keras.layers.Dropout(rate=0.36)(normalise2)
     # lstm3 = keras.layers.LSTM(80, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0015, l2=0.015), return_sequences=True)(dropout3)    # 32 originally
@@ -509,7 +509,7 @@ def main():
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dropout4 = keras.layers.Dropout(rate=0.2)(normalise3)
     # dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise3)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(normalise2)
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(normalise)
     output_x = keras.layers.Lambda(lambda x: x[:, :, 0], name='output_x')(dense2)
     output_y = keras.layers.Lambda(lambda y: y[:, :, 1], name='output_y')(dense2)
     # NOTE: Test to predict a single component. This requires that the datasets be adjusted above where they are zipped.
@@ -517,7 +517,7 @@ def main():
     model = keras.Model(inputs=inputs, outputs=[output_x, output_y])
     # model = keras.Model(inputs=inputs, outputs=[output_x])
     # model = keras.Model(inputs=inputs, outputs=[output_y])
-    model.compile(optimizer=optimizer, loss_weights={'output_x': 1.25, 'output_y': 1.0},loss=loss_function)
+    model.compile(optimizer=optimizer, loss_weights={'output_x': 2.0, 'output_y': 1.0},loss=loss_function)
     # model.compile(optimizer=optimizer, loss_weights={'output_x': 1.0},loss=loss_function)
     # model.compile(optimizer=optimizer, loss_weights={'output_y': 1.0},loss=loss_function)
     model.summary()
