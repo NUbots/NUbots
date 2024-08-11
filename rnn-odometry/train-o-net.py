@@ -66,7 +66,7 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 4  # Number of files to load
+    num_files = 25  # Number of files to load
     prefix = "s"  # s for straight path
     imu = []
     # servos = []
@@ -152,6 +152,17 @@ def main():
     joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
 
     print("Total joined data shape: ", joined_data.shape)
+
+    # Plot and inspect after joining
+    # num_channels = joined_data.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(joined_data[:, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
 
     # Split the training data into training, validation and test sets
     training_size = 0.5
@@ -342,8 +353,8 @@ def main():
 
 
     # Model parameters
-    learning_rate = 0.000025   # Controls how much to change the model in response to error.
-    epochs = 200
+    learning_rate = 0.00013   # Controls how much to change the model in response to error.
+    epochs = 100
     loss_function = keras.losses.MeanSquaredError()
     optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
@@ -354,9 +365,11 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
-    dropout = keras.layers.Dropout(rate=0.30)(inputs)
-    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001), return_sequences=False)(dropout)    # 32 originally
-    normalise = keras.layers.LayerNormalization()(lstm)
+    lstm = keras.layers.LSTM(8, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.3)(lstm)
+    # lstm2 = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.002), return_sequences=False)(lstm)    # 32 originally
+
+    normalise = keras.layers.LayerNormalization()(dropout)
     outputs = keras.layers.Dense(2)(normalise)
 
 
