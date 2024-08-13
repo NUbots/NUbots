@@ -365,8 +365,8 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
-    lstm = keras.layers.LSTM(8, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
-    dropout = keras.layers.Dropout(rate=0.3)(lstm)
+    lstm = keras.layers.LSTM(7, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.2)(lstm)
     # lstm2 = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.002), return_sequences=False)(lstm)    # 32 originally
 
     normalise = keras.layers.LayerNormalization()(dropout)
