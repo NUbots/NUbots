@@ -69,7 +69,7 @@ def main():
     num_files = 25  # Number of files to load
     prefix = "s"  # s for straight path
     imu = []
-    # servos = []
+    servos = []
     truth_all = []
     truth_start_end_indicator = []
 
@@ -77,8 +77,8 @@ def main():
         imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
         imu.append(imu_data)
 
-        # servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
-        # servos.append(servos_data)
+        servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
+        servos.append(servos_data)
 
         truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
         truth_all.append(truth_data)
@@ -101,18 +101,18 @@ def main():
 
     # Loop through each array and concatenate into a numpy array
     imu_joined = np.concatenate(imu, axis=0)
-    # servos_joined = np.concatenate(servos, axis=0)
+    servos_joined = np.concatenate(servos, axis=0)
     truth_all_joined = np.concatenate(truth_all, axis=0)
     truth_start_end_indicator_joined = np.array(truth_start_end_indicator)
 
     # Print the shape of the joined arrays
     print("IMU s joined: ", imu_joined.shape)
-    # print("Servos s joined: ", servos_joined.shape)
+    print("Servos s joined: ", servos_joined.shape)
     print("Truth s joined: ", truth_all_joined.shape)
     print("Truth start/end indicator: ", truth_start_end_indicator_joined.shape)
 
     # Slice out the arm and head servos
-    # servos_joined = servos_joined[:, 6:18]
+    servos_joined = servos_joined[:, 6:18]
 
     # Plot and inspect each joined array
     # num_channels = imu_joined.shape[1]
@@ -146,10 +146,10 @@ def main():
 
 
     # Join the data
-    # joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
+    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
 
     # Testing without the servos
-    joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
+    # joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
 
     print("Total joined data shape: ", joined_data.shape)
 
@@ -365,8 +365,8 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
-    lstm = keras.layers.LSTM(7, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)    # 32 originally
-    dropout = keras.layers.Dropout(rate=0.2)(lstm)
+    lstm = keras.layers.LSTM(7, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0015), return_sequences=False)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.5)(lstm)
     # lstm2 = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.002), return_sequences=False)(lstm)    # 32 originally
 
     normalise = keras.layers.LayerNormalization()(dropout)
