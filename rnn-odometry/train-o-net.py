@@ -246,22 +246,34 @@ def main():
     # NOTE: Remember to reshape if adding or removing features
     # NOTE: Just using IMU data, so changing index slice from 18 to 6
     # Training
-    input_data_train = train_arr[:, :6]  # imu and servos
-    input_targets_train = train_arr[:, 6:]  # truth
+    # Use when using the servos
+    input_data_train = train_arr[:, :18]  # imu and servos
+    input_targets_train = train_arr[:, 18:]  # truth
+    # Use when not using the servos
+    # input_data_train = train_arr[:, :6]  # imu and servos
+    # input_targets_train = train_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
-    input_data_validate = validate_arr[:, :6]  # imu and servos
-    input_targets_validate = validate_arr[:, 6:]  # truth
+    # Use when using the servos
+    input_data_validate = validate_arr[:, :18]  # imu and servos
+    input_targets_validate = validate_arr[:, 18:]  # truth
+    # Use when not using the servos
+    # input_data_validate = validate_arr[:, :6]  # imu and servos
+    # input_targets_validate = validate_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
-    input_data_test= test_arr[:, :6]  # imu and servos
-    input_targets_test = test_arr[:, 6:]  # truth
+    # Use when using the servos
+    input_data_test= test_arr[:, :18]  # imu and servos
+    input_targets_test = test_arr[:, 18:]  # truth
+    # Use when not using the servos
+    # input_data_test= test_arr[:, :6]  # imu and servos
+    # input_targets_test = test_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_test = convert_to_relative(input_targets_test)
@@ -365,7 +377,7 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
-    lstm = keras.layers.LSTM(7, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0015), return_sequences=False)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(20, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0015), return_sequences=False)(inputs)    # 32 originally
     dropout = keras.layers.Dropout(rate=0.5)(lstm)
     # lstm2 = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.002), return_sequences=False)(lstm)    # 32 originally
 
