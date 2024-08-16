@@ -1,6 +1,7 @@
 <map id="module::tools::RoboCupConfiguration" name="module::tools::RoboCupConfiguration">
-<area shape="rect" id="node1" title=" " alt="" coords="415,64,679,91"/>
+<area shape="rect" id="node1" title=" " alt="" coords="415,97,679,124"/>
 <area shape="rect" id="node2" title=" " alt="" coords="70,5,205,32"/>
 <area shape="rect" id="node3" href="$structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html" title="Smart enum for the robot&#39;s position." alt="" coords="5,57,269,98"/>
 <area shape="rect" id="node4" href="$structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html" title="Display values." alt="" coords="5,122,269,163"/>
+<area shape="rect" id="node5" href="$structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html" title=" " alt="" coords="5,187,269,229"/>
 </map>

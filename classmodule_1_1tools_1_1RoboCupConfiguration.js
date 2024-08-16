@@ -1,5 +1,6 @@
 var classmodule_1_1tools_1_1RoboCupConfiguration =
 [
+    [ "Config", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config" ],
     [ "Display", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display" ],
     [ "Position", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position" ],
     [ "RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a8a1406cc894564c08ba8b84b5197051d", null ],
@@ -12,6 +13,7 @@ var classmodule_1_1tools_1_1RoboCupConfiguration =
     [ "set_config_values", "classmodule_1_1tools_1_1RoboCupConfiguration.html#ab8b3216f2bdaee9d5f113c3e131acbba", null ],
     [ "toggle_selection", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a6e8476d897c104031dd930b2954bc8f0", null ],
     [ "user_input", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a53c034144dfee6e2ca4357cef51d9888", null ],
+    [ "cfg", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a858336b38e53e960c44d3aa115875c31", null ],
     [ "display", "classmodule_1_1tools_1_1RoboCupConfiguration.html#af0fbcb70e9a4a5c955cefcfad7eb8289", null ],
     [ "hostname", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a1eae40a927bc7cf7010c933c3fb7b499", null ],
     [ "ip_address", "classmodule_1_1tools_1_1RoboCupConfiguration.html#abb7f978fcc43688b3bba938a3ab571e2", null ],
