@@ -66,7 +66,7 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 25  # Number of files to load
+    num_files = 40  # Number of files to load
     prefix = "s"  # s for straight path
     imu = []
     servos = []
@@ -363,12 +363,27 @@ def main():
     print(f"input_data_validate: {input_data_validate.shape}")
     # Print the shape of the second element in the training dataset
 
-
     # Model parameters
-    learning_rate = 0.00013   # Controls how much to change the model in response to error.
-    epochs = 100
+    learning_rate = 0.00012   # Controls how much to change the model in response to error.
+    epochs = 500
     loss_function = keras.losses.MeanSquaredError()
-    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    # loss_function = keras.losses.MeanAbsoluteError()
+
+    # ** Optimisers **
+    # LR schedules
+    # size_of_dataset = input_data_train.shape[0]
+    # decay_to_epoch = 25                                         # Number of epochs for learning rate to decay over before it resets
+    # steps_per_epoch = size_of_dataset // 150             # Calculate the number of steps per epoch
+    # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    # print(f"Decay to epoch: {decay_to_epoch}")
+    # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.000001)
+
+    # Static learning rate
+    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+    # Used with the LR schedule
+    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
 
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -377,11 +392,16 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
-    lstm = keras.layers.LSTM(20, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0015), return_sequences=False)(inputs)    # 32 originally
-    dropout = keras.layers.Dropout(rate=0.5)(lstm)
-    # lstm2 = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.002), return_sequences=False)(lstm)    # 32 originally
 
-    normalise = keras.layers.LayerNormalization()(dropout)
+    lstm = keras.layers.LSTM(19, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)    # 32 originally
+    # dropout = keras.layers.Dropout(rate=0.5)(lstm)
+
+    # lstm2 = keras.layers.LSTM(8, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(dropout)    # 32 originally
+    # dropout2 = keras.layers.Dropout(rate=0.5)(lstm2)
+
+    normalise = keras.layers.LayerNormalization()(lstm)
+
+    # normalise = keras.layers.LayerNormalization()(normalise)
     outputs = keras.layers.Dense(2)(normalise)
 
 
