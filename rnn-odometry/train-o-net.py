@@ -66,7 +66,7 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 40  # Number of files to load
+    num_files = 10  # Number of files to load
     prefix = "s"  # s for straight path
     imu = []
     servos = []
@@ -82,6 +82,38 @@ def main():
 
         truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
         truth_all.append(truth_data)
+
+        # # Plot the data as it's loaded
+        # plt.figure(figsize=(12, 8))
+
+        # # Plot IMU data
+        # plt.subplot(3, 1, 1)
+        # plt.plot(imu_data)
+        # plt.title(f'IMU Data - File {i}')
+        # plt.xlabel('Sample')
+        # plt.ylabel('IMU Values')
+
+        # # Plot Servos data
+        # plt.subplot(3, 1, 2)
+        # plt.plot(servos_data)
+        # plt.title(f'Servos Data - File {i}')
+        # plt.xlabel('Sample')
+        # plt.ylabel('Servos Values')
+
+        # # Plot Truth data
+        # plt.subplot(3, 1, 3)
+        # plt.plot(truth_data)
+        # plt.title(f'Truth Data - File {i}')
+        # plt.xlabel('Sample')
+        # plt.ylabel('Truth Values')
+
+        # # Show the plot
+        # plt.tight_layout()
+        # plt.show()
+
+        # pause to inspect each plot
+        # input("Press Enter to continue to the next file...")
+        # plt.close()
 
         # Create a chunk for the truth_start_end_indicator array
         chunk_size = truth_data.shape[0]  # Assuming the first dimension is the one we're interested in
@@ -119,7 +151,7 @@ def main():
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(imu_joined[0:10000, i], label=f'imu {i+1}')
+    #     plt.plot(imu_joined[:, i], label=f'imu {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -179,6 +211,16 @@ def main():
     validate_arr = joined_data[num_train_max_idx: num_val_max_idx]
     test_arr = joined_data[num_val_max_idx:]
 
+    # Plot and inspect after splitting
+    # num_channels = train_arr.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(6):
+    #     plt.plot(train_arr[:, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
     # import pdb
     # pdb.set_trace()
 
@@ -200,18 +242,19 @@ def main():
     train_arr = (train_arr - mean) / std
     validate_arr = (validate_arr - mean) / std
     test_arr = (test_arr - mean) / std
-    # # # #
 
-    # # clip the outliers in the data
-    # train_arr_clipped = np.clip(train_arr, -4, 4)
-    # validate_arr_clipped = np.clip(validate_arr, -4, 4)
-    # test_arr_clipped = np.clip(test_arr, -4, 4)
+    # # #
+
+    # clip the outliers in the data
+    train_arr = np.clip(train_arr, -24, 24)
+    validate_arr = np.clip(validate_arr, -24, 24)
+    test_arr = np.clip(test_arr, -24, 24)
 
     ## End of standardisation ##
 
     ## Min/Max Scaling ##
 
-    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    # scaler = MinMaxScaler(feature_range=(0, 1))
     # # Fit scaler to training data only
     # scaler.fit(train_arr)
     # # Transform the data
@@ -232,8 +275,8 @@ def main():
     # num_channels = train_arr.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(train_arr[0:80000, i], label=f'Channel {i+1}')
+    # for i in range(6):
+    #     plt.plot(train_arr[:, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -364,15 +407,15 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.00012   # Controls how much to change the model in response to error.
-    epochs = 500
+    learning_rate = 0.0005   # Controls how much to change the model in response to error.
+    epochs = 100
     loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
 
     # ** Optimisers **
     # LR schedules
     # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 25                                         # Number of epochs for learning rate to decay over before it resets
+    # decay_to_epoch = 60                                         # Number of epochs for learning rate to decay over before it resets
     # steps_per_epoch = size_of_dataset // 150             # Calculate the number of steps per epoch
     # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     # print(f"Decay to epoch: {decay_to_epoch}")
@@ -380,10 +423,14 @@ def main():
     # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.000001)
 
     # Static learning rate
-    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
-    optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
+    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.Adamax(learning_rate=learning_rate)
+
     # Used with the LR schedule
     # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
 
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -393,13 +440,13 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
-    lstm = keras.layers.LSTM(19, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)    # 32 originally
-    # dropout = keras.layers.Dropout(rate=0.5)(lstm)
+    lstm = keras.layers.LSTM(8, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0116), bias_regularizer=keras.regularizers.L2(0.01970), recurrent_regularizer=keras.regularizers.L2(0.0015), return_sequences=False)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.25)(lstm)
 
     # lstm2 = keras.layers.LSTM(8, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(dropout)    # 32 originally
     # dropout2 = keras.layers.Dropout(rate=0.5)(lstm2)
 
-    normalise = keras.layers.LayerNormalization()(lstm)
+    normalise = keras.layers.LayerNormalization()(dropout)
 
     # normalise = keras.layers.LayerNormalization()(normalise)
     outputs = keras.layers.Dense(2)(normalise)
@@ -415,8 +462,9 @@ def main():
         y=input_targets_train,
         validation_data=validation_data,
         epochs=epochs,
-        callbacks=[tensorboard_callback]
+        callbacks=[tensorboard_callback],
         # Unspecified batch size will default to 32
+        batch_size=128
     )
 
     # Note add back the model save
