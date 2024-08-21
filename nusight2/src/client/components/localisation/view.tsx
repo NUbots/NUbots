@@ -1,6 +1,6 @@
 import React, { ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
-import { observer, disposeOnUnmount } from "mobx-react";
+import { disposeOnUnmount, observer } from "mobx-react";
 import { now } from "mobx-utils";
 
 import { Button } from "../button/button";
@@ -32,7 +32,6 @@ type LocalisationViewProps = {
   network: LocalisationNetwork;
 };
 
-
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
   { label: "Robocup", value: "robocup" },
@@ -55,10 +54,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1"
-                : "hover:bg-auto-contrast-1"
-                }`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -74,7 +74,6 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 }
 
 const EnhancedDropdown = dropdownContainer();
-
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
