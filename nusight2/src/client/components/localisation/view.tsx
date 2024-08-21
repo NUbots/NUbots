@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
+import React, { ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
-import { observer } from "mobx-react";
+import { observer, disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 
 import { Button } from "../button/button";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
-import { PerspectiveCamera } from "../three/three_fiber";
-import { ThreeFiber } from "../three/three_fiber";
+import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
@@ -26,207 +25,299 @@ import { SkyboxView } from "./r3f_components/objects/skybox/view";
 import { URDFNugus } from "./r3f_components/objects/urdf_nugus/view";
 import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
+type LocalisationViewProps = {
+  controller: LocalisationController;
+  Menu: ComponentType<{}>;
+  model: LocalisationModel;
+  network: LocalisationNetwork;
+};
 
-const FIELD_DIMENSION_OPTIONS = [
+
+const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
   { label: "Robocup", value: "robocup" },
 ];
 
-interface LocalisationViewProps {
-  controller: LocalisationController;
-  Menu: React.ComponentType<React.PropsWithChildren>;
+// Apply the interfaces to the component's props
+interface FieldDimensionSelectorProps {
   model: LocalisationModel;
-  network: LocalisationNetwork;
+  controller: LocalisationController;
 }
 
-export const LocalisationView: React.FC<LocalisationViewProps> = observer(({ controller, Menu, model, network }) => {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+@observer
+export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
+  private dropdownToggle = (<Button>Field Type</Button>);
 
-  useEffect(() => {
-    const onPointerLockChange = () => {
-      controller.onPointerLockChange(model, canvasRef.current === document.pointerLockElement);
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      controller.onMouseMove(model, e.movementX, e.movementY);
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      controller.onKeyDown(model, e.keyCode, {
-        shiftKey: e.shiftKey,
-        ctrlKey: e.ctrlKey,
-      });
-    };
-
-    const onKeyUp = (e: KeyboardEvent) => {
-      controller.onKeyUp(model, e.keyCode);
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      controller.onWheel(model, e.deltaY);
-    };
-
-    document.addEventListener("pointerlockchange", onPointerLockChange);
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("keyup", onKeyUp);
-    document.addEventListener("wheel", onWheel);
-
-    const dispose = reaction(
-      () => now("frame"),
-      (time: number) => {
-        controller.onAnimationFrame(model, time);
-      },
-    );
-
-    return () => {
-      document.removeEventListener("pointerlockchange", onPointerLockChange);
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("keyup", onKeyUp);
-      document.removeEventListener("wheel", onWheel);
-      dispose();
-      network.destroy();
-    };
-  }, [controller, model, network]);
-
-  const onClick = (e: { button: number }) => {
-    if (e.button === 0) {
-      controller.onLeftClick(model, () => canvasRef.current?.requestPointerLock());
-    } else if (e.button === 2) {
-      controller.onRightClick(model);
-    }
-  };
-
-  return (
-    <div className="flex flex-grow flex-shrink flex-col relative bg-auto-surface-0">
-      <LocalisationMenuBar
-        model={model}
-        Menu={Menu}
-        controller={controller}
-        onHawkEyeClick={() => controller.onHawkEyeClick(model)}
-        toggleVisibility={{
-          grid: () => controller.toggleGridVisibility(model),
-          field: () => controller.toggleFieldVisibility(model),
-          robot: () => controller.toggleRobotVisibility(model),
-          ball: () => controller.toggleBallVisibility(model),
-          particle: () => controller.toggleParticlesVisibility(model),
-          goal: () => controller.toggleGoalVisibility(model),
-          fieldLinePoints: () => controller.toggleFieldLinePointsVisibility(model),
-          fieldIntersections: () => controller.toggleFieldIntersectionsVisibility(model),
-          walkToDebug: () => controller.toggleWalkToDebugVisibility(model),
-          boundedBox: () => controller.toggleBoundedBoxVisibility(model),
-        }}
-      />
-      <div className="flex-grow relative border-t border-auto">
-        <ThreeFiber ref={canvasRef} onClick={onClick}>
-          <LocalisationViewModel model={model} />
-        </ThreeFiber>
-      </div>
-      <StatusBar model={model} />
-    </div>
-  );
-});
-
-const FieldDimensionSelector: React.FC<{ model: LocalisationModel; controller: LocalisationController }> = observer(
-  ({ model, controller }) => {
-    const dropdownToggle = <Button>Field Type</Button>;
-
+  render(): JSX.Element {
     return (
-      <EnhancedDropdown dropdownToggle={dropdownToggle}>
+      <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
         <div className="bg-auto-surface-2">
-          {FIELD_DIMENSION_OPTIONS.map((option) => (
+          {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                model.field.fieldType === option.value ? "hover:bg-auto-contrast-1" : "hover:bg-auto-contrast-1"
-              }`}
-              onClick={() => controller.setFieldDimensions(option.value, model)}
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
+                }`}
+              onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
-              <Icon size={24}>{model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}</Icon>
+              <Icon size={24}>
+                {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
+              </Icon>{" "}
               <span>{option.label}</span>
             </div>
           ))}
         </div>
       </EnhancedDropdown>
     );
-  },
-);
+  }
+}
+
 const EnhancedDropdown = dropdownContainer();
 
-const MenuItem: React.FC<{ label: string; onClick(): void; isVisible: boolean }> = ({ label, onClick, isVisible }) => (
-  <li className="flex m-0 p-0">
-    <button className="px-4" onClick={onClick}>
-      <div className="flex items-center justify-center">
-        <div className="flex items-center rounded">
-          <span className="mx-2">{label}</span>
-          <Icon size={24}>{isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+
+@observer
+export class LocalisationView extends React.Component<LocalisationViewProps> {
+  private readonly canvas = React.createRef<HTMLCanvasElement>();
+
+  componentDidMount(): void {
+    document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
+    document.addEventListener("mousemove", this.onMouseMove, false);
+    document.addEventListener("keydown", this.onKeyDown, false);
+    document.addEventListener("keyup", this.onKeyUp, false);
+    document.addEventListener("wheel", this.onWheel, false);
+    disposeOnUnmount(
+      this,
+      reaction(() => now("frame"), this.onAnimationFrame),
+    );
+  }
+
+  componentWillUnmount(): void {
+    document.removeEventListener("pointerlockchange", this.onPointerLockChange, false);
+    document.removeEventListener("mousemove", this.onMouseMove, false);
+    document.removeEventListener("keydown", this.onKeyDown, false);
+    document.removeEventListener("keyup", this.onKeyUp, false);
+    document.removeEventListener("wheel", this.onWheel, false);
+    this.props.network.destroy();
+  }
+
+  render(): JSX.Element {
+    return (
+      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
+        <LocalisationMenuBar
+          model={this.props.model}
+          Menu={this.props.Menu}
+          controller={this.props.controller}
+          onHawkEyeClick={this.onHawkEyeClick}
+          toggleGridVisibility={this.toggleGridVisibility}
+          toggleFieldVisibility={this.toggleFieldVisibility}
+          toggleRobotVisibility={this.toggleRobotVisibility}
+          toggleBallVisibility={this.toggleBallVisibility}
+          toggleParticleVisibility={this.toggleParticleVisibility}
+          toggleGoalVisibility={this.toggleGoalVisibility}
+          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+          toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+        ></LocalisationMenuBar>
+        <div className="flex-grow relative border-t border-auto">
+          <ThreeFiber ref={this.canvas} onClick={this.onClick}>
+            <LocalisationViewModel model={this.props.model} />
+          </ThreeFiber>
         </div>
+        <StatusBar model={this.props.model} />
       </div>
-    </button>
-  </li>
-);
+    );
+  }
 
-const LocalisationMenuBar: React.FC<{
-  Menu: React.ComponentType<React.PropsWithChildren>;
+  requestPointerLock() {
+    this.canvas.current!.requestPointerLock();
+  }
+
+  private onAnimationFrame = (time: number) => {
+    this.props.controller.onAnimationFrame(this.props.model, time);
+  };
+
+  private onClick = (e: { button: number }) => {
+    if (e.button === 0) {
+      this.props.controller.onLeftClick(this.props.model, () => this.requestPointerLock());
+    } else if (e.button === 2) {
+      this.props.controller.onRightClick(this.props.model);
+    }
+  };
+
+  private onPointerLockChange = () => {
+    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current === document.pointerLockElement);
+  };
+
+  private onMouseMove = (e: MouseEvent) => {
+    this.props.controller.onMouseMove(this.props.model, e.movementX, e.movementY);
+  };
+
+  private onKeyDown = (e: KeyboardEvent) => {
+    this.props.controller.onKeyDown(this.props.model, e.keyCode, {
+      shiftKey: e.shiftKey,
+      ctrlKey: e.ctrlKey,
+    });
+  };
+
+  private onKeyUp = (e: KeyboardEvent) => {
+    this.props.controller.onKeyUp(this.props.model, e.keyCode);
+  };
+
+  private onHawkEyeClick = () => {
+    this.props.controller.onHawkEyeClick(this.props.model);
+  };
+
+  private onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    this.props.controller.onWheel(this.props.model, e.deltaY);
+  };
+
+  private toggleGridVisibility = () => {
+    this.props.controller.toggleGridVisibility(this.props.model);
+  };
+
+  private toggleFieldVisibility = () => {
+    this.props.controller.toggleFieldVisibility(this.props.model);
+  };
+
+  private toggleRobotVisibility = () => {
+    this.props.controller.toggleRobotVisibility(this.props.model);
+  };
+
+  private toggleBallVisibility = () => {
+    this.props.controller.toggleBallVisibility(this.props.model);
+  };
+
+  private toggleParticleVisibility = () => {
+    this.props.controller.toggleParticlesVisibility(this.props.model);
+  };
+
+  private toggleGoalVisibility = () => {
+    this.props.controller.toggleGoalVisibility(this.props.model);
+  };
+
+  private toggleFieldLinePointsVisibility = () => {
+    this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
+  };
+
+  private toggleFieldIntersectionsVisibility = () => {
+    this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
+  };
+
+  private toggleWalkToDebugVisibility = () => {
+    this.props.controller.toggleWalkToDebugVisibility(this.props.model);
+  };
+
+  private toggleBoundedBoxVisibility = () => {
+    this.props.controller.toggleBoundedBoxVisibility(this.props.model);
+  };
+}
+
+interface LocalisationMenuBarProps {
+  Menu: ComponentType<PropsWithChildren>;
+
   model: LocalisationModel;
+
   controller: LocalisationController;
+
   onHawkEyeClick(): void;
-  toggleVisibility: Record<string, () => void>;
-}> = observer(({ Menu, model, controller, onHawkEyeClick, toggleVisibility }) => (
-  <Menu>
-    <ul className="flex h-full items-center">
-      <li className="flex px-4">
-        <Button className="px-7" onClick={onHawkEyeClick}>
-          Hawk Eye
-        </Button>
-      </li>
-      <li className="flex px-4">
-        <FieldDimensionSelector controller={controller} model={model} />
-      </li>
-      <MenuItem label="Grid" isVisible={model.gridVisible} onClick={toggleVisibility.grid} />
-      <MenuItem label="Field" isVisible={model.fieldVisible} onClick={toggleVisibility.field} />
-      <MenuItem label="Robots" isVisible={model.robotVisible} onClick={toggleVisibility.robot} />
-      <MenuItem label="Balls" isVisible={model.ballVisible} onClick={toggleVisibility.ball} />
-      <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={toggleVisibility.particle} />
-      <MenuItem label="Goals" isVisible={model.goalVisible} onClick={toggleVisibility.goal} />
-      <MenuItem
-        label="Field Line Points"
-        isVisible={model.fieldLinePointsVisible}
-        onClick={toggleVisibility.fieldLinePoints}
-      />
-      <MenuItem
-        label="Field Intersections"
-        isVisible={model.fieldIntersectionsVisible}
-        onClick={toggleVisibility.fieldIntersections}
-      />
-      <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={toggleVisibility.walkToDebug} />
-      <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={toggleVisibility.boundedBox} />
-    </ul>
-  </Menu>
-));
+  toggleGridVisibility(): void;
+  toggleFieldVisibility(): void;
+  toggleRobotVisibility(): void;
+  toggleBallVisibility(): void;
+  toggleParticleVisibility(): void;
+  toggleGoalVisibility(): void;
+  toggleFieldLinePointsVisibility(): void;
+  toggleFieldIntersectionsVisibility(): void;
+  toggleWalkToDebugVisibility(): void;
+  toggleBoundedBoxVisibility(): void;
+}
 
-const StatusBar: React.FC<{ model: LocalisationModel }> = observer(({ model }) => {
-  const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
-
+const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
-    <div className="bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between">
+    <li className="flex m-0 p-0">
+      <button className="px-4" onClick={props.onClick}>
+        <div className="flex items-center justify-center">
+          <div className="flex items-center rounded">
+            <span className="mx-2">{props.label}</span>
+            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+          </div>
+        </div>
+      </button>
+    </li>
+  );
+};
+
+const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
+  const { Menu, model, controller } = props;
+  return (
+    <Menu>
+      <ul className="flex h-full items-center">
+        <li className="flex px-4">
+          <Button className="px-7" onClick={props.onHawkEyeClick}>
+            Hawk Eye
+          </Button>
+        </li>
+        <li className="flex px-4">
+          <FieldDimensionSelector controller={controller} model={model} />
+        </li>
+        <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
+        <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
+        <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
+        <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
+        <MenuItem
+          label="Field Line Points"
+          isVisible={model.fieldLinePointsVisible}
+          onClick={props.toggleFieldLinePointsVisibility}
+        />
+        <MenuItem
+          label="Field Intersections"
+          isVisible={model.fieldIntersectionsVisible}
+          onClick={props.toggleFieldIntersectionsVisibility}
+        />
+        <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
+        <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
+      </ul>
+    </Menu>
+  );
+});
+
+interface StatusBarProps {
+  model: LocalisationModel;
+}
+
+const StatusBar = observer((props: StatusBarProps) => {
+  const target =
+    props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
+  return (
+    <div
+      className={
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+      }
+    >
       <span className="text-left w-1/3">&#160;</span>
       <span className="w-1/3">{target}</span>
-      <span className="text-right w-1/3">{viewModeString(model.viewMode)}</span>
+      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });
 
-const viewModeString = (viewMode: ViewMode): string => {
-  const modes = {
-    [ViewMode.FreeCamera]: "Free Camera",
-    [ViewMode.FirstPerson]: "First Person",
-    [ViewMode.ThirdPerson]: "Third Person",
-  };
-  return modes[viewMode] || "Unknown";
-};
+function viewModeString(viewMode: ViewMode) {
+  switch (viewMode) {
+    case ViewMode.FreeCamera:
+      return "Free Camera";
+    case ViewMode.FirstPerson:
+      return "First Person";
+    case ViewMode.ThirdPerson:
+      return "Third Person";
+    default:
+      throw new Error(`No string defined for view mode ${viewMode}`);
+  }
+}
 
 const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer(({ model }) => (
   <object3D>
