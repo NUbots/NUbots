@@ -5,10 +5,10 @@ import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 
-import { Vector3 } from "../../../../../shared/math/vector3";
-import { RobotModel } from "../../../robot/model";
-import { fullscreen } from "../../../storybook/fullscreen";
-import { LocalisationRobotModel } from "../../robot_model";
+import { Vector3 } from "../../../../../../../shared/math/vector3";
+import { RobotModel } from "../../../../../robot/model";
+import { fullscreen } from "../../../../../storybook/fullscreen";
+import { LocalisationRobotModel } from "../../../../robot_model";
 import { GLBNugus } from "../view";
 
 import { ModelVisualiser } from "./model_visualizer";

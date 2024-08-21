@@ -1,9 +1,9 @@
 import React from "react";
 import { observer } from "mobx-react";
 
-import { Vector3 } from "../../../../../shared/math/vector3";
-import { ThreeFiber } from "../../../three/three_fiber";
-import { PerspectiveCamera } from "../../../three/three_fiber";
+import { Vector3 } from "../../../../../../../shared/math/vector3";
+import { ThreeFiber } from "../../../../../three/three_fiber";
+import { PerspectiveCamera } from "../../../../../three/three_fiber";
 
 export const ModelVisualiser = observer(
   ({ cameraPosition, children }: { cameraPosition: Vector3; children: React.ReactNode }) => {
