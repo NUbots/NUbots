@@ -35,6 +35,13 @@ namespace module::tools {
 
     class RoboCupConfiguration : public NUClear::Reactor {
     private:
+        struct Config {
+            /// @brief Map of ssid and passwords that are possible
+            std::map<std::string, std::string> wifi_networks{};
+            /// @brief Common IPs to toggle
+            std::vector<std::string> common_ips{};
+        } cfg;
+
         /// @brief The hostname of the robot
         std::string hostname = "";
         /// @brief The name of the robot

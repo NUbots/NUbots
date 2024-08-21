@@ -6,8 +6,8 @@ import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 
 import { FieldModel } from "./r3f_components/objects/field/model";
-import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxModel } from "./r3f_components/objects/skybox/model";
+import { LocalisationRobotModel } from "./robot_model";
 
 export class TimeModel {
   @observable time: number; // seconds

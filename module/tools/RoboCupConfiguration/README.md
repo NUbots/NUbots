@@ -39,4 +39,4 @@ N/A
 
 ## Dependencies
 
-N/A
+- ncurses

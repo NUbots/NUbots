@@ -35,8 +35,8 @@ export const BoundingBox: React.FC<BoundingBoxProps> = ({ minX, maxX, minY, maxY
         });
     };
 
-    const verticalWallMaterial = useMemo(() => createWallMaterial(0), []);
-    const horizontalWallMaterial = useMemo(() => createWallMaterial(1), []);
+  const verticalWallMaterial = useMemo(() => createWallMaterial(0), []);
+  const horizontalWallMaterial = useMemo(() => createWallMaterial(1), []);
 
     // Update material color when color prop changes
     useEffect(() => {
@@ -45,28 +45,28 @@ export const BoundingBox: React.FC<BoundingBoxProps> = ({ minX, maxX, minY, maxY
         horizontalWallMaterial.uniforms.color.value = newColor;
     }, [color, verticalWallMaterial, horizontalWallMaterial]);
 
-    return (
-        <object3D position={[centerX, centerY, wallHeight / 2]}>
-            {/* Left wall */}
-            <mesh position={[-(width / 2 + wallThickness / 2), 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
-                <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
-                <primitive object={verticalWallMaterial} />
-            </mesh>
-            {/* Right wall */}
-            <mesh position={[width / 2 + wallThickness / 2, 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
-                <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
-                <primitive object={verticalWallMaterial} />
-            </mesh>
-            {/* Top wall */}
-            <mesh position={[0, height / 2 + wallThickness / 2, 0.009]} rotation={[0, 0, 0]}>
-                <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
-                <primitive object={horizontalWallMaterial} />
-            </mesh>
-            {/* Bottom wall */}
-            <mesh position={[0, -(height / 2 + wallThickness / 2), 0.009]} rotation={[0, 0, 0]}>
-                <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
-                <primitive object={horizontalWallMaterial} />
-            </mesh>
-        </object3D>
-    );
+  return (
+    <object3D position={[centerX, centerY, wallHeight / 2]}>
+      {/* Left wall */}
+      <mesh position={[-(width / 2 + wallThickness / 2), 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+        <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
+        <primitive object={verticalWallMaterial} />
+      </mesh>
+      {/* Right wall */}
+      <mesh position={[width / 2 + wallThickness / 2, 0, 0.009]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+        <boxGeometry args={[height + wallThickness, wallHeight, wallThickness]} />
+        <primitive object={verticalWallMaterial} />
+      </mesh>
+      {/* Top wall */}
+      <mesh position={[0, height / 2 + wallThickness / 2, 0.009]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
+        <primitive object={horizontalWallMaterial} />
+      </mesh>
+      {/* Bottom wall */}
+      <mesh position={[0, -(height / 2 + wallThickness / 2), 0.009]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width + wallThickness * 2, wallThickness, wallHeight]} />
+        <primitive object={horizontalWallMaterial} />
+      </mesh>
+    </object3D>
+  );
 };
