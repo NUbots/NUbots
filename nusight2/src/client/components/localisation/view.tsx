@@ -10,20 +10,20 @@ import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 
-import { FieldView } from "./three_objects/permanent/field/view";
-import { GridView } from "./three_objects/togglable/grid/view";
-import { SkyboxView } from "./three_objects/permanent/skybox/view";
-import { Robot } from "./three_objects/togglable/robot/view";
-import { BoundingBox } from "./three_objects/togglable/bounding_box/view";
-import { WalkPathVisualiser } from "./three_objects/togglable/walk_path_visualiser/view";
-import { WalkPathGoal } from "./three_objects/togglable/walk_path_goal/view";
-import { FieldIntersections } from "./three_objects/togglable/field_intersections/view";
-import { LocalisedRobots } from "./three_objects/togglable/localised_robots/view";
-import { FieldLinePoints } from "./three_objects/togglable/field_line_points/view";
-import { Particles } from "./three_objects/togglable/particles/view";
-import { Goals } from "./three_objects/togglable/localised_goals/view";
-import { Ball } from "./three_objects/togglable/ball/view";
-import { PurposeLabel } from "./three_objects/togglable/purpose_label/view";
+import { FieldView } from "./r3f_components/objects/field/view";
+import { GridView } from "./r3f_components/objects/grid/view";
+import { SkyboxView } from "./r3f_components/objects/skybox/view";
+import { URDFNugus } from "./r3f_components/objects/urdf_nugus/view";
+import { BoundingBox } from "./r3f_components/objects/bounding_box/view";
+import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
+import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
+import { FieldIntersections } from "./r3f_components/objects/field_intersections/view";
+import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view";
+import { FieldLinePoints } from "./r3f_components/objects/field_line_points/view";
+import { Particles } from "./r3f_components/objects/particles/view";
+import { Goals } from "./r3f_components/objects/localised_goals/view";
+import { Ball } from "./r3f_components/objects/ball/view";
+import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
 import { Icon } from "../icon/view";
 
 const FIELD_DIMENSION_OPTIONS = [
@@ -232,9 +232,19 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
     {model.robotVisible && model.robots.filter(robot => robot.visible).map(robot => (
-      <Robot key={robot.id} model={robot} />
+      <URDFNugus key={robot.id} model={robot} />
     ))}
-    {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
+    {model.fieldLinePointsVisible && model.robots.map((robot) =>
+      robot.visible && (
+        <FieldLinePoints
+          key={robot.id}
+          points={robot.rPFf}
+          color="blue"
+          size={0.02}
+        />
+      )
+    )}
+
     {model.ballVisible && model.robots.map((robot) =>
       robot.visible && robot.rBFf && (
         <Ball
@@ -262,8 +272,17 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
       <WalkPathGoal key={robot.id} model={robot} />
     ))}
     <LocalisedRobots model={model} />
-    {model.boundedBoxVisible && model.robots.filter(robot => robot.visible && robot.boundingBox).map(robot => (
-      <BoundingBox key={robot.id} model={robot} />
+    {model.boundedBoxVisible && model.robots.map(robot => (
+      robot.boundingBox && robot.visible && (
+        <BoundingBox
+          key={robot.id}
+          minX={robot.boundingBox.minX}
+          maxX={robot.boundingBox.maxX}
+          minY={robot.boundingBox.minY}
+          maxY={robot.boundingBox.maxY}
+          color={robot.color}
+        />
+      )
     ))}
   </object3D>
 ));
