@@ -1,6 +1,6 @@
 import React from "react";
-import { LocalisationModel } from "../../model";
-import { Vector3 } from "../../../../../shared/math/vector3";
+import { LocalisationModel } from "../../../model";
+import { Vector3 } from "../../../../../../shared/math/vector3";
 
 export const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
     return (

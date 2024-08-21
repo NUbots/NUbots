@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
-import { LocalisationRobotModel } from '../../robot_model';
+import { LocalisationRobotModel } from '../../../robot_model';
 import wallFragmentShader from './wall.frag';
 import wallVertexShader from './wall.vert';
 

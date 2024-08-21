@@ -1,18 +1,18 @@
-import { Vector3 } from 'three';
-import { LocalisationModel } from '../../model';
 import React from 'react';
+import { Vector3 } from "../../../../../../shared/math/vector3";
+import { LocalisationModel } from '../../../model';
 
-const Particles = ({ model }: { model: LocalisationModel }) => (
+export const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
     <>
         {model.robots.map(
             (robot) =>
                 robot.visible && (
                     <object3D key={robot.id}>
-                        {robot.particles.particle.map((particle, i) => {
+                        {robot.rPFf.map((d, i) => {
                             return (
-                                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
+                                <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
                                     <circleBufferGeometry args={[0.02, 20]} />
-                                    <meshBasicMaterial color="red" />
+                                    <meshBasicMaterial color="blue" />
                                 </mesh>
                             );
                         })}

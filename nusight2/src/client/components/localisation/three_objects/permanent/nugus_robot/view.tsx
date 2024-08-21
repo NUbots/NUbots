@@ -7,8 +7,8 @@ import { observer } from "mobx-react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-import { compose } from "../../../../../shared/base/compose";
-import { LocalisationRobotModel } from "../../robot_model";
+import { compose } from "../../../../../../shared/base/compose";
+import { LocalisationRobotModel } from "../../../robot_model";
 
 import url from "./config/nugus.glb?url";
 

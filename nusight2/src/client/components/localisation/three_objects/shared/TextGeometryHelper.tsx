@@ -1,4 +1,4 @@
-import roboto from "./Roboto Medium_Regular.json";
+import roboto from "../../../../../assets/fonts/roboto/Roboto Medium_Regular.json";
 
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
