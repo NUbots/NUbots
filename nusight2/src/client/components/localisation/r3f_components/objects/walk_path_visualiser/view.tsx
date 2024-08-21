@@ -1,7 +1,7 @@
 import React from "react";
 import * as THREE from "three";
 import { LocalisationRobotModel } from "../../../robot_model";
-import { ArrowGeometry } from "../../shared/ArrowGeometry";
+import { ArrowGeometry } from "../../shared_geometries/ArrowGeometry";
 
 export const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
     if (!model.Hfd || !model.Hfr) {

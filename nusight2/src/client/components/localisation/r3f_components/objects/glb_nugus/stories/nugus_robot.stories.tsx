@@ -9,11 +9,11 @@ import { Vector3 } from "../../../../../shared/math/vector3";
 import { RobotModel } from "../../../robot/model";
 import { fullscreen } from "../../../storybook/fullscreen";
 import { LocalisationRobotModel } from "../../robot_model";
-import { NUgusView } from "../view";
+import { GLBNugus } from "../view";
 
 import { ModelVisualiser } from "./model_visualizer";
 
-interface StoryProps {}
+interface StoryProps { }
 
 const meta: Meta<StoryProps> = {
   title: "components/localisation/NUgus Robot",
@@ -50,7 +50,7 @@ class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
   render() {
     return (
       <ModelVisualiser cameraPosition={new Vector3(0.5, 0.6, 0.5)}>
-        <NUgusView model={this.model} />
+        <GLBNugus model={this.model} />
       </ModelVisualiser>
     );
   }

@@ -12,7 +12,7 @@ import { LocalisationRobotModel } from "../../../robot_model";
 
 import url from "./config/nugus.glb?url";
 
-export const NUgusView = observer(({ model }: { model: LocalisationRobotModel }) => {
+export const GLBNugus = observer(({ model }: { model: LocalisationRobotModel }) => {
   const { scene: originalScene } = useLoader(GLTFLoader, url);
   // Clone so that each instance has its own copy that it may mutate.
   const scene = useMemo(() => originalScene.clone(), [originalScene]);
