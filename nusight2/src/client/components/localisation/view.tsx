@@ -1,30 +1,31 @@
 import React, { useEffect } from "react";
-import { observer } from "mobx-react";
 import { reaction } from "mobx";
+import { observer } from "mobx-react";
 import { now } from "mobx-utils";
+
+import { Button } from "../button/button";
+import { dropdownContainer } from "../dropdown_container/view";
+import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
-import { dropdownContainer } from "../dropdown_container/view";
-import { Button } from "../button/button";
+
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
-
-import { FieldView } from "./three_objects/permanent/field/view";
-import { GridView } from "./three_objects/togglable/grid/view";
-import { SkyboxView } from "./three_objects/permanent/skybox/view";
-import { Robot } from "./three_objects/togglable/robot/view";
-import { BoundingBox } from "./three_objects/togglable/bounding_box/view";
-import { WalkPathVisualiser } from "./three_objects/togglable/walk_path_visualiser/view";
-import { WalkPathGoal } from "./three_objects/togglable/walk_path_goal/view";
-import { FieldIntersections } from "./three_objects/togglable/field_intersections/view";
-import { LocalisedRobots } from "./three_objects/togglable/localised_robots/view";
-import { FieldLinePoints } from "./three_objects/togglable/field_line_points/view";
-import { Particles } from "./three_objects/togglable/particles/view";
-import { Goals } from "./three_objects/togglable/localised_goals/view";
-import { Ball } from "./three_objects/togglable/ball/view";
-import { PurposeLabel } from "./three_objects/togglable/purpose_label/view";
-import { Icon } from "../icon/view";
+import { Ball } from "./r3f_components/objects/ball/view";
+import { BoundingBox } from "./r3f_components/objects/bounding_box/view";
+import { FieldView } from "./r3f_components/objects/field/view";
+import { FieldIntersections } from "./r3f_components/objects/field_intersections/view";
+import { FieldLinePoints } from "./r3f_components/objects/field_line_points/view";
+import { GridView } from "./r3f_components/objects/grid/view";
+import { Goals } from "./r3f_components/objects/localised_goals/view";
+import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view";
+import { Particles } from "./r3f_components/objects/particles/view";
+import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
+import { SkyboxView } from "./r3f_components/objects/skybox/view";
+import { URDFNugus } from "./r3f_components/objects/urdf_nugus/view";
+import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
+import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
 
 const FIELD_DIMENSION_OPTIONS = [
   { label: "Lab", value: "lab" },
@@ -72,9 +73,12 @@ export const LocalisationView: React.FC<LocalisationViewProps> = observer(({ con
     document.addEventListener("keyup", onKeyUp);
     document.addEventListener("wheel", onWheel);
 
-    const dispose = reaction(() => now("frame"), (time: number) => {
-      controller.onAnimationFrame(model, time);
-    });
+    const dispose = reaction(
+      () => now("frame"),
+      (time: number) => {
+        controller.onAnimationFrame(model, time);
+      },
+    );
 
     return () => {
       document.removeEventListener("pointerlockchange", onPointerLockChange);
@@ -94,7 +98,6 @@ export const LocalisationView: React.FC<LocalisationViewProps> = observer(({ con
       controller.onRightClick(model);
     }
   };
-
 
   return (
     <div className="flex flex-grow flex-shrink flex-col relative bg-auto-surface-0">
@@ -136,8 +139,9 @@ const FieldDimensionSelector: React.FC<{ model: LocalisationModel; controller: L
           {FIELD_DIMENSION_OPTIONS.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${model.field.fieldType === option.value ? "hover:bg-auto-contrast-1" : "hover:bg-auto-contrast-1"
-                }`}
+              className={`flex p-2 ${
+                model.field.fieldType === option.value ? "hover:bg-auto-contrast-1" : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => controller.setFieldDimensions(option.value, model)}
             >
               <Icon size={24}>{model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}</Icon>
@@ -147,7 +151,7 @@ const FieldDimensionSelector: React.FC<{ model: LocalisationModel; controller: L
         </div>
       </EnhancedDropdown>
     );
-  }
+  },
 );
 const EnhancedDropdown = dropdownContainer();
 
@@ -187,8 +191,16 @@ const LocalisationMenuBar: React.FC<{
       <MenuItem label="Balls" isVisible={model.ballVisible} onClick={toggleVisibility.ball} />
       <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={toggleVisibility.particle} />
       <MenuItem label="Goals" isVisible={model.goalVisible} onClick={toggleVisibility.goal} />
-      <MenuItem label="Field Line Points" isVisible={model.fieldLinePointsVisible} onClick={toggleVisibility.fieldLinePoints} />
-      <MenuItem label="Field Intersections" isVisible={model.fieldIntersectionsVisible} onClick={toggleVisibility.fieldIntersections} />
+      <MenuItem
+        label="Field Line Points"
+        isVisible={model.fieldLinePointsVisible}
+        onClick={toggleVisibility.fieldLinePoints}
+      />
+      <MenuItem
+        label="Field Intersections"
+        isVisible={model.fieldIntersectionsVisible}
+        onClick={toggleVisibility.fieldIntersections}
+      />
       <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={toggleVisibility.walkToDebug} />
       <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={toggleVisibility.boundedBox} />
     </ul>
@@ -196,8 +208,7 @@ const LocalisationMenuBar: React.FC<{
 ));
 
 const StatusBar: React.FC<{ model: LocalisationModel }> = observer(({ model }) => {
-  const target =
-    model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
+  const target = model.viewMode !== ViewMode.FreeCamera && model.target ? model.target.name : "No Target";
 
   return (
     <div className="bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between">
@@ -231,40 +242,35 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     <hemisphereLight args={["#fff", "#fff", 0.6]} />
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
-    {model.robotVisible && model.robots.filter(robot => robot.visible).map(robot => (
-      <Robot key={robot.id} model={robot} />
-    ))}
+    {model.robotVisible &&
+      model.robots.filter((robot) => robot.visible).map((robot) => <URDFNugus key={robot.id} model={robot} />)}
     {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
-    {model.ballVisible && model.robots.map((robot) =>
-      robot.visible && robot.rBFf && (
-        <Ball
-          key={robot.id}
-          position={robot.rBFf.toArray()}
-          scale={robot.rBFf.z}
-        />
-      )
-    )}
+    {model.ballVisible &&
+      model.robots.map(
+        (robot) =>
+          robot.visible && robot.rBFf && <Ball key={robot.id} position={robot.rBFf.toArray()} scale={robot.rBFf.z} />,
+      )}
     {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
     {model.particlesVisible && <Particles model={model} />}
     {model.goalVisible && <Goals model={model} />}
-    {model.walkToDebugVisible && model.robots.filter(robot => robot.visible && robot.Hfd).map(robot => (
-      <WalkPathVisualiser key={robot.id} model={robot} />
-    ))}
-    {model.robots.filter(robot => robot.visible && robot.Hft && robot.purpose).map(robot => (
-      <PurposeLabel
-        key={robot.id}
-        robotModel={robot}
-        cameraPitch={model.camera.pitch}
-        cameraYaw={model.camera.yaw}
-      />
-    ))}
-    {model.walkToDebugVisible && model.robots.filter(robot => robot.visible && robot.Hfd).map(robot => (
-      <WalkPathGoal key={robot.id} model={robot} />
-    ))}
+    {model.walkToDebugVisible &&
+      model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => <WalkPathVisualiser key={robot.id} model={robot} />)}
+    {model.robots
+      .filter((robot) => robot.visible && robot.Hft && robot.purpose)
+      .map((robot) => (
+        <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />
+      ))}
+    {model.walkToDebugVisible &&
+      model.robots
+        .filter((robot) => robot.visible && robot.Hfd)
+        .map((robot) => <WalkPathGoal key={robot.id} model={robot} />)}
     <LocalisedRobots model={model} />
-    {model.boundedBoxVisible && model.robots.filter(robot => robot.visible && robot.boundingBox).map(robot => (
-      <BoundingBox key={robot.id} model={robot} />
-    ))}
+    {model.boundedBoxVisible &&
+      model.robots
+        .filter((robot) => robot.visible && robot.boundingBox)
+        .map((robot) => <BoundingBox key={robot.id} model={robot} />)}
   </object3D>
 ));
 

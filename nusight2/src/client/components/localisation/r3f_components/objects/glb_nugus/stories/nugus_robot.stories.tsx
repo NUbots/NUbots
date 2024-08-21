@@ -13,7 +13,7 @@ import { GLBNugus } from "../view";
 
 import { ModelVisualiser } from "./model_visualizer";
 
-interface StoryProps { }
+interface StoryProps {}
 
 const meta: Meta<StoryProps> = {
   title: "components/localisation/NUgus Robot",
