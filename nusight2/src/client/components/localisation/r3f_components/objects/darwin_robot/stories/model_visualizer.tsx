@@ -6,12 +6,12 @@ import { PointLight } from "three";
 import { Object3D } from "three";
 import { AxesHelper } from "three";
 
-import { Vector3 } from "../../../../../shared/math/vector3";
-import { scene } from "../../../three/builders";
-import { perspectiveCamera } from "../../../three/builders";
-import { Stage } from "../../../three/three";
-import { Canvas } from "../../../three/three";
-import { Three } from "../../../three/three";
+import { Vector3 } from "../../../../../../../shared/math/vector3";
+import { scene } from "../../../../../three/builders";
+import { perspectiveCamera } from "../../../../../three/builders";
+import { Stage } from "../../../../../three/three";
+import { Canvas } from "../../../../../three/three";
+import { Three } from "../../../../../three/three";
 
 export class ModelVisualiser extends Component<{
   model(): Object3D;
