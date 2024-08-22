@@ -28,10 +28,10 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
-  vision::RobotDetector
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos
@@ -51,6 +51,7 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
+  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   strategy::StrategiseLook
@@ -62,8 +63,9 @@ nuclear_role(
   strategy::AlignBallToGoal
   strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::Defender
+  purpose::AllRounder
   purpose::Striker
+  purpose::Defender
   purpose::Soccer
   purpose::Goalie
 )

@@ -34,16 +34,32 @@
 
 namespace module::purpose {
 
+    struct StartTester {};
+
     class Tester : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Priority of StartSafely task
+            int start_safely_priority = 0;
             /// @brief Priority of FindBall task
             int find_ball_priority = 0;
             /// @brief Priority of LookAtBall task
             int look_at_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_ball_priority = 0;
+            /// @brief Priority of StandStill task
+            int walk_to_kick_ball_priority = 0;
+            /// @brief Walk inside bounding box task
+            int walk_inside_bounded_box_priority = 0;
+            /// @brief x minimum bound on field to walk within
+            double bounded_region_x_min = 0.0;
+            /// @brief x maximum bound on field to walk within
+            double bounded_region_x_max = 0.0;
+            /// @brief y minimum bound on field to walk within
+            double bounded_region_y_min = 0.0;
+            /// @brief y maximum bound on field to walk within
+            double bounded_region_y_max = 0.0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task
@@ -70,6 +86,8 @@ namespace module::purpose {
             std::string chatgpt_prompt = "";
             /// @brief Duration to listen for audio when emitting AudioGPT task
             int audiogpt_listen_duration = 0;
+            /// @brief Delay in seconds before creating director tree
+            int start_delay = 0;
         } cfg;
 
         /// @brief The rate the tasks will emit, to drive the rest of the system

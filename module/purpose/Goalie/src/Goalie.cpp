@@ -33,10 +33,14 @@
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
+#include "message/strategy/FindFeature.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
+#include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
@@ -56,10 +60,14 @@ namespace module::purpose {
     using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
     using message::purpose::ThrowInGoalie;
+    using message::strategy::FindBall;
+    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToFieldPosition;
+    using message::strategy::WalkToKickBall;
 
     using extension::Configuration;
 
+    using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
     Goalie::Goalie(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -68,6 +76,11 @@ namespace module::purpose {
             // Use configuration here from file Goalie.yaml
             this->log_level    = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position = config["ready_position"].as<Expression>();
+
+            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
         });
 
         on<Provide<GoalieTask>, Optional<Trigger<GameState>>>().then(
@@ -98,8 +111,8 @@ namespace module::purpose {
         // Normal READY state
         on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
         });
 
         // Normal PLAYING state
@@ -142,13 +155,19 @@ namespace module::purpose {
     }
 
     void Goalie::play() {
-        // Stop the ball!
+        // Walk to the ball if it is within our section of the field
         // Second argument is priority - higher number means higher priority
-        Eigen::Vector3f position(cfg.ready_position.x(), cfg.ready_position.y(), 0);
-        emit<Task>(std::make_unique<WalkToFieldPosition>(position), cfg.ready_position.z(), 1);
-        emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
-        emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
-        emit<Task>(std::make_unique<DiveToBall>(), 4);  // dive to the ball
+        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
+        emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(
+                       cfg.bounded_region_x_min,
+                       cfg.bounded_region_x_max,
+                       cfg.bounded_region_y_min,
+                       cfg.bounded_region_y_max,
+                       pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                            Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
+                   4);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

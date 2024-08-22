@@ -51,7 +51,7 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>>().then(
+            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
                 [this](const Servo& servo, const RunInfo& info) {
                     if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
                         if (log_level <= NUClear::DEBUG) {
@@ -80,7 +80,7 @@ namespace module::actuation {
         /// @tparam Elements is a template pack of Servos that Group uses
         template <typename Group, typename... Elements>
         void add_group_provider() {
-            on<Provide<Group>, Needs<Elements>...>().then(
+            on<Provide<Group>, Needs<Elements>..., Priority::HIGH>().then(
                 [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
                     // Check if any subtask is Done
                     if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
@@ -132,7 +132,7 @@ namespace module::actuation {
             // Make an initial count message
             emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(0));
 
-            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>>().then(
+            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Priority::HIGH>().then(
                 [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {

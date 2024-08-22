@@ -140,8 +140,6 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       CTEST_OUTPUT_ON_FAILURE: 1
-      # CCache to the tools cache
-      CCACHE_DIR: /__w/_tool/ccache
 
     # Run on the container we just built
     container:
@@ -154,8 +152,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: CCache Directory
-        run: ccache -k cache_dir
+      - name: ccache
+        uses: TrentHouliston/ccache-action@e3d104e3e9fdc54e91ba1e63bafc172484923084
 
       - name: Configure the code
         run: |
@@ -208,4 +206,4 @@ jobs:
         run: ./b yarn
 
       - name: Check formatting
-        run: ./b format --check --all --verbose
+        run: ./b format --check --verbose

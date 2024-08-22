@@ -1,2 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# How long to wait until the ball is lost and we should look for it
+ball_search_timeout: 2

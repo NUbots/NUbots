@@ -15,11 +15,11 @@ lens:
   # Lens projection type
   projection: EQUIDISTANT
   # Normalised focal length: focal length in pixels / image width
-  focal_length: 0.34767878619271286
+  focal_length: 0.39
   # Normalised image centre offset: pixels from centre to optical axis / image width
   centre: [-0.01370165657132854, -0.013645629277120971]
   # The polynomial distortion coefficients for the lens
-  k: [0.46673390301927425, 0.15017118169604132]
+  k: [0.4667339, 0.150171181]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
   fov: 180 * pi / 180
 
@@ -28,6 +28,6 @@ urdf_path: "models/robot.urdf"
 
 is_left_camera: true
 
-roll_offset: 2.0 * pi / 180
+roll_offset: 0.0 * pi / 180
 
-pitch_offset: 5.0 * pi / 180
+pitch_offset: 3.0 * pi / 180

@@ -42,7 +42,6 @@ namespace module::actuation {
             cfg.mode        = config["mode"].as<std::string>();
 
             cfg.desired_gains = config["servo_gains"].as<std::map<std::string, double>>();
-
             // Set gains of servo to startup phase values
             cfg.servo_states.clear();
             cfg.startup_gain = config["startup"]["servo_gain"].as<double>();
@@ -50,10 +49,9 @@ namespace module::actuation {
                 utility::input::ServoID servo_id(servo.first);
                 cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
             }
-
             // Emit request to set desired gains after a delay
-            cfg.set_gain_delay = std::chrono::seconds(config["startup"]["duration"].as<int>());
-            emit<Scope::DELAY>(std::make_unique<SetGains>(), cfg.set_gain_delay);
+            emit<Scope::DELAY>(std::make_unique<SetGains>(),
+                               std::chrono::seconds(config["startup"]["duration"].as<int>()));
         });
 
         on<Trigger<SetGains>>().then([this] {
@@ -63,7 +61,8 @@ namespace module::actuation {
             }
         });
 
-        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
+
+        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>, Priority::HIGH>().then(
             [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
                 auto left_leg = std::make_unique<LeftLegIK>();
 
@@ -73,7 +72,7 @@ namespace module::actuation {
                 emit<Task>(left_leg, 0, false, "Control left foot");
             });
 
-        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>>().then(
+        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>, Priority::HIGH>().then(
             [this](const ControlRightFoot& right_foot, const Sensors& sensors) {
                 auto right_leg = std::make_unique<RightLegIK>();
 

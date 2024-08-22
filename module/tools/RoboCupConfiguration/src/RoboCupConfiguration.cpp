@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <ranges>
 #include <sstream>
+#include <termios.h>
 
 #include "extension/Configuration.hpp"
 
@@ -51,6 +52,9 @@ namespace module::tools {
         on<Configuration>("RoboCupConfiguration.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
+            cfg.common_ips    = config["common_ips"].as<std::vector<std::string>>();
         });
 
         on<Startup>().then([this] {
@@ -177,12 +181,6 @@ namespace module::tools {
             YAML::Node config       = YAML::LoadFile(soccer_file);
             robot_position          = config["position"].as<std::string>();
         }
-        // Ready position
-        {
-            std::string ready_file = get_config_file(robot_position.get_config_name());
-            YAML::Node config      = YAML::LoadFile(ready_file);
-            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-        }
 
         // Check if we have permissions
         if (geteuid() != 0) {
@@ -231,15 +229,6 @@ namespace module::tools {
             YAML::Node config  = YAML::LoadFile(soccer_file);
             config["position"] = std::string(robot_position);
             std::ofstream file(soccer_file);
-            file << config;
-        }
-
-        {
-            // Write ready position to the corresponding config file
-            std::string ready_file   = get_config_file(robot_position.get_config_name());
-            YAML::Node config        = YAML::LoadFile(ready_file);
-            config["ready_position"] = YAML::Node(ready_position);
-            std::ofstream file(ready_file);
             file << config;
         }
 
@@ -327,6 +316,43 @@ namespace module::tools {
     void RoboCupConfiguration::toggle_selection() {
         // Networking configuration column
         if (display.column_selection == 0) {
+            if (display.row_selection == int(Display::Column1::SSID) && !cfg.wifi_networks.empty()) {
+                // See if the current SSID is in the cfg.wifi_networks map
+                auto it = cfg.wifi_networks.find(ssid);
+                if (it != cfg.wifi_networks.end()) {
+                    // If it is, set the SSID and password to the next value in the map
+                    auto next = std::next(it);
+                    ssid      = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->first : next->first;
+                    password  = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->second : next->second;
+                }
+                else {
+                    // If it isn't, set the SSID and password to the first value in the map
+                    ssid     = cfg.wifi_networks.begin()->first;
+                    password = cfg.wifi_networks.begin()->second;
+                }
+            }
+
+            if (display.row_selection == int(Display::Column1::IP_ADDRESS) && !cfg.common_ips.empty()) {
+                // Change the IPs to use the player_id in the "X" position
+                std::vector<std::string> player_ips{};
+                for (const auto& ip : cfg.common_ips) {
+                    std::string player_ip = ip;
+                    player_ip.replace(player_ip.find("X"), 1, std::to_string(player_id));
+                    player_ips.push_back(player_ip);
+                }
+
+                // See if the current IP address is in the player_ips vector
+                auto it = std::find(player_ips.begin(), player_ips.end(), ip_address);
+                if (it != player_ips.end()) {
+                    // If it is, set the IP address to the next value in the vector
+                    auto next  = std::next(it);
+                    ip_address = next == player_ips.end() ? player_ips.front() : *next;
+                }
+                else {
+                    // If it isn't, set the IP address to the first value in the vector
+                    ip_address = player_ips.front();
+                }
+            }
             return;
         }
         // Game configuration column
@@ -334,15 +360,7 @@ namespace module::tools {
         switch (column) {
             case Display::Column2::PLAYER_ID: player_id = player_id == MAX_PLAYER_ID ? 1 : player_id + 1; break;
             case Display::Column2::TEAM_ID: team_id = team_id == MAX_TEAM_ID ? 1 : team_id + 1; break;
-            case Display::Column2::POSITION: {
-                ++robot_position;
-
-                // Get ready position for this position
-                std::string ready_file = get_config_file(robot_position.get_config_name());
-                YAML::Node config      = YAML::LoadFile(ready_file);
-                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-                break;
-            }
+            case Display::Column2::POSITION: ++robot_position; break;
             default: break;
         }
     }
@@ -366,39 +384,41 @@ namespace module::tools {
         switch (column) {
             case Display::Column2::PLAYER_ID: player_id = std::stoi(user_input()); break;
             case Display::Column2::TEAM_ID: team_id = std::stoi(user_input()); break;
-            case Display::Column2::POSITION: {
-                robot_position = user_input();
-
-                // Get ready position for this position
-                std::string ready_file = get_config_file(robot_position.get_config_name());
-                YAML::Node config      = YAML::LoadFile(ready_file);
-                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-
-                break;
-            }
-            case Display::Column2::READY_POSITION: {
-                std::stringstream ss(user_input());
-                ss >> ready_position.x() >> ready_position.y() >> ready_position.z();
-                break;
-            }
+            case Display::Column2::POSITION: robot_position = user_input(); break;
             default: break;
         }
     }
 
     std::string RoboCupConfiguration::user_input() {
         // Read characters until we see either esc or enter
-        std::stringstream chars;
+        std::string input;
+        int cursor_pos = 0;
 
         // Keep reading until our termination case is reached
         while (true) {
             auto ch = getch();
             switch (ch) {
-                case 27: return "";
+                case 27: return "";  // Escape key
                 case '\n':
-                case KEY_ENTER: return chars.str(); break;
+                case KEY_ENTER: return input;
+                case KEY_BACKSPACE:
+                case 127:  // ASCII code for backspace
+                    if (!input.empty() && cursor_pos > 0) {
+                        input.erase(cursor_pos - 1, 1);
+                        cursor_pos--;
+                        // Redraw the input
+                        move(getcury(stdscr), display.C1_SEL_POS);
+                        clrtoeol();
+                        addstr(input.c_str());
+                        move(getcury(stdscr), display.C1_SEL_POS + cursor_pos);
+                    }
+                    break;
                 default:
-                    chars << static_cast<char>(ch);
-                    addch(ch);
+                    if (isprint(ch)) {  // Only add printable characters
+                        input.insert(cursor_pos, 1, static_cast<char>(ch));
+                        cursor_pos++;
+                        addch(ch);
+                    }
                     break;
             }
         }
@@ -469,10 +489,6 @@ namespace module::tools {
         mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
         mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
         mvprintw(7, display.C2_PAD, ("Position : " + std::string(robot_position)).c_str());
-
-        std::stringstream ready_string{};
-        ready_string << ready_position.transpose();
-        mvprintw(8, display.C2_PAD, ("Ready    : " + ready_string.str()).c_str());
 
         // Print commands
         // Heading Commands
