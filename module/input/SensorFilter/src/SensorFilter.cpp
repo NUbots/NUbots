@@ -305,12 +305,10 @@ namespace module::input {
         //     are unlikely to cause phantom button presses, and if they do, the debounce routine
         //     would require that we have N_thresh > N errors causing the _same_ phantom button press
         for (const auto& s : sensors) {
-            if (s->buttons.left) {
+            if (s->buttons.left)
                 ++left_count;
-            }
-            if (s->buttons.middle) {
+            if (s->buttons.middle)
                 ++middle_count;
-            }
         }
         // Compare to the debounce threshold to determine if we have a down event
         bool new_left_down   = left_count > cfg.button_debounce_threshold;
