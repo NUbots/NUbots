@@ -32,22 +32,6 @@ type LocalisationViewProps = {
   network: LocalisationNetwork;
 };
 
-import { FieldView } from "./r3f_components/objects/field/view";
-import { GridView } from "./r3f_components/objects/grid/view";
-import { SkyboxView } from "./r3f_components/objects/skybox/view";
-import { URDFNugus } from "./r3f_components/objects/urdf_nugus/view";
-import { BoundingBox } from "./r3f_components/objects/bounding_box/view";
-import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
-import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
-import { FieldIntersections } from "./r3f_components/objects/field_intersections/view";
-import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view";
-import { FieldLinePoints } from "./r3f_components/objects/field_line_points/view";
-import { Particles } from "./r3f_components/objects/particles/view";
-import { Goals } from "./r3f_components/objects/localised_goals/view";
-import { Ball } from "./r3f_components/objects/ball/view";
-import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
-import { Icon } from "../icon/view";
-
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
   { label: "Robocup", value: "robocup" },
@@ -70,11 +54,10 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                this.props.model.field.fieldType === option.value
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
                   ? "hover:bg-auto-contrast-1"
                   : "hover:bg-auto-contrast-1"
-              }`}
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
