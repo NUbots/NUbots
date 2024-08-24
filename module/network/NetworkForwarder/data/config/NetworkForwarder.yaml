@@ -35,6 +35,7 @@ targets:
     message.localisation.Ball: true
     message.localisation.Field: true
     message.localisation.Robots: true
+    message.localisation.AssociationLines: true
 
     # Log messages
     message.nuclear.LogMessage: false
