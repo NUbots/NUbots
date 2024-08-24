@@ -44,5 +44,6 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
     [ "packet_wait", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58f19b0d15954f1f93f5b3ccd116cb3f", null ],
     [ "packet_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a28d80e07d1cac02aa2b2d2fb4dbfd260", null ],
     [ "servo_states", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c", null ],
+    [ "thread_count", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a39670cb63b50fe0a6cfda73c6126a3bc", null ],
     [ "UPDATE_FREQUENCY", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ade90fc00d6374310b21f057d75bd8753", null ]
 ];
