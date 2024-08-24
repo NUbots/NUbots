@@ -22,7 +22,7 @@ import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view"
 import { Particles } from "./r3f_components/objects/particles/view";
 import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
 import { SkyboxView } from "./r3f_components/objects/skybox/view";
-import { URDFNugus } from "./r3f_components/objects/urdf_nugus/view";
+import { Nugus } from "./r3f_components/objects/urdf_nugus/view";
 import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
 type LocalisationViewProps = {
@@ -333,7 +333,7 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
     {model.robotVisible &&
-      model.robots.filter((robot) => robot.visible).map((robot) => <URDFNugus key={robot.id} model={robot} />)}
+      model.robots.filter((robot) => robot.visible).map((robot) => <Nugus key={robot.id} model={robot} />)}
     {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
     {model.ballVisible &&
       model.robots.map(
