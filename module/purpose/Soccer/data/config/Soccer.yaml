@@ -19,19 +19,19 @@ max_robots: 5
 
 # Goalie bounding box
 goalie:
-  x_min: 3.5
-  x_max: 5
-  y_min: -4.0
-  y_max: 4.0
+  x_min: 1.6
+  x_max: 3.4
+  y_min: -3.0
+  y_max: 3.0
 # Defender bounding box
 defender:
-  x_min: 1.5
-  x_max: 3.5
-  y_min: -4.0
-  y_max: 4.0
+  x_min: 1.6
+  x_max: 3.4
+  y_min: -3.0
+  y_max: 3.0
 # Striker bounding box
 striker:
-  x_min: -5.0
-  x_max: 1.5
-  y_min: -4.0
-  y_max: 4.0
+  x_min: -4.0
+  x_max: 1.6
+  y_min: -3.0
+  y_max: 3.0
