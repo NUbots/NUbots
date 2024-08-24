@@ -19,10 +19,10 @@ import { FieldLinePoints } from "./r3f_components/objects/field_line_points/view
 import { GridView } from "./r3f_components/objects/grid/view";
 import { Goals } from "./r3f_components/objects/localised_goals/view";
 import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view";
+import { Nugus } from "./r3f_components/objects/nugus/view";
 import { Particles } from "./r3f_components/objects/particles/view";
 import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
 import { SkyboxView } from "./r3f_components/objects/skybox/view";
-import { Nugus } from "./r3f_components/objects/urdf_nugus/view";
 import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
 type LocalisationViewProps = {
