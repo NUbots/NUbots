@@ -171,7 +171,7 @@ namespace module::strategy {
                 }
 
 
-                emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk));
+                emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, true));
             }
         });
     }
