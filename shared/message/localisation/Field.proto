@@ -42,4 +42,16 @@ message Field {
     repeated vec3 particles = 4;
 }
 
+
+message Line {
+    vec3 start = 1;
+    vec3 end   = 2;
+}
+
+message AssociationLines {
+    /// Vector of lines representing the line between observation and landmark in field space
+    repeated Line lines = 1;
+}
+
+
 message ResetFieldLocalisation {}
