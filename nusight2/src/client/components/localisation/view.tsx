@@ -19,10 +19,10 @@ import { FieldLinePoints } from "./r3f_components/objects/field_line_points/view
 import { GridView } from "./r3f_components/objects/grid/view";
 import { Goals } from "./r3f_components/objects/localised_goals/view";
 import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view";
+import { Nugus } from "./r3f_components/objects/nugus/view";
 import { Particles } from "./r3f_components/objects/particles/view";
 import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
 import { SkyboxView } from "./r3f_components/objects/skybox/view";
-import { Nugus } from "./r3f_components/objects/nugus/view";
 import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
 type LocalisationViewProps = {
@@ -54,10 +54,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
                   ? "hover:bg-auto-contrast-1"
                   : "hover:bg-auto-contrast-1"
-                }`}
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -331,29 +332,18 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     <hemisphereLight args={["#fff", "#fff", 0.6]} />
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
-    {model.robotVisible && model.robots.filter(robot => robot.visible).map(robot => (
-      <Nugus key={robot.id} model={robot} />
-    ))}
-    {model.fieldLinePointsVisible && model.robots.map((robot) =>
-      robot.visible && (
-        <FieldLinePoints
-          key={robot.id}
-          points={robot.rPFf}
-          color="blue"
-          size={0.02}
-        />
-      )
-    )}
+    {model.robotVisible &&
+      model.robots.filter((robot) => robot.visible).map((robot) => <Nugus key={robot.id} model={robot} />)}
+    {model.fieldLinePointsVisible &&
+      model.robots.map(
+        (robot) => robot.visible && <FieldLinePoints key={robot.id} points={robot.rPFf} color="blue" size={0.02} />,
+      )}
 
-    {model.ballVisible && model.robots.map((robot) =>
-      robot.visible && robot.rBFf && (
-        <Ball
-          key={robot.id}
-          position={robot.rBFf.toArray()}
-          scale={robot.rBFf.z}
-        />
-      )
-    )}
+    {model.ballVisible &&
+      model.robots.map(
+        (robot) =>
+          robot.visible && robot.rBFf && <Ball key={robot.id} position={robot.rBFf.toArray()} scale={robot.rBFf.z} />,
+      )}
     {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
     {model.particlesVisible && <Particles model={model} />}
     {model.goalVisible && <Goals model={model} />}
@@ -371,18 +361,21 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
         .filter((robot) => robot.visible && robot.Hfd)
         .map((robot) => <WalkPathGoal key={robot.id} model={robot} />)}
     <LocalisedRobots model={model} />
-    {model.boundedBoxVisible && model.robots.map(robot => (
-      robot.boundingBox && robot.visible && (
-        <BoundingBox
-          key={robot.id}
-          minX={robot.boundingBox.minX}
-          maxX={robot.boundingBox.maxX}
-          minY={robot.boundingBox.minY}
-          maxY={robot.boundingBox.maxY}
-          color={robot.color}
-        />
-      )
-    ))}
+    {model.boundedBoxVisible &&
+      model.robots.map(
+        (robot) =>
+          robot.boundingBox &&
+          robot.visible && (
+            <BoundingBox
+              key={robot.id}
+              minX={robot.boundingBox.minX}
+              maxX={robot.boundingBox.maxX}
+              minY={robot.boundingBox.minY}
+              maxY={robot.boundingBox.maxY}
+              color={robot.color}
+            />
+          ),
+      )}
   </object3D>
 ));
 
