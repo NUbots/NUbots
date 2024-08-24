@@ -1,24 +1,19 @@
 import React from "react";
-import { Vector3 } from "three";
+import { Vector3 } from "../../../../../../shared/math/vector3";
 
-import { LocalisationModel } from "../../../model";
+interface ParticlesProps {
+  particles: {
+    particle: Vector3[];
+  };
+}
 
-export const Particles = ({ model }: { model: LocalisationModel }) => (
-  <>
-    {model.robots.map(
-      (robot) =>
-        robot.visible && (
-          <object3D key={robot.id}>
-            {robot.particles.particle.map((particle, i) => {
-              return (
-                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
-                  <circleBufferGeometry args={[0.02, 20]} />
-                  <meshBasicMaterial color="red" />
-                </mesh>
-              );
-            })}
-          </object3D>
-        ),
-    )}
-  </>
+export const Particles: React.FC<ParticlesProps> = ({ particles }) => (
+  <object3D>
+    {particles.particle.map((particle, index) => (
+      <mesh key={index} position={[particle.x, particle.y, 0.005]}>
+        <circleBufferGeometry args={[0.02, 20]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
+    ))}
+  </object3D>
 );

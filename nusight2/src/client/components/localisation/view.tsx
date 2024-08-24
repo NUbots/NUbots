@@ -25,6 +25,8 @@ import { PurposeLabel } from "./r3f_components/objects/purpose_label/view";
 import { SkyboxView } from "./r3f_components/objects/skybox/view";
 import { WalkPathGoal } from "./r3f_components/objects/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/objects/walk_path_visualiser/view";
+import { LocalisationRobotModel } from "./robot_model";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -54,11 +56,10 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                this.props.model.field.fieldType === option.value
-                  ? "hover:bg-auto-contrast-1"
-                  : "hover:bg-auto-contrast-1"
-              }`}
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -318,6 +319,61 @@ function viewModeString(viewMode: ViewMode) {
   }
 }
 
+interface RobotRenderProps {
+  robot: LocalisationRobotModel;
+  model: LocalisationModel;
+}
+
+const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) => {
+  if (!robot.visible) return null;
+
+  return (
+    <object3D key={robot.id}>
+      <Nugus model={robot} />
+
+      {model.fieldLinePointsVisible && (
+        <FieldLinePoints points={robot.rPFf} color="blue" size={0.02} />
+      )}
+
+      {model.ballVisible && robot.rBFf && (
+        <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />
+      )}
+
+      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
+        <FieldIntersections intersections={robot.fieldIntersections} />
+      )}
+
+      {model.walkToDebugVisible && robot.Hfd && (
+        <WalkPathVisualiser model={robot} />
+      )}
+
+      {robot.Hft && robot.purpose && (
+        <PurposeLabel
+          robotModel={robot}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
+        />
+      )}
+
+      {model.walkToDebugVisible && robot.Hfd && (
+        <WalkPathGoal model={robot} />
+      )}
+
+      {model.particlesVisible && <Particles particles={robot.particles} />}
+
+      {model.boundedBoxVisible && robot.boundingBox && (
+        <BoundingBox
+          minX={robot.boundingBox.minX}
+          maxX={robot.boundingBox.maxX}
+          minY={robot.boundingBox.minY}
+          maxY={robot.boundingBox.maxY}
+          color={robot.color}
+        />
+      )}
+    </object3D>
+  );
+});
+
 const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer(({ model }) => (
   <object3D>
     <PerspectiveCamera
@@ -330,52 +386,16 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     </PerspectiveCamera>
     <SkyboxView model={model.skybox} />
     <hemisphereLight args={["#fff", "#fff", 0.6]} />
+
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
-    {model.robotVisible &&
-      model.robots.filter((robot) => robot.visible).map((robot) => <Nugus key={robot.id} model={robot} />)}
-    {model.fieldLinePointsVisible &&
-      model.robots.map(
-        (robot) => robot.visible && <FieldLinePoints key={robot.id} points={robot.rPFf} color="blue" size={0.02} />,
-      )}
 
-    {model.ballVisible &&
-      model.robots.map(
-        (robot) =>
-          robot.visible && robot.rBFf && <Ball key={robot.id} position={robot.rBFf.toArray()} scale={robot.rBFf.z} />,
-      )}
-    {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
-    {model.particlesVisible && <Particles model={model} />}
+    {model.robotVisible && model.robots.map(robot => (
+      <RobotComponents key={robot.id} robot={robot} model={model} />
+    ))}
+
     {model.goalVisible && <Goals model={model} />}
-    {model.walkToDebugVisible &&
-      model.robots
-        .filter((robot) => robot.visible && robot.Hfd)
-        .map((robot) => <WalkPathVisualiser key={robot.id} model={robot} />)}
-    {model.robots
-      .filter((robot) => robot.visible && robot.Hft && robot.purpose)
-      .map((robot) => (
-        <PurposeLabel key={robot.id} robotModel={robot} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />
-      ))}
-    {model.walkToDebugVisible &&
-      model.robots
-        .filter((robot) => robot.visible && robot.Hfd)
-        .map((robot) => <WalkPathGoal key={robot.id} model={robot} />)}
     <LocalisedRobots model={model} />
-    {model.boundedBoxVisible &&
-      model.robots.map(
-        (robot) =>
-          robot.boundingBox &&
-          robot.visible && (
-            <BoundingBox
-              key={robot.id}
-              minX={robot.boundingBox.minX}
-              maxX={robot.boundingBox.maxX}
-              minY={robot.boundingBox.minY}
-              maxY={robot.boundingBox.maxY}
-              color={robot.color}
-            />
-          ),
-      )}
   </object3D>
 ));
 
