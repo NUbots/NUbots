@@ -44,6 +44,8 @@ namespace module::purpose {
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
             Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+            /// @brief Penalty defence position to walk to when defending against a penalty kick from the opposing team
+            Eigen::Vector3f penalty_defence_position = Eigen::Vector3f::Zero();
             /// @brief How far (m) the ball can be away from the centre of the field for it to be deemed as
             /// moved/touched by the other team during kickoff so we can start playing
             double ball_kickoff_outside_radius = 0.0;
