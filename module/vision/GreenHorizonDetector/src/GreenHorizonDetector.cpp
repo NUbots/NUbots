@@ -143,6 +143,14 @@ namespace module::vision {
                 return;
             }
 
+            // Remove points from the hull that have high confidence of field line
+            field_cluster.erase(
+                std::remove_if(field_cluster.begin(),
+                               field_cluster.end(),
+                               [&](const int& idx) { return cls(LINE_INDEX, idx) >= cfg.confidence_threshold; }),
+                field_cluster.end());
+
+
             // Find the convex hull of the field points
             auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
 

@@ -131,6 +131,9 @@ namespace module::strategy {
                 // Scale the distance to walk to based on the angle error
                 double angle_error_scaling_factor = std::clamp(std::abs(angle_error) / cfg.max_angle_error, 0.0, 1.0);
 
+                // Scale the distance to walk to based on the y error
+                double y_error_scaling_factor = std::clamp(std::abs(rBRr.y()) / cfg.ball_approach_distance, 0.0, 1.0);
+
                 // Compute position to kick
                 Eigen::Vector3d rKFf = Eigen::Vector3d::Zero();
 
@@ -166,7 +169,8 @@ namespace module::strategy {
                     // Move towards kick distance, where ball_approach_distance is scaled by angle error
                     // to ensure robot is facing the desired heading before reaching kick distance
                     rKFf = rBFf - uGBf * cfg.ball_kick_distance
-                           - uGBf * cfg.ball_approach_distance * angle_error_scaling_factor;
+                           - uGBf * cfg.ball_approach_distance * angle_error_scaling_factor
+                           - uGBf * cfg.ball_approach_distance * y_error_scaling_factor;
                     Hfk = pos_rpy_to_transform(rKFf, Eigen::Vector3d(0, 0, desired_heading));
                 }
 

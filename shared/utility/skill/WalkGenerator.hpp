@@ -280,6 +280,14 @@ namespace utility::skill {
             return t;
         }
 
+        /**
+         * @brief Set the desired torso pitch
+         * @param pitch Desired torso pitch.
+         */
+        void set_torso_pitch(const Scalar& pitch) {
+            p.torso_pitch = pitch;
+        }
+
     private:
         /// @brief Walk engine parameters.
         WalkParameters p;

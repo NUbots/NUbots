@@ -1,7 +1,8 @@
 log_level: INFO
 
 buttons:
-  debounce_threshold: 7
+  # We already debounce in both OpenCR and NUSense, so this is more for error filtering than true debouncing
+  debounce_threshold: 5
 
 foot_down:
   # Either (Z_HEIGHT or FSR)

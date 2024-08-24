@@ -98,7 +98,7 @@ namespace module::planning {
             log<NUClear::DEBUG>("Starting walk to task");
 
             // Reset the velocity magnitude to zero
-            velocity_magnitude = 0.0;
+            // velocity_magnitude = 0.0;
         });
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(

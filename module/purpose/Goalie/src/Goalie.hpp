@@ -43,6 +43,8 @@ namespace module::purpose {
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
             Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+            /// @brief Penalty defence position to walk to when defending from a penalty kick from the opposing team
+            Eigen::Vector3f penalty_defence_position = Eigen::Vector3f::Zero();
             /// @brief x minimum bound on field to walk within
             double bounded_region_x_min = 0.0;
             /// @brief x maximum bound on field to walk within
@@ -51,6 +53,8 @@ namespace module::purpose {
             double bounded_region_y_min = 0.0;
             /// @brief y maximum bound on field to walk within
             double bounded_region_y_max = 0.0;
+            /// @brief distance the ball needs to be kicked to begin playing in a penalty shootout
+            double penalty_shootout_kick_detection_threshold = 0.0;
         } cfg;
 
     public:

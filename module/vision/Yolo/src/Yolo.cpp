@@ -286,8 +286,7 @@ namespace module::vision {
                         || objects[class_id].name == "X-intersection") {
                         FieldIntersection i;
                         // Project the centre ray onto the ground plane in world {w} space
-                        Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
-                        Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
+                        Eigen::Vector3d rIWw = img.Hcw.inverse() * ray_to_camera_space(centre_ray);
 
                         // Only consider vision measurements within the green horizon, if it exists
                         if (horizon != nullptr && !point_in_convex_hull(horizon->horizon, rIWw)) {
