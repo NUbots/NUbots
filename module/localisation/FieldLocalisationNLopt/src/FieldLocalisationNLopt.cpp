@@ -41,7 +41,9 @@ namespace module::localisation {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
+    using message::localisation::AssociationLines;
     using message::localisation::Field;
+    using message::localisation::Line;
     using message::localisation::ResetFieldLocalisation;
     using message::vision::FieldLines;
 
@@ -68,7 +70,6 @@ namespace module::localisation {
 
             // Field line intersection optimisation parameters
             cfg.field_line_intersection_weight = config["field_line_intersection_weight"].as<double>();
-            cfg.min_association_distance       = config["min_association_distance"].as<double>();
             cfg.min_field_line_intersections   = config["min_field_line_intersections"].as<int>();
 
             // Constraints and weighting on change in state
@@ -134,16 +135,28 @@ namespace module::localisation {
             expected_goal_post_distance = (own_left_goal - own_right_goal).norm();
 
             // Set the initial state as either left, right, both sides of the field or manually specified inital state
-            auto left_side =
-                Eigen::Vector3d((fd.dimensions.field_length / 4), (fd.dimensions.field_width / 2), -M_PI_2);
-            auto right_side =
-                Eigen::Vector3d((fd.dimensions.field_length / 4), (-fd.dimensions.field_width / 2), M_PI_2);
+            auto left_middle_side =
+                Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto left_bottom_side =
+                Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto left_top_side =
+                Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto right__middle_side =
+                Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+            auto right_bottom_side =
+                Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+            auto right_top_side =
+                Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
             switch (cfg.starting_side) {
-                case StartingSide::LEFT: cfg.initial_hypotheses.emplace_back(left_side); break;
-                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right_side); break;
+                case StartingSide::LEFT: cfg.initial_hypotheses.emplace_back(left_middle_side); break;
+                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right__middle_side); break;
                 case StartingSide::EITHER:
-                    cfg.initial_hypotheses.emplace_back(left_side);
-                    cfg.initial_hypotheses.emplace_back(right_side);
+                    cfg.initial_hypotheses.emplace_back(left_middle_side);
+                    cfg.initial_hypotheses.emplace_back(left_bottom_side);
+                    cfg.initial_hypotheses.emplace_back(left_top_side);
+                    cfg.initial_hypotheses.emplace_back(right__middle_side);
+                    cfg.initial_hypotheses.emplace_back(right_bottom_side);
+                    cfg.initial_hypotheses.emplace_back(right_top_side);
                     break;
                 case StartingSide::CUSTOM: cfg.initial_hypotheses.emplace_back(cfg.initial_state); break;
                 default: log<NUClear::ERROR>("Invalid starting_side specified"); break;
@@ -183,6 +196,7 @@ namespace module::localisation {
                     // Don't run an update if there are not enough field line points or the robot is unstable
                     bool unstable = stability <= Stability::FALLING;
                     if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
+                        log<NUClear::DEBUG>("Not enough field line points or robot is unstable");
                         return;
                     }
 
@@ -204,7 +218,7 @@ namespace module::localisation {
                     else {
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(state, field_lines.rPWw, field_intersections, goals);
+                            run_field_line_optimisation(kf.get_state(), field_lines.rPWw, field_intersections, goals);
                         state = opt_results.first;
                     }
 
@@ -221,6 +235,15 @@ namespace module::localisation {
                     // Debugging
                     if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
                         debug_field_localisation(field->Hfw, raw_sensors);
+                    }
+                    // Association
+                    if (log_level <= NUClear::DEBUG) {
+                        auto associations      = data_association(field_intersections, field->Hfw);
+                        auto association_lines = std::make_unique<AssociationLines>();
+                        for (const auto& association : associations) {
+                            association_lines->lines.push_back({association.first, association.second});
+                        }
+                        emit(association_lines);
                     }
                     emit(field);
                 });
@@ -266,6 +289,52 @@ namespace module::localisation {
                                fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }
 
+    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
+        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const Eigen::Isometry3d& Hfw) {
+        // Field intersection measurement associated with a landmark
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+
+        // Occupied landmarks
+        std::vector<Eigen::Vector3d> occupied_landmarks{};
+
+        // Check each field intersection measurement and find the closest landmark
+        for (const auto& intersection : field_intersections->intersections) {
+            double min_distance = std::numeric_limits<double>::max();
+            Eigen::Vector3d closest_landmark;
+            bool found_association = false;
+
+            // Transform the observed intersection from world to field coordinates
+            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+
+            for (const auto& landmark : landmarks) {
+                // If the landmark is the same type as our measurement and we haven't already assigned it
+                if (landmark.type == intersection.type
+                    && std::find(occupied_landmarks.begin(), occupied_landmarks.end(), landmark.rLFf)
+                           == occupied_landmarks.end()) {
+                    // Calculate Euclidean distance between the observed intersection and the landmark
+                    double distance = (landmark.rLFf - rIFf).norm();
+
+                    // If this landmark is closer, update the association
+                    if (distance < min_distance) {
+                        min_distance      = distance;
+                        closest_landmark  = landmark.rLFf;
+                        found_association = true;
+                    }
+                }
+            }
+
+            occupied_landmarks.push_back(closest_landmark);
+
+            // If we found an association, add it to our list
+            if (found_association) {
+                associations.emplace_back(closest_landmark, rIFf);
+            }
+        }
+
+        return associations;
+    }
+
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
@@ -291,31 +360,15 @@ namespace module::localisation {
 
             // --- Field line intersection cost ---
             if (field_intersections) {
-                for (const auto& intersection : field_intersections->intersections) {
-                    double min_distance = std::numeric_limits<double>::max();
-
-                    for (const auto& landmark : landmarks) {
-                        // Check if the landmark is of the same type as the observed intersection
-                        if (landmark.type == intersection.type) {
-                            // Calculate Euclidean distance between the observed intersection and the landmark
-                            double distance = (landmark.rLFf - Hfw * intersection.rIWw).norm();
-
-                            // If this landmark is closer update
-                            if (distance < min_distance) {
-                                min_distance = distance;
-                            }
-                        }
-                    }
-
-                    // If the closest landmark is too far away, do not consider it as an association
-                    if (min_distance < cfg.min_association_distance) {
-                        cost += cfg.field_line_intersection_weight * std::pow(min_distance, 2);
-                    }
+                auto associations = data_association(field_intersections, Hfw);
+                for (const auto& association : associations) {
+                    // Calculate the distance between the observed intersection and the closest landmark
+                    double distance = (association.first - association.second).norm();
+                    cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
                 }
             }
 
             // --- Goal post cost ---
-
             // Only consider goal post cost if there are two goals
             if (goals && goals->goals.size() == 2) {
                 // Ensure the goal posts are roughly correct distance apart
@@ -344,6 +397,8 @@ namespace module::localisation {
 
             // --- State change cost ---
             cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
+
+            // Debugging
             if (log_level <= NUClear::DEBUG) {
                 emit(graph("Cost", cost));
             }
