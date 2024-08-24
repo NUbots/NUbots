@@ -236,15 +236,13 @@ namespace module::localisation {
                     if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
                         debug_field_localisation(field->Hfw, raw_sensors);
                     }
-                    // Association
-                    if (log_level <= NUClear::DEBUG) {
-                        auto associations      = data_association(field_intersections, field->Hfw);
-                        auto association_lines = std::make_unique<AssociationLines>();
-                        for (const auto& association : associations) {
-                            association_lines->lines.push_back({association.first, association.second});
-                        }
-                        emit(association_lines);
+                    // Association (run once for debugging in NUsight)
+                    auto associations      = data_association(field_intersections, field->Hfw);
+                    auto association_lines = std::make_unique<AssociationLines>();
+                    for (const auto& association : associations) {
+                        association_lines->lines.push_back({association.first, association.second});
                     }
+                    emit(association_lines);
                     emit(field);
                 });
     }
