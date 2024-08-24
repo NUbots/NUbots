@@ -6,7 +6,7 @@ import { LocalisationRobotModel } from "../../../robot_model";
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
-export const URDFNugus = ({ model }: { model: LocalisationRobotModel }) => {
+export const Nugus = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once
