@@ -2,5 +2,5 @@
 log_level: INFO
 send_port: 3737
 receive_port: 3737
-broadcast_ip: "192.168.255.255"
+broadcast_ip: "10.1.255.255"
 udp_filter_address: ""
