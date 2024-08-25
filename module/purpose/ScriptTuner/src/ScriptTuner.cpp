@@ -101,11 +101,19 @@ namespace module::purpose {
             start_color();
             // Set up our colours (id, foreground, background)
             init_pair(1, COLOR_RED, COLOR_BLACK);
-            init_pair(2, COLOR_YELLOW, COLOR_BLACK);
-            init_pair(3, COLOR_GREEN, COLOR_BLACK);
-            init_pair(4, COLOR_CYAN, COLOR_BLACK);
-            init_pair(5, COLOR_BLUE, COLOR_BLACK);
-            init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+            init_pair(2, COLOR_GREEN, COLOR_BLACK);
+            init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+            init_pair(4, COLOR_BLUE, COLOR_BLACK);
+            init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+            init_pair(6, COLOR_CYAN, COLOR_BLACK);
+            init_pair(7, COLOR_WHITE, COLOR_BLACK);
+            init_pair(8, COLOR_BLACK, COLOR_RED);
+            init_pair(9, COLOR_BLACK, COLOR_GREEN);
+            init_pair(10, COLOR_BLACK, COLOR_YELLOW);
+            init_pair(11, COLOR_BLACK, COLOR_BLUE);
+            init_pair(12, COLOR_BLACK, COLOR_MAGENTA);
+            init_pair(13, COLOR_BLACK, COLOR_CYAN);
+            init_pair(14, COLOR_BLACK, COLOR_WHITE);
             // Refresh the screen
             refresh_view();
         });
@@ -261,7 +269,7 @@ namespace module::purpose {
         for (size_t i = 0; i < script.frames.size(); ++i) {
             if (i == frame) {
                 // Add some emphasis to show this frame is selected
-                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(2));  // Yellow
+                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(3));  // Yellow
             }
             else {
                 // Dim the other frames
@@ -270,7 +278,7 @@ namespace module::purpose {
             printw(std::to_string(i + 1).c_str());
             if (i == frame) {
                 // Turn off emphasis and color
-                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(2));
+                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(3));
             }
             else {
                 // Turn off dimming
@@ -345,9 +353,9 @@ namespace module::purpose {
         // Loop through all our motors
         for (size_t i = 0; i < 20; ++i) {
             // Everything defaults to unlocked, we add locks as we find them
-            attron(COLOR_PAIR(3));  // Green
+            attron(COLOR_PAIR(2));  // Green
             mvprintw(i + 9, 2, "U");
-            attroff(COLOR_PAIR(3));  // Green
+            attroff(COLOR_PAIR(2));  // Green
 
             // highlight the selection
             attron(i == selection ? A_BOLD : A_DIM);
@@ -364,9 +372,9 @@ namespace module::purpose {
 
         for (auto& target : script.frames[frame].targets) {
             // Output that this frame is locked (we shuffle the head to the top of the list)
-            attron(COLOR_PAIR(1));  // Green
+            attron(COLOR_PAIR(1));  // Red
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
-            attroff(COLOR_PAIR(1));  // Green
+            attroff(COLOR_PAIR(1));  // Red
 
             // Highlight the selection by dimming others
             if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
