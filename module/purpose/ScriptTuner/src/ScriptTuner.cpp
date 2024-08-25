@@ -154,6 +154,9 @@ namespace module::purpose {
                 case KEY_DOWN:  // Change selection down
                     selection = (selection + 1) % 20;
                     break;
+                case '/':  // Change selection to the opposite side
+                    selection = selection % 2 ? selection - 1 : selection + 1;
+                    break;
                 case 9:          // Swap between angle and gain
                 case KEY_LEFT:   // Swap between angle and gain
                 case KEY_RIGHT:  // Swap between angle and gain
@@ -579,9 +582,10 @@ namespace module::purpose {
             curs_set(0);
 
             const char* ALL_COMMANDS[] =
-                {",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
+                {"/", ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
 
-            const char* ALL_MEANINGS[] = {"Left a frame",
+            const char* ALL_MEANINGS[] = {"Select the other servo in a pair",
+                                          "Left a frame",
                                           "Right a frame",
                                           "New Frame",
                                           "Delete Frame",
