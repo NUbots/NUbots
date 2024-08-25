@@ -495,8 +495,14 @@ namespace module::purpose {
         }
         move(4, 12);
 
+        // Make the cursor visible
+        curs_set(1);
+
         // Get the users input
         std::string result = user_input();
+
+        // Make the cursor invisible
+        curs_set(0);
 
         // If we have a result
         if (!result.empty()) {
