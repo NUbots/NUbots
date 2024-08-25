@@ -260,13 +260,21 @@ namespace module::purpose {
         move(3, 10);
         for (size_t i = 0; i < script.frames.size(); ++i) {
             if (i == frame) {
-                // Turn on highlighting to show this frame is selected
-                attron(A_STANDOUT);
+                // Add some emphasis to show this frame is selected
+                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(2));  // Yellow
+            }
+            else {
+                // Dim the other frames
+                attron(A_DIM);
             }
             printw(std::to_string(i + 1).c_str());
             if (i == frame) {
-                // Turn off highlighting
-                attroff(A_STANDOUT);
+                // Turn off emphasis and color
+                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(2));
+            }
+            else {
+                // Turn off dimming
+                attroff(A_DIM);
             }
             printw(" ");
         }
