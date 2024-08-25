@@ -97,7 +97,16 @@ namespace module::purpose {
             noecho();
             // Hide the cursor
             curs_set(0);
-
+            // Start our colours
+            start_color();
+            // Set up our colours (id, foreground, background)
+            init_pair(1, COLOR_RED, COLOR_BLACK);
+            init_pair(2, COLOR_YELLOW, COLOR_BLACK);
+            init_pair(3, COLOR_GREEN, COLOR_BLACK);
+            init_pair(4, COLOR_CYAN, COLOR_BLACK);
+            init_pair(5, COLOR_BLUE, COLOR_BLACK);
+            init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+            // Refresh the screen
             refresh_view();
         });
 
@@ -328,7 +337,9 @@ namespace module::purpose {
         // Loop through all our motors
         for (size_t i = 0; i < 20; ++i) {
             // Everything defaults to unlocked, we add locks as we find them
+            attron(COLOR_PAIR(3));  // Green
             mvprintw(i + 9, 2, "U");
+            attroff(COLOR_PAIR(3));  // Green
 
             // Output the motor name
             attron(A_BOLD);
@@ -341,7 +352,9 @@ namespace module::purpose {
 
         for (auto& target : script.frames[frame].targets) {
             // Output that this frame is locked (we shuffle the head to the top of the list)
+            attron(COLOR_PAIR(1));  // Green
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
+            attroff(COLOR_PAIR(1));  // Green
 
             // Output this frames gain and angle
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
@@ -991,7 +1004,7 @@ namespace module::purpose {
                     }  // end KEY_ENTER else
                     mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                     break;  // end case KEY_ENTER
-            }               // switch
+            }  // switch
 
         }  // while
 
@@ -1036,7 +1049,7 @@ namespace module::purpose {
             }
         }
 
-        // edit gains for only specifc frame
+        // edit gains for only specific frame
         if (editFrame) {
             for (auto& target : script.frames[frame].targets) {
                 switch (target.id.value) {
