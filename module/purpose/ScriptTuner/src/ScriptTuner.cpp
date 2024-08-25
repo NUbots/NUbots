@@ -341,13 +341,17 @@ namespace module::purpose {
             mvprintw(i + 9, 2, "U");
             attroff(COLOR_PAIR(3));  // Green
 
+            // highlight the selection
+            attron(i == selection ? A_BOLD : A_DIM);
+
             // Output the motor name
-            attron(A_BOLD);
             mvprintw(i + 9, 4, MOTOR_NAMES[i]);
-            attroff(A_BOLD);
 
             // Everything defaults to 0 angle and gain (unless we find one)
             mvprintw(i + 9, 26, "Angle:  -.--- Gain: ---.-");
+
+            // Turn off dimming
+            attroff(i == selection ? A_BOLD : A_DIM);
         }
 
         for (auto& target : script.frames[frame].targets) {
@@ -356,16 +360,28 @@ namespace module::purpose {
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
             attroff(COLOR_PAIR(1));  // Green
 
+            // Highlight the selection by dimming others
+            if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
+                attron(A_DIM);
+            }
+
             // Output this frames gain and angle
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
                      26,
                      "Angle: %+.3f Gain: %5.1f",
                      target.position,
                      target.gain);
+
+            // Turn off dimming
+            if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
+                attroff(A_DIM);
+            }
         }
 
         // Highlight our selected point
+        attron(A_BLINK);
         mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
+        attroff(A_BLINK);
 
         // We finished building
         refresh();
