@@ -252,7 +252,7 @@ namespace module::purpose {
         mvprintw(3, 2, "Frames:");                          // The frames section is filled out after this
         mvprintw(4,
                  2,
-                 "Duration: %ld",  // Output the selected frames duration
+                 "Duration: %ld ms",  // Output the selected frames duration
                  std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
         mvprintw(5, 2, "_");
 
