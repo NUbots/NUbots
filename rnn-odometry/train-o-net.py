@@ -440,10 +440,14 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.0015   # Controls how much to change the model in response to error.
-    epochs = 200
-    loss_function = keras.losses.MeanSquaredError()
-    # loss_function = keras.losses.MeanAbsoluteError()
+    learning_rate = 0.00025   # Controls how much to change the model in response to error.
+    epochs = 2000
+    # loss_function = keras.losses.MeanSquaredError()
+    loss_function = keras.losses.MeanAbsoluteError()
+    # loss_function = keras.losses.Huber()
+
+    # Random seed
+    tf.random.set_seed(42)
 
     # ** Optimisers **
     # LR schedules
@@ -473,9 +477,9 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
-    lstm = keras.layers.LSTM(16, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
     batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.30)(batch_norm)
+    dropout = keras.layers.Dropout(rate=0.3895)(batch_norm)
 
     # lstm2 = keras.layers.LSTM(6, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(dropout)    # 32 originally
     # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
