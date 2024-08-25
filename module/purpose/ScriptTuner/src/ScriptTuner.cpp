@@ -148,9 +148,11 @@ namespace module::purpose {
 
         on<Always>().then([this] {
             switch (getch()) {
+                case 'k':     // Change selection up
                 case KEY_UP:  // Change selection up
                     selection = selection == 0 ? 19 : selection - 1;
                     break;
+                case 'j':       // Change selection down
                 case KEY_DOWN:  // Change selection down
                     selection = (selection + 1) % 20;
                     break;
@@ -158,7 +160,9 @@ namespace module::purpose {
                     selection = selection % 2 ? selection - 1 : selection + 1;
                     break;
                 case 9:          // Swap between angle and gain
+                case 'h':        // Swap between angle and gain
                 case KEY_LEFT:   // Swap between angle and gain
+                case 'l':        // Swap between angle and gain
                 case KEY_RIGHT:  // Swap between angle and gain
                     angle_or_gain = !angle_or_gain;
                     break;
