@@ -160,10 +160,16 @@ namespace module::purpose {
                     angle_or_gain = !angle_or_gain;
                     break;
                 case ',':  // Move left a frame
-                    activate_frame(frame == 0 ? frame : frame - 1);
+                    if (frame > 0)
+                        activate_frame(frame - 1);
+                    else
+                        beep();
                     break;
                 case '.':  // Move right a frame
-                    activate_frame(frame == script.frames.size() - 1 ? frame : frame + 1);
+                    if (frame < script.frames.size() - 1)
+                        activate_frame(frame + 1);
+                    else
+                        beep();
                     break;
                 case '\n':       // Edit selected field
                 case KEY_ENTER:  // Edit selected field
