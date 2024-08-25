@@ -256,7 +256,7 @@ namespace module::purpose {
         for (size_t i = 0; i < script.frames.size(); ++i) {
             if (i == frame) {
                 // Add some emphasis to show this frame is selected
-                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(3));  // Yellow
+                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 2) % 6));
             }
             else {
                 // Dim the other frames
@@ -265,7 +265,7 @@ namespace module::purpose {
             printw(std::to_string(i + 1).c_str());
             if (i == frame) {
                 // Turn off emphasis and color
-                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(3));
+                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 2) % 6));
             }
             else {
                 // Turn off dimming
