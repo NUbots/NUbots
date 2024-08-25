@@ -99,21 +99,8 @@ namespace module::purpose {
             curs_set(0);
             // Start our colours
             start_color();
-            // Set up our colours (id, foreground, background)
-            init_pair(1, COLOR_RED, COLOR_BLACK);
-            init_pair(2, COLOR_GREEN, COLOR_BLACK);
-            init_pair(3, COLOR_YELLOW, COLOR_BLACK);
-            init_pair(4, COLOR_BLUE, COLOR_BLACK);
-            init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-            init_pair(6, COLOR_CYAN, COLOR_BLACK);
-            init_pair(7, COLOR_WHITE, COLOR_BLACK);
-            init_pair(8, COLOR_BLACK, COLOR_RED);
-            init_pair(9, COLOR_BLACK, COLOR_GREEN);
-            init_pair(10, COLOR_BLACK, COLOR_YELLOW);
-            init_pair(11, COLOR_BLACK, COLOR_BLUE);
-            init_pair(12, COLOR_BLACK, COLOR_MAGENTA);
-            init_pair(13, COLOR_BLACK, COLOR_CYAN);
-            init_pair(14, COLOR_BLACK, COLOR_WHITE);
+            // Create our colour pairs
+            setup_colour_pairs();
             // Refresh the screen
             refresh_view();
         });
@@ -1166,5 +1153,32 @@ namespace module::purpose {
         }
 
         return std::numeric_limits<float>::quiet_NaN();
+    }
+
+    void ScriptTuner::setup_colour_pairs() {
+        // Coloured text, black background
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+        init_pair(2, COLOR_GREEN, COLOR_BLACK);
+        init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+        init_pair(4, COLOR_BLUE, COLOR_BLACK);
+        init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+        init_pair(6, COLOR_CYAN, COLOR_BLACK);
+        init_pair(7, COLOR_WHITE, COLOR_BLACK);
+        // Black text, colour background
+        init_pair(8, COLOR_BLACK, COLOR_RED);
+        init_pair(9, COLOR_BLACK, COLOR_GREEN);
+        init_pair(10, COLOR_BLACK, COLOR_YELLOW);
+        init_pair(11, COLOR_BLACK, COLOR_BLUE);
+        init_pair(12, COLOR_BLACK, COLOR_MAGENTA);
+        init_pair(13, COLOR_BLACK, COLOR_CYAN);
+        init_pair(14, COLOR_BLACK, COLOR_WHITE);
+        // White text, colour background
+        init_pair(15, COLOR_WHITE, COLOR_RED);
+        init_pair(16, COLOR_WHITE, COLOR_GREEN);
+        init_pair(17, COLOR_WHITE, COLOR_YELLOW);
+        init_pair(18, COLOR_WHITE, COLOR_BLUE);
+        init_pair(19, COLOR_WHITE, COLOR_MAGENTA);
+        init_pair(20, COLOR_WHITE, COLOR_CYAN);
+        init_pair(21, COLOR_WHITE, COLOR_BLACK);
     }
 }  // namespace module::purpose

@@ -124,6 +124,9 @@ namespace module::purpose {
         /// @brief Converts valid user input to gain
         static float user_input_to_gain();
 
+        /// @brief Setup up colour pairs for ncurses
+        void setup_colour_pairs();
+
     public:
         explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
     };
