@@ -578,7 +578,7 @@ namespace module::purpose {
             curs_set(0);
 
             const char* ALL_COMMANDS[] =
-                {"/", ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
+                {"/", ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctrl-C"};
 
             const char* ALL_MEANINGS[] = {"Select the other servo in a pair",
                                           "Left a frame",
@@ -591,11 +591,11 @@ namespace module::purpose {
                                           "Edit the gains of an entire Script or Frame",
                                           "Play",
                                           "Save",
-                                          "Saves Script As)",
+                                          "Saves Script As",
                                           "Manual Refresh View",
                                           "Mirrors the script",
                                           "Exit (this works to exit help and edit_gain)",
-                                          "Quit Scripttuner"};
+                                          "Quit Script Tuner"};
 
             size_t longestCommand = 0;
             for (const auto& command : ALL_COMMANDS) {
@@ -608,7 +608,7 @@ namespace module::purpose {
             mvprintw(0, (COLS - 14) / 2, " Script Tuner ");
             mvprintw(3, 2, "Help Commands:");
             attroff(A_BOLD);
-            for (size_t i = 0; i < 15; i++) {
+            for (size_t i = 0; i < 16; i++) {
                 mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                 mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
             }
