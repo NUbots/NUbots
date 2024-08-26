@@ -83,7 +83,7 @@ namespace module::purpose {
         , angle_or_gain(true)
         , deg_or_rad(false)
         , unsaved_changes(false)
-        , autosave_path("Debugging")
+        , autosave_path("")
         , start_time(std::chrono::system_clock::now()) {
 
         // Add a blank frame to start with
