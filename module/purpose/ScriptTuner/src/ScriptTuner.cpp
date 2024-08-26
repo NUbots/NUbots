@@ -32,6 +32,7 @@ extern "C" {
 #undef OK
 }
 
+#include <cmath>
 #include <cstdio>
 #include <fcntl.h>
 #include <sstream>
@@ -213,6 +214,9 @@ namespace module::purpose {
                 case 'G':  // allows multiple gains to be edited at once
                     edit_gain();
                     break;
+                case 'D':  // switch units between degrees and radians
+                    deg_or_rad = !deg_or_rad;
+                    break;
                 case ':':  // lists commands
                     help();
                     break;
@@ -350,7 +354,7 @@ namespace module::purpose {
             mvprintw(i + 9, 4, MOTOR_NAMES[i]);
 
             // Everything defaults to 0 angle and gain (unless we find one)
-            mvprintw(i + 9, 26, "Angle:  -.--- Gain: ---.-");
+            mvprintw(i + 9, 26, deg_or_rad ? "Angle:  ---.- Gain: ---.-" : "Angle:  -.--- Gain: ---.-");
 
             // Turn off dimming
             attroff(i == selection ? A_BOLD : A_DIM);
@@ -368,16 +372,38 @@ namespace module::purpose {
             }
 
             // Output this frames gain and angle
-            mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
-                     26,
-                     "Angle: %+.3f Gain: %5.1f",
-                     target.position,
-                     target.gain);
-
+            if (deg_or_rad) {
+                // Internally we store angles in radians, so we convert to degrees here
+                // but this means sometimes the degrees amount has funny rounding as we
+                // only display to 1 decimal place, which is slightly lower precision
+                // than 3 decimal places of radians. It had to be done like this to
+                // maintain the same character width to keep things easy.
+                mvprintw(
+                    ((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
+                    26,
+                    "Angle: %4d.%01d Gain: %5.1f",  // Angle with 4 integer places (incl sign) and 1 decimal place
+                    static_cast<int>(target.position * 180 / M_PI),  // Get the integer part of the angle in degrees
+                    static_cast<int>(std::abs(target.position) * 180 / M_PI * 10) % 10,  // And the decimal part
+                    target.gain);
+            }
+            else {
+                mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
+                         26,
+                         "Angle: %+.3f Gain: %5.1f",
+                         target.position,
+                         target.gain);
+            }
             // Turn off dimming
             if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
                 attroff(A_DIM);
             }
+        }
+
+        // Add a note about units if we're in degrees
+        if (deg_or_rad) {
+            attron(A_DIM | COLOR_PAIR(6));  // Cyan
+            mvprintw(8, 26 + 6, "degrees");
+            attroff(A_DIM | COLOR_PAIR(6));  // Cyan
         }
 
         // Highlight our selected point
@@ -543,22 +569,23 @@ namespace module::purpose {
 
                 // If we are entering an angle
                 if (angle_or_gain) {
+                    // If we are in degrees convert to radians
+                    num = deg_or_rad ? num * M_PI / 180 : num;
 
                     // Normalize our angle to be between -pi and pi
                     num = utility::math::angle::normalizeAngle(num);
 
                     it->position = num;
-                    // Convert our angle to be between -pi and pi
                 }
                 // If it is a gain
                 else {
+                    // Check if the value is < 0 or > 100
                     if (num >= 0 && num <= 100) {
                         it->gain = num;
                     }
                     else {
                         beep();
                     }
-                    // Check if the value is < 0 or > 100
                 }
             }
             // If it's not a number then ignore and beep
@@ -578,7 +605,7 @@ namespace module::purpose {
             curs_set(0);
 
             const char* ALL_COMMANDS[] =
-                {"/", ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctrl-C"};
+                {"/", ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "D", "X", "Ctrl-C"};
 
             const char* ALL_MEANINGS[] = {"Select the other servo in a pair",
                                           "Left a frame",
@@ -594,6 +621,7 @@ namespace module::purpose {
                                           "Saves Script As",
                                           "Manual Refresh View",
                                           "Mirrors the script",
+                                          "Switch between degree and radian display modes",
                                           "Exit (this works to exit help and edit_gain)",
                                           "Quit Script Tuner"};
 
