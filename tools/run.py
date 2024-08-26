@@ -51,7 +51,7 @@ def register(command):
 @run_on_docker
 def run(args, use_gdb, **kwargs):
     # Check to see if ASan was enabled
-    use_asan = ("USE_ASAN" in b.cmake_cache) and (b.cmake_cache["USE_ASAN"] == "ON")
+    use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
