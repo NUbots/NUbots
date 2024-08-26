@@ -312,7 +312,7 @@ namespace module::purpose {
         for (size_t i = 0; i < script.frames.size(); ++i) {
             if (i == frame) {
                 // Add some emphasis to show this frame is selected
-                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 5) % 6));
+                attron(A_BOLD | A_STANDOUT | COLOR_PAIR(1 + (i + 5) % 6));
             }
             else {
                 // Dim the other frames
@@ -321,7 +321,7 @@ namespace module::purpose {
             printw(std::to_string(i + 1).c_str());
             if (i == frame) {
                 // Turn off emphasis and color
-                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 5) % 6));
+                attroff(A_BOLD | A_STANDOUT | COLOR_PAIR(1 + (i + 5) % 6));
             }
             else {
                 // Turn off dimming
@@ -1306,22 +1306,5 @@ namespace module::purpose {
         init_pair(4, COLOR_BLUE, COLOR_BLACK);
         init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
         init_pair(6, COLOR_CYAN, COLOR_BLACK);
-        init_pair(7, COLOR_WHITE, COLOR_BLACK);
-        // Black text, colour background
-        init_pair(8, COLOR_BLACK, COLOR_RED);
-        init_pair(9, COLOR_BLACK, COLOR_GREEN);
-        init_pair(10, COLOR_BLACK, COLOR_YELLOW);
-        init_pair(11, COLOR_BLACK, COLOR_BLUE);
-        init_pair(12, COLOR_BLACK, COLOR_MAGENTA);
-        init_pair(13, COLOR_BLACK, COLOR_CYAN);
-        init_pair(14, COLOR_BLACK, COLOR_WHITE);
-        // White text, colour background
-        init_pair(15, COLOR_WHITE, COLOR_RED);
-        init_pair(16, COLOR_WHITE, COLOR_GREEN);
-        init_pair(17, COLOR_WHITE, COLOR_YELLOW);
-        init_pair(18, COLOR_WHITE, COLOR_BLUE);
-        init_pair(19, COLOR_WHITE, COLOR_MAGENTA);
-        init_pair(20, COLOR_WHITE, COLOR_CYAN);
-        init_pair(21, COLOR_WHITE, COLOR_BLACK);
     }
 }  // namespace module::purpose
