@@ -135,6 +135,7 @@ namespace module::purpose {
             target.torque   = 100;
 
             script.frames[frame].targets.push_back(target);
+            unsaved_changes = true;
 
             // Emit a waypoint so that the motor will go rigid at this angle
             auto waypoint      = std::make_unique<ServoTarget>();
@@ -256,7 +257,10 @@ namespace module::purpose {
 
         // Write our title
         attron(A_BOLD);
-        mvprintw(0, (COLS - 14) / 2, " Script Tuner ");
+        mvprintw(0,
+                 (COLS - 14) / 2,
+                 " Script Tuner%s",
+                 unsaved_changes ? "* " : " ");  // Add asterisk for unsaved changes
         attroff(A_BOLD);
 
         // Top sections
@@ -273,7 +277,7 @@ namespace module::purpose {
         for (size_t i = 0; i < script.frames.size(); ++i) {
             if (i == frame) {
                 // Add some emphasis to show this frame is selected
-                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 2) % 6));
+                attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 5) % 6));
             }
             else {
                 // Dim the other frames
@@ -282,7 +286,7 @@ namespace module::purpose {
             printw(std::to_string(i + 1).c_str());
             if (i == frame) {
                 // Turn off emphasis and color
-                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 2) % 6));
+                attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(8 + (i + 5) % 6));
             }
             else {
                 // Turn off dimming
@@ -406,6 +410,13 @@ namespace module::purpose {
             attroff(A_DIM | COLOR_PAIR(6));  // Cyan
         }
 
+        // Add a note about unsaved changes
+        if (unsaved_changes) {
+            attron(A_BOLD | COLOR_PAIR(3));  // Yellow
+            mvprintw(9 + 20 + 1, 2 + 2, "Your script has unsaved changes!");
+            attroff(A_BOLD | COLOR_PAIR(3));  // Yellow
+        }
+
         // Highlight our selected point
         attron(A_BLINK);
         mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
@@ -434,6 +445,8 @@ namespace module::purpose {
         else {
             // Remove this frame
             script.frames[frame].targets.erase(it);
+            // We've removed a frame so we always have unsaved changes
+            unsaved_changes = true;
 
             // Emit a waypoint so that the motor will turn off gain (go limp)
             auto waypoint      = std::make_unique<ServoTarget>();
@@ -451,6 +464,8 @@ namespace module::purpose {
         auto new_frame = script.frames[frame];
         script.frames.insert(script.frames.begin() + frame, new_frame);
         script.frames[frame].duration = std::chrono::milliseconds(default_duration);
+        // A new frame means we always have unsaved changes
+        unsaved_changes = true;
     }
 
     void ScriptTuner::delete_frame() {
@@ -458,8 +473,19 @@ namespace module::purpose {
         if (script.frames.size() > 1) {
             script.frames.erase(std::begin(script.frames) + frame);
             frame = frame < script.frames.size() ? frame : frame - 1;
+            // We've removed a frame so we always have unsaved changes
+            unsaved_changes = true;
         }
         else {
+            // Check if the last frame is already empty
+            if (script.frames.front().targets.empty()) {
+                beep();
+            }
+            // If it's not empty then we'll have unsaved changes
+            else {
+                unsaved_changes = true;
+            }
+            // Clear the last frame
             script.frames.erase(std::begin(script.frames));
             script.frames.emplace_back();
             frame = 0;
@@ -501,6 +527,7 @@ namespace module::purpose {
     void ScriptTuner::save_script() {
         YAML::Node n(script);
         utility::file::writeToFile(script_path, n);
+        unsaved_changes = false;
     }
 
     void ScriptTuner::edit_duration() {
@@ -523,8 +550,12 @@ namespace module::purpose {
         // If we have a result
         if (!result.empty()) {
             try {
+                // Temp save old duration
+                auto old_duration             = script.frames[frame].duration;
                 int num                       = stoi(result);
                 script.frames[frame].duration = std::chrono::milliseconds(num);
+                // If the duration has changed then we have unsaved changes
+                unsaved_changes |= old_duration != script.frames[frame].duration;
             }
             // If it's not a number then ignore and beep
             catch (std::invalid_argument&) {
@@ -565,20 +596,32 @@ namespace module::purpose {
                     it->id       = id;
                     it->position = 0;
                     it->gain     = default_gain;
+                    // We've added a new frame so we always have unsaved changes
+                    unsaved_changes = true;
                 }
 
                 // If we are entering an angle
                 if (angle_or_gain) {
+                    // Temp save old position to check for changes
+                    auto old_position = script.frames[frame].targets[selection].position;
+
                     // If we are in degrees convert to radians
                     num = deg_or_rad ? num * M_PI / 180 : num;
 
                     // Normalize our angle to be between -pi and pi
                     num = utility::math::angle::normalizeAngle(num);
 
+                    // Set the new position
                     it->position = num;
+
+                    // If the position has changed then we have unsaved changes
+                    unsaved_changes |= old_position != script.frames[frame].targets[selection].position;
                 }
                 // If it is a gain
                 else {
+                    // Temp save old gain to check for changes
+                    auto old_gain = script.frames[frame].targets[selection].gain;
+
                     // Check if the value is < 0 or > 100
                     if (num >= 0 && num <= 100) {
                         it->gain = num;
@@ -586,6 +629,9 @@ namespace module::purpose {
                     else {
                         beep();
                     }
+
+                    // If the gain has changed then we have unsaved changes
+                    unsaved_changes |= old_gain != script.frames[frame].targets[selection].gain;
                 }
             }
             // If it's not a number then ignore and beep
@@ -795,6 +841,8 @@ namespace module::purpose {
             f = new_frame;
             refresh_view();
         }
+        // Mirroring the script is a change
+        unsaved_changes = true;
     }
 
     void ScriptTuner::save_script_as() {
@@ -1139,6 +1187,8 @@ namespace module::purpose {
                 }
             }
         }
+        // Track unsaved changes
+        unsaved_changes |= editScript || editFrame;
         refresh_view();
     }
 
