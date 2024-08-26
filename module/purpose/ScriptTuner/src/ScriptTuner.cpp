@@ -82,7 +82,9 @@ namespace module::purpose {
         , selection(0)
         , angle_or_gain(true)
         , deg_or_rad(false)
-        , unsaved_changes(false) {
+        , unsaved_changes(false)
+        , autosave_path("Debugging")
+        , start_time(std::chrono::system_clock::now()) {
 
         // Add a blank frame to start with
         script.frames.emplace_back();
@@ -153,6 +155,33 @@ namespace module::purpose {
             emit(std::move(waypoint));
         });
 
+        on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
+            // Only autosave if we have unsaved changes
+            if (!unsaved_changes)
+                return;
+
+            // Split the script name into the path and filename
+            auto [autosave_dir, filename] = utility::file::pathSplit(script_path);
+            autosave_dir += "/autosave/";
+
+            // Check if autosave directory exists
+            if (!std::filesystem::exists(autosave_dir)) {
+                // Create the autosave directory
+                utility::file::makeDir(autosave_dir);
+            }
+
+            // Get unix epoch time to use as autosave file identifier
+            auto now = NUClear::clock::now().time_since_epoch().count();
+            // Create filename with unix epoch time
+            autosave_path = autosave_dir + std::to_string(now) + "_" + filename;
+
+            // Save the script to the autosave directory
+            YAML::Node n(script);
+            utility::file::writeToFile(autosave_path, n);
+
+            // Log the autosave even though you can't see logs in script tuner
+            NUClear::log<NUClear::INFO>("Autosaved script to:", autosave_path);
+        });
 
         on<Always>().then([this] {
             switch (getch()) {
@@ -422,6 +451,12 @@ namespace module::purpose {
             mvprintw(9 + 20 + 1, 2 + 2, "Your script has unsaved changes!");
             attroff(A_BOLD | COLOR_PAIR(3));  // Yellow
         }
+        // And display a message to inform if we've autosaved
+        if (!autosave_path.empty()) {
+            attron(A_DIM | COLOR_PAIR(6));  // Cyan
+            mvprintw(9 + 20 + 2, 2 + 2, "Autosaved @ %s", autosave_path.c_str());
+            attroff(A_DIM | COLOR_PAIR(6));  // Cyan
+        }
 
         // Highlight our selected point
         attron(A_BLINK);
@@ -534,6 +569,24 @@ namespace module::purpose {
         YAML::Node n(script);
         utility::file::writeToFile(script_path, n);
         unsaved_changes = false;
+
+        /*
+         * Clear previous autosaves from this session
+         */
+
+        // Get the full path to the autosave directory
+        const auto autosave_dir = utility::file::pathSplit(autosave_path).first;
+        // Loop through all files in the autosave directory
+        for (auto filepath : utility::file::listFiles(autosave_dir)) {
+            // Extract the filename from the path of the current script
+            const auto script_name = utility::file::pathSplit(script_path).second;
+            // Check if the current file is an autosave file from this session
+            if (filepath.find(script_name) != std::string::npos
+                && utility::file::getModificationTime(filepath) > start_time) {
+                // If so, delete the old autosave file now that we've saved the scrip
+                std::filesystem::remove(filepath);
+            }
+        }
     }
 
     void ScriptTuner::edit_duration() {

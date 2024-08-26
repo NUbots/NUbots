@@ -46,6 +46,10 @@ namespace module::purpose {
      */
     class ScriptTuner : public NUClear::Reactor {
     private:
+        /// @brief The autosave interval in seconds
+        /// @note Set to 0 to disable autosave
+        static constexpr size_t AUTOSAVE_INTERVAL = 30;
+
         /// @brief The path to the script we are editing
         std::string script_path;
 
@@ -66,6 +70,13 @@ namespace module::purpose {
 
         /// @brief Whether changes have been made to the script since last save
         bool unsaved_changes;
+
+        /// @brief The last autosave location, so we can notify the user
+        std::string autosave_path;
+
+        /// @brief The time that ScriptTuner was started
+        /// @note Used to determine which autosaves are safe to delete
+        std::chrono::system_clock::time_point start_time;
 
         /// @brief Default gain for new frames
         const double default_gain = 6.64;
