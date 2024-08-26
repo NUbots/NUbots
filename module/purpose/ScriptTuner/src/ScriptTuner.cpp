@@ -329,26 +329,12 @@ namespace module::purpose {
         }
 
         // Each motor
-        const char* MOTOR_NAMES[] = {"Head Pan",
-                                     "Head Tilt",
-                                     "Right Shoulder Pitch",
-                                     "Left  Shoulder Pitch",
-                                     "Right Shoulder Roll",
-                                     "Left  Shoulder Roll",
-                                     "Right Elbow",
-                                     "Left  Elbow",
-                                     "Right Hip Yaw",
-                                     "Left  Hip Yaw",
-                                     "Right Hip Roll",
-                                     "Left  Hip Roll",
-                                     "Right Hip Pitch",
-                                     "Left  Hip Pitch",
-                                     "Right Knee",
-                                     "Left  Knee",
-                                     "Right Ankle Pitch",
-                                     "Left  Ankle Pitch",
-                                     "Right Ankle Roll",
-                                     "Left  Ankle Roll"};
+        const char* MOTOR_NAMES[] = {
+            "Head Pan (Yaw)",      "Head Tilt (Pitch)",   "Right Shoulder Pitch", "Left  Shoulder Pitch",
+            "Right Shoulder Roll", "Left  Shoulder Roll", "Right Elbow",          "Left  Elbow",
+            "Right Hip Yaw",       "Left  Hip Yaw",       "Right Hip Roll",       "Left  Hip Roll",
+            "Right Hip Pitch",     "Left  Hip Pitch",     "Right Knee",           "Left  Knee",
+            "Right Ankle Pitch",   "Left  Ankle Pitch",   "Right Ankle Roll",     "Left  Ankle Roll"};
 
         // Loop through all our motors
         for (size_t i = 0; i < 20; ++i) {
