@@ -76,7 +76,13 @@ namespace module::purpose {
     struct LockServo {};
 
     ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), script_path("Initializing..."), frame(0), selection(0), angle_or_gain(true) {
+        : Reactor(std::move(environment))
+        , script_path("Initializing...")
+        , frame(0)
+        , selection(0)
+        , angle_or_gain(true)
+        , deg_or_rad(false)
+        , unsaved_changes(false) {
 
         // Add a blank frame to start with
         script.frames.emplace_back();

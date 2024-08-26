@@ -62,10 +62,10 @@ namespace module::purpose {
         bool angle_or_gain;
 
         /// @brief If we are displaying angles in degrees or radians
-        bool deg_or_rad = false;
+        bool deg_or_rad;
 
         /// @brief Whether changes have been made to the script since last save
-        bool unsaved_changes = false;
+        bool unsaved_changes;
 
         /// @brief Default gain for new frames
         const double default_gain = 6.64;
