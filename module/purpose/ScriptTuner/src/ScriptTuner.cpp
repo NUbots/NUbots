@@ -157,9 +157,14 @@ namespace module::purpose {
 
         // Debugging to make sure logs are working
         /// TODO: Remove before merging with main
-        on<Every<5, std::chrono::seconds>>().then("Heartbeat", [this] { log<NUClear::DEBUG>("Beep Boop"); });
+        on<Every<5, std::chrono::seconds>>().then("Heartbeat", [this] {
+            static size_t counter = 0;
+            log<NUClear::DEBUG>("Beep Boop ", counter++);
+        });
 
         on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
+            log<NUClear::DEBUG>("Autosaving script if required...");
+
             // Only autosave if we have unsaved changes
             if (!unsaved_changes)
                 return;
@@ -179,8 +184,11 @@ namespace module::purpose {
                 autosave_dir = "/home/nubots/NUbots/.scripttuner/autosave/";
             }
 
+            log<NUClear::DEBUG>("-> Autosaving to: ", autosave_dir);
+
             // Check if autosave directory exists
             if (!std::filesystem::exists(autosave_dir)) {
+                log<NUClear::DEBUG>("-> Creating autosave directory: ", autosave_dir);
                 // Create the autosave directory
                 std::filesystem::create_directories(autosave_dir);
             }
