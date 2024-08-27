@@ -120,7 +120,7 @@ namespace module::purpose {
 
                 // Check if the script exists and load it if it does.
                 if (utility::file::exists(script_path)) {
-                    NUClear::log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
+                    log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
                     load_script(script_path);
                     // Build our initial gui with context from loaded script
                     refresh_view();
@@ -128,7 +128,7 @@ namespace module::purpose {
             }
 
             else {
-                NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                 powerplant.shutdown();
             }
         });
@@ -155,6 +155,10 @@ namespace module::purpose {
             emit(std::move(waypoint));
         });
 
+        // Debugging to make sure logs are working
+        /// TODO: Remove before merging with main
+        on<Every<5, std::chrono::seconds>>().then("Heartbeat", [this] { log<NUClear::DEBUG>("Beep Boop"); });
+
         on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
             // Only autosave if we have unsaved changes
             if (!unsaved_changes)
@@ -180,7 +184,10 @@ namespace module::purpose {
             utility::file::writeToFile(autosave_path, n);
 
             // Log the autosave even though you can't see logs in script tuner
-            NUClear::log<NUClear::INFO>("Autosaved script to:", autosave_path);
+            log<NUClear::INFO>("Autosaved script to:", autosave_path);
+
+            // This will make sure the alert is displayed on the screen
+            refresh_view();
         });
 
         on<Always>().then([this] {
@@ -562,7 +569,7 @@ namespace module::purpose {
         }
 
         // Log a success message
-        NUClear::log<NUClear::DEBUG>("Successfully loaded script from:", path);
+        log<NUClear::DEBUG>("Successfully loaded script from:", path);
     }
 
     void ScriptTuner::save_script() {
@@ -576,8 +583,10 @@ namespace module::purpose {
 
         // Get the full path to the autosave directory
         const auto autosave_dir = utility::file::pathSplit(autosave_path).first;
+        log<NUClear::DEBUG>("Deleting autosaves from this session in: ", autosave_dir);
         // Loop through all files in the autosave directory
         for (auto filepath : utility::file::listFiles(autosave_dir)) {
+            log<NUClear::DEBUG>("Found old autosave file: ", filepath);
             // Extract the filename from the path of the current script
             const auto script_name = utility::file::pathSplit(script_path).second;
             // Check if the current file is an autosave file from this session
@@ -585,10 +594,12 @@ namespace module::purpose {
                 && utility::file::getModificationTime(filepath) > start_time) {
                 // If so, delete the old autosave file now that we've saved the scrip
                 std::filesystem::remove(filepath);
+                log<NUClear::DEBUG>("Deleted old autosave file: ", filepath);
             }
         }
         // Remove the autosave directory if it's empty
         if (std::filesystem::is_empty(autosave_dir)) {
+            log<NUClear::DEBUG>("Deleting empty autosave directory: ", autosave_dir);
             std::filesystem::remove(autosave_dir);
         }
         // Clear the autosave path now that it doesn't exist anymore.
