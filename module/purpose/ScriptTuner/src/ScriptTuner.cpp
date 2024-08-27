@@ -587,6 +587,12 @@ namespace module::purpose {
                 std::filesystem::remove(filepath);
             }
         }
+        // Remove the autosave directory if it's empty
+        if (std::filesystem::is_empty(autosave_dir)) {
+            std::filesystem::remove(autosave_dir);
+        }
+        // Clear the autosave path now that it doesn't exist anymore.
+        autosave_path = "";
     }
 
     void ScriptTuner::edit_duration() {
