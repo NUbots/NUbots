@@ -176,13 +176,13 @@ namespace module::purpose {
             else {
                 // Otherwise, if we're running in the docker container, then replace the
                 // autosave directory with a subdirectory in the mounted `../NUbots/` folder.
-                autosave_dir = "../NUbots/.scripttuner/autosave/";
+                autosave_dir = "/home/nubots/NUbots/.scripttuner/autosave/";
             }
 
             // Check if autosave directory exists
             if (!std::filesystem::exists(autosave_dir)) {
                 // Create the autosave directory
-                utility::file::makeDir(autosave_dir);
+                std::filesystem::create_directories(autosave_dir);
             }
 
             // Get unix epoch time to use as autosave file identifier
