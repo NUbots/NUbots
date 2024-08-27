@@ -484,6 +484,17 @@ namespace module::purpose {
             attroff(A_DIM | COLOR_PAIR(6));  // Cyan
         }
 
+        // Log some info in the bottom left
+        attron(A_DIM | COLOR_PAIR(5));  // Magenta
+        // Figure out how wide the numbers are
+        const auto offset = 1 + (COLS > 9 ? (COLS > 99 ? 3 : 2) : 1) + (LINES > 9 ? (LINES > 99 ? 3 : 2) : 1);
+        // Log the terminal size as COLSxLINES
+        mvprintw(LINES - 3, COLS - 2 - offset, "%dx%d", COLS, LINES);
+        // And log the hostname
+        const auto hostname = utility::support::get_hostname();
+        mvprintw(LINES - 2, COLS - hostname.length() - 2, hostname.c_str());
+        attroff(A_DIM | COLOR_PAIR(5));  // Magenta
+
         // Highlight our selected point
         attron(A_BLINK);
         mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
