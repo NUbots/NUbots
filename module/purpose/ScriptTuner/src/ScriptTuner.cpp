@@ -91,8 +91,8 @@ namespace module::purpose {
         script.frames.back().duration = std::chrono::milliseconds(default_duration);
 
         on<Configuration>("ScriptTuner.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file KeyboardWalk.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
+            this->autosave_on_robot = config["autosave_on_robot"].as<bool>();
         });
 
         on<Startup>().then([this] {
@@ -166,7 +166,18 @@ namespace module::purpose {
 
             // Split the script name into the path and filename
             auto [autosave_dir, filename] = utility::file::pathSplit(script_path);
-            autosave_dir += "/autosave/";
+
+            // Pick the right autosave directory based on the configured save location
+            if (autosave_on_robot) {
+                // If we're autosaving on the robot, then save to an `autosave/` subdirectory
+                // in the same folder of the current script.
+                autosave_dir += "/autosave/";
+            }
+            else {
+                // Otherwise, if we're running in the docker container, then replace the
+                // autosave directory with a subdirectory in the mounted `../NUbots/` folder.
+                autosave_dir = "../NUbots/.scripttuner/autosave/";
+            }
 
             // Check if autosave directory exists
             if (!std::filesystem::exists(autosave_dir)) {
@@ -177,14 +188,14 @@ namespace module::purpose {
             // Get unix epoch time to use as autosave file identifier
             auto now = NUClear::clock::now().time_since_epoch().count();
             // Create filename with unix epoch time
-            autosave_path = autosave_dir + std::to_string(now) + "_" + filename;
+            this->autosave_path = autosave_dir + std::to_string(now) + "_" + filename;
 
             // Save the script to the autosave directory
             YAML::Node n(script);
-            utility::file::writeToFile(autosave_path, n);
+            utility::file::writeToFile(this->autosave_path, n);
 
             // Log the autosave even though you can't see logs in script tuner
-            log<NUClear::INFO>("Autosaved script to:", autosave_path);
+            log<NUClear::INFO>("Autosaved script to:", this->autosave_path);
 
             // This will make sure the alert is displayed on the screen
             refresh_view();
@@ -459,9 +470,9 @@ namespace module::purpose {
             attroff(A_BOLD | COLOR_PAIR(3));  // Yellow
         }
         // And display a message to inform if we've autosaved
-        if (!autosave_path.empty()) {
+        if (!this->autosave_path.empty()) {
             attron(A_DIM | COLOR_PAIR(6));  // Cyan
-            mvprintw(9 + 20 + 2, 2 + 2, "Autosaved @ %s", autosave_path.c_str());
+            mvprintw(9 + 20 + 2, 2 + 2, "Autosaved @ %s", this->autosave_path.c_str());
             attroff(A_DIM | COLOR_PAIR(6));  // Cyan
         }
 
@@ -582,7 +593,7 @@ namespace module::purpose {
          */
 
         // Get the full path to the autosave directory
-        const auto autosave_dir = utility::file::pathSplit(autosave_path).first;
+        const auto autosave_dir = utility::file::pathSplit(this->autosave_path).first;
         log<NUClear::DEBUG>("Deleting autosaves from this session in: ", autosave_dir);
         // Loop through all files in the autosave directory
         for (auto filepath : utility::file::listFiles(autosave_dir)) {
