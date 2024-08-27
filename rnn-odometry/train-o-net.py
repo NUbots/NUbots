@@ -66,7 +66,7 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 25  # Number of files to load
+    num_files = 40  # Number of files to load
     prefix = "s"  # s for straight path
     imu = []
     # servos = []
@@ -426,12 +426,14 @@ def main():
     sequence_length = 100   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
-    # batch_size = 150                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 128                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Partition the training and validation datasets into sequences
     input_data_train, input_targets_train = partition_dataset(input_data_train, input_targets_train, sequence_length)
     input_data_validate, input_targets_validate = partition_dataset(input_data_validate, input_targets_validate, sequence_length)
     validation_data = (input_data_validate, input_targets_validate)
+    # Test for any bugs by using the training data as validation data
+    # validation_data = (input_data_train, input_targets_train)
 
     # Print the shapes of the partitioned datasets
     print(f"input_data_train: {input_data_train.shape}")
@@ -440,24 +442,24 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.00025   # Controls how much to change the model in response to error.
-    epochs = 2000
+    learning_rate = 0.0001   # Controls how much to change the model in response to error.
+    epochs = 1000
     # loss_function = keras.losses.MeanSquaredError()
     loss_function = keras.losses.MeanAbsoluteError()
     # loss_function = keras.losses.Huber()
 
     # Random seed
-    tf.random.set_seed(42)
+    tf.random.set_seed(65)
 
     # ** Optimisers **
     # LR schedules
     # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 60                                         # Number of epochs for learning rate to decay over before it resets
-    # steps_per_epoch = size_of_dataset // 150             # Calculate the number of steps per epoch
+    # decay_to_epoch = 80                                         # Number of epochs for learning rate to decay over before it resets
+    # steps_per_epoch = size_of_dataset // batch_size             # Calculate the number of steps per epoch
     # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     # print(f"Decay to epoch: {decay_to_epoch}")
     # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.000001)
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.00001)
 
     # Static learning rate
     # optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
@@ -477,9 +479,9 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
-    lstm = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(4, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
     batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.3895)(batch_norm)
+    dropout = keras.layers.Dropout(rate=0.1)(batch_norm)
 
     # lstm2 = keras.layers.LSTM(6, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(dropout)    # 32 originally
     # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
@@ -503,7 +505,7 @@ def main():
         epochs=epochs,
         callbacks=[tensorboard_callback],
         # Unspecified batch size will default to 32
-        batch_size=128
+        batch_size=batch_size
     )
 
     # Note add back the model save
