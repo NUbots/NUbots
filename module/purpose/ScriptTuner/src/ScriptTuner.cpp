@@ -357,6 +357,13 @@ namespace module::purpose {
         }
 
 
+        // Log a message if the terminal is too small
+        if (COLS < 80 || LINES < 39) {
+            attron(COLOR_PAIR(2));  // Green
+            mvprintw(7, 2, "If possible, resize this terminal to >= 80x39.");
+            attroff(COLOR_PAIR(2));  // Green
+        }
+
         // Heading Commands
         attron(A_BOLD);
         mvprintw(LINES - 6, 2, "Commands");
@@ -484,14 +491,18 @@ namespace module::purpose {
             attroff(A_DIM | COLOR_PAIR(6));  // Cyan
         }
 
-        // Log some info in the bottom left
-        attron(A_DIM | COLOR_PAIR(5));  // Magenta
-        // Figure out how wide the numbers are
-        const auto offset = 1 + (COLS > 9 ? (COLS > 99 ? 3 : 2) : 1) + (LINES > 9 ? (LINES > 99 ? 3 : 2) : 1);
-        // Log the terminal size as COLSxLINES
-        mvprintw(LINES - 3, COLS - 2 - offset, "%dx%d", COLS, LINES);
+        // Log the terminal size in the bottom left, in highlighted red if we're too small, or dim purple normally
+        attron((COLS < 80 || LINES < 39) ? (A_BOLD | A_STANDOUT | COLOR_PAIR(1)) : (A_DIM | COLOR_PAIR(5)));
+        mvprintw(LINES - 3,
+                 COLS - 2 - (1 + (COLS > 9 ? (COLS > 99 ? 3 : 2) : 1) + (LINES > 9 ? (LINES > 99 ? 3 : 2) : 1)),
+                 "%dx%d",
+                 COLS,
+                 LINES);
+        attroff((COLS < 80 || LINES < 39) ? (A_BOLD | A_STANDOUT | COLOR_PAIR(1)) : (A_DIM | COLOR_PAIR(5)));
+
         // And log the hostname
         const auto hostname = utility::support::get_hostname();
+        attron(A_DIM | COLOR_PAIR(5));  // Magenta
         mvprintw(LINES - 2, COLS - hostname.length() - 2, hostname.c_str());
         attroff(A_DIM | COLOR_PAIR(5));  // Magenta
 
