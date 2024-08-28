@@ -148,6 +148,11 @@ namespace module::purpose {
         /// @brief Setup up colour pairs for ncurses
         void setup_colour_pairs();
 
+        /// @brief Print an ascii image of the NUgus with labelled motors
+        /// @param rows Starting position of the image (top left)
+        /// @param cols Starting position of the image (top left)
+        void print_nugus(const size_t rows, const size_t cols);
+
     public:
         explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
     };

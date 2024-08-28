@@ -511,6 +511,9 @@ namespace module::purpose {
         mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
         attroff(A_BLINK);
 
+        // Print the ascii art of NUgus showing selection, and location of servos
+        print_nugus(8, 55);
+
         // We finished building
         refresh();
     }
@@ -1364,5 +1367,81 @@ namespace module::purpose {
         init_pair(4, COLOR_BLUE, COLOR_BLACK);
         init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
         init_pair(6, COLOR_CYAN, COLOR_BLACK);
+    }
+
+    void ScriptTuner::print_nugus(const size_t line, const size_t col) {
+        const char* NUGUS[21]                                = {"         ____",
+                                                                "       .'    '.",
+                                                                "       |      |",
+                                                                " <- L  |      |  R ->",
+                                                                "        \\ 20 /",
+                                                                "  .-----' 19 '-----.",
+                                                                " /   2          1   \\",
+                                                                "| 4  .          .  3 |",
+                                                                "|   ||  Viewed  ||   |",
+                                                                "|   ||   from   ||   |",
+                                                                "|   ||  behind  ||   |",
+                                                                "| 6 ||          || 5 |",
+                                                                "\\___/|  8 ,,  7 |\\___/",
+                                                                "     | 10 ||  9 |",
+                                                                "     | 12 || 11 |",
+                                                                "     |    ||    |",
+                                                                "     | 14 || 13 |",
+                                                                "     |    ||    |",
+                                                                "     | 18 || 17 |",
+                                                                "     | 16 || 15 |",
+                                                                "     '----''----'"};
+        // The offsets of each ID within the NUgus ascii art.
+        std::array<std::pair<size_t, size_t>, 20> servo_locs = {{
+            {6, 16},   // ID 1
+            {6, 5},    // ID 2
+            {7, 19},   // ID 3
+            {7, 2},    // ID 4
+            {11, 19},  // ID 5
+            {11, 2},   // ID 6
+            {12, 14},  // ID 7
+            {12, 8},   // ID 8
+            {13, 14},  // ID 9
+            {13, 7},   // ID 10
+            {14, 13},  // ID 11
+            {14, 7},   // ID 12
+            {16, 13},  // ID 13
+            {16, 7},   // ID 14
+            {18, 13},  // ID 15
+            {18, 7},   // ID 16
+            {19, 13},  // ID 17
+            {19, 7},   // ID 18
+            {5, 10},   // ID 19
+            {4, 10}    // ID 20
+        }};
+
+        // Print the NUGUS
+        attron(A_DIM);
+        for (uint8_t i = 0; i < 21; i++) {
+            mvprintw(line + i, col, NUGUS[i]);
+        }
+        attroff(A_DIM);
+
+        // Print the servos showing if they're locked or not
+        // Default to unlocked, redraw the locks once we find them
+        for (uint8_t i = 0; i < 20; i++) {
+            // Verbosity to help off-by-one error hell
+            const uint8_t dxl_id  = i + 1;
+            const size_t list_idx = (i + 2) % 20;
+            attron(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
+            mvprintw(line + servo_locs[i].first, col + servo_locs[i].second, "%d", dxl_id);
+            attroff(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
+        }
+        // Loop through each motor in the frame and draw a lock if it's locked
+        for (auto& target : script.frames[frame].targets) {
+            // Even more verbosity to help off-by-one error even-hell-er
+            const uint8_t id      = static_cast<uint32_t>(target.id);
+            const uint8_t dxl_id  = id + 1;
+            const size_t list_idx = (id + 2) % 20;
+
+            attron(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
+            mvprintw(line + servo_locs[id].first, col + servo_locs[id].second, "%d", dxl_id);
+            attroff(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
+        }
     }
 }  // namespace module::purpose
