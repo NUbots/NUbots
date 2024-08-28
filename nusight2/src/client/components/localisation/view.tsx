@@ -339,24 +339,26 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />
       )}
 
-      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
+      {/* <LocalisedRobots id={robot.id} rRFf={robot.rRFf} /> */}
+
+      {/* {model.fieldIntersectionsVisible && robot.fieldIntersections && (
         <FieldIntersections intersections={robot.fieldIntersections} />
-      )}
+      )} */}
 
-      {model.walkToDebugVisible && robot.Hfd && (
+      {/* {model.walkToDebugVisible && robot.Hfd && (
         <WalkPathVisualiser model={robot} />
-      )}
+      )} */}
 
-      {robot.Hft && robot.purpose && (
+      {/* {robot.Hft && robot.purpose && (
         <PurposeLabel
           robotModel={robot}
           cameraPitch={model.camera.pitch}
           cameraYaw={model.camera.yaw}
         />
-      )}
+      )} */}
 
       {model.walkToDebugVisible && robot.Hfd && (
-        <WalkPathGoal model={robot} />
+        <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />
       )}
 
       {model.particlesVisible && <Particles particles={robot.particles} />}
@@ -395,7 +397,6 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     ))}
 
     {model.goalVisible && <Goals model={model} />}
-    <LocalisedRobots model={model} />
   </object3D>
 ));
 
