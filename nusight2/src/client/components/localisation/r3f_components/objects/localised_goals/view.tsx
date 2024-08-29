@@ -3,11 +3,11 @@ import React from "react";
 import { Vector3 } from "../../../../../../shared/math/vector3";
 import { LocalisationModel } from "../../../model";
 
-interface GoalsProps {
+interface LocalisedGoalsProps {
   rGFf: { bottom: Vector3; top: Vector3 }[];
 }
 
-export const Goals = ({ rGFf }: GoalsProps) => (
+export const LocalisedGoals = ({ rGFf }: LocalisedGoalsProps) => (
   <object3D>
     {rGFf.map((goal, i) => {
       return (

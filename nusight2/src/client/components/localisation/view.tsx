@@ -17,7 +17,7 @@ import { FieldView } from "./r3f_components/objects/field/view";
 import { FieldIntersections } from "./r3f_components/objects/field_intersections/view";
 import { FieldLinePoints } from "./r3f_components/objects/field_line_points/view";
 import { GridView } from "./r3f_components/objects/grid/view";
-import { Goals } from "./r3f_components/objects/localised_goals/view";
+import { LocalisedGoals } from "./r3f_components/objects/localised_goals/view";
 import { LocalisedRobots } from "./r3f_components/objects/localised_robots/view";
 import { Nugus } from "./r3f_components/objects/nugus/view";
 import { Particles } from "./r3f_components/objects/particles/view";
@@ -268,7 +268,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
         <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
         <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
-        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalsVisible} onClick={props.toggleGoalVisibility} />
         <MenuItem
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
@@ -339,7 +339,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />
       )}
 
-      {model.goalVisible && <Goals rGFf={robot.rGFf} />}
+      {model.goalsVisible && <LocalisedGoals rGFf={robot.rGFf} />}
 
       <LocalisedRobots id={robot.id} rRFf={robot.rRFf} />
 
