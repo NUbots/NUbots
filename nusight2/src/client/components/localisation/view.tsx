@@ -339,23 +339,32 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />
       )}
 
-      {/* <LocalisedRobots id={robot.id} rRFf={robot.rRFf} /> */}
+      {model.goalVisible && <Goals rGFf={robot.rGFf} />}
 
-      {/* {model.fieldIntersectionsVisible && robot.fieldIntersections && (
+      <LocalisedRobots id={robot.id} rRFf={robot.rRFf} />
+
+      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
         <FieldIntersections intersections={robot.fieldIntersections} />
-      )} */}
+      )}
 
-      {/* {model.walkToDebugVisible && robot.Hfd && (
-        <WalkPathVisualiser model={robot} />
-      )} */}
-
-      {/* {robot.Hft && robot.purpose && (
-        <PurposeLabel
-          robotModel={robot}
-          cameraPitch={model.camera.pitch}
-          cameraYaw={model.camera.yaw}
+      {model.walkToDebugVisible && robot.Hfd && robot.Hfr && (
+        <WalkPathVisualiser
+          Hfd={robot.Hfd}
+          Hfr={robot.Hfr}
+          Hft={robot.Hft}
+          min_align_radius={robot.min_align_radius}
+          max_align_radius={robot.max_align_radius}
+          min_angle_error={robot.min_angle_error}
+          max_angle_error={robot.max_angle_error}
+          angle_to_final_heading={robot.angle_to_final_heading}
+          velocity_target={robot.velocity_target}
         />
-      )} */}
+      )}
+
+      {robot.Hft && robot.purpose && (
+        <PurposeLabel Hft={robot.Hft} player_id={robot.player_id} color={robot.color} purpose={robot.purpose} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw}
+        />
+      )}
 
       {model.walkToDebugVisible && robot.Hfd && (
         <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />
@@ -395,8 +404,6 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.robotVisible && model.robots.map(robot => (
       <RobotComponents key={robot.id} robot={robot} model={model} />
     ))}
-
-    {model.goalVisible && <Goals model={model} />}
   </object3D>
 ));
 

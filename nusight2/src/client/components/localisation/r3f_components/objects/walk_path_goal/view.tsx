@@ -82,7 +82,7 @@ export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) 
           // Set opacity for all mesh children
           child.material.transparent = true;
           // Red
-          child.material.color = "rgb(0, 100, 100)";
+          child.material.color.setStyle("rgb(0, 100, 100)");
           child.material.opacity = 0.2;
         }
       });
