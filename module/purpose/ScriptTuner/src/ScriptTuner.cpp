@@ -1225,7 +1225,7 @@ namespace module::purpose {
                     }  // end KEY_ENTER else
                     mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                     break;  // end case KEY_ENTER
-            }  // switch
+            }               // switch
 
         }  // while
 
@@ -1370,27 +1370,27 @@ namespace module::purpose {
     }
 
     void ScriptTuner::print_nugus(const size_t line, const size_t col) {
-        const char* NUGUS[21]                                = {"         ____",
-                                                                "       .'    '.",
-                                                                "       |      |",
-                                                                " <- L  |      |  R ->",
-                                                                "        \\ 20 /",
-                                                                "  .-----' 19 '-----.",
-                                                                " /   2          1   \\",
-                                                                "| 4  .          .  3 |",
-                                                                "|   ||  Viewed  ||   |",
-                                                                "|   ||   from   ||   |",
-                                                                "|   ||  behind  ||   |",
-                                                                "| 6 ||          || 5 |",
-                                                                "\\___/|  8 ,,  7 |\\___/",
-                                                                "     | 10 ||  9 |",
-                                                                "     | 12 || 11 |",
-                                                                "     |    ||    |",
-                                                                "     | 14 || 13 |",
-                                                                "     |    ||    |",
-                                                                "     | 18 || 17 |",
-                                                                "     | 16 || 15 |",
-                                                                "     '----''----'"};
+        const char* NUGUS[21] = {"         ____",
+                                 "       .'    '.",
+                                 "       |      |",
+                                 " <- L  |      |  R ->",
+                                 "        \\ 20 /",
+                                 "  .-----' 19 '-----.",
+                                 " /   2          1   \\",
+                                 "| 4  .          .  3 |",
+                                 "|   ||  Viewed  ||   |",
+                                 "|   ||   from   ||   |",
+                                 "|   ||  behind  ||   |",
+                                 "| 6 ||          || 5 |",
+                                 "\\___/|  8 ,,  7 |\\___/",
+                                 "     | 10 ||  9 |",
+                                 "     | 12 || 11 |",
+                                 "     |    ||    |",
+                                 "     | 14 || 13 |",
+                                 "     |    ||    |",
+                                 "     | 18 || 17 |",
+                                 "     | 16 || 15 |",
+                                 "     '----''----'"};
         // The offsets of each ID within the NUgus ascii art.
         std::array<std::pair<size_t, size_t>, 20> servo_locs = {{
             {6, 16},   // ID 1
