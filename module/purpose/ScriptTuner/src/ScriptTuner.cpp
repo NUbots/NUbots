@@ -366,48 +366,53 @@ namespace module::purpose {
         // Log a message if the terminal is too small
         if (COLS < 80 || LINES < 39) {
             attron(COLOR_PAIR(2));  // Green
-            mvprintw(7, 2, "If possible, resize this terminal to >= 80x39.");
+            mvprintw(7, 2, "If possible, resize this terminal to >= 74x39.");
             attroff(COLOR_PAIR(2));  // Green
         }
 
-        // Heading Commands
-        attron(A_BOLD);
-        mvprintw(LINES - 6, 2, "Commands");
-        attroff(A_BOLD);
+
         mvprintw(LINES - 2, 2, "Type :help for a full list of commands");
 
-        // Each Command
-        const char* COMMANDS[] = {",", ".", "N", "I", " ", "T", "J", "G", "P", "S"};
-
-        // Each Meaning
-        const char* MEANINGS[] = {"Left a frame",
-                                  "Right a frame",
-                                  "New Frame",
-                                  "Delete Frame",
-                                  "Lock/Unlock",
-                                  "Edit Duration",
-                                  "Jump to Frame",
-                                  "Change Gains",
-                                  "Play",
-                                  "Save"};
-
-        // Prints commands and their meanings to the screen
-        for (size_t i = 0; i < 10; i = i + 2) {
+        // Only print help commands if the window is big enough to fit them
+        if (LINES >= 36) {
+            // Heading Commands
             attron(A_BOLD);
-            attron(A_STANDOUT);
-            mvprintw(LINES - 5, 2 + ((2 + 14) * (i / 2)), COMMANDS[i]);
+            mvprintw(LINES - 6, 2, "Commands");
             attroff(A_BOLD);
-            attroff(A_STANDOUT);
-            mvprintw(LINES - 5, 4 + ((2 + 14) * (i / 2)), MEANINGS[i]);
-        }
 
-        for (size_t i = 1; i < 10; i = i + 2) {
-            attron(A_BOLD);
-            attron(A_STANDOUT);
-            mvprintw(LINES - 4, 2 + ((2 + 14) * ((i - 1) / 2)), COMMANDS[i]);
-            attroff(A_BOLD);
-            attroff(A_STANDOUT);
-            mvprintw(LINES - 4, 4 + ((2 + 14) * ((i - 1) / 2)), MEANINGS[i]);
+            // Each Command
+            const char* COMMANDS[] = {",", ".", "N", "I", " ", "T", "J", "G", "P", "S"};
+
+            // Each Meaning
+            const char* MEANINGS[] = {"Left a frame",
+                                      "Right a frame",
+                                      "New Frame",
+                                      "Delete Frame",
+                                      "Lock/Unlock",
+                                      "Edit Duration",
+                                      "Jump to Frame",
+                                      "Change Gains",
+                                      "Play",
+                                      "Save"};
+
+            // Prints commands and their meanings to the screen
+            for (size_t i = 0; i < 10; i = i + 2) {
+                attron(A_BOLD);
+                attron(A_STANDOUT);
+                mvprintw(LINES - 5, 2 + ((2 + 14) * (i / 2)), COMMANDS[i]);
+                attroff(A_BOLD);
+                attroff(A_STANDOUT);
+                mvprintw(LINES - 5, 4 + ((2 + 14) * (i / 2)), MEANINGS[i]);
+            }
+
+            for (size_t i = 1; i < 10; i = i + 2) {
+                attron(A_BOLD);
+                attron(A_STANDOUT);
+                mvprintw(LINES - 4, 2 + ((2 + 14) * ((i - 1) / 2)), COMMANDS[i]);
+                attroff(A_BOLD);
+                attroff(A_STANDOUT);
+                mvprintw(LINES - 4, 4 + ((2 + 14) * ((i - 1) / 2)), MEANINGS[i]);
+            }
         }
 
         // Each motor
@@ -517,8 +522,10 @@ namespace module::purpose {
         mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
         attroff(A_BLINK);
 
-        // Print the ascii art of NUgus showing selection, and location of servos
-        print_nugus(8, 55);
+        // Print the ascii art of NUgus showing selection, and location of servos if there's space
+        if (COLS >= 74) {
+            print_nugus(8, COLS >= 87 ? 58 : 51 + (COLS - 51 - 22) / 2);
+        }
 
         // We finished building
         refresh();
@@ -1233,7 +1240,7 @@ namespace module::purpose {
                     }  // end KEY_ENTER else
                     mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                     break;  // end case KEY_ENTER
-            }               // switch
+            }  // switch
 
         }  // while
 
