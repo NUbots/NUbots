@@ -98,6 +98,8 @@ namespace module::purpose {
         on<Startup>().then([this] {
             // Start curses mode
             initscr();
+            // Make input capture non-blocking
+            nodelay(stdscr, true);
             // Capture our characters immediately (but pass through signals)
             cbreak();
             // Capture arrows and function keys
@@ -285,6 +287,10 @@ namespace module::purpose {
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
                     break;
+                case KEY_RESIZE:  // Capture resize events to trigger redraw
+                    break;
+                case ERR:  // No input, don't waste time refreshing
+                    return;
             }
             // Update whatever visual changes we made
             refresh_view();
@@ -595,6 +601,8 @@ namespace module::purpose {
                 case 27: return "";
                 case '\n':
                 case KEY_ENTER: return chars.str(); break;
+                case ERR: break;         // Handle no input
+                case KEY_RESIZE: break;  // Handle resize
                 default:
                     chars << static_cast<char>(ch);
                     addch(ch);
