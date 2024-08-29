@@ -56,10 +56,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1"
-                : "hover:bg-auto-contrast-1"
-                }`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -331,13 +332,9 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
     <object3D key={robot.id}>
       <Nugus model={robot} />
 
-      {model.fieldLinePointsVisible && (
-        <FieldLinePoints points={robot.rPFf} color="blue" size={0.02} />
-      )}
+      {model.fieldLinePointsVisible && <FieldLinePoints points={robot.rPFf} color="blue" size={0.02} />}
 
-      {model.ballVisible && robot.rBFf && (
-        <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />
-      )}
+      {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
 
       {model.goalsVisible && <LocalisedGoals rGFf={robot.rGFf} />}
 
@@ -362,13 +359,17 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       )}
 
       {robot.Hft && robot.purpose && (
-        <PurposeLabel Hft={robot.Hft} player_id={robot.player_id} color={robot.color} purpose={robot.purpose} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw}
+        <PurposeLabel
+          Hft={robot.Hft}
+          player_id={robot.player_id}
+          color={robot.color}
+          purpose={robot.purpose}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
         />
       )}
 
-      {model.walkToDebugVisible && robot.Hfd && (
-        <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />
-      )}
+      {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
 
       {model.particlesVisible && <Particles particles={robot.particles} />}
 
@@ -401,9 +402,7 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
 
-    {model.robotVisible && model.robots.map(robot => (
-      <RobotComponents key={robot.id} robot={robot} model={model} />
-    ))}
+    {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>
 ));
 

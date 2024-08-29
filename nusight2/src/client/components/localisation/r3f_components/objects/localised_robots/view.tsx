@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Vector3 } from "../../../../../../shared/math/vector3";
-import { LocalisationModel } from "../../../model";
 
 interface LocalisedRobotsProps {
   id: string;

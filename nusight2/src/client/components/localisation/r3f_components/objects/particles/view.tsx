@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Vector3 } from "../../../../../../shared/math/vector3";
 
 interface ParticlesProps {

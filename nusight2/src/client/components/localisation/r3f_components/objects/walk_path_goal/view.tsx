@@ -2,13 +2,13 @@ import React from "react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { ServoMotorSet } from "../../../robot_model";
 import { Matrix4 } from "../../../../../../shared/math/matrix4";
+import { ServoMotorSet } from "../../../robot_model";
 
 interface WalkPathGoalProps {
   Hfd: Matrix4;
   Hft: Matrix4;
-  motors: ServoMotorSet
+  motors: ServoMotorSet;
 }
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";

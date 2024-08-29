@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Vector3 } from "../../../../../../shared/math/vector3";
 import { FieldIntersection } from "../../../robot_model";
 
@@ -49,17 +50,11 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
       return (
         <>
           {commonCircle}
-          <mesh
-            position={[basePosition[0], basePosition[1], basePosition[2]]}
-            rotation={[0, 0, Math.PI / 4]}
-          >
+          <mesh position={[basePosition[0], basePosition[1], basePosition[2]]} rotation={[0, 0, Math.PI / 4]}>
             <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
-          <mesh
-            position={[basePosition[0], basePosition[1], basePosition[2]]}
-            rotation={[0, 0, -Math.PI / 4]}
-          >
+          <mesh position={[basePosition[0], basePosition[1], basePosition[2]]} rotation={[0, 0, -Math.PI / 4]}>
             <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
