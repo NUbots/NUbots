@@ -367,9 +367,9 @@ namespace module::purpose {
 
         // Log a message if the terminal is too small
         if (COLS < 74 || LINES < 39) {
-            attron(COLOR_PAIR(2));  // Green
+            attron(COLOR_PAIR(3));  // Yellow
             mvprintw(7, 2, "If possible, resize this terminal to >= 74x39.");
-            attroff(COLOR_PAIR(2));  // Green
+            attroff(COLOR_PAIR(3));  // Yellow
         }
 
         // Log whether we currently have autosave enabled
@@ -434,9 +434,9 @@ namespace module::purpose {
         // Loop through all our motors
         for (size_t i = 0; i < 20; ++i) {
             // Everything defaults to unlocked, we add locks as we find them
-            attron(COLOR_PAIR(2));  // Green
+            attron(COLOR_PAIR(1));  // Red
             mvprintw(i + 9, 2, "U");
-            attroff(COLOR_PAIR(2));  // Green
+            attroff(COLOR_PAIR(1));  // Red
 
             // highlight the selection
             attron(i == selection ? A_BOLD : A_DIM);
@@ -453,9 +453,9 @@ namespace module::purpose {
 
         for (auto& target : script.frames[frame].targets) {
             // Output that this frame is locked (we shuffle the head to the top of the list)
-            attron(COLOR_PAIR(1));  // Red
+            attron(COLOR_PAIR(2));  // Green
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
-            attroff(COLOR_PAIR(1));  // Red
+            attroff(COLOR_PAIR(2));  // Green
 
             // Highlight the selection by dimming others
             if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
@@ -1457,10 +1457,19 @@ namespace module::purpose {
         }};
 
         // Print the NUGUS
-        attron(A_DIM);
+        attron(A_DIM | COLOR_PAIR(4));
         for (uint8_t i = 0; i < 21; i++) {
             mvprintw(line + i, col, NUGUS[i]);
         }
+        attroff(A_DIM | COLOR_PAIR(4));
+
+        // Print the text in grey
+        attron(A_DIM);
+        mvprintw(line + 3, col + 1, "<- L");
+        mvprintw(line + 3, col + 17, "R ->");
+        mvprintw(line + 8, col + 8, "Viewed");
+        mvprintw(line + 9, col + 9, "from");
+        mvprintw(line + 10, col + 8, "behind");
         attroff(A_DIM);
 
         // Print the servos showing if they're locked or not
@@ -1469,9 +1478,9 @@ namespace module::purpose {
             // Verbosity to help off-by-one error hell
             const uint8_t dxl_id  = i + 1;
             const size_t list_idx = (i + 2) % 20;
-            attron(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
+            attron(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
             mvprintw(line + servo_locs[i].first, col + servo_locs[i].second, "%d", dxl_id);
-            attroff(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
+            attroff(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
         }
         // Loop through each motor in the frame and draw a lock if it's locked
         for (auto& target : script.frames[frame].targets) {
@@ -1480,9 +1489,9 @@ namespace module::purpose {
             const uint8_t dxl_id  = id + 1;
             const size_t list_idx = (id + 2) % 20;
 
-            attron(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
+            attron(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
             mvprintw(line + servo_locs[id].first, col + servo_locs[id].second, "%d", dxl_id);
-            attroff(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
+            attroff(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
         }
     }
 }  // namespace module::purpose
