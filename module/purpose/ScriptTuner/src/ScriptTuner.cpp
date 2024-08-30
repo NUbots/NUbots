@@ -77,6 +77,7 @@ namespace module::purpose {
 
     ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
+        , autosave_enabled(AUTOSAVE_INTERVAL != 0)
         , script_path("Initializing...")
         , frame(0)
         , selection(0)
@@ -167,8 +168,8 @@ namespace module::purpose {
         on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
             log<NUClear::DEBUG>("Autosaving script if required...");
 
-            // Only autosave if we have unsaved changes
-            if (!unsaved_changes)
+            // Only autosave if autosaving is enabled and we have unsaved changes
+            if (!autosave_enabled || !unsaved_changes)
                 return;
 
             // Split the script name into the path and filename
@@ -281,6 +282,9 @@ namespace module::purpose {
                 case 'D':  // switch units between degrees and radians
                     deg_or_rad = !deg_or_rad;
                     break;
+                case 'V':  // Toggle autosave
+                    autosave_enabled = !autosave_enabled;
+                    break;
                 case ':':  // lists commands
                     help();
                     break;
@@ -365,6 +369,12 @@ namespace module::purpose {
             mvprintw(7, 2, "If possible, resize this terminal to >= 74x39.");
             attroff(COLOR_PAIR(2));  // Green
         }
+
+        // Log whether we currently have autosave enabled
+        mvprintw(2, COLS - 2 - 13, "Autosave:    ");
+        attron(A_BOLD | (autosave_enabled ? COLOR_PAIR(2) : COLOR_PAIR(1)));
+        mvprintw(2, COLS - 2 - 3, autosave_enabled ? "ON" : "OFF");
+        attroff(A_BOLD | (autosave_enabled ? COLOR_PAIR(2) : COLOR_PAIR(1)));
 
 
         mvprintw(LINES - 2, 2, "Type :help for a full list of commands");
@@ -796,26 +806,29 @@ namespace module::purpose {
         if (tempcommand == "help") {
             curs_set(0);
 
-            const char* ALL_COMMANDS[] =
-                {"/", ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "D", "X", "Ctrl-C"};
+            const int NUM_COMMANDS = 18;
 
-            const char* ALL_MEANINGS[] = {"Select the other servo in a pair",
-                                          "Left a frame",
-                                          "Right a frame",
-                                          "New Frame",
-                                          "Delete Frame",
-                                          "Lock/Unlock",
-                                          "Edit Duration",
-                                          "Jump to Frame",
-                                          "Edit the gains of an entire Script or Frame",
-                                          "Play",
-                                          "Save",
-                                          "Saves Script As",
-                                          "Manual Refresh View",
-                                          "Mirrors the script",
-                                          "Switch between degree and radian display modes",
-                                          "Exit (this works to exit help and edit_gain)",
-                                          "Quit Script Tuner"};
+            const char* ALL_COMMANDS[NUM_COMMANDS] =
+                {"/", ",", ".", "N", "I", "space", "T", "J", "G", "P", "S", "A", "R", "M", "D", "V", "X", "Ctrl-C"};
+
+            const char* ALL_MEANINGS[NUM_COMMANDS] = {"Select the other servo in a pair",
+                                                      "Left a frame",
+                                                      "Right a frame",
+                                                      "New Frame",
+                                                      "Delete Frame",
+                                                      "Lock/Unlock",
+                                                      "Edit Duration",
+                                                      "Jump to Frame",
+                                                      "Edit the gains of an entire Script or Frame",
+                                                      "Play",
+                                                      "Save",
+                                                      "Saves Script As",
+                                                      "Manual Refresh View",
+                                                      "Mirrors the script",
+                                                      "Switch between degree and radian display modes",
+                                                      "Toggle autosave on/off",
+                                                      "Exit (this works to exit help and edit_gain)",
+                                                      "Quit Script Tuner"};
 
             size_t longestCommand = 0;
             for (const auto& command : ALL_COMMANDS) {
@@ -828,7 +841,7 @@ namespace module::purpose {
             mvprintw(0, (COLS - 14) / 2, " Script Tuner ");
             mvprintw(3, 2, "Help Commands:");
             attroff(A_BOLD);
-            for (size_t i = 0; i < 16; i++) {
+            for (size_t i = 0; i < NUM_COMMANDS; i++) {
                 mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                 mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
             }
@@ -841,7 +854,7 @@ namespace module::purpose {
                 mvprintw(3, 2, "Help Commands:");
                 attroff(A_BOLD);
 
-                for (size_t i = 0; i < 15; i++) {
+                for (size_t i = 0; i < NUM_COMMANDS; i++) {
                     mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                     mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                 }

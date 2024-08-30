@@ -54,6 +54,9 @@ namespace module::purpose {
         /// mounted ../NUbots folder in the docker container
         bool autosave_on_robot;
 
+        /// @brief Is autosaving enabled?
+        bool autosave_enabled;
+
         /// @brief The path to the script we are editing
         std::string script_path;
 
