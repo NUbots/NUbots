@@ -287,10 +287,10 @@ namespace module::purpose {
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
                     break;
-                case KEY_RESIZE:  // Capture resize events to trigger redraw
-                    break;
-                case ERR:  // No input, don't waste time refreshing
-                    return;
+                    // case KEY_RESIZE:  // Capture resize events to trigger redraw
+                    //     break;
+                    // case ERR:  // No input, don't waste time refreshing
+                    //     return;
             }
             // Update whatever visual changes we made
             refresh_view();
