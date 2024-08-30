@@ -604,11 +604,26 @@ namespace module::purpose {
                 case 27: return "";
                 case '\n':
                 case KEY_ENTER: return chars.str(); break;
-                case ERR: break;         // Handle no input
-                case KEY_RESIZE: break;  // Handle resize
+                case KEY_BACKSPACE:
+                    // If we have characters to delete
+                    if (!chars.str().empty()) {
+                        // Move one character back
+                        chars.seekp(-1, std::ios_base::end);
+                        addch('\b');
+                        // Overwrite the character we want to backspace
+                        chars << '\0';
+                        addch(' ');
+                        // And move the write head back again
+                        chars.seekp(-1, std::ios_base::end);
+                        addch('\b');
+                    }
+                    break;
                 default:
-                    chars << static_cast<char>(ch);
-                    addch(ch);
+                    // Check if we have a printable character before we do anything with it
+                    if (isprint(ch)) {
+                        chars << static_cast<char>(ch);
+                        addch(ch);
+                    }
                     break;
             }
         }
