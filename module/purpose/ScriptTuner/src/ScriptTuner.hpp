@@ -156,6 +156,10 @@ namespace module::purpose {
         /// @param cols Starting position of the image (top left)
         void print_nugus(const size_t rows, const size_t cols);
 
+        /// @brief Change selection up, down, left, right from nugus' body
+        /// @param direction The direction to move the selection (up, left, down, right)=(0, 1, 2, 3)
+        void move_nugus_selection(const uint8_t direction);
+
     public:
         explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
     };

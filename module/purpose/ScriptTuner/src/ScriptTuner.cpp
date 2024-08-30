@@ -232,6 +232,18 @@ namespace module::purpose {
                 case KEY_RIGHT:  // Swap between angle and gain
                     angle_or_gain = !angle_or_gain;
                     break;
+                case 'w':  // Move selection up in NUgus frame
+                    move_nugus_selection(0);
+                    break;
+                case 'a':  // Move selection left in NUgus frame
+                    move_nugus_selection(1);
+                    break;
+                case 's':  // Move selection down in NUgus frame
+                    move_nugus_selection(2);
+                    break;
+                case 'd':  // Move selection right in NUgus frame
+                    move_nugus_selection(3);
+                    break;
                 case ',':  // Move left a frame
                     if (frame > 0)
                         activate_frame(frame - 1);
@@ -808,12 +820,15 @@ namespace module::purpose {
         if (tempcommand == "help") {
             curs_set(0);
 
-            const int NUM_COMMANDS = 18;
+            const int NUM_COMMANDS = 20;
 
-            const char* ALL_COMMANDS[NUM_COMMANDS] =
-                {"/", ",", ".", "N", "I", "space", "T", "J", "G", "P", "S", "A", "R", "M", "D", "V", "X", "Ctrl-C"};
+            const char* ALL_COMMANDS[NUM_COMMANDS] = {"Arrows", "wasd", "/", ",", ".", "N",     "I",
+                                                      "Space",  "T",    "J", "G", "P", "S",     "A",
+                                                      "R",      "M",    "D", "V", "X", "Ctrl-C"};
 
-            const char* ALL_MEANINGS[NUM_COMMANDS] = {"Select the other servo in a pair",
+            const char* ALL_MEANINGS[NUM_COMMANDS] = {"Navigate around the servo list (vim-style hjlk works too)",
+                                                      "Navigate around the NUgus body",
+                                                      "Select the other servo in a pair",
                                                       "Left a frame",
                                                       "Right a frame",
                                                       "New Frame",
@@ -1493,5 +1508,51 @@ namespace module::purpose {
             mvprintw(line + servo_locs[id].first, col + servo_locs[id].second, "%d", dxl_id);
             attroff(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
         }
+    }
+
+    void ScriptTuner::move_nugus_selection(const uint8_t direction) {
+        // Get the current (dynamixel) id
+        auto id = 1 + (selection < 2 ? 18 + selection : selection - 2);
+        // Move the selection based on the direction
+        // clang-format off
+        switch (direction) {
+            case 0:  // up
+                // for all lower servos, traverse up the same side
+                if (id > 2 && id < 19) id -= 2;
+                // shoulder, go to neck
+                else if (id == 1 || id == 2) id = 19;
+                // lower neck, go up
+                else if (id == 19) id = 20;
+                // upper neck, wrap around to the bottom right
+                else if (id == 20) id = 17;
+                break;
+            case 1:  // left
+                // for all body servos, just switch sides
+                if (id < 19) id = id % 2 ? id + 1 : id - 1;
+                // for the lower neck, move down
+                else if (id == 19) id = 2;
+                // for upper neck, do nothing
+                break;
+            case 2:  // down
+                // for main body, just traverse the sides
+                if (id < 17) id += 2;
+                // for feet, go to upper neck
+                else if (id == 17 || id == 18) id = 20;
+                // for lower neck, go to left shoulder
+                else if (id == 19) id = 2;
+                // for upper neck, go to lower neck
+                else if (id == 20) id = 19;
+                break;
+            case 3:  // right
+                // for all body servos, just switch sides
+                if (id < 19) id = id % 2 ? id + 1 : id - 1;
+                // for the lower neck, move down
+                else if (id == 19) id = 1;
+                // for upper neck, do nothing
+                break;
+        }
+        // clang-format on
+        // Set the selection based on the new id
+        selection = ((id - 1) + 2) % 20;
     }
 }  // namespace module::purpose
