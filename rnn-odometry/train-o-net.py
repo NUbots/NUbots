@@ -66,14 +66,26 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 40  # Number of files to load
-    prefix = "s"  # s for straight path
+    num_files = 30  # Number of files to load
+    skip_files = []  # Files to skip - start stop runs: 8,14,15,22,25
+    prefix = "s-new"  # s for straight path
     imu = []
     # servos = []
     truth_all = []
     truth_start_end_indicator = []
 
-    for i in range(first_file, num_files):
+    for i in range(first_file, num_files + 1):
+
+        # Check that the start and end files are not in the skip_files list
+        if first_file in skip_files or num_files in skip_files:
+            print("Error: Start or end file in skip_files list.")
+            # Exit program
+            break
+
+        # Skip files in the skip_files list
+        if i in skip_files:
+            print(f"Skipping file {i}")
+            continue
         imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
         imu.append(imu_data)
 
@@ -96,11 +108,11 @@ def main():
         # plt.ylabel('IMU Values')
 
         # # Plot Servos data
-        # plt.subplot(3, 1, 2)
-        # plt.plot(servos_data)
-        # plt.title(f'Servos Data - File {i}')
-        # plt.xlabel('Sample')
-        # plt.ylabel('Servos Values')
+        # # plt.subplot(3, 1, 2)
+        # # plt.plot(servos_data)
+        # # plt.title(f'Servos Data - File {i}')
+        # # plt.xlabel('Sample')
+        # # plt.ylabel('Servos Values')
 
         # # Plot Truth data
         # plt.subplot(3, 1, 3)
@@ -454,12 +466,18 @@ def main():
     # ** Optimisers **
     # LR schedules
     # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 80                                         # Number of epochs for learning rate to decay over before it resets
+    # decay_to_epoch = 50                                         # Number of epochs for learning rate to decay over before it resets
     # steps_per_epoch = size_of_dataset // batch_size             # Calculate the number of steps per epoch
     # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     # print(f"Decay to epoch: {decay_to_epoch}")
     # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+
+    # LR schedule to decay the learning rate over a given number of steps (epochs calculated above), then it will reset.
     # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.00001)
+
+    # LR schedule to decrease learning rate by 0.1 after 100 epochs
+    # lr_schedule = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=learning_rate, decay_steps=decay_over_steps, decay_rate=0.01, staircase=True)
+
 
     # Static learning rate
     # optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
@@ -471,31 +489,34 @@ def main():
     # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
     # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
 
-    # Tensorboard
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    log_dir = "logs/fit/" + timestamp
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
-    lstm = keras.layers.LSTM(4, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(6, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
     batch_norm = keras.layers.BatchNormalization()(lstm)
     dropout = keras.layers.Dropout(rate=0.1)(batch_norm)
 
-    # lstm2 = keras.layers.LSTM(6, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(dropout)    # 32 originally
+    # lstm2 = keras.layers.LSTM(2, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(batch_norm)    # 32 originally
     # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
     # dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
 
     # normalise = keras.layers.LayerNormalization()(batch_norm)
 
     # normalise = keras.layers.LayerNormalization()(normalise)
-    outputs = keras.layers.Dense(2)(dropout)
-
+    outputs = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
+
+    # Callbacks
+    early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
+    checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
+    reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6, verbose=1)
+    # Tensorboard
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = "logs/fit/" + timestamp
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Train the model
     model.fit(
@@ -503,7 +524,7 @@ def main():
         y=input_targets_train,
         validation_data=validation_data,
         epochs=epochs,
-        callbacks=[tensorboard_callback],
+        callbacks=[early_stopping_callback, checkpoint_callback, reduce_lr_callback, tensorboard_callback],
         # Unspecified batch size will default to 32
         batch_size=batch_size
     )
