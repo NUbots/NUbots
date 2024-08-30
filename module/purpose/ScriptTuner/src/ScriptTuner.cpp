@@ -291,6 +291,8 @@ namespace module::purpose {
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
                     break;
+                case ERR:  // No input
+                    return;
             }
             // Update whatever visual changes we made
             refresh_view();
