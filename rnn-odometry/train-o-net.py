@@ -66,11 +66,11 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 30  # Number of files to load
+    num_files = 20  # Number of files to load
     skip_files = []  # Files to skip - start stop runs: 8,14,15,22,25
     prefix = "s-new"  # s for straight path
     imu = []
-    # servos = []
+    servos = []
     truth_all = []
     truth_start_end_indicator = []
 
@@ -86,12 +86,12 @@ def main():
         if i in skip_files:
             print(f"Skipping file {i}")
             continue
+
+        # Load the data
         imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
         imu.append(imu_data)
-
-        # servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
-        # servos.append(servos_data)
-
+        servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
+        servos.append(servos_data)
         truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
         # Convert the loaded chunk of truth data to relative positions
         truth_data = convert_to_relative(truth_data)
@@ -147,20 +147,20 @@ def main():
 
     # Loop through each array and concatenate into a numpy array
     imu_joined = np.concatenate(imu, axis=0)
-    # servos_joined = np.concatenate(servos, axis=0)
+    servos_joined = np.concatenate(servos, axis=0)
     truth_all_joined = np.concatenate(truth_all, axis=0)
     truth_start_end_indicator_joined = np.array(truth_start_end_indicator)
 
     # Print the shape of the joined arrays
     print("IMU s joined: ", imu_joined.shape)
-    # print("Servos s joined: ", servos_joined.shape)
+    print("Servos s joined: ", servos_joined.shape)
     print("Truth s joined: ", truth_all_joined.shape)
     print("Truth start/end indicator: ", truth_start_end_indicator_joined.shape)
 
     # Slice out the arm and head servos
-    # servos_joined = servos_joined[:, 6:18]
+    servos_joined = servos_joined[:, 6:18]
     # Print the shape of the sliced servos
-    # print("Servos s sliced: ", servos_joined.shape)
+    print("Servos s sliced: ", servos_joined.shape)
 
     # Plot and inspect each joined array
     # num_channels = servos_joined.shape[1]
@@ -194,10 +194,10 @@ def main():
 
 
     # Join the data
-    # joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
+    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
 
     # Testing without the servos
-    joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
+    # joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
 
     print("Total joined data shape: ", joined_data.shape)
 
@@ -250,33 +250,33 @@ def main():
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
-    mean = train_arr.mean(axis=0)
-    std = train_arr.std(axis=0)
-    print("mean: ", mean)
-    print("std: ", std)
+    # mean = train_arr.mean(axis=0)
+    # std = train_arr.std(axis=0)
+    # print("mean: ", mean)
+    # print("std: ", std)
 
-    train_arr = (train_arr - mean) / std
-    validate_arr = (validate_arr - mean) / std
-    test_arr = (test_arr - mean) / std
+    # train_arr = (train_arr - mean) / std
+    # validate_arr = (validate_arr - mean) / std
+    # test_arr = (test_arr - mean) / std
 
-    # # #
+    # # # #
 
-    # clip the outliers in the data
-    train_arr = np.clip(train_arr, -24, 24)
-    validate_arr = np.clip(validate_arr, -24, 24)
-    test_arr = np.clip(test_arr, -24, 24)
+    # # clip the outliers in the data
+    # train_arr = np.clip(train_arr, -24, 24)
+    # validate_arr = np.clip(validate_arr, -24, 24)
+    # test_arr = np.clip(test_arr, -24, 24)
 
     ## End of standardisation ##
 
     ## Min/Max Scaling ##
 
-    # scaler = MinMaxScaler(feature_range=(0, 1))
-    # # Fit scaler to training data only
-    # scaler.fit(train_arr)
-    # # Transform the data
-    # train_arr = scaler.transform(train_arr)
-    # validate_arr = scaler.transform(validate_arr)
-    # test_arr = scaler.transform(test_arr)
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    # Fit scaler to training data only
+    scaler.fit(train_arr)
+    # Transform the data
+    train_arr = scaler.transform(train_arr)
+    validate_arr = scaler.transform(validate_arr)
+    test_arr = scaler.transform(test_arr)
 
     ## End of Min/Max Scaling ##
 
@@ -306,33 +306,33 @@ def main():
     # NOTE: Just using IMU data, so changing index slice from 18 to 6
     # Training
     # Use when using the servos
-    # input_data_train = train_arr[:, :18]  # imu and servos
-    # input_targets_train = train_arr[:, 18:]  # truth
+    input_data_train = train_arr[:, :18]  # imu and servos
+    input_targets_train = train_arr[:, 18:]  # truth
     # Use when not using the servos
-    input_data_train = train_arr[:, :6]  # imu and servos
-    input_targets_train = train_arr[:, 6:]  # truth
+    # input_data_train = train_arr[:, :6]  # imu and servos
+    # input_targets_train = train_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     # Use when using the servos
-    # input_data_validate = validate_arr[:, :18]  # imu and servos
-    # input_targets_validate = validate_arr[:, 18:]  # truth
+    input_data_validate = validate_arr[:, :18]  # imu and servos
+    input_targets_validate = validate_arr[:, 18:]  # truth
     # Use when not using the servos
-    input_data_validate = validate_arr[:, :6]  # imu and servos
-    input_targets_validate = validate_arr[:, 6:]  # truth
+    # input_data_validate = validate_arr[:, :6]  # imu and servos
+    # input_targets_validate = validate_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     # Use when using the servos
-    # input_data_test= test_arr[:, :18]  # imu and servos
-    # input_targets_test = test_arr[:, 18:]  # truth
+    input_data_test= test_arr[:, :18]  # imu and servos
+    input_targets_test = test_arr[:, 18:]  # truth
     # Use when not using the servos
-    input_data_test= test_arr[:, :6]  # imu and servos
-    input_targets_test = test_arr[:, 6:]  # truth
+    # input_data_test= test_arr[:, :6]  # imu and servos
+    # input_targets_test = test_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_test = convert_to_relative(input_targets_test)
@@ -390,26 +390,26 @@ def main():
     # plt.show()
 
     # Plot and inspect (use only if training with servos)
-    # num_channels = input_data_train.shape[1]
+    # num_channels = input_data_test.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
     #     if i < 6:
     #         plt.subplot(4, 1, 1)
-    #         plt.plot(input_data_train[0:50000, i], label=f'Imu {i+1}')
+    #         plt.plot(input_data_test[0:50000, i], label=f'Imu {i+1}')
     #         plt.legend()
     #     elif i < 18:
     #         plt.subplot(4, 1, 2)
-    #         plt.plot(input_data_train[0:50000, i], label=f'Servos {i+1}')
+    #         plt.plot(input_data_test[0:50000, i], label=f'Servos {i+1}')
     #         plt.legend()
     #     else:
     #         plt.subplot(4, 1, 3)
-    #         plt.plot(input_data_train[0:50000, i], label=f'Indicator {i+1}')
+    #         plt.plot(input_data_test[0:50000, i], label=f'Indicator {i+1}')
     #         plt.legend()
     # # Also plot the truth on another subplot
     # plt.subplot(4, 1, 4)
-    # plt.plot(input_targets_train[0:50000, 0], label=f'Target 1')
-    # plt.plot(input_targets_train[0:50000, 1], label=f'Target 2')
+    # plt.plot(input_targets_test[0:50000, 0], label=f'Target 1')
+    # plt.plot(input_targets_test[0:50000, 1], label=f'Target 2')
     # plt.legend()
     # plt.show()
 
@@ -435,10 +435,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     # system_sample_rate = 115
-    sequence_length = 100   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = 25   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
-    batch_size = 128                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 256                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Partition the training and validation datasets into sequences
     input_data_train, input_targets_train = partition_dataset(input_data_train, input_targets_train, sequence_length)
@@ -455,7 +455,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.0001   # Controls how much to change the model in response to error.
-    epochs = 1000
+    epochs = 500
     # loss_function = keras.losses.MeanSquaredError()
     loss_function = keras.losses.MeanAbsoluteError()
     # loss_function = keras.losses.Huber()
@@ -492,27 +492,27 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
-    lstm = keras.layers.LSTM(6, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(16, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)
     batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.1)(batch_norm)
+    dropout = keras.layers.Dropout(rate=0.25)(batch_norm)
 
-    # lstm2 = keras.layers.LSTM(2, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(batch_norm)    # 32 originally
+    # lstm2 = keras.layers.LSTM(2, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.04), return_sequences=False)(batch_norm)    # 32 originally
     # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
     # dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
 
     # normalise = keras.layers.LayerNormalization()(batch_norm)
 
     # normalise = keras.layers.LayerNormalization()(normalise)
-    outputs = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
+    outputs = keras.layers.Dense(2)(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
 
     # Callbacks
-    early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
-    checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
-    reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6, verbose=1)
+    # early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
+    # checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
+    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6, verbose=1)
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     log_dir = "logs/fit/" + timestamp
@@ -524,7 +524,7 @@ def main():
         y=input_targets_train,
         validation_data=validation_data,
         epochs=epochs,
-        callbacks=[early_stopping_callback, checkpoint_callback, reduce_lr_callback, tensorboard_callback],
+        callbacks=[tensorboard_callback],
         # Unspecified batch size will default to 32
         batch_size=batch_size
     )
