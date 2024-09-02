@@ -172,6 +172,10 @@ namespace module::purpose {
             if (!autosave_enabled || !unsaved_changes)
                 return;
 
+            // Before we start, save the temp save the old path so we can delete it
+            // once we have a new autosave file.
+            auto last_autosave_path = this->autosave_path;
+
             // Split the script name into the path and filename
             auto [autosave_dir, filename] = utility::file::pathSplit(script_path);
 
@@ -207,6 +211,13 @@ namespace module::purpose {
 
             // Log the autosave even though you can't see logs in script tuner
             log<NUClear::INFO>("Autosaved script to:", this->autosave_path);
+
+            // Remove the old autosave file to ensure we don't create a massive list of
+            // autosave files during a long session.
+            if (!last_autosave_path.empty()) {
+                std::filesystem::remove(last_autosave_path);
+                log<NUClear::DEBUG>("Deleted old autosave file: ", last_autosave_path);
+            }
 
             // This will make sure the alert is displayed on the screen
             refresh_view();
@@ -671,27 +682,13 @@ namespace module::purpose {
         utility::file::writeToFile(script_path, n);
         unsaved_changes = false;
 
-        /*
-         * Clear previous autosaves from this session
-         */
-
-        // Get the full path to the autosave directory
-        const auto autosave_dir = utility::file::pathSplit(this->autosave_path).first;
-        log<NUClear::DEBUG>("Deleting autosaves from this session in: ", autosave_dir);
-        // Loop through all files in the autosave directory
-        for (auto filepath : utility::file::listFiles(autosave_dir)) {
-            log<NUClear::DEBUG>("Found old autosave file: ", filepath);
-            // Extract the filename from the path of the current script
-            const auto script_name = utility::file::pathSplit(script_path).second;
-            // Check if the current file is an autosave file from this session
-            if (filepath.find(script_name) != std::string::npos
-                && utility::file::getModificationTime(filepath) > start_time) {
-                // If so, delete the old autosave file now that we've saved the scrip
-                std::filesystem::remove(filepath);
-                log<NUClear::DEBUG>("Deleted old autosave file: ", filepath);
-            }
+        // Delete autosave files now that we've saved
+        if (!autosave_path.empty()) {
+            std::filesystem::remove(autosave_path);
+            log<NUClear::DEBUG>("Deleted old autosave file: ", autosave_path);
         }
         // Remove the autosave directory if it's empty
+        const auto autosave_dir = utility::file::pathSplit(this->autosave_path).first;
         if (std::filesystem::is_empty(autosave_dir)) {
             log<NUClear::DEBUG>("Deleting empty autosave directory: ", autosave_dir);
             std::filesystem::remove(autosave_dir);
