@@ -169,8 +169,9 @@ namespace module::purpose {
             log<NUClear::DEBUG>("Autosaving script if required...");
 
             // Only autosave if autosaving is enabled and we have unsaved changes
-            if (!autosave_enabled || !unsaved_changes)
+            if (!autosave_enabled || !unsaved_changes) {
                 return;
+            }
 
             // Before we start, save the temp save the old path so we can delete it
             // once we have a new autosave file.
