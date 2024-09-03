@@ -80,7 +80,7 @@ log
 log/*
 nsga2-output/*
 
-# ScriptTuner stuff
+# ScriptTuner autosaves
 /.scripttuner/
 
 # Generated documentation
