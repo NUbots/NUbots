@@ -8,7 +8,7 @@ interface PurposeLabelProps {
   Hft: Matrix4;
   player_id: number;
   purpose: string;
-  textColor: string;
+  textColor?: string;
   backgroundColor: string;
   cameraPitch: number;
   cameraYaw: number;
