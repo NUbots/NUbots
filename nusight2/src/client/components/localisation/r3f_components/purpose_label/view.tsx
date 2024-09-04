@@ -1,4 +1,5 @@
 import React from "react";
+import * as THREE from "three";
 
 import { Matrix4 } from "../../../../../../shared/math/matrix4";
 import { TextBillboard } from "../text_billboard/view";

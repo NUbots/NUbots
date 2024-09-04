@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
-
 import wallFragmentShader from "./wall.frag";
 import wallVertexShader from "./wall.vert";
 

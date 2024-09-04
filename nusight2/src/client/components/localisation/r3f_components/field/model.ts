@@ -1,6 +1,6 @@
 import { observable } from "mobx";
 
-import { FieldDimensions } from "../../../../../../shared/field/dimensions";
+import { FieldDimensions } from "../../../../../shared/field/dimensions";
 
 export class FieldModel {
   @observable dimensions: FieldDimensions;

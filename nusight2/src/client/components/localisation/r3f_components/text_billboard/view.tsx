@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 
-import { TextGeometryHelper } from "../../shared_geometries/TextGeometryHelper";
+import { TextGeometryHelper } from "../text_geometry_helper/TextGeometryHelper";
 
 const TEXT_OPACITY = 1;
 const TEXT_BACKDROP_OPACITY = 0.5;
@@ -32,14 +32,14 @@ const textBackdropGeometry = (width: number, height: number) => {
 export const TextBillboard = ({
   position,
   text,
-  color,
+  textColor,
   backgroundColor,
   cameraPitch,
   cameraYaw,
 }: {
   position: [number, number, number];
   text: string;
-  color: string;
+  textColor: string;
   backgroundColor: string;
   cameraPitch: number;
   cameraYaw: number;
@@ -52,11 +52,11 @@ export const TextBillboard = ({
 
   return (
     <object3D position={position} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>
-      <mesh position={[0, 0, 0.001]} geometry={backdropGeometry}>
-        <meshBasicMaterial color={backgroundColor} transparent opacity={TEXT_OPACITY} />
+      <mesh position={[0, 0, -0.01]} geometry={backdropGeometry}>
+        <meshBasicMaterial color={backgroundColor} transparent opacity={TEXT_BACKDROP_OPACITY} />
       </mesh>
       <mesh geometry={textGeometry}>
-        <meshBasicMaterial color={color} transparent opacity={TEXT_BACKDROP_OPACITY} />
+        <meshBasicMaterial color={textColor} transparent opacity={TEXT_OPACITY} />
       </mesh>
     </object3D>
   );
