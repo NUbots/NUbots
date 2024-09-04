@@ -21,7 +21,7 @@ export const PurposeLabel = ({
       position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
       backgroundColor={robotModel.color}
       textColor="white"
-      text={"white"}
+      text={label}
       cameraPitch={cameraPitch}
       cameraYaw={cameraYaw}
     />
