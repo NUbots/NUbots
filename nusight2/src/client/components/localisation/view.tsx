@@ -17,8 +17,7 @@ import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections/view";
 import { FieldPoints } from "./r3f_components/field_points/view";
 import { GridView } from "./r3f_components/grid/view";
-import { LocalisedGoals } from "./r3f_components/localised_goals/view";
-import { LocalisedRobots } from "./r3f_components/localised_robots/view";
+import { FieldObjects } from "./r3f_components/field_objects/view";
 import { Nugus } from "./r3f_components/nugus/view";
 import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
@@ -335,9 +334,25 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
 
-      {model.goalsVisible && <LocalisedGoals rGFf={robot.rGFf} />}
+      {model.goalsVisible &&
+        <FieldObjects
+          objects={robot.rGFf.map(goal => ({
+            position: goal.bottom,
+            height: goal.top.z,
+          }))}
+          defaultRadius={0.05}
+          defaultColor="magenta"
+        />
+      }
 
-      <LocalisedRobots id={robot.id} rRFf={robot.rRFf} />
+      <FieldObjects
+        objects={robot.rRFf.map(r => ({
+          position: r,
+        }))}
+        defaultHeight={0.8}
+        defaultRadius={0.1}
+        defaultColor="orange"
+      />
 
       {model.fieldIntersectionsVisible && robot.fieldIntersections && (
         <FieldIntersections intersections={robot.fieldIntersections} />
