@@ -10,7 +10,6 @@ import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
-import { LocalisationRobotModel } from "./robot_model";
 import { LocalisationNetwork } from "./network";
 import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
@@ -20,12 +19,13 @@ import { FieldLinePoints } from "./r3f_components/field_line_points/view";
 import { GridView } from "./r3f_components/grid/view";
 import { LocalisedGoals } from "./r3f_components/localised_goals/view";
 import { LocalisedRobots } from "./r3f_components/localised_robots/view";
+import { Nugus } from "./r3f_components/nugus/view";
 import { Particles } from "./r3f_components/particles/view";
 import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
-import { Nugus } from "./r3f_components/nugus/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
+import { LocalisationRobotModel } from "./robot_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -56,10 +56,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1"
-                : "hover:bg-auto-contrast-1"
-                }`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
