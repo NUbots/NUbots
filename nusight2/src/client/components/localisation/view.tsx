@@ -15,12 +15,11 @@ import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections/view";
-import { FieldLinePoints } from "./r3f_components/field_line_points/view";
+import { FieldPoints } from "./r3f_components/field_points/view";
 import { GridView } from "./r3f_components/grid/view";
 import { LocalisedGoals } from "./r3f_components/localised_goals/view";
 import { LocalisedRobots } from "./r3f_components/localised_robots/view";
 import { Nugus } from "./r3f_components/nugus/view";
-import { Particles } from "./r3f_components/particles/view";
 import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
@@ -56,11 +55,10 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                this.props.model.field.fieldType === option.value
-                  ? "hover:bg-auto-contrast-1"
-                  : "hover:bg-auto-contrast-1"
-              }`}
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -332,7 +330,8 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
     <object3D key={robot.id}>
       <Nugus model={robot} />
 
-      {model.fieldLinePointsVisible && <FieldLinePoints points={robot.rPFf} color="blue" size={0.02} />}
+      {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={robot.color} size={0.02} />}
+      {model.particlesVisible && <FieldPoints points={robot.particles} color={robot.color} size={0.02} />}
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
 
@@ -344,7 +343,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <FieldIntersections intersections={robot.fieldIntersections} />
       )}
 
-      {model.walkToDebugVisible && robot.Hfd && robot.Hfr && (
+      {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
         <WalkPathVisualiser
           Hfd={robot.Hfd}
           Hfr={robot.Hfr}
@@ -370,8 +369,6 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       )}
 
       {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
-
-      {model.particlesVisible && <Particles particles={robot.particles} />}
 
       {model.boundedBoxVisible && robot.boundingBox && (
         <BoundingBox
