@@ -1,5 +1,4 @@
 import React from "react";
-import * as THREE from "three";
 
 import { LocalisationRobotModel } from "../../robot_model";
 import { TextBillboard } from "../text_billboard/view";
