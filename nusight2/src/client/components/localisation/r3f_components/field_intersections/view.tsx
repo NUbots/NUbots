@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Vector3 } from "../../../../../../shared/math/vector3";
-import { FieldIntersection } from "../../../robot_model";
+import { Vector3 } from "../../../../../shared/math/vector3";
+import { FieldIntersection } from "../../robot_model";
 
 interface FieldIntersectionsProps {
   intersections: FieldIntersection[];

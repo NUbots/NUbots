@@ -10,6 +10,7 @@ import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
+import { LocalisationRobotModel } from "./robot_model";
 import { LocalisationNetwork } from "./network";
 import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
@@ -17,14 +18,15 @@ import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections/view";
 import { FieldLinePoints } from "./r3f_components/field_line_points/view";
 import { GridView } from "./r3f_components/grid/view";
-import { Goals } from "./r3f_components/localised_goals/view";
+import { LocalisedGoals } from "./r3f_components/localised_goals/view";
 import { LocalisedRobots } from "./r3f_components/localised_robots/view";
 import { Particles } from "./r3f_components/particles/view";
 import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
-import { URDFNugus } from "./r3f_components/urdf_nugus/view";
+import { Nugus } from "./r3f_components/nugus/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -54,11 +56,10 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                this.props.model.field.fieldType === option.value
-                  ? "hover:bg-auto-contrast-1"
-                  : "hover:bg-auto-contrast-1"
-              }`}
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -360,7 +361,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <PurposeLabel
           Hft={robot.Hft}
           player_id={robot.player_id}
-          color={robot.color}
+          backgroundColor={robot.color}
           purpose={robot.purpose}
           cameraPitch={model.camera.pitch}
           cameraYaw={model.camera.yaw}

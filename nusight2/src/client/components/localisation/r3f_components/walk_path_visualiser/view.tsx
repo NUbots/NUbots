@@ -1,9 +1,9 @@
 import React from "react";
 import * as THREE from "three";
 
-import { Matrix4 } from "../../../../../../shared/math/matrix4";
-import { Vector3 } from "../../../../../../shared/math/vector3";
-import { ArrowGeometry } from "../../shared_geometries/ArrowGeometry";
+import { Matrix4 } from "../../../../../shared/math/matrix4";
+import { Vector3 } from "../../../../../shared/math/vector3";
+import { ArrowGeometry } from "../arrow_geometry/ArrowGeometry";
 
 interface WalkPathVisualiserProps {
   Hfd: Matrix4;

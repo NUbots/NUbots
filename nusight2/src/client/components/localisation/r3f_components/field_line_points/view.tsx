@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Vector3 } from "../../../../../../shared/math/vector3";
+import { Vector3 } from "../../../../../shared/math/vector3";
 
 interface FieldLinePointsProps {
   points: Vector3[];

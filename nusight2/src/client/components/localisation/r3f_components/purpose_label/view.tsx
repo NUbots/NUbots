@@ -1,14 +1,15 @@
 import React from "react";
 import * as THREE from "three";
 
-import { Matrix4 } from "../../../../../../shared/math/matrix4";
+import { Matrix4 } from "../../../../../shared/math/matrix4";
 import { TextBillboard } from "../text_billboard/view";
 
 interface PurposeLabelProps {
   Hft: Matrix4;
   player_id: number;
   purpose: string;
-  color: string;
+  textColor: string;
+  backgroundColor: string;
   cameraPitch: number;
   cameraYaw: number;
 }
@@ -17,7 +18,8 @@ export const PurposeLabel: React.FC<PurposeLabelProps> = ({
   Hft,
   player_id,
   purpose,
-  color,
+  textColor = "white",
+  backgroundColor = "black",
   cameraPitch,
   cameraYaw,
 }) => {
@@ -27,8 +29,8 @@ export const PurposeLabel: React.FC<PurposeLabelProps> = ({
   return (
     <TextBillboard
       position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
-      color={color}
-      backgroundColor="white"
+      textColor={textColor}
+      backgroundColor={backgroundColor}
       text={label}
       cameraPitch={cameraPitch}
       cameraYaw={cameraYaw}
