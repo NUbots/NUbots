@@ -296,22 +296,32 @@ namespace module::input {
     }
 
     void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
+        // Keep track of the number of presses in the last N frames for debouncing
         int left_count   = 0;
         int middle_count = 0;
-        // If we have any downs in the last 20 frames then we are button pushed
+        // Count the number of downs in all messages we have
+        //     we used to discount sensors messages with subcontroller errors here, but that
+        //     ignored too many and ultimately led to unresponsive buttons. subcontroller errors
+        //     are unlikely to cause phantom button presses, and if they do, the debounce routine
+        //     would require that we have N_thresh > N errors causing the _same_ phantom button press
         for (const auto& s : sensors) {
-            if (s->buttons.left && (s->subcontroller_error == 0u)) {
+            if (s->buttons.left)
                 ++left_count;
-            }
-            if (s->buttons.middle && (s->subcontroller_error == 0u)) {
+            if (s->buttons.middle)
                 ++middle_count;
-            }
         }
+        // Compare to the debounce threshold to determine if we have a down event
         bool new_left_down   = left_count > cfg.button_debounce_threshold;
         bool new_middle_down = middle_count > cfg.button_debounce_threshold;
-        if (new_left_down != left_down) {
-            left_down = new_left_down;
-            if (new_left_down) {
+        // Check for a state change, i.e. a press or release event
+        bool left_state_change = left_down != new_left_down;
+        bool mid_state_change  = middle_down != new_middle_down;
+        // And set the state variable for next time.
+        left_down   = new_left_down;
+        middle_down = new_middle_down;
+        // If we have a state change, emit the appropriate event
+        if (left_state_change) {
+            if (left_down) {
                 log<NUClear::INFO>("Left Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
             }
@@ -320,9 +330,8 @@ namespace module::input {
                 emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
             }
         }
-        if (new_middle_down != middle_down) {
-            middle_down = new_middle_down;
-            if (new_middle_down) {
+        if (mid_state_change) {
+            if (middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
                 emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
             }

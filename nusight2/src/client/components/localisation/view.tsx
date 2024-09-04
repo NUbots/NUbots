@@ -333,7 +333,7 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
     {model.robotVisible &&
-      model.robots.filter((robot) => robot.visible).map((robot) => <URDFNugus key={robot.id} model={robot} />)}
+      model.robots.filter((robot) => robot.visible).map((robot) => <Nugus key={robot.id} model={robot} />)}
     {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
     {model.ballVisible &&
       model.robots.map(
