@@ -2,7 +2,7 @@ import React from "react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { LocalisationRobotModel } from "../../../robot_model";
+import { LocalisationRobotModel } from "../../robot_model";
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 

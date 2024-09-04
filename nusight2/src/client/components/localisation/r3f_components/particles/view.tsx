@@ -1,7 +1,7 @@
 import React from "react";
 import { Vector3 } from "three";
 
-import { LocalisationModel } from "../../../model";
+import { LocalisationModel } from "../../model";
 
 export const Particles = ({ model }: { model: LocalisationModel }) => (
   <>

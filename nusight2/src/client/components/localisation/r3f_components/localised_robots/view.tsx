@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Vector3 } from "../../../../../../shared/math/vector3";
-import { LocalisationModel } from "../../../model";
+import { Vector3 } from "../../../../../shared/math/vector3";
+import { LocalisationModel } from "../../model";
 
 export const LocalisedRobots = ({ model }: { model: LocalisationModel }) => (
   <>

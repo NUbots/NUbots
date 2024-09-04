@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 
-import { TextGeometryHelper } from "../../shared_geometries/TextGeometryHelper";
+import { TextGeometryHelper } from "../text_geometry_helper/TextGeometryHelper";
 
 const TEXT_OPACITY = 1;
 const TEXT_BACKDROP_OPACITY = 0.5;
