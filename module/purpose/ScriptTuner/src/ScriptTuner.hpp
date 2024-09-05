@@ -56,7 +56,7 @@ namespace module::purpose {
         bool autosave_on_robot = (AUTOSAVE_INTERVAL != 0);
 
         /// @brief Is autosaving enabled?
-        bool autosave_enabled;
+        bool autosave_enabled = true;
 
         /// @brief The path to the script we are editing
         std::string script_path;
