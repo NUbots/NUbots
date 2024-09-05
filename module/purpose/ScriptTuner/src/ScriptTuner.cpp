@@ -161,8 +161,7 @@ namespace module::purpose {
                 return;
             }
 
-            // Before we start, save the temp save the old path so we can delete it
-            // once we have a new autosave file.
+            // Before we start, temp save the old path so we can delete it once we have a new autosave file.
             auto last_autosave_path = this->autosave_path;
 
             // Split the script name into the path and filename
