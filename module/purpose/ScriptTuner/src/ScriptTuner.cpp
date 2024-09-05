@@ -153,13 +153,6 @@ namespace module::purpose {
             emit(std::move(waypoint));
         });
 
-        // Debugging to make sure logs are working
-        /// TODO: Remove before merging with main
-        on<Every<5, std::chrono::seconds>>().then("Heartbeat", [this] {
-            static size_t counter = 0;
-            log<NUClear::DEBUG>("Beep Boop ", counter++);
-        });
-
         on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
             log<NUClear::DEBUG>("Autosaving script if required...");
 
