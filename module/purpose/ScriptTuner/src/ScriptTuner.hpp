@@ -52,7 +52,8 @@ namespace module::purpose {
 
         /// @brief Should we autosave to the local script directory, or to the
         /// mounted ../NUbots folder in the docker container
-        bool autosave_on_robot;
+        /// @note This is toggle-able, and is just the default value
+        bool autosave_on_robot = (AUTOSAVE_INTERVAL != 0);
 
         /// @brief Is autosaving enabled?
         bool autosave_enabled;
@@ -70,16 +71,18 @@ namespace module::purpose {
         size_t selection;
 
         /// @brief If we are selecting the angle or gain for this item
-        bool angle_or_gain;
+        /// @note angle = true, gain = false
+        bool angle_or_gain = true;
 
         /// @brief If we are displaying angles in degrees or radians
-        bool deg_or_rad;
+        /// @note degrees = true, radians = false
+        bool deg_or_rad = false;
 
         /// @brief Whether changes have been made to the script since last save
-        bool unsaved_changes;
+        bool unsaved_changes = false;
 
         /// @brief The last autosave location, so we can notify the user
-        std::string autosave_path;
+        std::string autosave_path = "";
 
         /// @brief The time that ScriptTuner was started
         /// @note Used to determine which autosaves are safe to delete

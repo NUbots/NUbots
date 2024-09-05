@@ -77,14 +77,9 @@ namespace module::purpose {
 
     ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , autosave_enabled(AUTOSAVE_INTERVAL != 0)
         , script_path("Initializing...")
         , frame(0)
         , selection(0)
-        , angle_or_gain(true)
-        , deg_or_rad(false)
-        , unsaved_changes(false)
-        , autosave_path("")
         , start_time(std::chrono::system_clock::now()) {
 
         // Add a blank frame to start with
