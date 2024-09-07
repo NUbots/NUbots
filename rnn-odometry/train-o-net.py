@@ -66,9 +66,9 @@ def main():
 
     # numpy arrays
     first_file = 1
-    num_files = 20  # Number of files to load
+    num_files = 10  # Number of files to load
     skip_files = []  # Files to skip - start stop runs: 8,14,15,22,25
-    prefix = "s-new"  # s for straight path
+    prefix = "quad"  # s for straight path
     imu = []
     servos = []
     truth_all = []
@@ -179,8 +179,10 @@ def main():
     # NOTE: 17/04/2024 - Due to fluctuations in the z component, trying with just x, y
     # NOTE: Remember to reshape if adding or removing features
 
-    # slice out the x and y positions (9:11) of the truth array
-    truth_joined_sliced = truth_all_joined[:, 9:11]
+    # Slice out the desired truth values
+    indices = [9, 10]               # 0, 1, 3, 4, 6, 7, 9, 10 for a 2d projection of the matrix
+    truth_joined_sliced = truth_all_joined[:, indices]
+    print("Truth joined sliced: ", truth_joined_sliced.shape)
 
     # Plot and inspect after slicing
     # num_channels = servos_joined.shape[1]
@@ -250,14 +252,14 @@ def main():
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
-    # mean = train_arr.mean(axis=0)
-    # std = train_arr.std(axis=0)
-    # print("mean: ", mean)
-    # print("std: ", std)
+    mean = train_arr.mean(axis=0)
+    std = train_arr.std(axis=0)
+    print("mean: ", mean)
+    print("std: ", std)
 
-    # train_arr = (train_arr - mean) / std
-    # validate_arr = (validate_arr - mean) / std
-    # test_arr = (test_arr - mean) / std
+    train_arr = (train_arr - mean) / std
+    validate_arr = (validate_arr - mean) / std
+    test_arr = (test_arr - mean) / std
 
     # # # #
 
@@ -270,13 +272,13 @@ def main():
 
     ## Min/Max Scaling ##
 
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    # Fit scaler to training data only
-    scaler.fit(train_arr)
-    # Transform the data
-    train_arr = scaler.transform(train_arr)
-    validate_arr = scaler.transform(validate_arr)
-    test_arr = scaler.transform(test_arr)
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    # # Fit scaler to training data only
+    # scaler.fit(train_arr)
+    # # Transform the data
+    # train_arr = scaler.transform(train_arr)
+    # validate_arr = scaler.transform(validate_arr)
+    # test_arr = scaler.transform(test_arr)
 
     ## End of Min/Max Scaling ##
 
@@ -455,10 +457,10 @@ def main():
 
     # Model parameters
     learning_rate = 0.0001   # Controls how much to change the model in response to error.
-    epochs = 500
+    epochs = 6000
     # loss_function = keras.losses.MeanSquaredError()
-    loss_function = keras.losses.MeanAbsoluteError()
-    # loss_function = keras.losses.Huber()
+    # loss_function = keras.losses.MeanAbsoluteError()
+    loss_function = keras.losses.Huber()
 
     # Random seed
     tf.random.set_seed(65)
@@ -492,18 +494,20 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
-    lstm = keras.layers.LSTM(16, kernel_initializer=keras.initializers.GlorotNormal(), return_sequences=False)(inputs)
+    # Add Conv1D layer
+    # conv1d = keras.layers.Conv1D(filters=64, kernel_size=3, activation='tanh')(inputs)
+    # conv1d2 = keras.layers.Conv1D(filters=64, kernel_size=3, activation='tanh')(conv1d)
+    # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d2)
+
+    # lstm = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.005), return_sequences=False)(inputs)
+    lstm = keras.layers.Bidirectional(keras.layers.LSTM(19, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False))(inputs)
+
     batch_norm = keras.layers.BatchNormalization()(lstm)
     dropout = keras.layers.Dropout(rate=0.25)(batch_norm)
 
-    # lstm2 = keras.layers.LSTM(2, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.04), return_sequences=False)(batch_norm)    # 32 originally
-    # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
-    # dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
-
     # normalise = keras.layers.LayerNormalization()(batch_norm)
 
-    # normalise = keras.layers.LayerNormalization()(normalise)
-    outputs = keras.layers.Dense(2)(dropout)
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
