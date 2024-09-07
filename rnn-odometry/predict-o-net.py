@@ -28,10 +28,10 @@ test_targets = np.load('datasets/input_targets_test.npy')
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20240807-203901')
+model = load_model('models/model-20240907-204310')
 
 # Partition dataset
-window_size = 100
+window_size = 25
 test_data, test_targets = partition_dataset(test_data, test_targets, window_size)
 
 # Predict
@@ -43,7 +43,18 @@ print('loaded target set shape:', test_targets.shape)
 print('Sequenced target set shape: ', test_targets.shape)
 
 # Plot predictions vs targets
-plt.plot(predictions, label='predictions')
-plt.plot(test_targets, label='targets')
-plt.legend()
+# plt.plot(predictions, label='predictions')
+# plt.plot(test_targets, label='targets')
+# plt.legend()
+# plt.show()
+
+# Plot predictions vs targets with x,y pairs from each set on separate sub plots.
+num_channels = test_targets.shape[1]
+plt.figure(figsize=(10, 5))
+# plot each channel
+for i in range(num_channels):
+    plt.subplot(num_channels, 1, i + 1)
+    plt.plot(predictions[:, i], label='predictions')
+    plt.plot(test_targets[:, i], label='targets')
+    plt.legend()
 plt.show()
