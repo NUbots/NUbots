@@ -72,9 +72,11 @@ namespace module::strategy {
                 // Normalize the angle error to be within the range [-pi, pi]
                 angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
 
+                // If the robot is close enough to the target and the angle error is small enough, stop the robot
                 if (translational_error < current_threshold && std::abs(angle_error) < current_threshold
                     && !walk_to_field_position.dont_stop_at_target) {
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                    // Increase the threshold to the stopped threshold to prevent oscillations
                     current_threshold = cfg.stopped_threshold;
                     log<NUClear::DEBUG>("Stopped at field position");
                 }
