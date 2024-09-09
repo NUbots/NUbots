@@ -36,10 +36,13 @@ namespace module::strategy {
     class WalkToFieldPosition : public ::extension::behaviour::BehaviourReactor {
     private:
         struct Config {
-            double stop_threshold    = 0.0;
+            /// @brief Error threshold for stopping the robot.
+            double stop_threshold = 0.0;
+            /// @brief Error threshold for resuming walking.
             double stopped_threshold = 0.0;
         } cfg;
 
+        /// @brief The current threshold to use for stopping the robot.
         double current_threshold = 0.0;
 
     public:
