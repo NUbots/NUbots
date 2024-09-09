@@ -74,7 +74,7 @@ namespace module::strategy {
 
                 // If the robot is close enough to the target and the angle error is small enough, stop the robot
                 if (translational_error < current_threshold && std::abs(angle_error) < current_threshold
-                    && !walk_to_field_position.dont_stop_at_target) {
+                    && walk_to_field_position.stop_at_target) {
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     // Increase the threshold to the stopped threshold to prevent oscillations
                     current_threshold = cfg.stopped_threshold;

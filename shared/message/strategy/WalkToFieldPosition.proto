@@ -34,5 +34,5 @@ message WalkToFieldPosition {
     /// Transform from desired robot pose {d} to field {f} space
     iso3 Hfd = 1;
     /// Whether to stop at the target position
-    bool dont_stop_at_target = 2;
+    bool stop_at_target = 2;
 }

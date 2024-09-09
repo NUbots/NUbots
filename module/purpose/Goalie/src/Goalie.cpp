@@ -112,7 +112,8 @@ namespace module::purpose {
         on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
                 pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+                                     Eigen::Vector3d(0, 0, cfg.ready_position.z())),
+                true));
         });
 
         // Normal PLAYING state
