@@ -1,5 +1,7 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1purpose_1_1Striker_1_1Config.html#ab661e5ba8be3cb7d89f880b4316a55dc":[2,0,3,10,13,0,1],
+"structmodule_1_1purpose_1_1Striker_1_1Config.html#ad6b34a367ae6cc15b0ea63b9fd1719ca":[2,0,3,10,13,0,5],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html":[2,0,3,10,14,0],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a028d65df5a6a554f5b9cdc02e2f9b878":[2,0,3,10,14,0,13],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a0becafb9079d019878ca3534043ec2a8":[2,0,3,10,14,0,3],
@@ -97,6 +99,9 @@ var NAVTREEINDEX17 =
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a958bcdb230880540d2662b7bd4f33779":[2,0,3,12,10,0,4],
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#abb8208e99cfc7559c5f74c275fb08c46":[2,0,3,12,10,0,2],
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#ae78d1a0a643cad341f63f9104243d32e":[2,0,3,12,10,0,5],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html":[2,0,3,12,11,0],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a09cd94a1e1c0e907ed12cebd05a383df":[2,0,3,12,11,0,0],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#aa3a79e3c0440858506329b55d02a217f":[2,0,3,12,11,0,1],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[2,0,3,13,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[2,0,3,13,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[2,0,3,13,1,1,0,3],
@@ -244,10 +249,5 @@ var NAVTREEINDEX17 =
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#ab60b0be23e60aa36e6ae5a9726ab8034":[2,0,3,15,0,2,12],
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#ab61a54298efbca5f963bf03ee5a3bf91":[2,0,3,15,0,2,5],
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#af4e81aff534e2f5cfd9151cd315e0a5e":[2,0,3,15,0,2,0],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html":[2,0,3,15,0,3],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a0d7fd2d1e06a5790c1603d1806934a77":[2,0,3,15,0,3,1],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a167cffd6e28f48671b10c3d6f59bf79e":[2,0,3,15,0,3,4],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a61c6f3662eba6bb9cdb799caa57492f0":[2,0,3,15,0,3,0],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#a8443a288523719a479adb9c6a908ad6c":[2,0,3,15,0,3,2],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html#ae02020dab43777b0543326357d04633f":[2,0,3,15,0,3,3]
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html":[2,0,3,15,0,3]
 };

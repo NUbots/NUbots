@@ -1,5 +1,7 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac5ee0e6f69a25ed829bc9e54e65e3cb0":[2,0,3,9,1,1,0,180],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac65a5fbff4312301145433ec3d95ab5e":[2,0,3,9,1,1,0,23],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac7755a93d4acc70b34fb303eef530c9f":[2,0,3,9,1,1,0,19],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac92c89c94c4b8ce3a303b732ed4e6067":[2,0,3,9,1,1,0,192],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daca535e5797fce0e65fb7db94b4996dd5":[2,0,3,9,1,1,0,149],
@@ -190,7 +192,7 @@ var NAVTREEINDEX16 =
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#aa696d83e83b19c24b7b4627ed37bdf72":[2,0,3,9,3,1,4],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#af6e7f671e77fb21da5fc2098d3335bf6":[2,0,3,9,3,1,10],
 "structmodule_1_1purpose_1_1AllRounder_1_1Config.html":[2,0,3,10,0,0],
-"structmodule_1_1purpose_1_1AllRounder_1_1Config.html#a9ded8c08d4da4066a76f05b10738a853":[2,0,3,10,0,0,0],
+"structmodule_1_1purpose_1_1AllRounder_1_1Config.html#a3c3556ed66adc7ee628a48483d5ad65d":[2,0,3,10,0,0,0],
 "structmodule_1_1purpose_1_1BoundingBox.html":[2,0,3,10,1],
 "structmodule_1_1purpose_1_1BoundingBox.html#a2f6efb9eb0501b13328384f57047d1dc":[2,0,3,10,1,1],
 "structmodule_1_1purpose_1_1BoundingBox.html#a3e8cc08e4e0c4da35b3d17a45f392f95":[2,0,3,10,1,3],
@@ -198,16 +200,16 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1BoundingBox.html#a6a3aab2156304f1e444a44ec633e7ab2":[2,0,3,10,1,0],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html":[2,0,3,10,2,0],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a400303887fe079816c6e358c5e1f342f":[2,0,3,10,2,0,3],
-"structmodule_1_1purpose_1_1Defender_1_1Config.html#a7068d9443583c2b146dc8c1263debf46":[2,0,3,10,2,0,4],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#a5c1ccc883d9b2f653e0b598d98d4c107":[2,0,3,10,2,0,4],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a72ffbbd37882571ac75e58da7d69f336":[2,0,3,10,2,0,2],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a8e551e6b15600030fb6f8442b1f29432":[2,0,3,10,2,0,0],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#ab4241fe2ad381f18527232bfa57b2176":[2,0,3,10,2,0,1],
 "structmodule_1_1purpose_1_1DisableIdle.html":[2,0,3,10,3],
 "structmodule_1_1purpose_1_1EnableIdle.html":[2,0,3,10,4],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html":[2,0,3,10,5,0],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a25f90d291540e1dd4df4883739a509d0":[2,0,3,10,5,0,4],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html#a29ddc74e53077bfa902238edf8c46381":[2,0,3,10,5,0,3],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html#a2d057bfbad78f3b195297ed571a41dd6":[2,0,3,10,5,0,1],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a9c0f6ec31ad09bffbff0340d646bdb20":[2,0,3,10,5,0,4],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html#ab6fb3fe4b3fdd735c70be7ae559e5113":[2,0,3,10,5,0,2],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html#abe33008a0e413b9c81d5bc8a738fe786":[2,0,3,10,5,0,0],
 "structmodule_1_1purpose_1_1LockServo.html":[2,0,3,10,7],
@@ -246,8 +248,6 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Striker_1_1Config.html":[2,0,3,10,13,0],
 "structmodule_1_1purpose_1_1Striker_1_1Config.html#a2fdf0aee07e16b76895e36bbce47413c":[2,0,3,10,13,0,2],
 "structmodule_1_1purpose_1_1Striker_1_1Config.html#a6b24d3a80dabf632d6fed7070259e323":[2,0,3,10,13,0,0],
-"structmodule_1_1purpose_1_1Striker_1_1Config.html#a92be4939f75b369d452c20c2406b1aee":[2,0,3,10,13,0,5],
 "structmodule_1_1purpose_1_1Striker_1_1Config.html#a94174de20ab9566019c6bf3b546fc8f4":[2,0,3,10,13,0,4],
-"structmodule_1_1purpose_1_1Striker_1_1Config.html#aafcb47eb1452f47f9ffcc548df0f05ef":[2,0,3,10,13,0,3],
-"structmodule_1_1purpose_1_1Striker_1_1Config.html#ab661e5ba8be3cb7d89f880b4316a55dc":[2,0,3,10,13,0,1]
+"structmodule_1_1purpose_1_1Striker_1_1Config.html#aafcb47eb1452f47f9ffcc548df0f05ef":[2,0,3,10,13,0,3]
 };

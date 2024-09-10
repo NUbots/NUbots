@@ -102,7 +102,9 @@ var NAVTREEINDEX5 =
 "classmodule_1_1strategy_1_1WalkToBall.html#aab2b0923992f7dd90b649d1552945ef9":[2,0,3,12,10,1],
 "classmodule_1_1strategy_1_1WalkToBall.html#aeac294ba6020355ae437bd89dfccf57f":[2,0,3,12,10,3],
 "classmodule_1_1strategy_1_1WalkToFieldPosition.html":[2,0,3,12,11],
-"classmodule_1_1strategy_1_1WalkToFieldPosition.html#a333c4470a037c16e70e4f2f4020966ff":[2,0,3,12,11,0],
+"classmodule_1_1strategy_1_1WalkToFieldPosition.html#a333c4470a037c16e70e4f2f4020966ff":[2,0,3,12,11,1],
+"classmodule_1_1strategy_1_1WalkToFieldPosition.html#ab91274d6670070287bfa6e17662518cb":[2,0,3,12,11,3],
+"classmodule_1_1strategy_1_1WalkToFieldPosition.html#ae35ee48cc5e26a3782f5705dea5c8382":[2,0,3,12,11,2],
 "classmodule_1_1support_1_1LocalisationSimulator.html":[2,0,3,13,3],
 "classmodule_1_1support_1_1LocalisationSimulator.html#ab6cd024311cfd8af08115c5aef8525bd":[2,0,3,13,3,1],
 "classmodule_1_1support_1_1LocalisationSimulator.html#ace700ce76a76e9289f0d830284497765":[2,0,3,13,3,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#aef82b2c7638fe9f3a7300963810d4149":[2,0,3,13,2,7,2],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html":[2,0,3,13,2,8],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a06c79b489f52b6180f427d51dfdc28f9":[2,0,3,13,2,8,13],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a0d032346d1a58d44e948c9b846998919":[2,0,3,13,2,8,7],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a28cd5ccca22b289fc12cc4e783b45610":[2,0,3,13,2,8,14],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a2c4d74f91989ad5bf23aa531bc60222c":[2,0,3,13,2,8,9]
+"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a0d032346d1a58d44e948c9b846998919":[2,0,3,13,2,8,7]
 };

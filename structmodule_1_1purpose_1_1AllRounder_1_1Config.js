@@ -1,4 +1,4 @@
 var structmodule_1_1purpose_1_1AllRounder_1_1Config =
 [
-    [ "ready_position", "structmodule_1_1purpose_1_1AllRounder_1_1Config.html#a9ded8c08d4da4066a76f05b10738a853", null ]
+    [ "Hfr", "structmodule_1_1purpose_1_1AllRounder_1_1Config.html#a3c3556ed66adc7ee628a48483d5ad65d", null ]
 ];

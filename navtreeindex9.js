@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#acb1e2cbb829a10e05cc5df9475a54011":[2,0,7,8,0,11,30],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#aced506c10094809f1f58c9ea5cb354fd":[2,0,7,8,0,11,33],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#ad33c7039286ab0aad24bf8876151d8c0":[2,0,7,8,0,11,6],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#adad32a383e29da1f69fa2f65b89ca575":[2,0,7,8,0,11,0],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#adebb981b64b913de236db3e6cba8ec19":[2,0,7,8,0,11,10],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "functions_o.html":[2,3,0,15],
 "functions_p.html":[2,3,0,16],
 "functions_q.html":[2,3,0,17],
-"functions_r.html":[2,3,0,18],
-"functions_s.html":[2,3,0,19],
-"functions_t.html":[2,3,0,20]
+"functions_r.html":[2,3,0,18]
 };

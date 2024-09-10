@@ -255,6 +255,7 @@ var hierarchy =
     [ "module::strategy::StrategiseLook::Config", "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html", null ],
     [ "module::strategy::WalkInsideBoundedBox::Config", "structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html", null ],
     [ "module::strategy::WalkToBall::Config", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html", null ],
+    [ "module::strategy::WalkToFieldPosition::Config", "structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html", null ],
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],

@@ -1,5 +1,7 @@
 var NAVTREEINDEX11 =
 {
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabaf8efdf2c51511a057826a834276c96":[1,0,3,7,0,1,0,8,41],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabc01f96512167a7069c257557eeca9f0":[1,0,3,7,0,1,0,8,25],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabf6aa1e7e70a98990e84b6ec12115c15":[1,0,3,7,0,1,0,8,12],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac536d1fb0edde61bccd53cab09d5deb2":[1,0,3,7,0,1,0,8,6],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac79a53612e60468871f9432691620caf":[1,0,3,7,0,1,0,8,48],
@@ -247,7 +249,5 @@ var NAVTREEINDEX11 =
 "structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370":[2,0,1,0,5,2],
 "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4":[2,0,1,0,5,0],
 "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2":[2,0,1,0,5,0,0],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe":[2,0,1,0,5,0,2],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4":[2,0,1,0,5,0,1],
-"structextension_1_1behaviour_1_1Idle.html":[2,0,1,0,6]
+"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe":[2,0,1,0,5,0,2]
 };
