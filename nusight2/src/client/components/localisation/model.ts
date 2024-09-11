@@ -8,6 +8,9 @@ import { AppModel } from "../app/model";
 import { FieldModel } from "./r3f_components/field/model";
 import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
+import { TreeViewModel } from "../chart/view_model";
+
+export interface TreeData extends Map<string, TreeData> {}
 
 export class TimeModel {
   @observable time: number; // seconds
@@ -105,6 +108,8 @@ export class LocalisationModel {
   @observable target?: LocalisationRobotModel;
   @observable time: TimeModel;
 
+  @observable treeData: TreeData;
+
   @observable fieldVisible = true;
   @observable gridVisible = true;
   @observable robotVisible = true;
@@ -127,6 +132,7 @@ export class LocalisationModel {
       viewMode,
       target,
       time,
+      treeData,
     }: {
       field: FieldModel;
       skybox: SkyboxModel;
@@ -136,6 +142,7 @@ export class LocalisationModel {
       viewMode: ViewMode;
       target?: LocalisationRobotModel;
       time: TimeModel;
+      treeData: Map<string, TreeData>;
     },
   ) {
     this.appModel = appModel;
@@ -147,6 +154,7 @@ export class LocalisationModel {
     this.viewMode = viewMode;
     this.target = target;
     this.time = time;
+    this.treeData = treeData;
   }
 
   static of = memoize((appModel: AppModel): LocalisationModel => {
@@ -158,10 +166,18 @@ export class LocalisationModel {
       controls: ControlsModel.of(),
       viewMode: ViewMode.FreeCamera,
       time: TimeModel.of(),
+      treeData: new Map(),
     });
   });
 
   @computed get robots(): LocalisationRobotModel[] {
     return this.appModel.robots.map((robot) => LocalisationRobotModel.of(robot));
+  }
+
+  @computed get tree() {
+    return {
+      nodes: Array.from(this.treeData.entries()).map(([key, value]) => TreeViewModel.of({ label: key, model: value })),
+      usePessimisticToggle: true,
+    }
   }
 }

@@ -116,6 +116,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           </div>
           <div className="bg-auto-surface-2 relative p-4">
             sample
+            {/* <CheckboxTree /> */}
           </div>
         </div>
       </div>
@@ -173,8 +174,6 @@ interface LocalisationMenuBarProps {
 
   onHawkEyeClick(): void;
 }
-
-
 
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, controller } = props;
