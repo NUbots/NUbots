@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_LOCALISATION_FIELDLOCALSATIONNLOPT_HPP
-#define MODULE_LOCALISATION_FIELDLOCALSATIONNLOPT_HPP
+#ifndef MODULE_LOCALISATION_INTERSECTIONLOCALISATION_HPP
+#define MODULE_LOCALISATION_INTERSECTIONLOCALISATION_HPP
 
 #include <Eigen/Core>
 #include <nlopt.hpp>
@@ -172,7 +172,7 @@ namespace module::localisation {
         Eigen::Vector3d right;
     };
 
-    class FieldLocalisationNLopt : public NUClear::Reactor {
+    class IntersectionLocalisation : public NUClear::Reactor {
     private:
         // Define the model dimensions
         static constexpr size_t n_states       = 3;
@@ -192,9 +192,6 @@ namespace module::localisation {
 
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
-
-            /// @brief Minimum number of field line points for an update to run
-            size_t min_field_line_points = 0;
 
             /// @brief Minimum number of field line intersections for an update to run
             size_t min_field_line_intersections = 0;
@@ -252,6 +249,10 @@ namespace module::localisation {
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
+
+            /// @brief Max association distance for field line intersections [m]
+            double max_association_distance = 0.0;
+
         } cfg;
 
 
@@ -278,8 +279,8 @@ namespace module::localisation {
         bool startup = true;
 
     public:
-        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
-        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the IntersectionLocalisation reactor.
+        explicit IntersectionLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
@@ -295,13 +296,6 @@ namespace module::localisation {
          */
         void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
 
-        /**
-         * @brief Transform a field line point from world {w} to position in the distance map {m}
-         * @param particle The state of the particle (x,y,theta)
-         * @param rPWw The field point (x, y) in world space {w} [m]
-         * @return Eigen::Vector2i
-         */
-        Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
         /**
          * @brief Run the field line optimisation
@@ -310,17 +304,9 @@ namespace module::localisation {
          * @param field_intersections The field intersections
          * @return Pair <optimisation solution (x,y,theta), final cost>
          */
-        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
-            const Eigen::Vector3d& initial_guess,
-            const std::vector<Eigen::Vector3d>& field_lines,
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
-            const std::shared_ptr<const Goals>& goals);
-
-        /**
-         * @brief Setup field line distance map
-         * @param fd The field dimensions
-         */
-        void setup_fieldline_distance_map(const FieldDescription& fd);
+        std::pair<Eigen::Vector3d, double> run_optimisation(const Eigen::Vector3d& initial_guess,
+                                                            const FieldIntersections& field_intersections,
+                                                            const std::shared_ptr<const Goals>& goals);
 
         /**
          * @brief Setup field landmarks
@@ -332,9 +318,9 @@ namespace module::localisation {
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const FieldIntersections& field_intersections,
             const Eigen::Isometry3d& Hfw);
     };
 }  // namespace module::localisation
 
-#endif  // MODULE_LOCALISATION_FIELDLOCALSATIONNLOPT_HPP
+#endif  // MODULE_LOCALISATION_INTERSECTIONLOCALISATION_HPP
