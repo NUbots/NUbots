@@ -1,5 +1,6 @@
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+
 import { Vector3 } from "../../../../../shared/math/vector3";
 
 interface FieldPoints {
@@ -25,10 +26,5 @@ export const FieldPoints: React.FC<FieldPoints> = ({ points, color = "blue", siz
     }
   }, [points]);
 
-  return (
-    <instancedMesh
-      ref={meshRef}
-      args={[pointGeometry, pointMaterial, points.length]}
-    />
-  );
+  return <instancedMesh ref={meshRef} args={[pointGeometry, pointMaterial, points.length]} />;
 };

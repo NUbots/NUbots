@@ -15,9 +15,9 @@ import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections/view";
+import { FieldObjects } from "./r3f_components/field_objects/view";
 import { FieldPoints } from "./r3f_components/field_points/view";
 import { GridView } from "./r3f_components/grid/view";
-import { FieldObjects } from "./r3f_components/field_objects/view";
 import { Nugus } from "./r3f_components/nugus/view";
 import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
@@ -54,10 +54,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1"
-                : "hover:bg-auto-contrast-1"
-                }`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -334,19 +335,19 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
 
-      {model.goalsVisible &&
+      {model.goalsVisible && (
         <FieldObjects
-          objects={robot.rGFf.map(goal => ({
+          objects={robot.rGFf.map((goal) => ({
             position: goal.bottom,
             height: goal.top.z,
           }))}
           defaultRadius={0.05}
           defaultColor="magenta"
         />
-      }
+      )}
 
       <FieldObjects
-        objects={robot.rRFf.map(r => ({
+        objects={robot.rRFf.map((r) => ({
           position: r,
         }))}
         defaultHeight={0.8}
