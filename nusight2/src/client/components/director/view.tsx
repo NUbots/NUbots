@@ -49,46 +49,32 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
         {Array.from(selectedDirectorRobot?.providers.keys() || []).map((layerName: string) => (
           <div key={layerName} className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
             <div className="text-lg bg-auto-surface-1 py-1 px-4 w-fit h-fit rounded mb-4">{layerName}</div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-auto-surface-1 p-2 rounded">
-                Active
-                <div className="flex flex-wrap">
-                  {selectedDirectorRobot?.providers
-                    .get(layerName)
-                    ?.filter((provider) => provider.active)
-                    .map((provider) => (
-                      <div
-                        key={provider.id}
-                        className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-auto ${provider.done ? "bg-green-100" : ""
-                          }`}
-                      >
-                        <div>
-                          <div className="font-semibold">{provider.name}</div>
-                          <div className="text-xs">{provider.done ? " (Done)" : "(Not Done)"}</div>
-                        </div>
+            <div className="bg-auto-surface-1 p-2 rounded">
+              Active
+              <div className="flex flex-wrap">
+                {selectedDirectorRobot?.providers.get(layerName)?.map((provider) => (
+                  <div
+                    key={provider.id}
+                    className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2  ${
+                      provider.active ? "" : "border-dashed"
+                    } ${provider.done ? "border-blue-500" : "border-auto"}`}
+                  >
+                    <div>
+                      <div className="font-semibold">{provider.name}</div>
+                      <div className={`text-xs ${provider.done ? "text-blue-700 dark:text-blue-300" : ""}`}>
+                        {provider.done ? " Done" : "Not Done"}
                       </div>
-                    ))}
-                </div>
-              </div>
-              <div className="bg-auto-surface-1 p-2 rounded">
-                Not Active
-                <div className="flex flex-wrap">
-                  {selectedDirectorRobot?.providers
-                    .get(layerName)
-                    ?.filter((provider) => !provider.active)
-                    .map((provider) => (
                       <div
-                        key={provider.id}
-                        className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-auto border-dashed ${provider.done ? "bg-green-100" : ""
-                          }`}
+                        className={`text-xs  ${
+                          provider.active ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
+                        }`}
                       >
-                        <div>
-                          <div className="font-semibold">{provider.name}</div>
-                          <div className="text-xs">{provider.done ? " (Done)" : "(Not Done)"}</div>
-                        </div>
+                        {" "}
+                        {provider.active ? " Active" : "Not Active"}
                       </div>
-                    ))}
-                </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
