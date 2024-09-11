@@ -29,6 +29,7 @@
 
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -42,8 +43,8 @@ namespace module::purpose {
 
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Ready position to walk to (x, y, theta)
-            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+            /// @brief Ready position to walk to
+            Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
         } cfg;
 
 

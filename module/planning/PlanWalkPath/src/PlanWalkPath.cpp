@@ -94,13 +94,6 @@ namespace module::planning {
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
         });
 
-        on<Start<WalkTo>>().then([this] {
-            log<NUClear::DEBUG>("Starting walk to task");
-
-            // Reset the velocity magnitude to zero
-            velocity_magnitude = 0.0;
-        });
-
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
                 // Decompose the target pose into position and orientation
