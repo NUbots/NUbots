@@ -33,4 +33,6 @@ import "Transform.proto";
 message WalkToFieldPosition {
     /// Transform from desired robot pose {d} to field {f} space
     iso3 Hfd = 1;
+    /// Whether to stop at the target position
+    bool stop_at_target = 2;
 }

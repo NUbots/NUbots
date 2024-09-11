@@ -32,6 +32,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 namespace module::strategy {
@@ -40,6 +41,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::planning::WalkTo;
+    using message::skill::Walk;
     using WalkToFieldPositionTask = message::strategy::WalkToFieldPosition;
 
     WalkToFieldPosition::WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment)
@@ -47,14 +49,41 @@ namespace module::strategy {
 
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.stop_threshold    = config["stop_threshold"].as<double>();
+            cfg.stopped_threshold = config["stopped_threshold"].as<double>();
         });
+
+        on<Start<WalkToFieldPositionTask>>().then([this] { current_threshold = cfg.stop_threshold; });
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
                 // Transform from desired field position into robot space
-                Eigen::Isometry3d Hrd = sensors.Hrw * field.Hfw.inverse() * walk_to_field_position.Hfd;
-                emit<Task>(std::make_unique<WalkTo>(Hrd));
+                Eigen::Isometry3d Hrd      = sensors.Hrw * field.Hfw.inverse() * walk_to_field_position.Hfd;
+                double translational_error = Hrd.translation().norm();
+
+                // Compute the error between the desired heading and the measured heading
+                Eigen::Isometry3d Hfr          = field.Hfw * sensors.Hrw.inverse();
+                Eigen::Vector3d desired_unit_x = walk_to_field_position.Hfd.linear().col(0);
+                double desired_heading         = std::atan2(desired_unit_x.y(), desired_unit_x.x());
+                double measured_heading        = std::atan2(Hfr.linear().col(0).y(), Hfr.linear().col(0).x());
+
+                double angle_error = std::abs(desired_heading - measured_heading);
+                // Normalize the angle error to be within the range [-pi, pi]
+                angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
+
+                // If the robot is close enough to the target and the angle error is small enough, stop the robot
+                if (translational_error < current_threshold && std::abs(angle_error) < current_threshold
+                    && walk_to_field_position.stop_at_target) {
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                    // Increase the threshold to the stopped threshold to prevent oscillations
+                    current_threshold = cfg.stopped_threshold;
+                    log<NUClear::DEBUG>("Stopped at field position");
+                }
+                else {
+                    log<NUClear::DEBUG>("Walking to field position");
+                    emit<Task>(std::make_unique<WalkTo>(Hrd));
+                }
             });
     }
 
