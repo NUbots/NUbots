@@ -2,7 +2,7 @@ import React from "react";
 import { computed } from "mobx";
 import * as THREE from "three";
 
-import { Vector3 } from "../../../../shared/math/vector3";
+import { Vector3 } from "../../../../../shared/math/vector3";
 
 import { SkyboxModel } from "./model";
 import skyboxFrag from "./skybox.frag";
