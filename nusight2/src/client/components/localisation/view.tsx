@@ -330,8 +330,8 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
     <object3D key={robot.id}>
       <Nugus model={robot} />
 
-      {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={robot.color} size={0.02} />}
-      {model.particlesVisible && <FieldPoints points={robot.particles} color={robot.color} size={0.02} />}
+      {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
+      {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
 
