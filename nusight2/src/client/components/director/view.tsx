@@ -32,13 +32,13 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
         </div>
       </Menu>
       <div className="m-2">
-        <div className="m-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
-          <div className="text-lg bg-gray-200 py-1 px-4 w-fit h-fit rounded mb-4">Root Tasks</div>
-          <div className="bg-gray-200 p-2 rounded flex flex-wrap">
+        <div className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
+          <div className="text-lg bg-auto-surface-1 py-1 px-4 w-fit h-fit rounded mb-4">Root Tasks</div>
+          <div className="bg-auto-surface-1 p-2 rounded flex flex-wrap">
             {Array.from(selectedDirectorRobot?.rootTasks || []).map((rootTask) => (
               <div
                 key={rootTask}
-                className="bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500"
+                className="bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-auto"
               >
                 <div className="font-semibold">{rootTask}</div>
               </div>
@@ -47,10 +47,10 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
         </div>
 
         {Array.from(selectedDirectorRobot?.providers.keys() || []).map((layerName: string) => (
-          <div key={layerName} className="m-4 bg-gray-50 p-4 border border-2 border-gray-400 rounded">
-            <div className="text-lg bg-gray-200 py-1 px-4 w-fit h-fit rounded mb-4">{layerName}</div>
+          <div key={layerName} className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
+            <div className="text-lg bg-auto-surface-1 py-1 px-4 w-fit h-fit rounded mb-4">{layerName}</div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-200 p-2 rounded">
+              <div className="bg-auto-surface-1 p-2 rounded">
                 Active
                 <div className="flex flex-wrap">
                   {selectedDirectorRobot?.providers
@@ -59,7 +59,7 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                     .map((provider) => (
                       <div
                         key={provider.id}
-                        className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 ${provider.done ? "bg-green-100" : ""
+                        className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-auto ${provider.done ? "bg-green-100" : ""
                           }`}
                       >
                         <div>
@@ -70,7 +70,7 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                     ))}
                 </div>
               </div>
-              <div className="bg-gray-200 p-2 rounded">
+              <div className="bg-auto-surface-1 p-2 rounded">
                 Not Active
                 <div className="flex flex-wrap">
                   {selectedDirectorRobot?.providers
@@ -79,7 +79,7 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                     .map((provider) => (
                       <div
                         key={provider.id}
-                        className={`bg-gray-100 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-gray-500 border-dashed ${provider.done ? "bg-green-100" : ""
+                        className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2 border-auto border-dashed ${provider.done ? "bg-green-100" : ""
                           }`}
                       >
                         <div>
