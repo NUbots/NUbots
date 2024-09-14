@@ -463,16 +463,16 @@ def main():
     # for i in range(num_channels):
     #     if i < 6:
     #         plt.subplot(3, 1, 1)
-    #         plt.plot(input_data_train[:, i], label=f'Imu {i+1}')
+    #         plt.plot(input_data_train[:60000, i], label=f'Imu {i+1}')
     #         plt.legend()
     #     else:
     #         plt.subplot(3, 1, 2)
-    #         plt.plot(input_data_train[:, i], label=f'Indicator {i+1}')
+    #         plt.plot(input_data_train[:60000, i], label=f'Indicator {i+1}')
     #         plt.legend()
     # # Also plot the truth on another subplot
     # plt.subplot(3, 1, 3)
-    # plt.plot(input_targets_train[:, 0], label=f'Target 1')
-    # plt.plot(input_targets_train[:, 1], label=f'Target 2')
+    # plt.plot(input_targets_train[:60000, 0], label=f'Target 1')
+    # plt.plot(input_targets_train[:60000, 1], label=f'Target 2')
     # plt.legend()
     # plt.show()
 
@@ -481,7 +481,7 @@ def main():
     sequence_length = 100   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
-    batch_size = 256                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 50                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Partition the training and validation datasets into sequences
     input_data_train, input_targets_train = partition_dataset(input_data_train, input_targets_train, sequence_length)
@@ -497,8 +497,8 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.0001   # Controls how much to change the model in response to error.
-    epochs = 400
+    learning_rate = 0.00001   # Controls how much to change the model in response to error.
+    epochs = 150
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
     loss_function = keras.losses.Huber()
@@ -541,17 +541,17 @@ def main():
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d2)
 
     # lstm = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.005), return_sequences=False)(inputs)
-    lstm = keras.layers.LSTM(50, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.03), return_sequences=True)(inputs)
+    lstm = keras.layers.LSTM(5, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=True)(inputs)
     batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.3)(batch_norm)
+    dropout = keras.layers.Dropout(rate=0.25)(batch_norm)
 
-    lstm2 = keras.layers.LSTM(50, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.03), return_sequences=False)(dropout)
+    lstm2 = keras.layers.LSTM(5, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=False)(dropout)
     batch_norm2 = keras.layers.BatchNormalization()(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.3)(batch_norm2)
+    dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
 
-    normalise = keras.layers.LayerNormalization()(dropout2)
+    # normalise = keras.layers.LayerNormalization()(dropout2)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.025))(normalise)
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.01))(dropout2)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
