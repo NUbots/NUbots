@@ -42,6 +42,7 @@ export interface Provider {
   id: string;
   active: boolean;
   done: boolean;
+  parent: string;
 }
 
 export class DirectorRobotModel {

@@ -29,9 +29,10 @@ package message.behaviour;
 
 message Director {
     message ProviderGroup {
-        string name   = 1;
-        bool   active = 2;
-        bool   done   = 3;
+        string name     = 1;
+        bool   active   = 2;
+        bool   done     = 3;
+        string parent   = 4;
     }
 
     repeated ProviderGroup providers = 1;

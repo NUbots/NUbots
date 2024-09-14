@@ -40,6 +40,7 @@ export class DirectorNetwork {
         id: provider.name ?? "",
         layer: provider.name?.match(/^message::(.*?)::(.*)/)?.[1] ?? "",
         name: provider.name?.match(/^message::(.*?)::(.*)/)?.[2] ?? "",
+        parent: provider.parent ?? "",
         active: provider.active ?? false,
         done: provider.done ?? false,
       };
@@ -48,6 +49,8 @@ export class DirectorNetwork {
         robot.providers.set(newProvider.layer, []);
       }
       robot.providers.get(newProvider.layer)?.push(newProvider);
+
+      console.log("New provider:", newProvider);
     });
   }
 }

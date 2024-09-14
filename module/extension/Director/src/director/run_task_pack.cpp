@@ -344,6 +344,11 @@ namespace module::extension {
                 provider->active = group.active_task != nullptr;
                 provider->done   = group.done;
 
+                if (group.active_task && group.active_task->requester_id != 0) {
+                    auto parent_provider = providers.at(group.active_task->requester_id);
+                    provider->parent     = NUClear::util::demangle(parent_provider->group.type.name());
+                }
+
                 msg->providers.push_back(*provider);
             }
             emit(msg);
