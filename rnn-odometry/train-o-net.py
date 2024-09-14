@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import os
+import random
 import subprocess
 
 import joblib
@@ -65,76 +66,96 @@ def main():
         return smoothed_data
 
     # numpy arrays
-    first_file = 1
-    num_files = 10  # Number of files to load
-    skip_files = []  # Files to skip - start stop runs: 8,14,15,22,25
-    prefix = "quad"  # s for straight path
+    # first_file = 1
+    # num_files = 40  # Number of files to load
+    # skip_files = []  # Files to skip - start stop runs: 8,14,15,22,25
+    # prefix = "quad"  # s for straight path
+
+    # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
+    directories = [
+        {"prefix": "quad", "first_file": 1, "num_files": 40, "skip_files": []},
+        {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
+        {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
+    ]
+
     imu = []
-    servos = []
+    # servos = []
     truth_all = []
     truth_start_end_indicator = []
 
-    for i in range(first_file, num_files + 1):
+    # Toggles
+    shuffle = True
+    # Outer loop to iterate through each directory
+    for directory in directories:
+        prefix = directory["prefix"]
+        first_file = directory["first_file"]
+        num_files = directory["num_files"]
+        skip_files = directory["skip_files"]
 
-        # Check that the start and end files are not in the skip_files list
-        if first_file in skip_files or num_files in skip_files:
-            print("Error: Start or end file in skip_files list.")
-            # Exit program
-            break
+        # Inner loop to load the data
+        for i in range(first_file, num_files + 1):
 
-        # Skip files in the skip_files list
-        if i in skip_files:
-            print(f"Skipping file {i}")
-            continue
+            # Check that the start and end files are not in the skip_files list
+            if first_file in skip_files or num_files in skip_files:
+                print("Error: Start or end file in skip_files list.")
+                # Exit program
+                break
 
-        # Load the data
-        imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
-        imu.append(imu_data)
-        servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
-        servos.append(servos_data)
-        truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
-        # Convert the loaded chunk of truth data to relative positions
-        truth_data = convert_to_relative(truth_data)
-        truth_all.append(truth_data)
+            # Skip files in the skip_files list
+            if i in skip_files:
+                print(f"Skipping file {i}")
+                continue
 
-        # # Plot the data as it's loaded
-        # plt.figure(figsize=(12, 8))
+            # Load the data
+            imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
+            imu.append(imu_data)
 
-        # # Plot IMU data
-        # plt.subplot(3, 1, 1)
-        # plt.plot(imu_data)
-        # plt.title(f'IMU Data - File {i}')
-        # plt.xlabel('Sample')
-        # plt.ylabel('IMU Values')
+            # servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
+            # servos.append(servos_data)
 
-        # # Plot Servos data
-        # # plt.subplot(3, 1, 2)
-        # # plt.plot(servos_data)
-        # # plt.title(f'Servos Data - File {i}')
-        # # plt.xlabel('Sample')
-        # # plt.ylabel('Servos Values')
+            truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
+            # Convert the loaded chunk of truth data to relative positions
+            truth_data = convert_to_relative(truth_data)
+            truth_all.append(truth_data)
 
-        # # Plot Truth data
-        # plt.subplot(3, 1, 3)
-        # plt.plot(truth_data)
-        # plt.title(f'Truth Data - File {i}')
-        # plt.xlabel('Sample')
-        # plt.ylabel('Truth Values')
+            # # Plot the data as it's loaded
+            # plt.figure(figsize=(12, 8))
 
-        # # Show the plot
-        # plt.tight_layout()
-        # plt.show()
+            # # Plot IMU data
+            # plt.subplot(3, 1, 1)
+            # plt.plot(imu_data)
+            # plt.title(f'IMU Data - File {i}')
+            # plt.xlabel('Sample')
+            # plt.ylabel('IMU Values')
 
-        # pause to inspect each plot
-        # input("Press Enter to continue to the next file...")
-        # plt.close()
+            # # Plot Servos data
+            # # plt.subplot(3, 1, 2)
+            # # plt.plot(servos_data)
+            # # plt.title(f'Servos Data - File {i}')
+            # # plt.xlabel('Sample')
+            # # plt.ylabel('Servos Values')
 
-        # Create a chunk for the truth_start_end_indicator array
-        chunk_size = truth_data.shape[0]  # Assuming the first dimension is the one we're interested in
-        indicator_chunk = np.zeros(chunk_size)
-        indicator_chunk[0] = 1  # Start indicator
-        indicator_chunk[-1] = 1  # End indicator
-        truth_start_end_indicator.extend(indicator_chunk)
+            # # Plot Truth data
+            # plt.subplot(3, 1, 3)
+            # plt.plot(truth_data)
+            # plt.title(f'Truth Data - File {i}')
+            # plt.xlabel('Sample')
+            # plt.ylabel('Truth Values')
+
+            # # Show the plot
+            # plt.tight_layout()
+            # plt.show()
+
+            # pause to inspect each plot
+            # input("Press Enter to continue to the next file...")
+            # plt.close()
+
+            # Create a chunk for the truth_start_end_indicator array
+            chunk_size = truth_data.shape[0]  # Assuming the first dimension is the one we're interested in
+            indicator_chunk = np.zeros(chunk_size)
+            indicator_chunk[0] = 1  # Start indicator
+            indicator_chunk[-1] = 1  # End indicator
+            truth_start_end_indicator.append(indicator_chunk)
 
     # Need to do the relative conversions here
     # Use the convert_to_relative function to convert the truth data to relative positions
@@ -145,22 +166,42 @@ def main():
     # Loop through each truth array and smooth
     # truth_all = [gaussian_smooth(truth, 50) for truth in truth_all]
 
-    # Loop through each array and concatenate into a numpy array
+    # Print sizes before shuffling
+    print("IMU s: ", len(imu))
+    # print("Servos s: ", len(servos))
+    print("Truth s: ", len(truth_all))
+    print("Truth start/end indicator: ", len(truth_start_end_indicator))
+
+    # Shuffle the data if flag is set
+    if shuffle:
+        # Combine the data into a single list of tuples
+        combined_data = list(zip(imu, truth_all, truth_start_end_indicator))
+
+        # Set random seed for reproducibility
+        random.seed(42)
+        # Shuffle the combined data
+        random.shuffle(combined_data)
+
+        # Unzip the shuffled data
+        imu, truth_all, truth_start_end_indicator = zip(*combined_data)
+
+
+    # Concatenate lists into numpy arrays
     imu_joined = np.concatenate(imu, axis=0)
-    servos_joined = np.concatenate(servos, axis=0)
+    # servos_joined = np.concatenate(servos, axis=0)
     truth_all_joined = np.concatenate(truth_all, axis=0)
-    truth_start_end_indicator_joined = np.array(truth_start_end_indicator)
+    truth_start_end_indicator_joined = np.concatenate(truth_start_end_indicator, axis=0)
 
     # Print the shape of the joined arrays
     print("IMU s joined: ", imu_joined.shape)
-    print("Servos s joined: ", servos_joined.shape)
+    # print("Servos s joined: ", servos_joined.shape)
     print("Truth s joined: ", truth_all_joined.shape)
     print("Truth start/end indicator: ", truth_start_end_indicator_joined.shape)
 
-    # Slice out the arm and head servos
-    servos_joined = servos_joined[:, 6:18]
-    # Print the shape of the sliced servos
-    print("Servos s sliced: ", servos_joined.shape)
+    # # Slice out the arm and head servos
+    # servos_joined = servos_joined[:, 6:18]
+    # # Print the shape of the sliced servos
+    # print("Servos s sliced: ", servos_joined.shape)
 
     # Plot and inspect each joined array
     # num_channels = servos_joined.shape[1]
@@ -196,10 +237,10 @@ def main():
 
 
     # Join the data
-    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
+    # joined_data = np.concatenate([imu_joined, servos_joined, truth_joined_sliced], axis=1)
 
     # Testing without the servos
-    # joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
+    joined_data = np.concatenate([imu_joined, truth_joined_sliced], axis=1)
 
     print("Total joined data shape: ", joined_data.shape)
 
@@ -308,33 +349,33 @@ def main():
     # NOTE: Just using IMU data, so changing index slice from 18 to 6
     # Training
     # Use when using the servos
-    input_data_train = train_arr[:, :18]  # imu and servos
-    input_targets_train = train_arr[:, 18:]  # truth
+    # input_data_train = train_arr[:, :18]  # imu and servos
+    # input_targets_train = train_arr[:, 18:]  # truth
     # Use when not using the servos
-    # input_data_train = train_arr[:, :6]  # imu and servos
-    # input_targets_train = train_arr[:, 6:]  # truth
+    input_data_train = train_arr[:, :6]  # imu and servos
+    input_targets_train = train_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     # Use when using the servos
-    input_data_validate = validate_arr[:, :18]  # imu and servos
-    input_targets_validate = validate_arr[:, 18:]  # truth
+    # input_data_validate = validate_arr[:, :18]  # imu and servos
+    # input_targets_validate = validate_arr[:, 18:]  # truth
     # Use when not using the servos
-    # input_data_validate = validate_arr[:, :6]  # imu and servos
-    # input_targets_validate = validate_arr[:, 6:]  # truth
+    input_data_validate = validate_arr[:, :6]  # imu and servos
+    input_targets_validate = validate_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     # Use when using the servos
-    input_data_test= test_arr[:, :18]  # imu and servos
-    input_targets_test = test_arr[:, 18:]  # truth
+    # input_data_test= test_arr[:, :18]  # imu and servos
+    # input_targets_test = test_arr[:, 18:]  # truth
     # Use when not using the servos
-    # input_data_test= test_arr[:, :6]  # imu and servos
-    # input_targets_test = test_arr[:, 6:]  # truth
+    input_data_test= test_arr[:, :6]  # imu and servos
+    input_targets_test = test_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
     # input_targets_test = convert_to_relative(input_targets_test)
@@ -353,7 +394,7 @@ def main():
 
     #### Add indicator to the datasets ####
     # Convert indicator list to a numpy array before reshaping
-    truth_start_end_indicator_2d = np.array(truth_start_end_indicator).reshape(-1, 1)
+    truth_start_end_indicator_2d = truth_start_end_indicator_joined.reshape(-1, 1)
 
     # Split the indicator array
     train_indicator = truth_start_end_indicator_2d[:train_arr.shape[0]]
@@ -437,7 +478,7 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     # system_sample_rate = 115
-    sequence_length = 25   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = 100   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
     batch_size = 256                         # Number of samples per gradient update (original: 64, seemed better?: 512)
@@ -457,7 +498,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.0001   # Controls how much to change the model in response to error.
-    epochs = 6000
+    epochs = 400
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
     loss_function = keras.losses.Huber()
@@ -500,21 +541,24 @@ def main():
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d2)
 
     # lstm = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.005), return_sequences=False)(inputs)
-    lstm = keras.layers.Bidirectional(keras.layers.LSTM(19, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False))(inputs)
-
+    lstm = keras.layers.LSTM(50, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.03), return_sequences=True)(inputs)
     batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.25)(batch_norm)
+    dropout = keras.layers.Dropout(rate=0.3)(batch_norm)
 
-    # normalise = keras.layers.LayerNormalization()(batch_norm)
+    lstm2 = keras.layers.LSTM(50, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.03), return_sequences=False)(dropout)
+    batch_norm2 = keras.layers.BatchNormalization()(lstm2)
+    dropout2 = keras.layers.Dropout(rate=0.3)(batch_norm2)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
+    normalise = keras.layers.LayerNormalization()(dropout2)
+
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.025))(normalise)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
 
     # Callbacks
-    # early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
+    # early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     # checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
     # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6, verbose=1)
     # Tensorboard
