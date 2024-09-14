@@ -7,13 +7,13 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 
 
-def partition_dataset(features, targets, window_size):
+def partition_dataset(features, targets, sequence_length):
     inputs = []
     outputs = []
 
-    for i in range(0, len(features) - window_size):
-        window = features[i:i + window_size]
-        next_value = targets[i + window_size]
+    for i in range(0, len(features) - sequence_length):
+        window = features[i:i + sequence_length]
+        next_value = targets[i + sequence_length]
 
         inputs.append(window)
         outputs.append(next_value)
@@ -28,11 +28,11 @@ test_targets = np.load('datasets/input_targets_test.npy')
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20240907-204310')
+model = load_model('models/model-20240914-181910')
 
 # Partition dataset
-window_size = 25
-test_data, test_targets = partition_dataset(test_data, test_targets, window_size)
+sequence_length = 100
+test_data, test_targets = partition_dataset(test_data, test_targets, sequence_length)
 
 # Predict
 predictions = model.predict(test_data)
@@ -41,6 +41,13 @@ predictions = model.predict(test_data)
 print('prediction shape:', predictions.shape)
 print('loaded target set shape:', test_targets.shape)
 print('Sequenced target set shape: ', test_targets.shape)
+
+# Calculate and print error metrics
+mae = mean_absolute_error(test_targets, predictions)
+r2 = r2_score(test_targets, predictions)
+print('Mean Absolute Error:', mae)
+print('R2 Score:', r2)
+
 
 # Plot predictions vs targets
 # plt.plot(predictions, label='predictions')
