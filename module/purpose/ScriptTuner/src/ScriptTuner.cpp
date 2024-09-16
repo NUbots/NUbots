@@ -290,7 +290,9 @@ namespace module::purpose {
                     powerplant.shutdown();
                     break;
                 case ERR:  // No input
-                    return;
+                    napms(100);
+                    refresh_view();
+                    break;
             }
             // Update whatever visual changes we made
             refresh_view();
