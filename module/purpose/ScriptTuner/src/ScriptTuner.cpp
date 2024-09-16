@@ -117,7 +117,7 @@ namespace module::purpose {
                 script_path = args[1];
 
                 // Check if the script exists and load it if it does.
-                if (utility::file::exists(script_path)) {
+                if (std::filesystem::exists(script_path)) {
                     log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
                     load_script(script_path);
                     // Build our initial gui with context from loaded script
@@ -164,8 +164,8 @@ namespace module::purpose {
             // Before we start, temp save the old path so we can delete it once we have a new autosave file.
             auto last_autosave_path = this->autosave_path;
 
-            // Split the script name into the path and filename
-            auto [autosave_dir, filename] = utility::file::pathSplit(script_path);
+            // Split the parent directory off the autosave path
+            auto autosave_dir = script_path.parent_path();
 
             // Pick the right autosave directory based on the configured save location
             if (autosave_on_robot) {
@@ -191,7 +191,9 @@ namespace module::purpose {
             // Get unix epoch time to use as autosave file identifier
             auto now = NUClear::clock::now().time_since_epoch().count();
             // Create filename with unix epoch time
-            this->autosave_path = autosave_dir + std::to_string(now) + "_" + filename;
+            auto autosave_file = std::to_string(now) + "_" + script_path.filename().string();
+            // Concatenate into a full path
+            this->autosave_path = autosave_dir / autosave_file;
 
             // Save the script to the autosave directory
             YAML::Node n(script);
@@ -676,13 +678,13 @@ namespace module::purpose {
             log<NUClear::DEBUG>("Deleted old autosave file: ", autosave_path);
         }
         // Remove the autosave directory if it's empty
-        const auto autosave_dir = utility::file::pathSplit(this->autosave_path).first;
+        const auto autosave_dir = this->autosave_path.parent_path();
         if (std::filesystem::is_empty(autosave_dir)) {
             log<NUClear::DEBUG>("Deleting empty autosave directory: ", autosave_dir);
             std::filesystem::remove(autosave_dir);
         }
         // Clear the autosave path now that it doesn't exist anymore.
-        autosave_path = "";
+        autosave_path.clear();
     }
 
     void ScriptTuner::edit_duration() {
@@ -1009,8 +1011,8 @@ namespace module::purpose {
     void ScriptTuner::save_script_as() {
         move(5, 2);
         curs_set(1);
-        std::string save_script_as = user_input();
-        if (utility::file::exists(save_script_as)) {
+        std::filesystem::path save_script_as = user_input();
+        if (std::filesystem::exists(save_script_as)) {
             bool print = true;
             while (print) {
                 mvprintw(6, 2, "This file already exists.");

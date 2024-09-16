@@ -28,6 +28,7 @@
 #ifndef MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_HPP
 #define MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_HPP
 
+#include <filesystem>
 #include <nuclear>
 
 #include "message/actuation/Limbs.hpp"
@@ -59,7 +60,7 @@ namespace module::purpose {
         bool autosave_enabled = true;
 
         /// @brief The path to the script we are editing
-        std::string script_path;
+        std::filesystem::path script_path;
 
         /// @brief The script object we are editing
         Script<BodySequence> script;
@@ -82,7 +83,7 @@ namespace module::purpose {
         bool unsaved_changes = false;
 
         /// @brief The last autosave location, so we can notify the user
-        std::string autosave_path = "";
+        std::filesystem::path autosave_path = "";
 
         /// @brief The time that ScriptTuner was started
         /// @note Used to determine which autosaves are safe to delete
