@@ -51,13 +51,11 @@ namespace module::purpose {
         /// @note Set to 0 to disable autosave
         static constexpr size_t AUTOSAVE_INTERVAL = 30;
 
-        /// @brief Should we autosave to the local script directory, or to the
-        /// mounted ../NUbots folder in the docker container
-        /// @note This is toggle-able, and is just the default value
-        bool autosave_on_robot = (AUTOSAVE_INTERVAL != 0);
-
         /// @brief Is autosaving enabled?
-        bool autosave_enabled = true;
+        bool autosave_enabled = (AUTOSAVE_INTERVAL != 0);
+
+        /// @brief The autosave directory, imported from the config file
+        std::filesystem::path autosave_dir = "";
 
         /// @brief The path to the script we are editing
         std::filesystem::path script_path;

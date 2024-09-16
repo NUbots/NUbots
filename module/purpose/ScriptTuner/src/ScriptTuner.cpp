@@ -87,8 +87,8 @@ namespace module::purpose {
         script.frames.back().duration = std::chrono::milliseconds(default_duration);
 
         on<Configuration>("ScriptTuner.yaml").then([this](const Configuration& config) {
-            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
-            this->autosave_on_robot = config["autosave_on_robot"].as<bool>();
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            this->autosave_dir = config["autosave_dir"].as<std::string>();
         });
 
         on<Startup>().then([this] {
@@ -164,28 +164,13 @@ namespace module::purpose {
             // Before we start, temp save the old path so we can delete it once we have a new autosave file.
             auto last_autosave_path = this->autosave_path;
 
-            // Split the parent directory off the autosave path
-            auto autosave_dir = script_path.parent_path();
-
-            // Pick the right autosave directory based on the configured save location
-            if (autosave_on_robot) {
-                // If we're autosaving on the robot, then save to an `autosave/` subdirectory
-                // in the same folder of the current script.
-                autosave_dir += "/autosave/";
-            }
-            else {
-                // Otherwise, if we're running in the docker container, then replace the
-                // autosave directory with a subdirectory in the mounted `../NUbots/` folder.
-                autosave_dir = "/home/nubots/NUbots/.scripttuner/autosave/";
-            }
-
             log<NUClear::DEBUG>("-> Autosaving to: ", autosave_dir);
 
             // Check if autosave directory exists
-            if (!std::filesystem::exists(autosave_dir)) {
-                log<NUClear::DEBUG>("-> Creating autosave directory: ", autosave_dir);
+            if (!std::filesystem::exists(this->autosave_dir)) {
+                log<NUClear::DEBUG>("-> Creating autosave directory: ", this->autosave_dir);
                 // Create the autosave directory
-                std::filesystem::create_directories(autosave_dir);
+                std::filesystem::create_directories(this->autosave_dir);
             }
 
             // Get unix epoch time to use as autosave file identifier
@@ -193,7 +178,7 @@ namespace module::purpose {
             // Create filename with unix epoch time
             auto autosave_file = std::to_string(now) + "_" + script_path.filename().string();
             // Concatenate into a full path
-            this->autosave_path = autosave_dir / autosave_file;
+            this->autosave_path = this->autosave_dir / autosave_file;
 
             // Save the script to the autosave directory
             YAML::Node n(script);
@@ -518,8 +503,17 @@ namespace module::purpose {
         }
         // And display a message to inform if we've autosaved
         if (!this->autosave_path.empty()) {
+            // Make sure the path isn't too long for the screen
+            auto path = this->autosave_path.string();
+            if (path.length() > size_t(COLS - 18)) {
+                // Overwrite the end of the path with an ellipsis and null terminator
+                path[COLS - 18 - 3] = '.';
+                path[COLS - 18 - 2] = '.';
+                path[COLS - 18 - 1] = '.';
+                path[COLS - 18]     = '\0';
+            }
             attron(A_DIM | COLOR_PAIR(6));  // Cyan
-            mvprintw(9 + 20 + 2, 2 + 2, "Autosaved @ %s", this->autosave_path.c_str());
+            mvprintw(9 + 20 + 2, 2 + 2, "Autosaved @ %s", path.c_str());
             attroff(A_DIM | COLOR_PAIR(6));  // Cyan
         }
 
