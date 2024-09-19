@@ -72,10 +72,13 @@ def main():
     # prefix = "quad"  # s for straight path
 
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
+    # NOTE: Other paths to consider: Spiral, figure 8, s shaped
     directories = [
         {"prefix": "quad", "first_file": 1, "num_files": 40, "skip_files": []},
         {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
         {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
+        {"prefix": "zz", "first_file": 1, "num_files": 40, "skip_files": []},
+        {"prefix": "circ", "first_file": 1, "num_files": 40, "skip_files": []},
     ]
 
     imu = []
@@ -256,8 +259,8 @@ def main():
 
 
     # Split the training data into training, validation and test sets
-    training_size = 0.5
-    validate_size = 0.2
+    training_size = 0.8
+    validate_size = 0.1
     num_time_steps = joined_data.shape[0]
 
     num_train_max_idx = int(np.floor(num_time_steps * training_size))
@@ -481,7 +484,7 @@ def main():
     sequence_length = 100   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
-    batch_size = 50                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 256                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Partition the training and validation datasets into sequences
     input_data_train, input_targets_train = partition_dataset(input_data_train, input_targets_train, sequence_length)
@@ -498,7 +501,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00001   # Controls how much to change the model in response to error.
-    epochs = 150
+    epochs = 100
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
     loss_function = keras.losses.Huber()
@@ -541,11 +544,11 @@ def main():
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d2)
 
     # lstm = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.005), return_sequences=False)(inputs)
-    lstm = keras.layers.LSTM(5, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=True)(inputs)
+    lstm = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=True)(inputs)
     batch_norm = keras.layers.BatchNormalization()(lstm)
     dropout = keras.layers.Dropout(rate=0.25)(batch_norm)
 
-    lstm2 = keras.layers.LSTM(5, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=False)(dropout)
+    lstm2 = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=False)(dropout)
     batch_norm2 = keras.layers.BatchNormalization()(lstm2)
     dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
 
