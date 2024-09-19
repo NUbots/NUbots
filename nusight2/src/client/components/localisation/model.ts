@@ -5,9 +5,9 @@ import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 
-import { FieldModel } from "./field/model";
+import { FieldModel } from "./r3f_components/field/model";
+import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
-import { SkyboxModel } from "./skybox/model";
 
 export class TimeModel {
   @observable time: number; // seconds
