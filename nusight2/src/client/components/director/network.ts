@@ -27,30 +27,52 @@ export class DirectorNetwork {
   private onDirectorMessage(robotModel: RobotModel, message: DirectorMessage) {
     const robot = DirectorRobotModel.of(robotModel);
 
-    robot.providers.clear();
-    robot.rootTasks = [];
+    robot.layers.clear();
+    robot.children.clear();
     message.providers.forEach((provider) => {
-      if (provider.name?.startsWith("extension::behaviour::commands::RootType")) {
-        robot.rootTasks.push(
-          provider.name?.match(/^extension::behaviour::commands::RootType<message::(.*)>/)?.[1] ?? "",
-        );
-        return;
-      }
-      const newProvider = {
-        id: provider.name ?? "",
-        layer: provider.name?.match(/^message::(.*?)::(.*)/)?.[1] ?? "",
-        name: provider.name?.match(/^message::(.*?)::(.*)/)?.[2] ?? "",
-        parent: provider.parent ?? "",
-        active: provider.active ?? false,
-        done: provider.done ?? false,
+      let newProvider: {
+        id: string;
+        layer: string;
+        name: string;
+        parent: string;
+        active: boolean;
+        done: boolean;
+        isRootTask: boolean;
       };
 
-      if (!robot.providers.has(newProvider.layer)) {
-        robot.providers.set(newProvider.layer, []);
+      if (provider.name?.startsWith("extension::behaviour::commands::RootType")) {
+        newProvider = {
+          id: provider.name ?? "",
+          layer: "root",
+          name: provider.name?.match(/^extension::behaviour::commands::RootType<message::(.*)>/)?.[1] ?? "",
+          parent: "",
+          active: provider.active ?? false,
+          done: provider.done ?? false,
+          isRootTask: true,
+        };
+      } else {
+        newProvider = {
+          id: provider.name ?? "",
+          layer: provider.name?.match(/^message::(.*?)::(.*)/)?.[1] ?? "",
+          name: provider.name?.match(/^message::(.*?)::(.*)/)?.[2] ?? "",
+          parent: provider.parent ?? "",
+          active: provider.active ?? false,
+          done: provider.done ?? false,
+          isRootTask: provider.name?.match(/^message::(.*?)::(.*)/)?.[1] === "root",
+        };
       }
-      robot.providers.get(newProvider.layer)?.push(newProvider);
 
-      console.log("New provider:", newProvider);
+      if (provider.parent) {
+        if (!robot.children.has(provider.parent)) {
+          robot.children.set(provider.parent, []);
+        }
+        robot.children.get(provider.parent)?.push(newProvider);
+      }
+
+      if (!robot.layers.has(newProvider.layer)) {
+        robot.layers.set(newProvider.layer, []);
+      }
+      robot.layers.get(newProvider.layer)?.push(newProvider);
     });
   }
 }

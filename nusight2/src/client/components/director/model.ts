@@ -43,14 +43,16 @@ export interface Provider {
   active: boolean;
   done: boolean;
   parent: string;
+  isRootTask: boolean;
 }
 
 export class DirectorRobotModel {
   robotModel: RobotModel;
 
   @observable.shallow messages: DirectorMessage[] = [];
-  @observable.shallow providers: Map<string, Provider[]> = new Map();
-  @observable.shallow rootTasks: string[] = [];
+  @observable.shallow layers: Map<string, Provider[]> = new Map();
+  @observable.shallow children: Map<String, Provider[]> = new Map();
+  @observable.shallow providers: Map<String, Provider[]> = new Map();
 
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;
@@ -59,4 +61,25 @@ export class DirectorRobotModel {
   static of = memoize((robotModel: RobotModel): DirectorRobotModel => {
     return new DirectorRobotModel(robotModel);
   });
+
+  generateMermaidGraph(): string {
+    let graph = "graph TD\n";
+    let hasNodes = false;
+
+    for (const layer of this.layers.keys()) {
+      for (const task of this.layers.get(layer) ?? []) {
+        for (const child of this.children.get(task.id) ?? []) {
+          graph += `${task.name}-->${child.name};\n`;
+          hasNodes = true;
+        }
+      }
+    }
+
+    // Add a default node if the graph is empty
+    if (!hasNodes) {
+      graph += "DefaultNode[No tasks yet];\n";
+    }
+
+    return graph;
+  }
 }

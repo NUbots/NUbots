@@ -1,6 +1,7 @@
 import React from "react";
 import { PropsWithChildren } from "react";
 import { observer } from "mobx-react";
+import Mermaid from "mermaid-react";
 
 import { RobotSelectorSingle } from "../robot_selector_single/view";
 
@@ -19,6 +20,9 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
   const { Menu, model, controller } = props;
   const { robots, selectedDirectorRobot } = model;
 
+  const graphDefinition = selectedDirectorRobot?.generateMermaidGraph();
+  console.log(graphDefinition);
+
   return (
     <div className="w-full flex flex-col">
       <Menu>
@@ -32,7 +36,7 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
         </div>
       </Menu>
       <div className="m-2">
-        <div className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
+        {/* <div className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
           <div className="text-lg bg-auto-surface-1 py-1 px-4 w-fit h-fit rounded mb-4">Root Tasks</div>
           <div className="bg-auto-surface-1 p-2 rounded flex flex-wrap">
             {Array.from(selectedDirectorRobot?.rootTasks || []).map((rootTask) => (
@@ -44,20 +48,19 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
-        {Array.from(selectedDirectorRobot?.providers.keys() || []).map((layerName: string) => (
+        {Array.from(selectedDirectorRobot?.layers.keys() || []).map((layerName: string) => (
           <div key={layerName} className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
             <div className="text-lg bg-auto-surface-1 py-1 px-4 w-fit h-fit rounded mb-4">{layerName}</div>
             <div className="bg-auto-surface-1 p-2 rounded">
               Active
               <div className="flex flex-wrap">
-                {selectedDirectorRobot?.providers.get(layerName)?.map((provider) => (
+                {selectedDirectorRobot?.layers.get(layerName)?.map((provider) => (
                   <div
                     key={provider.id}
-                    className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2  ${
-                      provider.active ? "" : "border-dashed"
-                    } ${provider.done ? "border-blue-500" : "border-auto"}`}
+                    className={`bg-auto-surface-1 flex min-w-[7em] w-fit h-fit p-4 m-1 rounded border border-2  ${provider.active ? "" : "border-dashed"
+                      } ${provider.done ? "border-blue-500" : "border-auto"}`}
                   >
                     <div>
                       <div className="font-semibold">{provider.name}</div>
@@ -65,9 +68,8 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
                         {provider.done ? " Done" : "Not Done"}
                       </div>
                       <div
-                        className={`text-xs  ${
-                          provider.active ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
-                        }`}
+                        className={`text-xs  ${provider.active ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
+                          }`}
                       >
                         {" "}
                         {provider.active ? " Active" : "Not Active"}
@@ -79,6 +81,9 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
             </div>
           </div>
         ))}
+        <div className="m-4 bg-auto-surface-2 p-4 border border-2 border-auto rounded">
+          {graphDefinition && <Mermaid id="mermaid-graph" mmd={graphDefinition} />}
+        </div>
       </div>
     </div>
   );
