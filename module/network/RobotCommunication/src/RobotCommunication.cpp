@@ -138,6 +138,7 @@ namespace module::network {
                 msg->timestamp = NUClear::clock::now();
 
                 // State
+                // If there is game state information, then process 
                 if (game_state) {
                     int penalty_reason = game_state->data.self.penalty_reason;
                     switch (penalty_reason) {
