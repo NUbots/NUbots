@@ -41,7 +41,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
+FROM --platform=linux/amd64 archlinux:base-devel-20240915.0.262934
 
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -122,7 +122,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-18.1.8.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -131,7 +131,7 @@ RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v14.0.0.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v19.1.0.tar.gz \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
@@ -210,11 +210,11 @@ RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/ta
     -DIGC_DIR=${prefix}
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2024.05.08.tar.gz
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.2.tar.gz
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
