@@ -25,6 +25,7 @@
  * SOFTWARE.
  */
 
+
 #ifndef UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 #define UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 
@@ -32,17 +33,14 @@
 #include <utility>
 #include <vector>
 
-// If we are not in debug mode, don't build it! Please don't build it!
-#if !defined(NDEBUG) and !defined(__APPLE__)
-
 namespace utility::support::evil {
 
     struct StackFrame {
 
         StackFrame() = default;
 
-        StackFrame(uintptr_t pc_, std::string file_, int lineno_, std::string function_)
-            : pc(pc_), file(std::move(file_)), lineno(lineno_), function(std::move(function_)) {}
+        StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
+            : pc(pc), file(std::move(file)), lineno(lineno), function(std::move(function)) {}
 
         uintptr_t pc{};
         std::string file;
@@ -50,11 +48,30 @@ namespace utility::support::evil {
         std::string function;
     };
 
-    extern thread_local std::vector<StackFrame> stack;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
-    extern thread_local std::string exception_name;     // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    /**
+     * Get the stack trace of the last exception that happened in the current thread.
+     *
+     * You must ensure that you are running this function in the thread that the exception was thrown in.
+     *
+     * Make sure you are compiling in debug mode to get the stack trace.
+     * In release mode this function will return an empty vector.
+     *
+     * @return the stack trace of the current thread or an empty vector if not available
+     */
+    std::vector<StackFrame> last_exception_stack_trace();
+
+    /**
+     * Get the name of the last exception that happened in the current thread.
+     *
+     * You must ensure that you are running this function in the thread that the exception was thrown in.
+     *
+     * Make sure you are compiling in debug mode to get the exception name.
+     * In release mode this function will return "Unknown exception".
+     *
+     * @return the name of the last exception or "Unknown exception" if not available
+     */
+    std::string last_exception_name();
 
 }  // namespace utility::support::evil
-
-#endif  // !defined(NDEBUG) and !defined(__APPLE__)
 
 #endif  // UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
