@@ -57,12 +57,12 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                r.reactor.emit<NUClear::dsl::word::emit::Inline>(
                     std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvideReaction>>(r.id));
             });
         }
@@ -95,8 +95,8 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+            task.parent->reactor.emit<NUClear::dsl::word::emit::Inline>(
+                std::make_unique<commands::ProviderDone>(task.parent->id, task.id));
         }
     };
 
@@ -155,7 +155,7 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director about this when condition
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(std::make_unique<commands::WhenExpression>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(std::make_unique<commands::WhenExpression>(
                 reaction,
                 // typeindex of the enum value
                 typeid(State),
@@ -200,7 +200,7 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
     };
@@ -260,7 +260,7 @@ namespace extension::behaviour {
          */
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
@@ -312,10 +312,10 @@ namespace extension::behaviour {
 
             // Work out who is sending the task so we can determine if it's a subtask
             const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
+            uint64_t reaction_id = (task != nullptr) ? task->parent->id : -1;
             uint64_t task_id     = (task != nullptr) ? task->id : -1;
 
-            NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
+            NUClear::dsl::word::emit::Inline<commands::BehaviourTask>::emit(
                 powerplant,
                 std::make_shared<commands::BehaviourTask>(typeid(T),
                                                           typeid(commands::RootType<T>),
