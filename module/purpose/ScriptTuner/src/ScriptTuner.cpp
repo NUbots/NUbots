@@ -372,7 +372,7 @@ namespace module::purpose {
         // If we don't then save our current motor position as the position
         if (it == std::end(script.frames[frame].targets)) {
 
-            emit<Scope::DIRECT>(std::make_unique<LockServo>());
+            emit<Scope::INLINE>(std::make_unique<LockServo>());
         }
         else {
             // Remove this frame

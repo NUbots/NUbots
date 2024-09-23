@@ -44,7 +44,7 @@ namespace module::network {
             netConfig->name             = name.empty() ? utility::support::get_hostname() : name;
             netConfig->announce_address = config["address"].as<std::string>();
             netConfig->announce_port    = config["port"].as<uint16_t>();
-            emit<Scope::DIRECT>(netConfig);
+            emit<Scope::INLINE>(netConfig);
         });
 
         on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {

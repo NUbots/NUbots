@@ -81,16 +81,16 @@ namespace module::tools {
             // Set playback mode
             auto set_mode_request  = std::make_unique<SetModeRequest>();
             set_mode_request->mode = config.mode;
-            emit<Scope::DIRECT>(set_mode_request);
+            emit<Scope::INLINE>(set_mode_request);
 
             // Load the files
             auto load_request      = std::make_unique<LoadRequest>();
             load_request->files    = std::vector<std::string>(std::next(args.begin()), args.end());
             load_request->messages = config.messages;
-            emit<Scope::DIRECT>(std::move(load_request));
+            emit<Scope::INLINE>(std::move(load_request));
 
             // Start playback
-            emit<Scope::DIRECT>(std::make_unique<PlayRequest>());
+            emit<Scope::INLINE>(std::make_unique<PlayRequest>());
         });
 
         on<Trigger<PlaybackState>>().then([this](const PlaybackState& playback_state) {

@@ -178,7 +178,7 @@ namespace module::extension {
                 bool valid = w->validator(state);
                 if (valid != w->current) {
                     w->current = valid;
-                    emit<Scope::DIRECT>(std::make_unique<StateUpdate>(id, w->type, state));
+                    emit<Scope::INLINE>(std::make_unique<StateUpdate>(id, w->type, state));
                 }
             });
 

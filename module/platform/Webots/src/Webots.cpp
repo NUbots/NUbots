@@ -418,7 +418,7 @@ namespace module::platform {
             targets->targets.emplace_back(target);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(targets);
+            emit<Scope::INLINE>(targets);
         });
 
         on<Shutdown>().then([this] {
@@ -452,7 +452,7 @@ namespace module::platform {
             }
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(targets);
+            emit<Scope::INLINE>(targets);
         });
 
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
