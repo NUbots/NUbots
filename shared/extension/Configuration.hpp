@@ -320,7 +320,7 @@ namespace NUClear::dsl {
             /// @param reaction The reaction we are binding which will watch the config path(s)
             /// @param file_name The file_name of the desired config file
             template <typename DSL>
-            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& file_name) {
+            static void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& file_name) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
@@ -444,7 +444,7 @@ namespace NUClear::dsl {
             /// @param t The associated Configuration Reaction
             /// @return A Configuration object is returned.
             template <typename DSL>
-            [[nodiscard]] static inline std::shared_ptr<::extension::Configuration> get(threading::Reaction& t) {
+            [[nodiscard]] static std::shared_ptr<::extension::Configuration> get(threading::ReactionTask& t) {
                 // Get the file watch event
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
 
@@ -476,7 +476,7 @@ namespace NUClear::dsl {
                     return std::make_shared<::extension::Configuration>(relative_path, hostname, binary_name, platform);
                 }
                 catch (const YAML::ParserException& e) {
-                    throw std::runtime_error(watch.path + " " + std::string(e.what()));
+                    throw std::runtime_error(watch.path.string() + " " + std::string(e.what()));
                 }
             }
         };
