@@ -25,10 +25,13 @@
  * SOFTWARE.
  */
 
+
 #ifndef EXTENSION_FILEWATCH_HPP
 #define EXTENSION_FILEWATCH_HPP
 
+#include <filesystem>
 #include <nuclear>
+#include <span>
 
 namespace extension {
 
@@ -38,10 +41,11 @@ namespace extension {
         enum Event {
             NO_OP   = 0,  // No event
             RENAMED = 1,  // File created or renamed
-            CHANGED = 2   // File modified
+            CHANGED = 2,  // File modified
+            DELETED = 3   // File was deleted
         };
 
-        std::string path;
+        std::filesystem::path path;
         int events{};
 
         inline operator bool() const {
@@ -51,7 +55,7 @@ namespace extension {
     };
 
     struct FileWatchRequest {
-        std::string path;
+        std::filesystem::path path;
         int events{};
         std::shared_ptr<NUClear::threading::Reaction> reaction;
     };
@@ -69,12 +73,12 @@ namespace NUClear::dsl {
 
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction,
-                                    const std::string& path,
+                                    const std::filesystem::path& path,
                                     int events) {
 
                 // Add our unbinder
                 reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                    r.reactor.emit<word::emit::Direct>(
+                    r.reactor.emit<word::emit::Inline>(
                         std::make_unique<operation::Unbind<::extension::FileWatch>>(r.id));
                 });
 
@@ -85,22 +89,22 @@ namespace NUClear::dsl {
                 fw->reaction = reaction;
 
                 // Send our file watcher to the extension
-                reaction->reactor.powerplant.emit<word::emit::Direct>(fw);
+                reaction->reactor.powerplant.emit<word::emit::Inline>(fw);
             }
 
             template <typename DSL>
-            static inline ::extension::FileWatch get(threading::Reaction& /*reaction*/) {
+            static inline ::extension::FileWatch get(threading::ReactionTask& /*unused*/) {
 
                 // Get our File Watch store value
                 auto* ptr = ::extension::FileWatch::FileWatchStore::value;
 
                 // If there was something in the store
-                if (ptr != nullptr) {
+                if (ptr) {
                     return *ptr;
                 }
 
                 // Return an invalid file watch element
-                return ::extension::FileWatch{"", 0};
+                return {"", 0};
             }
         };
     }  // namespace operation
@@ -110,6 +114,7 @@ namespace NUClear::dsl {
         template <>
         struct is_transient<::extension::FileWatch> : public std::true_type {};
     }  // namespace trait
+
 }  // namespace NUClear::dsl
 
 #endif  // EXTENSION_FILEWATCH_HPP
