@@ -74,11 +74,13 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: Spiral, figure 8, s shaped
     directories = [
-        {"prefix": "quad", "first_file": 1, "num_files": 40, "skip_files": []},
-        {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
-        {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
-        {"prefix": "zz", "first_file": 1, "num_files": 40, "skip_files": []},
-        {"prefix": "circ", "first_file": 1, "num_files": 40, "skip_files": []},
+        {"prefix": "quad", "first_file": 1, "num_files": 50, "skip_files": []},
+        {"prefix": "s", "first_file": 1, "num_files": 25, "skip_files": []},
+        {"prefix": "s-new", "first_file": 1, "num_files": 25, "skip_files": []},
+        {"prefix": "zz", "first_file": 1, "num_files": 50, "skip_files": []},
+        {"prefix": "circ", "first_file": 1, "num_files": 50, "skip_files": []},
+        {"prefix": "sprl", "first_file": 1, "num_files": 50, "skip_files": [35]},
+        {"prefix": "fig8", "first_file": 1, "num_files": 50, "skip_files": [18]},
     ]
 
     imu = []
@@ -544,17 +546,17 @@ def main():
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d2)
 
     # lstm = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.005), return_sequences=False)(inputs)
-    lstm = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=True)(inputs)
+    lstm = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.015), return_sequences=True)(inputs)
     batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.25)(batch_norm)
+    dropout = keras.layers.Dropout(rate=0.2)(batch_norm)
 
-    lstm2 = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.01), return_sequences=False)(dropout)
+    lstm2 = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.015), return_sequences=False)(dropout)
     batch_norm2 = keras.layers.BatchNormalization()(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
+    dropout2 = keras.layers.Dropout(rate=0.2)(batch_norm2)
 
     # normalise = keras.layers.LayerNormalization()(dropout2)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.01))(dropout2)
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.015))(dropout2)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
