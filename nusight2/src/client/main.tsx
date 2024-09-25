@@ -10,6 +10,7 @@ import { AppModel } from "./components/app/model";
 import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
+import { installRerun } from "./components/rerun/install";
 import { installDashboard } from "./components/dashboard/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
@@ -42,6 +43,7 @@ installVisualMesh({ nav, appModel, nusightNetwork, Menu });
 installProfiler({ nav, appModel, nusightNetwork, Menu });
 installTempMonitor({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
+installRerun({ nav, appModel, nusightNetwork, Menu });
 
 configure({ enforceActions: "observed" });
 createRoot(document.getElementById("root")!).render(<AppView nav={nav} />);
