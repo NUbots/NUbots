@@ -122,7 +122,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-18.1.8.tar.gz \
+RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-19.1.0.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -137,14 +137,14 @@ RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/ar
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
-RUN install-from-source https://github.com/intel/opencl-clang/archive/v14.0.0.tar.gz \
+RUN install-from-source https://github.com/intel/opencl-clang/archive/v19.1.0.tar.gz \
     --patch https://gist.githubusercontent.com/TrentHouliston/4281ecb27d1990f77cc43659ac888aaf/raw/4ddad7c87feb38e5c53917cc06036d0fead97791/resource_linker_skip_cross.patch
 
 # Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.5.0.tar.gz \
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.20.1.tar.gz \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/sdk-1.3.216.0.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2022.2.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/sdk-1.3.290.0.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2024.3.tar.gz \
     -DSPIRV_WERROR=Off \
     -DBUILD_SHARED_LIBS=ON \
     -DSPIRV_TOOLS_BUILD_STATIC=OFF \
@@ -155,7 +155,7 @@ RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/
 RUN install-package ncurses
 
 # intel graphics compiler
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.11485.tar.gz \
+RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.17537.20.tar.gz \
     --patch https://raw.githubusercontent.com/archlinux/svntogit-community/f557b1f70d15c5f991ca6b20c06113069ac5c30b/trunk/fix-zlib-linking.patch \
     --patch https://github.com/intel/intel-graphics-compiler/commit/12c99343388eba6e6275856b25e0fa8978585dfb.patch \
     --patch https://github.com/intel/intel-graphics-compiler/commit/1d5ceafdbc005f3adc58be5af1dc92f068908e16.patch \
@@ -179,21 +179,21 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DINSTALL_GENX_IR=ON
 
 # gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.1.7.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
     --build-system cmake \
     -DRUN_TEST_SUITE=OFF
 
 # Libpci access and libdrm for communicating with graphics hardware
-RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
-RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz \
+RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.18.tar.xz
+RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.123.tar.xz \
     --build-system meson \
     -Dudev=false \
     -Dvalgrind=false
 
 # Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.15.0.tar.gz
+RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
 
-RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-22.4.4.tar.gz \
+RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.2.5.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
@@ -204,7 +204,7 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
     -DENABLE_NONFREE_KERNELS=ON
 
 # Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/22.29.23750.tar.gz \
+RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.35.30872.22.tar.gz \
     --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
@@ -220,14 +220,14 @@ RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
 # tcmalloc
-RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
+RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.16/gperftools-2.16.tar.gz \
     --build-system autotools \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
 
 # Protobuf
 RUN install-package protobuf && \
-    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v28.2/protobuf-28.2.tar.gz \
     --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
     -DWITH_PROTOC="/usr/sbin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
@@ -235,7 +235,7 @@ RUN install-package protobuf && \
     -DBUILD_SHARED_LIBS=OFF
 
 # OpenCV
-RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.10.0.tar.gz
 
 # OpenVino - Dependencies
 RUN install-package opencl-clhpp && \
@@ -243,7 +243,7 @@ RUN install-package opencl-clhpp && \
     install-package ocl-icd
 
 # OpenVino
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 && \
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch releases/2024/1 && \
     cd openvino &&  \
     git submodule update --init --recursive && \
     mkdir build && \
@@ -269,7 +269,7 @@ RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/
 
 # Libjpeg
 RUN install-package yasm
-RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.0.7-esr.tar.gz \
+RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/3.0.90.tar.gz \
     -DWITH_SIMD=ON \
     -DFORCE_INLINE=ON \
     -DINLINE_WORKS=1 \
@@ -282,17 +282,17 @@ RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/r
     -DFLOATTEST="sse"
 
 # yaml-cpp
-RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.tar.gz \
+RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.8.0.tar.gz \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
 
 # fmt formatting library
-RUN install-from-source https://github.com/fmtlib/fmt/archive/refs/tags/9.0.0.tar.gz \
+RUN install-from-source https://github.com/fmtlib/fmt/archive/refs/tags/11.0.2.tar.gz \
     -DFMT_DOC=OFF \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz \
+RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.7.1.tar.gz \
     -DCATCH_CONFIG_CONSOLE_WIDTH=120 \
     -DCATCH_CONFIG_CPP11_TO_STRING=ON \
     -DCATCH_CONFIG_CPP17_UNCAUGHT_EXCEPTIONS=ON \
@@ -302,21 +302,21 @@ RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.
     -DCATCH_CONFIG_CPP17_BYTE=ON
 
 # Aravis
-RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
-RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
+RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.27.tar.gz
+RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.12.tar.gz \
     --without-python
-RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.72.3/glib-2.72.3.tar.bz2 \
+RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz
+RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.82.1/glib-2.82.1.tar.bz2 \
     -Ddefault_library=both && \
     cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
-RUN install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
+RUN install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.33/aravis-0.8.33.tar.xz \
     -Ddefault_library=both \
     -Dusb=enabled \
     -Ddocumentation=disabled \
     -Dintrospection=disabled
 
 # LibUV
-RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz \
+RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.49.0.tar.gz \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
@@ -325,13 +325,13 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/964efc8c1771
     -DBUILD_TESTS=OFF
 
 # Backtrace
-RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8602fda64e78f1f46563220f2ee9f7e70819c51d.tar.gz \
+RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/86885d14049fab06ef8a33aac51664230ca09200.tar.gz \
     --without-system-libunwind \
     --enable-shared \
     --enable-static
 
 # Alsa and espeak
-RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
+RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.12.tar.gz \
     --without-debug
 RUN install-package alsa-utils
 RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz
@@ -342,29 +342,29 @@ RUN ldconfig && \
     --autotools-force-regenerate
 
 # mio memory mapping library
-RUN install-from-source https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz \
+RUN install-from-source https://github.com/mandreyel/mio/archive/8b6b7d878c89e81614d05edca7936de41ccdd2da.tar.gz \
     --patch https://patch-diff.githubusercontent.com/raw/mandreyel/mio/pull/93.patch
 
 # zstr header to have file streams that do zlib compression
-RUN install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.6/src/zstr.hpp \
+RUN install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.7/src/zstr.hpp \
     --header-path include/zstr && \
-    install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.6/src/strict_fstream.hpp \
+    install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.7/src/strict_fstream.hpp \
     --header-path include/zstr
 
 # Visual Mesh
-RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a17bbee73339eaee556f47a80b93c40.tar.gz \
+RUN install-from-source https://github.com/NUbots/VisualMesh/archive/bed46217f43a46fc6fc9c6a7e240e8e18943faf1.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
 
 # JSON for modern C++ (https://github.com/nlohmann/json)
-RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp
 
 # TinyXML
-RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
+RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.tar.gz
 
 # NLopt
-RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.8.0.tar.gz
 
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
@@ -379,13 +379,13 @@ RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
 # Install python libraries
 RUN pip install \
-    pygit2==1.13.3 \
+    pygit2==1.15.1 \
     xxhash \
     pylint \
     termcolor \
     stringcase \
     Pillow \
-    protobuf==4.21.2 \
+    protobuf==5.28.2 \
     mycroft-mimic3-tts \
     tqdm
 
@@ -393,22 +393,23 @@ RUN pip install \
 RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
-    doxygen
+    doxygen \
+    valgrind \
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
-    isort==5.10.1 \
-    black==22.6.0 \
+    isort==5.13.2 \
+    black==24.8.0 \
     licenseheaders==0.8.8
 
-RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O - \
+RUN wget -nv https://nodejs.org/dist/v22.9.0/node-v22.9.0-linux-x64.tar.xz -O - \
     | tar --extract --xz --strip-components=1 --directory /usr --file - \
-    node-v20.13.1-linux-x64/bin/ node-v20.13.1-linux-x64/include/ node-v20.13.1-linux-x64/lib/
+    node-v22.9.0-linux-x64/bin/ node-v22.9.0-linux-x64/include/ node-v22.9.0-linux-x64/lib/
 RUN npm install -g \
-    yarn@1.22.19 \
-    prettier@2.7.1 \
-    eslint@8.57.0
+    yarn@1.22.22 \
+    prettier@3.3.3 \
+    eslint@9.11.1
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
