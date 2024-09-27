@@ -166,9 +166,9 @@ namespace module::purpose {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task != nullptr) {
+            if (message.statistics != nullptr) {
                 // Get our reactor name
-                std::string reactor = message.task->identifiers.reactor;
+                std::string reactor = message.statistics->identifiers->reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
@@ -176,7 +176,9 @@ namespace module::purpose {
 
                 // This is our source
                 source = reactor + " "
-                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
+                         + (message.statistics->identifiers->name.empty()
+                                ? ""
+                                : "- " + message.statistics->identifiers->name + " ");
             }
 
             LogColours colours;
