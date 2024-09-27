@@ -391,7 +391,7 @@ namespace NUClear::dsl {
             /// @param t The associated Configuration Reaction
             /// @return False is the reaction is not to be run, otherwise true
             template <typename DSL>
-            [[nodiscard]] static inline bool precondition(threading::Reaction& t) {
+            [[nodiscard]] static inline bool precondition(threading::ReactionTask& t) {
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
                 // Check if the watch is valid and the file is a yaml file
                 if (!watch || fs::path(watch.path).extension() != ".yaml") {
