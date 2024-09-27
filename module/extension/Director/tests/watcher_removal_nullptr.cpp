@@ -99,7 +99,7 @@ namespace {
 TEST_CASE("Test that a watcher can take over from another provider", "[director][remove][watcher]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();
