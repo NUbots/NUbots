@@ -397,9 +397,9 @@ namespace module::platform {
                     || servo_state[target.id].goal_position != target.position
                     || servo_state[target.id].torque != target.torque) {
 
-                    servo_state[target.id].dirty = true;
-                    servo_state[target.id].id    = target.id;
-                    servo_state[target.id].name  = id_to_joint_name[target.id];
+                    servo_state[target.id].dirty      = true;
+                    servo_state[target.id].id         = target.id;
+                    servo_state[target.id].servo_name = id_to_joint_name[target.id];
 
                     servo_state[target.id].p_gain = target.gain;
                     // `i` and `d` gains are always 0
@@ -624,15 +624,15 @@ namespace module::platform {
 
                             // Create servo position message
                             actuator_requests.motor_positions.emplace_back(
-                                MotorPosition(servo.name, servo.goal_position));
+                                MotorPosition(servo.servo_name, servo.goal_position));
 
                             // Create servo velocity message
                             actuator_requests.motor_velocities.emplace_back(
-                                MotorVelocity(servo.name, servo.moving_speed));
+                                MotorVelocity(servo.servo_name, servo.moving_speed));
 
                             // Create servo PID message
                             actuator_requests.motor_pids.emplace_back(
-                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                                MotorPID(servo.servo_name, {servo.p_gain, servo.i_gain, servo.d_gain}));
                         }
 
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk
