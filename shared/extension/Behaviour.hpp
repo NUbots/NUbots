@@ -77,11 +77,11 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
-            NUClear::threading::ReactionTask& r) {
+        static std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
+            NUClear::threading::ReactionTask& t) {
 
-            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(r.id));
-            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
+            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(t.parent->id));
+            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(t.parent->id));
             return std::make_tuple(run_data, run_info);
         }
 
@@ -93,7 +93,7 @@ namespace extension::behaviour {
          * @param task The reaction task object that just finished
          */
         template <typename DSL>
-        static inline void postcondition(NUClear::threading::ReactionTask& task) {
+        static void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
             task.parent->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::ProviderDone>(task.parent->id, task.id));
@@ -224,9 +224,9 @@ namespace extension::behaviour {
         bool done;
 
         template <typename DSL>
-        static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::ReactionTask& r) {
+        static std::shared_ptr<Uses<Provider>> get(NUClear::threading::ReactionTask& t) {
 
-            auto group_info = information::InformationSource::get_group_info(r.id,
+            auto group_info = information::InformationSource::get_group_info(t.parent->id,
                                                                              typeid(Provider),
                                                                              typeid(commands::RootType<Provider>));
 
