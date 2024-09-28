@@ -1,25 +1,35 @@
 import React from "react";
 
-import { LocalisationRobotModel } from "../../robot_model";
+import { Matrix4 } from "../../../../../shared/math/matrix4";
 import { TextBillboard } from "../text_billboard/view";
 
-export const PurposeLabel = ({
-  robotModel,
-  cameraPitch,
-  cameraYaw,
-}: {
-  robotModel: LocalisationRobotModel;
+interface PurposeLabelProps {
+  Hft: Matrix4;
+  player_id: number;
+  purpose: string;
+  textColor?: string;
+  backgroundColor: string;
   cameraPitch: number;
   cameraYaw: number;
+}
+
+export const PurposeLabel: React.FC<PurposeLabelProps> = ({
+  Hft,
+  player_id,
+  purpose,
+  textColor = "white",
+  backgroundColor = "black",
+  cameraPitch,
+  cameraYaw,
 }) => {
-  const rTFf = robotModel.Hft.decompose().translation;
-  const label = robotModel.player_id == -1 ? robotModel.purpose : "N" + robotModel.player_id + " " + robotModel.purpose;
+  const rTFf = Hft.decompose().translation;
+  const label = player_id == -1 ? purpose : "N" + player_id + " " + purpose;
 
   return (
     <TextBillboard
       position={[rTFf?.x, rTFf?.y, rTFf?.z + 0.6]}
-      backgroundColor={robotModel.color}
-      textColor="white"
+      textColor={textColor}
+      backgroundColor={backgroundColor}
       text={label}
       cameraPitch={cameraPitch}
       cameraYaw={cameraYaw}

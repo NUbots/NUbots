@@ -145,7 +145,7 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
-  @observable particles: { particle: Vector3[] }; // Particle filter particles.
+  @observable particles: Vector3[]; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
   @observable fieldIntersections?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
@@ -201,7 +201,7 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
-    particles: { particle: Vector3[] };
+    particles: Vector3[];
     ball?: { rBWw: Vector3 };
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
@@ -257,7 +257,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
-      particles: { particle: [] },
+      particles: [],
       goals: { points: [] },
       robots: [],
       purpose: "",
