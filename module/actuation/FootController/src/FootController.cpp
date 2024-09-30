@@ -32,8 +32,6 @@ namespace module::actuation {
 
     using extension::Configuration;
 
-    using message::actuation::ServoID;
-
 
     FootController::FootController(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
