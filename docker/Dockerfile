@@ -373,6 +373,13 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 # lame
 RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
+# cargo
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# rerun
+RUN install-from-source https://github.com/rerun-io/rerun/archive/refs/tags/0.18.2.tar.gz
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################

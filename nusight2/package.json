@@ -104,6 +104,8 @@
   },
   "dependencies": {
     "@react-three/fiber": "^8.13.0",
+    "@rerun-io/web-viewer-react": "^0.18.2",
+    "@rollup/plugin-wasm": "^6.2.2",
     "@use-it/interval": "1.0.0",
     "binary": "0.3.0",
     "binary-search-bounds": "2.0.5",
@@ -137,6 +139,8 @@
     "three": "0.143.0",
     "throttle-debounce": "3.0.1",
     "urdf-loader": "0.12.1",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.3.0",
     "xxhashjs": "0.2.2"
   }
 }

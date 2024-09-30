@@ -5,6 +5,7 @@ import run from "@rollup/plugin-run";
 import typescript from "@rollup/plugin-typescript";
 import url from "@rollup/plugin-url";
 import minimist from "minimist";
+import wasm from "@rollup/plugin-wasm";
 import * as path from "path";
 
 const rootDir = __dirname;
@@ -71,6 +72,10 @@ const config = {
           args: args.nonRollupArgs,
         })
       : undefined,
+    wasm({
+      targetEnv: 'auto',
+      publicPath: '/assets/'
+    }), 
   ],
   external(id) {
     return /node_modules/.test(id) || ["tslib", "events", "bindings"].includes(id);

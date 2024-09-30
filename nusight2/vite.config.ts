@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 import glslPlugin from "./build_scripts/glsl_plugin";
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 
 // See https://vitejs.dev/config/
 export default defineConfig({
@@ -10,7 +12,8 @@ export default defineConfig({
   optimizeDeps: {
     // These dependencies are not auto-detected in Vite's initial pre-bundling run.
     // Adding them here includes them in the first run, avoiding a second one.
-    include: ["socket.io-client", "socket.io-parser"],
+    include: ["socket.io-client", "socket.io-parser", "re_viewer"],
+    exclude: ["@rerun-io/web-viewer-react"],
   },
   server: {
     port: 3000,
@@ -55,5 +58,7 @@ export default defineConfig({
       },
     }),
     glslPlugin(),
+    wasm(),
+    topLevelAwait(),
   ],
 });

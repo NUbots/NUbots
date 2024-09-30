@@ -1,0 +1,7 @@
+log_level: INFO
+
+# Set to true to forward DataPoint messages to Rerun
+forward_datapoints: true
+
+# Config for the Rerun recording
+recording_name: "NUbots"
