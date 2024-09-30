@@ -140,10 +140,10 @@ namespace module::skill {
                 auto left_arm  = std::make_unique<LeftArm>();
                 auto right_arm = std::make_unique<RightArm>();
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
-                    right_arm->servos[id] = arm_servos[id];
+                    right_arm->servos[static_cast<uint32_t>(id)] = arm_servos[static_cast<uint32_t>(id)];
                 }
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_ARM)) {
-                    left_arm->servos[id] = arm_servos[id];
+                    left_arm->servos[static_cast<uint32_t>(id)] = arm_servos[static_cast<uint32_t>(id)];
                 }
                 emit<Task>(left_arm, 0, true, "Walk left arm");
                 emit<Task>(right_arm, 0, true, "Walk right arm");

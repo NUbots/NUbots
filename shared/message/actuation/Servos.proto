@@ -58,21 +58,25 @@ message ServoState {
     uint32 id = 1;
     /// Current error state of the servo, different to the dynamixel packet error status
     uint32 hardware_error = 2;
+    /// Packet error status
+    uint32 packet_error = 3;
     // Values that are either simulated or read from the servos
     /// The last read pulse width modulation of the servo
-    float present_pwm = 3;
+    float present_pwm = 4;
     /// The last read current of the servo
-    float present_current = 4;
+    float present_current = 5;
     /// The last read velocity of the servo
-    float present_velocity = 5;
+    float present_velocity = 6;
     /// The last read position of the servo
-    float present_position = 6;
+    float present_position = 7;
     /// The last read voltage of the servo
-    float voltage = 7;
+    float voltage = 8;
     /// The last read temperature of the servo
-    float temperature = 8;
+    float temperature = 9;
     // Whether we have initialised this servo yet
-    bool initialised = 9;
+    bool initialised = 10;
+    // Whether the servo has new command which has not been executed
+    bool dirty = 11;
 }
 
 message ServoStates {

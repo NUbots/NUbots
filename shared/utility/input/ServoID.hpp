@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 NUbots
+ * Copyright (c) 2013 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -25,68 +25,84 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_INPUT_LIMBID_HPP
-#define UTILITY_INPUT_LIMBID_HPP
+#ifndef UTILITY_INPUT_SERVOID_HPP
+#define UTILITY_INPUT_SERVOID_HPP
 
 #include <set>
-
-#include "message/actuation/Servos.hpp"
-
-#include "utility/input/ServoID.hpp"
+#include <string>
 
 namespace utility::input {
-    // LimbID is a higher level of ServoID (see ServoID.h),
-    // which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
-    using ServoID = utility::input::ServoID;
 
-    struct LimbID {
-        enum Value { UNKNOWN = 0, LEFT_LEG = 1, RIGHT_LEG = 2, LEFT_ARM = 3, RIGHT_ARM = 4, HEAD = 5 };
-        Value value = Value::UNKNOWN;
+    struct ServoID {
+        enum Value {
+            R_SHOULDER_PITCH = 0,
+            L_SHOULDER_PITCH = 1,
+            R_SHOULDER_ROLL  = 2,
+            L_SHOULDER_ROLL  = 3,
+            R_ELBOW          = 4,
+            L_ELBOW          = 5,
+            R_HIP_YAW        = 6,
+            L_HIP_YAW        = 7,
+            R_HIP_ROLL       = 8,
+            L_HIP_ROLL       = 9,
+            R_HIP_PITCH      = 10,
+            L_HIP_PITCH      = 11,
+            R_KNEE           = 12,
+            L_KNEE           = 13,
+            R_ANKLE_PITCH    = 14,
+            L_ANKLE_PITCH    = 15,
+            R_ANKLE_ROLL     = 16,
+            L_ANKLE_ROLL     = 17,
+            HEAD_YAW         = 18,
+            HEAD_PITCH       = 19,
+            NUMBER_OF_SERVOS = 20
+        };
+        Value value = Value::R_SHOULDER_PITCH;
 
         // Constructors
-        LimbID() = default;
-        LimbID(uint8_t const& v) : value(static_cast<Value>(v)) {}
-        LimbID(uint32_t const& v) : value(static_cast<Value>(v)) {}
-        LimbID(uint64_t const& v) : value(static_cast<Value>(v)) {}
-        LimbID(int const& v) : value(static_cast<Value>(v)) {}
-        LimbID(Value const& v) : value(v) {}
-        LimbID(std::string const& str);
+        ServoID() = default;
+        ServoID(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        ServoID(uint32_t const& v) : value(static_cast<Value>(v)) {}
+        ServoID(uint64_t const& v) : value(static_cast<Value>(v)) {}
+        ServoID(int const& v) : value(static_cast<Value>(v)) {}
+        ServoID(Value const& v) : value(v) {}
+        ServoID(std::string const& str);
 
         // Operators
-        bool operator<(LimbID const& other) const {
+        bool operator<(ServoID const& other) const {
             return value < other.value;
         }
-        bool operator>(LimbID const& other) const {
+        bool operator>(ServoID const& other) const {
             return value > other.value;
         }
-        bool operator<=(LimbID const& other) const {
+        bool operator<=(ServoID const& other) const {
             return value <= other.value;
         }
-        bool operator>=(LimbID const& other) const {
+        bool operator>=(ServoID const& other) const {
             return value >= other.value;
         }
-        bool operator==(LimbID const& other) const {
+        bool operator==(ServoID const& other) const {
             return value == other.value;
         }
-        bool operator!=(LimbID const& other) const {
+        bool operator!=(ServoID const& other) const {
             return value != other.value;
         }
-        bool operator<(LimbID::Value const& other) const {
+        bool operator<(ServoID::Value const& other) const {
             return value < other;
         }
-        bool operator>(LimbID::Value const& other) const {
+        bool operator>(ServoID::Value const& other) const {
             return value > other;
         }
-        bool operator<=(LimbID::Value const& other) const {
+        bool operator<=(ServoID::Value const& other) const {
             return value <= other;
         }
-        bool operator>=(LimbID::Value const& other) const {
+        bool operator>=(ServoID::Value const& other) const {
             return value >= other;
         }
-        bool operator==(LimbID::Value const& other) const {
+        bool operator==(ServoID::Value const& other) const {
             return value == other;
         }
-        bool operator!=(LimbID::Value const& other) const {
+        bool operator!=(ServoID::Value const& other) const {
             return value != other;
         }
 
@@ -108,14 +124,11 @@ namespace utility::input {
         }
         operator std::string() const;
 
-        static std::set<ServoID> servos_for_limb(const LimbID& limb);
-        static std::set<ServoID> servos_for_legs();
-        static std::set<ServoID> servos_for_arms();
-        static LimbID limb_for_servo(const ServoID& servo);
+        friend std::ostream& operator<<(std::ostream& out, const ServoID& val);
 
-        friend std::ostream& operator<<(std::ostream& out, const LimbID& val);
+    private:
+        static const std::set<ServoID> values;
     };
-
 }  // namespace utility::input
 
-#endif
+#endif  // UTILITY_INPUT_SERVOID_HPP

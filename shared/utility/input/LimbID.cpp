@@ -28,9 +28,11 @@
 
 #include <stdexcept>
 
+#include "ServoID.hpp"
+
 namespace utility::input {
 
-    using ServoID = message::actuation::ServoID;
+    using ServoID = utility::input::ServoID;
 
     LimbID::LimbID(std::string const& str) {
         // clang-format off

@@ -74,9 +74,8 @@ namespace module::platform::OpenCR {
             }
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                nugus.servo_offset[i]     = config["servos"][i]["offset"].as<Expression>();
-                nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
-                servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
+                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
+                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
             }
 
             // populate alarm config levels

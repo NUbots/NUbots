@@ -36,6 +36,7 @@
 #include "message/actuation/Servos.hpp"
 
 #include "utility/file/fileutil.hpp"
+#include "utility/input/ServoID.hpp"
 #include "utility/platform/aliases.hpp"
 #include "utility/support/network.hpp"
 
@@ -47,7 +48,8 @@
 namespace utility::skill {
 
     using message::actuation::Servo;
-    using message::actuation::ServoID;
+    using message::actuation::ServoGoal;
+    using utility::input::ServoID;
 
     /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
     struct ScriptRequest {
@@ -239,7 +241,7 @@ namespace utility::skill {
             time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(frame.duration);
 
             // Add the servos in the frame to a map
-            std::map<uint32_t, ServoCommand> servos{};
+            std::map<uint32_t, ServoGoal> servos{};
             for (const auto& target : frame.targets) {
                 auto servo                 = Servo();
                 servo.goal.goal_time       = time;

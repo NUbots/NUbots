@@ -28,7 +28,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/strategy/StartSafely.hpp"
 
@@ -39,7 +39,6 @@ namespace module::strategy {
 
     using StartSafelyTask = message::strategy::StartSafely;
     using message::actuation::BodySequence;
-    using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::input::Sensors;
 
@@ -68,9 +67,10 @@ namespace module::strategy {
             // Load the script
             script = load_script<BodySequence>(cfg.script_name);
             for (int i = 0; i < 20; i++) {
-                servo_targets[i]                       = script->frames[0].servos[i].position;
-                script->frames[0].servos[i].state.gain = cfg.servo_gain;
-                script->frames[0].servos[i].time       = NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
+                servo_targets[i]                                 = script->frames[0].servos[i].goal.goal_position;
+                script->frames[0].servos[i].goal.position_p_gain = cfg.servo_gain;
+                script->frames[0].servos[i].goal.goal_time =
+                    NUClear::clock::now() + std::chrono::seconds(cfg.move_time);
             }
         });
 
@@ -85,10 +85,10 @@ namespace module::strategy {
 
             // Check if servos have reached their positions
             bool all_servos_at_target = true;
-            for (auto& servo : sensors.servo) {
-                double error = std::abs(servo.present_position - servo_targets[servo.id]);
+            for (auto& [id, servo] : sensors.servos) {
+                double error = std::abs(servo.state.present_position - servo_targets[id]);
                 if (error > cfg.servo_error) {
-                    log<NUClear::TRACE>("Servo", servo.id, "has not reached target position with error", error);
+                    log<NUClear::TRACE>("Servo", id, "has not reached target position with error", error);
                     all_servos_at_target = false;
                     break;
                 }

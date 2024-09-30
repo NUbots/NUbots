@@ -40,7 +40,7 @@ namespace module::platform::OpenCR {
         // We need to do 2 sync writes here.
         // We always write to all servos if at least one of them is dirty
         const bool servos_dirty =
-            std::any_of(servos.cbegin(), servos.cend(), [](const Servo& servo) -> bool { return servo.dirty; });
+            std::any_of(servos.cbegin(), servos.cend(), [](const Servo& servo) -> bool { return servo.state.dirty; });
 
         if (servos_dirty) {
             // Write data is split into two components
@@ -53,17 +53,18 @@ namespace module::platform::OpenCR {
                 data2[i].id = nugus.servo_ids()[i];
 
                 // Clear our dirty flag
-                servos[i].dirty = false;
+                servos[i].state.dirty = false;
 
                 // If our torque should be disabled then we disable our torque
-                data1[i].data.torque_enable = uint8_t(servos[i].torque != 0 && !std::isnan(servos[i].goal_position));
+                data1[i].data.torque_enable =
+                    uint8_t(servos[i].goal.torque_enabled != 0 && !std::isnan(servos[i].goal.goal_position));
 
                 // Pack our data
-                data1[i].data.velocity_i_gain = convert::i_gain(servos[i].goal.velocity_i_gain);
-                data1[i].data.velocity_p_gain = convert::p_gain(servos[i].goal.velocity_p_gain);
-                data1[i].data.position_d_gain = convert::d_gain(servos[i].goal.position_d_gain);
-                data1[i].data.position_i_gain = convert::i_gain(servos[i].goal.position_i_gain);
+                data1[i].data.velocity_p_gain = convert::p_gain(0.0);
+                data1[i].data.velocity_i_gain = convert::i_gain(0.0);
                 data1[i].data.position_p_gain = convert::p_gain(servos[i].goal.position_p_gain);
+                data1[i].data.position_i_gain = convert::i_gain(servos[i].goal.position_i_gain);
+                data1[i].data.position_d_gain = convert::d_gain(servos[i].goal.position_d_gain);
 
                 data2[i].data.feedforward_1st_gain = convert::ff_gain(servos[i].goal.feedforward_1st_gain);
                 data2[i].data.feedforward_2nd_gain = convert::ff_gain(servos[i].goal.feedforward_2nd_gain);

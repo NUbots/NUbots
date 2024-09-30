@@ -104,13 +104,7 @@ namespace module::actuation {
 
             if (cfg.mode == "IK") {
                 for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
-                    // Get servo from sensors for graphing information
-                    auto servo       = sensors.servos[unit32_t(id)];
-                    std::string name = static_cast<std::string>(id);
-                    emit(graph("Servo Present Position/" + name, servo.state.present_position));
-                    emit(graph("Servo Goal Position/" + name, servo.state.goal_position));
-                    emit(graph("Servo Error/" + name, servo.state.present_position - servo.goal.goal_position));
-                    ik_task->servos[id]                = cfg.servos[unit32_t(id)];
+                    ik_task->servos[id]                = cfg.servos[id];
                     ik_task->servos[id].goal.goal_time = foot_control_task.time;
                 }
             }

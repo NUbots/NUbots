@@ -160,8 +160,8 @@ namespace module::platform::OpenCR {
 
         // Loop over all servo states and set the servos to uninitialised so we can read their state and update our
         // internal goal state
-        for (auto& servo_state : servo_states) {
-            servo_state.initialised = false;
+        for (auto& [id, servo] : servos) {
+            servo.state.initialised = false;
         }
 
         // Find OpenCR firmware and model versions
