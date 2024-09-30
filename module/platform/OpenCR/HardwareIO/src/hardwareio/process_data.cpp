@@ -29,15 +29,19 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::input::ButtonLeftDown;
     using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::nusight::graph;
 
     /*
         Process the status return packet data
@@ -157,19 +161,18 @@ namespace module::platform::OpenCR {
         servos[servo_index].state.voltage     = convert::voltage(data.present_voltage);
         servos[servo_index].state.temperature = convert::temperature(data.present_temperature);
 
-        // Buzz if any servo is hot, use the boolean flag to turn the buzzer off once the servo is no longer hot
+        // Buzz if any servo is hot, forever, until power is turned off.
+        // Middle button can be used to disable alarm once no servos are hot, if a power cycle is not desired.
         // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
         bool any_servo_hot = false;
         for (const auto& servo : servos) {
             if (servo.temperature > cfg.alarms.temperature.level) {
-                any_servo_hot = true;
+                log<NUClear::WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
+                                   packet.id,
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)));
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
-        }
-
-        if (!any_servo_hot) {
-            emit(std::make_unique<Buzzer>(0));
         }
 
         // If this servo has not been initialised yet, set the goal states to the current states
@@ -177,6 +180,20 @@ namespace module::platform::OpenCR {
             servos[servo_index].goal.goal_position = servos[servo_index].state.present_position;
             servos[servo_index].goal.torque        = servos[servo_index].goal.torque_enabled ? 1.0f : 0.0f;
             servos[servo_index].state.initialised  = true;
+        }
+
+        // Emit plot for debugging
+        if (log_level == NUClear::DEBUG) {
+            emit(graph(
+                fmt::format("{} ({}) Packet length", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                packet.length));
+            emit(graph(fmt::format("{} ({}) Present position",
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)),
+                                   packet.id),
+                       data.present_position));
+            emit(graph(
+                fmt::format("{} ({}) Present voltage", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                data.present_voltage));
         }
     }
 

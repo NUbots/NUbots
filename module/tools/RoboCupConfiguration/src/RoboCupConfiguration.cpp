@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <ranges>
 #include <sstream>
+#include <termios.h>
 
 #include "extension/Configuration.hpp"
 
@@ -51,6 +52,9 @@ namespace module::tools {
         on<Configuration>("RoboCupConfiguration.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
+            cfg.common_ips    = config["common_ips"].as<std::vector<std::string>>();
         });
 
         on<Startup>().then([this] {
@@ -75,22 +79,29 @@ namespace module::tools {
 
         // Trigger when stdin has something to read
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
-            log_message = "";
+            display.log_message = "";
 
             // Get the character the user has typed
             switch (getch()) {
                 case KEY_UP:  // Change row_selection up
-                    row_selection = row_selection != 0 ? row_selection - 1 : (column_selection ? 1 : 5);
+                    display.row_selection = display.row_selection != 0
+                                                ? display.row_selection - 1
+                                                : (display.column_selection ? size_t(Display::Column2::END) - 1
+                                                                            : size_t(Display::Column1::END) - 1);
                     break;
                 case KEY_DOWN:  // Change row_selection down
-                    row_selection = column_selection ? (row_selection + 1) % 2 : (row_selection + 1) % 6;
+                    display.row_selection = display.column_selection
+                                                ? (display.row_selection + 1) % size_t(Display::Column2::END)
+                                                : (display.row_selection + 1) % size_t(Display::Column1::END);
                     break;
                 case KEY_LEFT:  // Network config
-                    column_selection = 0;
+                    display.column_selection = 0;
                     break;
                 case KEY_RIGHT:  // Game config
-                    column_selection = 1;
-                    row_selection    = row_selection > 1 ? 1 : row_selection;
+                    display.column_selection = 1;
+                    display.row_selection    = display.row_selection > size_t(Display::Column2::END) - 1
+                                                   ? size_t(Display::Column2::END) - 1
+                                                   : display.row_selection;
                     break;
                 case '\n':       // Edit selected field
                 case KEY_ENTER:  // Edit selected field
@@ -98,7 +109,7 @@ namespace module::tools {
                         edit_selection();
                     }
                     catch (...) {
-                        log_message = "Warning: Invalid input!";
+                        display.log_message = "Warning: Invalid input!";
                     }
                     break;
                 case ' ':  // Toggles selection
@@ -106,7 +117,7 @@ namespace module::tools {
                     break;
                 case 'R':  // reset the values
                     get_config_values();
-                    log_message = "Values have been reset.";
+                    display.log_message = "Values have been reset.";
                     break;
                 case 'C':  // configures files with the new values
                     set_config_values();
@@ -116,11 +127,11 @@ namespace module::tools {
                     break;
                 case 'S':  // starts the robocup service
                     system("systemctl start robocup");
-                    log_message = "RoboCup service started!";
+                    display.log_message = "RoboCup service started!";
                     break;
                 case 'D':  // stops the robocup service
                     system("systemctl stop robocup");
-                    log_message = "RoboCup service stopped!";
+                    display.log_message = "RoboCup service stopped!";
                     break;
                 case 'E':  // enables wifi services
                     system("systemctl enable --now wpa_supplicant");
@@ -143,6 +154,9 @@ namespace module::tools {
     void RoboCupConfiguration::get_config_values() {
         // Hostname
         hostname = utility::support::get_hostname();
+
+        // Robot name
+        robot_name = utility::platform::get_robot_alias(hostname);
 
         // Wifi interface
         wifi_interface = utility::support::get_wireless_interface();
@@ -167,16 +181,10 @@ namespace module::tools {
             YAML::Node config       = YAML::LoadFile(soccer_file);
             robot_position          = config["position"].as<std::string>();
         }
-        // Ready position
-        {
-            std::string ready_file = get_config_file(robot_position.get_config_name());
-            YAML::Node config      = YAML::LoadFile(ready_file);
-            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-        }
 
         // Check if we have permissions
         if (geteuid() != 0) {
-            log_message = "Warning: To configure the network, run with sudo.";
+            display.log_message = "Warning: To configure the network, run with sudo.";
         }
     }
 
@@ -186,13 +194,13 @@ namespace module::tools {
 
         // Check if we are on a robot
         if (get_platform() != "nugus") {
-            log_message = "Configure Error: Network configuration only available on NUgus robots!";
+            display.log_message = "Configure Error: Network configuration only available on NUgus robots!";
             return;
         }
 
         // Check if we have permissions
         if (geteuid() != 0) {
-            log_message = "Configure Error: Insufficient permissions! Run with sudo!";
+            display.log_message = "Configure Error: Insufficient permissions! Run with sudo!";
             return;
         }
 
@@ -210,7 +218,7 @@ namespace module::tools {
         system("systemctl restart wpa_supplicant");
         system(("systemctl restart wpa_supplicant@" + wifi_interface).c_str());
 
-        log_message = "Network configured!";
+        display.log_message = "Network configured!";
     }
 
     void RoboCupConfiguration::set_config_values() {
@@ -225,23 +233,29 @@ namespace module::tools {
         }
 
         {
-            // Write ready position to the corresponding config file
-            std::string ready_file   = get_config_file(robot_position.get_config_name());
-            YAML::Node config        = YAML::LoadFile(ready_file);
-            config["ready_position"] = YAML::Node(ready_position);
-            std::ofstream file(ready_file);
+            // Write team_id and player_id to the global config
+            std::string global_file = get_config_file("GlobalConfig.yaml");
+            YAML::Node config       = YAML::LoadFile(global_file);
+            config["team_id"]       = team_id;
+            config["player_id"]     = player_id;
+            std::ofstream file(global_file);
             file << config;
         }
 
         // Check if we are on a robot
         if (get_platform() != "nugus") {
-            log_message = "Configure Error: Network configuration only available on NUgus robots!";
+            display.log_message = "Configure Error: Network configuration only available on NUgus robots!";
             return;
+        }
+
+        // Write robot name
+        if (!robot_name.empty()) {
+            utility::platform::set_robot_alias(hostname, robot_name);
         }
 
         // Check if any of ip_address, ssid or password are empty
         if (ip_address.empty() || ssid.empty() || password.empty()) {
-            log_message = "Configure Error: IP Address, SSID and Password must be set!";
+            display.log_message = "Configure Error: IP Address, SSID and Password must be set!";
             return;
         }
 
@@ -262,7 +276,7 @@ namespace module::tools {
         // In the lab, the IP addresses of the robots are set and may not match in this way,
         // but at RoboCup, it is important that this format is followed
         if (team_id != std::stoi(ip_parts[2]) || player_id != std::stoi(ip_parts[3])) {
-            log_message +=
+            display.log_message +=
                 "Warning: At RoboCup, the third position of the IP address should be the team ID and the fourth should "
                 "be the player number. ";
         }
@@ -296,90 +310,115 @@ namespace module::tools {
             "wpa_passphrase " + ssid + " " + password + " | sed 's/}/\tpriority=9999\\n}/' >> " + wpa_supplicant_file;
         system(command.c_str());
 
-        log_message += "Files have been configured.";
+        display.log_message += "Files have been configured.";
     }
 
     void RoboCupConfiguration::toggle_selection() {
         // Networking configuration column
-        if (column_selection == 0) {
-            switch (row_selection) {
-                case 2:  // player_id
-                    player_id = player_id == 6 ? 1 : player_id + 1;
-                    break;
-                case 3:  // team_id
-                    team_id = team_id == 33 ? 1 : team_id + 1;
-                    break;
+        if (display.column_selection == 0) {
+            if (display.row_selection == int(Display::Column1::SSID) && !cfg.wifi_networks.empty()) {
+                // See if the current SSID is in the cfg.wifi_networks map
+                auto it = cfg.wifi_networks.find(ssid);
+                if (it != cfg.wifi_networks.end()) {
+                    // If it is, set the SSID and password to the next value in the map
+                    auto next = std::next(it);
+                    ssid      = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->first : next->first;
+                    password  = next == cfg.wifi_networks.end() ? cfg.wifi_networks.begin()->second : next->second;
+                }
+                else {
+                    // If it isn't, set the SSID and password to the first value in the map
+                    ssid     = cfg.wifi_networks.begin()->first;
+                    password = cfg.wifi_networks.begin()->second;
+                }
+            }
+
+            if (display.row_selection == int(Display::Column1::IP_ADDRESS) && !cfg.common_ips.empty()) {
+                // Change the IPs to use the player_id in the "X" position
+                std::vector<std::string> player_ips{};
+                for (const auto& ip : cfg.common_ips) {
+                    std::string player_ip = ip;
+                    player_ip.replace(player_ip.find("X"), 1, std::to_string(player_id));
+                    player_ips.push_back(player_ip);
+                }
+
+                // See if the current IP address is in the player_ips vector
+                auto it = std::find(player_ips.begin(), player_ips.end(), ip_address);
+                if (it != player_ips.end()) {
+                    // If it is, set the IP address to the next value in the vector
+                    auto next  = std::next(it);
+                    ip_address = next == player_ips.end() ? player_ips.front() : *next;
+                }
+                else {
+                    // If it isn't, set the IP address to the first value in the vector
+                    ip_address = player_ips.front();
+                }
             }
             return;
         }
         // Game configuration column
-        if (row_selection == 0) {
-            ++robot_position;
-
-            // Get ready position for this position
-            std::string ready_file = get_config_file(robot_position.get_config_name());
-            YAML::Node config      = YAML::LoadFile(ready_file);
-            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+        Display::Column2 column = static_cast<Display::Column2>(display.row_selection);
+        switch (column) {
+            case Display::Column2::PLAYER_ID: player_id = player_id == MAX_PLAYER_ID ? 1 : player_id + 1; break;
+            case Display::Column2::TEAM_ID: team_id = team_id == MAX_TEAM_ID ? 1 : team_id + 1; break;
+            case Display::Column2::POSITION: ++robot_position; break;
+            default: break;
         }
     }
 
     void RoboCupConfiguration::edit_selection() {
         // Networking configuration column
-        if (column_selection == 0) {
-            switch (row_selection) {
-                case 0:  // wifi interface
-                    wifi_interface = user_input();
-                    break;
-                case 1:  // ip_address
-                    ip_address = user_input();
-                    break;
-                case 2:  // player_id
-                    player_id = std::stoi(user_input());
-                    break;
-                case 3:  // team_id
-                    team_id = std::stoi(user_input());
-                    break;
-                case 4:  // ssid
-                    ssid = user_input();
-                    break;
-                case 5:  // password
-                    password = user_input();
-                    break;
+        if (display.column_selection == 0) {
+            Display::Column1 column = static_cast<Display::Column1>(display.row_selection);
+            switch (column) {
+                case Display::Column1::ROBOT_NAME: robot_name = user_input(); break;
+                case Display::Column1::WIFI_INTERFACE: wifi_interface = user_input(); break;
+                case Display::Column1::IP_ADDRESS: ip_address = user_input(); break;
+                case Display::Column1::SSID: ssid = user_input(); break;
+                case Display::Column1::PASSWORD: password = user_input(); break;
+                default: break;
             }
             return;
         }
         // Game configuration column
-        switch (row_selection) {
-            case 0:  // robot position
-                robot_position = user_input();
-                {
-                    // Get ready position for this position
-                    std::string ready_file = get_config_file(robot_position.get_config_name());
-                    YAML::Node config      = YAML::LoadFile(ready_file);
-                    ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-                }
-                break;
-            case 1:  // ready position
-                std::stringstream ss(user_input());
-                ss >> ready_position.x() >> ready_position.y() >> ready_position.z();
-                break;
+        Display::Column2 column = static_cast<Display::Column2>(display.row_selection);
+        switch (column) {
+            case Display::Column2::PLAYER_ID: player_id = std::stoi(user_input()); break;
+            case Display::Column2::TEAM_ID: team_id = std::stoi(user_input()); break;
+            case Display::Column2::POSITION: robot_position = user_input(); break;
+            default: break;
         }
     }
 
     std::string RoboCupConfiguration::user_input() {
         // Read characters until we see either esc or enter
-        std::stringstream chars;
+        std::string input;
+        int cursor_pos = 0;
 
         // Keep reading until our termination case is reached
         while (true) {
             auto ch = getch();
             switch (ch) {
-                case 27: return "";
+                case 27: return "";  // Escape key
                 case '\n':
-                case KEY_ENTER: return chars.str(); break;
+                case KEY_ENTER: return input;
+                case KEY_BACKSPACE:
+                case 127:  // ASCII code for backspace
+                    if (!input.empty() && cursor_pos > 0) {
+                        input.erase(cursor_pos - 1, 1);
+                        cursor_pos--;
+                        // Redraw the input
+                        move(getcury(stdscr), display.C1_SEL_POS);
+                        clrtoeol();
+                        addstr(input.c_str());
+                        move(getcury(stdscr), display.C1_SEL_POS + cursor_pos);
+                    }
+                    break;
                 default:
-                    chars << static_cast<char>(ch);
-                    addch(ch);
+                    if (isprint(ch)) {  // Only add printable characters
+                        input.insert(cursor_pos, 1, static_cast<char>(ch));
+                        cursor_pos++;
+                        addch(ch);
+                    }
                     break;
             }
         }
@@ -435,29 +474,26 @@ namespace module::tools {
         attroff(A_BOLD);
 
         attron(A_ITALIC);
-        mvprintw(2, 2, "Networking");
+        mvprintw(2, display.C1_PAD, "Networking");
         attroff(A_ITALIC);
-        mvprintw(4, 2, ("Hostname        : " + hostname).c_str());
-        mvprintw(5, 2, ("Wifi Interface  : " + wifi_interface).c_str());
-        mvprintw(6, 2, ("IP Address      : " + ip_address).c_str());
-        mvprintw(7, 2, ("Player ID       : " + std::to_string(player_id)).c_str());
-        mvprintw(8, 2, ("Team ID         : " + std::to_string(team_id)).c_str());
-        mvprintw(9, 2, ("SSID            : " + ssid).c_str());
-        mvprintw(10, 2, ("Password        : " + password).c_str());
+        mvprintw(4, display.C1_PAD, ("Hostname        : " + hostname).c_str());
+        mvprintw(5, display.C1_PAD, ("Robot Name      : " + robot_name).c_str());
+        mvprintw(6, display.C1_PAD, ("Wifi Interface  : " + wifi_interface).c_str());
+        mvprintw(7, display.C1_PAD, ("IP Address      : " + ip_address).c_str());
+        mvprintw(8, display.C1_PAD, ("SSID            : " + ssid).c_str());
+        mvprintw(9, display.C1_PAD, ("Password        : " + password).c_str());
 
         attron(A_ITALIC);
-        mvprintw(2, 40, "Game Configuration");
+        mvprintw(2, display.C2_PAD, "Game Configuration");
         attroff(A_ITALIC);
-        mvprintw(5, 40, ("Position: " + std::string(robot_position)).c_str());
-
-        std::stringstream ready_string{};
-        ready_string << ready_position.transpose();
-        mvprintw(6, 40, ("Ready   : " + ready_string.str()).c_str());
+        mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
+        mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
+        mvprintw(7, display.C2_PAD, ("Position : " + std::string(robot_position)).c_str());
 
         // Print commands
         // Heading Commands
         attron(A_BOLD);
-        mvprintw(LINES - 10, 2, "Commands");
+        mvprintw(LINES - display.COMMAND_BOTTOM_PAD, display.C1_PAD, "Commands");
         attroff(A_BOLD);
 
         // Each Command
@@ -477,33 +513,40 @@ namespace module::tools {
                                   "Shutdown"};
 
         // Prints commands and their meanings to the screen
+        // Print the first row
         for (size_t i = 0; i < (sizeof(COMMANDS) / sizeof(COMMANDS[0])); i = i + 2) {
             attron(A_BOLD);
             attron(A_STANDOUT);
-            mvprintw(LINES - 9, 2 + ((3 + 14) * (i / 2)), COMMANDS[i]);
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 1,
+                     display.C1_PAD + (display.COMMAND_GAP * (i / 2)),
+                     COMMANDS[i]);
             attroff(A_BOLD);
             attroff(A_STANDOUT);
-            int gap = i == 0 ? 8 : 4;
-            mvprintw(LINES - 9, gap + ((3 + 14) * (i / 2)), MEANINGS[i]);
+            int gap = i == 0 ? 8 : 4;  // ENTER and SPACE are longer than the single-letter commands
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 1, gap + (display.COMMAND_GAP * (i / 2)), MEANINGS[i]);
         }
 
+        // Print the second row
         for (size_t i = 1; i < (sizeof(COMMANDS) / sizeof(COMMANDS[0])); i = i + 2) {
             attron(A_BOLD);
             attron(A_STANDOUT);
-            mvprintw(LINES - 8, 2 + ((3 + 14) * ((i - 1) / 2)), COMMANDS[i]);
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2,
+                     display.C1_PAD + (display.COMMAND_GAP * ((i - 1) / 2)),
+                     COMMANDS[i]);
             attroff(A_BOLD);
             attroff(A_STANDOUT);
-            int gap = i == 1 ? 8 : 4;
-            mvprintw(LINES - 8, gap + ((3 + 14) * ((i - 1) / 2)), MEANINGS[i]);
+            int gap = i == 1 ? 8 : 4;  // ENTER and SPACE are longer than the single-letter commands
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2, gap + (display.COMMAND_GAP * ((i - 1) / 2)), MEANINGS[i]);
         }
 
         // Print any log_messages
         attron(A_BOLD);
-        mvprintw(LINES - 2, 2, log_message.c_str());
+        mvprintw(LINES - display.LOG_BOTTOM_PAD, display.C1_PAD, display.log_message.c_str());
         attroff(A_BOLD);
 
         // Highlight our selected point
-        mvchgat(row_selection + 5, 20 + (column_selection * 30), 13, A_STANDOUT, 0, nullptr);
+        int col_pos = display.column_selection == 0 ? display.C1_SEL_POS : display.C2_SEL_POS;
+        mvchgat(display.row_selection + 5, col_pos, display.SELECT_WIDTH, A_STANDOUT, 0, nullptr);
 
         refresh();
     }

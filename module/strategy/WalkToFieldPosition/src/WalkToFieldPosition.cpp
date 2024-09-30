@@ -32,7 +32,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
-#include "message/strategy/StandStill.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 namespace module::strategy {
@@ -41,7 +41,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::planning::WalkTo;
-    using message::strategy::StandStill;
+    using message::skill::Walk;
     using WalkToFieldPositionTask = message::strategy::WalkToFieldPosition;
 
     WalkToFieldPosition::WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment)
@@ -49,62 +49,40 @@ namespace module::strategy {
 
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
-            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.align_radius     = config["align_radius"].as<double>();
-            cfg.stop_tolerance   = config["stop_tolerance"].as<double>();
-            cfg.resume_tolerance = config["resume_tolerance"].as<double>();
+            this->log_level       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.stop_threshold    = config["stop_threshold"].as<double>();
+            cfg.stopped_threshold = config["stopped_threshold"].as<double>();
         });
 
-        on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
+        on<Start<WalkToFieldPositionTask>>().then([this] { current_threshold = cfg.stop_threshold; });
+
+        on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
-                // Get the transformation from robot {r} space to field {f} space
-                const Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+                // Transform from desired field position into robot space
+                Eigen::Isometry3d Hrd      = sensors.Hrw * field.Hfw.inverse() * walk_to_field_position.Hfd;
+                double translational_error = Hrd.translation().norm();
 
-                // Get the vector from field to desired point
-                const Eigen::Vector3d rPFf(walk_to_field_position.rPFf.x(), walk_to_field_position.rPFf.y(), 0.0);
+                // Compute the error between the desired heading and the measured heading
+                Eigen::Isometry3d Hfr          = field.Hfw * sensors.Hrw.inverse();
+                Eigen::Vector3d desired_unit_x = walk_to_field_position.Hfd.linear().col(0);
+                double desired_heading         = std::atan2(desired_unit_x.y(), desired_unit_x.x());
+                double measured_heading        = std::atan2(Hfr.linear().col(0).y(), Hfr.linear().col(0).x());
 
-                // Create a unit vector in the direction of the desired heading in field space
-                const Eigen::Vector3d uHFf(std::cos(walk_to_field_position.heading),
-                                           std::sin(walk_to_field_position.heading),
-                                           0.0);
+                double angle_error = std::abs(desired_heading - measured_heading);
+                // Normalize the angle error to be within the range [-pi, pi]
+                angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
 
-                // Transform the field position from field {f} space to robot {r} space
-                const Eigen::Vector3d rPRr(Hfr.inverse() * rPFf);
-
-                // Compute the current position error and heading error in field {f} space
-                const double position_error = (Hfr.translation().head(2) - rPFf.head(2)).norm();
-                Eigen::Vector2d uXRf        = Hfr.rotation().col(0).head<2>();
-                const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head<2>()))));
-
-                // If we have stopped and our position and heading error is below resume tolerance, then remain stopped
-                if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {
-                    emit<Task>(std::make_unique<StandStill>());
-                    stopped = true;
-                    return;
+                // If the robot is close enough to the target and the angle error is small enough, stop the robot
+                if (translational_error < current_threshold && std::abs(angle_error) < current_threshold
+                    && walk_to_field_position.stop_at_target) {
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                    // Increase the threshold to the stopped threshold to prevent oscillations
+                    current_threshold = cfg.stopped_threshold;
+                    log<NUClear::DEBUG>("Stopped at field position");
                 }
-
-                // If the error in the desired field position and heading is low enough, stand still
-                if (!stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
-                    emit<Task>(std::make_unique<StandStill>());
-                    stopped = true;
-                    return;
-                }
-
-                // If we are getting close to the field position begin to align with the desired heading in field space
-                if (position_error < cfg.align_radius) {
-                    // Rotate the desired heading in field {f} space to robot space
-                    const Eigen::Vector3d uHRr(Hfr.inverse().linear() * uHFf);
-                    const double desired_heading = std::atan2(uHRr.y(), uHRr.x());
-                    emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
-                }
-                // Otherwise, walk directly to the field position
                 else {
-                    const double desired_heading = std::atan2(rPRr.y(), rPRr.x());
-                    emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
-                }
-
-                if (log_level <= NUClear::DEBUG) {
-                    log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
+                    log<NUClear::DEBUG>("Walking to field position");
+                    emit<Task>(std::make_unique<WalkTo>(Hrd));
                 }
             });
     }

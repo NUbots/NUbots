@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -37,6 +37,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
 
@@ -53,6 +54,8 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -65,10 +68,12 @@ namespace module::network {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
 
-                // need to determine send and receive ports
+                // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
-                // need to determine broadcast ip
+                // Need to determine broadcast ip
                 cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
+                // Need to determine optional filtering packets
+                cfg.udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                 // If we are changing ports (the port starts at 0 so this should start it the first time)
                 if (config["receive_port"].as<uint>() != cfg.receive_port) {
@@ -83,6 +88,22 @@ namespace module::network {
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
+                            std::string remote_addr = p.remote.address;
+
+                            // Apply filtering of packets if udp_filter_address is set in config
+                            if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
+                                if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
+                                    == ignored_ip_addresses.end()) {
+                                    ignored_ip_addresses.insert(remote_addr);
+                                    log<NUClear::INFO>("Ignoring UDP packet from",
+                                                       remote_addr,
+                                                       "as it doesn't match configured filter address",
+                                                       cfg.udp_filter_address);
+                                }
+
+                                return;
+                            }
+
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
@@ -101,6 +122,7 @@ namespace module::network {
            Optional<With<Sensors>>,
            Optional<With<Field>>,
            Optional<With<GameState>>,
+           Optional<With<Purpose>>,
            Optional<With<GlobalConfig>>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -108,6 +130,7 @@ namespace module::network {
                          const std::shared_ptr<const Sensors>& sensors,
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
+                         const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const GlobalConfig>& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -115,11 +138,14 @@ namespace module::network {
                 msg->timestamp = NUClear::clock::now();
 
                 // State
-                int penalty_reason = game_state->data.self.penalty_reason;
-                switch (penalty_reason) {
-                    case 0: msg->state = 0; break;
-                    case 1: msg->state = 1; break;
-                    default: msg->state = 2; break;
+                // If there is game state information, then process
+                if (game_state) {
+                    int penalty_reason = game_state->data.self.penalty_reason;
+                    switch (penalty_reason) {
+                        case 0: msg->state = 0; break;
+                        case 1: msg->state = 1; break;
+                        default: msg->state = 2; break;
+                    }
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
@@ -182,6 +208,11 @@ namespace module::network {
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+
+                // Current purpose (soccer position) of the Robot
+                if (purpose) {
+                    msg->purpose = *purpose;
+                }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

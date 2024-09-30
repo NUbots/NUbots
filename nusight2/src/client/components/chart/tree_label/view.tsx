@@ -40,7 +40,7 @@ export class TreeLabel extends Component<TreeLabelProps> {
         <span className="flex-grow">{node.label}</span>
 
         <button
-          className="w-[12px] h-[12px] rounded-full"
+          className="w-3 h-3 rounded-full"
           onClick={this.togglePicker}
           style={{ backgroundColor: node.color }}
         ></button>

@@ -9,7 +9,7 @@ FieldLength: 6.4
 FieldWidth: 3.55
 GoalDepth: 0.4
 # Distance between inner edges of goal posts.
-GoalWidth: 1.65
+GoalWidth: 2.1
 GoalAreaLength: 0.72
 GoalAreaWidth: 2.3
 # Height to the bottom of the crossbar.

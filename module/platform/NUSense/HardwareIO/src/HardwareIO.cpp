@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -120,8 +120,54 @@ namespace module::platform::NUSense {
             sensors->battery = 0;  // not yet implemented
 
             // Servo data
-            sensors->servos = data.servos;
-            for (auto& servo : sensors->servos) {
+            for (const auto& [key, val] : data.servo_map) {
+                // Get a reference to the servo we are populating
+                RawSensors::Servo& servo = utility::platform::get_raw_servo(val.id - 1, *sensors);
+                // fill all servo values from the reference
+                servo.hardware_error        = val.hardware_error;
+                servo.torque_enabled        = val.torque_enabled;
+                servo.velocity_i_gain       = 0;  // not present in NUSense message
+                servo.velocity_p_gain       = 0;  // not present in NUSense message
+                servo.position_d_gain       = 0;  // not present in NUSense message
+                servo.position_i_gain       = 0;  // not present in NUSense message
+                servo.position_p_gain       = 0;  // not present in NUSense message
+                servo.feed_forward_1st_Gain = 0;  // not present in NUSense message
+                servo.feed_forward_2nd_Gain = 0;  // not present in NUSense message
+                servo.present_PWM           = val.present_pwm;
+                servo.present_current       = val.present_current;
+                servo.present_velocity      = val.present_velocity;
+                servo.present_position      = val.present_position;
+                servo.goal_PWM              = val.goal_pwm;
+                servo.goal_current          = val.goal_current;
+                servo.goal_velocity         = val.goal_velocity;
+                servo.goal_position         = val.goal_position;
+                servo.voltage               = val.voltage;
+                servo.temperature           = val.temperature;
+                servo.profile_acceleration  = 0;  // not present in NUSense message
+                servo.profile_velocity      = 0;  // not present in NUSense message
+
+                // Log any errors and timeouts from the servo.
+                if (val.packet_counts.packet_errors != 0) {
+                    log<NUClear::WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
+                                                   val.packet_counts.packet_errors,
+                                                   val.id,
+                                                   nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.packet_counts.crc_errors != 0) {
+                    // For now, the CRC is set to debug until terminating-resistors are gotten since there are many when
+                    // the robot is walking.
+                    log<NUClear::DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
+                                                    val.packet_counts.crc_errors,
+                                                    val.id,
+                                                    nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.packet_counts.timeouts != 0) {
+                    log<NUClear::WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
+                                                   val.packet_counts.timeouts,
+                                                   val.id,
+                                                   nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+
                 // Add the offsets and switch the direction.
                 servo.present_position *= nugus.servo_direction[servo.id];
                 servo.present_position += nugus.servo_offset[servo.id];

@@ -17,3 +17,9 @@ ukf:
     covariance:
       position: [1e-3, 1e-3]
       velocity: [1e-3, 1e-3]
+
+# Maximum distance a ball can be from current mean to be accepted as a measurement
+acceptance_radius: 2
+
+# Maximum number of ball rejections before acceptance
+max_rejections: 25

@@ -346,8 +346,9 @@ export class LocalisationController {
     model.particlesVisible = !model.particlesVisible;
   };
 
+  @action
   toggleGoalVisibility = (model: LocalisationModel) => {
-    model.goalVisible = !model.goalVisible;
+    model.goalsVisible = !model.goalsVisible;
   };
 
   @action
@@ -363,5 +364,15 @@ export class LocalisationController {
   @action
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
+  };
+
+  @action
+  toggleWalkToDebugVisibility = (model: LocalisationModel) => {
+    model.walkToDebugVisible = !model.walkToDebugVisible;
+  };
+
+  @action
+  toggleBoundedBoxVisibility = (model: LocalisationModel) => {
+    model.boundedBoxVisible = !model.boundedBoxVisible;
   };
 }

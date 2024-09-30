@@ -42,6 +42,7 @@
 #include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Buttons.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"

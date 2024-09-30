@@ -33,11 +33,11 @@ namespace module::input {
 
     using message::actuation::BodySide;
     using message::behaviour::state::Stability;
+    using message::input::ButtonLeftDown;
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
     using message::localisation::ResetFieldLocalisation;
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::ButtonMiddleUp;
 
     using message::actuation::ServoID;
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
@@ -123,16 +123,13 @@ namespace module::input {
                 emit(std::move(sensors));
             });
 
-        on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<20, Trigger<RawSensors>>>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {
                 // Detect wether a button has been pressed or not in the last 20 messages
                 detect_button_press(raw_sensors);
             });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
-            // Reset the mahony filter
-            mahony_filter.set_state(cfg.initial_Rwt);
-
             // Reset anchor frame
             Hwp                   = Eigen::Isometry3d::Identity();
             Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
@@ -218,27 +215,107 @@ namespace module::input {
             NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
 
-
         // **************** Servos ****************
+        sensors->servos = raw_sensors.servos;
         for (const auto& servo : raw_sensors.servos) {
             if (servo.hardware_error != RawSensors::HardwareError::HARDWARE_OK) {
-                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(servo, servo.id));
+                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(servo, servo.state.id));
             }
-            sensors[servo.id] = servo;
-            // Determine the current position with potential fallback to the last known good position
+            // Fallback to the last known good position if the servo has an error related to the encoder
             double position = servo.state.present_position;
             double velocity = servo.state.present_velocity;
             if (previous_sensors
                 && (fabs(position - previous_sensors->servos[servo.state.id].present_position) > cfg.max_servo_change
                     || servo.state.hardware_error == RawSensors::HardwareError::MOTOR_ENCODER)) {
-                position = previous_sensors->servos[servo.state.id].present_position;
-                velocity = previous_sensors->servos[servo.state.id].present_velocity;
+                servo.state.present_position = previous_sensors->servos[servo.state.id].present_position;
+                servo.state.present_velocity = previous_sensors->servos[servo.state.id].present_velocity;
                 NUClear::log<NUClear::DEBUG>("Suspected encoder error on servo ",
                                              ServoID(servo.state.id),
                                              ": Using last known good position.");
             }
-            sensors[servo.id].state.present_position = position;
-            sensors[servo.id].state.present_velocity = velocity;
+        }
+
+        // **************** Accelerometer and Gyroscope ****************
+        // If our platform has errors then reuse our last sensor value of the accelerometer and gyroscope
+        sensors->accelerometer =
+            subcontroller_packet_error ? previous_sensors->accelerometer : raw_sensors.accelerometer.cast<double>();
+        sensors->gyroscope =
+            subcontroller_packet_error ? previous_sensors->gyroscope : raw_sensors.gyroscope.cast<double>();
+
+        // If we have a previous Sensors message AND (our platform has errors OR the gyro is spinning too fast) then
+        // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
+        // throw massive numbers without an error flag and if our hardware is working as intended, it should never
+        // read that we're spinning at 2 revs/s
+        if (raw_sensors.gyroscope.norm() > 4.0 * M_PI) {
+            NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
+            if (previous_sensors) {
+                sensors->gyroscope = previous_sensors->gyroscope;
+            }
+        }
+
+        // **************** Timestamp ****************
+        sensors->timestamp = raw_sensors.timestamp;
+
+        // **************** Battery Voltage  ****************
+        // Update the current battery voltage of the whole robot
+        sensors->voltage = raw_sensors.battery;
+
+        // **************** Buttons and LEDs ****************
+        sensors->button.reserve(2);
+        sensors->button.emplace_back(0, raw_sensors.buttons.left);
+        sensors->button.emplace_back(1, raw_sensors.buttons.middle);
+        sensors->led.reserve(5);
+        sensors->led.emplace_back(0, raw_sensors.led_panel.led2 ? 0xFF0000 : 0);
+        sensors->led.emplace_back(1, raw_sensors.led_panel.led3 ? 0xFF0000 : 0);
+        sensors->led.emplace_back(2, raw_sensors.led_panel.led4 ? 0xFF0000 : 0);
+        sensors->led.emplace_back(3, raw_sensors.head_led.RGB);  // Head
+        sensors->led.emplace_back(4, raw_sensors.eye_led.RGB);   // Eye
+    }
+
+    void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
+        // Keep track of the number of presses in the last N frames for debouncing
+        int left_count   = 0;
+        int middle_count = 0;
+        // Count the number of downs in all messages we have
+        //     we used to discount sensors messages with subcontroller errors here, but that
+        //     ignored too many and ultimately led to unresponsive buttons. subcontroller errors
+        //     are unlikely to cause phantom button presses, and if they do, the debounce routine
+        //     would require that we have N_thresh > N errors causing the _same_ phantom button press
+        for (const auto& s : sensors) {
+            if (s->buttons.left)
+                ++left_count;
+            if (s->buttons.middle)
+                ++middle_count;
+        }
+        // Compare to the debounce threshold to determine if we have a down event
+        bool new_left_down   = left_count > cfg.button_debounce_threshold;
+        bool new_middle_down = middle_count > cfg.button_debounce_threshold;
+        // Check for a state change, i.e. a press or release event
+        bool left_state_change = left_down != new_left_down;
+        bool mid_state_change  = middle_down != new_middle_down;
+        // And set the state variable for next time.
+        left_down   = new_left_down;
+        middle_down = new_middle_down;
+        // If we have a state change, emit the appropriate event
+        if (left_state_change) {
+            if (left_down) {
+                log<NUClear::INFO>("Left Button Down");
+                emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
+            }
+            else {
+                log<NUClear::INFO>("Left Button Up");
+                emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
+            }
+        }
+        if (mid_state_change) {
+            if (middle_down) {
+                log<NUClear::INFO>("Middle Button Down");
+                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
+            }
+            else {
+                log<NUClear::INFO>("Middle Button Up");
+                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
+            }
         }
     }
 

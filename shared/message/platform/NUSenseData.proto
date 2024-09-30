@@ -31,40 +31,52 @@ syntax = "proto3";
 
 package message.platform;
 
-import "message/actuation/Servos.proto";
+// Message mainly for NUSense <-> NUC communication. NUSense will encode this message via nanopb after it queries all
+// servo states and send it to the NUC.
+message Servo {
 
-// // Message mainly for NUSense <-> NUC communication. NUSense will encode this message via nanopb after it queries all
-// // servo states and send it to the NUC.
-// message Servo {
-//     /// The ID of the servo
-//     uint32 id = 1;
-//     /// Current error state of the servo
-//     /// different to the dynamixel packet error status
-//     uint32 hardware_error = 2;
-//     /// Whether the servo's torque is enabled, allowing it to move
-//     bool torque_enabled = 3;
-//     // Values that are either simulated or read from the servos
-//     /// The last read pulse width modulation of the servo
-//     float present_pwm = 4;
-//     /// The last read current of the servo
-//     float present_current = 5;
-//     /// The last read velocity of the servo
-//     float present_velocity = 6;
-//     /// The last read position of the servo
-//     float present_position = 7;
-//     // The desired pwm value for motor control
-//     float goal_pwm = 8;
-//     // The desired current value for the servo
-//     float goal_current = 9;
-//     // The desired velocity value for the servo
-//     float goal_velocity = 10;
-//     // The desired position value for the servo
-//     float goal_position = 11;
-//     /// The last read voltage of the servo
-//     float voltage = 12;
-//     /// The last read temperature of the servo
-//     float temperature = 13;
-// }
+    message PacketCounts {
+        /// The total number of packets received.
+        uint32 total = 1;
+        /// The number of timeouts.
+        uint32 timeouts = 2;
+        /// The number of CRC-errors.
+        uint32 crc_errors = 3;
+        /// The number of packet-errors.
+        uint32 packet_errors = 4;
+    }
+
+    /// The ID of the servo
+    uint32 id = 1;
+    /// Current error state of the servo
+    /// different to the dynamixel packet error status
+    uint32 hardware_error = 2;
+    /// Whether the servo's torque is enabled, allowing it to move
+    bool torque_enabled = 3;
+    // Values that are either simulated or read from the servos
+    /// The last read pulse width modulation of the servo
+    float present_pwm = 4;
+    /// The last read current of the servo
+    float present_current = 5;
+    /// The last read velocity of the servo
+    float present_velocity = 6;
+    /// The last read position of the servo
+    float present_position = 7;
+    // The desired pwm value for motor control
+    float goal_pwm = 8;
+    // The desired current value for the servo
+    float goal_current = 9;
+    // The desired velocity value for the servo
+    float goal_velocity = 10;
+    // The desired position value for the servo
+    float goal_position = 11;
+    /// The last read voltage of the servo
+    float voltage = 12;
+    /// The last read temperature of the servo
+    float temperature = 13;
+    /// The windowed counts of the dynamixel packets since the last NUSense message
+    PacketCounts packet_counts = 14;
+}
 
 message IMU {
 
@@ -102,6 +114,6 @@ message NUSense {
      *  18 : head_yaw
      *  19 : head_pitch
      */
-    map<uint32, message.actuation.Servo> servos = 1;
+    map<uint32, Servo> servos = 1;
     IMU                imu       = 2;
 }
