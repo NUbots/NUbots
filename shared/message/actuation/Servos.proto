@@ -72,7 +72,7 @@ message ServoState {
     /// The last read temperature of the servo
     float temperature = 8;
     // Whether we have initialised this servo yet
-    bool initialised = 10;
+    bool initialised = 9;
 }
 
 message ServoStates {
@@ -87,27 +87,27 @@ message ServoGoal {
     // Goal time to reach the desired state
     google.protobuf.Timestamp goal_time = 3;
     /// Whether the servo's torque is enabled, allowing it to move
-    bool torque_enabled = 5;
+    bool torque_enabled = 4;
     /// Propotional gain of the servo
-    float position_p_gain = 4;
+    float position_p_gain = 5;
     /// Integral gain of the servo
-    float position_i_gain = 5;
+    float position_i_gain = 6;
     /// Derivative gain of the servo
-    float position_d_gain = 6;
+    float position_d_gain = 7;
     /// feedforward_1st_gain
-    float feedforward_1st_gain = 7;
+    float feedforward_1st_gain = 8;
     /// feedforward_2nd_gain
-    float feedforward_2nd_gain = 8;
+    float feedforward_2nd_gain = 9;
     /// profile_velocity
-    float profile_velocity = 9;
+    float profile_velocity = 10;
     /// profile_acceleration
-    float profile_acceleration = 10;
+    float profile_acceleration = 11;
     // The desired current value for the servo
-    float goal_current = 11;
+    float goal_current = 12;
     // The desired velocity value for the servo
-    float goal_velocity = 12;
+    float goal_velocity = 13;
     // The desired pwm value for motor control
-    float goal_pwm = 13;
+    float goal_pwm = 14;
 }
 
 message ServoGoals {
@@ -118,7 +118,7 @@ message Servo {
     /// Servo state
     ServoState state = 1;
     /// Servo goal
-    ServoGoal goal = 3;
+    ServoGoal goal = 2;
 }
 
 // Message for each servo with command information
