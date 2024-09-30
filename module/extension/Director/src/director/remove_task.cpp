@@ -68,7 +68,10 @@ namespace module::extension {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
                         auto lock             = hold_run_reason(RunInfo::RunReason::STOPPED);
-                        powerplant.submit(provider->reaction->get_task(), true);
+                        auto task             = provider->reaction->get_task();
+                        if (task) {
+                            powerplant.submit(std::move(task), true);
+                        }
                     }
                 }
                 group.active_task     = nullptr;
