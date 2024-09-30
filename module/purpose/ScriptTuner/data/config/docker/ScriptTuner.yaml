@@ -4,4 +4,4 @@ log_level: INFO
 # Select whether we should autosave logs locally to the folder the script is in,
 # or to the mounted NUbots folder in the docker container.
 # When running on a real robot, this should be set to true.
-autosave_dir: "/home/nubots/scripts/autosave/"
+autosave_dir: "/home/nubots/NUbots/.scripttuner/autosave/"
