@@ -1,5 +1,15 @@
 var NAVTREEINDEX11 =
 {
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea76b0d23e07898b79116d4e0cfeaea871":[1,0,3,7,0,1,0,8,30],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea771e1bdfe1ff8b047d8fc1eb705b80d8":[1,0,3,7,0,1,0,8,57],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea7f2c3ad3c86f9557ede3f8647d6bf143":[1,0,3,7,0,1,0,8,39],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea8ec480313335ed1cc238909a5c46f4e3":[1,0,3,7,0,1,0,8,47],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea951eb2bd2bc2b6b27ef808beb85bbb2f":[1,0,3,7,0,1,0,8,8],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea99815af430adc0a31881951dfe7ecdcf":[1,0,3,7,0,1,0,8,5],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa10427b75509aa6dafdd67e6b69240e5":[1,0,3,7,0,1,0,8,43],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa54fc66909d01803e1ed39f3689aa7da":[1,0,3,7,0,1,0,8,37],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa77d671b4a13a27b9e79c5a99c19a513":[1,0,3,7,0,1,0,8,36],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eab75d8a2c3c647346973220ce1237fe18":[1,0,3,7,0,1,0,8,1],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabaf8efdf2c51511a057826a834276c96":[1,0,3,7,0,1,0,8,41],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabc01f96512167a7069c257557eeca9f0":[1,0,3,7,0,1,0,8,25],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabf6aa1e7e70a98990e84b6ec12115c15":[1,0,3,7,0,1,0,8,12],
@@ -239,15 +249,5 @@ var NAVTREEINDEX11 =
 "structextension_1_1FileWatchRequest.html":[2,0,1,4],
 "structextension_1_1FileWatchRequest.html#a070ac2a7a9e9db30b1e0a8f4f7ebcc61":[2,0,1,4,1],
 "structextension_1_1FileWatchRequest.html#a7b2bc3ef08b34643edde9c0721a4ba47":[2,0,1,4,0],
-"structextension_1_1FileWatchRequest.html#ae9adb6f108890dc2dd82bcbac2265ebd":[2,0,1,4,2],
-"structextension_1_1FileWatcherReady.html":[2,0,1,3],
-"structextension_1_1behaviour_1_1Causing.html":[2,0,1,0,3],
-"structextension_1_1behaviour_1_1Causing.html#a1e62867eb96b62dfa70b2ee369da85ef":[2,0,1,0,3,0],
-"structextension_1_1behaviour_1_1Done.html":[2,0,1,0,4],
-"structextension_1_1behaviour_1_1GroupInfo.html":[2,0,1,0,5],
-"structextension_1_1behaviour_1_1GroupInfo.html#a2a976c93e0b219a0c6eb9a3a98b5f2d8":[2,0,1,0,5,1],
-"structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370":[2,0,1,0,5,2],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4":[2,0,1,0,5,0],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2":[2,0,1,0,5,0,0],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe":[2,0,1,0,5,0,2]
+"structextension_1_1FileWatchRequest.html#ae9adb6f108890dc2dd82bcbac2265ebd":[2,0,1,4,2]
 };

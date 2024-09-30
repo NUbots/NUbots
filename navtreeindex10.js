@@ -1,5 +1,15 @@
 var NAVTREEINDEX10 =
 {
+"functions_i.html":[2,3,0,9],
+"functions_j.html":[2,3,0,10],
+"functions_k.html":[2,3,0,11],
+"functions_l.html":[2,3,0,12],
+"functions_m.html":[2,3,0,13],
+"functions_n.html":[2,3,0,14],
+"functions_o.html":[2,3,0,15],
+"functions_p.html":[2,3,0,16],
+"functions_q.html":[2,3,0,17],
+"functions_r.html":[2,3,0,18],
 "functions_s.html":[2,3,0,19],
 "functions_t.html":[2,3,0,20],
 "functions_type.html":[2,3,3],
@@ -239,15 +249,5 @@ var NAVTREEINDEX10 =
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea6b0ccaca7bfa7951b76b97fbc77935f3":[1,0,3,7,0,1,0,8,29],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea7098218d4f8427ece1f1f6746ea18341":[1,0,3,7,0,1,0,8,51],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea74ef508c0ae769b250a291c958aafe4b":[1,0,3,7,0,1,0,8,34],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea75550bcab6aea5e09835dbbc3bfc3fe1":[1,0,3,7,0,1,0,8,16],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea76b0d23e07898b79116d4e0cfeaea871":[1,0,3,7,0,1,0,8,30],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea771e1bdfe1ff8b047d8fc1eb705b80d8":[1,0,3,7,0,1,0,8,57],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea7f2c3ad3c86f9557ede3f8647d6bf143":[1,0,3,7,0,1,0,8,39],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea8ec480313335ed1cc238909a5c46f4e3":[1,0,3,7,0,1,0,8,47],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea951eb2bd2bc2b6b27ef808beb85bbb2f":[1,0,3,7,0,1,0,8,8],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea99815af430adc0a31881951dfe7ecdcf":[1,0,3,7,0,1,0,8,5],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa10427b75509aa6dafdd67e6b69240e5":[1,0,3,7,0,1,0,8,43],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa54fc66909d01803e1ed39f3689aa7da":[1,0,3,7,0,1,0,8,37],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa77d671b4a13a27b9e79c5a99c19a513":[1,0,3,7,0,1,0,8,36],
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eab75d8a2c3c647346973220ce1237fe18":[1,0,3,7,0,1,0,8,1]
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea75550bcab6aea5e09835dbbc3bfc3fe1":[1,0,3,7,0,1,0,8,16]
 };

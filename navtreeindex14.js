@@ -1,5 +1,15 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html#a83c2361ee73aac8d8813072c55a7e005":[2,0,3,3,7,0,0,0,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html#ab4e1cb0e783e4d88b727a9538b885883":[2,0,3,3,7,0,0,0,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html":[2,0,3,3,7,0,0,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html#ad3e66b86c41b4e2260790cf627f2d023":[2,0,3,3,7,0,0,1,3],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html#af6796a27433b5de88a069c366b30f887":[2,0,3,3,7,0,0,1,2],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html":[2,0,3,3,7,0,0,1,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html#a6c230250c19c6c9236dc493907205c32":[2,0,3,3,7,0,0,1,0,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html":[2,0,3,3,7,0,0,1,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html#a347cd5acc9ab34da3b45691254c4dc5c":[2,0,3,3,7,0,0,1,1,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html#a3edc698f67ca9fba21234fa8b9fd22d9":[2,0,3,3,7,0,0,1,1,1],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html":[2,0,3,3,7,1],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76":[2,0,3,3,7,1,6],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8":[2,0,3,3,7,1,4],
@@ -239,15 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#aca3c9598a22fcc497820ea13e25b8177":[2,0,3,8,4,0,7],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#adc786a549bae88e7f61fbcd5371a2d15":[2,0,3,8,4,0,10],
 "structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html":[2,0,3,9,2,0],
-"structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html#ab0e2067cfdef478231ad3dc832e504d7":[2,0,3,9,2,0,2],
-"structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html#af0eaa05a5f622744df89827197a614ac":[2,0,3,9,2,0,1],
-"structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html#af682b4edd6ae4ace6a261e6e007b773d":[2,0,3,9,2,0,0],
-"structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html":[2,0,3,9,0,0],
-"structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html#ac796b4c55279d9a745ad94b63a88620c":[2,0,3,9,0,0,0],
-"structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html":[2,0,3,9,0,1],
-"structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html#a1ceecf42080b2d3de4f6dcd7277b9286":[2,0,3,9,0,1,0],
-"structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html#a9f7ca29a7f6fe2dee9e2a5d488bc1c29":[2,0,3,9,0,1,1],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html":[2,0,3,9,0,2,0],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a5068f68dd606db1039090d209765ab8c":[2,0,3,9,0,2,0,2],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a607d75ed948a8e4e0752887a2d1e19b7":[2,0,3,9,0,2,0,1]
+"structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html#ab0e2067cfdef478231ad3dc832e504d7":[2,0,3,9,2,0,2]
 };

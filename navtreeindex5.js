@@ -1,6 +1,16 @@
 var NAVTREEINDEX5 =
 {
-"classmodule_1_1purpose_1_1ScriptTuner.html#ae79c06b94af2e712d497c387a00022d6":[2,0,3,10,10,13],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ab597bed733671504a799f54389f17a35":[2,0,3,10,10,11],
+"classmodule_1_1purpose_1_1ScriptTuner.html#abe21098e5c8895bd186b4b0347c7d3f9":[2,0,3,10,10,23],
+"classmodule_1_1purpose_1_1ScriptTuner.html#abfe016bb3ddd981a060c6807fab207c7":[2,0,3,10,10,14],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ac81cabe2775737f6ddb8c55b08d9342a":[2,0,3,10,10,32],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ac93ba3407b55686131335cd8f44bc6cd":[2,0,3,10,10,12],
+"classmodule_1_1purpose_1_1ScriptTuner.html#aca74bd25a5339ba473d81d5f2e9d3cf6":[2,0,3,10,10,2],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ae0669010a7986b8dd46fd188cd47c877":[2,0,3,10,10,18],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ae244635f792ca756525158f258cd0123":[2,0,3,10,10,27],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ae2c32e85f5044aaf4c26a03cb50d085d":[2,0,3,10,10,29],
+"classmodule_1_1purpose_1_1ScriptTuner.html#ae79c06b94af2e712d497c387a00022d6":[2,0,3,10,10,15],
+"classmodule_1_1purpose_1_1ScriptTuner.html#aee3ff04dba98a1fee18dbf2571a8e34f":[2,0,3,10,10,25],
 "classmodule_1_1purpose_1_1ScriptTuner.html#affdf36ab572d8227827132b5b9a15377":[2,0,3,10,10,0],
 "classmodule_1_1purpose_1_1Soccer.html":[2,0,3,10,11],
 "classmodule_1_1purpose_1_1Soccer.html#a1418b5cfbcd8a6b9b3f3914254fb7570":[2,0,3,10,11,6],
@@ -239,15 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac6f0339573e2a7c02f7d0f1a28e96883":[2,0,3,13,2,6,12],
 "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae4b435518893ae0a1a011d04d98e2416":[2,0,3,13,2,6,5],
 "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae9691ab7643e875d50d323d3ca15573a":[2,0,3,13,2,6,9],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html":[2,0,3,13,2,7],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#a53c65a41ea4bbbd7d33ea05f40d561fb":[2,0,3,13,2,7,4],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#a70de5b1544be6ffbe2fc425497d650c3":[2,0,3,13,2,7,5],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#abaa17d270c19783fd262b784426e8ee1":[2,0,3,13,2,7,3],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ac80b18626025541fb02f22494df2f395":[2,0,3,13,2,7,1],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ad0e2d5f4edfb450027507a0bfc9473c5":[2,0,3,13,2,7,6],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ad5650439dc12ea6197ac8daaa67091ea":[2,0,3,13,2,7,0],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#aef82b2c7638fe9f3a7300963810d4149":[2,0,3,13,2,7,2],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html":[2,0,3,13,2,8],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a06c79b489f52b6180f427d51dfdc28f9":[2,0,3,13,2,8,13],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a0d032346d1a58d44e948c9b846998919":[2,0,3,13,2,8,7]
+"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html":[2,0,3,13,2,7]
 };
