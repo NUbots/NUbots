@@ -26,7 +26,6 @@
 # SOFTWARE.
 #
 
-import itertools
 import os
 import re
 import sys
@@ -39,10 +38,15 @@ banner_file = sys.argv[2]
 module_path = sys.argv[3]
 role_modules = sys.argv[4:]
 
+
+def set_indent(text, indent=0):
+    return textwrap.indent(textwrap.dedent(text), " " * indent)
+
+
 # Open our output role file
 with open(role_name, "w", encoding="utf-8") as role_file:
-
     # We use our NUClear header
+    role_file.write("#include <iostream>\n")
     role_file.write("#include <nuclear>\n\n")
 
     # Add our module headers
@@ -97,20 +101,44 @@ with open(role_name, "w", encoding="utf-8") as role_file:
     for l in role_banner_lines:
         role_file.write('    std::cerr << R"({})" << std::endl;\n'.format(l))
 
-    start = """\
+    # Install the tracing module and activate it based on an environment variable
+    role_file.write(
+        set_indent(
+            """
+            NUClear::Configuration config;
+            int concurrency = int(std::thread::hardware_concurrency() + 2);
+            config.default_pool_concurrency = concurrency >= 4 ? concurrency : 4;
 
-    NUClear::Configuration config;
-    unsigned int nThreads = std::thread::hardware_concurrency() + 2;
-    config.thread_count = nThreads >= 4 ? nThreads : 4;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+            NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-    NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));"""
+            // Install the tracing module and activate it based on an environment variable
+            std::cerr << "Installing NUClear::extension::TraceController" << std::endl;
+            plant.install<NUClear::extension::TraceController>();
+            if (std::getenv("NUCLEAR_TRACE_FILE") != nullptr) {
+                std::string trace_file = std::getenv("NUCLEAR_TRACE_FILE");
+                bool logs = std::getenv("NUCLEAR_TRACE_LOGS") != nullptr;
+                std::cerr << "Tracing to " << trace_file << (logs ? " with " : " without ") << "logs" << std::endl;
+                auto msg = std::make_unique<NUClear::message::BeginTrace>(trace_file, logs);
+                plant.emit<NUClear::dsl::word::emit::Inline>(msg);
+            }
 
-    role_file.write(start)
+            """,
+            4,
+        )
+    )
+
+    role_modules = ["module::{0}".format(m) for m in role_modules]
+    role_modules = [
+        "NUClear::extension::ChronoController",
+        "NUClear::extension::IOController",
+        "NUClear::extension::NetworkController",
+        *role_modules,
+    ]
 
     for module in role_modules:
         role_file.write('    std::cerr << "Installing " << "{0}" << std::endl;\n'.format(module))
-        role_file.write("    plant.install<module::{0}>();\n".format(module))
+        role_file.write("    plant.install<{0}>();\n".format(module))
 
     end = """
     plant.start();

@@ -234,7 +234,7 @@ namespace module::platform::NUSense {
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(command_list));
+            emit<Scope::INLINE>(std::move(command_list));
         });
     }
 

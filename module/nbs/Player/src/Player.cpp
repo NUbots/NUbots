@@ -95,7 +95,7 @@ namespace module::nbs {
 
             // Synchronise the clock epoch to the first message timestamp
             if (decoder_iterator != decoder.end()) {
-                emit<Scope::DIRECT>(
+                emit<Scope::INLINE>(
                     std::make_unique<NUClear::message::TimeTravel>(start_time,
                                                                    playback_speed,
                                                                    NUClear::message::TimeTravel::Action::RELATIVE));
@@ -111,7 +111,7 @@ namespace module::nbs {
 
         on<Trigger<PauseRequest>>().then([this]() {
             // Set the clock rtf to 0.0 to pause time
-            emit<Scope::DIRECT>(
+            emit<Scope::INLINE>(
                 std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                0.0,
                                                                NUClear::message::TimeTravel::Action::RELATIVE));
@@ -123,7 +123,7 @@ namespace module::nbs {
         on<Trigger<SetPlaybackSpeedRequest>>().then([this](const SetPlaybackSpeedRequest& set_speed_request) {
             // Set the clock rtf to match the desired playback speed
             playback_speed = std::pow(2.0, set_speed_request.playback_speed);
-            emit<Scope::DIRECT>(
+            emit<Scope::INLINE>(
                 std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                playback_speed,
                                                                NUClear::message::TimeTravel::Action::RELATIVE));
@@ -148,7 +148,7 @@ namespace module::nbs {
                 case SEQUENTIAL:
                     // Set the RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
                     playback_speed = 0.0;
-                    emit<Scope::DIRECT>(
+                    emit<Scope::INLINE>(
                         std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                        playback_speed,
                                                                        NUClear::message::TimeTravel::Action::RELATIVE));
@@ -163,7 +163,7 @@ namespace module::nbs {
         idle_handle = on<Idle<>, Single>().then([this] {
             std::lock_guard<std::mutex> decoder_lock(decoder_mutex);
             if (NUClear::clock::now() < target_emit_time) {
-                emit<Scope::DIRECT>(
+                emit<Scope::INLINE>(
                     std::make_unique<NUClear::message::TimeTravel>(target_emit_time,
                                                                    playback_speed,
                                                                    NUClear::message::TimeTravel::Action::NEAREST));

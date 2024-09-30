@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package message.nuclear;
+
+import "message/nuclear/ReactionStatistics.proto";
+
+/**
+ * Replicates the NUClear::message::ReactionEvent class from NUClear
+ */
+message ReactionEvent {
+    enum Event {
+        CREATED      = 0;
+        MISSING_DATA = 1;
+        BLOCKED      = 2;
+        STARTED      = 3;
+        FINISHED     = 4;
+    }
+
+    /// The type of event that this is
+    Event event = 1;
+    /// The reaction statistics for this event
+    ReactionStatistics statistics = 2;
+}

@@ -100,7 +100,7 @@ namespace {
 TEST_CASE("Test that subtasks can be changed when one subtask calls the other", "[director][subtasks][change]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();
