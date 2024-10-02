@@ -45,6 +45,7 @@ namespace module::extension {
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
 
 
+    thread_local Director::PackBuilder Director::pack_builder;
     thread_local RunInfo::RunReason Director::current_run_reason = RunInfo::RunReason::OTHER_TRIGGER;
 
     /**
