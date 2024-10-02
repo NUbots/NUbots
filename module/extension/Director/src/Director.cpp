@@ -258,7 +258,7 @@ namespace module::extension {
         });
 
         // Add a needs relationship to this Provider
-        on<Trigger<NeedsExpression, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
+        on<Trigger<NeedsExpression>, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
             add_needs(needs);
         });
 
@@ -275,34 +275,34 @@ namespace module::extension {
 
                 // Modify the task we received to look like it came from this provider
                 task->requester_id = root_provider->id;
-                emit(std::make_unique<TaskPack>(root_provider, {task}));
+                emit(std::make_unique<TaskPack>(root_provider, TaskList{task}));
             }
             else {
                 // An error occurred, we should never have a dangling task pack
-                if(pack_builder.task_id != 0 && pack_builder.task_id != task->requester_task_id) {
+                if (pack_builder.task_id != 0 && pack_builder.task_id != task->requester_task_id) {
                     log<NUClear::ERROR>("A task pack was left dangling when a new task arrived");
                 }
 
                 // Make a new pack if one doesn't exist
-                if(pack_builder.pack == nullptr) {
+                if (pack_builder.pack == nullptr) {
                     pack_builder.task_id = task->requester_task_id;
-                    pack_builder.pack = std::make_unique<TaskPack>();
+                    pack_builder.pack    = std::make_unique<TaskPack>();
                 }
-                pack_builder.pack.push_back(task);
+                pack_builder.pack->second.push_back(task);
             }
         });
 
         // This reaction runs when a Provider finishes to send off the task pack to the main director
         // It should always be triggered from the postcondition of a Provider and executed inline
         on<Trigger<ProviderDone>, Inline::ALWAYS>().then("Package Tasks", [this](const ProviderDone& done) {
-            if(pack_builder.task_id != done.requester_task_id) {
+            if (pack_builder.task_id != done.requester_task_id) {
                 log<NUClear::ERROR>("A task pack was left dangling when a Provider finished");
                 return;
             }
 
             // Sort the task pack so highest priority tasks come first
             // We sort by direct priority not challenge priority since they're all the same pack
-            std::stable_sort(pack_builder.pack.rbegin(), pack_builder.pack.rend(), direct_priority);
+            std::stable_sort(pack_builder.pack->second.rbegin(), pack_builder.pack->second.rend(), direct_priority);
 
             // Clean up the builder and emit the pack
             pack_builder.task_id = 0;
@@ -310,17 +310,19 @@ namespace module::extension {
         });
 
         // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated", [this](const StateUpdate& update) {
-            // Get the group that had a state update
-            auto p  = providers.at(update.provider_id);
-            auto& g = p->group;
+        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated",
+                                                                        [this](const StateUpdate& update) {
+                                                                            // Get the group that had a state update
+                                                                            auto p  = providers.at(update.provider_id);
+                                                                            auto& g = p->group;
 
-            // Go check if this state update has changed any of the tasks that are queued
-            reevaluate_group(g);
-        });
+                                                                            // Go check if this state update has changed
+                                                                            // any of the tasks that are queued
+                                                                            reevaluate_group(g);
+                                                                        });
 
         // We have a new task pack to run
-        on<Trigger<TaskPack>,Sync<Director>, Pool<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
+        on<Trigger<TaskPack>, Sync<Director>, Pool<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             run_task_pack(pack);
         });
     }
