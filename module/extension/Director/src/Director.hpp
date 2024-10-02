@@ -29,7 +29,6 @@
 #define MODULE_EXTENSION_DIRECTOR_HPP
 
 #include <memory>
-#include <mutex>
 #include <nuclear>
 #include <typeindex>
 #include <vector>
@@ -50,9 +49,10 @@ namespace module::extension {
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
         using TaskPack = std::pair<std::shared_ptr<component::Provider>, TaskList>;
 
-    private:
-        std::recursive_mutex director_mutex{};
+        // Only use a single thread at a time for the Director
+        static constexpr int concurrency = 1;
 
+    private:
         /**
          * Adds a Provider for a type
          *
@@ -464,6 +464,18 @@ namespace module::extension {
                                                           const std::type_index& root_type) override;
 
     private:
+        struct PackBuilder {
+            /// The task_id that this thread is building for.
+            /// If this doesn't match the current task_id something went wrong clear the list.
+            /// If this is 0, then it means that this thread is not building a pack currently.
+            NUClear::id_t task_id = 0;
+            std::unique_ptr<TaskPack> pack;
+        };
+
+        /// A thread local pack builder instance so that threads don't need to have lock contention when emitting
+        /// multiple subtasks
+        static thread_local PackBuilder pack_builder;
+
         /// A list of Provider groups
         std::map<std::type_index, component::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
@@ -475,10 +487,6 @@ namespace module::extension {
         /// The current run reason this thread is executing for. Defaults to OTHER_TRIGGER as that will be what it
         /// is if a non Director execution occurs
         thread_local static ::extension::behaviour::RunInfo::RunReason current_run_reason;
-
-        /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
-        /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<component::DirectorTask>> pack_builder;
 
     public:
         friend class InformationSource;

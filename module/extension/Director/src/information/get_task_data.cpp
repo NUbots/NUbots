@@ -30,6 +30,9 @@
 namespace module::extension {
 
     std::shared_ptr<void> Director::_get_task_data(const uint64_t& reaction_id) {
+        // Still need this lock because of withs etc :(
+        // Perhaps though what should happen is that an emit for the director state should be emitted before so these
+        // can look it up in the cache
         std::lock_guard<std::recursive_mutex> lock(director_mutex);
 
         // How did we get here?

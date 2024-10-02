@@ -238,39 +238,33 @@ namespace module::extension {
         });
 
         // Removes all the Providers for a reaction when it is unbound
-        on<Trigger<Unbind>>().then("Remove Provider", [this](const Unbind& unbind) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<Unbind>, Sync<Director>>().then("Remove Provider", [this](const Unbind& unbind) {  //
             remove_provider(unbind.id);
         });
 
         // Add a Provider
-        on<Trigger<ProvideReaction>>().then("Add Provider", [this](const ProvideReaction& provide) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<ProvideReaction>, Sync<Director>>().then("Add Provider", [this](const ProvideReaction& provide) {
             add_provider(provide);
         });
 
         // Add a when expression to this Provider
-        on<Trigger<WhenExpression>>().then("Add When", [this](const WhenExpression& when) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<WhenExpression>, Sync<Director>>().then("Add When", [this](const WhenExpression& when) {  //
             add_when(when);
         });
 
         // Add a causing condition to this Provider
-        on<Trigger<CausingExpression>>().then("Add Causing", [this](const CausingExpression& causing) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<CausingExpression>, Sync<Director>>().then("Add Causing", [this](const CausingExpression& causing) {
             add_causing(causing);
         });
 
         // Add a needs relationship to this Provider
-        on<Trigger<NeedsExpression>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<NeedsExpression, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
             add_needs(needs);
         });
 
         // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
         // the Provider has finished executing
-        on<Trigger<BehaviourTask>>().then("Director Task", [this](const BehaviourTask& t) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<BehaviourTask>, Inline::ALWAYS>().then("Director Task", [this](const BehaviourTask& t) {
             // Make our own mutable director task from the behaviour task
             auto task = std::make_shared<DirectorTask>(t);
 
@@ -281,60 +275,42 @@ namespace module::extension {
 
                 // Modify the task we received to look like it came from this provider
                 task->requester_id = root_provider->id;
-
-                emit(std::make_unique<TaskPack>(TaskPack(root_provider, {task})));
+                emit(std::make_unique<TaskPack>(root_provider, {task}));
             }
             else {
-                auto& p = providers.at(task->requester_id);
-                auto id = p->reaction->identifiers->name;
-                if (p->classification == Provider::Classification::START) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a start provider.");
+                // An error occurred, we should never have a dangling task pack
+                if(pack_builder.task_id != 0 && pack_builder.task_id != task->requester_task_id) {
+                    log<NUClear::ERROR>("A task pack was left dangling when a new task arrived");
                 }
-                else if (p->classification == Provider::Classification::STOP) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a stop provider.");
+
+                // Make a new pack if one doesn't exist
+                if(pack_builder.pack == nullptr) {
+                    pack_builder.task_id = task->requester_task_id;
+                    pack_builder.pack = std::make_unique<TaskPack>();
                 }
-                // Everything is fine
-                else {
-                    pack_builder.emplace(task->requester_task_id, task);
-                }
+                pack_builder.pack.push_back(task);
             }
         });
 
         // This reaction runs when a Provider finishes to send off the task pack to the main director
-        on<Trigger<ProviderDone>>().then("Package Tasks", [this](const ProviderDone& done) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
-            // Get all the tasks that were emitted by this provider and send it as a task pack
-            auto range  = pack_builder.equal_range(done.requester_task_id);
-            auto pack   = std::make_unique<TaskPack>();
-            pack->first = providers.at(done.requester_id);
-            for (auto it = range.first; it != range.second; ++it) {
-                pack->second.push_back(it->second);
+        // It should always be triggered from the postcondition of a Provider and executed inline
+        on<Trigger<ProviderDone>, Inline::ALWAYS>().then("Package Tasks", [this](const ProviderDone& done) {
+            if(pack_builder.task_id != done.requester_task_id) {
+                log<NUClear::ERROR>("A task pack was left dangling when a Provider finished");
+                return;
             }
 
             // Sort the task pack so highest priority tasks come first
             // We sort by direct priority not challenge priority since they're all the same pack
-            std::stable_sort(pack->second.rbegin(), pack->second.rend(), [](const auto& a, const auto& b) {
-                return direct_priority(a, b);
-            });
+            std::stable_sort(pack_builder.pack.rbegin(), pack_builder.pack.rend(), direct_priority);
 
-            // Emit the task pack
-            emit(pack);
-
-            // Erase the task pack builder for this id
-            pack_builder.erase(done.requester_task_id);
+            // Clean up the builder and emit the pack
+            pack_builder.task_id = 0;
+            emit(std::move(pack_builder.pack));
         });
 
         // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>>().then("State Updated", [this](const StateUpdate& update) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated", [this](const StateUpdate& update) {
             // Get the group that had a state update
             auto p  = providers.at(update.provider_id);
             auto& g = p->group;
@@ -344,8 +320,7 @@ namespace module::extension {
         });
 
         // We have a new task pack to run
-        on<Trigger<TaskPack>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<TaskPack>,Sync<Director>, Pool<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             run_task_pack(pack);
         });
     }
