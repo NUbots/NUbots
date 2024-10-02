@@ -32,8 +32,11 @@
 #include "extension/Configuration.hpp"
 
 #include "message/eye/DataPoint.hpp"
+#include "message/input/RoboCup.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/support/GlobalConfig.hpp"
 #include "message/vision/Ball.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
@@ -45,7 +48,10 @@ namespace module::localisation {
     using Ball        = message::localisation::Ball;
     using VisionBalls = message::vision::Balls;
     using VisionBall  = message::vision::Ball;
+    using message::input::RoboCup;
     using message::support::FieldDescription;
+    using message::support::GlobalConfig;
+    using message::localisation::Field;
 
     using message::eye::DataPoint;
 
@@ -57,7 +63,7 @@ namespace module::localisation {
 
         using message::localisation::Ball;
 
-        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration, Trigger<GlobalConfig>>("BallLocalisation.yaml").then([this](const Configuration& config, const GlobalConfig& global_config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
             // Set our measurement noise
             cfg.ukf.noise.measurement.position =
@@ -95,7 +101,39 @@ namespace module::localisation {
             // Set our rejection count
             cfg.max_rejections = config["max_rejections"].as<int>();
 
+            cfg.max_robots = config["max_robots"].as<int>();
+
+            cfg.ignore_guess_delay = config["ignore_guess_delay"].as<double>();
+
+            team_guesses.resize(cfg.max_robots);
+
+            player_id = global_config.player_id;
+
             last_time_update = NUClear::clock::now();
+        });
+
+        on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
+            log<NUClear::INFO>("ID: ", robocup.current_pose.player_id);
+            log<NUClear::INFO>("Ball: ", robocup.ball.position.x(), robocup.ball.position.y(), robocup.ball.position.z());
+
+            Eigen::Isometry3d Hfw = field.Hfw;
+
+            Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
+
+            Eigen::Vector3d rBWw = Hfw.inverse() * rBFf;
+
+            team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
+            team_guesses[robocup.current_pose.player_id - 1].rBWw = rBWw;
+        });
+
+        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+
+            if (!balls.balls.empty()) {
+
+                for (auto ball : balls.balls) {
+                    log<NUClear::INFO>("Ball: ", ball.uBCc.x(), ball.uBCc.y(), ball.uBCc.z());
+                }
+            }
         });
 
         /* To run whenever a ball has been detected */
@@ -134,6 +172,12 @@ namespace module::localisation {
                     if (rejection_count > cfg.max_rejections) {
                         accept_ball     = true;
                         rejection_count = 0;
+                    }
+
+                    int count = 0;
+
+                    for (TeamGuess guess: team_guesses) {
+
                     }
 
                     if (accept_ball) {

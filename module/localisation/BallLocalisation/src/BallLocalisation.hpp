@@ -80,6 +80,12 @@ namespace module::localisation {
             /// @brief Maximum number of detections of a ball not being accepted before it is accepted
             int max_rejections = 0;
 
+            uint player_id = 0;
+
+            int max_robots = 0;
+
+            double ignore_guess_delay = 0.0;
+
         } cfg;
 
         /// @brief Rejection count
@@ -93,6 +99,16 @@ namespace module::localisation {
 
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};
+
+        struct TeamGuess {
+            NUClear::clock::time_point last_heard = NUClear::clock::now();
+
+            Eigen::Vector3d rBWw;
+        };
+
+        uint player_id = 0;
+
+        std::vector<TeamGuess> team_guesses {};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.

@@ -115,7 +115,7 @@ namespace module::network {
                 }
             });
 
-        on<Every<2, Per<std::chrono::seconds>>,
+        on<Every<250, Per<std::chrono::milliseconds>>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
@@ -134,18 +134,17 @@ namespace module::network {
                          const std::shared_ptr<const GlobalConfig>& config) {
                 auto msg = std::make_unique<RoboCup>();
 
+                //log<NUClear::INFO>("MSG Time ", NUClear::clock::now().time_since_epoch().count());
+
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();
 
                 // State
-                // If there is game state information, then process
-                if (game_state) {
-                    int penalty_reason = game_state->data.self.penalty_reason;
-                    switch (penalty_reason) {
-                        case 0: msg->state = 0; break;
-                        case 1: msg->state = 1; break;
-                        default: msg->state = 2; break;
-                    }
+                int penalty_reason = game_state->data.self.penalty_reason;
+                switch (penalty_reason) {
+                    case 0: msg->state = 0; break;
+                    case 1: msg->state = 1; break;
+                    default: msg->state = 2; break;
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
