@@ -1,6 +1,7 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
+import { FieldDimensions } from "../../../shared/field/dimensions";
 import { Vector3 } from "../../../shared/math/vector3";
 
 import { KeyCode } from "./keycodes";
@@ -144,6 +145,55 @@ export class LocalisationController {
     }
   }
 
+  @action
+  setFieldDimensions(field_type: string, model: LocalisationModel) {
+    model.field.fieldType = field_type;
+    switch (field_type) {
+      case "lab":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.07,
+          markWidth: 0.1,
+          fieldLength: 6.4,
+          fieldWidth: 3.55,
+          goalDepth: 0.4,
+          goalWidth: 1.65,
+          goalAreaLength: 0.72,
+          goalAreaWidth: 2.3,
+          penaltyAreaLength: 0,
+          penaltyAreaWidth: 0,
+          goalCrossbarHeight: 0.55,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1.0,
+          penaltyMarkDistance: 0,
+          centerCircleDiameter: 1.2,
+          borderStripMinWidth: 0.5,
+        });
+        break;
+      case "robocup":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.06,
+          markWidth: 0.1,
+          fieldLength: 9,
+          fieldWidth: 6,
+          goalDepth: 0.6,
+          goalWidth: 2.6,
+          goalAreaLength: 1,
+          goalAreaWidth: 3,
+          penaltyAreaLength: 2,
+          penaltyAreaWidth: 5,
+          goalCrossbarHeight: 1.25,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1,
+          penaltyMarkDistance: 1.5,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 1.0,
+        });
+        break;
+      default:
+        console.error("Unknown field dimension");
+    }
+  }
+
   private updatePosition(model: LocalisationModel) {
     switch (model.viewMode) {
       case ViewMode.FreeCamera:
@@ -275,4 +325,54 @@ export class LocalisationController {
     const targetIndex = model.robots.findIndex((robot) => robot === model.target);
     return model.robots[targetIndex - 1] || model.robots[model.robots.length - 1];
   }
+
+  @action
+  toggleFieldVisibility = (model: LocalisationModel) => {
+    model.fieldVisible = !model.fieldVisible;
+  };
+
+  @action
+  toggleGridVisibility = (model: LocalisationModel) => {
+    model.gridVisible = !model.gridVisible;
+  };
+
+  @action
+  toggleBallVisibility = (model: LocalisationModel) => {
+    model.ballVisible = !model.ballVisible;
+  };
+
+  @action
+  toggleParticlesVisibility = (model: LocalisationModel) => {
+    model.particlesVisible = !model.particlesVisible;
+  };
+
+  @action
+  toggleGoalVisibility = (model: LocalisationModel) => {
+    model.goalsVisible = !model.goalsVisible;
+  };
+
+  @action
+  toggleRobotVisibility = (model: LocalisationModel) => {
+    model.robotVisible = !model.robotVisible;
+  };
+
+  @action
+  toggleFieldLinePointsVisibility = (model: LocalisationModel) => {
+    model.fieldLinePointsVisible = !model.fieldLinePointsVisible;
+  };
+
+  @action
+  toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
+    model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
+  };
+
+  @action
+  toggleWalkToDebugVisibility = (model: LocalisationModel) => {
+    model.walkToDebugVisible = !model.walkToDebugVisible;
+  };
+
+  @action
+  toggleBoundedBoxVisibility = (model: LocalisationModel) => {
+    model.boundedBoxVisible = !model.boundedBoxVisible;
+  };
 }

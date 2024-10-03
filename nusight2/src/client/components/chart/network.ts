@@ -5,7 +5,6 @@ import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
 import { message } from "../../../shared/messages";
 import { Clock } from "../../../shared/time/clock";
-import { toSeconds } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -16,6 +15,7 @@ import { TreeData } from "./model";
 
 import Sensors = message.input.Sensors;
 import DataPoint = message.eye.DataPoint;
+import { TimestampObject } from "../../../shared/time/timestamp";
 
 const ServoIds = [
   "Right Shoulder Pitch",
@@ -81,7 +81,7 @@ export class ChartNetwork {
 
       if (!node.has(key)) {
         // Create a new series with the start time of this datapoint
-        node.set(key, DataSeries.of(toSeconds(data.timestamp)));
+        node.set(key, DataSeries.of(TimestampObject.toSeconds(data.timestamp)));
       }
 
       const leaf = node.get(key) as DataSeries;
@@ -91,7 +91,7 @@ export class ChartNetwork {
       const chartTime = this.clock.now() - this.model.startTime;
 
       // Now according to the datapoint
-      const pointTime = toSeconds(data.timestamp) - leaf.startTime;
+      const pointTime = TimestampObject.toSeconds(data.timestamp) - leaf.startTime;
 
       // Estimate the drifting distance between the clocks
       leaf.updateDelta(pointTime - chartTime);

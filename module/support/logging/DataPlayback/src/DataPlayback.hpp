@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_SUPPORT_LOGGING_DATAPLAYBACK_HPP
 #define MODULE_SUPPORT_LOGGING_DATAPLAYBACK_HPP
 
@@ -18,7 +44,7 @@ namespace module::support::logging {
 
         struct Player {
             // The function that will queue this message to be emitted
-            std::function<void(const NUClear::clock::time_point&, const std::vector<char>&)> emit;
+            std::function<void(const NUClear::clock::time_point&, const std::vector<uint8_t>&)> emit;
             // If this player should execute and send messages
             bool enabled = false;
         };
@@ -27,7 +53,7 @@ namespace module::support::logging {
         void add_player() {
             uint64_t hash = NUClear::util::serialise::Serialise<T>::hash();
             Player p;
-            p.emit = [this](const NUClear::clock::time_point& emit_time, const std::vector<char>& payload) {
+            p.emit = [this](const NUClear::clock::time_point& emit_time, const std::vector<uint8_t>& payload) {
                 // Deserialise our type
                 auto msg = std::make_unique<T>(NUClear::util::serialise::Serialise<T>::deserialise(payload));
 

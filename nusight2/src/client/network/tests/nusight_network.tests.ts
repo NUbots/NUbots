@@ -6,6 +6,7 @@ import { createMockEventEmitter } from "../../../shared/base/testing/create_mock
 import { message } from "../../../shared/messages";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { AppModel } from "../../components/app/model";
+import { NbsScrubbersModel } from "../../components/nbs_scrubbers/model";
 import { NUsightNetwork } from "../nusight_network";
 
 import Test = message.support.nusight.Test;
@@ -16,7 +17,10 @@ describe("NUsightNetwork", () => {
 
   beforeEach(() => {
     nuclearnetClient = createMockNUClearNetClient().nuclearnetClient;
-    nusightNetwork = new NUsightNetwork(nuclearnetClient, new AppModel({ robots: [] }));
+    nusightNetwork = new NUsightNetwork(
+      nuclearnetClient,
+      new AppModel({ robots: [], scrubbersModel: NbsScrubbersModel.of() }),
+    );
   });
 
   it("send() forwards the given packet to NUClearNet", () => {

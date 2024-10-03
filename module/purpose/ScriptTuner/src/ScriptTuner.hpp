@@ -1,25 +1,34 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2023 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_HPP
 #define MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_HPP
 
+#include <filesystem>
 #include <nuclear>
 
 #include "message/actuation/Limbs.hpp"
@@ -28,7 +37,7 @@
 
 namespace module::purpose {
 
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using utility::skill::Script;
 
     /**
@@ -38,11 +47,21 @@ namespace module::purpose {
      */
     class ScriptTuner : public NUClear::Reactor {
     private:
+        /// @brief The autosave interval in seconds
+        /// @note Set to 0 to disable autosave
+        static constexpr size_t AUTOSAVE_INTERVAL = 30;
+
+        /// @brief Is autosaving enabled?
+        bool autosave_enabled = (AUTOSAVE_INTERVAL != 0);
+
+        /// @brief The autosave directory, imported from the config file
+        std::filesystem::path autosave_dir = "";
+
         /// @brief The path to the script we are editing
-        std::string script_path;
+        std::filesystem::path script_path;
 
         /// @brief The script object we are editing
-        Script<LimbsSequence> script;
+        Script<BodySequence> script;
 
         /// @brief The index of the frame we are currently editing
         size_t frame;
@@ -51,10 +70,25 @@ namespace module::purpose {
         size_t selection;
 
         /// @brief If we are selecting the angle or gain for this item
-        bool angle_or_gain;
+        /// @note angle = true, gain = false
+        bool angle_or_gain = true;
+
+        /// @brief If we are displaying angles in degrees or radians
+        /// @note degrees = true, radians = false
+        bool deg_or_rad = false;
+
+        /// @brief Whether changes have been made to the script since last save
+        bool unsaved_changes = false;
+
+        /// @brief The last autosave location, so we can notify the user
+        std::filesystem::path autosave_path = "";
+
+        /// @brief The time that ScriptTuner was started
+        /// @note Used to determine which autosaves are safe to delete
+        std::chrono::system_clock::time_point start_time;
 
         /// @brief Default gain for new frames
-        const size_t default_gain = 10;
+        const double default_gain = 6.64;
 
         /// @brief Default duration for new frames
         const size_t default_duration = 1000;
@@ -115,6 +149,18 @@ namespace module::purpose {
 
         /// @brief Converts valid user input to gain
         static float user_input_to_gain();
+
+        /// @brief Setup up colour pairs for ncurses
+        void setup_colour_pairs();
+
+        /// @brief Print an ascii image of the NUgus with labelled motors
+        /// @param rows Starting position of the image (top left)
+        /// @param cols Starting position of the image (top left)
+        void print_nugus(const size_t rows, const size_t cols);
+
+        /// @brief Change selection up, down, left, right from nugus' body
+        /// @param direction The direction to move the selection (up, left, down, right)=(0, 1, 2, 3)
+        void move_nugus_selection(const uint8_t direction);
 
     public:
         explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Goalie.hpp"
 
 #include "extension/Behaviour.hpp"
@@ -7,10 +33,14 @@
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
+#include "message/strategy/FindFeature.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
+#include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
@@ -30,18 +60,29 @@ namespace module::purpose {
     using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
     using message::purpose::ThrowInGoalie;
+    using message::strategy::FindBall;
+    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToFieldPosition;
+    using message::strategy::WalkToKickBall;
 
     using extension::Configuration;
 
+    using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
     Goalie::Goalie(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ready_position = config["ready_position"].as<Expression>();
+            this->log_level                = config["log_level"].as<NUClear::LogLevel>();
+            Eigen::Vector3d ready_position = config["ready_position"].as<Expression>();
+            cfg.Hfr = pos_rpy_to_transform(Eigen::Vector3d(ready_position.x(), ready_position.y(), 0),
+                                           Eigen::Vector3d(0, 0, ready_position.z()));
+
+            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
         });
 
         on<Provide<GoalieTask>, Optional<Trigger<GameState>>>().then(
@@ -70,11 +111,8 @@ namespace module::purpose {
             });
 
         // Normal READY state
-        on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
-            emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
-        });
+        on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then(
+            [this] { emit<Task>(std::make_unique<WalkToFieldPosition>(cfg.Hfr, true)); });
 
         // Normal PLAYING state
         on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
@@ -116,13 +154,17 @@ namespace module::purpose {
     }
 
     void Goalie::play() {
-        // Stop the ball!
+        // Walk to the ball if it is within our section of the field
         // Second argument is priority - higher number means higher priority
-        Eigen::Vector3f position(cfg.ready_position.x(), cfg.ready_position.y(), 0);
-        emit<Task>(std::make_unique<WalkToFieldPosition>(position), cfg.ready_position.z(), 1);
-        emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
-        emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
-        emit<Task>(std::make_unique<DiveToBall>(), 4);  // dive to the ball
+        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
+        emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
+                                                          cfg.bounded_region_x_max,
+                                                          cfg.bounded_region_y_min,
+                                                          cfg.bounded_region_y_max,
+                                                          cfg.Hfr),
+                   4);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

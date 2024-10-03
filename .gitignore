@@ -78,6 +78,10 @@ packer/build.pwi
 /home/nubots/NUbots/log/*
 log
 log/*
+nsga2-output/*
+
+# ScriptTuner autosaves
+/.scripttuner/
 
 # Generated documentation
 /doc/Generated/*

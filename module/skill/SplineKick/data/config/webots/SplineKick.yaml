@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Waypoints for kick foot relative to planted foot [x, y, z, time]
 # Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested

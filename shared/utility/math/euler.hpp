@@ -1,4 +1,31 @@
 /*
+ * MIT License
+ *
+ * Copyright (c) 2021 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*
 This code is largely based on the original code by Quentin "Leph" Rouxel and Team Rhoban.
 The original files can be found at:
 https://github.com/Rhoban/model/
@@ -39,7 +66,7 @@ namespace utility::math::euler {
      * @return false if angles are not valid
      */
     template <typename T, std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 1))>* = nullptr>
-    inline bool CheckEulerBounds(const T& angles) {
+    inline bool check_euler_bounds(const T& angles) {
         return (angles(0) >= -M_PI && angles(0) <= M_PI)
                && ((angles(1) > -M_PI / 2.0 && angles(1) < M_PI / 2.0)
                    || (angles(0) == 0 && angles(2) == 0 && (angles(1) == -M_PI / 2.0 || angles(1) == M_PI / 2.0)))
@@ -55,44 +82,44 @@ namespace utility::math::euler {
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 1))>* = nullptr>
-    inline Eigen::Matrix3d EulerToMatrix(const T& angles, EulerType eulerType) {
+    inline Eigen::Matrix3d eul_to_mat(const T& angles, EulerType eulerType) {
         Eigen::Quaternion<Scalar> quat;
         switch (eulerType) {
             case EulerYawPitchRoll: {
-                Eigen::AngleAxis<Scalar> yawRot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-                Eigen::AngleAxis<Scalar> pitchRot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-                Eigen::AngleAxis<Scalar> rollRot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-                quat = rollRot * pitchRot * yawRot;
+                Eigen::AngleAxis<Scalar> yaw_rot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+                Eigen::AngleAxis<Scalar> pitch_rot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+                Eigen::AngleAxis<Scalar> roll_rot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+                quat = roll_rot * pitch_rot * yaw_rot;
             } break;
             case EulerYawRollPitch: {
-                Eigen::AngleAxis<Scalar> yawRot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-                Eigen::AngleAxis<Scalar> pitchRot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-                Eigen::AngleAxis<Scalar> rollRot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-                quat = pitchRot * rollRot * yawRot;
+                Eigen::AngleAxis<Scalar> yaw_rot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+                Eigen::AngleAxis<Scalar> pitch_rot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+                Eigen::AngleAxis<Scalar> roll_rot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+                quat = pitch_rot * roll_rot * yaw_rot;
             } break;
             case EulerRollPitchYaw: {
-                Eigen::AngleAxis<Scalar> yawRot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-                Eigen::AngleAxis<Scalar> pitchRot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-                Eigen::AngleAxis<Scalar> rollRot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-                quat = yawRot * pitchRot * rollRot;
+                Eigen::AngleAxis<Scalar> yaw_rot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+                Eigen::AngleAxis<Scalar> pitch_rot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+                Eigen::AngleAxis<Scalar> roll_rot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+                quat = yaw_rot * pitch_rot * roll_rot;
             } break;
             case EulerRollYawPitch: {
-                Eigen::AngleAxis<Scalar> yawRot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-                Eigen::AngleAxis<Scalar> pitchRot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-                Eigen::AngleAxis<Scalar> rollRot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-                quat = pitchRot * yawRot * rollRot;
+                Eigen::AngleAxis<Scalar> yaw_rot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+                Eigen::AngleAxis<Scalar> pitch_rot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+                Eigen::AngleAxis<Scalar> roll_rot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+                quat = pitch_rot * yaw_rot * roll_rot;
             } break;
             case EulerPitchRollYaw: {
-                Eigen::AngleAxis<Scalar> yawRot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-                Eigen::AngleAxis<Scalar> pitchRot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-                Eigen::AngleAxis<Scalar> rollRot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-                quat = yawRot * rollRot * pitchRot;
+                Eigen::AngleAxis<Scalar> yaw_rot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+                Eigen::AngleAxis<Scalar> pitch_rot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+                Eigen::AngleAxis<Scalar> roll_rot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+                quat = yaw_rot * roll_rot * pitch_rot;
             } break;
             case EulerPitchYawRoll: {
-                Eigen::AngleAxis<Scalar> yawRot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-                Eigen::AngleAxis<Scalar> pitchRot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-                Eigen::AngleAxis<Scalar> rollRot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-                quat = rollRot * yawRot * pitchRot;
+                Eigen::AngleAxis<Scalar> yaw_rot(angles(1), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+                Eigen::AngleAxis<Scalar> pitch_rot(angles(0), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+                Eigen::AngleAxis<Scalar> roll_rot(angles(2), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+                quat = roll_rot * yaw_rot * pitch_rot;
             } break;
             default: {
                 throw std::logic_error("Euler invalid type");
@@ -110,7 +137,7 @@ namespace utility::math::euler {
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 3))>* = nullptr>
-    inline Eigen::Matrix<Scalar, 3, 1> MatrixToEuler(const T& mat, EulerType eulerType) {
+    inline Eigen::Matrix<Scalar, 3, 1> mat_to_eul(const T& mat, EulerType eulerType) {
         Eigen::Matrix<Scalar, 3, 1> tmp(0.0, 0.0, 0.0);
         switch (eulerType) {
             case EulerYawPitchRoll: {
@@ -144,7 +171,7 @@ namespace utility::math::euler {
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 3))>* = nullptr>
-    inline Eigen::Matrix<Scalar, 3, 1> MatrixToEulerIntrinsic(const T& mat) {
+    inline Eigen::Matrix<Scalar, 3, 1> mat_to_rpy_intrinsic(const T& mat) {
         // Eigen euler angles and with better range
         return Eigen::Matrix<Scalar, 3, 1>(
             // Roll
@@ -163,12 +190,38 @@ namespace utility::math::euler {
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 1))>* = nullptr>
-    inline Eigen::Matrix<Scalar, 3, 3> EulerIntrinsicToMatrix(const T& angles) {
-        Eigen::AngleAxis<Scalar> yawRot(angles.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-        Eigen::AngleAxis<Scalar> pitchRot(angles.y(), Eigen::Matrix<Scalar, 3, 1>::UnitY());
-        Eigen::AngleAxis<Scalar> rollRot(angles.x(), Eigen::Matrix<Scalar, 3, 1>::UnitX());
-        Eigen::Quaternion<Scalar> quat = yawRot * pitchRot * rollRot;
+    inline Eigen::Matrix<Scalar, 3, 3> rpy_intrinsic_to_mat(const T& angles) {
+        Eigen::AngleAxis<Scalar> yaw_rot(angles.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+        Eigen::AngleAxis<Scalar> pitch_rot(angles.y(), Eigen::Matrix<Scalar, 3, 1>::UnitY());
+        Eigen::AngleAxis<Scalar> roll_rot(angles.x(), Eigen::Matrix<Scalar, 3, 1>::UnitX());
+        Eigen::Quaternion<Scalar> quat = yaw_rot * pitch_rot * roll_rot;
         return quat.matrix();
+    }
+
+    /**
+     * @brief Create a homogeneous transformation matrix from position and Euler angles.
+     * @param position The position vector [x, y, z].
+     * @param angles Euler angles [roll, pitch, yaw].
+     * @return A homogeneous transformation matrix as Eigen::Transform.
+     */
+    template <typename Scalar>
+    inline Eigen::Transform<Scalar, 3, Eigen::Isometry> pos_rpy_to_transform(
+        const Eigen::Matrix<Scalar, 3, 1>& position,
+        const Eigen::Matrix<Scalar, 3, 1>& angles) {
+
+        // Create the rotation matrix from Euler angles
+        Eigen::Matrix<Scalar, 3, 3> rotation_matrix = rpy_intrinsic_to_mat(angles);
+
+        // Create the transformation object
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> transform;
+
+        // Set the translation (position)
+        transform.translation() = position;
+
+        // Set the rotation
+        transform.linear() = rotation_matrix;
+
+        return transform;
     }
 }  // namespace utility::math::euler
 

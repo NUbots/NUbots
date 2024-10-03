@@ -18,7 +18,7 @@ function LightAndDarkStepper(props: NumericStepperProps) {
       <div className="border border-b-0 p-5 rounded-t-lg">
         <NumericStepper {...props} />
       </div>
-      <div className="dark bg-slate-800 p-5 rounded-b-lg">
+      <div className="dark bg-gray-800 p-5 rounded-b-lg">
         <NumericStepper {...props} />
       </div>
     </div>

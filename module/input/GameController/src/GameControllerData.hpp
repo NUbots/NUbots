@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2014 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef MODULES_INPUT_GAMECONTROLLERDATA_HPP
@@ -81,41 +89,41 @@ namespace module::input::gamecontroller {
     };
 
     struct Robot {
-        PenaltyState penaltyState;  // penalty state of the player
-        uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
-        uint8_t numberOfWarnings;   // number of warnings
-        uint8_t yellowCardCount;    // number of yellow cards
-        uint8_t redCardCount;       // number of red cards
-        bool goalKeeper;            // flags if robot is goal keeper
+        PenaltyState penalty_state;   // penalty state of the player
+        uint8_t penalised_time_left;  // estimate of time till unpenalised (seconds)
+        uint8_t number_of_warnings;   // number of warnings
+        uint8_t yellow_card_count;    // number of yellow cards
+        uint8_t red_card_count;       // number of red cards
+        bool goal_keeper;             // flags if robot is goal keeper
     };
 
     struct Team {
-        uint8_t teamId;                                         // unique team number
-        TeamColour teamColour;                                  // colour of the team
-        uint8_t score;                                          // team's score
-        uint8_t penaltyShot;                                    // penalty shot counter
-        uint16_t singleShots;                                   // bits represent penalty shot success
-        uint8_t coachSequence;                                  // sequence number of the coach's message
-        std::array<char, SPL_COACH_MESSAGE_SIZE> coachMessage;  // the coach's message to the team
-        Robot coach;                                            // the coach
-        std::array<Robot, MAX_NUM_PLAYERS> players;             // the team's players
+        uint8_t team_id;                                         // unique team number
+        TeamColour team_colour;                                  // colour of the team
+        uint8_t score;                                           // team's score
+        uint8_t penalty_shot;                                    // penalty shot counter
+        uint16_t single_shots;                                   // bits represent penalty shot success
+        uint8_t coach_sequence;                                  // sequence number of the coach's message
+        std::array<char, SPL_COACH_MESSAGE_SIZE> coach_message;  // the coach's message to the team
+        Robot coach;                                             // the coach
+        std::array<Robot, MAX_NUM_PLAYERS> players;              // the team's players
     };
 
     struct GameControllerPacket {
         std::array<char, 4> header;  // header to identify the structure
         uint16_t version;            // version of the data structure
-        uint8_t packetNumber;        // number incremented with each packet sent (with wraparound)
-        uint8_t playersPerTeam;      // the number of players on a team
-        GameType gameType;           // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
+        uint8_t packet_number;       // number incremented with each packet sent (with wraparound)
+        uint8_t players_per_team;    // the number of players on a team
+        GameType game_type;          // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
         State state;                 // state of the game (STATE_READY, STATE_PLAYING, etc)
-        bool firstHalf;              // 1 = game in first half, 0 otherwise
-        uint8_t kickOffTeam;         // the team number of the next team to kick off or DROPBALL
+        bool first_half;             // 1 = game in first half, 0 otherwise
+        uint8_t kick_off_team;       // the team number of the next team to kick off or DROPBALL
         Mode mode;                   // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
-        std::array<uint8_t, 4> secondaryStateInfo;  // Extra info on the secondary state
-        TeamColour dropInTeam;                      // number of team that caused last drop in
-        int16_t dropInTime;      // number of seconds passed since the last drop in. -1 (0xffff) before first dropin
-        uint16_t secsRemaining;  // estimate of number of seconds remaining in the half
-        uint16_t secondaryTime;  // number of seconds shown as secondary time (remaining ready, until free ball, etc)
+        std::array<uint8_t, 4> secondary_state_info;  // Extra info on the secondary state
+        TeamColour drop_in_team;                      // number of team that caused last drop in
+        int16_t drop_in_time;     // number of seconds passed since the last drop in. -1 (0xffff) before first dropin
+        uint16_t secs_remaining;  // estimate of number of seconds remaining in the half
+        uint16_t secondary_time;  // number of seconds shown as secondary time (remaining ready, until free ball, etc)
         std::array<Team, 2> teams;
     };
 
@@ -129,23 +137,23 @@ namespace module::input::gamecontroller {
 #pragma pack(pop)
 
     inline std::ostream& operator<<(std::ostream& os, const Robot& robot) {
-        os << "\t\tPenalty state......: " << uint(robot.penaltyState) << std::endl
-           << "\t\tPenalised time left: " << uint(robot.penalisedTimeLeft) << std::endl
-           << "\t\tNumber of warnings: " << uint(robot.numberOfWarnings) << std::endl
-           << "\t\tYellow Card Count..: " << uint(robot.yellowCardCount) << std::endl
-           << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl
-           << "\t\tGoalkeeper: " << std::boolalpha << robot.goalKeeper << std::endl;
+        os << "\t\tPenalty state......: " << uint(robot.penalty_state) << std::endl
+           << "\t\tPenalised time left: " << uint(robot.penalised_time_left) << std::endl
+           << "\t\tNumber of warnings: " << uint(robot.number_of_warnings) << std::endl
+           << "\t\tYellow Card Count..: " << uint(robot.yellow_card_count) << std::endl
+           << "\t\tRed Card Count.....: " << uint(robot.red_card_count) << std::endl
+           << "\t\tGoalkeeper: " << std::boolalpha << robot.goal_keeper << std::endl;
         return os;
     }
 
     inline std::ostream& operator<<(std::ostream& os, const Team& team) {
-        os << "Team id: " << uint(team.teamId) << std::endl
-           << "\tTeam colour...: " << uint(team.teamColour) << std::endl
+        os << "Team id: " << uint(team.team_id) << std::endl
+           << "\tTeam colour...: " << uint(team.team_colour) << std::endl
            << "\tScore.........: " << uint(team.score) << std::endl
-           << "\tPenalty shot..: " << uint(team.penaltyShot) << std::endl
-           << "\tSingle shots..: " << uint(team.singleShots) << std::endl
-           << "\tCoach Sequence: " << uint(team.coachSequence) << std::endl
-           << "\tCoach message.: " << std::string(team.coachMessage.data()) << std::endl;
+           << "\tPenalty shot..: " << uint(team.penalty_shot) << std::endl
+           << "\tSingle shots..: " << uint(team.single_shots) << std::endl
+           << "\tCoach Sequence: " << uint(team.coach_sequence) << std::endl
+           << "\tCoach message.: " << std::string(team.coach_message.data()) << std::endl;
 
         for (uint i = 0; i < team.players.size(); i++) {
             os << "\tRobot " << i + 1 << ":" << std::endl << team.players[i] << std::endl;
@@ -155,19 +163,19 @@ namespace module::input::gamecontroller {
 
     inline std::ostream& operator<<(std::ostream& os, const GameControllerPacket& packet) {
         os << "Version.............: " << uint(packet.version) << std::endl
-           << "Packet number.......: " << uint(packet.packetNumber) << std::endl
-           << "Players per team....: " << uint(packet.playersPerTeam) << std::endl
-           << "Game Type...........: " << uint(packet.gameType) << std::endl
+           << "Packet number.......: " << uint(packet.packet_number) << std::endl
+           << "Players per team....: " << uint(packet.players_per_team) << std::endl
+           << "Game Type...........: " << uint(packet.game_type) << std::endl
            << "State...............: " << uint(packet.state) << std::endl
-           << "First half..........: " << std::boolalpha << packet.firstHalf << std::endl
-           << "Kick off team.......: " << uint(packet.kickOffTeam) << std::endl
+           << "First half..........: " << std::boolalpha << packet.first_half << std::endl
+           << "Kick off team.......: " << uint(packet.kick_off_team) << std::endl
            << "Mode................: " << uint(packet.mode) << std::endl
            << "Secondary State Info: "
-           << std::string(packet.secondaryStateInfo.begin(), packet.secondaryStateInfo.end()) << std::endl
-           << "Drop in team........: " << uint(packet.dropInTeam) << std::endl
-           << "Drop in time........: " << uint(packet.dropInTime) << std::endl
-           << "Seconds remaining...: " << uint(packet.secsRemaining) << std::endl
-           << "Secondary time......: " << uint(packet.secondaryTime) << std::endl
+           << std::string(packet.secondary_state_info.begin(), packet.secondary_state_info.end()) << std::endl
+           << "Drop in team........: " << uint(packet.drop_in_team) << std::endl
+           << "Drop in time........: " << uint(packet.drop_in_time) << std::endl
+           << "Seconds remaining...: " << uint(packet.secs_remaining) << std::endl
+           << "Secondary time......: " << uint(packet.secondary_time) << std::endl
            << packet.teams[0] << std::endl
            << packet.teams[1] << std::endl;
         return os;

@@ -1,23 +1,29 @@
-import React from "react";
-import { PropsWithChildren } from "react";
-import { ComponentType } from "react";
+import React, { ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
-import { observer } from "mobx-react";
-import { disposeOnUnmount } from "mobx-react";
+import { disposeOnUnmount, observer } from "mobx-react";
 import { now } from "mobx-utils";
 
-import { Vector3 } from "../../../shared/math/vector3";
-import { PerspectiveCamera } from "../three/three_fiber";
-import { ThreeFiber } from "../three/three_fiber";
+import { Button } from "../button/button";
+import { dropdownContainer } from "../dropdown_container/view";
+import { Icon } from "../icon/view";
+import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
-import { FieldView } from "./field/view";
-import { LocalisationModel } from "./model";
-import { ViewMode } from "./model";
+import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
-import { NUgusView } from "./nugus_robot/view";
-import { SkyboxView } from "./skybox/view";
-import style from "./style.module.css";
+import { Ball } from "./r3f_components/ball/view";
+import { BoundingBox } from "./r3f_components/bounding_box/view";
+import { FieldView } from "./r3f_components/field/view";
+import { FieldIntersections } from "./r3f_components/field_intersections/view";
+import { FieldObjects } from "./r3f_components/field_objects/view";
+import { FieldPoints } from "./r3f_components/field_points/view";
+import { GridView } from "./r3f_components/grid/view";
+import { Nugus } from "./r3f_components/nugus/view";
+import { PurposeLabel } from "./r3f_components/purpose_label/view";
+import { SkyboxView } from "./r3f_components/skybox/view";
+import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
+import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
+import { LocalisationRobotModel } from "./robot_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -25,6 +31,49 @@ type LocalisationViewProps = {
   model: LocalisationModel;
   network: LocalisationNetwork;
 };
+
+const FieldDimensionOptions = [
+  { label: "Lab", value: "lab" },
+  { label: "Robocup", value: "robocup" },
+];
+
+// Apply the interfaces to the component's props
+interface FieldDimensionSelectorProps {
+  model: LocalisationModel;
+  controller: LocalisationController;
+}
+
+@observer
+export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
+  private dropdownToggle = (<Button>Field Type</Button>);
+
+  render(): JSX.Element {
+    return (
+      <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
+        <div className="bg-auto-surface-2">
+          {FieldDimensionOptions.map((option) => (
+            <div
+              key={option.value}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
+              onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
+            >
+              <Icon size={24}>
+                {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
+              </Icon>{" "}
+              <span>{option.label}</span>
+            </div>
+          ))}
+        </div>
+      </EnhancedDropdown>
+    );
+  }
+}
+
+const EnhancedDropdown = dropdownContainer();
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
@@ -53,9 +102,24 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div className={style.localisation}>
-        <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
-        <div className={style.localisation__canvas}>
+      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
+        <LocalisationMenuBar
+          model={this.props.model}
+          Menu={this.props.Menu}
+          controller={this.props.controller}
+          onHawkEyeClick={this.onHawkEyeClick}
+          toggleGridVisibility={this.toggleGridVisibility}
+          toggleFieldVisibility={this.toggleFieldVisibility}
+          toggleRobotVisibility={this.toggleRobotVisibility}
+          toggleBallVisibility={this.toggleBallVisibility}
+          toggleParticleVisibility={this.toggleParticleVisibility}
+          toggleGoalVisibility={this.toggleGoalVisibility}
+          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+          toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+        ></LocalisationMenuBar>
+        <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
@@ -108,24 +172,114 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     e.preventDefault();
     this.props.controller.onWheel(this.props.model, e.deltaY);
   };
+
+  private toggleGridVisibility = () => {
+    this.props.controller.toggleGridVisibility(this.props.model);
+  };
+
+  private toggleFieldVisibility = () => {
+    this.props.controller.toggleFieldVisibility(this.props.model);
+  };
+
+  private toggleRobotVisibility = () => {
+    this.props.controller.toggleRobotVisibility(this.props.model);
+  };
+
+  private toggleBallVisibility = () => {
+    this.props.controller.toggleBallVisibility(this.props.model);
+  };
+
+  private toggleParticleVisibility = () => {
+    this.props.controller.toggleParticlesVisibility(this.props.model);
+  };
+
+  private toggleGoalVisibility = () => {
+    this.props.controller.toggleGoalVisibility(this.props.model);
+  };
+
+  private toggleFieldLinePointsVisibility = () => {
+    this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
+  };
+
+  private toggleFieldIntersectionsVisibility = () => {
+    this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
+  };
+
+  private toggleWalkToDebugVisibility = () => {
+    this.props.controller.toggleWalkToDebugVisibility(this.props.model);
+  };
+
+  private toggleBoundedBoxVisibility = () => {
+    this.props.controller.toggleBoundedBoxVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
   Menu: ComponentType<PropsWithChildren>;
 
+  model: LocalisationModel;
+
+  controller: LocalisationController;
+
   onHawkEyeClick(): void;
+  toggleGridVisibility(): void;
+  toggleFieldVisibility(): void;
+  toggleRobotVisibility(): void;
+  toggleBallVisibility(): void;
+  toggleParticleVisibility(): void;
+  toggleGoalVisibility(): void;
+  toggleFieldLinePointsVisibility(): void;
+  toggleFieldIntersectionsVisibility(): void;
+  toggleWalkToDebugVisibility(): void;
+  toggleBoundedBoxVisibility(): void;
 }
 
+const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
+  return (
+    <li className="flex m-0 p-0">
+      <button className="px-4" onClick={props.onClick}>
+        <div className="flex items-center justify-center">
+          <div className="flex items-center rounded">
+            <span className="mx-2">{props.label}</span>
+            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+          </div>
+        </div>
+      </button>
+    </li>
+  );
+};
+
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
-  const { Menu } = props;
+  const { Menu, model, controller } = props;
   return (
     <Menu>
-      <ul className={style.localisation__menu}>
-        <li className={style.localisation__menuItem}>
-          <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>
+      <ul className="flex h-full items-center">
+        <li className="flex px-4">
+          <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
-          </button>
+          </Button>
         </li>
+        <li className="flex px-4">
+          <FieldDimensionSelector controller={controller} model={model} />
+        </li>
+        <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
+        <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
+        <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
+        <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalsVisible} onClick={props.toggleGoalVisibility} />
+        <MenuItem
+          label="Field Line Points"
+          isVisible={model.fieldLinePointsVisible}
+          onClick={props.toggleFieldLinePointsVisibility}
+        />
+        <MenuItem
+          label="Field Intersections"
+          isVisible={model.fieldIntersectionsVisible}
+          onClick={props.toggleFieldIntersectionsVisibility}
+        />
+        <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
+        <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
       </ul>
     </Menu>
   );
@@ -139,10 +293,14 @@ const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div className={style.localisation__status}>
-      <span className={style.localisation__info}>&#160;</span>
-      <span className={style.localisation__target}>{target}</span>
-      <span className={style.localisation__viewMode}>{viewModeString(props.model.viewMode)}</span>
+    <div
+      className={
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+      }
+    >
+      <span className="text-left w-1/3">&#160;</span>
+      <span className="w-1/3">{target}</span>
+      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });
@@ -160,60 +318,105 @@ function viewModeString(viewMode: ViewMode) {
   }
 }
 
-export const LocalisationViewModel = observer(({ model }: { model: LocalisationModel }) => {
+interface RobotRenderProps {
+  robot: LocalisationRobotModel;
+  model: LocalisationModel;
+}
+
+const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) => {
+  if (!robot.visible) return null;
+
   return (
-    <object3D>
-      <PerspectiveCamera
-        args={[75, 1, 0.01, 100]}
-        position={model.camera.position.toArray()}
-        rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
-        up={[0, 0, 1]}
-      >
-        <pointLight color="white" />
-      </PerspectiveCamera>
-      <FieldView model={model.field} />
-      <SkyboxView model={model.skybox} />
-      <hemisphereLight args={["#fff", "#fff", 0.6]} />
-      {model.robots.map((robotModel) => {
-        return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
-      })}
-      <FieldLinePoints model={model} />
-      <Balls model={model} />
+    <object3D key={robot.id}>
+      <Nugus model={robot} />
+
+      {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
+      {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
+
+      {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
+
+      {model.goalsVisible && (
+        <FieldObjects
+          objects={robot.rGFf.map((goal) => ({
+            position: goal.bottom,
+            height: goal.top.z,
+          }))}
+          defaultRadius={0.05}
+          defaultColor="magenta"
+        />
+      )}
+
+      <FieldObjects
+        objects={robot.rRFf.map((r) => ({
+          position: r,
+        }))}
+        defaultHeight={0.8}
+        defaultRadius={0.1}
+        defaultColor="orange"
+      />
+
+      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
+        <FieldIntersections intersections={robot.fieldIntersections} />
+      )}
+
+      {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
+        <WalkPathVisualiser
+          Hfd={robot.Hfd}
+          Hfr={robot.Hfr}
+          Hft={robot.Hft}
+          min_align_radius={robot.min_align_radius}
+          max_align_radius={robot.max_align_radius}
+          min_angle_error={robot.min_angle_error}
+          max_angle_error={robot.max_angle_error}
+          angle_to_final_heading={robot.angle_to_final_heading}
+          velocity_target={robot.velocity_target}
+        />
+      )}
+
+      {robot.Hft && robot.purpose && (
+        <PurposeLabel
+          Hft={robot.Hft}
+          player_id={robot.player_id}
+          backgroundColor={robot.color}
+          purpose={robot.purpose}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
+        />
+      )}
+
+      {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
+
+      {model.boundedBoxVisible && robot.boundingBox && (
+        <BoundingBox
+          minX={robot.boundingBox.minX}
+          maxX={robot.boundingBox.maxX}
+          minY={robot.boundingBox.minY}
+          maxY={robot.boundingBox.maxY}
+          color={robot.color}
+        />
+      )}
     </object3D>
   );
 });
 
-const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
-  <>
-    {model.robots.map(
-      (robot) =>
-        robot.visible && (
-          <object3D key={robot.id}>
-            {robot.rPFf.map((d, i) => {
-              return (
-                <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
-                  <circleBufferGeometry args={[0.02, 20]} />
-                  <meshBasicMaterial color="blue" />
-                </mesh>
-              );
-            })}
-          </object3D>
-        ),
-    )}
-  </>
-);
+const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer(({ model }) => (
+  <object3D>
+    <PerspectiveCamera
+      args={[75, 1, 0.01, 100]}
+      position={model.camera.position.toArray()}
+      rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
+      up={[0, 0, 1]}
+    >
+      <pointLight color="white" />
+    </PerspectiveCamera>
+    <SkyboxView model={model.skybox} />
+    <hemisphereLight args={["#fff", "#fff", 0.6]} />
 
-const Balls = ({ model }: { model: LocalisationModel }) => (
-  <>
-    {model.robots.map(
-      (robot) =>
-        robot.visible &&
-        robot.rBFf && (
-          <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
-            <sphereBufferGeometry args={[1, 20, 20]} />
-            <meshStandardMaterial color="orange" />
-          </mesh>
-        ),
-    )}
-  </>
-);
+    {model.fieldVisible && <FieldView model={model.field} />}
+    {model.gridVisible && <GridView />}
+
+    {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
+  </object3D>
+));
+
+export default LocalisationView;

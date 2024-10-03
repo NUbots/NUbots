@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Kinematics.hpp"
 
 #include "extension/Behaviour.hpp"
@@ -61,7 +87,7 @@ namespace module::actuation {
         });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>>().then(
+        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>, Priority::HIGH>().then(
             [this](const LeftLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
@@ -71,7 +97,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<LeftLeg>();
-                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htl, LimbID::LEFT_LEG);
+                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htf, LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -85,14 +111,14 @@ namespace module::actuation {
                 auto q_sol = tinyrobotics::inverse_kinematics(nugus_model_left,
                                                               cfg.left_foot_name,
                                                               cfg.torso_name,
-                                                              leg_ik.Htl,
+                                                              leg_ik.Htf,
                                                               q0,
                                                               options);
 
                 if (log_level <= NUClear::DEBUG) {
                     // Compute error between the IK solution and desired pose
-                    auto Htl_sol = tinyrobotics::forward_kinematics(nugus_model_left, q_sol, cfg.left_foot_name);
-                    auto error   = tinyrobotics::homogeneous_error(leg_ik.Htl, Htl_sol);
+                    auto Htf_sol = tinyrobotics::forward_kinematics(nugus_model_left, q_sol, cfg.left_foot_name);
+                    auto error   = tinyrobotics::homogeneous_error(leg_ik.Htf, Htf_sol);
                     log<NUClear::DEBUG>("IK left error: {}", error.squaredNorm());
                 }
 
@@ -103,7 +129,7 @@ namespace module::actuation {
             });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>>().then(
+        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>, Priority::HIGH>().then(
             [this](const RightLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
@@ -113,7 +139,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<RightLeg>();
-                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htr, LimbID::RIGHT_LEG);
+                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htf, LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -127,14 +153,14 @@ namespace module::actuation {
                 auto q_sol = tinyrobotics::inverse_kinematics(nugus_model_right,
                                                               cfg.right_foot_name,
                                                               cfg.torso_name,
-                                                              leg_ik.Htr,
+                                                              leg_ik.Htf,
                                                               q0,
                                                               options);
 
                 if (log_level <= NUClear::DEBUG) {
                     // Compute error between the IK solution and desired pose
-                    auto Htr_sol = tinyrobotics::forward_kinematics(nugus_model_right, q_sol, cfg.right_foot_name);
-                    auto error   = tinyrobotics::homogeneous_error(leg_ik.Htr, Htr_sol);
+                    auto Htf_sol = tinyrobotics::forward_kinematics(nugus_model_right, q_sol, cfg.right_foot_name);
+                    auto error   = tinyrobotics::homogeneous_error(leg_ik.Htf, Htf_sol);
                     log<NUClear::DEBUG>("IK right error: {}", error.squaredNorm());
                 }
 

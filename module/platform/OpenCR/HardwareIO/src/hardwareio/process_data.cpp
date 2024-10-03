@@ -1,17 +1,47 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include <fmt/format.h>
 
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::input::ButtonLeftDown;
     using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::nusight::graph;
 
     /*
         Process the status return packet data
@@ -131,19 +161,17 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
-        // Buzz if any servo is hot, use the boolean flag to turn the buzzer off once the servo is no longer hot
+        // Buzz if any servo is hot, forever, until power is turned off.
+        // Middle button can be used to disable alarm once no servos are hot, if a power cycle is not desired.
         // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
-        bool any_servo_hot = false;
         for (const auto& servo : servo_states) {
             if (servo.temperature > cfg.alarms.temperature.level) {
-                any_servo_hot = true;
+                log<NUClear::WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
+                                   packet.id,
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)));
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
-        }
-
-        if (!any_servo_hot) {
-            emit(std::make_unique<Buzzer>(0));
         }
 
         // If this servo has not been initialised yet, set the goal states to the current states
@@ -151,6 +179,20 @@ namespace module::platform::OpenCR {
             servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
             servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
             servo_states[servo_index].initialised   = true;
+        }
+
+        // Emit plot for debugging
+        if (log_level == NUClear::DEBUG) {
+            emit(graph(
+                fmt::format("{} ({}) Packet length", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                packet.length));
+            emit(graph(fmt::format("{} ({}) Present position",
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)),
+                                   packet.id),
+                       data.present_position));
+            emit(graph(
+                fmt::format("{} ({}) Present voltage", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                data.present_voltage));
         }
     }
 

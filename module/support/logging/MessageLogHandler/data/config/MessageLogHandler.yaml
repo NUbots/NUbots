@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display from this module
+log_level: INFO
+
+log_settings:
+  # Sets the minimum log level that this module will handle for logs coming in
+  min_level: DEBUG
+  # If true, will ignore the display level of the log and recode everything
+  log_all: false

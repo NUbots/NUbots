@@ -4,6 +4,34 @@ log_level: INFO
 # For the robot playing without listening to GameController
 force_playing: false
 
+# Delay in seconds before the robot starts playing after button press
+disable_idle_delay: 5
+
 # The position of the robot
-# GOALIE, STRIKER, DEFENDER
-position: STRIKER
+# ALL_ROUNDER, GOALIE, STRIKER, DEFENDER, DYNAMIC
+position: DYNAMIC
+
+# The number of seconds to wait before assuming a teammate is inactive
+timeout: 4
+
+# The largest robot id number
+max_robots: 5
+
+# Goalie bounding box
+goalie:
+  x_min: 1.6
+  x_max: 3.4
+  y_min: -3.0
+  y_max: 3.0
+# Defender bounding box
+defender:
+  x_min: 1.6
+  x_max: 3.4
+  y_min: -3.0
+  y_max: 3.0
+# Striker bounding box
+striker:
+  x_min: -4.0
+  x_max: 1.6
+  y_min: -3.0
+  y_max: 3.0
