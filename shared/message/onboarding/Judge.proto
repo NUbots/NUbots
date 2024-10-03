@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package message.onboarding;
+
+message Judge {
+    bool isCorrect = 1;
+    int32 sol = 2;
+}

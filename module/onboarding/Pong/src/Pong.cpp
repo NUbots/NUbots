@@ -27,9 +27,7 @@ namespace module::onboarding {
 
         on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
             auto pong_msg = std::make_unique<Pong>();
-            // TODO: Log a INFO level message with the text "Pong"
             log<NUClear::INFO>("Pong");
-            // TODO: Emit a Pong message
             emit(pong_msg);
         });
     }
