@@ -410,36 +410,6 @@ namespace module::extension {
          */
         void run_task_pack(const TaskPack& pack);
 
-        /**
-         * A RunReasonLock instance will reset the current_run_reason back to OTHER_TRIGGER when it is destroyed.
-         *
-         * This is used so that the run reason can temporarily be set to something else, and then reset back to the
-         * default if there is an exception or other error.
-         */
-        using RunReasonLock = std::unique_ptr<void, std::function<void(void*)>>;
-
-        /**
-         * Holds a run reason as the current run reason for the current thread.
-         *
-         * It returns a lock object that acts as an RAII object that will reset the current run reason when it is
-         * destroyed.
-         *
-         * @param reason the reason to hold until the lock is destroyed
-         *
-         * @return a lock object that will reset `current_run_reason` to its default when destroyed
-         */
-        RunReasonLock hold_run_reason(const ::extension::behaviour::RunInfo::RunReason& reason);
-
-        /**
-         * Holds a thread local group info as the current group info for the current thread.
-         * Also stores the updated group info in the main cache once the lock is destroyed.
-         *
-         * @param group the provider group to update the information for
-         *
-         * @return a lock object that will reset the group info to its default when destroyed
-         */
-        GroupInfoLock hold_group_info(const component::ProviderGroup& group);
-
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);

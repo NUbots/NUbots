@@ -31,7 +31,12 @@ namespace module::extension {
 
     using component::DirectorTask;
     using component::Provider;
+    using ::extension::behaviour::GroupInfo;
     using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::information::GroupInfoStore;
+    using ::extension::behaviour::information::RunReasonStore;
+    using ::extension::behaviour::information::TaskDataStore;
+
 
     void Director::run_task_on_provider(const std::shared_ptr<DirectorTask>& task,
                                         const std::shared_ptr<component::Provider>& provider,
@@ -50,8 +55,8 @@ namespace module::extension {
                     // We have to swap to this as the active provider so it can actually run
                     group.active_provider = provider;
 
-                    auto group_info_lock = hold_group_info(group);
-                    auto run_reason_lock = hold_run_reason(RunInfo::RunReason::STARTED);
+                    auto group_info_lock = GroupInfoStore::set(GroupInfo::State::RUNNING, group.done);
+                    auto run_reason_lock = RunReasonStore::set(RunInfo::RunReason::STARTED);
                     powerplant.submit(provider->reaction->get_task(true));
                 }
             }
@@ -60,9 +65,12 @@ namespace module::extension {
         // Set the active provider ready for running
         group.active_provider = provider;
 
-        // Run the reaction
-        auto group_info_lock = hold_group_info(group);
-        auto lock          = hold_run_reason(run_reason);
+        // Set data
+        auto group_info_lock = GroupInfoStore::set(GroupInfo::State::RUNNING, group.done);
+        auto run_reason_lock = RunReasonStore::set(run_reason);
+        auto task_data_lock  = TaskDataStore::set(task, provider->id);
+
+        // Run the provider
         auto reaction_task = provider->reaction->get_task();
         if (reaction_task) {
             powerplant.submit(std::move(reaction_task));
