@@ -4,6 +4,7 @@
 
 #include "message/onboarding/Ping.hpp"
 #include "message/onboarding/Pong.hpp"
+#include "message/onboarding/Task.hpp"
 
 namespace module::onboarding {
 
