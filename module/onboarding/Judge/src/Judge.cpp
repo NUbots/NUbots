@@ -30,6 +30,7 @@ namespace module::onboarding {
         on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
             auto sol = (10 * 11) / 2;
             if (sol == ping_msg.val) {
+                log<NUClear::INFO>("Nodding");
                 emit<Task>(load_script<LimbsSequence>("NodYes.yaml"));
             }
         });
