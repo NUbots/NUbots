@@ -63,7 +63,8 @@ namespace extension::behaviour {
         private:
             using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<RunReason<T>>>;
 
-            static public : using Lock = std::unique_ptr<void, std::function<void(void*)>>;
+        public:
+            using Lock = std::unique_ptr<void, std::function<void(void*)>>;
 
             /**
              * Set the runreason for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.

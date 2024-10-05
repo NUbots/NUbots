@@ -41,7 +41,8 @@ namespace extension::behaviour {
             using DataThreadStore     = NUClear::dsl::store::ThreadStore<std::shared_ptr<void>>;
             using ProviderThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<uint64_t>>;
 
-            static public : using Lock = std::unique_ptr<void, std::function<void(void*)>>;
+        public:
+            using Lock = std::unique_ptr<void, std::function<void(void*)>>;
 
             /**
              * Set the TaskData for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.

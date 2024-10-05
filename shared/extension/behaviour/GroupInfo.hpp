@@ -62,7 +62,8 @@ namespace extension::behaviour {
             using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<GroupInfo<T>>>;
             using GlobalStore = NUClear::util::TypeMap<T, T, GroupInfo<T>>;
 
-            static public : using Lock = std::unique_ptr<void, std::function<void(void*)>>;
+        public:
+            using Lock = std::unique_ptr<void, std::function<void(void*)>>;
 
             /**
              * Set the group info for this thread and return a lock that when destroyed will upgrade the data to the
