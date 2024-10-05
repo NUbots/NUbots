@@ -79,6 +79,11 @@ namespace module::extension::component {
             });
         }
 
+        Lock publish(const RunReason& run_reason, const std::shared_ptr<DirectorTask>& task) {
+            // TODO call the function that stores data and stuff... I'm tired idk
+            // That function should be set on this any time a provider is added to the group
+        }
+
         /// The type that this provider group manages
         std::type_index type;
 

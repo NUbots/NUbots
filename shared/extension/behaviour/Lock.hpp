@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -25,37 +25,19 @@
  * SOFTWARE.
  */
 
-#include "Director.hpp"
+#ifndef EXTENSION_BEHAVIOUR_LOCK_HPP
+#define EXTENSION_BEHAVIOUR_LOCK_HPP
 
-namespace module::extension {
+#include <memory>
+#include <nuclear>
 
-    std::shared_ptr<void> Director::_get_task_data(const uint64_t& reaction_id) {
-        // Still need this lock because of withs etc :(
-        // Perhaps though what should happen is that an emit for the director state should be emitted before so these
-        // can look it up in the cache
-        std::lock_guard<std::recursive_mutex> lock(director_mutex);
+#include "Lock.hpp"
 
-        // How did we get here?
-        if (!providers.contains(reaction_id)) {
-            return nullptr;
-        }
+namespace extension::behaviour {
 
-        // Get the provider and group for the reaction
-        auto provider = providers.at(reaction_id);
-        auto group    = provider->group;
+    /// Used to provide an RAII lock around a piece of data that is being stored in a store
+    using Lock = std::unique_ptr<const void, std::function<void(const void*)>>;
 
-        // Only the active provider is allowed to have data
-        if (provider != group.active_provider) {
-            return nullptr;
-        }
+}  // namespace extension::behaviour
 
-        // If the task is of the wrong type we can't return it
-        if (group.active_task->type != provider->type) {
-            return nullptr;
-        }
-
-        // Return the data
-        return group.active_task->data;
-    }
-
-}  // namespace module::extension
+#endif  // EXTENSION_BEHAVIOUR_LOCK_HPP

@@ -35,7 +35,7 @@ namespace module::extension {
     using component::Provider;
     using component::ProviderGroup;
     using ::extension::Configuration;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::RunReason;
     using ::extension::behaviour::commands::BehaviourTask;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::NeedsExpression;
@@ -43,10 +43,6 @@ namespace module::extension {
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
-
-
-    thread_local Director::PackBuilder Director::pack_builder;
-    thread_local RunInfo::RunReason Director::current_run_reason = RunInfo::RunReason::OTHER_TRIGGER;
 
     /**
      * This message gets emitted when a state we are monitoring is updated.
@@ -229,10 +225,6 @@ namespace module::extension {
     }
 
     Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        if (source != nullptr) {
-            throw std::runtime_error("Multiple behaviour directors are not allowed.");
-        }
-        source = this;
 
         on<Configuration>("Director.yaml").then("Configure", [this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -328,9 +320,6 @@ namespace module::extension {
         });
     }
 
-    Director::~Director() {
-        // Remove this director as the information source
-        source = nullptr;
-    }
+    thread_local Director::PackBuilder Director::pack_builder;
 
 }  // namespace module::extension

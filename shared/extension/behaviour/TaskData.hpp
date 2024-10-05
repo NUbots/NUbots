@@ -29,46 +29,61 @@
 #define EXTENSION_BEHAVIOUR_TASKDATA_HPP
 
 #include <memory>
-#include <typeindex>
+#include <nuclear>
 
 namespace extension::behaviour {
 
     namespace information {
 
+        /**
+         * This class is used to store the task data for a provider.
+         *
+         * @tparam T the type of data that the provider using this store needs.
+         */
         template <typename T>
         struct TaskDataStore {
         private:
-            using DataThreadStore     = NUClear::dsl::store::ThreadStore<std::shared_ptr<void>>;
-            using ProviderThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<uint64_t>>;
+            using TaskData    = std::pair<NUClear::id_t, std::shared_ptr<const T>>;
+            using ThreadStore = NUClear::dsl::store::ThreadStore<TaskData>;
+            using GlobalStore = NUClear::util::TypeMap<T, T, TaskData>;
 
         public:
-            using Lock = std::unique_ptr<void, std::function<void(void*)>>;
-
             /**
-             * Set the TaskData for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.
+             * Set the TaskData for this thread and return a lock that when will upgrade the data to the global store.
              *
              * @param info the TaskData to set
              *
-             * @return a lock object that once destroyed will clear to nullptr
+             * @return a lock object that will upgrade the data to the global store when it goes out of scope
              */
-            static Lock set(const std::shared_ptr<const TaskData<T>>& info,
-                            const std::shared_ptr<uint64_t>& provider_id) {
-                auto lock = std::unique_ptr<void, std::function<void(void*)>>(reinterpret_cast<void*>(0x1), [](void*) {
-                    DataThreadStore::value     = nullptr;
-                    ProviderThreadStore::value = nullptr;
+            static Lock set(const std::shared_ptr<TaskData>& data) {
+
+                auto lock          = Lock(&data, [data](const void*) {
+                    GlobalStore::set(data);
+                    ThreadStore::value = nullptr;
                 });
-                DataThreadStore::value     = &info;
-                ProviderThreadStore::value = &provider_id;
+                ThreadStore::value = &data;
                 return lock;
             }
 
-            static std::shared_ptr<const TaskData<T>> get(const std::shared_ptr<uint64_t>& provider_id) {
-                if (ProviderThreadStore::value == nullptr || *ProviderThreadStore::value != provider_id) {
+            /**
+             * Retrieves the TaskData for this provider.
+             *
+             * This function attempts to retrieve data from either the thread-local store or the global store,
+             * depending on the current thread context. If the data is not found or the provider ID does not match,
+             * it returns nullptr.
+             *
+             * @param provider_id The ID of the provider whose data is to be retrieved.
+             *
+             * @return A shared pointer to a constant object of type T if found, otherwise nullptr.
+             */
+            static std::shared_ptr<const T> get(const NUClear::id_t& provider_id) {
+                auto d = ThreadStore::value == nullptr ? GlobalStore::get() : *ThreadStore::value;
+                if (d == nullptr || d->first != provider_id) {
                     return nullptr;
                 }
-                return std::make_shared<TaskData<T>>(*DataThreadStore::value);
+                return d->second;
             }
-        }
+        };
 
     }  // namespace information
 

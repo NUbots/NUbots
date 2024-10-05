@@ -40,9 +40,7 @@
 
 namespace module::extension {
 
-    class Director
-        : public NUClear::Reactor
-        , ::extension::behaviour::information::InformationSource {
+    class Director : public NUClear::Reactor {
     public:
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<component::DirectorTask>>;
@@ -351,7 +349,7 @@ namespace module::extension {
          */
         void run_task_on_provider(const std::shared_ptr<component::DirectorTask>& task,
                                   const std::shared_ptr<component::Provider>& provider,
-                                  const ::extension::behaviour::RunInfo::RunReason& run_reason);
+                                  const ::extension::behaviour::RunReason& run_reason);
 
         /**
          * The level of solution that we can run at
@@ -413,38 +411,6 @@ namespace module::extension {
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
-        virtual ~Director();
-
-        /**
-         * Provides the task data via the InformationSource interface so it can be accessed
-         *
-         * @param reaction_id the provider reaction that is requesting its information.
-         *
-         * @return the data that is stored in this reaction, or nullptr if it shouldn't be executing
-         */
-        std::shared_ptr<void> _get_task_data(const uint64_t& reaction_id) override;
-
-        /**
-         * Provides the RunInfo data via the InformationSource interface so it can be accessed
-         *
-         * @param reaction_id the provider reaction that is requesting its information.
-         *
-         * @return the information about why this task has been executed
-         */
-        ::extension::behaviour::RunInfo _get_run_info(const uint64_t& reaction_id) override;
-
-        /**
-         * Provides the ProviderGroup data via the InformationSource interface so it can be accessed
-         *
-         * @param reaction_id the provider reaction that is requesting its information.
-         * @param type        the type of provider group that is being requested
-         * @param root_type   the secondary type to use if this is a root task
-         *
-         * @return the information about the provider group that this task is running on
-         */
-        ::extension::behaviour::GroupInfo _get_group_info(const uint64_t& reaction_id,
-                                                          const std::type_index& type,
-                                                          const std::type_index& root_type) override;
 
     private:
         struct PackBuilder {
@@ -466,10 +432,6 @@ namespace module::extension {
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
         uint64_t unique_id_source = 0;
-
-        /// The current run reason this thread is executing for. Defaults to OTHER_TRIGGER as that will be what it
-        /// is if a non Director execution occurs
-        thread_local static ::extension::behaviour::RunInfo::RunReason current_run_reason;
 
     public:
         friend class InformationSource;

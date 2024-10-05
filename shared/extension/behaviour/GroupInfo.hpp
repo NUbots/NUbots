@@ -31,26 +31,32 @@
 #include <memory>
 #include <typeindex>
 
+#include "Lock.hpp"
+
 namespace extension::behaviour {
 
     /**
      * Provides information about the current state of a provider group
      */
-    template <typename T>
     struct GroupInfo {
-        enum RunState {
-            /// The group has not emitted the task
-            NO_TASK,
-            /// The group is running the task
-            RUNNING,
-            /// The group has the task queued
-            QUEUED
+        struct TaskInfo {
+            /// The unique ID of the task
+            NUClear::id_t id;
+            /// The type of the task
+            std::type_index type;
+            /// The ID of the provider that requested the task
+            NUClear::id_t requester_id;
         };
 
-        /// The current run state of the group
-        RunState run_state;
+        /// The ID of the active provider
+        NUClear::id_t active_provider_id;
+        /// The TaskInfo of the active task (zeroed if there is no active task)
+        TaskInfo active_task;
 
-        /// Whether the task is done or not, regardless of if this provider group is running it
+        /// Queue of tasks that are waiting to be run on this provider group
+        std::vector<TaskInfo> watchers;
+
+        /// Whether the provider group is done or not
         bool done;
     };
 
@@ -59,12 +65,10 @@ namespace extension::behaviour {
         template <typename T>
         struct GroupInfoStore {
         private:
-            using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<GroupInfo<T>>>;
-            using GlobalStore = NUClear::util::TypeMap<T, T, GroupInfo<T>>;
+            using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<const GroupInfo>>;
+            using GlobalStore = NUClear::util::TypeMap<T, T, const GroupInfo>;
 
         public:
-            using Lock = std::unique_ptr<void, std::function<void(void*)>>;
-
             /**
              * Set the group info for this thread and return a lock that when destroyed will upgrade the data to the
              * global store.
@@ -74,9 +78,8 @@ namespace extension::behaviour {
              * @return a lock object that once destroyed will upgrade the data to the global store and clear the thread
              * store
              */
-            static Lock set(const std::shared_ptr<const GroupInfo<T>>& info) {
-
-                auto lock = std::unique_ptr<void, std::function<void(void*)>>(reinterpret_cast<void*>(0x1), [](void*) {
+            static Lock set(const std::shared_ptr<const GroupInfo>& info) {
+                auto lock          = Lock(&info, [info](const void*) {
                     GlobalStore::set(info);
                     ThreadStore::value = nullptr;
                 });
@@ -84,10 +87,10 @@ namespace extension::behaviour {
                 return lock;
             }
 
-            static std::shared_ptr<const GroupInfo<T>> get() {
-                return ThreadStore::value == nullptr ? GlobalStore<GroupType>::get() : *ThreadStore<GroupType>::value;
+            static std::shared_ptr<const GroupInfo> get() {
+                return ThreadStore::value == nullptr ? GlobalStore::get() : *ThreadStore::value;
             }
-        }
+        };
 
     }  // namespace information
 

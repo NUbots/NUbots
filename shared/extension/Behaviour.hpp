@@ -31,7 +31,9 @@
 #include <memory>
 #include <nuclear>
 
-#include "behaviour/InformationSource.hpp"
+#include "behaviour/GroupInfo.hpp"
+#include "behaviour/RunReason.hpp"
+#include "behaviour/TaskData.hpp"
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
@@ -58,7 +60,19 @@ namespace extension::behaviour {
 
             // Tell the Director
             reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
+                std::make_unique<commands::ProvideReaction>(
+                    reaction,
+                    typeid(T),
+                    classification,
+                    [](const RunReason& run_reason, const std::shared_ptr<const void>& data, const GroupInfo& info)
+                        -> Lock {
+                        auto reason_lock = information::RunReasonStore::set(run_reason);
+                        auto run_lock    = information::TaskDataStore<T>::set(std::static_pointer_cast<const T>(data));
+                        auto group_lock  = information::GroupInfoStore<T>::set(info);
+
+                        // TODO need to somehow make a "combined lock" that will unlock all of these when it is
+                        // destroyed
+                    }));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
@@ -77,12 +91,11 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
-            NUClear::threading::ReactionTask& t) {
+        static std::tuple<std::shared_ptr<const T>, RunReason> get(NUClear::threading::ReactionTask& t) {
 
-            auto run_data = std::static_pointer_cast<T>(information::get_task_data<T>(t.parent->id));
-            auto run_info = std::make_shared<RunInfo>(information::get_run_info(t.parent->id));
-            return std::make_tuple(run_data, run_info);
+            auto run_data   = information::TaskDataStore<T>::get(t.parent->id);
+            auto run_reason = information::RunReasonStore::get();
+            return std::make_tuple(run_data, run_reason);
         }
 
         /**
@@ -205,6 +218,15 @@ namespace extension::behaviour {
         }
     };
 
+    enum class RunState {
+        /// The group has not emitted the task
+        NO_TASK,
+        /// The group is running the task
+        RUNNING,
+        /// The group has the task queued
+        QUEUED
+    };
+
     /**
      * Adds a Uses object to the callback to allow access to information from the context of this provider.
      *
@@ -216,22 +238,38 @@ namespace extension::behaviour {
      *   It allows you to see what has happened in previous calls, e.g. are we re-running because our previous task
      *   emitted that it was done
      *
-     * @tparam Provider the type of the provider this uses is for
+     * @tparam T the type of the provider this uses is for
      */
-    template <typename Provider>
+    template <typename T>
     struct Uses {
-        GroupInfo::RunState run_state;
+
+        /// The current run state of the group
+        RunState run_state;
+        /// Whether the task is done or not, regardless of if this provider group is running it
         bool done;
 
         template <typename DSL>
-        static std::shared_ptr<Uses<Provider>> get(NUClear::threading::ReactionTask& t) {
+        static Uses<T> get(NUClear::threading::ReactionTask& t) {
 
-            auto group_info = information::get_group_info<Provider>();
 
-            auto data = std::make_shared<Uses<Provider>>();
+            // Default values if we can't find the group info
+            Uses<T> data;
+            data.run_state = RunState::NO_TASK;
+            data.done      = false;
 
-            data->run_state = group_info.run_state;
-            data->done      = group_info.done;
+            auto is_target_task = [&t](const auto& task) {
+                return task.requester_id == t.parent->id && task.type == typeid(T);
+            };
+
+            auto group_info = information::GroupInfoStore<T>::get();
+            if (group_info != nullptr) {
+                data.run_state = group_info->active_task.id == t.parent->id ? RunState::RUNNING
+                                 : std::any_of(group_info->watchers.begin(), group_info->watchers.end(), is_target_task)
+                                     ? RunState::QUEUED
+                                     : RunState::NO_TASK;
+
+                data.done = group_info->done;
+            }
 
             return data;
         }
@@ -372,9 +410,8 @@ namespace extension::behaviour {
         template <typename T>
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
-        using Task      = ::extension::behaviour::Task<T>;
-        using RunInfo   = ::extension::behaviour::RunInfo;
-        using GroupInfo = ::extension::behaviour::GroupInfo;
+        using Task = ::extension::behaviour::Task<T>;
+        using RunReason = ::extension::behaviour::RunReason;
         using Done      = ::extension::behaviour::Done;
         using Idle      = ::extension::behaviour::Idle;
     };
