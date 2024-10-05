@@ -26,9 +26,13 @@ namespace module::onboarding {
         });
 
         on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
-            auto pong_msg = std::make_unique<Pong>();
-            log<NUClear::INFO>("Pong");
-            emit(pong_msg);
+            if (ping_msg.count < 10) {
+                auto pong_msg   = std::make_unique<Pong>();
+                pong_msg->count = ping_msg.count;
+                pong_msg->val   = ping_msg.val;
+                log<NUClear::INFO>("Pong");
+                emit(pong_msg);
+            }
         });
     }
 
