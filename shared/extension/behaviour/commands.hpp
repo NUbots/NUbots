@@ -34,6 +34,8 @@
 #include <typeindex>
 #include <utility>
 
+#include "Lock.hpp"
+
 /**
  * This namespace holds all of the communication primitives that are used by the Behaviour header to send messages to
  * the behaviour system. You shouldn't be emitting any of these messages outside of the behaviour header.
@@ -80,6 +82,8 @@ namespace extension::behaviour::commands {
         std::type_index type;
         /// The action type that this Provider is using
         ProviderClassification classification;
+        /// A function that will place data into the correct caches and return a Lock
+        std::function<Lock(const RunReason&, const std::shared_ptr<const void>&, const GroupInfo& info)> set_data;
     };
 
     /**

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -25,8 +25,19 @@
  * SOFTWARE.
  */
 
-#include "InformationSource.hpp"
+#ifndef EXTENSION_BEHAVIOUR_LOCK_HPP
+#define EXTENSION_BEHAVIOUR_LOCK_HPP
 
-namespace extension::behaviour::information {
-    InformationSource* InformationSource::source = nullptr;
-}
+#include <memory>
+#include <nuclear>
+
+#include "Lock.hpp"
+
+namespace extension::behaviour {
+
+    /// Used to provide an RAII lock around a piece of data that is being stored in a store
+    using Lock = std::unique_ptr<const void, std::function<void(const void*)>>;
+
+}  // namespace extension::behaviour
+
+#endif  // EXTENSION_BEHAVIOUR_LOCK_HPP
