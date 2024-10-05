@@ -233,6 +233,21 @@ namespace module::platform::OpenCR {
 
                     break;
 
+                // Handles NUFSR sensor data
+                case PacketTypes::FSR_DATA:
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());
+                    // call packet handler
+                    process_opencr_data(unstuffed_packet);
+
+                    // check if we received the final packet we are expecting
+                    if (queue_item_waiting() == NUgus::ID::NO_ID) {
+                        log<NUClear::TRACE>("OpenCR data received, requesting servo data");
+                        send_servo_request();
+                    }
+
+                    break;
+
+
                 // Handles servo data
                 case PacketTypes::SERVO_DATA:
                     emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());

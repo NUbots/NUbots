@@ -238,6 +238,15 @@ namespace module::platform::OpenCR {
         int16_t acc[3];
     } __attribute__((packed));
 
+    /// @brief The data to write to the NUFSR device
+    
+    // No write Required at the device side.
+
+    /// @brief The data to read from the NUFSR device
+    struct NUFSRReadData {
+        std::array<uint16_t, 4> adcs = {0, 0, 0, 0};
+    } __attribute__((packed));
+
     /// @brief Document addresses used for read/writing to dynamixel devices, especially
     /// where indirect addressing is used.
     enum class AddressBook : uint16_t {
