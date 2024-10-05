@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -25,66 +25,47 @@
  * SOFTWARE.
  */
 
-#ifndef EXTENSION_BEHAVIOUR_GROUPINFO_HPP
-#define EXTENSION_BEHAVIOUR_GROUPINFO_HPP
+#ifndef EXTENSION_BEHAVIOUR_TASKDATA_HPP
+#define EXTENSION_BEHAVIOUR_TASKDATA_HPP
 
 #include <memory>
 #include <typeindex>
 
 namespace extension::behaviour {
 
-    /**
-     * Provides information about the current state of a provider group
-     */
-    template <typename T>
-    struct GroupInfo {
-        enum RunState {
-            /// The group has not emitted the task
-            NO_TASK,
-            /// The group is running the task
-            RUNNING,
-            /// The group has the task queued
-            QUEUED
-        };
-
-        /// The current run state of the group
-        RunState run_state;
-
-        /// Whether the task is done or not, regardless of if this provider group is running it
-        bool done;
-    };
-
     namespace information {
 
         template <typename T>
-        struct GroupInfoStore {
+        struct TaskDataStore {
         private:
-            using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<GroupInfo<T>>>;
-            using GlobalStore = NUClear::util::TypeMap<T, T, GroupInfo<T>>;
+            using DataThreadStore     = NUClear::dsl::store::ThreadStore<std::shared_ptr<void>>;
+            using ProviderThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<uint64_t>>;
 
             static public : using Lock = std::unique_ptr<void, std::function<void(void*)>>;
 
             /**
-             * Set the group info for this thread and return a lock that when destroyed will upgrade the data to the
-             * global store.
+             * Set the TaskData for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.
              *
-             * @param info the group info to set
+             * @param info the TaskData to set
              *
-             * @return a lock object that once destroyed will upgrade the data to the global store and clear the thread
-             * store
+             * @return a lock object that once destroyed will clear to nullptr
              */
-            static Lock set(const std::shared_ptr<const GroupInfo<T>>& info) {
-
+            static Lock set(const std::shared_ptr<const TaskData<T>>& info,
+                            const std::shared_ptr<uint64_t>& provider_id) {
                 auto lock = std::unique_ptr<void, std::function<void(void*)>>(reinterpret_cast<void*>(0x1), [](void*) {
-                    GlobalStore::set(info);
-                    ThreadStore::value = nullptr;
+                    DataThreadStore::value     = nullptr;
+                    ProviderThreadStore::value = nullptr;
                 });
-                ThreadStore::value = &info;
+                DataThreadStore::value     = &info;
+                ProviderThreadStore::value = &provider_id;
                 return lock;
             }
 
-            static std::shared_ptr<const GroupInfo<T>> get() {
-                return ThreadStore::value == nullptr ? GlobalStore<GroupType>::get() : *ThreadStore<GroupType>::value;
+            static std::shared_ptr<const TaskData<T>> get(const std::shared_ptr<uint64_t>& provider_id) {
+                if (ProviderThreadStore::value == nullptr || *ProviderThreadStore::value != provider_id) {
+                    return nullptr;
+                }
+                return std::make_shared<TaskData<T>>(*DataThreadStore::value);
             }
         }
 
@@ -92,4 +73,4 @@ namespace extension::behaviour {
 
 }  // namespace extension::behaviour
 
-#endif  // EXTENSION_BEHAVIOUR_GROUPINFO_HPP
+#endif  // EXTENSION_BEHAVIOUR_TASKDATA_HPP
