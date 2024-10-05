@@ -430,6 +430,16 @@ namespace module::extension {
          */
         RunReasonLock hold_run_reason(const ::extension::behaviour::RunInfo::RunReason& reason);
 
+        /**
+         * Holds a thread local group info as the current group info for the current thread.
+         * Also stores the updated group info in the main cache once the lock is destroyed.
+         *
+         * @param group the provider group to update the information for
+         *
+         * @return a lock object that will reset the group info to its default when destroyed
+         */
+        GroupInfoLock hold_group_info(const component::ProviderGroup& group);
+
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);

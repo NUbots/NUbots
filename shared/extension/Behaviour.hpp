@@ -80,8 +80,8 @@ namespace extension::behaviour {
         static std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
             NUClear::threading::ReactionTask& t) {
 
-            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(t.parent->id));
-            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(t.parent->id));
+            auto run_data = std::static_pointer_cast<T>(information::get_task_data<T>(t.parent->id));
+            auto run_info = std::make_shared<RunInfo>(information::get_run_info(t.parent->id));
             return std::make_tuple(run_data, run_info);
         }
 
@@ -226,9 +226,7 @@ namespace extension::behaviour {
         template <typename DSL>
         static std::shared_ptr<Uses<Provider>> get(NUClear::threading::ReactionTask& t) {
 
-            auto group_info = information::InformationSource::get_group_info(t.parent->id,
-                                                                             typeid(Provider),
-                                                                             typeid(commands::RootType<Provider>));
+            auto group_info = information::get_group_info<Provider>();
 
             auto data = std::make_shared<Uses<Provider>>();
 

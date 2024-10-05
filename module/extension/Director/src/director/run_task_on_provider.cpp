@@ -50,7 +50,8 @@ namespace module::extension {
                     // We have to swap to this as the active provider so it can actually run
                     group.active_provider = provider;
 
-                    auto lock = hold_run_reason(RunInfo::RunReason::STARTED);
+                    auto group_info_lock = hold_group_info(group);
+                    auto run_reason_lock = hold_run_reason(RunInfo::RunReason::STARTED);
                     powerplant.submit(provider->reaction->get_task(true));
                 }
             }
@@ -60,6 +61,7 @@ namespace module::extension {
         group.active_provider = provider;
 
         // Run the reaction
+        auto group_info_lock = hold_group_info(group);
         auto lock          = hold_run_reason(run_reason);
         auto reaction_task = provider->reaction->get_task();
         if (reaction_task) {
