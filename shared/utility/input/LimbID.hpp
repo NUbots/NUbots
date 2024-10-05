@@ -30,6 +30,8 @@
 
 #include <set>
 
+#include "message/actuation/Servos.hpp"
+
 #include "utility/input/ServoID.hpp"
 
 namespace utility::input {

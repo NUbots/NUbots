@@ -39,6 +39,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/BodySide.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
@@ -49,7 +50,6 @@
 #include "utility/actuation/tinyrobotics.hpp"
 #include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/nusight/NUhelpers.hpp"

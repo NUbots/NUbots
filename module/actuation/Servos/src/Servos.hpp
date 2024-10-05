@@ -31,43 +31,40 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/actuation/ServoMap.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
-    using message::actuation::ServoTarget;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoID;
     using message::input::Sensors;
-    using utility::input::ServoID;
     using utility::nusight::graph;
 
     class Servos : public ::extension::behaviour::BehaviourReactor {
     private:
-        /// @brief Creates a reaction that sends a given servo command as a servo target command for the platform module
-        /// to use
+        /// @brief Creates a reaction that sends a given servo goal command as a servo goal command for the platform
+        /// module to use
         // TODO(ysims): add capability to be Done when the servo reaches the target position
-        template <typename Servo, ServoID::Value ID>
+        template <typename ServoGoal, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
+            on<Provide<ServoGoal>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
                 [this](const Servo& servo, const RunInfo& info) {
                     if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
                         if (log_level <= NUClear::DEBUG) {
-                            emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
-                                       servo.command.position,
-                                       servo.command.state.gain,
-                                       servo.command.state.torque));
+                            emit(graph("Servo " + std::to_string(ID)
+                                           + " (Present Position, Goal Position, Present Current, Goal Current): ",
+                                       sensors.servos[ID].state.present_position,
+                                       servo_goal.goal_position,
+                                       sensors.servos[ID].state.present_current,
+                                       servo_goal.goal_current));
                         }
-                        emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                           ID,
-                                                           servo.command.position,
-                                                           servo.command.state.gain,
-                                                           servo.command.state.torque));
+                        emit(std::make_unique<ServoGoal>(servo_goal));
                     }
                     // If the time to reach the position is over, then stop requesting the position
-                    else if (NUClear::clock::now() >= servo.command.time) {
+                    else if (NUClear::clock::now() >= servo_goal.goal_time) {
                         emit<Task>(std::make_unique<Done>());
                     }
                 });

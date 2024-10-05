@@ -35,11 +35,11 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/matrix/transform.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -191,8 +191,8 @@ namespace module::motion {
         Eigen::Isometry3d getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? Eigen::Isometry3d(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
-                        : Eigen::Isometry3d(sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]));
+                        ? Eigen::Isometry3d(sensors.Htx[message::actuation::ServoID::L_ANKLE_ROLL])
+                        : Eigen::Isometry3d(sensors.Htx[message::actuation::ServoID::R_ANKLE_ROLL]));
         }
 
         Eigen::Isometry3d getFootPose(const message::input::Sensors& sensors) {
@@ -211,7 +211,8 @@ namespace module::motion {
                 bool servosAtGoal = true;
 
                 // Check all the servos between R_HIP_YAW and L_ANKLE_ROLL are within the angle threshold
-                for (int id = utility::input::ServoID::R_HIP_YAW; id <= utility::input::ServoID::L_ANKLE_ROLL; ++id) {
+                for (int id = message::actuation::ServoID::R_HIP_YAW; id <= message::actuation::ServoID::L_ANKLE_ROLL;
+                     ++id) {
                     if (std::fabs(sensors.servo[id].goal_position - sensors.servo[id].present_position)
                         > servo_angle_threshold) {
                         servosAtGoal = false;

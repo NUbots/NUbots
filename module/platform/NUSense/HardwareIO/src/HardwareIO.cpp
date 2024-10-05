@@ -32,7 +32,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/platform/NUSenseData.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/reflection.hpp"
@@ -44,10 +44,10 @@
 namespace module::platform::NUSense {
 
     using extension::Configuration;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
-    using message::actuation::SubcontrollerServoTarget;
-    using message::actuation::SubcontrollerServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
+    using message::actuation::SubcontrollerServoGoal;
+    using message::actuation::SubcontrollerServoGoals;
     using message::platform::NUSense;
     using message::platform::RawSensors;
     using utility::support::Expression;
@@ -169,8 +169,8 @@ namespace module::platform::NUSense {
                 }
 
                 // Add the offsets and switch the direction.
-                servo.present_position *= nugus.servo_direction[val.id - 1];
-                servo.present_position += nugus.servo_offset[val.id - 1];
+                servo.present_position *= nugus.servo_direction[servo.id];
+                servo.present_position += nugus.servo_offset[servo.id];
             }
 
             log<NUClear::TRACE>(
@@ -210,10 +210,10 @@ namespace module::platform::NUSense {
 
 
         // Sync is used because uart write is a shared resource
-        on<Trigger<ServoTargets>, Sync<HardwareIO>>().then([this](const ServoTargets& commands) {
+        on<Trigger<ServoGoals>, Sync<HardwareIO>>().then([this](const ServoGoals& commands) {
             // Copy the data into a new message so we can use a duration instead of a timepoint
             // and take the offsets and switch the direction.
-            auto servo_targets = SubcontrollerServoTargets();
+            auto servo_targets = SubcontrollerServoGoals();
 
             // Change the timestamp in servo targets to the difference between the timestamp and now
             // Take away the offset and switch the direction if needed
@@ -229,8 +229,8 @@ namespace module::platform::NUSense {
             send_packet(servo_targets);
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            auto command_list = std::make_unique<ServoTargets>();
+        on<Trigger<ServoGoal>>().then([this](const ServoGoal& command) {
+            auto command_list = std::make_unique<ServoGoals>();
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above

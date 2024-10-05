@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include "ServoID.hpp"
+
 namespace utility::input {
 
     using ServoID = utility::input::ServoID;

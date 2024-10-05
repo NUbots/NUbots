@@ -39,14 +39,13 @@ namespace module::input {
     using message::input::ButtonMiddleUp;
     using message::localisation::ResetFieldLocalisation;
 
+    using message::actuation::ServoID;
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
     using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::FrameID;
-    using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
-    using utility::platform::get_raw_servo;
     using utility::platform::make_packet_error_string;
     using utility::platform::make_servo_hardware_error_string;
     using utility::support::Expression;
@@ -143,7 +142,7 @@ namespace module::input {
 
     void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
         // Convert the sensor joint angles to a configuration vector
-        Eigen::Matrix<double, n_servos, 1> q = sensors_to_configuration<double, n_servos>(sensors);
+        Eigen::Matrix<double, n_servos, 1> q = servos_to_configuration<double, n_servos>(sensors->servos);
 
         // **************** Kinematics ****************
         // Htx is a map from FrameID to homogeneous transforms from each frame to the torso
@@ -216,50 +215,28 @@ namespace module::input {
             NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
 
-
         // **************** Servos ****************
-        for (uint32_t id = 0; id < n_servos; ++id) {
-            const auto& raw_servo       = get_raw_servo(id, raw_sensors);
-            const auto& hardware_status = raw_servo.hardware_error;
-
-            // Check for an error on the servo and report it
-            if (hardware_status != RawSensors::HardwareError::HARDWARE_OK) {
-                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(raw_servo, id));
+        sensors->servos = raw_sensors.servos;
+        for (const auto& servo : raw_sensors.servos) {
+            if (servo.hardware_error != RawSensors::HardwareError::HARDWARE_OK) {
+                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(servo, servo.state.id));
             }
-
-            // Determine the current position with potential fallback to the last known good position
-            double current_position = raw_servo.present_position;
+            // Fallback to the last known good position if the servo has an error related to the encoder
+            double position = servo.state.present_position;
+            double velocity = servo.state.present_velocity;
             if (previous_sensors
-                && (fabs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change
-                    || hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
-                current_position = previous_sensors->servo[id].present_position;
+                && (fabs(position - previous_sensors->servos[servo.state.id].present_position) > cfg.max_servo_change
+                    || servo.state.hardware_error == RawSensors::HardwareError::MOTOR_ENCODER)) {
+                servo.state.present_position = previous_sensors->servos[servo.state.id].present_position;
+                servo.state.present_velocity = previous_sensors->servos[servo.state.id].present_velocity;
                 NUClear::log<NUClear::DEBUG>("Suspected encoder error on servo ",
-                                             id,
+                                             ServoID(servo.state.id),
                                              ": Using last known good position.");
             }
-
-            sensors->servo.emplace_back(
-                hardware_status,
-                id,
-                raw_servo.torque_enabled,
-                raw_servo.position_p_gain,
-                raw_servo.position_i_gain,
-                raw_servo.position_d_gain,
-                raw_servo.goal_position,
-                raw_servo.profile_velocity,
-                current_position,
-                /* If there is an encoder error, then use the last known good velocity */
-                ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
-                    ? previous_sensors->servo[id].present_velocity
-                    : raw_servo.present_velocity,
-                raw_servo.present_current,
-                raw_servo.voltage,
-                static_cast<float>(raw_servo.temperature));
         }
 
         // **************** Accelerometer and Gyroscope ****************
-        // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
-        // accelerometer
+        // If our platform has errors then reuse our last sensor value of the accelerometer and gyroscope
         sensors->accelerometer =
             subcontroller_packet_error ? previous_sensors->accelerometer : raw_sensors.accelerometer.cast<double>();
         sensors->gyroscope =
@@ -296,48 +273,39 @@ namespace module::input {
     }
 
     void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-        // Keep track of the number of presses in the last N frames for debouncing
         int left_count   = 0;
         int middle_count = 0;
-        // Count the number of downs in all messages we have
-        //     we used to discount sensors messages with subcontroller errors here, but that
-        //     ignored too many and ultimately led to unresponsive buttons. subcontroller errors
-        //     are unlikely to cause phantom button presses, and if they do, the debounce routine
-        //     would require that we have N_thresh > N errors causing the _same_ phantom button press
+        // If we have any downs in the last 20 frames then we are button pushed
         for (const auto& s : sensors) {
-            if (s->buttons.left)
+            if (s->buttons.left && (s->subcontroller_error == 0u)) {
                 ++left_count;
-            if (s->buttons.middle)
+            }
+            if (s->buttons.middle && (s->subcontroller_error == 0u)) {
                 ++middle_count;
+            }
         }
-        // Compare to the debounce threshold to determine if we have a down event
         bool new_left_down   = left_count > cfg.button_debounce_threshold;
         bool new_middle_down = middle_count > cfg.button_debounce_threshold;
-        // Check for a state change, i.e. a press or release event
-        bool left_state_change = left_down != new_left_down;
-        bool mid_state_change  = middle_down != new_middle_down;
-        // And set the state variable for next time.
-        left_down   = new_left_down;
-        middle_down = new_middle_down;
-        // If we have a state change, emit the appropriate event
-        if (left_state_change) {
-            if (left_down) {
+        if (new_left_down != left_down) {
+            left_down = new_left_down;
+            if (new_left_down) {
                 log<NUClear::INFO>("Left Button Down");
-                emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
+                emit(std::make_unique<ButtonLeftDown>());
             }
             else {
                 log<NUClear::INFO>("Left Button Up");
-                emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
+                emit(std::make_unique<ButtonLeftUp>());
             }
         }
-        if (mid_state_change) {
-            if (middle_down) {
+        if (new_middle_down != middle_down) {
+            middle_down = new_middle_down;
+            if (new_middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
-                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
+                emit(std::make_unique<ButtonMiddleDown>());
             }
             else {
                 log<NUClear::INFO>("Middle Button Up");
-                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
+                emit(std::make_unique<ButtonMiddleUp>());
             }
         }
     }

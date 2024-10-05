@@ -41,7 +41,7 @@ extern "C" {
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/strategy/FallRecovery.hpp"
@@ -49,7 +49,6 @@ extern "C" {
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 
@@ -58,8 +57,8 @@ namespace module::purpose {
     using NUClear::message::CommandLineArguments;
 
     using message::actuation::BodySequence;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
     using message::behaviour::state::Stability;
     using message::platform::RawSensors;
     using message::strategy::FallRecovery;
@@ -71,7 +70,7 @@ namespace module::purpose {
     using utility::skill::Frame;
     using utility::skill::Script;
     using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
+    using ServoID = message::actuation::ServoID;
 
     struct LockServo {};
 
@@ -144,7 +143,7 @@ namespace module::purpose {
             unsaved_changes = true;
 
             // Emit a waypoint so that the motor will go rigid at this angle
-            auto waypoint      = std::make_unique<ServoTarget>();
+            auto waypoint      = std::make_unique<ServoGoal>();
             waypoint->time     = NUClear::clock::now();
             waypoint->id       = target.id;
             waypoint->gain     = target.gain;
@@ -305,7 +304,7 @@ namespace module::purpose {
     void ScriptTuner::activate_frame(int frame) {
         this->frame = frame;
 
-        auto waypoints = std::make_unique<ServoTargets>();
+        auto waypoints = std::make_unique<ServoGoals>();
         for (auto& target : script.frames[frame].targets) {
             waypoints->targets.emplace_back(NUClear::clock::now() + std::chrono::milliseconds(1000),
                                             target.id,
@@ -571,7 +570,7 @@ namespace module::purpose {
             unsaved_changes = true;
 
             // Emit a waypoint so that the motor will turn off gain (go limp)
-            auto waypoint      = std::make_unique<ServoTarget>();
+            auto waypoint      = std::make_unique<ServoGoal>();
             waypoint->time     = NUClear::clock::now();
             waypoint->id       = selection < 2 ? 18 + selection : selection - 2;
             waypoint->gain     = 0;

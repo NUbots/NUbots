@@ -31,8 +31,6 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/Servos.hpp"
 
-#include "utility/input/ServoID.hpp"
-
 namespace utility::actuation {
 
     using message::actuation::HeadPitch;
@@ -55,7 +53,7 @@ namespace utility::actuation {
     using message::actuation::RightKnee;
     using message::actuation::RightShoulderPitch;
     using message::actuation::RightShoulderRoll;
-    using utility::input::ServoID;
+    using message::actuation::ServoID;
 
     template <typename Servo>
     struct ServoMap;

@@ -61,8 +61,8 @@ namespace module::motion {
         float KICK_PRIORITY;
         float EXECUTION_PRIORITY;
 
-        float gain_legs = 50;
-        float torque    = 100;
+        float gain_legs      = 50;
+        float torque_enabled = 100;
 
         bool feedback_active;
         utility::motion::Balancer feedbackBalancer;

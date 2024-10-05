@@ -141,30 +141,31 @@ namespace module::platform::OpenCR {
     void HardwareIO::process_servo_data(const StatusReturn& packet) {
         const DynamixelServoReadData data = *(reinterpret_cast<const DynamixelServoReadData*>(packet.data.data()));
 
-        // IDs are 1..20 so need to be converted for the servo_states index
+        // IDs are 1..20 so need to be converted for the servos index
         uint8_t servo_index = packet.id - 1;
 
-        servo_states[servo_index].torque_enabled = (data.torque_enable == 1);
+        servos[servo_index].goal.torque_enabled = (data.torque_enable == 1);
 
         // Although they're stored in the servo state here, packet errors are combined and processed all at once as
         // subcontroller errors in the RawSensors message
-        servo_states[servo_index].packet_error = packet.error;
+        servos[servo_index].state.packet_error = packet.error;
 
         // Servo error status from control table, NOT dynamixel status packet error.
-        servo_states[servo_index].hardware_error = data.hardware_error_status;
+        servos[servo_index].state.hardware_error = data.hardware_error_status;
 
-        servo_states[servo_index].present_pwm      = convert::PWM(data.present_pwm);
-        servo_states[servo_index].present_current  = convert::current(data.present_current);
-        servo_states[servo_index].present_velocity = convert::velocity(data.present_velocity);  // todo: check
-        servo_states[servo_index].present_position =
+        servos[servo_index].state.present_pwm      = convert::PWM(data.present_pwm);
+        servos[servo_index].state.present_current  = convert::current(data.present_current);
+        servos[servo_index].state.present_velocity = convert::velocity(data.present_velocity);  // todo: check
+        servos[servo_index].state.present_position =
             convert::position(servo_index, data.present_position, nugus.servo_direction, nugus.servo_offset);
-        servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
-        servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
+        servos[servo_index].state.voltage     = convert::voltage(data.present_voltage);
+        servos[servo_index].state.temperature = convert::temperature(data.present_temperature);
 
         // Buzz if any servo is hot, forever, until power is turned off.
         // Middle button can be used to disable alarm once no servos are hot, if a power cycle is not desired.
         // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
-        for (const auto& servo : servo_states) {
+        bool any_servo_hot = false;
+        for (const auto& servo : servos) {
             if (servo.temperature > cfg.alarms.temperature.level) {
                 log<NUClear::WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
                                    packet.id,
@@ -175,10 +176,10 @@ namespace module::platform::OpenCR {
         }
 
         // If this servo has not been initialised yet, set the goal states to the current states
-        if (!servo_states[servo_index].initialised) {
-            servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
-            servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
-            servo_states[servo_index].initialised   = true;
+        if (!servos[servo_index].initialised) {
+            servos[servo_index].goal.goal_position = servos[servo_index].state.present_position;
+            servos[servo_index].goal.torque        = servos[servo_index].goal.torque_enabled ? 1.0f : 0.0f;
+            servos[servo_index].state.initialised  = true;
         }
 
         // Emit plot for debugging

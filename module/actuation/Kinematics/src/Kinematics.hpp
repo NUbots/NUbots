@@ -36,9 +36,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/Limbs.hpp"
-#include "message/actuation/ServoCommand.hpp"
-
-#include "utility/input/ServoID.hpp"
+#include "message/actuation/Servos.hpp"
 
 namespace module::actuation {
 

@@ -29,6 +29,7 @@ package message.platform;
 
 import "message/platform/webots/messages.proto";
 import "google/protobuf/timestamp.proto";
+import "message/actuation/Servos.proto";
 
 import "Vector.proto";
 
@@ -118,56 +119,6 @@ message RawSensors {
         FSR right = 2;
     }
 
-    // Full set of information to use for servos using Dynamixel v2 firmware
-    message Servo {
-        uint32 hardware_error  = 1;  // components of type RawSensors::HardwareError (but can have multiple bits set)
-        bool   torque_enabled  = 2;
-        float  velocity_i_gain = 3;
-        float  velocity_p_gain = 4;
-        float  position_d_gain = 5;
-        float  position_i_gain = 6;
-        float  position_p_gain = 7;
-        float  feed_forward_1st_Gain = 8;
-        float  feed_forward_2nd_Gain = 9;
-        float  present_PWM           = 10;
-        float  present_current       = 11;
-        float  present_velocity      = 12;
-        float  present_position      = 13;
-        float  goal_PWM              = 14;
-        float  goal_current          = 15;
-        float  goal_velocity         = 16;
-        float  goal_position         = 17;
-        float  voltage               = 18;
-        float  temperature           = 19;
-        float  profile_acceleration  = 20;
-        // Replaces "Moving speed" from v1 protocol, basically just the set speed.
-        float profile_velocity = 21;
-    };
-
-    /// Set of all the servos on the robot
-    message Servos {
-        Servo r_shoulder_pitch = 1;
-        Servo l_shoulder_pitch = 2;
-        Servo r_shoulder_roll  = 3;
-        Servo l_shoulder_roll  = 4;
-        Servo r_elbow          = 5;
-        Servo l_elbow          = 6;
-        Servo r_hip_yaw        = 7;
-        Servo l_hip_yaw        = 8;
-        Servo r_hip_roll       = 9;
-        Servo l_hip_roll       = 10;
-        Servo r_hip_pitch      = 11;
-        Servo l_hip_pitch      = 12;
-        Servo r_knee           = 13;
-        Servo l_knee           = 14;
-        Servo r_ankle_pitch    = 15;
-        Servo l_ankle_pitch    = 16;
-        Servo r_ankle_roll     = 17;
-        Servo l_ankle_roll     = 18;
-        Servo head_pan         = 19;
-        Servo head_tilt        = 20;
-    }
-
     google.protobuf.Timestamp timestamp = 1;  // Timestamp when our data were taken
 
     uint32 subcontroller_error = 2;  // components of type RawSensors::PacketError (but can have multiple bits set)
@@ -178,7 +129,7 @@ message RawSensors {
     Buttons  buttons       = 6;
     fvec3    accelerometer = 7;
     fvec3    gyroscope     = 8;
-    Servos   servo         = 9;
+    map<uint32, message.actuation.Servo> servos   = 9;
     float    battery       = 10;
     FSRs     fsr           = 11;
 

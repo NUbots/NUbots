@@ -40,15 +40,20 @@
 #include <tinyrobotics/parser.hpp>
 #include <vector>
 
+#include "message/actuation/Servos.hpp"
 #include "message/input/Image.hpp"
 #include "message/platform/webots/messages.hpp"
 
 namespace module::platform {
 
+    using message::actuation::Servo;
+
+    using message::actuation::ServoID;
+
     class Webots : public NUClear::Reactor {
     private:
         /// @brief How often we read the servos
-        static constexpr int UPDATE_FREQUENCY = 90;
+        static constexpr int UPDATE_FREQUENCY = 1000;
 
         /// @brief Handle for incoming data reaction. This will be bound/unbound during (re)connection
         ReactionHandle read_io;
@@ -103,33 +108,8 @@ namespace module::platform {
         double max_velocity_mx64;
         double max_velocity_mx106;
 
-        /// @brief Current state of a servo
-        struct ServoState {
-            /// @brief True if we need to write new values to the simulator
-            bool dirty = false;
-
-            /// @brief ID of the servo
-            int id;
-
-            /// @brief Name of the servo
-            std::string name;
-
-            double p_gain = 32.0 / 255.0;
-            // `i` and `d` gains are always 0
-            static constexpr double i_gain = 0.0;
-            static constexpr double d_gain = 0.0;
-
-            double moving_speed  = 0.0;
-            double goal_position = 0.0;
-            double torque        = 0.0;  // 0.0 to 1.0
-
-            /// Values that are read from the simulator
-            double present_position = 0.0;
-            double present_speed    = 0.0;
-        };
-
         /// @brief Our current servo states
-        std::array<ServoState, 20> servo_state{};
+        std::map<ServoID, Servo> servos;
 
         /// @brief Buffer for storing received messages
         std::vector<uint8_t> buffer{};

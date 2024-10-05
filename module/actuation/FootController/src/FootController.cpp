@@ -43,11 +43,13 @@ namespace module::actuation {
 
             cfg.desired_gains = config["servo_gains"].as<std::map<std::string, double>>();
             // Set gains of servo to startup phase values
-            cfg.servo_states.clear();
+            cfg.servos.clear();
             cfg.startup_gain = config["startup"]["servo_gain"].as<double>();
-            for (const auto& servo : cfg.desired_gains) {
-                utility::input::ServoID servo_id(servo.first);
-                cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
+            for (const auto& [key, gain] : cfg.desired_gains) {
+                auto new_servo                 = Servo();
+                new_servo.goal.position_p_gain = cfg.startup_gain;
+                new_servo.goal.torque_enabled  = true;
+                cfg.servos[ServoID(key)]       = new_servo;
             }
             // Emit request to set desired gains after a delay
             emit<Scope::DELAY>(std::make_unique<SetGains>(),
@@ -56,8 +58,10 @@ namespace module::actuation {
 
         on<Trigger<SetGains>>().then([this] {
             for (const auto& [key, gain] : cfg.desired_gains) {
-                utility::input::ServoID servo_id(key);
-                cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
+                auto new_servo                 = Servo();
+                new_servo.goal.position_p_gain = gain;
+                new_servo.goal.torque_enabled  = true;
+                cfg.servos[ServoID(key)]       = new_servo;
             }
         });
 

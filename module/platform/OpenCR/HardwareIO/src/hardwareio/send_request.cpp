@@ -39,43 +39,42 @@ namespace module::platform::OpenCR {
         // SYNC_WRITE (write the same memory addresses on all devices)
         // We need to do 2 sync writes here.
         // We always write to all servos if at least one of them is dirty
-        const bool servos_dirty = std::any_of(servo_states.cbegin(),
-                                              servo_states.cend(),
-                                              [](const ServoState& servo) -> bool { return servo.dirty; });
+        const bool servos_dirty =
+            std::any_of(servos.cbegin(), servos.cend(), [](const Servo& servo) -> bool { return servo.state.dirty; });
 
         if (servos_dirty) {
             // Write data is split into two components
             dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1> data1[20];
             dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2> data2[20];
 
-            for (uint i = 0; i < servo_states.size(); ++i) {
+            for (uint i = 0; i < servos.size(); ++i) {
                 // Servo ID is sequential, but not 0-indexed
                 data1[i].id = nugus.servo_ids()[i];
                 data2[i].id = nugus.servo_ids()[i];
 
                 // Clear our dirty flag
-                servo_states[i].dirty = false;
+                servos[i].state.dirty = false;
 
                 // If our torque should be disabled then we disable our torque
                 data1[i].data.torque_enable =
-                    uint8_t(servo_states[i].torque != 0 && !std::isnan(servo_states[i].goal_position));
+                    uint8_t(servos[i].goal.torque_enabled != 0 && !std::isnan(servos[i].goal.goal_position));
 
                 // Pack our data
-                data1[i].data.velocity_i_gain = convert::i_gain(servo_states[i].velocity_i_gain);
-                data1[i].data.velocity_p_gain = convert::p_gain(servo_states[i].velocity_p_gain);
-                data1[i].data.position_d_gain = convert::d_gain(servo_states[i].position_d_gain);
-                data1[i].data.position_i_gain = convert::i_gain(servo_states[i].position_i_gain);
-                data1[i].data.position_p_gain = convert::p_gain(servo_states[i].position_p_gain);
+                data1[i].data.velocity_p_gain = convert::p_gain(0.0);
+                data1[i].data.velocity_i_gain = convert::i_gain(0.0);
+                data1[i].data.position_p_gain = convert::p_gain(servos[i].goal.position_p_gain);
+                data1[i].data.position_i_gain = convert::i_gain(servos[i].goal.position_i_gain);
+                data1[i].data.position_d_gain = convert::d_gain(servos[i].goal.position_d_gain);
 
-                data2[i].data.feedforward_1st_gain = convert::ff_gain(servo_states[i].feedforward_1st_gain);
-                data2[i].data.feedforward_2nd_gain = convert::ff_gain(servo_states[i].feedforward_2nd_gain);
-                data2[i].data.goal_pwm             = convert::PWM(servo_states[i].goal_pwm);
-                data2[i].data.goal_current         = convert::current(servo_states[i].goal_current);
-                data2[i].data.goal_velocity        = convert::velocity(servo_states[i].goal_velocity);
-                data2[i].data.profile_acceleration = convert::ff_gain(servo_states[i].profile_acceleration);
-                data2[i].data.profile_velocity     = convert::profile_velocity(servo_states[i].profile_velocity);
+                data2[i].data.feedforward_1st_gain = convert::ff_gain(servos[i].goal.feedforward_1st_gain);
+                data2[i].data.feedforward_2nd_gain = convert::ff_gain(servos[i].goal.feedforward_2nd_gain);
+                data2[i].data.goal_pwm             = convert::PWM(servos[i].goal.goal_pwm);
+                data2[i].data.goal_current         = convert::current(servos[i].goal.goal_current);
+                data2[i].data.goal_velocity        = convert::velocity(servos[i].goal.goal_velocity);
+                data2[i].data.profile_acceleration = convert::ff_gain(servos[i].goal.profile_acceleration);
+                data2[i].data.profile_velocity     = convert::profile_velocity(servos[i].goal.profile_velocity);
                 data2[i].data.goal_position =
-                    convert::position(i, servo_states[i].goal_position, nugus.servo_direction, nugus.servo_offset);
+                    convert::position(i, servos[i].goal.goal_position, nugus.servo_direction, nugus.servo_offset);
             }
 
             opencr.write(

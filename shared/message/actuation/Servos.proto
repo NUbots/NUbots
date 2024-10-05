@@ -27,86 +27,182 @@ syntax = "proto3";
 
 package message.actuation;
 
-import "message/actuation/ServoCommand.proto";
+import "google/protobuf/timestamp.proto";
+
+enum ServoID {
+    R_SHOULDER_PITCH = 0;
+    L_SHOULDER_PITCH = 1;
+    R_SHOULDER_ROLL  = 2;
+    L_SHOULDER_ROLL  = 3;
+    R_ELBOW          = 4;
+    L_ELBOW          = 5;
+    R_HIP_YAW        = 6;
+    L_HIP_YAW        = 7;
+    R_HIP_ROLL       = 8;
+    L_HIP_ROLL       = 9;
+    R_HIP_PITCH      = 10;
+    L_HIP_PITCH      = 11;
+    R_KNEE           = 12;
+    L_KNEE           = 13;
+    R_ANKLE_PITCH    = 14;
+    L_ANKLE_PITCH    = 15;
+    R_ANKLE_ROLL     = 16;
+    L_ANKLE_ROLL     = 17;
+    HEAD_YAW         = 18;
+    HEAD_PITCH       = 19;
+    NUMBER_OF_SERVOS = 20;
+}
+
+message ServoState {
+    /// The ID of the servo
+    uint32 id = 1;
+    /// Current error state of the servo, different to the dynamixel packet error status
+    uint32 hardware_error = 2;
+    /// Packet error status
+    uint32 packet_error = 3;
+    // Values that are either simulated or read from the servos
+    /// The last read pulse width modulation of the servo
+    float present_pwm = 4;
+    /// The last read current of the servo
+    float present_current = 5;
+    /// The last read velocity of the servo
+    float present_velocity = 6;
+    /// The last read position of the servo
+    float present_position = 7;
+    /// The last read voltage of the servo
+    float voltage = 8;
+    /// The last read temperature of the servo
+    float temperature = 9;
+    // Whether we have initialised this servo yet
+    bool initialised = 10;
+    // Whether the servo has new command which has not been executed
+    bool dirty = 11;
+}
+
+message ServoStates {
+    map<uint32, ServoState> states = 1;
+}
+
+message ServoGoal {
+    /// The ID of the servo
+    uint32 id = 1;
+    // The desired position value for the servo
+    float goal_position = 2;
+    // Goal time to reach the desired state
+    google.protobuf.Timestamp goal_time = 3;
+    /// Whether the servo's torque is enabled, allowing it to move
+    bool torque_enabled = 4;
+    /// Propotional gain of the servo
+    float position_p_gain = 5;
+    /// Integral gain of the servo
+    float position_i_gain = 6;
+    /// Derivative gain of the servo
+    float position_d_gain = 7;
+    /// feedforward_1st_gain
+    float feedforward_1st_gain = 8;
+    /// feedforward_2nd_gain
+    float feedforward_2nd_gain = 9;
+    /// profile_velocity
+    float profile_velocity = 10;
+    /// profile_acceleration
+    float profile_acceleration = 11;
+    // The desired current value for the servo
+    float goal_current = 12;
+    // The desired velocity value for the servo
+    float goal_velocity = 13;
+    // The desired pwm value for motor control
+    float goal_pwm = 14;
+}
+
+message ServoGoals {
+    map<uint32, ServoGoal> goals = 1;
+}
+
+message Servo {
+    /// Servo state
+    ServoState state = 1;
+    /// Servo goal
+    ServoGoal goal = 2;
+}
 
 // Message for each servo with command information
 
 message RightShoulderPitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftShoulderPitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightShoulderRoll {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftShoulderRoll {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightElbow {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftElbow {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightHipYaw {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftHipYaw {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightHipRoll {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftHipRoll {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightHipPitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftHipPitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightKnee {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftKnee {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightAnklePitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftAnklePitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message RightAnkleRoll {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message LeftAnkleRoll {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message HeadYaw {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }
 
 message HeadPitch {
-    ServoCommand command = 1;
+    ServoGoal servo = 1;
 }

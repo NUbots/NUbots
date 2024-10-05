@@ -33,7 +33,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
@@ -47,8 +47,8 @@
 
 namespace utility::skill {
 
-    using message::actuation::ServoCommand;
-    using message::actuation::ServoState;
+    using message::actuation::Servo;
+    using message::actuation::ServoGoal;
     using utility::input::ServoID;
 
     /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
@@ -167,13 +167,13 @@ namespace utility::skill {
                                                                                          * script.duration_modifier);
 
                 // Add the servos in the frame to a map
-                std::map<uint32_t, ServoCommand> servos{};
+                std::map<uint32_t, ServoGoal> servo_goals{};
                 for (const auto& target : frame.targets) {
-                    servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                    servo_goals[target.id] = ServoGoal(target.id, target.position, time, target.gain, target.torque);
                 }
 
-                // Add the map to the pack. This represents one sequence of servos.
-                msg->frames.emplace_back(servos);
+                // Add the map to the pack. This represents one sequence of servo_goals.
+                msg->frames.emplace_back(servo_goals);
             }
         }
 
@@ -241,9 +241,14 @@ namespace utility::skill {
             time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(frame.duration);
 
             // Add the servos in the frame to a map
-            std::map<uint32_t, ServoCommand> servos{};
+            std::map<uint32_t, ServoGoal> servos{};
             for (const auto& target : frame.targets) {
-                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                auto servo                 = Servo();
+                servo.goal.goal_time       = time;
+                servo.goal.goal_position   = target.position;
+                servo.goal.torque_enabled  = true;
+                servo.goal.position_p_gain = target.gain;
+                servos[target.id]          = servo;
             }
 
             // Add the map to the pack. This represents one sequence of servos.

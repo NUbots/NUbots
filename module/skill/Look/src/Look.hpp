@@ -32,16 +32,24 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/actuation/Servos.hpp"
+
 namespace module::skill {
+
+    using message::actuation::Servo;
 
     class Look : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
             float smoothing_factor = 0.0;
-            float head_gain        = 0.0;
-            float head_torque      = 0.0;
         } cfg;
+
+        /// Head pitch servo
+        Servo head_pitch{};
+
+        /// Head yaw servo
+        Servo head_yaw{};
 
         /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
         /// between smoothing and not smoothing. Smoothing is given by the message.

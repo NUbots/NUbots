@@ -31,12 +31,11 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/actuation/tinyrobotics.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/comparison.hpp"
 
 namespace module::actuation {
@@ -49,14 +48,13 @@ namespace module::actuation {
     using message::actuation::LeftLegIK;
     using message::actuation::RightLeg;
     using message::actuation::RightLegIK;
-    using message::actuation::ServoCommand;
-    using message::actuation::ServoState;
+    using message::actuation::Servo;
+    using message::actuation::ServoID;
     using utility::actuation::kinematics::calculate_head_joints;
     using utility::actuation::kinematics::calculate_leg_joints;
     using utility::actuation::tinyrobotics::configuration_to_servos;
     using utility::actuation::tinyrobotics::servos_to_configuration;
     using utility::input::LimbID;
-    using utility::input::ServoID;
 
     Kinematics::Kinematics(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -100,8 +98,10 @@ namespace module::actuation {
                 auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htf, LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
-                    servos->servos[joint.first] =
-                        ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
+                    auto servo                  = Servo();
+                    servo.goal.time             = leg_ik.time;
+                    servo.goal.goal_position    = joint.second;
+                    servos->servos[joint.first] = servo;
                 }
 
                 // Warm start the optimisation based IK with the analytical solution
@@ -142,8 +142,10 @@ namespace module::actuation {
                 auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htf, LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
-                    servos->servos[joint.first] =
-                        ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
+                    auto servo                  = Servo();
+                    servo.goal.time             = leg_ik.time;
+                    servo.goal.goal_position    = joint.second;
+                    servos->servos[joint.first] = servo;
                 }
 
                 // Warm start the optimisation based IK with the analytical solution

@@ -33,7 +33,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/output/CompressedImage.hpp"
@@ -45,7 +45,6 @@
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 #include "utility/input/FrameID.hpp"
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -65,8 +64,8 @@ extern "C" {
 namespace module::platform {
 
     using extension::Configuration;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
     using message::input::Image;
     using message::input::Sensors;
     using message::platform::RawSensors;
@@ -76,6 +75,7 @@ namespace module::platform {
     using message::platform::webots::Message;
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
+    using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::OdometryGroundTruth;
     using message::platform::webots::SensorMeasurements;
@@ -86,8 +86,8 @@ namespace module::platform {
     using message::support::optimisation::OptimisationRobotPosition;
     using message::support::optimisation::OptimisationTimeUpdate;
 
+    using message::actuation::ServoID;
     using utility::input::FrameID;
-    using utility::input::ServoID;
     using utility::platform::get_raw_servo;
     using utility::support::Expression;
     using utility::vision::fourcc;
@@ -362,8 +362,8 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoTargets& targets,
-                                                                                    const RawSensors& sensors) {
+        on<Trigger<ServoGoals>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoGoals& targets,
+                                                                                  const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -395,7 +395,7 @@ namespace module::platform {
                     || servo_state[target.id].d_gain != target.gain * 0.0
                     || servo_state[target.id].moving_speed != speed
                     || servo_state[target.id].goal_position != target.position
-                    || servo_state[target.id].torque != target.torque) {
+                    || servo_state[target.id].torque_enabled != target.torque_enabled) {
 
                     servo_state[target.id].dirty = true;
                     servo_state[target.id].id    = target.id;
@@ -407,14 +407,15 @@ namespace module::platform {
                     // servo_state[target.id].d_gain        = target.gain * 0.0;
                     servo_state[target.id].moving_speed  = speed;
                     servo_state[target.id].goal_position = target.position;
+                    servo_state[target.id].goal_torque   = target.goal_torque;
 
-                    servo_state[target.id].torque = target.torque;
+                    servo_state[target.id].torque_enabled = target.torque_enabled;
                 }
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget& target) {
-            auto targets = std::make_unique<ServoTargets>();
+        on<Trigger<ServoGoal>>().then([this](const ServoGoal& target) {
+            auto targets = std::make_unique<ServoGoals>();
             targets->targets.emplace_back(target);
 
             // Emit it so it's captured by the reaction above
@@ -439,12 +440,12 @@ namespace module::platform {
                 servo.p_gain           = 32.0 / 255.0;
                 servo.moving_speed     = 0.0;
                 servo.goal_position    = 0.0;
-                servo.torque           = 0.0;
+                servo.torque_enabled   = 0.0;
                 servo.present_position = 0.0;
                 servo.present_speed    = 0.0;
             }
 
-            auto targets = std::make_unique<ServoTargets>();
+            auto targets = std::make_unique<ServoGoals>();
 
             // Clear all servo targets on reset
             for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
@@ -623,16 +624,19 @@ namespace module::platform {
                             servo.dirty = false;
 
                             // Create servo position message
-                            actuator_requests.motor_positions.emplace_back(
-                                MotorPosition(servo.name, servo.goal_position));
+                            // actuator_requests.motor_positions.emplace_back(
+                            //     MotorPosition(servo.name, servo.goal_position));
 
-                            // Create servo velocity message
-                            actuator_requests.motor_velocities.emplace_back(
-                                MotorVelocity(servo.name, servo.moving_speed));
+                            // // Create servo velocity message
+                            // actuator_requests.motor_velocities.emplace_back(
+                            //     MotorVelocity(servo.name, servo.moving_speed));
 
-                            // Create servo PID message
-                            actuator_requests.motor_pids.emplace_back(
-                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                            // // Create servo PID message
+                            // actuator_requests.motor_pids.emplace_back(
+                            //     MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+
+                            // Create servo torque message
+                            actuator_requests.motor_torques.emplace_back(MotorTorque(servo.name, servo.goal_torque));
                         }
 
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk

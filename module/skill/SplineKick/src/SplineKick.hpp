@@ -32,15 +32,17 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoCommand.hpp"
+#include "message/actuation/Servos.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/motion/splines/Trajectory.hpp"
 #include "utility/skill/KickGenerator.hpp"
 
 namespace module::skill {
 
+    using message::actuation::ServoID;
     using utility::motion::splines::Waypoint;
+
+    using message::actuation::Servo;
 
     class SplineKick : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -48,11 +50,8 @@ namespace module::skill {
         static constexpr int UPDATE_FREQUENCY = 200;
 
         struct Config {
-            /// @brief Stores the gains for each servo
-            std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
-
-            /// @brief Desired arm positions while walking
-            std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
+            /// @brief Stores the state and goal information for each servo
+            std::map<ServoID, Servo> arm_servos{};
         } cfg;
 
         /// @brief Last time we updated the walk engine

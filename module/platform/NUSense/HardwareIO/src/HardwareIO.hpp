@@ -62,7 +62,7 @@ namespace module::platform::NUSense {
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
         /// NUSense.
         /// @tparam T is the type of the protobuf message to be serialised. In NUSense's case, we expect this to be
-        /// SubcontrollerServoTargets.
+        /// SubcontrollerServoGoals.
         /// @param packet A const reference to a protobuf message of type T. This gets serialised and turned to a
         /// vector of bytes before sending to NUSense.
         template <typename T>

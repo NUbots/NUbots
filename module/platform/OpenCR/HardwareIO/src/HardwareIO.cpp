@@ -33,8 +33,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/ServoTarget.hpp"
-#include "message/localisation/Field.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
@@ -44,11 +43,11 @@
 namespace module::platform::OpenCR {
 
     using extension::Configuration;
-    using message::actuation::ServoTarget;
-    using message::actuation::ServoTargets;
+    using message::actuation::ServoGoal;
+    using message::actuation::ServoGoals;
+    using message::actuation::ServoID;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
-    using utility::input::ServoID;
     using utility::support::Expression;
 
     using message::output::Buzzer;
@@ -75,9 +74,8 @@ namespace module::platform::OpenCR {
             }
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                nugus.servo_offset[i]     = config["servos"][i]["offset"].as<Expression>();
-                nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
-                servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
+                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
+                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
             }
 
             // populate alarm config levels
@@ -253,7 +251,7 @@ namespace module::platform::OpenCR {
 
         // REACTIONS FOR RECEIVING HARDWARE REQUESTS FROM THE SYSTEM
 
-        on<Trigger<ServoTargets>, Pool<HardwareIO>>().then([this](const ServoTargets& commands) {
+        on<Trigger<ServoGoals>>().then([this](const ServoGoals& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
                 // Desired time to reach the goal position (in milliseconds)
@@ -263,31 +261,31 @@ namespace module::platform::OpenCR {
                 time_span = std::max(time_span, 0.0f);
 
                 // Update our internal state
-                if (servo_states[command.id].torque != command.torque
-                    || servo_states[command.id].position_p_gain != command.gain
-                    || servo_states[command.id].position_i_gain != command.gain * 0
-                    || servo_states[command.id].position_d_gain != command.gain * 0
-                    || servo_states[command.id].goal_position != command.position
-                    || servo_states[command.id].profile_velocity != time_span) {
+                if (servos[command.id].goal.torque_enabled != command.torque_enabled
+                    || servos[command.id].goal.position_p_gain != command.gain
+                    || servos[command.id].goal.position_i_gain != command.gain * 0
+                    || servos[command.id].goal.position_d_gain != command.gain * 0
+                    || servos[command.id].goal.goal_position != command.position
+                    || servos[command.id].goal.profile_velocity != time_span) {
 
-                    servo_states[command.id].dirty = true;
+                    servos[command.id].goal.dirty = true;
 
-                    servo_states[command.id].torque = command.torque;
+                    servos[command.id].goal.torque_enabled = command.torque_enabled;
 
-                    servo_states[command.id].position_p_gain = command.gain;
-                    servo_states[command.id].position_i_gain = command.gain * 0;
-                    servo_states[command.id].position_d_gain = command.gain * 0;
+                    servos[command.id].goal.position_p_gain = command.gain;
+                    servos[command.id].goal.position_i_gain = command.gain * 0;
+                    servos[command.id].goal.position_d_gain = command.gain * 0;
 
-                    servo_states[command.id].goal_position = command.position;
+                    servos[command.id].goal.goal_position = command.position;
                     // Drive Mode is Time-Based, so we need to set the profile velocity to the time (in milliseconds) we
                     // want to take to reach the goal position
-                    servo_states[command.id].profile_velocity = time_span;
+                    servos[command.id].goal.profile_velocity = time_span;
                 }
             }
         });
 
-        on<Trigger<ServoTarget>, Pool<HardwareIO>>().then([this](const ServoTarget& command) {
-            auto command_list = std::make_unique<ServoTargets>();
+        on<Trigger<ServoGoal>>().then([this](const ServoGoal& command) {
+            auto command_list = std::make_unique<ServoGoals>();
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above

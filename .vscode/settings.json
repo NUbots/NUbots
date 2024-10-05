@@ -16,15 +16,21 @@
     "options": ["-I${workspaceFolder}/nuclear/message/proto"]
   },
   "files.associations": {
+    "*.m": "matlab",
     "*.role": "cmake",
     ".clang-tidy": "yaml",
-    ".Doxyfile": "properties"
+    ".Doxyfile": "properties",
+    "random": "cpp",
+    "*.ipp": "cpp",
+    "__locale": "cpp",
+    "thread": "cpp",
+    "*.proto": "proto3"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
   "[python]": {
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+      "source.organizeImports": "explicit"
     }
   },
   "[jsonc]": {
