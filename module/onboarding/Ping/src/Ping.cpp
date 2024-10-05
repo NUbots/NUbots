@@ -5,6 +5,9 @@
 #include "message/onboarding/Ping.hpp"
 #include "message/onboarding/Pong.hpp"
 
+int32_t pongcount = 0;
+
+
 namespace module::onboarding {
 
     using extension::Configuration;
@@ -19,12 +22,10 @@ namespace module::onboarding {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Startup>().then([this] {
-            // Vibe
-        });
 
         on<Trigger<Pong>>().then([this](const Pong& pong_msg) {
             auto ping_msg = std::make_unique<Ping>();
+            ping_msg->count = pongcount++; // TODO: Assign counter value.
             log<NUClear::INFO>("Ping");
             emit(ping_msg);
         });
