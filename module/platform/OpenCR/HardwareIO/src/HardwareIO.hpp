@@ -225,6 +225,12 @@ namespace module::platform::OpenCR {
         /// @brief handle sending a request to the OpenCR device
         void send_opencr_request();
 
+        /// @brief handle sending a request to the OpenCR device
+        void send_nufsr1_request();
+
+        /// @brief handle sending a request to the OpenCR device
+        void send_nufsr2_request();
+
         /// @brief handle sending a request to the servo devices
         void send_servo_request();
 
