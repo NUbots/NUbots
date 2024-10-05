@@ -31,6 +31,9 @@ namespace module::onboarding {
             // TODO: Log a INFO level message with the text "Pong"
             log<NUClear::INFO>("Pong");
 
+            // Log a INFO level messge with the count
+            log<NUClear::INFO>(ping_msg.count);
+
             // TODO: Emit a Pong message
             emit(pong_msg);
         });

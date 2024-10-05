@@ -11,6 +11,8 @@ private:
     struct Config {
     } cfg;
 
+    int counter = 0;
+
 public:
     /// @brief Called by the powerplant to build and setup the Ping reactor.
     explicit Ping(std::unique_ptr<NUClear::Environment> environment);
