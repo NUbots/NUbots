@@ -26,11 +26,12 @@ namespace module::onboarding {
         });
 
         on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
-            // TODO: Log a INFO level message with the text "Pong"
+            // Logs an INFO level message with the text "Pong" followed by the ping count
             log<NUClear::INFO>("Pong", ping_msg.count);
 
-            // TODO: Emit a Pong message
+            // Emit a Pong message after updating the count
             auto pong_msg = std::make_unique<Pong>();
+            pong_msg->count = ping_msg.count;
             emit(pong_msg);
         });
     }

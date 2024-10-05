@@ -5,8 +5,6 @@
 #include "message/onboarding/Ping.hpp"
 #include "message/onboarding/Pong.hpp"
 
-int32_t pongcount = 0;
-
 
 namespace module::onboarding {
 
@@ -25,7 +23,7 @@ namespace module::onboarding {
 
         on<Trigger<Pong>>().then([this](const Pong& pong_msg) {
             auto ping_msg = std::make_unique<Ping>();
-            ping_msg->count = pongcount++; // TODO: Assign counter value.
+            ping_msg->count = pong_msg.count + 1; // Assign counter value.
             log<NUClear::INFO>("Ping");
             emit(ping_msg);
         });
