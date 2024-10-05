@@ -5,16 +5,17 @@
 
 namespace module::onboarding {
 
-class Ping : public NUClear::Reactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    class Ping : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+        } cfg;
+        int count = 0;
 
-public:
-    /// @brief Called by the powerplant to build and setup the Ping reactor.
-    explicit Ping(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the Ping reactor.
+        explicit Ping(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::onboarding
 
