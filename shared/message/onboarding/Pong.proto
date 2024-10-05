@@ -2,6 +2,5 @@ syntax = "proto3";
 
 package message.onboarding;
 
-message Ping{
-    int32 count = 1;
+message Pong{
 }
