@@ -130,4 +130,20 @@ namespace module::platform::OpenCR {
                                                 sizeof(OpenCRReadData)));
     }
 
+    void HardwareIO::send_nufsr1_request() {
+        // Get NUFSR data
+        // READ (only reading from a single device here)
+        packet_queue[NUgus::ID::R_FSR].push_back(PacketTypes::FSR_DATA);
+        opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::R_FSR),
+                                                sizeof(NUFSRReadData)));
+    }
+
+    void HardwareIO::send_nufsr2_request() {
+        // Get NUFSR data
+        // READ (only reading from a single device here)
+        packet_queue[NUgus::ID::L_FSR].push_back(PacketTypes::FSR_DATA);
+        opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::L_FSR),
+                                                sizeof(NUFSRReadData)));
+    }
+
 }  // namespace module::platform::OpenCR

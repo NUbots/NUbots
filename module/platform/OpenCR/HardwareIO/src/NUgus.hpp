@@ -83,8 +83,8 @@ namespace module::platform::OpenCR {
             L_ANKLE_ROLL     = 18,
             HEAD_YAW         = 19,
             HEAD_PITCH       = 20,
-            R_FSR            = 111,
-            L_FSR            = 112,
+            R_FSR            = 21,
+            L_FSR            = 22,
             OPENCR           = 200,
             BROADCAST        = 254
         };
@@ -137,6 +137,8 @@ namespace module::platform::OpenCR {
                 case ID::L_ANKLE_ROLL: return L_ANKLE_ROLL;
                 case ID::HEAD_YAW: return HEAD_YAW;
                 case ID::HEAD_PITCH: return HEAD_PITCH;
+                case ID::R_FSR: return R_FSR;
+                case ID::L_FSR: return L_FSR;
                 default: throw std::runtime_error("Unknown device id");
             }
         }
@@ -244,7 +246,7 @@ namespace module::platform::OpenCR {
 
     /// @brief The data to read from the NUFSR device
     struct NUFSRReadData {
-        std::array<uint16_t, 4> adcs = {0, 0, 0, 0};
+        uint16_t adc[4];
     } __attribute__((packed));
 
     /// @brief Document addresses used for read/writing to dynamixel devices, especially
