@@ -15,7 +15,7 @@ namespace module::onboarding {
     Judge::Judge(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         using extension::behaviour::Task;
-        using message::actuation::LimbsSequence;
+        using message::actuation::BodySequence;
         using message::onboarding::Judge;
         using message::onboarding::Ping;
         using utility::skill::load_script;
@@ -31,7 +31,7 @@ namespace module::onboarding {
             auto sol = (10 * 11) / 2;
             if (sol == ping_msg.val) {
                 log<NUClear::INFO>("Nodding");
-                emit<Task>(load_script<LimbsSequence>("NodYes.yaml"));
+                emit<Task>(load_script<BodySequence>("NodYes.yaml"));
             }
         });
     }
