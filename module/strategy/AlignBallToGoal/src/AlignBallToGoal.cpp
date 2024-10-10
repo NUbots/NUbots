@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "AlignBallToGoal.hpp"
 
 #include "extension/Behaviour.hpp"
@@ -18,7 +44,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::planning::TurnAroundBall;
+    using message::planning::PivotAroundPoint;
     using message::support::FieldDescription;
     using AlignBallToGoalTask = message::strategy::AlignBallToGoal;
     using utility::support::Expression;
@@ -33,16 +59,11 @@ namespace module::strategy {
             cfg.angle_threshold         = config["angle_threshold"].as<Expression>();
         });
 
-        on<Provide<AlignBallToGoalTask>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>,
-           With<FieldDescription>,
-           Every<30, Per<std::chrono::seconds>>>()
-            .then([this](const Ball& ball,
-                         const Field& field,
-                         const Sensors& sensors,
-                         const FieldDescription& field_description) {
+        on<Provide<AlignBallToGoalTask>, With<Ball>, With<Field>, With<Sensors>, With<FieldDescription>>().then(
+            [this](const Ball& ball,
+                   const Field& field,
+                   const Sensors& sensors,
+                   const FieldDescription& field_description) {
                 // If the ball is close, align towards the goal
                 Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
                 double distance_to_ball = rBRr.head(2).norm();
@@ -60,10 +81,10 @@ namespace module::strategy {
                     // Only align if we are not within a threshold of the goal
                     if (std::fabs(kick_angle) > cfg.angle_threshold) {
                         if (kick_angle < 0.0) {
-                            emit<Task>(std::make_unique<TurnAroundBall>(true));
+                            emit<Task>(std::make_unique<PivotAroundPoint>(true));
                         }
                         else {
-                            emit<Task>(std::make_unique<TurnAroundBall>(false));
+                            emit<Task>(std::make_unique<PivotAroundPoint>(false));
                         }
                     }
                 }

@@ -1,9 +1,18 @@
-# Controls the minimum log level that NUClear log will display
-log_level: INFO
-
-# For the robot playing without listening to GameController
-force_playing: false
-
-# The position of the robot
-# GOALIE, STRIKER, DEFENDER
-position: STRIKER
+# Goalie bounding box
+goalie:
+  x_min: 3.5
+  x_max: 5
+  y_min: -4.0
+  y_max: 4.0
+# Defender bounding box
+defender:
+  x_min: 1.5
+  x_max: 3.5
+  y_min: -4.0
+  y_max: 4.0
+# Striker bounding box
+striker:
+  x_min: -5
+  x_max: 1.5
+  y_min: -4.0
+  y_max: 4.0

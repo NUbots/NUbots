@@ -1,5 +1,32 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "PlanKick.hpp"
 
+#include <fmt/format.h>
 #include <string>
 
 #include "extension/Behaviour.hpp"
@@ -67,6 +94,9 @@ namespace module::planning {
 
                 // Need to be near the ball to consider kicking it
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
+                    log<NUClear::DEBUG>(fmt::format("Ball not close enough, distance {}m and angle {} radians.",
+                                                    ball_distance,
+                                                    ball_angle));
                     return;
                 }
 
@@ -75,6 +105,7 @@ namespace module::planning {
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
+                    log<NUClear::DEBUG>("Robot is not aligned to the kick target.");
                     return;
                 }
 
@@ -88,6 +119,7 @@ namespace module::planning {
 
                 // If the robot is not standing, make it stand before kicking
                 if (stability != Stability::STANDING) {
+                    log<NUClear::DEBUG>("Standing to kick!");
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     return;
                 }
@@ -95,9 +127,11 @@ namespace module::planning {
                 // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
                 if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && rBRr.y() > 0.0)) {
+                    log<NUClear::INFO>("LEFT KICK!");
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
                 else {  // kick leg is forced right or ball is more to the right and kick leg is auto
+                    log<NUClear::INFO>("RIGHT KICK!");
                     emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG));
                 }
             });

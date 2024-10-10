@@ -115,7 +115,9 @@ This example adds a `searchLogs()` method to the `LogNetwork` class, which will 
 // Assumes the following protobuf messages are available:
 //   - message.output.SearchLogsRequest
 //   - message.output.SearchLogsRequest.Response
-// Both messages must have an `rpc_token` field to be used with RPC calls.
+// To be used with RPC calls, the message types must meet these requirements:
+//   - the request message must have a `rpc` field of type `RpcRequestMeta`
+//   - the response message must have a `rpc` field of type `RpcResponseMeta`
 
 export class LogNetwork {
   // [...] (see above for constructor, listeners, etc.)

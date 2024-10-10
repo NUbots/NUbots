@@ -1,3 +1,30 @@
+##
+## MIT License
+##
+## Copyright (c) 2019 NUbots
+##
+## This file is part of the NUbots codebase.
+## See https://github.com/NUbots/NUbots for further info.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy
+## of this software and associated documentation files (the "Software"), to deal
+## in the Software without restriction, including without limitation the rights
+## to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## copies of the Software, and to permit persons to whom the Software is
+## furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all
+## copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+## SOFTWARE.
+##
+
 # syntax=docker/dockerfile:1.3
 # For information on "RUN --mount ..." syntax
 # See https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md
@@ -16,10 +43,7 @@
 ### Date format is ISO year/month/day
 FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
 
-# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
-# If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
-# needs to be altered.
+COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
 # Setup pacman first before we install so we can turn off pgp
 COPY etc/pacman.conf /etc/pacman.conf
@@ -210,6 +234,39 @@ RUN install-package protobuf && \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
     -DBUILD_SHARED_LIBS=OFF
 
+# OpenCV
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
+
+# OpenVino - Dependencies
+RUN install-package opencl-clhpp && \
+    install-package opencl-headers && \
+    install-package ocl-icd
+
+# OpenVino
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 && \
+    cd openvino &&  \
+    git submodule update --init --recursive && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DBUILD_TESTING:BOOL='OFF' \
+            -DCMAKE_BUILD_TYPE:STRING='Release' \
+            -DENABLE_AVX512F:BOOL='OFF' \
+            -DENABLE_PYTHON:BOOL='OFF' \
+            -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+            -DENABLE_NCC_STYLE:BOOL='OFF' \
+            -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+            -DENABLE_SYSTEM_TBB:BOOL='ON' \
+            -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+            -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
+            -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+            -Wno-dev && \
+    make -j$(nproc) && \
+    make install && \
+    /usr/local/setupvars.sh
+
+# Move OpenVino libraries to our library path
+RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+
 # Libjpeg
 RUN install-package yasm
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.0.7-esr.tar.gz \
@@ -264,7 +321,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/e682ea6224bee18034bed24d37403ca922c421e7.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/964efc8c1771c67c417d8e683bd09b24d8e2871b.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -276,6 +333,7 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
     --without-debug
+RUN install-package alsa-utils
 RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz
 # Need to run ldconfig before building eSpeak because ...... ¯\_(ツ)_/¯
 RUN ldconfig && \
@@ -312,18 +370,23 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+# lame
+RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
 # Install python libraries
 RUN pip install \
+    pygit2==1.13.3 \
     xxhash \
     pylint \
     termcolor \
     stringcase \
     Pillow \
     protobuf==4.21.2 \
+    mycroft-mimic3-tts \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
@@ -336,16 +399,16 @@ RUN install-package \
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.10.1 \
-    black==22.6.0
+    black==22.6.0 \
+    licenseheaders==0.8.8
 
-RUN install-package \
-    yarn \
-    nodejs \
-    npm
-
+RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O - \
+    | tar --extract --xz --strip-components=1 --directory /usr --file - \
+    node-v20.13.1-linux-x64/bin/ node-v20.13.1-linux-x64/include/ node-v20.13.1-linux-x64/lib/
 RUN npm install -g \
+    yarn@1.22.19 \
     prettier@2.7.1 \
-    eslint@8.27.0
+    eslint@8.57.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -368,8 +431,17 @@ RUN chmod 440 /etc/sudoers.d/user
 # Create the user, and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
-RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid $user_gid -m nubots
+ARG dialout_gid=20
+
+# useradd -G is not sufficient to add the nubots user to the dialout
+# group as docker manages to lose supplementary groups when changing
+# to the nubots user.
+# Also need to add "--group-add dialout" to the docker run command in run.py
+# Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
+RUN groupadd --gid $dialout_gid dialout \
+    && groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp -m nubots
+
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user

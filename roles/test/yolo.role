@@ -1,0 +1,22 @@
+# This role is used for testing YOLO on the real robot. This role does not move the robot's servos.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig # Field description
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
+  output::ImageCompressor
+  # Sensors
+  input::Camera
+  platform::${SUBCONTROLLER}::HardwareIO
+  input::SensorFilter # For object post-processing
+  # Vision
+  vision::Yolo
+  # Data logging is commonly used with this role for camera calibration: support::logging::DataLogging
+)

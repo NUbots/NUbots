@@ -1,7 +1,7 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetPeer } from "nuclearnet.js";
 
-import { MessageType } from "../../shared/messages";
+import { message, MessageType } from "../../shared/messages";
 import { Emit } from "../../shared/messages/emit";
 import { messageTypeToName } from "../../shared/messages/type_converters";
 import { hashType } from "../nuclearnet/hash_type";
@@ -9,10 +9,15 @@ import { hashType } from "../nuclearnet/hash_type";
 import { NUsightSession } from "./session";
 import { NUsightSessionClient } from "./session_client";
 
+import IRpcRequestMeta = message.eye.IRpcRequestMeta;
+import IRpcResponseMeta = message.eye.IRpcResponseMeta;
+
 export type NUClearMessageCallback<T> = (peer: NUClearNetPeer, message: T) => void;
 export type ClientMessageCallback<T> = (client: NUsightSessionClient, message: T) => void;
 
-export type RpcResponse = { ok: true; rpcToken: number } | { ok: false; rpcToken: number; error: string };
+export interface RpcResponse {
+  rpc?: IRpcResponseMeta | null;
+}
 export type RpcRequestHandler<T> = (request: T, sender: NUsightSessionClient) => RpcResponse | Promise<RpcResponse>;
 
 /** Used for messages from the current NUsight server */
@@ -94,7 +99,7 @@ export class NUsightSessionNetwork {
   }
 
   /** Register a handler to respond to RPC requests of the given type from a client in the session */
-  onClientRpc<T extends { rpcToken: number }>(
+  onClientRpc<T extends { rpc?: IRpcRequestMeta | null }>(
     type: MessageType<T> | { type: MessageType<T>; subtype?: number },
     requestHandler: RpcRequestHandler<T>,
   ) {
@@ -106,9 +111,11 @@ export class NUsightSessionNetwork {
         const ResponseType = (request.constructor as any).Response;
         this.emit(
           new ResponseType({
-            ok: false,
-            rpcToken: request.rpcToken,
-            error: error instanceof Error ? error.message : String(error),
+            rpc: {
+              ok: false,
+              token: request.rpc?.token,
+              error: error instanceof Error ? error.message : String(error),
+            },
           }),
           { target: `nusight#${client.id}` },
         );

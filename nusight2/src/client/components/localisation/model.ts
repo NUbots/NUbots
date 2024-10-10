@@ -105,6 +105,17 @@ export class LocalisationModel {
   @observable target?: LocalisationRobotModel;
   @observable time: TimeModel;
 
+  @observable fieldVisible = true;
+  @observable gridVisible = true;
+  @observable robotVisible = true;
+  @observable ballVisible = true;
+  @observable particlesVisible = true;
+  @observable goalVisible = true;
+  @observable fieldLinePointsVisible = true;
+  @observable fieldIntersectionsVisible = true;
+  @observable walkToDebugVisible = true;
+  @observable boundedBoxVisible = true;
+
   constructor(
     appModel: AppModel,
     {

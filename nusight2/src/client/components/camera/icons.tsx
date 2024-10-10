@@ -2,7 +2,7 @@ import React from "react";
 
 export function IconZoomIn(props: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" stroke="#1197d3" xmlns="http://www.w3.org/2000/svg">
+    <svg className={props.className} viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
       <line x1="10.5" y1="7.75" x2="10.5" y2="13.25" strokeWidth="1.5" strokeLinecap="round" />
       <line x1="7.75" y1="10.5" x2="13.25" y2="10.5" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M19.5 19.5L15 15" strokeWidth="1.5" strokeLinecap="round" />
@@ -13,7 +13,7 @@ export function IconZoomIn(props: { className?: string }) {
 
 export function IconZoomOut(props: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" stroke="#1197d3" xmlns="http://www.w3.org/2000/svg">
+    <svg className={props.className} viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
       <circle cx="10.5" cy="10.5" r="5.75" fill="none" strokeWidth="1.5" />
       <path d="M19.5 19.5L15 15" strokeWidth="1.5" strokeLinecap="round" />
       <line x1="7.75" y1="10.5" x2="13.25" y2="10.5" strokeWidth="1.5" strokeLinecap="round" />
@@ -23,7 +23,13 @@ export function IconZoomOut(props: { className?: string }) {
 
 export function IconZoomReset(props: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" fill="#1197d3" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      className={props.className}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         fillRule="evenodd"
         clipRule="evenodd"

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_PLATFORM_OPENCR_HARDWAREIO_HPP
 #define MODULE_PLATFORM_OPENCR_HARDWAREIO_HPP
 
@@ -22,6 +48,9 @@ namespace module::platform::OpenCR {
     public:
         /// @brief Called by the powerplant to build and setup the HardwareIO reactor.
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Makes HardwareIO a threadpool descriptor type
+        static constexpr int thread_count = 1;
 
     private:
         /// @brief Manages the connection with OpenCR
@@ -215,6 +244,14 @@ namespace module::platform::OpenCR {
         /// @returns the number of packets cleared
         int queue_clear_all();
 
+        /// @brief Creates the model watchdog thread
+        /// @return NUClear::threading::ReactionHandle object
+        ReactionHandle create_model_watchdog();
+
+        /// @brief Creates the packet watchdog thread
+        /// @return NUClear::threading::ReactionHandle object
+        ReactionHandle create_packet_watchdog();
+
         struct PacketWatchdog {};
         struct ModelWatchdog {};
 
@@ -235,6 +272,8 @@ namespace module::platform::OpenCR {
                 } temperature;
             } alarms;
         } cfg;
+
+        enum UnstuffingState : uint8_t { DATA, UNSTUFF_1, UNSTUFF_2, UNSTUFF_3 };
     };
 
 }  // namespace module::platform::OpenCR

@@ -1,19 +1,21 @@
+# This role is used to test the robot's connection with the GameController software.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run
-  extension::FileWatcher
-  support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
-  # Hardware for button testing
-  platform::${SUBCONTROLLER}::HardwareIO
-  input::SensorFilter
-  # Support and Configuration
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  # GlobalConfig is used by GameController
   support::configuration::GlobalConfig
-  support::configuration::SoccerConfig
+  # Network
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
+  # Sensors for button testing
+  input::SensorFilter
+  # GameController communications
   input::GameController
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

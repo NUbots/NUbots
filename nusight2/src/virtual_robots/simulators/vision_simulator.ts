@@ -8,7 +8,7 @@ import { fourcc } from "../../shared/image_decoder/fourcc";
 import { Imat4 } from "../../shared/messages";
 import { message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { toTimestamp } from "../../shared/time/timestamp";
+import { TimestampObject } from "../../shared/time/timestamp";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";
 
@@ -69,7 +69,7 @@ export class VisionSimulator extends Simulator {
         data,
         id,
         name: `Virtual Camera #${id}`,
-        timestamp: toTimestamp(time),
+        timestamp: TimestampObject.fromSeconds(time),
         Hcw: toProtoMat44(Hcw),
         lens: {
           projection: Projection.RECTILINEAR,
@@ -89,7 +89,7 @@ export class VisionSimulator extends Simulator {
       messageType: "message.vision.Balls",
       buffer: Balls.encode({
         id: 1,
-        timestamp: toTimestamp(time),
+        timestamp: TimestampObject.fromSeconds(time),
         Hcw: toProtoMat44(Hcw),
         balls: [
           {
@@ -98,7 +98,7 @@ export class VisionSimulator extends Simulator {
             measurements: [
               {
                 type: MeasurementType.ANGULAR,
-                srBCc: new Vector3(1, 0, 0),
+                rBCc: new Vector3(1, 0, 0),
               },
             ],
           },
@@ -116,7 +116,7 @@ export class VisionSimulator extends Simulator {
       messageType: "message.vision.Goals",
       buffer: Goals.encode({
         id: 1,
-        timestamp: toTimestamp(time),
+        timestamp: TimestampObject.fromSeconds(time),
         Hcw: toProtoMat44(Hcw),
         goals: [
           {
