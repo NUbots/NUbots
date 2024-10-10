@@ -26,6 +26,9 @@ namespace module::onboarding {
         });
 
         on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
+            // Log the count value received in the Ping message
+            log<NUClear::INFO>("Pong received Ping with count:", ping_msg.count);
+            // Emit a new Pong message in response
             auto pong_msg = std::make_unique<Pong>();
             log<NUClear::INFO>("Pong");
             emit(pong_msg);

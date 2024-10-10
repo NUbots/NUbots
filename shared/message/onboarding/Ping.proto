@@ -3,4 +3,6 @@ syntax = "proto3";
 package message.onboarding;
 
 message Ping{
+    // An int32 field named "count"
+    uint32 count = 1;
 }
