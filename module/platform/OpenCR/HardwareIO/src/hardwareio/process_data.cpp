@@ -140,7 +140,7 @@ namespace module::platform::OpenCR {
 
     void HardwareIO::process_nufsr_data(const StatusReturn& packet) {
         const NUFSRReadData data = *(reinterpret_cast<const NUFSRReadData*>(packet.data.data()));
-        log<NUClear::INFO>(fmt::format("NUFSR Data %d,%d,%d,%d", data.adc));
+        log<NUClear::DEBUG>(fmt::format("NUFSR Data {},{},{},{}", data.adc[0],data.adc[1],data.adc[2],data.adc[3]));
         
     }
 

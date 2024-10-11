@@ -137,8 +137,8 @@ namespace module::platform::OpenCR {
                 case ID::L_ANKLE_ROLL: return L_ANKLE_ROLL;
                 case ID::HEAD_YAW: return HEAD_YAW;
                 case ID::HEAD_PITCH: return HEAD_PITCH;
-                case ID::R_FSR: return R_FSR;
-                case ID::L_FSR: return L_FSR;
+                //case ID::R_FSR: return R_FSR;
+                //case ID::L_FSR: return L_FSR;
                 default: throw std::runtime_error("Unknown device id");
             }
         }

@@ -69,7 +69,7 @@ namespace module::platform::OpenCR {
         uint32_t packet_wait = 0;
 
         /// @brief Maps device IDs to expected packet data
-        enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA, FSR_DATA };
+        enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA, FSR_DATA, FSR_DATA2};
 
         /// @brief The packets we are currently waiting to receive
         std::map<NUgus::ID, std::vector<PacketTypes>> packet_queue;
@@ -211,6 +211,11 @@ namespace module::platform::OpenCR {
         /// @param packet a preprocessed OpenCR packet
         /// @note Although we do a Sync Write to all servos, data is returned one by one
         void process_servo_data(const message::platform::StatusReturn& packet);
+
+        /// @brief Reads adc information from fsr's
+        /// @param packet a preprocessed FSR packet
+        /// @note Debug prototype
+        void process_nufsr_data(const message::platform::StatusReturn& packet);
 
         /// @brief Reads info from the state variables and processes it into a RawSensors message
         /// @return A RawSensors message created from the current state variables

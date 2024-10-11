@@ -135,6 +135,7 @@ namespace module::platform::OpenCR {
         // READ (only reading from a single device here)
         packet_queue[NUgus::ID::R_FSR].push_back(PacketTypes::FSR_DATA);
         opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::R_FSR),
+                                                uint16_t (64),
                                                 sizeof(NUFSRReadData)));
     }
 
@@ -143,6 +144,7 @@ namespace module::platform::OpenCR {
         // READ (only reading from a single device here)
         packet_queue[NUgus::ID::L_FSR].push_back(PacketTypes::FSR_DATA);
         opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::L_FSR),
+                                                uint16_t (64),
                                                 sizeof(NUFSRReadData)));
     }
 

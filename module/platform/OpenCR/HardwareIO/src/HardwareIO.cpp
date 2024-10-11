@@ -248,7 +248,7 @@ namespace module::platform::OpenCR {
                     break;
 
                 // Handles NUFSR sensor data
-                case PacketTypes::FSR_DATA:
+                case PacketTypes::FSR_DATA2:
                     emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());
                     // call packet handler
                     process_nufsr_data(unstuffed_packet);

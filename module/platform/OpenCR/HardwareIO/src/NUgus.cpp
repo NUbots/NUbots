@@ -50,7 +50,8 @@ namespace module::platform::OpenCR {
         , L_ANKLE_ROLL(uint8_t(ID::L_ANKLE_ROLL))
         , HEAD_YAW(uint8_t(ID::HEAD_YAW))
         , HEAD_PITCH(uint8_t(ID::HEAD_PITCH))
-        , R_FSR(uint8_t(ID::R_FSR))
-        , L_FSR(uint8_t(ID::L_FSR)) {}
+        // , R_FSR(uint8_t(ID::R_FSR))
+        // , L_FSR(uint8_t(ID::L_FSR)) 
+        {}
 
 }  // namespace module::platform::OpenCR
