@@ -64,11 +64,14 @@ namespace extension::behaviour {
                     reaction,
                     typeid(T),
                     classification,
-                    [](const RunReason& run_reason, const std::shared_ptr<const void>& data, const GroupInfo& info)
-                        -> Lock {
+                    [reaction](const RunReason& run_reason,
+                               const std::shared_ptr<const void>& data,
+                               const GroupInfo& info) -> Lock {
                         auto reason_lock = information::RunReasonStore::set(run_reason);
-                        auto run_lock    = information::TaskDataStore<T>::set(std::static_pointer_cast<const T>(data));
-                        auto group_lock  = information::GroupInfoStore<T>::set(info);
+                        auto run_lock    = information::TaskDataStore<T>::set(
+                            std::make_shared<std::pair<long unsigned int, std::shared_ptr<const T>>>(
+                                std::make_pair(reaction->id, std::static_pointer_cast<const T>(data))));
+                        auto group_lock = information::GroupInfoStore<T>::set(info);
 
                         // TODO need to somehow make a "combined lock" that will unlock all of these when it is
                         // destroyed
@@ -410,7 +413,7 @@ namespace extension::behaviour {
         template <typename T>
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
-        using Task = ::extension::behaviour::Task<T>;
+        using Task      = ::extension::behaviour::Task<T>;
         using RunReason = ::extension::behaviour::RunReason;
         using Done      = ::extension::behaviour::Done;
         using Idle      = ::extension::behaviour::Idle;
