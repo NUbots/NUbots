@@ -33,6 +33,7 @@ namespace module::extension {
     using component::DirectorTask;
     using component::Provider;
     using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::information::RunReasonStore;
 
     void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
 
@@ -67,7 +68,7 @@ namespace module::extension {
                 for (auto& provider : group.providers) {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
-                        auto lock             = hold_run_reason(RunInfo::RunReason::STOPPED);
+                        auto run_reason_lock  = RunReasonStore::set(RunInfo::RunReason::STOPPED);
                         powerplant.submit(provider->reaction->get_task(true));
                     }
                 }
@@ -92,6 +93,8 @@ namespace module::extension {
             }
             // After we have removed all our subtasks we are no longer a zombie, we are just dead
             group.zombie = false;
+
+            auto group_info_lock = GroupInfoStore::set(GroupInfo::State::NO_TASK, group.done);
         }
     }
 
