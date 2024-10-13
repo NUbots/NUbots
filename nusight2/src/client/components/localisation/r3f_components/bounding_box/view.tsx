@@ -1,14 +1,18 @@
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
-import { LocalisationRobotModel } from "../../robot_model";
-
 import wallFragmentShader from "./wall.frag";
 import wallVertexShader from "./wall.vert";
 
-export const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
-  if (!model.boundingBox) return null;
-  const { minX, maxX, minY, maxY } = model.boundingBox;
+interface BoundingBoxProps {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  color: string;
+}
+
+export const BoundingBox: React.FC<BoundingBoxProps> = ({ minX, maxX, minY, maxY, color }) => {
   const width = maxX - minX;
   const height = maxY - minY;
   const centerX = (minX + maxX) / 2;
@@ -20,7 +24,7 @@ export const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   const createWallMaterial = (orientation: number) => {
     return new THREE.ShaderMaterial({
       uniforms: {
-        color: { value: new THREE.Color(model.color) },
+        color: { value: new THREE.Color(color) },
         wallHeight: { value: wallHeight },
         solidBottomHeight: { value: solidBottomHeight },
         orientation: { value: orientation },
@@ -35,12 +39,12 @@ export const BoundingBox = ({ model }: { model: LocalisationRobotModel }) => {
   const verticalWallMaterial = useMemo(() => createWallMaterial(0), []);
   const horizontalWallMaterial = useMemo(() => createWallMaterial(1), []);
 
-  // Update material color when model.color changes
+  // Update material color when color prop changes
   useEffect(() => {
-    const newColor = new THREE.Color(model.color);
+    const newColor = new THREE.Color(color);
     verticalWallMaterial.uniforms.color.value = newColor;
     horizontalWallMaterial.uniforms.color.value = newColor;
-  }, [model.color, verticalWallMaterial, horizontalWallMaterial]);
+  }, [color, verticalWallMaterial, horizontalWallMaterial]);
 
   return (
     <object3D position={[centerX, centerY, wallHeight / 2]}>
