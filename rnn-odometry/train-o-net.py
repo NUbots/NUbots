@@ -72,15 +72,16 @@ def main():
     # prefix = "quad"  # s for straight path
 
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
-    # NOTE: Other paths to consider: Spiral, figure 8, s shaped
+    # NOTE: Other paths to consider: s shaped
     directories = [
-        {"prefix": "quad", "first_file": 1, "num_files": 50, "skip_files": []},
-        {"prefix": "s", "first_file": 1, "num_files": 25, "skip_files": []},
-        {"prefix": "s-new", "first_file": 1, "num_files": 25, "skip_files": []},
-        {"prefix": "zz", "first_file": 1, "num_files": 50, "skip_files": []},
-        {"prefix": "circ", "first_file": 1, "num_files": 50, "skip_files": []},
-        {"prefix": "sprl", "first_file": 1, "num_files": 50, "skip_files": [35]},
-        {"prefix": "fig8", "first_file": 1, "num_files": 50, "skip_files": [18]},
+        {"prefix": "quad", "first_file": 1, "num_files": 10, "skip_files": []},
+        # {"prefix": "s", "first_file": 1, "num_files": 5, "skip_files": []},
+        # {"prefix": "s-new", "first_file": 1, "num_files": 5, "skip_files": []},
+        {"prefix": "zz", "first_file": 1, "num_files": 10, "skip_files": []},
+        # {"prefix": "circ", "first_file": 1, "num_files": 10, "skip_files": []},
+        # {"prefix": "sprl", "first_file": 1, "num_files": 10, "skip_files": [35]},
+        # {"prefix": "fig8", "first_file": 1, "num_files": 10, "skip_files": [18]},
+        # {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
     ]
 
     imu = []
@@ -120,7 +121,7 @@ def main():
 
             truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
             # Convert the loaded chunk of truth data to relative positions
-            truth_data = convert_to_relative(truth_data)
+            # truth_data = convert_to_relative(truth_data)
             truth_all.append(truth_data)
 
             # # Plot the data as it's loaded
@@ -261,8 +262,8 @@ def main():
 
 
     # Split the training data into training, validation and test sets
-    training_size = 0.8
-    validate_size = 0.1
+    training_size = 0.7
+    validate_size = 0.2
     num_time_steps = joined_data.shape[0]
 
     num_train_max_idx = int(np.floor(num_time_steps * training_size))
@@ -310,9 +311,9 @@ def main():
     # # # #
 
     # # clip the outliers in the data
-    # train_arr = np.clip(train_arr, -24, 24)
-    # validate_arr = np.clip(validate_arr, -24, 24)
-    # test_arr = np.clip(test_arr, -24, 24)
+    train_arr = np.clip(train_arr, -24, 24)
+    validate_arr = np.clip(validate_arr, -24, 24)
+    test_arr = np.clip(test_arr, -24, 24)
 
     ## End of standardisation ##
 
@@ -329,6 +330,7 @@ def main():
     ## End of Min/Max Scaling ##
 
     # Print the shapes and min/max values of the datasets
+    print("Set sizes after normalisation and before splitting:")
     print(f"Training set size: {train_arr.shape}")
     print("Training set min:", np.min(train_arr))
     print("Training set max:", np.max(train_arr))
@@ -339,7 +341,7 @@ def main():
     # num_channels = train_arr.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
-    # for i in range(6):
+    # for i in range(num_channels):
     #     plt.plot(train_arr[:, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
@@ -412,6 +414,7 @@ def main():
     #### End of adding indicator ####
 
     # print dataset shapes (will have an extra column for the indicator)
+    print("Set sizes after splitting and adding indicator:")
     print(f"input_data_train: {input_data_train.shape}")
     print(f"input_targets_train: {input_targets_train.shape}")
     print(f"input_data_validate: {input_data_validate.shape}")
@@ -483,10 +486,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     # system_sample_rate = 115
-    sequence_length = 100   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = 64   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
-    batch_size = 256                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 128                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Partition the training and validation datasets into sequences
     input_data_train, input_targets_train = partition_dataset(input_data_train, input_targets_train, sequence_length)
@@ -502,11 +505,12 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.00001   # Controls how much to change the model in response to error.
+    learning_rate = 0.0001   # Controls how much to change the model in response to error.
+    gradient_clip = 1.0
     epochs = 100
-    # loss_function = keras.losses.MeanSquaredError()
+    loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
-    loss_function = keras.losses.Huber()
+    # loss_function = keras.losses.Huber()
 
     # Random seed
     tf.random.set_seed(65)
@@ -514,22 +518,22 @@ def main():
     # ** Optimisers **
     # LR schedules
     # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 50                                         # Number of epochs for learning rate to decay over before it resets
+    # decay_to_epoch = 20                                         # Number of epochs for learning rate to decay over before it resets
     # steps_per_epoch = size_of_dataset // batch_size             # Calculate the number of steps per epoch
     # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     # print(f"Decay to epoch: {decay_to_epoch}")
     # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
 
     # LR schedule to decay the learning rate over a given number of steps (epochs calculated above), then it will reset.
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.08, alpha=0.00001)
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=0.9, alpha=1e-12)
 
     # LR schedule to decrease learning rate by 0.1 after 100 epochs
     # lr_schedule = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=learning_rate, decay_steps=decay_over_steps, decay_rate=0.01, staircase=True)
 
 
     # Static learning rate
-    # optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
-    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    optimizer = keras.optimizers.Adam(learning_rate=learning_rate, clipvalue=gradient_clip)
+    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
     # optimizer = keras.optimizers.Adamax(learning_rate=learning_rate)
 
@@ -541,22 +545,29 @@ def main():
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
     # Add Conv1D layer
-    # conv1d = keras.layers.Conv1D(filters=64, kernel_size=3, activation='tanh')(inputs)
-    # conv1d2 = keras.layers.Conv1D(filters=64, kernel_size=3, activation='tanh')(conv1d)
-    # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d2)
+    # conv1d = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(inputs)
+    # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
+    # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    # lstm = keras.layers.LSTM(32, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.005), return_sequences=False)(inputs)
-    lstm = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.015), return_sequences=True)(inputs)
-    batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.2)(batch_norm)
+    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.02), return_sequences=False)(inputs)
+    # batch_norm = keras.layers.BatchNormalization()(lstm)
+    dropout = keras.layers.Dropout(rate=0.31)(lstm)
 
-    lstm2 = keras.layers.LSTM(9, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.015), return_sequences=False)(dropout)
-    batch_norm2 = keras.layers.BatchNormalization()(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.2)(batch_norm2)
+    # attention = keras.layers.Attention()([dropout, dropout])
 
-    # normalise = keras.layers.LayerNormalization()(dropout2)
+    # lstm2 = keras.layers.LSTM(80,kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0008), return_sequences=True)(batch_norm)
+    # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
+    # dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.015))(dropout2)
+    # # attention = keras.layers.Attention()([dropout, dropout2])
+
+    # lstm3 = keras.layers.LSTM(80,kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0008), return_sequences=False)(batch_norm2)
+    # batch_norm3 = keras.layers.BatchNormalization()(lstm3)
+    # dropout3 = keras.layers.Dropout(rate=0.25)(batch_norm3)
+
+    # flatten = keras.layers.Flatten()(attention)
+
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1])(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
@@ -565,7 +576,7 @@ def main():
     # Callbacks
     # early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     # checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
-    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6, verbose=1)
+    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=1e-12, verbose=1)
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     log_dir = "logs/fit/" + timestamp
@@ -579,7 +590,8 @@ def main():
         epochs=epochs,
         callbacks=[tensorboard_callback],
         # Unspecified batch size will default to 32
-        batch_size=batch_size
+        batch_size=batch_size,
+        shuffle=False
     )
 
     # Note add back the model save

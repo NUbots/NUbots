@@ -22,16 +22,16 @@ def partition_dataset(features, targets, sequence_length):
 
 
 # Load data
-test_data = np.load('datasets/input_data_test.npy')
-test_targets = np.load('datasets/input_targets_test.npy')
+test_data = np.load('datasets/input_data_train.npy')
+test_targets = np.load('datasets/input_targets_train.npy')
 # test_data = test_data[:4000]
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20240914-181910')
+model = load_model('models/model-20241013-161411')
 
 # Partition dataset
-sequence_length = 100
+sequence_length = 64
 test_data, test_targets = partition_dataset(test_data, test_targets, sequence_length)
 
 # Predict
@@ -57,11 +57,19 @@ print('R2 Score:', r2)
 
 # Plot predictions vs targets with x,y pairs from each set on separate sub plots.
 num_channels = test_targets.shape[1]
-plt.figure(figsize=(10, 5))
-# plot each channel
+plt.figure(figsize=(10, 5 + num_channels * 2))
+
+# Plot each channel
 for i in range(num_channels):
-    plt.subplot(num_channels, 1, i + 1)
+    plt.subplot(num_channels + 1, 1, i + 1)
     plt.plot(predictions[:, i], label='predictions')
     plt.plot(test_targets[:, i], label='targets')
     plt.legend()
+
+# Plot test_data on its own subplot
+plt.subplot(num_channels + 1, 1, num_channels + 1)
+for i in range(test_data.shape[2]):
+    plt.plot(test_data[:, -1, i], label=f'test_data_channel_{i}')
+plt.legend()
+
 plt.show()
