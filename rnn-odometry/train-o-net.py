@@ -74,13 +74,13 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: s shaped
     directories = [
-        {"prefix": "quad", "first_file": 1, "num_files": 10, "skip_files": []},
-        # {"prefix": "s", "first_file": 1, "num_files": 5, "skip_files": []},
-        # {"prefix": "s-new", "first_file": 1, "num_files": 5, "skip_files": []},
-        {"prefix": "zz", "first_file": 1, "num_files": 10, "skip_files": []},
-        # {"prefix": "circ", "first_file": 1, "num_files": 10, "skip_files": []},
-        # {"prefix": "sprl", "first_file": 1, "num_files": 10, "skip_files": [35]},
-        # {"prefix": "fig8", "first_file": 1, "num_files": 10, "skip_files": [18]},
+        {"prefix": "quad", "first_file": 1, "num_files": 20, "skip_files": []},
+        {"prefix": "s", "first_file": 1, "num_files": 10, "skip_files": []},
+        {"prefix": "s-new", "first_file": 1, "num_files": 10, "skip_files": []},
+        {"prefix": "zz", "first_file": 1, "num_files": 20, "skip_files": []},
+        {"prefix": "circ", "first_file": 1, "num_files": 20, "skip_files": []},
+        {"prefix": "sprl", "first_file": 1, "num_files": 20, "skip_files": [35]},
+        {"prefix": "fig8", "first_file": 1, "num_files": 20, "skip_files": [18]},
         # {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
     ]
 
@@ -505,12 +505,12 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.0001   # Controls how much to change the model in response to error.
+    learning_rate = 0.00001   # Controls how much to change the model in response to error.
     gradient_clip = 1.0
     epochs = 100
-    loss_function = keras.losses.MeanSquaredError()
+    # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
-    # loss_function = keras.losses.Huber()
+    loss_function = keras.losses.Huber()
 
     # Random seed
     tf.random.set_seed(65)
@@ -532,8 +532,8 @@ def main():
 
 
     # Static learning rate
-    optimizer = keras.optimizers.Adam(learning_rate=learning_rate, clipvalue=gradient_clip)
-    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.Adam(learning_rate=learning_rate, clipvalue=gradient_clip)
+    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=gradient_clip)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
     # optimizer = keras.optimizers.Adamax(learning_rate=learning_rate)
 
@@ -549,9 +549,9 @@ def main():
     # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.02), return_sequences=False)(inputs)
+    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)
     # batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.31)(lstm)
+    dropout = keras.layers.Dropout(rate=0.25)(lstm)
 
     # attention = keras.layers.Attention()([dropout, dropout])
 
@@ -567,7 +567,7 @@ def main():
 
     # flatten = keras.layers.Flatten()(attention)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1])(dropout)
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1],kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
