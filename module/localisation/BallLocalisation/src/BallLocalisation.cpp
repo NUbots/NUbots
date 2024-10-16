@@ -63,7 +63,7 @@ namespace module::localisation {
 
         using message::localisation::Ball;
 
-        on<Configuration, Trigger<GlobalConfig>>("BallLocalisation.yaml").then([this](const Configuration& config, const GlobalConfig& global_config) {
+        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
             // Set our measurement noise
             cfg.ukf.noise.measurement.position =
@@ -106,8 +106,6 @@ namespace module::localisation {
             cfg.ignore_guess_delay = config["ignore_guess_delay"].as<double>();
 
             team_guesses.resize(cfg.max_robots);
-
-            player_id = global_config.player_id;
 
             last_time_update = NUClear::clock::now();
         });
@@ -174,11 +172,41 @@ namespace module::localisation {
                         rejection_count = 0;
                     }
 
-                    int count = 0;
+                    std::vector<Eigen::Vector3d> to_check;
 
-                    for (TeamGuess guess: team_guesses) {
+                    for (auto guess: team_guesses) {
+
+                        if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - guess.last_heard).count()
+                        < cfg.ignore_guess_delay) {
+                            to_check.emplace_back(guess.rBWw);
+                        }
+                    }
+
+                    if (to_check.size() > 0) {
+
+                        Eigen::Vector3d error = Eigen::Vector3d::Zero();
+
+                        if (to_check.size() > 1) {
+                            for (auto i = to_check.begin() + 1; i!=to_check.end(); ++i) {
+                                error -= (*to_check.begin() - *i).cwiseAbs();
+                            }
+                        }
+
+                        if (error.norm() < 1.0) {
+
+                            Eigen::Vector3d average = Eigen::Vector3d::Zero();
+
+                            for (auto guess: to_check) {
+                                average += guess;
+                            }
+
+                            average /= to_check.size();
+
+                            log<NUClear::INFO>("Best Guess: ", average.x(), average.y(), average.z());
+                        }
 
                     }
+
 
                     if (accept_ball) {
                         // Compute the time since the last update (in seconds)

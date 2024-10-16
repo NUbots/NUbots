@@ -106,8 +106,6 @@ namespace module::localisation {
             Eigen::Vector3d rBWw;
         };
 
-        uint player_id = 0;
-
         std::vector<TeamGuess> team_guesses {};
 
     public:
