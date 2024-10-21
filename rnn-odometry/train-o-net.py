@@ -74,14 +74,14 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: s shaped
     directories = [
-        {"prefix": "quad", "first_file": 1, "num_files": 20, "skip_files": []},
-        {"prefix": "s", "first_file": 1, "num_files": 10, "skip_files": []},
-        {"prefix": "s-new", "first_file": 1, "num_files": 10, "skip_files": []},
-        {"prefix": "zz", "first_file": 1, "num_files": 20, "skip_files": []},
-        {"prefix": "circ", "first_file": 1, "num_files": 20, "skip_files": []},
-        {"prefix": "sprl", "first_file": 1, "num_files": 20, "skip_files": [35]},
-        {"prefix": "fig8", "first_file": 1, "num_files": 20, "skip_files": [18]},
-        # {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
+        {"prefix": "quad", "first_file": 1, "num_files": 60, "skip_files": []},
+        {"prefix": "s", "first_file": 1, "num_files": 30, "skip_files": []},
+        {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
+        {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
+        {"prefix": "circ", "first_file": 1, "num_files": 60, "skip_files": []},
+        {"prefix": "sprl", "first_file": 1, "num_files": 60, "skip_files": [35]},
+        {"prefix": "fig8", "first_file": 1, "num_files": 60, "skip_files": [18]},
+        {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
     ]
 
     imu = []
@@ -486,10 +486,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     # system_sample_rate = 115
-    sequence_length = 64   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = 32   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     # sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     # sampling_rate = 1                           # Used for downsampling
-    batch_size = 128                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 256                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Partition the training and validation datasets into sequences
     input_data_train, input_targets_train = partition_dataset(input_data_train, input_targets_train, sequence_length)
@@ -505,7 +505,7 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.00001   # Controls how much to change the model in response to error.
+    learning_rate = 0.000125   # Controls how much to change the model in response to error.
     gradient_clip = 1.0
     epochs = 100
     # loss_function = keras.losses.MeanSquaredError()
@@ -525,7 +525,7 @@ def main():
     # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
 
     # LR schedule to decay the learning rate over a given number of steps (epochs calculated above), then it will reset.
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=0.9, alpha=1e-12)
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1, alpha=1e-10)
 
     # LR schedule to decrease learning rate by 0.1 after 100 epochs
     # lr_schedule = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=learning_rate, decay_steps=decay_over_steps, decay_rate=0.01, staircase=True)
@@ -536,9 +536,12 @@ def main():
     optimizer = keras.optimizers.AdamW(learning_rate=learning_rate, clipnorm=gradient_clip)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
     # optimizer = keras.optimizers.Adamax(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.Nadam(learning_rate=learning_rate, clipnorm=gradient_clip)
+    # optimizer = keras.optimizers.Lion(learning_rate=learning_rate, clipnorm=gradient_clip)
+    # optimizer = keras.optimizers.Ftrl(learning_rate=learning_rate, clipnorm=gradient_clip)
 
     # Used with the LR schedule
-    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=gradient_clip)
     # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
 
     # Model Layers
@@ -549,9 +552,10 @@ def main():
     # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)
+    lstm = keras.layers.LSTM(18, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)
     # batch_norm = keras.layers.BatchNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.25)(lstm)
+    layer_norm = keras.layers.LayerNormalization()(lstm)
+    dropout = keras.layers.Dropout(rate=0.215)(layer_norm)
 
     # attention = keras.layers.Attention()([dropout, dropout])
 
@@ -576,7 +580,7 @@ def main():
     # Callbacks
     # early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     # checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
-    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=1e-12, verbose=1)
+    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-6, verbose=1)
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     log_dir = "logs/fit/" + timestamp
