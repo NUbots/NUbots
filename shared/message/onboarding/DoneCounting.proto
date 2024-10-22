@@ -2,5 +2,6 @@ syntax = "proto3";
 
 package message.onboarding;
 
-message Ping{
+message DoneCounting{
+    int32 final_sum = 1;
 }

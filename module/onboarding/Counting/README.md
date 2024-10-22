@@ -1,4 +1,4 @@
-# Ping
+# Counting
 
 ## Description
 

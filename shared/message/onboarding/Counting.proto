@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package message.onboarding;
+
+message Counting{
+    int32 iterations_left = 1;
+    int32 sum = 2;
+}
