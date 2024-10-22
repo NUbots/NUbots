@@ -934,6 +934,3 @@ SCENARIO("Conversion from protobuf message to Neutron is consistent", "[nuclear]
         }
     }
 }
-
-// woah awesomeness
-// gitkraken le works awesomely
