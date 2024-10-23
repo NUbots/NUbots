@@ -30,7 +30,7 @@ def main():
 
         return np.array(inputs), np.array(outputs)
 
-    def convert_to_relative(data):
+    def convert_relative_to_start(data):
         """
         This function takes a dataset of world coordinates and converts it to relative positions
         based on the starting position (assumed to be the first index).
@@ -47,6 +47,26 @@ def main():
 
         # Calculate relative positions for all data points (excluding starting position)
         relative_positions = data - starting_position
+
+        return relative_positions
+
+    def convert_relative_to_previous(data):
+        """
+        This function takes a dataset of world coordinates and converts it to relative positions
+        based on the previous position.
+
+        Args:
+            data: A NumPy array of shape (num_datapoints, 3) representing world coordinates.
+
+        Returns:
+            A NumPy array of shape (num_datapoints, 3) representing relative positions.
+        """
+
+        # Calculate the difference between consecutive coordinates
+        relative_positions = np.diff(data, axis=0)
+
+        # Prepend a row of zeros to maintain the same shape as the input
+        relative_positions = np.vstack([np.zeros((1, data.shape[1])), relative_positions])
 
         return relative_positions
 
@@ -74,14 +94,14 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: s shaped
     directories = [
-        {"prefix": "quad", "first_file": 1, "num_files": 60, "skip_files": []},
-        {"prefix": "s", "first_file": 1, "num_files": 30, "skip_files": []},
+        # {"prefix": "quad", "first_file": 1, "num_files": 60, "skip_files": []},
+        {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
         {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
-        {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
-        {"prefix": "circ", "first_file": 1, "num_files": 60, "skip_files": []},
-        {"prefix": "sprl", "first_file": 1, "num_files": 60, "skip_files": [35]},
-        {"prefix": "fig8", "first_file": 1, "num_files": 60, "skip_files": [18]},
-        {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
+        # {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
+        # {"prefix": "circ", "first_file": 1, "num_files": 60, "skip_files": []},
+        # {"prefix": "sprl", "first_file": 1, "num_files": 60, "skip_files": [35]},
+        # {"prefix": "fig8", "first_file": 1, "num_files": 60, "skip_files": [18]},
+        # {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
     ]
 
     imu = []
@@ -121,7 +141,8 @@ def main():
 
             truth_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-truth-{i}.npy")
             # Convert the loaded chunk of truth data to relative positions
-            # truth_data = convert_to_relative(truth_data)
+            # truth_data = convert_relative_to_start(truth_data)
+            truth_data = convert_relative_to_previous(truth_data)
             truth_all.append(truth_data)
 
             # # Plot the data as it's loaded
@@ -164,9 +185,9 @@ def main():
             truth_start_end_indicator.append(indicator_chunk)
 
     # Need to do the relative conversions here
-    # Use the convert_to_relative function to convert the truth data to relative positions
+    # Use the convert_relative_to_start function to convert the truth data to relative positions
     # NOTE: Htw is already relative to the starting point!! But the starting point can vary if not converted
-    # truth_all = [convert_to_relative(truth) for truth in truth_all]
+    # truth_all = [convert_relative_to_start(truth) for truth in truth_all]
 
     # Smoothing should be done here
     # Loop through each truth array and smooth
@@ -363,7 +384,7 @@ def main():
     input_targets_train = train_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
-    # input_targets_train = convert_to_relative(input_targets_train)
+    # input_targets_train = convert_relative_to_start(input_targets_train)
 
     # Validation
     # Use when using the servos
@@ -374,7 +395,7 @@ def main():
     input_targets_validate = validate_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
-    # input_targets_validate = convert_to_relative(input_targets_validate)
+    # input_targets_validate = convert_relative_to_start(input_targets_validate)
 
     # Testing
     # Use when using the servos
@@ -385,7 +406,7 @@ def main():
     input_targets_test = test_arr[:, 6:]  # truth
 
     # Convert sliced targets to relative position
-    # input_targets_test = convert_to_relative(input_targets_test)
+    # input_targets_test = convert_relative_to_start(input_targets_test)
 
     # Plot and inspect after splitting
     # num_channels = input_targets_train.shape[1]
@@ -507,7 +528,7 @@ def main():
     # Model parameters
     learning_rate = 0.000125   # Controls how much to change the model in response to error.
     gradient_clip = 1.0
-    epochs = 100
+    epochs = 250
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
     loss_function = keras.losses.Huber()
@@ -552,10 +573,10 @@ def main():
     # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    lstm = keras.layers.LSTM(18, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)
+    lstm = keras.layers.LSTM(16, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)
     # batch_norm = keras.layers.BatchNormalization()(lstm)
     layer_norm = keras.layers.LayerNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.215)(layer_norm)
+    dropout = keras.layers.Dropout(rate=0.25)(layer_norm)
 
     # attention = keras.layers.Attention()([dropout, dropout])
 
