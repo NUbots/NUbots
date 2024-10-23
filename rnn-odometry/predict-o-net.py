@@ -36,6 +36,9 @@ def convert_to_absolute(relative_data, initial_position):
     # Initialize the array for absolute positions
     absolute_positions = np.zeros_like(relative_data)
 
+    # Ensure initial_position has the correct shape
+    initial_position = initial_position[:relative_data.shape[1]]
+
     # Set the first position to the initial position
     absolute_positions[0] = initial_position
 
@@ -52,7 +55,7 @@ test_targets = np.load('datasets/input_targets_test.npy')
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20241022-213532')
+model = load_model('models/model-20241023-194313')
 
 # Partition dataset
 sequence_length = 32
@@ -72,6 +75,10 @@ r2 = r2_score(test_targets, predictions)
 print('Mean Absolute Error:', mae)
 print('R2 Score:', r2)
 
+# Ensure initial_position has the correct shape
+initial_position = test_data[0, 0, :test_targets.shape[1]]
+predictions = convert_to_absolute(predictions, initial_position)
+test_targets = convert_to_absolute(test_targets, initial_position)
 
 # Plot predictions vs targets
 # plt.plot(predictions, label='predictions')
