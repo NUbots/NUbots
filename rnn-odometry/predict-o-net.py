@@ -20,18 +20,42 @@ def partition_dataset(features, targets, sequence_length):
 
     return np.array(inputs), np.array(outputs)
 
+def convert_to_absolute(relative_data, initial_position):
+    """
+    This function takes a dataset of relative coordinates and converts it back to absolute positions
+    based on the initial position.
+
+    Args:
+        relative_data: A NumPy array of shape (num_datapoints, 3) representing relative coordinates.
+        initial_position: A NumPy array of shape (3,) representing the initial absolute position.
+
+    Returns:
+        A NumPy array of shape (num_datapoints, 3) representing absolute positions.
+    """
+
+    # Initialize the array for absolute positions
+    absolute_positions = np.zeros_like(relative_data)
+
+    # Set the first position to the initial position
+    absolute_positions[0] = initial_position
+
+    # Cumulatively sum the relative positions to get absolute positions
+    for i in range(1, relative_data.shape[0]):
+        absolute_positions[i] = absolute_positions[i-1] + relative_data[i]
+
+    return absolute_positions
 
 # Load data
-test_data = np.load('datasets/input_data_train.npy')
-test_targets = np.load('datasets/input_targets_train.npy')
+test_data = np.load('datasets/input_data_test.npy')
+test_targets = np.load('datasets/input_targets_test.npy')
 # test_data = test_data[:4000]
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20241013-161411')
+model = load_model('models/model-20241022-213532')
 
 # Partition dataset
-sequence_length = 64
+sequence_length = 32
 test_data, test_targets = partition_dataset(test_data, test_targets, sequence_length)
 
 # Predict
