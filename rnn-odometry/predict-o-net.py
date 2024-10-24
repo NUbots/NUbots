@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from keras.models import load_model
-from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -55,7 +55,7 @@ test_targets = np.load('datasets/input_targets_test.npy')
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20241023-194313')
+model = load_model('models/model-20241024-184828')
 
 # Partition dataset
 sequence_length = 32
@@ -70,8 +70,11 @@ print('loaded target set shape:', test_targets.shape)
 print('Sequenced target set shape: ', test_targets.shape)
 
 # Calculate and print error metrics
+mape = mean_absolute_percentage_error(test_targets, predictions)
 mae = mean_absolute_error(test_targets, predictions)
 r2 = r2_score(test_targets, predictions)
+
+print('Mean Absolute Percentage Error:', mape)
 print('Mean Absolute Error:', mae)
 print('R2 Score:', r2)
 
