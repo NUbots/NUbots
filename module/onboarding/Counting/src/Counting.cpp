@@ -21,7 +21,7 @@ Counting::Counting(std::unique_ptr<NUClear::Environment> environment) : Reactor(
         this->log_level = config["log_level"].as<NUClear::LogLevel>();
     });
 
-    on<Trigger<StartCounting>>().then([this](const StartCounting& start_counting_msg) {
+    on<Trigger<StartCounting>>().then([this](const StartCounting& start_counting_msg) {\
         auto counting_msg = std::make_unique<Counting>();
 
         counting_msg->iterations_left = start_counting_msg.total_iterations;

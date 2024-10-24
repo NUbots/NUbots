@@ -11,7 +11,7 @@ nuclear_role(
   extension::Director
   actuation::Kinematics
   actuation::Servos
-  onboarding::StartCounting
-  onboarding::Counting
   onboarding::DoneCounting
+  onboarding::Counting
+  onboarding::StartCounting
 )

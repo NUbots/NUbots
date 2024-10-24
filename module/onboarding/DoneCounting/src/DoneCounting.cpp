@@ -18,7 +18,7 @@ DoneCounting::DoneCounting(std::unique_ptr<NUClear::Environment> environment) : 
     });
 
     on<Trigger<DoneCounting>>().then([this](const DoneCounting& done_counting_msg) {
-
+        log<NUClear::INFO>("Received DoneCounting message: " + std::to_string(done_counting_msg.final_sum));
     }); 
 }
 
