@@ -66,7 +66,7 @@ namespace extension::behaviour {
                     classification,
                     [reaction](const RunReason& run_reason,
                                const std::shared_ptr<const void>& data,
-                               const GroupInfo& info) -> Lock {
+                               const std::shared_ptr<GroupInfo>& info) -> Lock {
                         auto reason_lock = information::RunReasonStore::set(run_reason);
                         auto run_lock    = information::TaskDataStore<T>::set(
                             std::make_shared<std::pair<long unsigned int, std::shared_ptr<const T>>>(

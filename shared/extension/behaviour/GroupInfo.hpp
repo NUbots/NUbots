@@ -66,7 +66,7 @@ namespace extension::behaviour {
         struct GroupInfoStore {
         private:
             using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<const GroupInfo>>;
-            using GlobalStore = NUClear::util::TypeMap<T, T, const GroupInfo>;
+            using GlobalStore = NUClear::util::TypeMap<T, T, const std::shared_ptr<GroupInfo>>;
 
         public:
             /**
@@ -78,7 +78,7 @@ namespace extension::behaviour {
              * @return a lock object that once destroyed will upgrade the data to the global store and clear the thread
              * store
              */
-            static Lock set(const GroupInfo info) {
+            static Lock set(const std::shared_ptr<GroupInfo> info) {
                 auto lock          = Lock(&info, [info](const void*) {
                     GlobalStore::set(info);
                     ThreadStore::value = nullptr;
