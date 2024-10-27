@@ -55,7 +55,7 @@ namespace module::strategy {
         });
 
         on<Provide<ReadyTask>, With<Stability>>().then([this](const RunInfo& info, const Stability& stability) {
-            if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+            if (info.run_reason == RunReason::NEW_TASK) {
                 // Set the timer and emit a walk Task
                 start_ready_time = NUClear::clock::now();
                 emit<Task>(std::make_unique<Walk>(

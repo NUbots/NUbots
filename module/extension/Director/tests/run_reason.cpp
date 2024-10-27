@@ -43,14 +43,14 @@ namespace {
 
     class TestReactor : public TestBase<TestReactor> {
     public:
-        std::string decode_reason(const RunInfo::RunReason& reason) {
+        std::string decode_reason(const RunReason& reason) {
             switch (reason) {
-                case RunInfo::RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
-                case RunInfo::RunReason::NEW_TASK: return "NEW_TASK"; break;
-                case RunInfo::RunReason::STARTED: return "STARTED"; break;
-                case RunInfo::RunReason::STOPPED: return "STOPPED"; break;
-                case RunInfo::RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
-                case RunInfo::RunReason::PUSHED: return "PUSHED"; break;
+                case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
+                case RunReason::NEW_TASK: return "NEW_TASK"; break;
+                case RunReason::STARTED: return "STARTED"; break;
+                case RunReason::STOPPED: return "STOPPED"; break;
+                case RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
+                case RunReason::PUSHED: return "PUSHED"; break;
                 default: return "ERROR"; break;
             };
         }
@@ -63,12 +63,12 @@ namespace {
 
                 // If we get a new task then emit a subtask
                 // When we re-run because of SUBTASK_DONE we won't re-emit this subtask making it stop
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                if (info.run_reason == RunReason::NEW_TASK) {
                     events.push_back("emitting subtask");
                     emit<Task>(std::make_unique<Subtask>());
                 }
 
-                if (info.run_reason == RunInfo::RunReason::OTHER_TRIGGER) {
+                if (info.run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("emitting simple task done");
                     emit<Task>(std::make_unique<Done>());
                 }

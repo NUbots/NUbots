@@ -62,7 +62,7 @@ namespace module::skill {
 
         on<Provide<SayTask>>().then([this](const SayTask& say, const RunInfo& info) {
             // Only say text if it is a new task
-            if (info.run_reason == RunInfo::NEW_TASK) {
+            if (info.run_reason == NEW_TASK) {
                 // Play the requested audio using python command-line tool mimic3 and aplay
                 // Sanitize the text to remove special characters which could break the command
                 std::string sanitized_text         = say.text;

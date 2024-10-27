@@ -58,7 +58,7 @@ namespace {
 
             on<Provide<PrimaryTask>, Trigger<TriggerTest>>().then([this](const RunInfo& info) {
                 // Run SubTask when task is trigger, but not when the TriggerTest triggers the provider
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                if (info.run_reason == RunReason::NEW_TASK) {
                     emit<Task>(std::make_unique<SubTask>("primary task"));
                 }
             });

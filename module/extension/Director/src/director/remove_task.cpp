@@ -32,7 +32,7 @@ namespace module::extension {
 
     using component::DirectorTask;
     using component::Provider;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::RunReason;
     using ::extension::behaviour::information::RunReasonStore;
 
     void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
@@ -68,7 +68,7 @@ namespace module::extension {
                 for (auto& provider : group.providers) {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
-                        auto run_reason_lock  = RunReasonStore::set(RunInfo::RunReason::STOPPED);
+                        auto run_reason_lock  = RunReasonStore::set(RunReason::STOPPED);
                         powerplant.submit(provider->reaction->get_task(true));
                     }
                 }

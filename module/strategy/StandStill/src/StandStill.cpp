@@ -48,7 +48,7 @@ namespace module::strategy {
 
         on<Provide<StandStillTask>>().then([this](const RunInfo& info) {
             // If we haven't emitted yet, then emit a walk task
-            if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+            if (info.run_reason == RunReason::NEW_TASK) {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             }
             else {
