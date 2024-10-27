@@ -53,9 +53,6 @@ namespace module::extension {
             TaskList tasks;
         };
 
-        /// @brief  Mutex to prevent race conditions
-        std::recursive_mutex director_mutex{};
-
         // Only use a single thread at a time for the Director
         static constexpr int concurrency = 1;
 
