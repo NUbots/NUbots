@@ -925,7 +925,7 @@ namespace module::platform {
             image->name           = camera.name;
             image->dimensions.x() = camera.width;
             image->dimensions.y() = camera.height;
-            image->format         = fourcc("BGR3");  // Change to "JPEG" when webots compression is implemented
+            image->format         = fourcc("RGBA");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
