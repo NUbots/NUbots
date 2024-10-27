@@ -119,14 +119,14 @@ namespace module::skill {
                 kick_generator.update(time_delta, kick.leg);
 
                 // If this is not a new task and time has elapsed, then we are done kicking.
-                if ((info.run_reason != RunInfo::RunReason::NEW_TASK)
+                if ((info.run_reason != RunReason::NEW_TASK)
                     && kick_generator.get_time() == kick_generator.get_duration()) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
 
                 // If this is a new task and time has elapsed, then we need to start a new kick
-                if ((info.run_reason == RunInfo::RunReason::NEW_TASK)
+                if ((info.run_reason == RunReason::NEW_TASK)
                     && kick_generator.get_time() == kick_generator.get_duration()) {
                     // Start a new kick
                     kick_generator.reset();

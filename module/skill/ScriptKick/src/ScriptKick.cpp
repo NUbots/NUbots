@@ -53,12 +53,12 @@ namespace module::skill {
 
         on<Provide<Kick>, Needs<LimbsSequence>>().then([this](const Kick& kick, const RunInfo& info) {
             // If the script has finished executing, then this is Done
-            if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+            if (info.run_reason == RunReason::SUBTASK_DONE) {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
             // If it isn't a new task, don't do anything
-            if (info.run_reason != RunInfo::RunReason::NEW_TASK) {
+            if (info.run_reason != RunReason::NEW_TASK) {
                 emit<Task>(std::make_unique<Idle>());
                 return;
             }

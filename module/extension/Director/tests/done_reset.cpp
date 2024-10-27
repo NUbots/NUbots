@@ -45,14 +45,14 @@ namespace {
 
     class TestReactor : public TestBase<TestReactor> {
     public:
-        std::string decode_reason(const RunInfo::RunReason& reason) {
+        std::string decode_reason(const RunReason& reason) {
             switch (reason) {
-                case RunInfo::RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
-                case RunInfo::RunReason::NEW_TASK: return "NEW_TASK"; break;
-                case RunInfo::RunReason::STARTED: return "STARTED"; break;
-                case RunInfo::RunReason::STOPPED: return "STOPPED"; break;
-                case RunInfo::RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
-                case RunInfo::RunReason::PUSHED: return "PUSHED"; break;
+                case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
+                case RunReason::NEW_TASK: return "NEW_TASK"; break;
+                case RunReason::STARTED: return "STARTED"; break;
+                case RunReason::STOPPED: return "STOPPED"; break;
+                case RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
+                case RunReason::PUSHED: return "PUSHED"; break;
                 default: return "ERROR"; break;
             };
         }
@@ -66,7 +66,7 @@ namespace {
                                      + " a.done: " + std::to_string(a.done) + " b.done: " + std::to_string(b.done));
 
                     // Emit tasks if new task happens
-                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                    if (info.run_reason == RunReason::NEW_TASK) {
                         events.push_back("emitting SubtaskA and SubtaskB");
                         emit<Task>(std::make_unique<SubtaskA>());
                         emit<Task>(std::make_unique<SubtaskB>());
@@ -77,7 +77,7 @@ namespace {
                 });
 
             on<Provide<SubtaskA>, Trigger<PokeA>>().then([this](const RunInfo& info) {
-                if (info.run_reason == RunInfo::RunReason::OTHER_TRIGGER) {
+                if (info.run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("SubtaskA done");
                     emit<Task>(std::make_unique<Done>());
                 }
@@ -87,7 +87,7 @@ namespace {
             });
 
             on<Provide<SubtaskB>, Trigger<PokeB>>().then([this](const RunInfo& info) {
-                if (info.run_reason == RunInfo::RunReason::OTHER_TRIGGER) {
+                if (info.run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("SubtaskB done");
                     emit<Task>(std::make_unique<Done>());
                 }

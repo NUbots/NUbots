@@ -51,7 +51,7 @@ namespace module::skill {
         });
 
         on<Provide<DiveTask>>().then([this](const DiveTask& dive, const RunInfo& info) {
-            if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+            if (info.run_reason == RunReason::SUBTASK_DONE) {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }

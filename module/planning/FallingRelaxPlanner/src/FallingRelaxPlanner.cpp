@@ -85,7 +85,7 @@ namespace module::planning {
         on<Provide<RelaxWhenFalling>, Uses<BodySequence>, Trigger<Sensors>>().then(
             [this](const RunInfo& info, const Uses<BodySequence>& body, const Sensors& sensors) {
                 // OTHER_TRIGGER means we ran because of a sensors update
-                if (info.run_reason == RunInfo::OTHER_TRIGGER) {
+                if (info.run_reason == OTHER_TRIGGER) {
                     auto& a = sensors.accelerometer;
                     auto& g = sensors.gyroscope;
 

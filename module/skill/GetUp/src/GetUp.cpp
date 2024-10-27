@@ -63,7 +63,7 @@ namespace module::skill {
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then(
             [this](const RunInfo& info, const Sensors& sensors) {
                 switch (info.run_reason) {
-                    case RunInfo::NEW_TASK: {
+                    case NEW_TASK: {
                         // If we're running getup we fell over
                         emit(std::make_unique<Stability>(Stability::FALLEN));
 
@@ -116,7 +116,7 @@ namespace module::skill {
                         }
 
                     } break;
-                    case RunInfo::SUBTASK_DONE: {
+                    case SUBTASK_DONE: {
                         // When the subtask is done, we are done
                         log<NUClear::INFO>("Finished getting up");
                         emit(std::make_unique<Stability>(Stability::STANDING));

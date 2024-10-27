@@ -90,7 +90,7 @@ namespace module::actuation {
         on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>, Priority::HIGH>().then(
             [this](const LeftLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (info.run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
@@ -132,7 +132,7 @@ namespace module::actuation {
         on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>, Priority::HIGH>().then(
             [this](const RightLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (info.run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
@@ -174,7 +174,7 @@ namespace module::actuation {
         on<Provide<HeadIK>, With<KinematicsModel>, Needs<Head>>().then(
             [this](const HeadIK& head_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the head is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (info.run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
