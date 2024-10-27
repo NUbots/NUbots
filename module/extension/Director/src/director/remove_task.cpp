@@ -32,7 +32,9 @@ namespace module::extension {
 
     using component::DirectorTask;
     using component::Provider;
+    using ::extension::behaviour::GroupInfo;
     using ::extension::behaviour::RunReason;
+    using ::extension::behaviour::information::GroupInfoStore;
     using ::extension::behaviour::information::RunReasonStore;
 
     void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
