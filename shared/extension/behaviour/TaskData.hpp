@@ -44,7 +44,7 @@ namespace extension::behaviour {
         struct TaskDataStore {
         private:
             using TaskData    = std::pair<NUClear::id_t, std::shared_ptr<const T>>;
-            using ThreadStore = NUClear::dsl::store::ThreadStore<TaskData>;
+            using ThreadStore = NUClear::dsl::store::ThreadStore<const std::shared_ptr<TaskData>>;
             using GlobalStore = NUClear::util::TypeMap<T, T, TaskData>;
 
         public:
