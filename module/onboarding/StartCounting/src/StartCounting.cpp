@@ -22,7 +22,7 @@ StartCounting::StartCounting(std::unique_ptr<NUClear::Environment> environment) 
         auto start_counting_msg = std::make_unique<StartCounting>();
 
         start_counting_msg->total_iterations = 10;
-        start_counting_msg->starting_sum = 0;
+        start_counting_msg->starting_sum = 1;
 
         emit(start_counting_msg);
     });

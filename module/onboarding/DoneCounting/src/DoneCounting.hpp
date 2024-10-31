@@ -3,9 +3,11 @@
 
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
+
 namespace module::onboarding {
 
-class DoneCounting : public NUClear::Reactor {
+class DoneCounting : public ::extension::behaviour::BehaviourReactor {
 private:
     /// @brief Stores configuration values
     struct Config {
