@@ -69,10 +69,10 @@ namespace extension::behaviour {
             current_scope = previous_scope;
 
             // Emit all the tasks that were accumulated in this scope
-            reaction_task.parent->reactor.emit(std::make_unique<commands::TaskPack>(reaction_task.parent->id,
-                                                                                    reaction_task.id,
-                                                                                    false,
-                                                                                    std::move(*tasks)));
+            reaction_task.parent->reactor.emit(std::make_unique<commands::BehaviourTasks>(reaction_task.parent->id,
+                                                                                          reaction_task.id,
+                                                                                          false,
+                                                                                          std::move(*tasks)));
         }
 
         template <typename T>
@@ -92,7 +92,7 @@ namespace extension::behaviour {
             /// Root tasks emit the task immediately as a single pack
             else {
                 powerplant.emit(
-                    std::make_unique<commands::TaskPack>(0, 0, true, std::vector<commands::BehaviourTask>{task}));
+                    std::make_unique<commands::BehaviourTasks>(0, 0, true, std::vector<commands::BehaviourTask>{task}));
             }
         }
 
