@@ -60,7 +60,7 @@ namespace module::extension::component {
             , dying(false) {}
 
         /// The Provider type this task is for
-        std::type_index type;
+        const std::type_index type;
         /// The Provider id of the requester
         uint64_t requester_id;
         /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)

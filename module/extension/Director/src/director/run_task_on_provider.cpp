@@ -37,7 +37,7 @@ namespace module::extension {
     using ::extension::behaviour::information::RunReasonStore;
     using ::extension::behaviour::information::TaskDataStore;
 
-    void Director::run_task_on_provider(const std::shared_ptr<DirectorTask>& task,
+    void Director::run_task_on_provider(const std::shared_ptr<const DirectorTask>& task,
                                         const std::shared_ptr<component::Provider>& provider,
                                         const RunReason& run_reason) {
 
@@ -45,7 +45,7 @@ namespace module::extension {
             // Store run reason
             auto lock_run_reason = RunReasonStore::set(run_reason);
             // Store task data
-            auto lock_task = TaskDataStore<provider->type>::set(
+            auto lock_task = TaskDataStore<task->type>::set(
                 std::make_shared<std::pair<long unsigned int, std::shared_ptr<const DirectorTask>>>(
                     std::make_pair(task->requester_id, task)));
 
