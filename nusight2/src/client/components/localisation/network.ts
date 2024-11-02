@@ -13,6 +13,7 @@ import { RobotModel } from "../robot/model";
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
+import { Line } from "./robot_model";
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
@@ -25,6 +26,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.localisation.AssociationLines, this.onAssociationLines);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
   }
@@ -48,6 +50,16 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+  };
+
+  @action onAssociationLines = (robotModel: RobotModel, associationLines: message.localisation.AssociationLines) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.association_lines = associationLines.lines.map((line) => {
+      return new Line({
+        start: Vector3.from(line.start),
+        end: Vector3.from(line.end),
+      });
+    });
   };
 
   @action

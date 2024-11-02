@@ -25,6 +25,8 @@ import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
 
+import * as THREE from "three";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -395,6 +397,8 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           color={robot.color}
         />
       )}
+
+      <AssociationLines model={model} />
     </object3D>
   );
 });
@@ -418,5 +422,33 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>
 ));
+
+const AssociationLines = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible &&
+          robot.association_lines && (
+            <object3D key={robot.id}>
+              {robot.association_lines.map((line, index) => {
+                const start = new THREE.Vector3(line.start.x, line.start.y, 0.005);
+                const end = new THREE.Vector3(line.end.x, line.end.y, 0.005);
+
+                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+
+                return (
+                  <line key={index}>
+                    <bufferGeometry attach="geometry" {...geometry} />
+                    <lineBasicMaterial attach="material" color="red" linewidth={4} />
+                  </line>
+                );
+              })}
+            </object3D>
+          ),
+      )}
+    </>
+  );
+};
 
 export default LocalisationView;
