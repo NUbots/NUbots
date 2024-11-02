@@ -350,7 +350,7 @@ namespace module::extension {
          * @param provider      the provider that we are running the task on
          * @param run_reason    the reason that we are running this task
          */
-        void run_task_on_provider(const std::shared_ptr<const component::DirectorTask>& task,
+        void run_task_on_provider(const std::shared_ptr<component::DirectorTask>& task,
                                   const std::shared_ptr<component::Provider>& provider,
                                   const ::extension::behaviour::RunReason& run_reason);
 
