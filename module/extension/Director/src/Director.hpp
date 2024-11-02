@@ -44,8 +44,14 @@ namespace module::extension {
     public:
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<component::DirectorTask>>;
+
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
-        using TaskPack = std::pair<std::shared_ptr<component::Provider>, TaskList>;
+        struct TaskPack {
+            /// The provider that emitted this task pack
+            std::shared_ptr<component::Provider> provider;
+            /// The tasks that were emitted by the provider
+            TaskList tasks;
+        };
 
         /// @brief  Mutex to prevent race conditions
         std::recursive_mutex director_mutex{};

@@ -36,7 +36,7 @@ namespace module::extension {
     using component::ProviderGroup;
     using ::extension::Configuration;
     using ::extension::behaviour::RunReason;
-    using ::extension::behaviour::commands::BehaviourTask;
+    using ::extension::behaviour::commands::BehaviourTasks;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::NeedsExpression;
     using ::extension::behaviour::commands::ProviderDone;
@@ -256,24 +256,26 @@ namespace module::extension {
         });
 
         // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated",
-                                                                        [this](const StateUpdate& update) {
-                                                                            // Get the group that had a state update
-                                                                            auto p  = providers.at(update.provider_id);
-                                                                            auto& g = p->group;
+        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated", [this](const StateUpdate& u) {
+            // Get the group that had a state update
+            auto p  = providers.at(u.provider_id);
+            auto& g = p->group;
 
-                                                                            // Go check if this state update has changed
-                                                                            // any of the tasks that are queued
-                                                                            reevaluate_group(g);
-                                                                        });
+            // Go check if this state update has changed
+            // any of the tasks that are queued
+            reevaluate_group(g);
+        });
 
         // We have a new task pack to run
-        on<Trigger<std::vector<BehaviourTask>>, Sync<Director>, Pool<Director>>().then(
-            "Run Task Pack",
-            [this](const std::vector<BehaviourTask>& pack) {
-                // Convert to a Director TaskPack
-                run_task_pack(pack);
-            });
+        on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>>().then("Run", [this](const BehaviourTasks& p) {
+            // Convert the task pack to a Director task pack
+            TaskPack director_pack;
+
+            // TODO get the provider from the pack
+            // TODO copy over all the tasks from the pack
+
+            run_task_pack(director_pack);
+        });
     }
 
     thread_local Director::PackBuilder Director::pack_builder;

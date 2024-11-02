@@ -221,18 +221,18 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Represents a pack of tasks that are emitted by a single provider and should be considered as siblings.
+     * Represents a group of tasks that are emitted by a single provider and should be considered as siblings.
      */
-    struct TaskPack {
+    struct BehaviourTasks {
         /**
          *
          * @param requester_id_         the id of the reaction that emitted this task
          * @param requester_task_id_    the task_id of the reaction task that emitted this
          */
-        TaskPack(const NUClear::id_t& requester_id_,
-                 const NUClear::id_t& requester_task_id_,
-                 const bool& root_,
-                 std::vector<BehaviourTask>&& tasks_)
+        BehaviourTasks(const NUClear::id_t& requester_id_,
+                       const NUClear::id_t& requester_task_id_,
+                       const bool& root_,
+                       std::vector<BehaviourTask>&& tasks_)
             : requester_reaction_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , root(root_)
