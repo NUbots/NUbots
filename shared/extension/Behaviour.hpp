@@ -44,19 +44,20 @@ namespace extension::behaviour {
      * While running in a ProviderScope, the behaviour of task emits will be different.
      */
     struct ProviderScope {
-        ProviderScope(const NUClear::threading::ReactionTask& reaction_task)
+        ProviderScope(NUClear::threading::ReactionTask& reaction_task)
             : reaction_task(reaction_task)
             , previous_scope(std::exchange(current_scope, this))
             , tasks(std::make_unique<std::vector<commands::BehaviourTask>>()) {}
 
-        ProviderScope(ProviderScope&& other) {
-            previous_scope = std::exchange(other.previous_scope, nullptr);
-            task_groups    = std::move(other.task_groups);
-        }
+        ProviderScope(ProviderScope&& other)
+            : reaction_task(other.reaction_task)
+            , previous_scope(std::exchange(other.previous_scope, nullptr))
+            , tasks(std::move(other.tasks)) {}
+
         ProviderScope& operator=(ProviderScope&& other) {
             if (this != &other) {
                 previous_scope = std::exchange(other.previous_scope, nullptr);
-                task_groups    = std::move(other.task_groups);
+                tasks          = std::move(other.tasks);
             }
             return *this;
         }
@@ -101,10 +102,10 @@ namespace extension::behaviour {
         /// another provider
         ProviderScope* previous_scope = nullptr;
         /// The tasks that have been accumulated in this scope
-        std::unique_ptr<std::vector<commands::BehaviourTask>> tasks;
+        std::unique_ptr<std::vector<commands::BehaviourTask>> tasks{};
 
         /// Holds the scope object which is currently active
-        static thread_local ProviderScope* current_scope = nullptr;
+        constexpr static thread_local ProviderScope* current_scope = nullptr;
     };
 
     /**
