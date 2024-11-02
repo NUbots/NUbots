@@ -67,7 +67,7 @@ namespace module::extension {
                 for (auto& provider : group.providers) {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
-                        auto lock = group.set_data(RunReason::STOPPED, active_task->data, group.get_group_info());
+                        auto lock = group.set_data(RunReason::STOPPED, original_task->data, group.get_group_info());
                         powerplant.submit(provider->reaction->get_task(true));
                     }
                 }
