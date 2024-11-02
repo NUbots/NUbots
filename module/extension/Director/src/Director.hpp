@@ -420,9 +420,6 @@ namespace module::extension {
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
         uint64_t unique_id_source = 0;
-
-    public:
-        friend class InformationSource;
     };
 
 }  // namespace module::extension
