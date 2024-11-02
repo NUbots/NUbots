@@ -255,53 +255,6 @@ namespace module::extension {
             add_needs(needs);
         });
 
-        // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
-        // the Provider has finished executing
-        on<Trigger<BehaviourTask>, Inline::ALWAYS>().then("Director Task", [this](const BehaviourTask& t) {
-            // Make our own mutable director task from the behaviour task
-            auto task = std::make_shared<DirectorTask>(t);
-
-            // Root level task, make the pack immediately and send it off to be executed as a root task
-            if (!providers.contains(task->requester_id)) {
-                // Get the root provider from the task root type
-                auto root_provider = get_root_provider(t.root_type);
-
-                // Modify the task we received to look like it came from this provider
-                task->requester_id = root_provider->id;
-                emit(std::make_unique<TaskPack>(root_provider, TaskList{task}));
-            }
-            else {
-                // An error occurred, we should never have a dangling task pack
-                if (pack_builder.task_id != 0 && pack_builder.task_id != task->requester_task_id) {
-                    log<NUClear::ERROR>("A task pack was left dangling when a new task arrived");
-                }
-
-                // Make a new pack if one doesn't exist
-                if (pack_builder.pack == nullptr) {
-                    pack_builder.task_id = task->requester_task_id;
-                    pack_builder.pack    = std::make_unique<TaskPack>();
-                }
-                pack_builder.pack->second.push_back(task);
-            }
-        });
-
-        // This reaction runs when a Provider finishes to send off the task pack to the main director
-        // It should always be triggered from the postcondition of a Provider and executed inline
-        on<Trigger<ProviderDone>, Inline::ALWAYS>().then("Package Tasks", [this](const ProviderDone& done) {
-            if (pack_builder.task_id != done.requester_task_id) {
-                log<NUClear::ERROR>("A task pack was left dangling when a Provider finished");
-                return;
-            }
-
-            // Sort the task pack so highest priority tasks come first
-            // We sort by direct priority not challenge priority since they're all the same pack
-            std::stable_sort(pack_builder.pack->second.rbegin(), pack_builder.pack->second.rend(), direct_priority);
-
-            // Clean up the builder and emit the pack
-            pack_builder.task_id = 0;
-            emit(std::move(pack_builder.pack));
-        });
-
         // A state that we were monitoring is updated, we might be able to run the task now
         on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated",
                                                                         [this](const StateUpdate& update) {
@@ -315,9 +268,12 @@ namespace module::extension {
                                                                         });
 
         // We have a new task pack to run
-        on<Trigger<TaskPack>, Sync<Director>, Pool<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
-            run_task_pack(pack);
-        });
+        on < Trigger<std::vector<BehaviourTask>, Sync<Director>, Pool<Director>>().then(
+            "Run Task Pack",
+            [this](const std::vector<BehaviourTask>& pack) {
+                // Convert to a Director TaskPack
+                run_task_pack(pack);
+            });
     }
 
     thread_local Director::PackBuilder Director::pack_builder;
