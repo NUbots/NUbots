@@ -65,7 +65,7 @@ namespace extension::behaviour {
         template <typename T>
         struct GroupInfoStore {
         private:
-            using ThreadStore = NUClear::dsl::store::ThreadStore<std::shared_ptr<const GroupInfo>>;
+            using ThreadStore = NUClear::dsl::store::ThreadStore<const std::shared_ptr<GroupInfo>>;
             using GlobalStore = NUClear::util::TypeMap<T, T, GroupInfo>;
 
         public:
