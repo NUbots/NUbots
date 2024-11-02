@@ -88,7 +88,7 @@ namespace module::actuation {
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
         on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>, Priority::HIGH>().then(
-            [this](const LeftLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
+            [this](const LeftLegIK& leg_ik, const RunReason& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
@@ -130,7 +130,7 @@ namespace module::actuation {
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
         on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>, Priority::HIGH>().then(
-            [this](const RightLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
+            [this](const RightLegIK& leg_ik, const RunReason& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
@@ -172,7 +172,7 @@ namespace module::actuation {
 
         /// @brief Calculates head kinematics and makes a task for the Head servos
         on<Provide<HeadIK>, With<KinematicsModel>, Needs<Head>>().then(
-            [this](const HeadIK& head_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
+            [this](const HeadIK& head_ik, const RunReason& info, const KinematicsModel& kinematics_model) {
                 // If the head is done moving, then IK is done
                 if (info.run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());

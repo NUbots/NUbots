@@ -52,7 +52,7 @@ namespace module::actuation {
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
             on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
-                [this](const Servo& servo, const RunInfo& info) {
+                [this](const Servo& servo, const RunReason& info) {
                     if (info.run_reason == RunReason::NEW_TASK) {
                         if (log_level <= NUClear::DEBUG) {
                             emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
@@ -81,7 +81,7 @@ namespace module::actuation {
         template <typename Group, typename... Elements>
         void add_group_provider() {
             on<Provide<Group>, Needs<Elements>..., Priority::HIGH>().then(
-                [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
+                [this](const Group& group, const RunReason& info, const Uses<Elements>... elements) {
                     // Check if any subtask is Done
                     if (info.run_reason == RunReason::SUBTASK_DONE) {
                         // If every servo task is done then emit Done (ignore servos that weren't included in the Task
@@ -133,7 +133,7 @@ namespace module::actuation {
             emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(0));
 
             on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Priority::HIGH>().then(
-                [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
+                [this](const Sequence& sequence, const RunReason& info, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {
                         emit<Task>(std::make_unique<Done>());

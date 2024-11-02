@@ -61,7 +61,7 @@ namespace extension::behaviour {
 
         public:
             /**
-             * Set the RunInfo for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.
+             * Set the RunReason for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.
              *
              * @param info the RunReason to set
              *
@@ -77,11 +77,11 @@ namespace extension::behaviour {
              * Retrieves a shared pointer to a current RunReason object.
              *
              * This function returns a shared pointer to the current RunReason object provided by Director.
-             * If the RunReasonStore's value is null, it returns a shared pointer to a new RunInfo  with OTHER_TRIGGER.
-             * Otherwise, it returns a shared pointer to a new RunInfo object that is a copy of the current value in
-             * RunReasonStore.
+             * If the RunReasonStore's value is null, it returns a shared pointer to a new RunReason  with
+             * OTHER_TRIGGER. Otherwise, it returns a shared pointer to a new RunReason object that is a copy of the
+             * current value in RunReasonStore.
              *
-             * @return a shared pointer to the current RunInfo.
+             * @return a shared pointer to the current RunReason.
              */
             static RunReason get() {
                 return ThreadStore::value == nullptr ? RunReason::OTHER_TRIGGER : *ThreadStore::value;

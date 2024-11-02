@@ -108,7 +108,7 @@ namespace module::skill {
         });
 
         on<Provide<Kick>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then(
-            [this](const Kick& kick, const RunInfo& info) {
+            [this](const Kick& kick, const RunReason& info) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)

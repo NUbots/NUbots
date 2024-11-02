@@ -61,7 +61,7 @@ namespace {
             : TestBase<TestReactor>(std::move(environment)) {
 
             on<Provide<SimpleTask>, Uses<SubtaskA>, Uses<SubtaskB>>().then(
-                [this](const RunInfo& info, const Uses<SubtaskA>& a, const Uses<SubtaskB>& b) {
+                [this](const RunReason& info, const Uses<SubtaskA>& a, const Uses<SubtaskB>& b) {
                     events.push_back("SimpleTask " + decode_reason(info.run_reason)
                                      + " a.done: " + std::to_string(a.done) + " b.done: " + std::to_string(b.done));
 
@@ -76,7 +76,7 @@ namespace {
                     }
                 });
 
-            on<Provide<SubtaskA>, Trigger<PokeA>>().then([this](const RunInfo& info) {
+            on<Provide<SubtaskA>, Trigger<PokeA>>().then([this](const RunReason& info) {
                 if (info.run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("SubtaskA done");
                     emit<Task>(std::make_unique<Done>());
@@ -86,7 +86,7 @@ namespace {
                 }
             });
 
-            on<Provide<SubtaskB>, Trigger<PokeB>>().then([this](const RunInfo& info) {
+            on<Provide<SubtaskB>, Trigger<PokeB>>().then([this](const RunReason& info) {
                 if (info.run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("SubtaskB done");
                     emit<Task>(std::make_unique<Done>());

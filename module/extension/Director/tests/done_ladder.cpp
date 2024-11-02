@@ -46,7 +46,7 @@ namespace {
             : TestBase<TestReactor>(std::move(environment)) {
 
             on<Provide<Level<1, 1>>, Uses<Level<2, 1>>, Uses<Level<2, 2>>>().then(
-                [this](const RunInfo& info, const Uses<Level<2, 1>>& a, const Uses<Level<2, 2>>& b) {
+                [this](const RunReason& info, const Uses<Level<2, 1>>& a, const Uses<Level<2, 2>>& b) {
                     if (info.run_reason == RunReason::SUBTASK_DONE) {
                         events.push_back("testing Level<1,1> children: a:" + std::to_string(a.done)
                                          + ", b:" + std::to_string(b.done));
@@ -68,7 +68,7 @@ namespace {
 
             // Provides for the level 2 tasks which emit two level 3 tasks each
             on<Provide<Level<2, 1>>, Needs<Level<3, 1>>, Needs<Level<3, 2>>>().then(
-                [this](const RunInfo& info, const Uses<Level<3, 1>>& a, const Uses<Level<3, 2>>& b) {
+                [this](const RunReason& info, const Uses<Level<3, 1>>& a, const Uses<Level<3, 2>>& b) {
                     if (info.run_reason == RunReason::SUBTASK_DONE) {
                         events.push_back("testing Level<2,1> children: a:" + std::to_string(a.done)
                                          + ", b:" + std::to_string(b.done));
@@ -89,7 +89,7 @@ namespace {
                 });
 
             on<Provide<Level<2, 2>>, Needs<Level<3, 3>>, Needs<Level<3, 4>>>().then(
-                [this](const RunInfo& info, const Uses<Level<3, 3>>& a, const Uses<Level<3, 4>>& b) {
+                [this](const RunReason& info, const Uses<Level<3, 3>>& a, const Uses<Level<3, 4>>& b) {
                     if (info.run_reason == RunReason::SUBTASK_DONE) {
                         events.push_back("testing Level<2,2> children: a:" + std::to_string(a.done)
                                          + ", b:" + std::to_string(b.done));

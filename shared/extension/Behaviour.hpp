@@ -484,6 +484,7 @@ namespace extension::behaviour {
         template <typename T>
         using Task      = ::extension::behaviour::Task<T>;
         using RunReason = ::extension::behaviour::RunReason;
+        using GroupInfo = ::extension::behaviour::GroupInfo;
         using Done      = ::extension::behaviour::Done;
         using Idle      = ::extension::behaviour::Idle;
     };

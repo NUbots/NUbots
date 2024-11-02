@@ -35,6 +35,7 @@ namespace module::extension {
     using component::Provider;
     using component::ProviderGroup;
     using ::extension::Configuration;
+    using ::extension::behaviour::GroupInfo;
     using ::extension::behaviour::RunReason;
     using ::extension::behaviour::commands::BehaviourTasks;
     using ::extension::behaviour::commands::CausingExpression;
