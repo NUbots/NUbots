@@ -34,6 +34,7 @@
 #include <typeindex>
 #include <utility>
 
+#include "GroupInfo.hpp"
 #include "Lock.hpp"
 
 /**

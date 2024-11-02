@@ -31,5 +31,3 @@ namespace extension::behaviour {
     thread_local ProviderScope* ProviderScope::current_scope = nullptr;
 
 }  // namespace extension::behaviour
-
-#endif  // EXTENSION_BEHAVIOUR_PROVIDER_SCOPE_HPP
