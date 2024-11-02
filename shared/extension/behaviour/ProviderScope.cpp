@@ -28,7 +28,7 @@
 
 namespace extension::behaviour {
 
-    ProviderScope* ProviderScope::current_scope = nullptr;
+    thread_local ProviderScope* ProviderScope::current_scope = nullptr;
 
 }  // namespace extension::behaviour
 
