@@ -65,13 +65,14 @@ namespace extension::behaviour {
                     reaction,
                     typeid(T),
                     classification,
-                    [reaction](const RunReason& run_reason,
-                               const std::shared_ptr<const void>& data,
-                               const std::shared_ptr<GroupInfo>& info) -> Lock {
+                    [](const NUClear::id_t& active_id,
+                       const RunReason& run_reason,
+                       const std::shared_ptr<const void>& data,
+                       const std::shared_ptr<GroupInfo>& info) -> Lock {
                         auto reason_lock = information::RunReasonStore::set(run_reason);
                         auto run_lock    = information::TaskDataStore<T>::set(
-                            std::make_shared<std::pair<long unsigned int, std::shared_ptr<const T>>>(
-                                std::make_pair(reaction->id, std::static_pointer_cast<const T>(data))));
+                            std::make_shared<std::pair<NUClear::id_t, std::shared_ptr<const T>>>(
+                                std::make_pair(active_id, std::static_pointer_cast<const T>(data))));
                         auto group_lock = information::GroupInfoStore<T>::set(info);
 
                         // Return a tuple that will unlock all of these when it is destroyed
@@ -106,7 +107,7 @@ namespace extension::behaviour {
          * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done
          */
         static ProviderScope scope(NUClear::threading::ReactionTask& t) {
-            return ProviderScope(t);
+            return ProviderScope(typeid(T), t);
         }
     };
 
