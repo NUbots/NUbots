@@ -279,8 +279,7 @@ namespace module::extension {
 
             // Convert the Behaviour tasks to Director tasks
             for (auto& task : p.tasks) {
-                pack.tasks.push_back(
-                    std::make_shared<DirectorTask>(p.requester_reaction_id, p.requester_reaction_id, task));
+                pack.tasks.push_back(std::make_shared<DirectorTask>(pack.provider->id, p.requester_task_id, task));
             }
 
             run_task_pack(pack);
