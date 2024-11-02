@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <nuclear>
+#include <optional>
 
 #include "behaviour/GroupInfo.hpp"
 #include "behaviour/ProviderScope.hpp"
@@ -93,7 +94,7 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static std::tuple<std::shared_ptr<const T>, RunReason> get(NUClear::threading::ReactionTask& t) {
+        static std::tuple<std::shared_ptr<const T>, std::optional<RunReason>> get(NUClear::threading::ReactionTask& t) {
             return {
                 information::TaskDataStore<T>::get(t.parent->id),
                 information::RunReasonStore::get(),
@@ -244,7 +245,7 @@ namespace extension::behaviour {
         bool done;
 
         template <typename DSL>
-        static Uses<T> get(NUClear::threading::ReactionTask& t) {
+        static std::optional<Uses<T>> get(NUClear::threading::ReactionTask& t) {
 
 
             // Default values if we can't find the group info
