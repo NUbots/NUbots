@@ -279,6 +279,4 @@ namespace module::extension {
         });
     }
 
-    thread_local Director::PackBuilder Director::pack_builder;
-
 }  // namespace module::extension
