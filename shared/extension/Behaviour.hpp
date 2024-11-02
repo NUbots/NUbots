@@ -123,19 +123,6 @@ namespace extension::behaviour {
     template <typename T, commands::ProviderClassification classification>
     struct ProviderBase {
 
-        struct CombinedLock {
-            std::shared_ptr<std::vector<std::unique_lock<std::mutex>>> locks_;
-
-            template <typename... Locks>
-            CombinedLock(Locks... locks) : locks_{std::make_shared<std::vector<std::unique_lock<std::mutex>>>()} {
-                (locks_->emplace_back(std::move(locks)), ...);
-            }
-
-            ~CombinedLock() {
-                locks_->clear();
-            }
-        };
-
         /**
          * Binds a Provider object, sending it to the Director so it can control its execution.
          *
@@ -163,7 +150,7 @@ namespace extension::behaviour {
 
                         // Return a "combined lock" that will unlock all of these when it is
                         // destroyed
-                        return CombinedLock(reason_lock, run_lock, group_lock);
+                        return std::make_tuple(reason_lock, run_lock, group_lock);
                     }));
 
             // Add our unbinder
