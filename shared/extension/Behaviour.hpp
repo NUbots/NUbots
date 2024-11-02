@@ -97,10 +97,10 @@ namespace extension::behaviour {
          */
         template <typename DSL>
         static std::tuple<std::shared_ptr<const T>, RunReason> get(NUClear::threading::ReactionTask& t) {
-
-            auto run_data   = information::TaskDataStore<T>::get(t.parent->id);
-            auto run_reason = information::RunReasonStore::get();
-            return std::make_tuple(run_data, run_reason);
+            return {
+                information::TaskDataStore<T>::get(t.parent->id),
+                information::RunReasonStore::get(),
+            };
         }
 
         /**
