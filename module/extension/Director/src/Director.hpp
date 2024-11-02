@@ -422,7 +422,7 @@ namespace module::extension {
         std::map<uint64_t, std::shared_ptr<component::Provider>> providers;
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
-        uint64_t unique_id_source = 0;
+        NUClear::id_t unique_id_source = 0;
     };
 
 }  // namespace module::extension
