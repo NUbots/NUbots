@@ -78,7 +78,7 @@ namespace extension::behaviour {
              * @return a lock object that once destroyed will upgrade the data to the global store and clear the thread
              * store
              */
-            static Lock set(const std::shared_ptr<GroupInfo>& info) {
+            static Lock set(const std::shared_ptr<const GroupInfo>& info) {
                 auto lock          = Lock([info] {
                     GlobalStore::set(info);
                     ThreadStore::value = nullptr;
