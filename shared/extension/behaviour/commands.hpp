@@ -75,11 +75,13 @@ namespace extension::behaviour::commands {
          * @param reaction_         the reaction for this provides object
          * @param type_             the type that this Provider provides for
          * @param classification_   what kind of provider this ProvideReaction is for
+         * @param set_data_         a function that will set the data for this Provider Group
          */
         ProvideReaction(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                         const std::type_index& type_,
-                        const ProviderClassification& classification_)
-            : reaction(std::move(reaction_)), type(type_), classification(classification_) {}
+                        const ProviderClassification& classification_,
+                        const DataSetter& set_data_)
+            : reaction(std::move(reaction_)), type(type_), classification(classification_), set_data(set_data_) {}
 
         /// The reaction for this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
