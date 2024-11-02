@@ -85,22 +85,22 @@ namespace module::extension::component {
             });
         }
 
-        GroupInfo get_group_info() {
-            GroupInfo group_info;
-            group_info.active_provider_id = active_provider != nullptr ? active_provider->id : 0;
+        std::shared_ptr<const GroupInfo> get_group_info() {
+            auto group_info                = std::make_shared<GroupInfo>();
+            group_info->active_provider_id = active_provider != nullptr ? active_provider->id : 0;
 
-            group_info.active_task.id           = active_task != nullptr ? active_task->requester_task_id : 0;
-            group_info.active_task.type         = active_task != nullptr ? active_task->type : typeid(void);
-            group_info.active_task.requester_id = active_task != nullptr ? active_task->requester_id : 0;
+            group_info->active_task.id           = active_task != nullptr ? active_task->requester_task_id : 0;
+            group_info->active_task.type         = active_task != nullptr ? active_task->type : typeid(void);
+            group_info->active_task.requester_id = active_task != nullptr ? active_task->requester_id : 0;
 
             for (auto& watcher : watchers) {
-                group_info.watchers.emplace_back(GroupInfo::TaskInfo{
+                group_info->watchers.emplace_back(GroupInfo::TaskInfo{
                     .id           = watcher->requester_task_id,
                     .type         = watcher->type,
                     .requester_id = watcher->requester_id,
                 });
             }
-            group_info.done = done;
+            group_info->done = done;
 
             return group_info;
         }
