@@ -268,7 +268,7 @@ namespace module::extension {
                                                                         });
 
         // We have a new task pack to run
-        on < Trigger<std::vector<BehaviourTask>, Sync<Director>, Pool<Director>>().then(
+        on<Trigger<std::vector<BehaviourTask>>, Sync<Director>, Pool<Director>>().then(
             "Run Task Pack",
             [this](const std::vector<BehaviourTask>& pack) {
                 // Convert to a Director TaskPack
