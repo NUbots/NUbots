@@ -39,6 +39,75 @@
 namespace extension::behaviour {
 
     /**
+     * This struct holds all the scope information for a provider.
+     *
+     * While running in a ProviderScope, the behaviour of task emits will be different.
+     */
+    struct ProviderScope {
+        ProviderScope(const NUClear::threading::ReactionTask& reaction_task)
+            : reaction_task(reaction_task)
+            , previous_scope(std::exchange(current_scope, this))
+            , tasks(std::make_unique<std::vector<commands::BehaviourTask>>()) {}
+
+        ProviderScope(ProviderScope&& other) {
+            previous_scope = std::exchange(other.previous_scope, nullptr);
+            task_groups    = std::move(other.task_groups);
+        }
+        ProviderScope& operator=(ProviderScope&& other) {
+            if (this != &other) {
+                previous_scope = std::exchange(other.previous_scope, nullptr);
+                task_groups    = std::move(other.task_groups);
+            }
+            return *this;
+        }
+        ProviderScope(const ProviderScope&)            = delete;
+        ProviderScope& operator=(const ProviderScope&) = delete;
+
+        ~ProviderScope() {
+            // Upon desctruction restore the previous scope as the current scope
+            current_scope = previous_scope;
+
+            // Emit all the tasks that were accumulated in this scope
+            emit(std::make_unique<commands::TaskPack>(reaction_task.parent->id,
+                                                      reaction_task.id,
+                                                      false,
+                                                      std::move(*tasks)));
+        }
+
+        template <typename T>
+        static void emit(const std::shared_ptr<T>& data,
+                         const std::string& name,
+                         const int priority,
+                         const bool optional) {
+
+            // Create the task object
+            auto task = commands::BehaviourTask(typeid(T), data, name, priority, optional);
+
+            // If we are in a scope (running in a provider) accumulate the task to be emitted later
+            if (current_scope != nullptr) {
+                current_scope->tasks->push_back(std::move(task));
+            }
+            /// Root tasks emit the task immediately as a single pack
+            else {
+                emit(std::make_unique<commands::TaskPack>(0, 0, true, std::vector<commands::BehaviourTask>{task}));
+            }
+        }
+
+    private:
+        /// The reaction task object this scope is for
+        NUClear::threading::ReactionTask& reaction_task;
+        /// The previous scope that was active before this one so it can be restored
+        /// This should only not be nullptr if somehow an Inline emit forces another provider to run while still in
+        /// another provider
+        ProviderScope* previous_scope = nullptr;
+        /// The tasks that have been accumulated in this scope
+        std::unique_ptr<std::vector<commands::BehaviourTask>> tasks;
+
+        /// Holds the scope object which is currently active
+        static thread_local ProviderScope* current_scope = nullptr;
+    };
+
+    /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
      * to handle their common code.
      *
@@ -105,9 +174,7 @@ namespace extension::behaviour {
          * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done
          */
         static ProviderScope scope(NUClear::threading::ReactionTask& t) {
-            // TODO store the current task id in a thread local variable
-            // TODO accumulate tasks that are emitted in the Task emit scope
-            // TODO when the ProviderScope object you made here is destroyed, emit the task group as a pack
+            return ProviderScope(t);
         }
     };
 
@@ -344,31 +411,8 @@ namespace extension::behaviour {
                          const bool& optional    = false,
                          const std::string& name = "") {
 
-            // TODO here you can check if the task is in a provider.
-            // see https://github.com/Fastcode/NUClear/blob/main/tests/tests/dsl/TaskScope.cpp#L87
-
-            // Then if you are in a provider, store this task in a thread local store somewhere
-
-            // If you are not in a provider, then this is a root task, you can do whatever transformations are required
-            // and emit the task to the director.
-            // As a result you shouldn't need to pass the RootType through in BehaviourTask anymore since you can deal
-            // with it here while you know both the types.
-
-            // Work out who is sending the task so we can determine if it's a subtask
-            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = (task != nullptr) ? task->parent->id : -1;
-            uint64_t task_id     = (task != nullptr) ? task->id : -1;
-
-            NUClear::dsl::word::emit::Inline<commands::BehaviourTask>::emit(
-                powerplant,
-                std::make_shared<commands::BehaviourTask>(typeid(T),
-                                                          typeid(commands::RootType<T>),
-                                                          reaction_id,
-                                                          task_id,
-                                                          data,
-                                                          name,
-                                                          priority,
-                                                          optional));
+            /// Emit using the provider scope as it will know how to handle the task
+            ProviderScope::emit<T>(data, priority, optional, name);
         }
     };
 
