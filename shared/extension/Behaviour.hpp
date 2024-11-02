@@ -148,8 +148,7 @@ namespace extension::behaviour {
                                 std::make_pair(reaction->id, std::static_pointer_cast<const T>(data))));
                         auto group_lock = information::GroupInfoStore<T>::set(info);
 
-                        // Return a "combined lock" that will unlock all of these when it is
-                        // destroyed
+                        // Return a tuple that will unlock all of these when it is destroyed
                         return std::make_tuple(reason_lock, run_lock, group_lock);
                     }));
 
