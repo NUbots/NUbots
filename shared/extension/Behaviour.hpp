@@ -78,9 +78,9 @@ namespace extension::behaviour {
         template <typename T>
         static void emit(NUClear::PowerPlant& powerplant,
                          const std::shared_ptr<T>& data,
-                         const std::string& name,
                          const int priority,
-                         const bool optional) {
+                         const bool optional,
+                         const std::string& name) {
 
             // Create the task object
             auto task = commands::BehaviourTask(typeid(T), data, name, priority, optional);
