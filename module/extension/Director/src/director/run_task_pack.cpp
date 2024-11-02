@@ -230,8 +230,8 @@ namespace module::extension {
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(tasks.size());
-        for (const auto& t : tasks) {
+        tasks.reserve(requested_tasks.size());
+        for (const auto& t : requested_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
