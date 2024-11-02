@@ -67,7 +67,9 @@ namespace extension::behaviour::commands {
         /// A function that can be used to set data into the correct caches and return a Lock for when the task is
         /// executed. This is provided as a function pointer rather than an std::function to ensure that it is stateless
         /// for the given Provider type (ProviderGroup).
-        using DataSetter = Lock (*)(const RunReason&, const std::shared_ptr<const void>&, const GroupInfo&);
+        using DataSetter = Lock (*)(const RunReason&,
+                                    const std::shared_ptr<const void>&,
+                                    const std::shared_ptr<const GroupInfo>&);
 
         /**
          * @brief Construct a new Provide Reaction object to send to the behaviour system

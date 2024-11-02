@@ -68,7 +68,7 @@ namespace extension::behaviour {
                     [](const NUClear::id_t& allowed_id,
                        const RunReason& run_reason,
                        const std::shared_ptr<const void>& data,
-                       const std::shared_ptr<GroupInfo>& info) -> Lock {
+                       const std::shared_ptr<const GroupInfo>& info) -> Lock {
                         return {
                             information::RunReasonStore::set(run_reason),  // Make clang-format not be dumb
                             information::TaskDataStore<T>::set(allowed_id, data),
