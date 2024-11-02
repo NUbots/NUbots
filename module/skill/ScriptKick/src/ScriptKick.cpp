@@ -51,14 +51,14 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<Kick>, Needs<LimbsSequence>>().then([this](const Kick& kick, const RunReason& info) {
+        on<Provide<Kick>, Needs<LimbsSequence>>().then([this](const Kick& kick, const RunReason& run_reason) {
             // If the script has finished executing, then this is Done
-            if (info.run_reason == RunReason::SUBTASK_DONE) {
+            if (run_reason == RunReason::SUBTASK_DONE) {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
             // If it isn't a new task, don't do anything
-            if (info.run_reason != RunReason::NEW_TASK) {
+            if (run_reason != RunReason::NEW_TASK) {
                 emit<Task>(std::make_unique<Idle>());
                 return;
             }

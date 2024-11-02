@@ -67,9 +67,9 @@ namespace extension::behaviour {
              *
              * @return a lock object that once destroyed will clear to nullptr
              */
-            static Lock set(const RunReason& info) {
+            static Lock set(const RunReason& run_reason) {
                 auto lock          = Lock(&info, [](const void*) { ThreadStore::value = nullptr; });
-                ThreadStore::value = &info;
+                ThreadStore::value = &run_reason;
                 return lock;
             }
 

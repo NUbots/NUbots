@@ -46,9 +46,9 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<StandStillTask>>().then([this](const RunReason& info) {
+        on<Provide<StandStillTask>>().then([this](const RunReason& run_reason) {
             // If we haven't emitted yet, then emit a walk task
-            if (info.run_reason == RunReason::NEW_TASK) {
+            if (run_reason == RunReason::NEW_TASK) {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             }
             else {

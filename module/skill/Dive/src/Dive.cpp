@@ -50,8 +50,8 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<DiveTask>>().then([this](const DiveTask& dive, const RunReason& info) {
-            if (info.run_reason == RunReason::SUBTASK_DONE) {
+        on<Provide<DiveTask>>().then([this](const DiveTask& dive, const RunReason& run_reason) {
+            if (run_reason == RunReason::SUBTASK_DONE) {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
