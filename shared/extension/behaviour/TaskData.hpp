@@ -31,62 +31,58 @@
 #include <memory>
 #include <nuclear>
 
-namespace extension::behaviour {
+namespace extension::behaviour::information {
 
-    namespace information {
+    /**
+     * This class is used to store the task data for a provider.
+     *
+     * @tparam T the type of data that the provider using this store needs.
+     */
+    template <typename T>
+    struct TaskDataStore {
+    private:
+        using TaskData    = std::pair<NUClear::id_t, std::shared_ptr<const T>>;
+        using ThreadStore = NUClear::dsl::store::ThreadStore<const std::shared_ptr<TaskData>>;
+        using GlobalStore = NUClear::util::TypeMap<T, T, TaskData>;
+
+    public:
+        /**
+         * Set the TaskData for this thread and return a lock that when will upgrade the data to the global store.
+         *
+         * @param info the TaskData to set
+         *
+         * @return a lock object that will upgrade the data to the global store when it goes out of scope
+         */
+        static Lock set(const std::shared_ptr<TaskData>& data) {
+
+            auto lock          = Lock(&data, [data](const void*) {
+                GlobalStore::set(data);
+                ThreadStore::value = nullptr;
+            });
+            ThreadStore::value = &data;
+            return lock;
+        }
 
         /**
-         * This class is used to store the task data for a provider.
+         * Retrieves the TaskData for this provider.
          *
-         * @tparam T the type of data that the provider using this store needs.
+         * This function attempts to retrieve data from either the thread-local store or the global store,
+         * depending on the current thread context. If the data is not found or the provider ID does not match,
+         * it returns nullptr.
+         *
+         * @param provider_id The ID of the provider whose data is to be retrieved.
+         *
+         * @return A shared pointer to a constant object of type T if found, otherwise nullptr.
          */
-        template <typename T>
-        struct TaskDataStore {
-        private:
-            using TaskData    = std::pair<NUClear::id_t, std::shared_ptr<const T>>;
-            using ThreadStore = NUClear::dsl::store::ThreadStore<const std::shared_ptr<TaskData>>;
-            using GlobalStore = NUClear::util::TypeMap<T, T, TaskData>;
-
-        public:
-            /**
-             * Set the TaskData for this thread and return a lock that when will upgrade the data to the global store.
-             *
-             * @param info the TaskData to set
-             *
-             * @return a lock object that will upgrade the data to the global store when it goes out of scope
-             */
-            static Lock set(const std::shared_ptr<TaskData>& data) {
-
-                auto lock          = Lock(&data, [data](const void*) {
-                    GlobalStore::set(data);
-                    ThreadStore::value = nullptr;
-                });
-                ThreadStore::value = &data;
-                return lock;
+        static std::shared_ptr<const T> get(const NUClear::id_t& provider_id) {
+            auto d = ThreadStore::value == nullptr ? GlobalStore::get() : *ThreadStore::value;
+            if (d == nullptr || d->first != provider_id) {
+                return nullptr;
             }
+            return d->second;
+        }
+    };
 
-            /**
-             * Retrieves the TaskData for this provider.
-             *
-             * This function attempts to retrieve data from either the thread-local store or the global store,
-             * depending on the current thread context. If the data is not found or the provider ID does not match,
-             * it returns nullptr.
-             *
-             * @param provider_id The ID of the provider whose data is to be retrieved.
-             *
-             * @return A shared pointer to a constant object of type T if found, otherwise nullptr.
-             */
-            static std::shared_ptr<const T> get(const NUClear::id_t& provider_id) {
-                auto d = ThreadStore::value == nullptr ? GlobalStore::get() : *ThreadStore::value;
-                if (d == nullptr || d->first != provider_id) {
-                    return nullptr;
-                }
-                return d->second;
-            }
-        };
-
-    }  // namespace information
-
-}  // namespace extension::behaviour
+}  // namespace extension::behaviour::information
 
 #endif  // EXTENSION_BEHAVIOUR_TASKDATA_HPP
