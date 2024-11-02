@@ -32,86 +32,12 @@
 #include <nuclear>
 
 #include "behaviour/GroupInfo.hpp"
+#include "behaviour/ProviderScope.hpp"
 #include "behaviour/RunReason.hpp"
 #include "behaviour/TaskData.hpp"
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
-
-    /**
-     * This struct holds all the scope information for a provider.
-     *
-     * While running in a ProviderScope, the behaviour of task emits will be different.
-     */
-    struct ProviderScope {
-        ProviderScope(NUClear::threading::ReactionTask& reaction_task)
-            : reaction_task(reaction_task)
-            , previous_scope(std::exchange(current_scope, this))
-            , tasks(std::make_unique<std::vector<commands::BehaviourTask>>()) {}
-
-        ProviderScope(ProviderScope&& other)
-            : reaction_task(other.reaction_task)
-            , previous_scope(std::exchange(other.previous_scope, nullptr))
-            , tasks(std::move(other.tasks)) {}
-
-        ProviderScope& operator=(ProviderScope&& other) {
-            if (this != &other) {
-                previous_scope = std::exchange(other.previous_scope, nullptr);
-                tasks          = std::move(other.tasks);
-            }
-            return *this;
-        }
-        ProviderScope(const ProviderScope&)            = delete;
-        ProviderScope& operator=(const ProviderScope&) = delete;
-
-        ~ProviderScope() {
-            // Upon desctruction restore the previous scope as the current scope
-            current_scope = previous_scope;
-
-            // Emit all the tasks that were accumulated in this scope
-            reaction_task.parent->reactor.emit(std::make_unique<commands::BehaviourTasks>(reaction_task.parent->id,
-                                                                                          reaction_task.id,
-                                                                                          false,
-                                                                                          std::move(*tasks)));
-        }
-
-        template <typename T>
-        static void emit(NUClear::PowerPlant& powerplant,
-                         const std::shared_ptr<T>& data,
-                         const int priority,
-                         const bool optional,
-                         const std::string& name) {
-
-            // Create the task object
-            auto task = commands::BehaviourTask(typeid(T), data, name, priority, optional);
-
-            // If we are in a scope (running in a provider) accumulate the task to be emitted later
-            if (current_scope != nullptr) {
-                current_scope->tasks->push_back(std::move(task));
-            }
-            /// Root tasks emit the task immediately as a single pack
-            else {
-                powerplant.emit(
-                    std::make_unique<commands::BehaviourTasks>(0, 0, true, std::vector<commands::BehaviourTask>{task}));
-            }
-        }
-
-    private:
-        /// The reaction task object this scope is for
-        NUClear::threading::ReactionTask& reaction_task;
-        /// The previous scope that was active before this one so it can be restored
-        /// This should only not be nullptr if somehow an Inline emit forces another provider to run while still in
-        /// another provider
-        ProviderScope* previous_scope = nullptr;
-        /// The tasks that have been accumulated in this scope
-        std::unique_ptr<std::vector<commands::BehaviourTask>> tasks{};
-
-        /// Holds the scope object which is currently active
-        static thread_local ProviderScope* current_scope;
-    };
-
-    // Define and initialize the static thread-local variable outside the class
-    thread_local ProviderScope* ProviderScope::current_scope = nullptr;
 
     /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
