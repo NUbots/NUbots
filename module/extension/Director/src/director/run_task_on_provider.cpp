@@ -37,7 +37,7 @@ namespace module::extension {
     using ::extension::behaviour::information::RunReasonStore;
     using ::extension::behaviour::information::TaskDataStore;
 
-    void Director::run_task_on_provider(const std::shared_ptr<const DirectorTask>& task,
+    void Director::run_task_on_provider(const std::shared_ptr<DirectorTask>& task,
                                         const std::shared_ptr<component::Provider>& provider,
                                         const RunReason& run_reason) {
 
