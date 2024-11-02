@@ -51,11 +51,11 @@ namespace module::extension {
      * When it updates we check to see if this would now satisfy the conditions and if it does we emit
      */
     struct StateUpdate {
-        StateUpdate(const uint64_t& provider_id_, const std::type_index& type_, const int& state_)
+        StateUpdate(const NUClear::id_t& provider_id_, const std::type_index& type_, const int& state_)
             : provider_id(provider_id_), type(type_), state(state_) {}
 
         /// The reaction id of the Provider which was waiting on this type
-        uint64_t provider_id;
+        NUClear::id_t provider_id;
         /// The enum type that this enum was listening for
         std::type_index type;
         /// The new value for the enum
@@ -84,7 +84,7 @@ namespace module::extension {
         providers.emplace(provide.reaction->id, provider);
     }
 
-    void Director::remove_provider(const uint64_t& id) {
+    void Director::remove_provider(const NUClear::id_t& id) {
 
         // If we can find it, erase it
         auto it = providers.find(id);
@@ -135,7 +135,7 @@ namespace module::extension {
         if (group.providers.empty()) {
             // We subtract from unique_id_source here so that we fill numbers from the top while regular
             // reaction_ids are filling from the bottom
-            uint64_t unique = --unique_id_source;
+            NUClear::id_t unique = --unique_id_source;
             auto provider =
                 std::make_shared<Provider>(group, unique, Provider::Classification::ROOT, root_type, nullptr);
             group.providers.push_back(provider);

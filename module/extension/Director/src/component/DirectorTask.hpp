@@ -64,9 +64,9 @@ namespace module::extension::component {
         /// The Provider type this task is for
         const std::type_index type;
         /// The Provider id of the requester
-        uint64_t requester_id;
+        NUClear::id_t requester_id;
         /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
-        uint64_t requester_task_id;
+        NUClear::id_t requester_task_id;
         /// The data for the command, (the data that will be given to the Provider) if null counts as no task
         std::shared_ptr<void> data;
         /// A name for this task to be shown in debugging systems

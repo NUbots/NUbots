@@ -73,7 +73,7 @@ namespace module::extension {
          *
          * @throws std::runtime_error when the reaction does not provide anything
          */
-        void remove_provider(const uint64_t& id);
+        void remove_provider(const NUClear::id_t& id);
 
         /**
          * Finds or creates a root provider for a task and returns it
@@ -419,7 +419,7 @@ namespace module::extension {
         /// A list of Provider groups
         std::map<std::type_index, component::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
-        std::map<uint64_t, std::shared_ptr<component::Provider>> providers;
+        std::map<NUClear::id_t, std::shared_ptr<component::Provider>> providers;
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
         NUClear::id_t unique_id_source = 0;
