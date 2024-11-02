@@ -61,7 +61,7 @@ namespace module::skill {
         });
 
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then(
-            [this](const RunInfo& info, const Sensors& sensors) {
+            [this](const RunReason& info, const Sensors& sensors) {
                 switch (info.run_reason) {
                     case NEW_TASK: {
                         // If we're running getup we fell over

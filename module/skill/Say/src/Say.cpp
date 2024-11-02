@@ -60,7 +60,7 @@ namespace module::skill {
             }
         });
 
-        on<Provide<SayTask>>().then([this](const SayTask& say, const RunInfo& info) {
+        on<Provide<SayTask>>().then([this](const SayTask& say, const RunReason& info) {
             // Only say text if it is a new task
             if (info.run_reason == NEW_TASK) {
                 // Play the requested audio using python command-line tool mimic3 and aplay

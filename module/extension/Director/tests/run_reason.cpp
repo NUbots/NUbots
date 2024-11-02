@@ -58,7 +58,7 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
-            on<Provide<SimpleTask>, Trigger<TriggerTest>>().then([this](const RunInfo& info) {
+            on<Provide<SimpleTask>, Trigger<TriggerTest>>().then([this](const RunReason& info) {
                 events.push_back("simple task ran because: " + decode_reason(info.run_reason));
 
                 // If we get a new task then emit a subtask
@@ -74,24 +74,24 @@ namespace {
                 }
             });
 
-            on<Start<SimpleTask>>().then([this](const RunInfo& info) {  //
+            on<Start<SimpleTask>>().then([this](const RunReason& info) {  //
                 events.push_back("simple task started because: " + decode_reason(info.run_reason));
             });
-            on<Stop<SimpleTask>>().then([this](const RunInfo& info) {  //
+            on<Stop<SimpleTask>>().then([this](const RunReason& info) {  //
                 events.push_back("simple task stopped because: " + decode_reason(info.run_reason));
             });
 
             // This subtask will immediately return done
-            on<Provide<Subtask>, Trigger<TriggerTest>>().then([this](const RunInfo& info) {
+            on<Provide<Subtask>, Trigger<TriggerTest>>().then([this](const RunReason& info) {
                 events.push_back("subtask ran because: " + decode_reason(info.run_reason));
                 events.push_back("emitting subtask done");
                 emit<Task>(std::make_unique<Done>());
             });
 
-            on<Start<Subtask>>().then([this](const RunInfo& info) {  //
+            on<Start<Subtask>>().then([this](const RunReason& info) {  //
                 events.push_back("subtask started because: " + decode_reason(info.run_reason));
             });
-            on<Stop<Subtask>>().then([this](const RunInfo& info) {  //
+            on<Stop<Subtask>>().then([this](const RunReason& info) {  //
                 events.push_back("subtask stopped because: " + decode_reason(info.run_reason));
             });
 
@@ -121,8 +121,8 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Tests that the reason for a provider being executed can be provided in its RunInfo",
-          "[director][triggered][runinfo][runreason]") {
+TEST_CASE("Tests that the reason for a provider being executed can be provided in its RunReason",
+          "[director][triggered][RunReason][runreason]") {
 
     // Run the module
     NUClear::Configuration config;

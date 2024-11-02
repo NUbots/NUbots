@@ -60,7 +60,7 @@ namespace module::skill {
             utility::openai::start(cfg.openai_api_key);
         });
 
-        on<Provide<GPTChatRequest>>().then([this](const GPTChatRequest& gpt_request, const RunInfo& info) {
+        on<Provide<GPTChatRequest>>().then([this](const GPTChatRequest& gpt_request, const RunReason& info) {
             if (info.run_reason == NEW_TASK) {
                 // Send request to OpenAI API
                 nlohmann::json request = {
@@ -81,7 +81,7 @@ namespace module::skill {
             }
         });
 
-        on<Provide<GPTAudioRequest>>().then([this](const GPTAudioRequest& gpt_request, const RunInfo& info) {
+        on<Provide<GPTAudioRequest>>().then([this](const GPTAudioRequest& gpt_request, const RunReason& info) {
             if (info.run_reason == NEW_TASK) {
                 // Record audio for requested time
                 log<NUClear::INFO>("Recording audio...");

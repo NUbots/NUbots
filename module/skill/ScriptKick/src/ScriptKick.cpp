@@ -51,7 +51,7 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<Kick>, Needs<LimbsSequence>>().then([this](const Kick& kick, const RunInfo& info) {
+        on<Provide<Kick>, Needs<LimbsSequence>>().then([this](const Kick& kick, const RunReason& info) {
             // If the script has finished executing, then this is Done
             if (info.run_reason == RunReason::SUBTASK_DONE) {
                 emit<Task>(std::make_unique<Done>());

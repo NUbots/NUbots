@@ -54,7 +54,7 @@ namespace module::strategy {
             cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<double>();
         });
 
-        on<Provide<ReadyTask>, With<Stability>>().then([this](const RunInfo& info, const Stability& stability) {
+        on<Provide<ReadyTask>, With<Stability>>().then([this](const RunReason& info, const Stability& stability) {
             if (info.run_reason == RunReason::NEW_TASK) {
                 // Set the timer and emit a walk Task
                 start_ready_time = NUClear::clock::now();
