@@ -76,7 +76,8 @@ namespace extension::behaviour {
         }
 
         template <typename T>
-        static void emit(const std::shared_ptr<T>& data,
+        static void emit(NUClear::PowerPlant& powerplant,
+                         const std::shared_ptr<T>& data,
                          const std::string& name,
                          const int priority,
                          const bool optional) {
@@ -90,7 +91,8 @@ namespace extension::behaviour {
             }
             /// Root tasks emit the task immediately as a single pack
             else {
-                emit(std::make_unique<commands::TaskPack>(0, 0, true, std::vector<commands::BehaviourTask>{task}));
+                powerplant.emit(
+                    std::make_unique<commands::TaskPack>(0, 0, true, std::vector<commands::BehaviourTask>{task}));
             }
         }
 
@@ -430,7 +432,7 @@ namespace extension::behaviour {
                          const std::string& name = "") {
 
             /// Emit using the provider scope as it will know how to handle the task
-            ProviderScope::emit<T>(data, priority, optional, name);
+            ProviderScope::emit<T>(powerplant, data, priority, optional, name);
         }
     };
 
