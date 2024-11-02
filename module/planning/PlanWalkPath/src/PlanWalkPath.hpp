@@ -59,6 +59,8 @@ namespace module::planning {
             double min_angle_error = 0.0;
             // Proportional gain for strafing to target point
             double strafe_gain = 0.0;
+            // Maximum angle to target for strafing backwards
+            double max_strafe_angle = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;

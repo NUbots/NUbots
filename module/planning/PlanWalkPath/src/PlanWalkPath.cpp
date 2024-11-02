@@ -80,6 +80,7 @@ namespace module::planning {
             cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
             cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
             cfg.strafe_gain      = config["strafe_gain"].as<double>();
+            cfg.max_strafe_angle = config["max_strafe_angle"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -177,6 +178,20 @@ namespace module::planning {
                     desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
                 }
                 else {
+                    // TODO: Possibly make own radius for strafing backwards, and try playing with angles
+                    // This is the middle and inner circle
+
+                    // TODO: Also don't go backwards when angle_to_final_heading similar to angle_to_target
+                    // within certain range
+                    if (std::abs(angle_to_target) > cfg.max_strafe_angle) {
+                        log<NUClear::DEBUG>("Angle to target: ",
+                                            angle_to_target,
+                                            " is greater than max strafe angle: ",
+                                            cfg.max_strafe_angle);
+                        log<NUClear::DEBUG>("Stepping backwards.");
+                        emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(-0.1, 0.0, 0.0)));
+                        return;
+                    }
                     // "Decelerate"
                     velocity_magnitude -= cfg.acceleration;
                     // Limit the velocity to zero
