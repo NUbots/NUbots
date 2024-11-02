@@ -160,9 +160,9 @@ namespace module::extension {
 
     void Director::run_task_pack(const TaskPack& pack) {
 
-        const auto& provider = pack.provider;
-        const auto& tasks    = pack.tasks;
-        auto& group          = provider->group;
+        const auto& provider        = pack.provider;
+        const auto& requested_tasks = pack.tasks;
+        auto& group                 = provider->group;
 
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
@@ -170,10 +170,10 @@ namespace module::extension {
         }
 
         // See if a Idle command was emitted
-        for (const auto& t : tasks) {
+        for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Idle)) {
 
-                if (tasks.size() > 1) {
+                if (requested_tasks.size() > 1) {
                     log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
                 }
 
@@ -183,7 +183,7 @@ namespace module::extension {
         }
 
         // See if a done command was emitted
-        for (const auto& t : tasks) {
+        for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
                 auto parent_provider = providers.at(group.active_task->requester_id);
 
@@ -216,7 +216,7 @@ namespace module::extension {
                                          RunReason::SUBTASK_DONE);
                 }
 
-                if (tasks.size() > 1) {
+                if (requested_tasks.size() > 1) {
                     log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 
