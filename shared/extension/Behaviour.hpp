@@ -102,8 +102,15 @@ namespace extension::behaviour {
         }
 
         /**
-         * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done
+         * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done.
+         *
+         * @tparam DSL the DSL from NUClear for the on statement
+         *
+         * @param t the reaction task that is being scoped
+         *
+         * @return the scope object that will accumulate tasks to be emitted together
          */
+        template <typename DSL>
         static ProviderScope scope(NUClear::threading::ReactionTask& t) {
             return ProviderScope(typeid(T), t);
         }
