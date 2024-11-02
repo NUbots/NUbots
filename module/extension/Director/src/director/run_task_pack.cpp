@@ -160,7 +160,8 @@ namespace module::extension {
 
     void Director::run_task_pack(const TaskPack& pack) {
 
-        const auto& provider = pack.first;
+        const auto& provider = pack.provider;
+        const auto& tasks    = pack.tasks;
         auto& group          = provider->group;
 
         // Check if this Provider is active and allowed to make subtasks
@@ -169,10 +170,10 @@ namespace module::extension {
         }
 
         // See if a Idle command was emitted
-        for (const auto& t : pack.second) {
+        for (const auto& t : tasks) {
             if (t->type == typeid(::extension::behaviour::Idle)) {
 
-                if (pack.second.size() > 1) {
+                if (tasks.size() > 1) {
                     log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
                 }
 
@@ -182,7 +183,7 @@ namespace module::extension {
         }
 
         // See if a done command was emitted
-        for (const auto& t : pack.second) {
+        for (const auto& t : tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
                 auto parent_provider = providers.at(group.active_task->requester_id);
 
@@ -215,7 +216,7 @@ namespace module::extension {
                                          RunReason::SUBTASK_DONE);
                 }
 
-                if (pack.second.size() > 1) {
+                if (tasks.size() > 1) {
                     log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 
@@ -229,8 +230,8 @@ namespace module::extension {
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(pack.second.size());
-        for (const auto& t : pack.second) {
+        tasks.reserve(tasks.size());
+        for (const auto& t : tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
