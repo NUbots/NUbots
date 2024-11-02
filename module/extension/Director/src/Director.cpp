@@ -271,12 +271,20 @@ namespace module::extension {
         // We have a new task pack to run
         on<Trigger<std::vector<BehaviourTask>>, Sync<Director>, Pool<Director>>().then(
             "Run Task Pack",
-            [this](const std::vector<BehaviourTask>& pack) {
-                // Convert to a Director TaskPack
-                run_task_pack(pack);
+            [this](const std::vector<BehaviourTask>& behaviour_pack) {
+                // Get the provider for this behaviour pack
+                auto provider = groups.at(behaviour_pack.front().type).active_provider;
+
+                // Create the TaskList from this behaviour pack
+                TaskList task_list{};
+                for (const auto& behaviour : behaviour_pack) {
+                    task_list.push_back(std::make_shared<DirectorTask>(behaviour));
+                }
+
+                // Create the full task pack and run it
+                TaskPack task_pack = std::make_pair(provider, task_list);
+                run_task_pack(task_pack);
             });
     }
-
-    thread_local Director::PackBuilder Director::pack_builder;
 
 }  // namespace module::extension
