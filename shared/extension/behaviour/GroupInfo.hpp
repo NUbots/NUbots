@@ -79,7 +79,7 @@ namespace extension::behaviour {
              * store
              */
             static Lock set(const std::shared_ptr<GroupInfo>& info) {
-                auto lock          = Lock(&info, [info](const void*) {
+                auto lock          = Lock([info] {
                     GlobalStore::set(info);
                     ThreadStore::value = nullptr;
                 });

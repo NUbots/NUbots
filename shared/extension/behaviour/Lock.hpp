@@ -31,12 +31,85 @@
 #include <memory>
 #include <nuclear>
 
-#include "Lock.hpp"
-
 namespace extension::behaviour {
 
-    /// Used to provide an RAII lock around a piece of data that is being stored in a store
-    using Lock = std::unique_ptr<const void, std::function<void(const void*)>>;
+    class Lock {
+    public:
+        /**
+         * Constructs a Lock with an optional on_destroy function.
+         *
+         * @param on_destroy A function to be called when the Lock is destroyed.
+         */
+        explicit Lock(std::function<void()> on_destroy = nullptr) : on_destroy(std::move(on_destroy)) {}
+
+        /**
+         * Move constructor.
+         *
+         * @param other The Lock to move from.
+         */
+        Lock(Lock&& other) noexcept : on_destroy(std::move(other.on_destroy)) {
+            other.on_destroy = nullptr;
+        }
+
+        /**
+         * Constructs a Lock from multiple locks.
+         *
+         * @tparam Lock1 The type of the first lock.
+         * @tparam Lock2 The type of the second lock.
+         * @tparam LockN The types of the remaining locks.
+         *
+         * @param lock1 The first lock.
+         * @param lock2 The second lock.
+         * @param lockN The remaining locks.
+         */
+        template <typename Lock1, typename Lock2, typename... LockN>
+        Lock(Lock1&& lock1, Lock2&& lock2, LockN&&... lockN) {
+            std::array<std::function<void()>, 2 + sizeof...(LockN)> on_destroy_functions = {
+                std::exchange(lock1.on_destroy, nullptr),
+                std::exchange(lock2.on_destroy, nullptr),
+                std::exchange(lockN.on_destroy, nullptr)...,
+            };
+
+            on_destroy = [on_destroy_functions = std::move(on_destroy_functions)]() {
+                for (auto& func : on_destroy_functions) {
+                    if (func) {
+                        func();
+                    }
+                }
+            };
+        }
+
+        /**
+         * Move assignment operator.
+         *
+         * @param other The Lock to move from.
+         *
+         * @return Lock& A reference to this Lock.
+         */
+        Lock& operator=(Lock&& other) noexcept {
+            if (this != &other) {
+                on_destroy       = std::move(other.on_destroy);
+                other.on_destroy = nullptr;
+            }
+            return *this;
+        }
+
+        // Deleted copy constructor and copy assignment operator
+        Lock(const Lock&)            = delete;
+        Lock& operator=(const Lock&) = delete;
+
+        /**
+         * Destructor. Calls the on_destroy function if it exists.
+         */
+        ~Lock() {
+            if (on_destroy) {
+                on_destroy();
+            }
+        }
+
+    private:
+        std::function<void()> on_destroy;
+    };
 
 }  // namespace extension::behaviour
 

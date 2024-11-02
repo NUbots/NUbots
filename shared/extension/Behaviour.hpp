@@ -65,18 +65,15 @@ namespace extension::behaviour {
                     reaction,
                     typeid(T),
                     classification,
-                    [](const NUClear::id_t& active_id,
+                    [](const NUClear::id_t& allowed_id,
                        const RunReason& run_reason,
                        const std::shared_ptr<const void>& data,
                        const std::shared_ptr<GroupInfo>& info) -> Lock {
-                        auto reason_lock = information::RunReasonStore::set(run_reason);
-                        auto run_lock    = information::TaskDataStore<T>::set(
-                            std::make_shared<std::pair<NUClear::id_t, std::shared_ptr<const T>>>(
-                                std::make_pair(active_id, std::static_pointer_cast<const T>(data))));
-                        auto group_lock = information::GroupInfoStore<T>::set(info);
-
-                        // Return a tuple that will unlock all of these when it is destroyed
-                        return std::make_tuple(reason_lock, run_lock, group_lock);
+                        return {
+                            information::RunReasonStore::set(run_reason),  // Make clang-format not be dumb
+                            information::TaskDataStore<T>::set(allowed_id, data),
+                            information::GroupInfoStore<T>::set(info),
+                        };
                     }));
 
             // Add our unbinder
