@@ -105,8 +105,11 @@ namespace extension::behaviour {
         std::unique_ptr<std::vector<commands::BehaviourTask>> tasks{};
 
         /// Holds the scope object which is currently active
-        constexpr static thread_local ProviderScope* current_scope = nullptr;
+        static thread_local ProviderScope* current_scope;
     };
+
+    // Define and initialize the static thread-local variable outside the class
+    thread_local ProviderScope* ProviderScope::current_scope = nullptr;
 
     /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
