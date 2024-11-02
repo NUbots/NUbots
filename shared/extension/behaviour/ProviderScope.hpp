@@ -83,9 +83,14 @@ namespace extension::behaviour {
             }
             /// Root tasks emit the task immediately as a single pack
             else {
+                // Get the current reaction
+                auto current_task = NUClear::threading::ReactionTask::get_current_task();
+                auto reaction_id  = current_task != nullptr ? current_task->parent->id : 0;
+                auto task_id      = current_task != nullptr ? current_task->id : 0;
+
                 powerplant.emit(std::make_unique<commands::BehaviourTasks>(typeid(commands::RootProvider<T>),
-                                                                           0,
-                                                                           0,
+                                                                           reaction_id,
+                                                                           task_id,
                                                                            true,
                                                                            std::vector<commands::BehaviourTask>{task}));
             }
