@@ -47,11 +47,11 @@ namespace {
     class TestReactor : public TestBase<TestReactor> {
     public:
         /// Print the subtask state
-        std::string decode_run_state(GroupInfo::RunState state) {
+        std::string decode_run_state(RunState state) {
             switch (state) {
-                case GroupInfo::RunState::NO_TASK: return "NO_TASK";
-                case GroupInfo::RunState::RUNNING: return "RUNNING";
-                case GroupInfo::RunState::QUEUED: return "QUEUED";
+                case RunState::NO_TASK: return "NO_TASK";
+                case RunState::RUNNING: return "RUNNING";
+                case RunState::QUEUED: return "QUEUED";
                 default: return "ERROR";
             }
         }
