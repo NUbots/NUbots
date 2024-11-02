@@ -107,9 +107,6 @@ namespace extension::behaviour {
         static thread_local ProviderScope* current_scope;
     };
 
-    // Define and initialize the static thread-local variable outside the class
-    thread_local ProviderScope* ProviderScope::current_scope = nullptr;
-
 }  // namespace extension::behaviour
 
 #endif  // EXTENSION_BEHAVIOUR_PROVIDER_SCOPE_HPP
