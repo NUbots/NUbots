@@ -202,14 +202,26 @@ namespace extension::behaviour::commands {
          * @param optional_             whether this task is optional or not
          */
         BehaviourTask(const std::type_index& type_,
+                      const uint64_t requester_id_,
+                      const uint64_t requester_task_id_,
                       std::shared_ptr<void> data_,
                       std::string name_,
                       const int& priority_,
                       const bool& optional_)
-            : type(type_), data(std::move(data_)), name(std::move(name_)), priority(priority_), optional(optional_) {}
+            : type(type_)
+            , requester_id(requester_id_)
+            , requester_task_id(requester_task_id_)
+            , data(std::move(data_))
+            , name(std::move(name_))
+            , priority(priority_)
+            , optional(optional_) {}
 
         /// The Provider type this task is for
         std::type_index type;
+        /// The Provider id of the requester
+        uint64_t requester_id;
+        /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
+        uint64_t requester_task_id;
         /// The data for the command, (the data that will be given to the Provider). If it is null it counts as no task
         std::shared_ptr<void> data;
         /// A name for this task to be shown in debugging systems
