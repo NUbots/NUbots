@@ -35,7 +35,6 @@
 #include "Provider.hpp"
 
 #include "extension/behaviour/GroupInfo.hpp"
-#include "extension/behaviour/RunReason.hpp"
 #include "extension/behaviour/commands.hpp"
 
 namespace module::extension::component {
@@ -44,7 +43,6 @@ namespace module::extension::component {
 
         using DataSetter = ::extension::behaviour::commands::ProvideReaction::DataSetter;
         using GroupInfo  = ::extension::behaviour::GroupInfo;
-        using RunReason  = ::extension::behaviour::RunReason;
 
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<DirectorTask>>;
