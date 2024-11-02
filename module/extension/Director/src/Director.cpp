@@ -66,7 +66,7 @@ namespace module::extension {
 
         // Create if it doesn't already exist
         if (!groups.contains(provide.type)) {
-            groups.emplace(provide.type, ProviderGroup(provide.type));
+            groups.emplace(provide.type, ProviderGroup(provide.type, provide.set_data));
         }
         auto& group = groups.at(provide.type);
 
@@ -128,7 +128,8 @@ namespace module::extension {
     std::shared_ptr<component::Provider> Director::get_root_provider(const std::type_index& root_type) {
         // Create a root provider for this task if one doesn't already exist and use it
         if (!groups.contains(root_type)) {
-            groups.emplace(root_type, ProviderGroup(root_type));
+            /// Can leave the set_data as nullptr as nobody should ever issue tasks to a root provider
+            groups.emplace(root_type, ProviderGroup(root_type, nullptr));
         }
         auto& group = groups.at(root_type);
         if (group.providers.empty()) {

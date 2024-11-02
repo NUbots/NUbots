@@ -34,21 +34,22 @@
 
 #include "Provider.hpp"
 
+#include "extension/behaviour/GroupInfo.hpp"
 #include "extension/behaviour/RunReason.hpp"
-#include "extension/behaviour/TaskData.hpp"
+#include "extension/behaviour/commands.hpp"
 
 namespace module::extension::component {
 
-    using ::extension::behaviour::RunReason;
-    using ::extension::behaviour::information::RunReasonStore;
-    using ::extension::behaviour::information::TaskDataStore;
-
     struct ProviderGroup {
+
+        using DataSetter = ::extension::behaviour::commands::ProvideReaction::DataSetter;
+        using GroupInfo  = ::extension::behaviour::GroupInfo;
+        using RunReason  = ::extension::behaviour::RunReason;
 
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<DirectorTask>>;
 
-        ProviderGroup(const std::type_index& type_) : type(type_) {}
+        ProviderGroup(const std::type_index& type_, const DataSetter& set_data) : type(type_), set_data(set_data) {}
 
         struct WatchHandle {
             WatchHandle(const std::function<void()>& deleter_) : deleter(deleter_) {}
@@ -86,8 +87,31 @@ namespace module::extension::component {
             });
         }
 
+        GroupInfo get_group_info() {
+            GroupInfo group_info;
+            group_info.active_provider_id = active_provider != nullptr ? active_provider->id : 0;
+
+            group_info.active_task.id           = active_task != nullptr ? active_task->requester_task_id : 0;
+            group_info.active_task.type         = active_task != nullptr ? active_task->type : typeid(void);
+            group_info.active_task.requester_id = active_task != nullptr ? active_task->requester_id : 0;
+
+            for (auto& watcher : watchers) {
+                group_info.watchers.emplace_back(GroupInfo::TaskInfo{
+                    .id           = watcher->requester_task_id,
+                    .type         = watcher->type,
+                    .requester_id = watcher->requester_id,
+                });
+            }
+            group_info.done = done;
+
+            return group_info;
+        }
+
         /// The type that this provider group manages
         std::type_index type;
+
+        /// The data setter for this provider group
+        DataSetter set_data;
 
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;
