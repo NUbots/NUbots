@@ -69,10 +69,10 @@ namespace extension::behaviour {
             current_scope = previous_scope;
 
             // Emit all the tasks that were accumulated in this scope
-            emit(std::make_unique<commands::TaskPack>(reaction_task.parent->id,
-                                                      reaction_task.id,
-                                                      false,
-                                                      std::move(*tasks)));
+            reaction_task.parent->reactor.emit(std::make_unique<commands::TaskPack>(reaction_task.parent->id,
+                                                                                    reaction_task.id,
+                                                                                    false,
+                                                                                    std::move(*tasks)));
         }
 
         template <typename T>
