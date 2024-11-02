@@ -413,18 +413,6 @@ namespace module::extension {
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        struct PackBuilder {
-            /// The task_id that this thread is building for.
-            /// If this doesn't match the current task_id something went wrong clear the list.
-            /// If this is 0, then it means that this thread is not building a pack currently.
-            NUClear::id_t task_id = 0;
-            std::unique_ptr<TaskPack> pack;
-        };
-
-        /// A thread local pack builder instance so that threads don't need to have lock contention when emitting
-        /// multiple subtasks
-        static thread_local PackBuilder pack_builder;
-
         /// A list of Provider groups
         std::map<std::type_index, component::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it

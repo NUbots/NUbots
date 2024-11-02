@@ -102,17 +102,12 @@ namespace extension::behaviour {
         }
 
         /**
-         * Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted
-         *
-         * @tparam DSL the NUClear dsl for the on statement
-         *
-         * @param task The reaction task object that just finished
+         * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done
          */
-        template <typename DSL>
-        static void postcondition(NUClear::threading::ReactionTask& task) {
-            // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent->reactor.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::ProviderDone>(task.parent->id, task.id));
+        static ProviderScope scope(NUClear::threading::ReactionTask& t) {
+            // TODO store the current task id in a thread local variable
+            // TODO accumulate tasks that are emitted in the Task emit scope
+            // TODO when the ProviderScope object you made here is destroyed, emit the task group as a pack
         }
     };
 
@@ -348,6 +343,16 @@ namespace extension::behaviour {
                          const int& priority     = 0,
                          const bool& optional    = false,
                          const std::string& name = "") {
+
+            // TODO here you can check if the task is in a provider.
+            // see https://github.com/Fastcode/NUClear/blob/main/tests/tests/dsl/TaskScope.cpp#L87
+
+            // Then if you are in a provider, store this task in a thread local store somewhere
+
+            // If you are not in a provider, then this is a root task, you can do whatever transformations are required
+            // and emit the task to the director.
+            // As a result you shouldn't need to pass the RootType through in BehaviourTask anymore since you can deal
+            // with it here while you know both the types.
 
             // Work out who is sending the task so we can determine if it's a subtask
             const auto* task     = NUClear::threading::ReactionTask::get_current_task();
