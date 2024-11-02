@@ -49,10 +49,12 @@ namespace module::extension::component {
          *
          * @param task                  the BehaviourTask to use as a base
          */
-        DirectorTask(const ::extension::behaviour::commands::BehaviourTask& task)
+        DirectorTask(const NUClear::id_t& requester_id,
+                     const NUClear::id_t& requester_task_id,
+                     const ::extension::behaviour::commands::BehaviourTask& task)
             : type(task.type)
-            , requester_id(task.requester_id)
-            , requester_task_id(task.requester_task_id)
+            , requester_id(requester_id)
+            , requester_task_id(requester_task_id)
             , data(task.data)
             , name(task.name)
             , priority(task.priority)

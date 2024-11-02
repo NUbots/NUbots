@@ -271,12 +271,19 @@ namespace module::extension {
         // We have a new task pack to run
         on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>>().then("Run", [this](const BehaviourTasks& p) {
             // Convert the task pack to a Director task pack
-            TaskPack director_pack;
+            TaskPack pack;
 
-            // TODO get the provider from the pack
-            // TODO copy over all the tasks from the pack
+            // Root providers are identified by being declared root and their requester type will be RootProvider<T>
+            pack.provider =
+                p.root ? get_root_provider(p.requester_type) : pack.provider = providers.at(p.requester_reaction_id);
 
-            run_task_pack(director_pack);
+            // Convert the Behaviour tasks to Director tasks
+            for (auto& task : p.tasks) {
+                pack.tasks.push_back(
+                    std::make_shared<DirectorTask>(p.requester_reaction_id, p.requester_reaction_id, task));
+            }
+
+            run_task_pack(pack);
         });
     }
 
