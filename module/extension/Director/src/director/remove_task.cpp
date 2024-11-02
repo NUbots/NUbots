@@ -89,14 +89,11 @@ namespace module::extension {
                     remove_task(t);
                 }
 
-
                 // We now have no subtasks
                 group.subtasks.clear();
             }
             // After we have removed all our subtasks we are no longer a zombie, we are just dead
             group.zombie = false;
-
-            auto group_info_lock = GroupInfoStore::set(GroupInfo::State::NO_TASK, group.done);
         }
     }
 

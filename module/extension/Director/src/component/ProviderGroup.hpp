@@ -86,33 +86,6 @@ namespace module::extension::component {
             });
         }
 
-        struct CombinedLock {
-            std::shared_ptr<std::vector<std::unique_lock<std::mutex>>> locks_;
-
-            template <typename... Locks>
-            CombinedLock(Locks... locks) : locks_{std::make_shared<std::vector<std::unique_lock<std::mutex>>>()} {
-                (locks_->emplace_back(std::move(locks)), ...);
-            }
-
-            ~CombinedLock() {
-                locks_->clear();
-            }
-        };
-
-        CombinedLock publish(const RunReason& run_reason, const std::shared_ptr<DirectorTask>& task) {
-            // Create individual locks
-            auto reason_lock = RunReasonStore::set(run_reason);
-            auto task_lock   = TaskDataStore<DirectorTask>::set(
-                std::make_shared<std::pair<long unsigned int, std::shared_ptr<const DirectorTask>>>(
-                    std::make_pair(task->requester_id, task)));
-
-            // Return a combined lock
-            return CombinedLock(std::move(reason_lock), std::move(task_lock));
-
-            // TODO call the function that stores data and stuff... I'm tired idk
-            // That function should be set on this any time a provider is added to the group
-        }
-
         /// The type that this provider group manages
         std::type_index type;
 

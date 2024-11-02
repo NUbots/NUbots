@@ -41,23 +41,23 @@ namespace extension::behaviour {
     struct GroupInfo {
         struct TaskInfo {
             /// The unique ID of the task
-            NUClear::id_t id;
+            NUClear::id_t id = 0;
             /// The type of the task
-            std::type_index type;
+            std::type_index type = std::type_index(typeid(void));
             /// The ID of the provider that requested the task
-            NUClear::id_t requester_id;
+            NUClear::id_t requester_id = 0;
         };
 
         /// The ID of the active provider
-        NUClear::id_t active_provider_id;
+        NUClear::id_t active_provider_id = 0;
         /// The TaskInfo of the active task (zeroed if there is no active task)
-        TaskInfo active_task;
+        TaskInfo active_task = TaskInfo();
 
         /// Queue of tasks that are waiting to be run on this provider group
-        std::vector<TaskInfo> watchers;
+        std::vector<TaskInfo> watchers{};
 
         /// Whether the provider group is done or not
-        bool done;
+        bool done = false;
     };
 
     namespace information {
@@ -78,7 +78,7 @@ namespace extension::behaviour {
              * @return a lock object that once destroyed will upgrade the data to the global store and clear the thread
              * store
              */
-            static Lock set(const std::shared_ptr<GroupInfo> info) {
+            static Lock set(const std::shared_ptr<GroupInfo>& info) {
                 auto lock          = Lock(&info, [info](const void*) {
                     GlobalStore::set(info);
                     ThreadStore::value = nullptr;

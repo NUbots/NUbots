@@ -33,10 +33,49 @@ namespace module::extension {
     using component::Provider;
     using ::extension::behaviour::GroupInfo;
     using ::extension::behaviour::RunReason;
+    using ::extension::behaviour::information::GroupInfoStore;
+    using ::extension::behaviour::information::RunReasonStore;
+    using ::extension::behaviour::information::TaskDataStore;
 
     void Director::run_task_on_provider(const std::shared_ptr<DirectorTask>& task,
                                         const std::shared_ptr<component::Provider>& provider,
                                         const RunReason& run_reason) {
+
+        auto get_locks = [&]() {
+            // Store run reason
+            auto lock_run_reason = RunReasonStore::set(run_reason);
+            // Store task data
+            auto lock_task = TaskDataStore<provider->type>::set(
+                std::make_shared<std::pair<long unsigned int, std::shared_ptr<const DirectorTask>>>(
+                    std::make_pair(task->requester_id, task)));
+
+            // Create group info
+            auto group_info = GroupInfo();
+            if (provider != nullptr) {
+                group_info.active_provider_id = provider->id;
+            }
+            if (task != nullptr) {
+                group_info.active_task.id           = task->requester_task_id;
+                group_info.active_task.type         = task->type;
+                group_info.active_task.requester_id = task->requester_id;
+            }
+            if (provider != nullptr) {
+                for (auto& watcher : provider->group.watchers) {
+                    group_info.watchers.emplace_back(GroupInfo::TaskInfo{
+                        .id           = watcher->requester_task_id,
+                        .type         = watcher->type,
+                        .requester_id = watcher->requester_id,
+                    });
+                }
+            }
+            if (provider != nullptr) {
+                group_info.done = provider->group.done;
+            }
+            // Store group info
+            auto lock_group_info = GroupInfoStore<provider->type>::set(group_info);
+
+            return std::make_tuple(lock_run_reason, lock_task, lock_group_info);
+        };
 
         // Update the active provider and task
         auto& group              = provider->group;
@@ -51,7 +90,7 @@ namespace module::extension {
                     // We have to swap to this as the active provider so it can actually run
                     group.active_provider = provider;
 
-                    auto lock = group.publish(RunReason::STARTED, task);
+                    auto [lock_run_reason, lock_task, lock_group_info] = get_locks();
                     powerplant.submit(provider->reaction->get_task(true));
                 }
             }
@@ -61,7 +100,7 @@ namespace module::extension {
         group.active_provider = provider;
 
         // Run the provider
-        auto lock = group.publish(run_reason, task);
+        auto [lock_run_reason, lock_task, lock_group_info] = get_locks();
         powerplant.submit(provider->reaction->get_task());
     }
 
