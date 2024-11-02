@@ -55,14 +55,19 @@ namespace extension::behaviour::commands {
     };
 
     template <typename T>
-    struct RootType {
-        RootType() = delete;
+    struct RootProvider {
+        RootProvider() = delete;
     };
 
     /**
      * Message used to tell the behaviour system about a new Provides reaction
      */
     struct ProvideReaction {
+
+        /// A function that can be used to set data into the correct caches and return a Lock for when the task is
+        /// executed. This is provided as a function pointer rather than an std::function to ensure that it is stateless
+        /// for the given Provider type (ProviderGroup).
+        using DataSetter = Lock (*)(const RunReason&, const std::shared_ptr<const void>&, const GroupInfo&);
 
         /**
          * @brief Construct a new Provide Reaction object to send to the behaviour system
@@ -83,7 +88,7 @@ namespace extension::behaviour::commands {
         /// The action type that this Provider is using
         ProviderClassification classification;
         /// A function that will place data into the correct caches and return a Lock
-        std::function<Lock(const RunReason&, const std::shared_ptr<const void>&, const GroupInfo& info)> set_data;
+        DataSetter set_data;
     };
 
     /**
@@ -241,15 +246,19 @@ namespace extension::behaviour::commands {
          * @param requester_id_         the id of the reaction that emitted this task
          * @param requester_task_id_    the task_id of the reaction task that emitted this
          */
-        BehaviourTasks(const NUClear::id_t& requester_id_,
+        BehaviourTasks(const std::type_index& requester_type_,
+                       const NUClear::id_t& requester_id_,
                        const NUClear::id_t& requester_task_id_,
                        const bool& root_,
                        std::vector<BehaviourTask>&& tasks_)
-            : requester_reaction_id(requester_id_)
+            : requester_type(requester_type_)
+            , requester_reaction_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , root(root_)
             , tasks(std::move(tasks_)) {}
 
+        /// The type of the requester, will be either the provider type or RootProvider<type> for root tasks
+        std::type_index requester_type;
         /// The reaction id of the requester if it is a Provider, otherwise it will be 0 (for root tasks)
         NUClear::id_t requester_reaction_id;
         /// The reaction task id of the provider
