@@ -111,8 +111,8 @@ namespace extension::behaviour {
          * @return the scope object that will accumulate tasks to be emitted together
          */
         template <typename DSL>
-        static ProviderScope scope(NUClear::threading::ReactionTask& t) {
-            return ProviderScope(typeid(T), t);
+        static std::unique_ptr<ProviderScope> scope(NUClear::threading::ReactionTask& t) {
+            return std::make_unique<ProviderScope>(typeid(T), t);
         }
     };
 

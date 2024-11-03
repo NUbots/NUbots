@@ -42,15 +42,9 @@ namespace extension::behaviour {
         ProviderScope(const std::type_index& provider_type, NUClear::threading::ReactionTask& reaction_task)
             : provider_type(provider_type)
             , reaction_task(reaction_task)
-            , previous_scope(std::exchange(current_scope, this))
-            , tasks(std::make_unique<std::vector<commands::BehaviourTask>>()) {}
+            , previous_scope(std::exchange(current_scope, this)) {}
 
-        ProviderScope(ProviderScope&& other)
-            : provider_type(other.provider_type)
-            , reaction_task(other.reaction_task)
-            , previous_scope(std::exchange(other.previous_scope, nullptr))
-            , tasks(std::move(other.tasks)) {}
-
+        ProviderScope(ProviderScope&& other)            = delete;
         ProviderScope& operator=(ProviderScope&& other) = delete;
         ProviderScope(const ProviderScope&)             = delete;
         ProviderScope& operator=(const ProviderScope&)  = delete;
@@ -64,7 +58,7 @@ namespace extension::behaviour {
                                                                                           reaction_task.parent->id,
                                                                                           reaction_task.id,
                                                                                           false,
-                                                                                          std::move(*tasks)));
+                                                                                          std::move(tasks)));
         }
 
         template <typename T>
@@ -79,7 +73,7 @@ namespace extension::behaviour {
 
             // If we are in a scope (running in a provider) accumulate the task to be emitted later
             if (current_scope != nullptr) {
-                current_scope->tasks->push_back(std::move(task));
+                current_scope->tasks.push_back(std::move(task));
             }
             /// Root tasks emit the task immediately as a single pack
             else {
@@ -106,7 +100,7 @@ namespace extension::behaviour {
         /// another provider
         ProviderScope* previous_scope = nullptr;
         /// The tasks that have been accumulated in this scope
-        std::unique_ptr<std::vector<commands::BehaviourTask>> tasks{};
+        std::vector<commands::BehaviourTask> tasks;
 
         /// Holds the scope object which is currently active
         static thread_local ProviderScope* current_scope;
