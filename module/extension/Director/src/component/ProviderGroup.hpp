@@ -91,7 +91,7 @@ namespace module::extension::component {
             });
         }
 
-        std::shared_ptr<const GroupInfo> get_group_info() {
+        std::shared_ptr<const GroupInfo> get_group_info() const {
             auto group_info                = std::make_shared<GroupInfo>();
             group_info->active_provider_id = active_provider != nullptr ? active_provider->id : 0;
 
