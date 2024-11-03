@@ -65,7 +65,7 @@ namespace {
                 // Second time emit idle
                 else if (t.id == 2) {
                     events.push_back("emitting idle");
-                    emit<Task>(std::make_unique<Idle>());
+                    emit<Task>(std::make_unique<Continue>());
                 }
 
                 // Third time emit no tasks
@@ -142,7 +142,7 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that when Idle is emitted nothing changes with subtasks", "[director][triggered][idle]") {
+TEST_CASE("Test that when Continue is emitted nothing changes with subtasks", "[director][triggered][continue]") {
 
     // Run the module
     NUClear::Configuration config;

@@ -122,8 +122,8 @@ namespace module::skill {
                         emit(std::make_unique<Stability>(Stability::STANDING));
                         emit<Task>(std::make_unique<Done>());
                     } break;
-                    // These shouldn't happen but if they do just idle
-                    default: emit<Task>(std::make_unique<Idle>()); break;
+                    // These shouldn't happen but if they do just continue doing the same thing
+                    default: emit<Task>(std::make_unique<Continue>()); break;
                 }
             });
     }

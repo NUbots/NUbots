@@ -54,7 +54,7 @@ namespace module::planning {
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
             [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
-                    emit<Task>(std::make_unique<Idle>());
+                    emit<Task>(std::make_unique<Continue>());
                     log<NUClear::DEBUG>("Idle");
                     return;
                 }

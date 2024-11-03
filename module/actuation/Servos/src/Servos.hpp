@@ -91,8 +91,8 @@ namespace module::actuation {
                             emit<Task>(std::make_unique<Done>());
                             return;
                         }
-                        // Emit Idle if all the servos are not Done yet
-                        emit<Task>(std::make_unique<Idle>());
+                        // Emit Continue if all the servos are not Done yet
+                        emit<Task>(std::make_unique<Continue>());
                         return;
                     }
 
@@ -156,7 +156,7 @@ namespace module::actuation {
                     }
                     // Any other run reason shouldn't happen
                     else {
-                        emit<Task>(std::make_unique<Idle>());
+                        emit<Task>(std::make_unique<Continue>());
                     }
                 });
         }

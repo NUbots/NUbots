@@ -143,13 +143,13 @@ namespace module::planning {
                             emit<Task>(load_script<BodySequence>(cfg.fall_script));
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                 }
                 else {
                     // Emit an idle task for every other reason
-                    emit(std::make_unique<Idle>());
+                    emit(std::make_unique<Continue>());
                 }
             });
     }

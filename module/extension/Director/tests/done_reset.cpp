@@ -72,7 +72,7 @@ namespace {
                         emit<Task>(std::make_unique<SubtaskB>());
                     }
                     else {
-                        emit<Task>(std::make_unique<Idle>());
+                        emit<Task>(std::make_unique<Continue>());
                     }
                 });
 

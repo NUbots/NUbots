@@ -52,7 +52,7 @@ namespace module::strategy {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             }
             else {
-                emit<Task>(std::make_unique<Idle>());
+                emit<Task>(std::make_unique<Continue>());
             }
         });
     }

@@ -67,8 +67,8 @@ namespace module::strategy {
                      && stability != Stability::STANDING) {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             }
-            else {  // Otherwise, emit the idle task to keep walking or standing still
-                emit<Task>(std::make_unique<Idle>());
+            else {  // Otherwise, emit the Continue task to keep doing the same thing
+                emit<Task>(std::make_unique<Continue>());
             }
         });
     }

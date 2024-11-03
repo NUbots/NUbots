@@ -41,8 +41,6 @@ public:
     template <int i>
     struct Step {};
 
-    struct ShutdownOnIdle {};
-
     explicit TestBase(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         // Timeout if the test doesn't complete in time
@@ -52,8 +50,7 @@ public:
         });
 
         // Shutdown if the system is idle
-        on<Trigger<ShutdownOnIdle>, Priority::IDLE>().then([this] { powerplant.shutdown(); });
-        on<Startup>().then([this] { emit(std::make_unique<ShutdownOnIdle>()); });
+        on<Idle<>>().then([this] { powerplant.shutdown(); });
     }
 };
 

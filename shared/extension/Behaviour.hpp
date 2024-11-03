@@ -369,10 +369,10 @@ namespace extension::behaviour {
      * When this is emitted the director will just continue with whatever was previously emitted by this provider.
      *
      * ```
-     * emit<Task>(std::make_unique<Idle>());
+     * emit<Task>(std::make_unique<Continue>());
      * ```
      */
-    struct Idle {};
+    struct Continue {};
 
     /**
      * A reactor subtype that can be used when making a behaviour reactor.
@@ -404,7 +404,7 @@ namespace extension::behaviour {
         using RunReason = ::extension::behaviour::RunReason;
         using RunState  = ::extension::behaviour::RunState;
         using Done      = ::extension::behaviour::Done;
-        using Idle      = ::extension::behaviour::Idle;
+        using Continue  = ::extension::behaviour::Continue;
     };
 
 }  // namespace extension::behaviour

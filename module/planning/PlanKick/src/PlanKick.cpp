@@ -74,7 +74,7 @@ namespace module::planning {
                    const Sensors& sensors) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == RunState::RUNNING && !kick.done) {
-                    emit<Task>(std::make_unique<Idle>());
+                    emit<Task>(std::make_unique<Continue>());
                     return;
                 }
 
@@ -113,7 +113,7 @@ namespace module::planning {
                 // Otherwise, the kick conditions are met and we need to check if we are already kicking
                 // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
                 if (kick.run_state == RunState::QUEUED) {
-                    emit<Task>(std::make_unique<Idle>());
+                    emit<Task>(std::make_unique<Continue>());
                     return;
                 }
 

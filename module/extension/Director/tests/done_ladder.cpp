@@ -55,7 +55,7 @@ namespace {
                             emit<Task>(std::make_unique<Done>());
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                     else {
@@ -77,7 +77,7 @@ namespace {
                             emit<Task>(std::make_unique<Done>());
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                     else {
@@ -98,7 +98,7 @@ namespace {
                             emit<Task>(std::make_unique<Done>());
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                     else {

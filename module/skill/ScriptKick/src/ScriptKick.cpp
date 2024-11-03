@@ -57,9 +57,9 @@ namespace module::skill {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
-            // If it isn't a new task, don't do anything
+            // If it isn't a new task, keep doing whatever we were doing
             if (run_reason != RunReason::NEW_TASK) {
-                emit<Task>(std::make_unique<Idle>());
+                emit<Task>(std::make_unique<Continue>());
                 return;
             }
 

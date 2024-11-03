@@ -171,8 +171,7 @@ namespace module::extension {
 
         // See if a Idle command was emitted
         for (const auto& t : requested_tasks) {
-            if (t->type == typeid(::extension::behaviour::Idle)) {
-
+            if (t->type == typeid(::extension::behaviour::Continue)) {
                 if (requested_tasks.size() > 1) {
                     log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
                 }
