@@ -43,11 +43,15 @@ namespace module::extension::component {
 
         using DataSetter = ::extension::behaviour::commands::ProvideReaction::DataSetter;
         using GroupInfo  = ::extension::behaviour::GroupInfo;
+        using RunReason  = ::extension::behaviour::RunReason;
 
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<DirectorTask>>;
 
-        ProviderGroup(const std::type_index& type_, const DataSetter& set_data) : type(type_), set_data(set_data) {}
+        ProviderGroup(const std::type_index& type_, const DataSetter& set_data) : type(type_), set_data(set_data) {
+            // Call set_data to initialise the GroupInfo cache
+            set_data(0, RunReason::OTHER_TRIGGER, nullptr, get_group_info());
+        }
 
         struct WatchHandle {
             WatchHandle(const std::function<void()>& deleter_) : deleter(deleter_) {}
