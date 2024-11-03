@@ -65,7 +65,6 @@ namespace extension::behaviour {
         template <typename T>
         struct GroupInfoStore {
         private:
-            using ThreadStore = NUClear::dsl::store::ThreadStore<const std::shared_ptr<const GroupInfo>>;
             using GlobalStore = NUClear::util::TypeMap<T, T, const GroupInfo>;
 
         public:
@@ -79,18 +78,24 @@ namespace extension::behaviour {
              * store
              */
             static Lock set(const std::shared_ptr<const GroupInfo>& info) {
-                auto lock          = Lock([info] {
+                auto lock  = Lock([info] {
                     GlobalStore::set(info);
-                    ThreadStore::value = nullptr;
+                    local_data = nullptr;
                 });
-                ThreadStore::value = &info;
+                local_data = info;
                 return lock;
             }
 
             static std::shared_ptr<const GroupInfo> get() {
-                return ThreadStore::value == nullptr ? GlobalStore::get() : *ThreadStore::value;
+                return local_data == nullptr ? GlobalStore::get() : local_data;
             }
+
+        private:
+            static thread_local std::shared_ptr<const GroupInfo> local_data;
         };
+
+        template <typename T>
+        thread_local std::shared_ptr<const GroupInfo> GroupInfoStore<T>::local_data = nullptr;
 
     }  // namespace information
 

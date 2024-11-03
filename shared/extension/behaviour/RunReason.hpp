@@ -56,9 +56,6 @@ namespace extension::behaviour {
     namespace information {
 
         struct RunReasonStore {
-        private:
-            using ThreadStore = NUClear::dsl::store::ThreadStore<const RunReason>;
-
         public:
             /**
              * Set the RunReason for this thread and return a lock that when destroyed will default to OTHER_TRIGGER.
@@ -68,8 +65,8 @@ namespace extension::behaviour {
              * @return a lock object that once destroyed will clear to nullptr
              */
             static Lock set(const RunReason& run_reason) {
-                auto lock          = Lock([] { ThreadStore::value = nullptr; });
-                ThreadStore::value = &run_reason;
+                auto lock      = Lock([] { current_reason = RunReason::OTHER_TRIGGER; });
+                current_reason = run_reason;
                 return lock;
             }
 
@@ -84,8 +81,11 @@ namespace extension::behaviour {
              * @return a shared pointer to the current RunReason.
              */
             static RunReason get() {
-                return ThreadStore::value == nullptr ? RunReason::OTHER_TRIGGER : *ThreadStore::value;
+                return current_reason;
             }
+
+        private:
+            static thread_local RunReason current_reason;
         };
 
     }  // namespace information

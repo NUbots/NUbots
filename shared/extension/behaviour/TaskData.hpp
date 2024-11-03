@@ -54,13 +54,12 @@ namespace extension::behaviour::information {
          * @return a lock object that will upgrade the data to the global store when it goes out of scope
          */
         static Lock set(const NUClear::id_t& allowed_id, const std::shared_ptr<const void>& raw_data) {
-
-            auto lock = Lock([] {
-                GlobalStore::set(TaskDataStore::local_data);
+            auto data  = std::make_shared<TaskData>(allowed_id, std::static_pointer_cast<const T>(raw_data));
+            auto lock  = Lock([data] {
+                GlobalStore::set(data);
                 local_data = nullptr;
             });
-
-            local_data = std::make_shared<TaskData>(allowed_id, std::static_pointer_cast<const T>(raw_data));
+            local_data = data;
 
             return lock;
         }
