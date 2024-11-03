@@ -50,7 +50,7 @@ namespace module::extension::component {
 
         ProviderGroup(const std::type_index& type_, const DataSetter& set_data) : type(type_), set_data(set_data) {
             // Call set_data to initialise the GroupInfo cache unless this is a root provider
-            if (set_data) {
+            if (set_data != nullptr) {
                 set_data(0, RunReason::OTHER_TRIGGER, nullptr, get_group_info());
             }
         }
