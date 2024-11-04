@@ -11,8 +11,8 @@ cameras:
   left_camera:
     concurrent: 2
     network: config/networks/WebotsNetwork.yaml
-    engine: cpu # To run with opencl engine in webots, use ./b run {role} --device /dev/dri:/dev/dri
-    cache_directory: "" # unneeded for cpu engine
+    engine: opencl
+    cache_directory: "./vision_cache/"
     classifier:
       height: [0.5, 1.0]
       max_distance: 11
