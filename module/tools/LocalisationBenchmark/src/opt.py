@@ -120,7 +120,7 @@ def objective(trial):
     }
 
     # Modify the YAML file with the new parameters
-    yaml_path = '/home/nubots/build/config/FieldLocalisationNLopt.yaml'
+    yaml_path = '/home/nubots/build/config/webots/FieldLocalisationNLopt.yaml'
     modify_yaml(params, yaml_path)
 
     # Run the benchmark and get the RMSE
@@ -149,31 +149,3 @@ if __name__ == '__main__':
     for key, value in study.best_params.items():
         print(f'{key}: {value}')
     print(f'Best RMSE: {study.best_value}')
-
-    # # Paths to the executable and NBS file
-    # executable_path = '/home/nubots/build/bin/webots/localisation_benchmark'
-    # nbs_file = '/home/nubots/build/recordings/localisation/20241104T05_40_50.nbs'
-
-    # # Ensure the executable and NBS file exist
-    # if not os.path.isfile(executable_path):
-    #     print(f"Executable not found at {executable_path}")
-    # if not os.path.isfile(nbs_file):
-    #     print(f"NBS file not found at {nbs_file}")
-
-    # # Command to run
-    # command = [executable_path, nbs_file]
-
-    # result = subprocess.run(
-    #     command,
-    #     cwd='/home/nubots/build',
-    #     capture_output=True,
-    #     text=True,
-    #     check=True,
-    #     bufsize=1
-    # )
-    # output = result.stdout
-    # print(output)
-    # rmse_translation = parse_rmse_translation(output)
-    # rmse_rotation = parse_rmse_rotation(output)
-    # print(rmse_translation)
-    # print(rmse_rotation)
