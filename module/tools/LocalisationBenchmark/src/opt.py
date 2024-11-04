@@ -58,7 +58,7 @@ def run_benchmark():
     """
     # Paths to the executable and NBS file
     executable_path = '/home/nubots/build/bin/webots/localisation_benchmark'
-    nbs_file = '/home/nubots/build/recordings/localisation/20241104T05_40_50.nbs'
+    nbs_file = '/home/nubots/build/recordings/localisation/20241104T06_31_29.nbs'
 
     # Ensure the executable and NBS file exist
     if not os.path.isfile(executable_path):
@@ -104,9 +104,9 @@ def objective(trial):
     The objective function for Optuna that defines the optimization problem.
     """
     # Suggest values for the parameters within the specified ranges
-    field_line_distance_weight = trial.suggest_loguniform('field_line_distance_weight', 0.1, 100)
-    field_line_intersection_weight = trial.suggest_loguniform('field_line_intersection_weight', 0.1, 100)
-    state_change_weight = trial.suggest_loguniform('state_change_weight', 0.1, 10)
+    field_line_distance_weight = trial.suggest_loguniform('field_line_distance_weight', 0.01, 100)
+    field_line_intersection_weight = trial.suggest_loguniform('field_line_intersection_weight', 0.01, 100)
+    state_change_weight = trial.suggest_loguniform('state_change_weight', 0.01, 100)
     Q_value = trial.suggest_loguniform('Q', 1e-6, 1e-2)
     R_value = trial.suggest_uniform('R', 0.1, 10)
 
