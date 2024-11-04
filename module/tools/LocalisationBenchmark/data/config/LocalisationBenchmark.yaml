@@ -1,0 +1,37 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# FAST - as fast as possible
+# REALTIME - as fast as the messages were recorded
+# SEQUENTIAL - one message at a time, waits for all message sub tasks to complete before continuing
+playback_mode: REALTIME
+
+# You can put any messages that is emitted in the system here and it will be played back
+# The below ones are just the most common and here as an example
+messages:
+  # Input
+  message.platform.RawSensors: true
+  message.input.Image: false
+  message.output.CompressedImage: false
+  # Vision
+  message.vision.Balls: false
+  message.vision.Goals: true
+  message.vision.GreenHorizon: false
+  message.vision.FieldLines: true
+  message.vision.FieldIntersections: true
+  message.vision.VisualMesh: false
+  message.vision.BoundingBoxes: false
+  # Odometry and Localisation
+  message.localisation.Ball: false
+  message.localisation.Field: false
+  message.localisation.Robot: false
+  message.input.Sensors: true
+  message.support.FieldDescription: false
+  # Behaviour state
+  message.behaviour.state.WalkState: false
+  message.behaviour.state.Stability: true
+  # Logging and Support
+  message.support.nusight.Overview: false
+  message.eye.DataPoint: false
+  message.nuclear.LogMessage: false
+  message.nuclear.ReactionStatistics: false
