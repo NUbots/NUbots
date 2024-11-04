@@ -387,7 +387,9 @@ RUN pip install \
     Pillow \
     protobuf==4.21.2 \
     mycroft-mimic3-tts \
-    tqdm
+    tqdm \
+    optuna \
+    PyYAML
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
