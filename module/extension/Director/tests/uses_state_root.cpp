@@ -44,7 +44,7 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 7> {
     public:
         /// Print the subtask state
         std::string decode_run_state(RunState state) {
@@ -56,8 +56,7 @@ namespace {
             }
         }
 
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Trigger<RunTrigger>>().then([this] {
                 events.push_back("emitting subtask");
@@ -125,16 +124,6 @@ namespace {
             on<Trigger<Step<7>>, Priority::LOW>().then([this] {
                 events.push_back("emit uses trigger");
                 emit<Scope::INLINE>(std::make_unique<UsesTrigger>());
-            });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-                emit(std::make_unique<Step<7>>());
             });
         }
 

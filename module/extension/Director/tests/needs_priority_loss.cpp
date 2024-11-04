@@ -45,10 +45,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // First complex task needs both simple tasks
             on<Provide<ComplexTask<1>>, Needs<SimpleTask<1>>, Needs<SimpleTask<2>>>().then([this] {
@@ -86,10 +85,6 @@ namespace {
                 // Emit a higher priority complex task that just uses one
                 events.push_back("requesting complex task 2");
                 emit<Task>(std::make_unique<ComplexTask<2>>(), 100);
-            });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
             });
         }
     };

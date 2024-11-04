@@ -39,10 +39,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             a_handle = on<Provide<SimpleTask>>().then([this] {  //
                 events.push_back("version a");
@@ -74,13 +73,6 @@ namespace {
             on<Trigger<Step<5>>, Priority::LOW>().then([this] {
                 events.push_back("emitting task 3");
                 emit<Task>(std::make_unique<SimpleTask>());
-            });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
             });
         }
 

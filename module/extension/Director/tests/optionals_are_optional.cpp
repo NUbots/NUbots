@@ -51,10 +51,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask<0>>>().then([this](const SimpleTask<0>& t) {  //
                 events.push_back("task 0 " + t.msg);
@@ -104,14 +103,6 @@ namespace {
                 // Emit an optional blocker task which the complex task should override
                 events.push_back("emitting optional blocker task");
                 emit<Task>(std::make_unique<BlockerTask>("optional"), 50, true);
-            });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
             });
         }
     };

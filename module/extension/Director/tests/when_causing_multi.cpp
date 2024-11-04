@@ -54,10 +54,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, Needs<Subtask<1>>, Needs<Subtask<2>>>().then([this] {
                 events.push_back("task executed");
@@ -110,12 +109,6 @@ namespace {
                 // Increase the priority of the task so it can push the helper
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);
-            });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
             });
         }
     };

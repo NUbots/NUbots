@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 8> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {
                 events.push_back("task " + std::to_string(t.id));
@@ -62,9 +61,9 @@ namespace {
                     emit<Task>(std::make_unique<DependentTask>(t.id));
                 }
 
-                // Second time emit idle
+                // Second time emit continue
                 else if (t.id == 2) {
-                    events.push_back("emitting idle");
+                    events.push_back("emitting continue");
                     emit<Task>(std::make_unique<Continue>());
                 }
 
@@ -126,17 +125,6 @@ namespace {
                 events.push_back("emitting trigger 4");
                 emit(std::make_unique<TriggerTest>());
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-                emit(std::make_unique<Step<7>>());
-                emit(std::make_unique<Step<8>>());
-            });
         }
     };
 
@@ -162,7 +150,7 @@ TEST_CASE("Test that when Continue is emitted nothing changes with subtasks", "[
         "dependent run with 1",
         "emitting task 2",
         "task 2",
-        "emitting idle",
+        "emitting continue",
         "emitting trigger 2",
         "dependent run with 1",
         "emitting task 3",

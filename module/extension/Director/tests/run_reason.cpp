@@ -41,7 +41,7 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
         std::string decode_reason(const RunReason& reason) {
             switch (reason) {
@@ -55,8 +55,7 @@ namespace {
             };
         }
 
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, Trigger<TriggerTest>>().then([this](const RunReason& run_reason) {
                 events.push_back("simple task ran because: " + decode_reason(run_reason));
@@ -109,12 +108,6 @@ namespace {
                 // Checks OTHER_TRIGGER and STOPPED for simple task
                 events.push_back("emitting trigger test");
                 emit(std::make_unique<TriggerTest>());
-            });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
             });
         }
     };

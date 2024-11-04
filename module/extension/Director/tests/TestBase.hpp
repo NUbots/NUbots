@@ -33,25 +33,82 @@
 
 #include "extension/Behaviour.hpp"
 
-template <typename BaseClass, int timeout = 1000>
+/**
+ * A base class for tests that run a series of steps.
+ *
+ * This class is a BehaviourReactor that will run a series of steps in a test.
+ * Each step is executed in turn once the system has become Idle after processing all the previous steps.
+ *
+ * At the end of the steps once the system is idle it will shutdown the powerplant.
+ */
+template <typename BaseClass, int NSteps>
 class TestBase : public extension::behaviour::BehaviourReactor {
 public:
-    // Struct to use to emit each step of the test, by doing each step in a separate reaction with low priority, it will
+    // Struct to use to emit each step of the test, by doing each step in a separate reaction with it will
     // ensure that everything has finished changing before the next step is run
     template <int i>
     struct Step {};
 
-    explicit TestBase(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+    /**
+     * Emit this struct to fail the test
+     */
+    struct Fail {
+        explicit Fail(std::string message) : message(std::move(message)) {}
+        std::string message;
+    };
 
-        // Timeout if the test doesn't complete in time
-        on<Watchdog<BaseClass, timeout, std::chrono::milliseconds>>().then([this] {
-            std::cout << "Test timed out" << std::endl;
-            powerplant.shutdown();
+    /**
+     * Construct the test base with the given environment and timeout.
+     *
+     * @param environment The environment to run the test in
+     * @param timeout The time to wait for the test to complete before failing
+     */
+    explicit TestBase(std::unique_ptr<NUClear::Environment> environment,
+                      std::chrono::steady_clock::duration timeout = std::chrono::milliseconds(1000))
+        : BehaviourReactor(std::move(environment)) {
+        // Advance to the next step when the system is idle
+        on<Idle<>>().then([this] { next_step<NSteps>(++step); });
+
+        on<Trigger<Fail>, MainThread>().then([this](const Fail& f) {
+            INFO(f.message);
+            CHECK(false);
+            powerplant.shutdown(true);
         });
-
-        // Shutdown if the system is idle
-        on<Idle<>>().then([this] { powerplant.shutdown(); });
+        emit<Scope::DELAY>(std::make_unique<Fail>("Test did not complete successfully"), timeout);
     }
+
+private:
+    /**
+     * Run the step with the given index.
+     *
+     * This function will emit the next step in the test, or shutdown the powerplant if the last step has been reached.
+     * It is a recursive template function that will call itself with the next step index until the last step is
+     * reached.
+     *
+     * Since the function has a constexpr if, the compiler should be able to optimise this into it's most efficient
+     * form.
+     *
+     * @tparam i The index of the step to run
+     *
+     * @param v The index of the current step to check against
+     */
+    template <int I>
+    void next_step(const int& v) {
+        if (v == I) {
+            emit(std::make_unique<Step<I>>());
+        }
+        else {
+            if constexpr (I > 1) {  // Check the next step
+                next_step<I - 1>(v);
+            }
+            else {  // Shutdown after the last step
+                powerplant.shutdown();
+            }
+        }
+    }
+
+    /// The current step of the test
+    int step = 0;
 };
 
 #endif  // MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
