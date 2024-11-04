@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
@@ -28,19 +28,19 @@ start_time_delay: 1
 use_ground_truth_localisation: false
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 10
+field_line_distance_weight: 0
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 10
+field_line_intersection_weight: 98.53554157824513
 
 # Weighting associated with change between last solution result
-state_change_weight: 1
+state_change_weight: 69.53873492661621
 
 # Weighting associated with goal post distance error
 goal_post_distance_weight: 0
 
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.5, 0.5, 0.5]
+change_limit: [0.1, 0.1, 0.1]
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
@@ -69,11 +69,11 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-1, 0, 0]
-    - [0, 1e-1, 0]
-    - [0, 0, 1e-1]
+    - [0.005656433141271127, 0, 0]
+    - [0, 0.005656433141271127, 0]
+    - [0, 0, 0.005656433141271127]
   # Measurement model noise
   R:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
+    - [0.6014524542398463, 0, 0]
+    - [0, 0.6014524542398463, 0]
+    - [0, 0, 0.6014524542398463]
