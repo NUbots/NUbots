@@ -177,23 +177,29 @@ namespace module::planning {
                         1.0);
                     desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
                 }
-                // TODO: Possibly make own radius for strafing backwards, and try playing with angles
-                else if (std::abs(angle_to_target) > cfg.max_strafe_angle
-                         && !(std::abs(angle_to_target - angle_to_final_heading) < 0.5)) {
-                    log<NUClear::DEBUG>("Stepping backwards.");
-                    desired_velocity_magnitude = 0.1;
-                    rDRr                       = Eigen::Vector2d(-1, rDRr.y());
-                    desired_heading            = 0.0;
-                }
                 else {
-                    // "Decelerate"
-                    velocity_magnitude -= cfg.acceleration;
-                    // Limit the velocity to zero
-                    velocity_magnitude = std::max(velocity_magnitude, 0.0);
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
-                    // "Proportional control" to strafe towards the target inside align radius
-                    desired_velocity_magnitude = cfg.strafe_gain * error;
+                    // If we are aligned with the final heading, we are close to the target
+                    // and the angle to the target is too large, step backwards
+                    if ((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)) {
+                        // Step backwards, but keep the direction towards the target
+                        rDRr = Eigen::Vector2d(-1, rDRr.y());
+                        // Do not rotate the robot
+                        desired_heading = 0.0;
+                        // Accelerate away from the target, faster when closer
+                        desired_velocity_magnitude = 1 - (cfg.strafe_gain * error);
+                        // TODO: adjust velocity magnitude?
+                    }
+                    // Go towards target
+                    else {
+                        // "Decelerate"
+                        velocity_magnitude -= cfg.acceleration;
+                        // Limit the velocity to zero
+                        velocity_magnitude = std::max(velocity_magnitude, 0.0);
+                        // "Proportional control" to strafe towards the target inside align radius
+                        desired_velocity_magnitude = cfg.strafe_gain * error;
+                    }
                 }
 
                 // Calculate the target velocity
