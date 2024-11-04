@@ -108,11 +108,6 @@ namespace module::tools {
             emit<Scope::DIRECT>(std::make_unique<PlayRequest>());
         });
 
-        on<Trigger<PlaybackState>>().then([this](const PlaybackState& playback_state) {
-            // Update progress bar
-            progress_bar.update(playback_state.current_message, playback_state.total_messages, "", "NBS Playback");
-        });
-
 
         on<Trigger<Field>, With<Sensors>, With<RawSensors>>().then(
             [this](const Field& field, const Sensors& sensors, const RawSensors& raw_sensors) {
@@ -125,13 +120,11 @@ namespace module::tools {
 
                 // Compute translation error
                 double translation_error = (Hft_gt.translation() - Hft_est.translation()).norm();
-                log<NUClear::INFO>("Translation error: ", translation_error);
                 total_translation_error += translation_error * translation_error;
 
                 // Compute rotation error
                 Eigen::AngleAxisd rotation_diff(Hft_gt.linear() * Hft_est.linear().inverse());
                 double rotation_error = rotation_diff.angle();  // in radians
-                log<NUClear::INFO>("Rotation error (radians): ", rotation_error);
                 total_rotation_error += rotation_error * rotation_error;
 
                 // Increment counter
@@ -139,13 +132,12 @@ namespace module::tools {
             });
 
         on<Trigger<Finished>>().then([this] {
-            log<NUClear::INFO>("Finished playback");
             double rmse_translation = std::sqrt(total_translation_error / count);
             double rmse_rotation    = std::sqrt(total_rotation_error / count);
-            log<NUClear::INFO>("RMSE translation error (meters): ", rmse_translation);
-            log<NUClear::INFO>("RMSE rotation error (degrees): ", rmse_rotation * 180.0 / M_PI);
-            progress_bar.close();
-            // powerplant.shutdown();
+            std::cout << "translation rmse error: " << rmse_translation << std::endl;
+            std::cout << "rotation rmse error: " << rmse_rotation * 180.0 / M_PI << std::endl;
+            // Kill program
+            powerplant.shutdown();
         });
     }
 

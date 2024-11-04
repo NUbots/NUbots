@@ -45,9 +45,6 @@ namespace module::tools {
             std::vector<std::string> messages;
         } config;
 
-        /// @brief Progress bar for the NBS file playback
-        utility::support::ProgressBar progress_bar;
-
         /// @brief The total error in the translation
         double total_translation_error = 0.0;
 
