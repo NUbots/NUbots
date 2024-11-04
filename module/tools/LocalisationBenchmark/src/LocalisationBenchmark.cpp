@@ -26,9 +26,14 @@
  */
 #include "LocalisationBenchmark.hpp"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.hpp"
 
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/platform/RawSensors.hpp"
 
 namespace module::tools {
 
@@ -44,7 +49,10 @@ namespace module::tools {
     using message::nbs::player::PlaybackMode::REALTIME;
     using message::nbs::player::PlaybackMode::SEQUENTIAL;
 
+    using message::input::Sensors;
     using message::localisation::Field;
+    using message::localisation::ResetFieldLocalisation;
+    using message::platform::RawSensors;
 
     using NUClear::message::CommandLineArguments;
 
@@ -79,6 +87,11 @@ namespace module::tools {
             }
         });
 
+        on<Trigger<ResetFieldLocalisation>>().then([this](const ResetFieldLocalisation& reset) {
+            total_translation_error = 0.0;
+            total_rotation_error    = 0.0;
+        });
+
         on<Startup, With<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
             // Set playback mode
             auto set_mode_request  = std::make_unique<SetModeRequest>();
@@ -100,15 +113,39 @@ namespace module::tools {
             progress_bar.update(playback_state.current_message, playback_state.total_messages, "", "NBS Playback");
         });
 
+
+        on<Trigger<Field>, With<Sensors>, With<RawSensors>>().then(
+            [this](const Field& field, const Sensors& sensors, const RawSensors& raw_sensors) {
+                // Compute estimated Hft
+                Eigen::Isometry3d Hft_est = field.Hfw * sensors.Htw.inverse();
+
+                // Compute ground truth Hft
+                Eigen::Isometry3d Hft_gt = Eigen::Isometry3d(raw_sensors.localisation_ground_truth.Hfw)
+                                           * Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
+
+                // Compute translation error
+                double translation_error = (Hft_gt.translation() - Hft_est.translation()).norm();
+                log<NUClear::INFO>("Translation error: ", translation_error);
+                total_translation_error += translation_error * translation_error;
+
+                // Compute rotation error
+                Eigen::AngleAxisd rotation_diff(Hft_gt.linear() * Hft_est.linear().inverse());
+                double rotation_error = rotation_diff.angle();  // in radians
+                log<NUClear::INFO>("Rotation error (radians): ", rotation_error);
+                total_rotation_error += rotation_error * rotation_error;
+
+                // Increment counter
+                count++;
+            });
+
         on<Trigger<Finished>>().then([this] {
             log<NUClear::INFO>("Finished playback");
+            double rmse_translation = std::sqrt(total_translation_error / count);
+            double rmse_rotation    = std::sqrt(total_rotation_error / count);
+            log<NUClear::INFO>("RMSE translation error (meters): ", rmse_translation);
+            log<NUClear::INFO>("RMSE rotation error (degrees): ", rmse_rotation * 180.0 / M_PI);
             progress_bar.close();
-            powerplant.shutdown();
-        });
-
-        on<Trigger<Field>>().then([this](const Field& field) {
-            // Do something with the field message
-            log<NUClear::INFO>("Received field message");
+            // powerplant.shutdown();
         });
     }
 

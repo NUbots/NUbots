@@ -49,4 +49,5 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  support::logging::DataLogging
 )

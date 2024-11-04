@@ -48,6 +48,15 @@ namespace module::tools {
         /// @brief Progress bar for the NBS file playback
         utility::support::ProgressBar progress_bar;
 
+        /// @brief The total error in the translation
+        double total_translation_error = 0.0;
+
+        /// @brief The total error in the rotation
+        double total_rotation_error = 0.0;
+
+        /// @brief The total number of field messages
+        size_t count = 0;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the LocalisationBenchmark reactor.
