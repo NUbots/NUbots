@@ -29,7 +29,6 @@ messages:
   message.support.FieldDescription: false
   # Behaviour state
   message.behaviour.state.WalkState: false
-  message.behaviour.state.Stability: true
   # Logging and Support
   message.support.nusight.Overview: false
   message.eye.DataPoint: false

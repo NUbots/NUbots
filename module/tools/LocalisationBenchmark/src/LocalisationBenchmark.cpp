@@ -39,9 +39,9 @@ namespace module::tools {
 
     using extension::Configuration;
 
-    using message::nbs::player::Finished;
     using message::nbs::player::LoadRequest;
     using message::nbs::player::PauseRequest;
+    using message::nbs::player::PlaybackFinished;
     using message::nbs::player::PlaybackState;
     using message::nbs::player::PlayRequest;
     using message::nbs::player::SetModeRequest;
@@ -104,6 +104,9 @@ namespace module::tools {
             load_request->messages = config.messages;
             emit<Scope::DIRECT>(std::move(load_request));
 
+            // Delay for .1 seconds
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
             // Start playback
             emit<Scope::DIRECT>(std::make_unique<PlayRequest>());
         });
@@ -131,7 +134,7 @@ namespace module::tools {
                 count++;
             });
 
-        on<Trigger<Finished>>().then([this] {
+        on<Trigger<PlaybackFinished>>().then([this] {
             double rmse_translation = std::sqrt(total_translation_error / count);
             double rmse_rotation    = std::sqrt(total_rotation_error / count);
             std::cout << "translation rmse error: " << rmse_translation << std::endl;
