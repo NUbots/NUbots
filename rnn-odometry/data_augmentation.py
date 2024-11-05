@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def add_noise(data, noise_level=0.05):
     noise = np.random.normal(loc=0, scale=noise_level, size=data.shape)
     return data + noise
@@ -21,3 +24,20 @@ def augment_batch(batch):
             sequence = time_warp(sequence)
         augmented.append(sequence)
     return np.array(augmented)
+
+def time_warp_batch(batch, sigma=0.2, knot=4):
+    augmented = []
+    for sequence in batch:
+        sequence = time_warp(sequence, sigma, knot)
+        augmented.append(sequence)
+    return np.array(augmented)
+
+def time_warp_batch(batch, targets, sigma=0.2, knot=4):
+    augmented_batch = []
+    augmented_targets = []
+    for sequence, target in zip(batch, targets):
+        warped_sequence = time_warp(sequence, sigma, knot)
+        warped_target = time_warp(target, sigma, knot)
+        augmented_batch.append(warped_sequence)
+        augmented_targets.append(warped_target)
+    return np.array(augmented_batch), np.array(augmented_targets)
