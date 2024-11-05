@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 
-import argparse
 import datetime
-import os
 import random
-import subprocess
 
-import joblib
 import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from data_augmentation import time_warp_batch
 from scipy.ndimage import gaussian_filter1d
 from sklearn.preprocessing import MinMaxScaler
 
@@ -94,14 +91,14 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: s shaped
     directories = [
-        # {"prefix": "quad", "first_file": 1, "num_files": 60, "skip_files": []},
-        {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
-        {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
-        # {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
-        # {"prefix": "circ", "first_file": 1, "num_files": 60, "skip_files": []},
-        # {"prefix": "sprl", "first_file": 1, "num_files": 60, "skip_files": [35]},
-        # {"prefix": "fig8", "first_file": 1, "num_files": 60, "skip_files": [18]},
-        # {"prefix": "rndf", "first_file": 1, "num_files": 20, "skip_files": []},
+        {"prefix": "quad", "first_file": 1, "num_files": 50, "skip_files": []},
+        # {"prefix": "s", "first_file": 1, "num_files": 20, "skip_files": []},
+        # {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
+        # {"prefix": "zz", "first_file": 1, "num_files": 50, "skip_files": []},
+        {"prefix": "circ", "first_file": 1, "num_files": 50, "skip_files": []},
+        # {"prefix": "sprl", "first_file": 1, "num_files": 51, "skip_files": [35]},
+        # {"prefix": "fig8", "first_file": 1, "num_files": 50, "skip_files": [18]},
+        # {"prefix": "rndf", "first_file": 1, "num_files": 10, "skip_files": []},
     ]
 
     imu = []
@@ -156,11 +153,11 @@ def main():
             # plt.ylabel('IMU Values')
 
             # # Plot Servos data
-            # # plt.subplot(3, 1, 2)
-            # # plt.plot(servos_data)
-            # # plt.title(f'Servos Data - File {i}')
-            # # plt.xlabel('Sample')
-            # # plt.ylabel('Servos Values')
+            # plt.subplot(3, 1, 2)
+            # plt.plot(servos_data)
+            # plt.title(f'Servos Data - File {i}')
+            # plt.xlabel('Sample')
+            # plt.ylabel('Servos Values')
 
             # # Plot Truth data
             # plt.subplot(3, 1, 3)
@@ -173,7 +170,7 @@ def main():
             # plt.tight_layout()
             # plt.show()
 
-            # pause to inspect each plot
+            # # pause to inspect each plot
             # input("Press Enter to continue to the next file...")
             # plt.close()
 
@@ -199,18 +196,27 @@ def main():
     print("Truth s: ", len(truth_all))
     print("Truth start/end indicator: ", len(truth_start_end_indicator))
 
-    # Shuffle the data if flag is set
+    # Shuffle the data if flag is set (without servos)
     if shuffle:
         # Combine the data into a single list of tuples
         combined_data = list(zip(imu, truth_all, truth_start_end_indicator))
-
         # Set random seed for reproducibility
         random.seed(42)
         # Shuffle the combined data
         random.shuffle(combined_data)
-
         # Unzip the shuffled data
         imu, truth_all, truth_start_end_indicator = zip(*combined_data)
+
+    # Shuffle that includes servos
+    # if shuffle:
+    #     # Combine the data into a single list of tuples
+    #     combined_data = list(zip(imu, servos, truth_all, truth_start_end_indicator))
+    #     # Set random seed for reproducibility
+    #     random.seed(42)
+    #     # Shuffle the combined data
+    #     random.shuffle(combined_data)
+    #     # Unzip the shuffled data
+    #     imu, servos, truth_all, truth_start_end_indicator = zip(*combined_data)
 
 
     # Concatenate lists into numpy arrays
@@ -519,6 +525,12 @@ def main():
     # Test for any bugs by using the training data as validation data
     # validation_data = (input_data_train, input_targets_train)
 
+    # Apply data augmentation
+    input_data_train_warped, input_targets_train_warped = time_warp_batch(input_data_train, input_targets_train, sigma=0.2, knot=4)
+    # Concatenate the augmented data to the original training data
+    input_data_train = np.concatenate((input_data_train, input_data_train_warped), axis=0)
+    input_targets_train = np.concatenate((input_targets_train, input_targets_train_warped), axis=0)
+
     # Print the shapes of the partitioned datasets
     print(f"input_data_train: {input_data_train.shape}")
     print(f"input_targets_train: {input_targets_train.shape}")
@@ -526,9 +538,9 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.000125   # Controls how much to change the model in response to error.
+    learning_rate = 0.0001   # Controls how much to change the model in response to error.
     gradient_clip = 1.0
-    epochs = 250
+    epochs = 200
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
     loss_function = keras.losses.Huber()
@@ -546,7 +558,7 @@ def main():
     # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
 
     # LR schedule to decay the learning rate over a given number of steps (epochs calculated above), then it will reset.
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1, alpha=1e-10)
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.00, m_mul=1.00, alpha=1e-8)
 
     # LR schedule to decrease learning rate by 0.1 after 100 epochs
     # lr_schedule = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=learning_rate, decay_steps=decay_over_steps, decay_rate=0.01, staircase=True)
@@ -569,30 +581,31 @@ def main():
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
     # Add Conv1D layer
-    # conv1d = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(inputs)
+    conv1d = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(inputs)
     # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
-    # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
+    max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    lstm = keras.layers.LSTM(16, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(inputs)
+    lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(max_pool_1d)
     # batch_norm = keras.layers.BatchNormalization()(lstm)
-    layer_norm = keras.layers.LayerNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.25)(layer_norm)
+    # layer_norm = keras.layers.LayerNormalization()(lstm)
+    dropout = keras.layers.Dropout(rate=0.15)(lstm)
 
     # attention = keras.layers.Attention()([dropout, dropout])
 
-    # lstm2 = keras.layers.LSTM(80,kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0008), return_sequences=True)(batch_norm)
-    # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
-    # dropout2 = keras.layers.Dropout(rate=0.25)(batch_norm2)
+    # lstm2 = keras.layers.LSTM(15,kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.003), return_sequences=True)(dropout)
+    # # batch_norm2 = keras.layers.BatchNormalization()(lstm2)
+    # layer_norm2 = keras.layers.LayerNormalization()(lstm2)
+    # dropout2 = keras.layers.Dropout(rate=0.25)(lstm2)
 
     # # attention = keras.layers.Attention()([dropout, dropout2])
 
-    # lstm3 = keras.layers.LSTM(80,kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0008), return_sequences=False)(batch_norm2)
+    # lstm3 = keras.layers.LSTM(15,kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.003), return_sequences=False)(dropout2)
     # batch_norm3 = keras.layers.BatchNormalization()(lstm3)
-    # dropout3 = keras.layers.Dropout(rate=0.25)(batch_norm3)
+    # dropout3 = keras.layers.Dropout(rate=0.25)(lstm3)
 
     # flatten = keras.layers.Flatten()(attention)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1],kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
@@ -601,7 +614,7 @@ def main():
     # Callbacks
     # early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     # checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
-    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-6, verbose=1)
+    # reduce_lr_callback = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=6, min_lr=1e-6, verbose=1)
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     log_dir = "logs/fit/" + timestamp
