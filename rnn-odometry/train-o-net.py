@@ -49,23 +49,29 @@ def main():
 
     def convert_relative_to_previous(data):
         """
-        This function takes a dataset of world coordinates and converts it to relative positions
-        based on the previous position.
+        Converts a dataset to relative values based on the previous row.
+
+        This function takes a 2D dataset (e.g., coordinates, features) and converts
+        each row to relative values based on the difference from the previous row.
+        The first row is set to zeros to maintain the same shape as the input.
 
         Args:
-            data: A NumPy array of shape (num_datapoints, 3) representing world coordinates.
+            data (numpy.ndarray): A 2D array where each row represents a data point
+                                and each column represents a feature.
 
         Returns:
-            A NumPy array of shape (num_datapoints, 3) representing relative positions.
+            numpy.ndarray: A 2D array of the same shape as the input, with each row
+                        representing the relative values compared to the previous row.
+
         """
 
-        # Calculate the difference between consecutive coordinates
-        relative_positions = np.diff(data, axis=0)
+        # Calculate the difference between consecutive values
+        relative_data = np.diff(data, axis=0)
 
         # Prepend a row of zeros to maintain the same shape as the input
-        relative_positions = np.vstack([np.zeros((1, data.shape[1])), relative_positions])
+        relative_data = np.vstack([np.zeros((1, data.shape[1])), relative_data])
 
-        return relative_positions
+        return relative_data
 
     def gaussian_smooth(data, window_size):
         "Takes an array and separately applies gaussian filter to each dimension"
@@ -91,14 +97,14 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: s shaped
     directories = [
-        {"prefix": "quad", "first_file": 1, "num_files": 50, "skip_files": []},
-        # {"prefix": "s", "first_file": 1, "num_files": 20, "skip_files": []},
+        # {"prefix": "quad", "first_file": 1, "num_files": 40, "skip_files": []},
+        # {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
         # {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
-        # {"prefix": "zz", "first_file": 1, "num_files": 50, "skip_files": []},
-        {"prefix": "circ", "first_file": 1, "num_files": 50, "skip_files": []},
-        # {"prefix": "sprl", "first_file": 1, "num_files": 51, "skip_files": [35]},
-        # {"prefix": "fig8", "first_file": 1, "num_files": 50, "skip_files": [18]},
-        # {"prefix": "rndf", "first_file": 1, "num_files": 10, "skip_files": []},
+        {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
+        # {"prefix": "circ", "first_file": 1, "num_files": 30, "skip_files": []},
+        # {"prefix": "sprl", "first_file": 1, "num_files": 21, "skip_files": [35]},
+        # {"prefix": "fig8", "first_file": 1, "num_files": 40, "skip_files": [18]},
+        # {"prefix": "rndf", "first_file": 1, "num_files": 30, "skip_files": []},
     ]
 
     imu = []
@@ -131,6 +137,8 @@ def main():
 
             # Load the data
             imu_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-imu-{i}.npy")
+            # Convert the loaded chunk of IMU data to relative values
+            imu_data = convert_relative_to_previous(imu_data)
             imu.append(imu_data)
 
             # servos_data = np.load(f"processed-outputs/numpy/{prefix}/{i}/{prefix}-servos-{i}.npy")
@@ -526,10 +534,10 @@ def main():
     # validation_data = (input_data_train, input_targets_train)
 
     # Apply data augmentation
-    input_data_train_warped, input_targets_train_warped = time_warp_batch(input_data_train, input_targets_train, sigma=0.2, knot=4)
-    # Concatenate the augmented data to the original training data
-    input_data_train = np.concatenate((input_data_train, input_data_train_warped), axis=0)
-    input_targets_train = np.concatenate((input_targets_train, input_targets_train_warped), axis=0)
+    # input_data_train_warped, input_targets_train_warped = time_warp_batch(input_data_train, input_targets_train, sigma=0.8, knot=12)
+    # # Concatenate the augmented data to the original training data
+    # input_data_train = np.concatenate((input_data_train, input_data_train_warped), axis=0)
+    # input_targets_train = np.concatenate((input_targets_train, input_targets_train_warped), axis=0)
 
     # Print the shapes of the partitioned datasets
     print(f"input_data_train: {input_data_train.shape}")
@@ -581,14 +589,14 @@ def main():
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
     # Add Conv1D layer
-    conv1d = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(inputs)
-    # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
-    max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
+    # conv1d = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(inputs)
+    # # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
+    # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.001), return_sequences=False)(max_pool_1d)
-    # batch_norm = keras.layers.BatchNormalization()(lstm)
+    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0005), return_sequences=False)(inputs)
+    batch_norm = keras.layers.BatchNormalization()(lstm)
     # layer_norm = keras.layers.LayerNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.15)(lstm)
+    dropout = keras.layers.Dropout(rate=0.05)(batch_norm)
 
     # attention = keras.layers.Attention()([dropout, dropout])
 
@@ -605,7 +613,7 @@ def main():
 
     # flatten = keras.layers.Flatten()(attention)
 
-    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.001))(dropout)
+    outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.0005))(dropout)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
