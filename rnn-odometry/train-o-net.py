@@ -97,10 +97,10 @@ def main():
     # Dicts containing data to be loaded - note that these can (and should) be shuffled after they are loaded
     # NOTE: Other paths to consider: s shaped
     directories = [
-        # {"prefix": "quad", "first_file": 1, "num_files": 40, "skip_files": []},
+        {"prefix": "quad", "first_file": 1, "num_files": 60, "skip_files": []},
         # {"prefix": "s", "first_file": 1, "num_files": 60, "skip_files": []},
         # {"prefix": "s-new", "first_file": 1, "num_files": 30, "skip_files": []},
-        {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
+        # {"prefix": "zz", "first_file": 1, "num_files": 60, "skip_files": []},
         # {"prefix": "circ", "first_file": 1, "num_files": 30, "skip_files": []},
         # {"prefix": "sprl", "first_file": 1, "num_files": 21, "skip_files": [35]},
         # {"prefix": "fig8", "first_file": 1, "num_files": 40, "skip_files": [18]},
@@ -112,8 +112,16 @@ def main():
     truth_all = []
     truth_start_end_indicator = []
 
+
+
     # Toggles
+    # toggle for shuffling the data
     shuffle = True
+    # toggle for retraining
+    retrain = True
+    # toggle for data augmentation
+    timewarp = True
+
     # Outer loop to iterate through each directory
     for directory in directories:
         prefix = directory["prefix"]
@@ -534,10 +542,11 @@ def main():
     # validation_data = (input_data_train, input_targets_train)
 
     # Apply data augmentation
-    # input_data_train_warped, input_targets_train_warped = time_warp_batch(input_data_train, input_targets_train, sigma=0.8, knot=12)
-    # # Concatenate the augmented data to the original training data
-    # input_data_train = np.concatenate((input_data_train, input_data_train_warped), axis=0)
-    # input_targets_train = np.concatenate((input_targets_train, input_targets_train_warped), axis=0)
+    if timewarp:
+        input_data_train_warped, input_targets_train_warped = time_warp_batch(input_data_train, input_targets_train, sigma=1, knot=3)
+        # Concatenate the augmented data to the original training data
+        input_data_train = np.concatenate((input_data_train, input_data_train_warped), axis=0)
+        input_targets_train = np.concatenate((input_targets_train, input_targets_train_warped), axis=0)
 
     # Print the shapes of the partitioned datasets
     print(f"input_data_train: {input_data_train.shape}")
@@ -546,9 +555,9 @@ def main():
     # Print the shape of the second element in the training dataset
 
     # Model parameters
-    learning_rate = 0.0001   # Controls how much to change the model in response to error.
+    learning_rate = 0.0002   # Controls how much to change the model in response to error.
     gradient_clip = 1.0
-    epochs = 200
+    epochs = 400
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.MeanAbsoluteError()
     loss_function = keras.losses.Huber()
@@ -585,6 +594,7 @@ def main():
     # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule, clipnorm=gradient_clip)
     # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
 
+    # Create the model
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[2]))
 
@@ -593,10 +603,10 @@ def main():
     # # conv1d2 = keras.layers.Conv1D(filters=8, kernel_size=3, activation='tanh')(conv1d)
     # max_pool_1d = keras.layers.MaxPooling1D(pool_size=2)(conv1d)
 
-    lstm = keras.layers.LSTM(120, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0005), return_sequences=False)(inputs)
-    batch_norm = keras.layers.BatchNormalization()(lstm)
-    # layer_norm = keras.layers.LayerNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.05)(batch_norm)
+    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L2(0.0005), return_sequences=False)(inputs)
+    # batch_norm = keras.layers.BatchNormalization()(lstm)
+    layer_norm = keras.layers.LayerNormalization()(lstm)
+    dropout = keras.layers.Dropout(rate=0.05)(layer_norm)
 
     # attention = keras.layers.Attention()([dropout, dropout])
 
@@ -614,8 +624,19 @@ def main():
     # flatten = keras.layers.Flatten()(attention)
 
     outputs = keras.layers.Dense(truth_joined_sliced.shape[1], kernel_regularizer=keras.regularizers.L2(0.0005))(dropout)
-
     model = keras.Model(inputs=inputs, outputs=outputs)
+
+    # Retrain the model if the flag is set
+    if retrain:
+        # Load the model
+        previous_model = keras.models.load_model('models/model-20241109-161026-retrain1')
+        # Copy the weights of the previous model to the new model
+        for i in range(len(previous_model.layers)):
+            if isinstance(previous_model.layers[i], keras.layers.Layer) and isinstance(model.layers[i], keras.layers.Layer):
+                model.layers[i].set_weights(previous_model.layers[i].get_weights())
+            else:
+                print(f"Layer {i} is not a keras layer")
+
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
 
