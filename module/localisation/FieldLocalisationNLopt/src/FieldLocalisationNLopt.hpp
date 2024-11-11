@@ -252,6 +252,9 @@ namespace module::localisation {
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
+
+            /// @brief Maximum distance for landmark association
+            double max_association_distance = 0.0;
         } cfg;
 
 
