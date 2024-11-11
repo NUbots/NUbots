@@ -21,7 +21,7 @@ def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
     localisation_config['field_line_intersection_weight'] = params['field_line_intersection_weight']
     localisation_config['state_change_weight'] = params['state_change_weight']
     localisation_config['goal_post_distance_weight'] = params['goal_post_distance_weight']
-    localisation_config['change_limit'] = params['change_limit']
+    localisation_config['change_limit'] = [params['change_limit_x'], params['change_limit_y'], params['change_limit_theta']]
     localisation_config['max_association_distance'] = params['max_association_distance']
 
     # Update matrix parameters for Kalman filter noise covariances
@@ -40,7 +40,6 @@ def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
     # Update Mahony filter parameters
     sensor_filter_config['mahony']['Kp'] = params['Kp']
     sensor_filter_config['mahony']['Ki'] = params['Ki']
-    sensor_filter_config['mahony']['initial_bias'] = params['initial_bias']
 
     with open(sensor_filter_yaml_path, 'w') as file:
         yaml.safe_dump(sensor_filter_config, file)
@@ -147,7 +146,6 @@ def objective(trial):
     R_theta = trial.suggest_uniform('R_theta', 1e-2, 1e1)
     Kp = trial.suggest_uniform('Kp', 1e-2, 1e1)
     Ki = trial.suggest_uniform('Ki', 1e-2, 1e1)
-    initial_bias = [trial.suggest_uniform(f'initial_bias_{i}', -1.0, 1.0) for i in range(3)]
 
     # Prepare the parameters dictionary
     params = {
@@ -155,7 +153,9 @@ def objective(trial):
         'field_line_intersection_weight': field_line_intersection_weight,
         'state_change_weight': state_change_weight,
         'goal_post_distance_weight': goal_post_distance_weight,
-        'change_limit': [change_limit_x, change_limit_y, change_limit_theta],
+        'change_limit_x': change_limit_x,
+        'change_limit_y': change_limit_y,
+        'change_limit_theta': change_limit_theta,
         'max_association_distance': max_association_distance,
         'Q_x': Q_x,
         'Q_y': Q_y,
@@ -165,7 +165,6 @@ def objective(trial):
         'R_theta': R_theta,
         'Kp': Kp,
         'Ki': Ki,
-        'initial_bias': initial_bias
     }
 
     # Modify the YAML files with the new parameters
@@ -193,7 +192,7 @@ if __name__ == '__main__':
     study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimization')
 
     # Start the optimization
-    study.optimize(objective, n_trials=50)  # Adjust n_trials as needed
+    study.optimize(objective, n_trials=250)  # Adjust n_trials as needed
 
     # Print the best parameters and RMSE
     print('Best parameters found:')
