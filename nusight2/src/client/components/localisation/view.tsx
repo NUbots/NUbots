@@ -15,6 +15,7 @@ import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections/view";
+import { AssociationLines } from "./r3f_components/association_lines/view";
 import { FieldObjects } from "./r3f_components/field_objects/view";
 import { FieldPoints } from "./r3f_components/field_points/view";
 import { GridView } from "./r3f_components/grid/view";
@@ -358,7 +359,10 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       />
 
       {model.fieldIntersectionsVisible && robot.fieldIntersections && (
-        <FieldIntersections intersections={robot.fieldIntersections} />
+        <FieldIntersections intersections={robot.fieldIntersectionsF} />
+      )}
+      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
+        <AssociationLines lines={robot.association_lines} />
       )}
 
       {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
@@ -397,8 +401,6 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           color={robot.color}
         />
       )}
-
-      <AssociationLines model={model} />
     </object3D>
   );
 });
@@ -422,33 +424,5 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>
 ));
-
-const AssociationLines = ({ model }: { model: LocalisationModel }) => {
-  return (
-    <>
-      {model.robots.map(
-        (robot) =>
-          robot.visible &&
-          robot.association_lines && (
-            <object3D key={robot.id}>
-              {robot.association_lines.map((line, index) => {
-                const start = new THREE.Vector3(line.start.x, line.start.y, 0.005);
-                const end = new THREE.Vector3(line.end.x, line.end.y, 0.005);
-
-                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-
-                return (
-                  <line key={index}>
-                    <bufferGeometry attach="geometry" {...geometry} />
-                    <lineBasicMaterial attach="material" color="red" linewidth={4} />
-                  </line>
-                );
-              })}
-            </object3D>
-          ),
-      )}
-    </>
-  );
-};
 
 export default LocalisationView;
