@@ -168,8 +168,7 @@ namespace module::planning {
                     // "Accelerate"
                     velocity_magnitude += cfg.acceleration;
                     // Limit the velocity magnitude to the maximum velocity
-                    // velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
-                    velocity_magnitude = std::min(velocity_magnitude, -0.1);
+                    velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
                     // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
                     // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
                     const double angle_error_gain = std::clamp(
