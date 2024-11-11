@@ -196,6 +196,8 @@ namespace utility::localisation {
                              message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
         landmarks.push_back({Eigen::Vector3d(0, -fd.dimensions.center_circle_diameter / 2, 0),
                              message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector3d(0, 0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
 
         if (fd.dimensions.penalty_area_length != 0 && fd.dimensions.penalty_area_width != 0) {
             // T intersections from the penalty areas
