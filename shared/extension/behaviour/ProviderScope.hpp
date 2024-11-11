@@ -53,6 +53,12 @@ namespace extension::behaviour {
             // Upon desctruction restore the previous scope as the current scope
             current_scope = previous_scope;
 
+            // Sort the task pack so highest priority tasks come first
+            // Optional tasks are always considered lower priority than non optional tasks
+            std::stable_sort(tasks.begin(), tasks.end(), [](const auto& a, const auto& b) {
+                return a.optional == b.optional ? a.priority > b.priority : b.optional;
+            });
+
             // Emit all the tasks that were accumulated in this scope
             reaction_task.parent->reactor.emit(std::make_unique<commands::BehaviourTasks>(provider_type,
                                                                                           reaction_task.parent->id,
