@@ -193,6 +193,9 @@ namespace module::localisation {
                         return;
                     }
 
+                    // Start timer for the optimisation routine
+                    auto start = std::chrono::high_resolution_clock::now();
+
                     // Don't run an update if there are not enough field line points or the robot is unstable
                     bool unstable = stability <= Stability::FALLING;
                     if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
@@ -244,6 +247,13 @@ namespace module::localisation {
                     }
                     emit(association_lines);
                     emit(field);
+
+                    // End timer for the optimisation routine
+                    auto end      = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.0;
+                    log<NUClear::DEBUG>("Field localisation optimisation took ", duration, " ms");
+                    // LOg FPS
+                    log<NUClear::DEBUG>("FieldLocalisationNLopt FPS", 1000.0 / duration);
                 });
     }
 

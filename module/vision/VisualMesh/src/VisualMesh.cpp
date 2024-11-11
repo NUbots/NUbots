@@ -101,8 +101,19 @@ namespace module::vision {
                         // Extract the camera position now that we need it
                         Eigen::Isometry3d Hcw(image.Hcw);
 
+                        // Start timer
+                        auto start = std::chrono::high_resolution_clock::now();
+
                         // Run the inference
                         auto result = runner(image, Hcw.cast<float>());
+
+                        // End timer
+                        auto end = std::chrono::high_resolution_clock::now();
+                        auto duration =
+                            std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.0;
+                        log<NUClear::DEBUG>("VisualMesh inference took ", duration, " ms");
+                        // Log fps
+                        log<NUClear::DEBUG>("VisualMesh FPS", 1000.0 / duration);
 
                         if (result.indices.empty()) {
                             // The ground is not visible, hence the mesh cannot be drawn

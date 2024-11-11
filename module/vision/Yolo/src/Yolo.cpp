@@ -327,7 +327,7 @@ namespace module::vision {
                     auto end      = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
                     log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
-                    log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
+                    log<NUClear::DEBUG>("Yolo FPS: ", 1000.0 / duration);
                 }
             });
     }
