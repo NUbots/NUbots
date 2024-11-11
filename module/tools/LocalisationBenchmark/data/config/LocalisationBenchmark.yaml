@@ -25,7 +25,7 @@ messages:
   message.localisation.Ball: false
   message.localisation.Field: false
   message.localisation.Robot: false
-  message.input.Sensors: true
+  message.input.Sensors: false
   message.support.FieldDescription: false
   # Behaviour state
   message.behaviour.state.WalkState: false
