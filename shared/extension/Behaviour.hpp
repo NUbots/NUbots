@@ -266,7 +266,7 @@ namespace extension::behaviour {
 
             auto group_info = information::GroupInfoStore<T>::get();
             if (group_info != nullptr) {
-                data.run_state = group_info->active_task.id == t.parent->id ? RunState::RUNNING
+                data.run_state = group_info->active_task.requester_id == t.parent->id ? RunState::RUNNING
                                  : std::any_of(group_info->watchers.begin(), group_info->watchers.end(), is_target_task)
                                      ? RunState::QUEUED
                                      : RunState::NO_TASK;
