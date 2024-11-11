@@ -43,7 +43,7 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 15> {
     public:
         std::string decode_reason(const RunReason& reason) {
             switch (reason) {
@@ -57,8 +57,7 @@ namespace {
             };
         }
 
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, Uses<SubtaskA>, Uses<SubtaskB>>().then(
                 [this](const RunReason& run_reason, const Uses<SubtaskA>& a, const Uses<SubtaskB>& b) {
@@ -132,26 +131,33 @@ namespace {
                 events.push_back("removing simple task");
                 emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
-
-            // Repeat steps
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-                emit(std::make_unique<Step<7>>());
-                emit(std::make_unique<Step<8>>());
-
-                // Repeat steps 2-7 to test again
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-                emit(std::make_unique<Step<7>>());
-                emit(std::make_unique<Step<8>>());
+            on<Trigger<Step<9>>, Priority::LOW>().then([this] {
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Trigger<Step<10>>, Priority::LOW>().then([this] {
+                events.push_back("emitting PokeA");
+                emit(std::make_unique<PokeA>());
+            });
+            on<Trigger<Step<11>>, Priority::LOW>().then([this] {
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Trigger<Step<12>>, Priority::LOW>().then([this] {
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Trigger<Step<13>>, Priority::LOW>().then([this] {
+                events.push_back("emitting PokeB");
+                emit(std::make_unique<PokeB>());
+            });
+            on<Trigger<Step<14>>, Priority::LOW>().then([this] {
+                events.push_back("emitting PokeA");
+                emit(std::make_unique<PokeA>());
+            });
+            on<Trigger<Step<15>>, Priority::LOW>().then([this] {
+                events.push_back("removing simple task");
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
         }
 
