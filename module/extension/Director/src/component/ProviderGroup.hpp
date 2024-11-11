@@ -48,10 +48,11 @@ namespace module::extension::component {
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<DirectorTask>>;
 
-        ProviderGroup(const std::type_index& type_, const DataSetter& set_data) : type(type_), set_data(set_data) {
-            // Call set_data to initialise the GroupInfo cache unless this is a root provider
-            if (set_data != nullptr) {
-                set_data(0, RunReason::OTHER_TRIGGER, nullptr, get_group_info());
+        ProviderGroup(const std::type_index& type_, const DataSetter& data_setter)
+            : type(type_), data_setter(data_setter) {
+            // Call data_setter to initialise the GroupInfo cache unless this is a root provider
+            if (data_setter != nullptr) {
+                update_data();
             }
         }
 
@@ -91,6 +92,13 @@ namespace module::extension::component {
             });
         }
 
+        ::extension::behaviour::Lock update_data(const RunReason& reason = RunReason::OTHER_TRIGGER) {
+            return data_setter(active_provider != nullptr ? active_provider->id : 0,
+                               reason,
+                               active_task != nullptr ? active_task->data : nullptr,
+                               get_group_info());
+        }
+
         std::shared_ptr<const GroupInfo> get_group_info() const {
             auto group_info                = std::make_shared<GroupInfo>();
             group_info->active_provider_id = active_provider != nullptr ? active_provider->id : 0;
@@ -115,7 +123,7 @@ namespace module::extension::component {
         std::type_index type;
 
         /// The data setter for this provider group
-        DataSetter set_data;
+        DataSetter data_setter;
 
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;

@@ -187,7 +187,7 @@ namespace module::extension {
                 auto parent_provider = providers.at(group.active_task->requester_id);
 
                 // Check if we are already done, and if so we don't want to pester the parent again
-                if (provider->group.done) {
+                if (group.done) {
                     // Running Done when already in a Done state shouldn't happen for a root task since it should
                     // already have been removed
                     if (parent_provider->classification == Provider::Classification::ROOT) {
@@ -197,7 +197,8 @@ namespace module::extension {
                 }
 
                 // This provider is now in the done state
-                provider->group.done = true;
+                group.done = true;
+                group.update_data();
 
                 auto& parent_group = parent_provider->group;
 
@@ -225,7 +226,7 @@ namespace module::extension {
         }
 
         // If we get here, the provider is not done and we are running new tasks
-        provider->group.done = false;
+        group.done = false;
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;

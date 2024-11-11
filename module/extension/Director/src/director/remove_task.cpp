@@ -65,10 +65,7 @@ namespace module::extension {
                 for (auto& provider : group.providers) {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
-                        auto lock             = group.set_data(provider->id,
-                                                   RunReason::STOPPED,
-                                                   original_task->data,
-                                                   group.get_group_info());
+                        auto lock             = group.update_data(RunReason::STOPPED);
                         powerplant.submit(provider->reaction->get_task(true));
                     }
                 }
@@ -76,7 +73,7 @@ namespace module::extension {
                 group.active_provider = nullptr;
 
                 // Updatae the group information to reflect that this provider group is no longer running
-                group.set_data(0, RunReason::OTHER_TRIGGER, nullptr, group.get_group_info());
+                group.update_data();
 
                 // If anyone was pushing this group they can't push anymore since we are not active
                 if (group.pushing_task != nullptr) {
