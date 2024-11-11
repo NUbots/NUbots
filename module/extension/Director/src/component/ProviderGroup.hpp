@@ -93,6 +93,11 @@ namespace module::extension::component {
         }
 
         ::extension::behaviour::Lock update_data(const RunReason& reason = RunReason::OTHER_TRIGGER) {
+            // Root providers don't have a data_setter
+            if (data_setter == nullptr) {
+                return ::extension::behaviour::Lock();
+            }
+
             return data_setter(active_provider != nullptr ? active_provider->id : 0,
                                reason,
                                active_task != nullptr ? active_task->data : nullptr,
