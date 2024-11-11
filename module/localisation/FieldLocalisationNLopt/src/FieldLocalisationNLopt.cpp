@@ -71,6 +71,7 @@ namespace module::localisation {
             // Field line intersection optimisation parameters
             cfg.field_line_intersection_weight = config["field_line_intersection_weight"].as<double>();
             cfg.min_field_line_intersections   = config["min_field_line_intersections"].as<int>();
+            cfg.max_association_distance       = config["max_association_distance"].as<double>();
 
             // Constraints and weighting on change in state
             cfg.change_limit        = Eigen::Vector3d(config["change_limit"].as<Expression>());
@@ -323,8 +324,8 @@ namespace module::localisation {
                     // Calculate Euclidean distance between the observed intersection and the landmark
                     double distance = (landmark.rLFf - rIFf).norm();
 
-                    // If this landmark is closer, update the association
-                    if (distance < min_distance) {
+                    // If this landmark is closer and within the maximum association distance, update the association
+                    if (distance < min_distance && distance <= cfg.max_association_distance) {
                         min_distance      = distance;
                         closest_landmark  = landmark.rLFf;
                         found_association = true;
@@ -332,10 +333,9 @@ namespace module::localisation {
                 }
             }
 
-            occupied_landmarks.push_back(closest_landmark);
-
-            // If we found an association, add it to our list
+            // Mark the closest landmark as occupied if within the distance threshold
             if (found_association) {
+                occupied_landmarks.push_back(closest_landmark);
                 associations.emplace_back(closest_landmark, rIFf);
             }
         }
