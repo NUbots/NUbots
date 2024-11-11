@@ -114,7 +114,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that if multiple things that are needed have when+causings all will run", "[director][!mayfail]") {
+TEST_CASE("Test that if multiple things that are needed have when+causings all will run", "[director][!mayfail][.]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;

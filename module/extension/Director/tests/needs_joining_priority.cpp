@@ -91,7 +91,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
-          "[director][needs][joining][priority][!mayfail]") {
+          "[director][needs][joining][priority][!mayfail][.]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;

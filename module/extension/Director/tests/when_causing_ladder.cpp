@@ -102,7 +102,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail]") {
+TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail][.]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;

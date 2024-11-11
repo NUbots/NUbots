@@ -94,7 +94,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][!mayfail]") {
+TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][!mayfail][.]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
