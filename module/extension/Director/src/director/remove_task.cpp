@@ -59,8 +59,6 @@ namespace module::extension {
             // If nothing in the queue updated the active task to a new task we are now idle
             // That also means we need to remove any subtasks this group had recursively
             if (group.active_task == nullptr) {
-
-
                 // Run the Stop reactions for this provider group since it is no longer running
                 // First we restore the original task so we have data for the stop reaction
                 group.active_task = original_task;
@@ -76,6 +74,9 @@ namespace module::extension {
                 }
                 group.active_task     = nullptr;
                 group.active_provider = nullptr;
+
+                // Updatae the group information to reflect that this provider group is no longer running
+                group.set_data(0, RunReason::OTHER_TRIGGER, nullptr, group.get_group_info());
 
                 // If anyone was pushing this group they can't push anymore since we are not active
                 if (group.pushing_task != nullptr) {
