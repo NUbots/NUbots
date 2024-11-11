@@ -15,6 +15,7 @@ nuclear_role(
   network::NetworkForwarder
   network::PlotJuggler
   # Localisation
+  input::SensorFilter
   localisation::FieldLocalisationNLopt
   # Platform
   tools::LocalisationBenchmark
