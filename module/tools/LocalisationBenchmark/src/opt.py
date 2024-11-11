@@ -1,5 +1,6 @@
 import os
 import re
+import shutil  # Import shutil for file operations
 import subprocess
 import sys
 
@@ -7,26 +8,43 @@ import optuna
 import yaml
 
 
-def modify_yaml(params, yaml_path):
+def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
     """
-    Modifies the YAML configuration file with the provided parameters.
+    Modifies the YAML configuration files with the provided parameters.
     """
-    with open(yaml_path, 'r') as file:
-        config = yaml.safe_load(file)
+    # Modify FieldLocalisationNLopt.yaml
+    with open(localisation_yaml_path, 'r') as file:
+        localisation_config = yaml.safe_load(file)
 
-    # Update scalar parameters
-    config['field_line_distance_weight'] = params['field_line_distance_weight']
-    config['field_line_intersection_weight'] = params['field_line_intersection_weight']
-    config['state_change_weight'] = params['state_change_weight']
+    # Update scalar parameters for FieldLocalisationNLopt.yaml
+    localisation_config['field_line_distance_weight'] = params['field_line_distance_weight']
+    localisation_config['field_line_intersection_weight'] = params['field_line_intersection_weight']
+    localisation_config['state_change_weight'] = params['state_change_weight']
+    localisation_config['goal_post_distance_weight'] = params['goal_post_distance_weight']
+    localisation_config['change_limit'] = params['change_limit']
+    localisation_config['max_association_distance'] = params['max_association_distance']
 
     # Update matrix parameters for Kalman filter noise covariances
-    Q_value = params['Q']
-    R_value = params['R']
-    config['kalman']['Q'] = [[Q_value, 0, 0], [0, Q_value, 0], [0, 0, Q_value]]
-    config['kalman']['R'] = [[R_value, 0, 0], [0, R_value, 0], [0, 0, R_value]]
+    Q_values = [params['Q_x'], params['Q_y'], params['Q_theta']]
+    R_values = [params['R_x'], params['R_y'], params['R_theta']]
+    localisation_config['kalman']['Q'] = [[Q_values[0], 0, 0], [0, Q_values[1], 0], [0, 0, Q_values[2]]]
+    localisation_config['kalman']['R'] = [[R_values[0], 0, 0], [0, R_values[1], 0], [0, 0, R_values[2]]]
 
-    with open(yaml_path, 'w') as file:
-        yaml.safe_dump(config, file)
+    with open(localisation_yaml_path, 'w') as file:
+        yaml.safe_dump(localisation_config, file)
+
+    # Modify SensorFilter.yaml
+    with open(sensor_filter_yaml_path, 'r') as file:
+        sensor_filter_config = yaml.safe_load(file)
+
+    # Update Mahony filter parameters
+    sensor_filter_config['mahony']['Kp'] = params['Kp']
+    sensor_filter_config['mahony']['Ki'] = params['Ki']
+    sensor_filter_config['mahony']['initial_bias'] = params['initial_bias']
+
+    with open(sensor_filter_yaml_path, 'w') as file:
+        yaml.safe_dump(sensor_filter_config, file)
+
 
 def parse_rmse_translation(output):
     """
@@ -40,6 +58,7 @@ def parse_rmse_translation(output):
         print(output)
         return None
 
+
 def parse_rmse_rotation(output):
     """
     Parses the RMSE rotation error from the module's output.
@@ -52,13 +71,14 @@ def parse_rmse_rotation(output):
         print(output)
         return None
 
+
 def run_benchmark():
     """
     Runs the LocalisationBenchmark module and captures the RMSE.
     """
     # Paths to the executable and NBS file
     executable_path = '/home/nubots/build/bin/webots/localisation_benchmark'
-    nbs_file = '/home/nubots/build/recordings/localisation/20241104T06_31_29.nbs'
+    nbs_file = '/home/nubots/build/recordings/logging/benchmark.nbs'
 
     # Ensure the executable and NBS file exist
     if not os.path.isfile(executable_path):
@@ -79,13 +99,14 @@ def run_benchmark():
             capture_output=True,
             text=True,
             check=True,
-            bufsize=1
+            bufsize=1,
+            timeout=20  # Timeout after 20 seconds (adjust as needed)
         )
         output = result.stdout
         rmse_translation = parse_rmse_translation(output)
         rmse_rotation = parse_rmse_rotation(output)
-        print(rmse_translation)
-        print(rmse_rotation)
+        print("RMSE Translation: " + str(rmse_translation))
+        print("RMSE Rotation: " + str(rmse_rotation))
 
         if rmse_translation is None or rmse_rotation is None:
             return None
@@ -94,34 +115,63 @@ def run_benchmark():
         total_rmse = rmse_translation + rmse_rotation
         return total_rmse
 
+    except subprocess.TimeoutExpired as e:
+        print("Benchmark timed out.")
+        # The subprocess is killed automatically when TimeoutExpired is raised
+        return None
+
     except subprocess.CalledProcessError as e:
         print("An error occurred while running the benchmark:")
         print(e.stderr)
         return None
+
 
 def objective(trial):
     """
     The objective function for Optuna that defines the optimization problem.
     """
     # Suggest values for the parameters within the specified ranges
-    field_line_distance_weight = trial.suggest_loguniform('field_line_distance_weight', 0.01, 100)
-    field_line_intersection_weight = trial.suggest_loguniform('field_line_intersection_weight', 0.01, 100)
-    state_change_weight = trial.suggest_loguniform('state_change_weight', 0.01, 100)
-    Q_value = trial.suggest_loguniform('Q', 1e-6, 1e-2)
-    R_value = trial.suggest_uniform('R', 0.1, 10)
+    field_line_distance_weight = trial.suggest_loguniform('field_line_distance_weight', 1e-2, 1e2)
+    field_line_intersection_weight = trial.suggest_loguniform('field_line_intersection_weight', 1e-2, 1e2)
+    state_change_weight = trial.suggest_loguniform('state_change_weight', 1e-2, 1e2)
+    goal_post_distance_weight = trial.suggest_loguniform('goal_post_distance_weight', 1e-2, 1e2)
+    change_limit_x = trial.suggest_uniform('change_limit_x', 1e-2, 1.0)
+    change_limit_y = trial.suggest_uniform('change_limit_y', 1e-2, 1.0)
+    change_limit_theta = trial.suggest_uniform('change_limit_theta', 1e-2, 1.0)
+    max_association_distance = trial.suggest_uniform('max_association_distance', 1e-2, 10.0)
+    Q_x = trial.suggest_loguniform('Q_x', 1e-6, 1e-2)
+    Q_y = trial.suggest_loguniform('Q_y', 1e-6, 1e-2)
+    Q_theta = trial.suggest_loguniform('Q_theta', 1e-6, 1e-2)
+    R_x = trial.suggest_uniform('R_x', 1e-2, 1e1)
+    R_y = trial.suggest_uniform('R_y', 1e-2, 1e1)
+    R_theta = trial.suggest_uniform('R_theta', 1e-2, 1e1)
+    Kp = trial.suggest_uniform('Kp', 1e-2, 1e1)
+    Ki = trial.suggest_uniform('Ki', 1e-2, 1e1)
+    initial_bias = [trial.suggest_uniform(f'initial_bias_{i}', -1.0, 1.0) for i in range(3)]
 
     # Prepare the parameters dictionary
     params = {
         'field_line_distance_weight': field_line_distance_weight,
         'field_line_intersection_weight': field_line_intersection_weight,
         'state_change_weight': state_change_weight,
-        'Q': Q_value,
-        'R': R_value
+        'goal_post_distance_weight': goal_post_distance_weight,
+        'change_limit': [change_limit_x, change_limit_y, change_limit_theta],
+        'max_association_distance': max_association_distance,
+        'Q_x': Q_x,
+        'Q_y': Q_y,
+        'Q_theta': Q_theta,
+        'R_x': R_x,
+        'R_y': R_y,
+        'R_theta': R_theta,
+        'Kp': Kp,
+        'Ki': Ki,
+        'initial_bias': initial_bias
     }
 
-    # Modify the YAML file with the new parameters
-    yaml_path = '/home/nubots/build/config/webots/FieldLocalisationNLopt.yaml'
-    modify_yaml(params, yaml_path)
+    # Modify the YAML files with the new parameters
+    localisation_yaml_path = '/home/nubots/build/config/webots/FieldLocalisationNLopt.yaml'
+    sensor_filter_yaml_path = '/home/nubots/build/config/webots/SensorFilter.yaml'
+    modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path)
 
     # Run the benchmark and get the RMSE
     rmse = run_benchmark()
@@ -137,6 +187,7 @@ def objective(trial):
     # Return the RMSE as the objective value to minimize
     return rmse
 
+
 if __name__ == '__main__':
     # Create an Optuna study object
     study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimization')
@@ -149,3 +200,22 @@ if __name__ == '__main__':
     for key, value in study.best_params.items():
         print(f'{key}: {value}')
     print(f'Best RMSE: {study.best_value}')
+
+    # Paths to the YAML files
+    localisation_yaml_path = '/home/nubots/build/config/webots/FieldLocalisationNLopt.yaml'
+    sensor_filter_yaml_path = '/home/nubots/build/config/webots/SensorFilter.yaml'
+
+    # Modify the YAML files with the best parameters
+    modify_yaml(study.best_params, localisation_yaml_path, sensor_filter_yaml_path)
+
+    # Define the destination directory
+    destination_dir = '/home/nubots/build/recordings/'
+
+    # Ensure the destination directory exists
+    os.makedirs(destination_dir, exist_ok=True)
+
+    # Copy the updated YAML files to the destination directory
+    shutil.copy(localisation_yaml_path, os.path.join(destination_dir, 'BestFieldLocalisationNLopt.yaml'))
+    shutil.copy(sensor_filter_yaml_path, os.path.join(destination_dir, 'BestSensorFilter.yaml'))
+
+    print(f'Best YAML files have been saved to {destination_dir}')
