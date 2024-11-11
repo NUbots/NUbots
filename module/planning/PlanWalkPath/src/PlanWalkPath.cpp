@@ -189,16 +189,28 @@ namespace module::planning {
                     // If we are aligned with the final heading, we are close to the target
                     // and the angle to the target is too large, step backwards
                     if ((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)) {
-                        // Limit the velocity to -1
-                        velocity_magnitude = std::max(velocity_magnitude, -cfg.max_velocity_magnitude);
-                        log<NUClear::DEBUG>("Backwards velocity magnitude : ", velocity_magnitude);
-                        // Step backwards, but keep the direction forward
+                        log<NUClear::DEBUG>("Stepping backwards, angle to target:", angle_to_target);
+
+                        // Ensure the backwards velocity magnitude does not exceed the maximum
+                        velocity_magnitude = std::clamp(velocity_magnitude, -cfg.max_velocity_magnitude, 0.0);
+
+                        // Map angle_to_target to a range for interpolation between max_strafe_angle and 1.19
+                        const double angle_progress = std::clamp(
+                            (std::abs(angle_to_target) - cfg.max_strafe_angle) / (1.19 - cfg.max_strafe_angle),
+                            0.05,
+                            0.95);
+
+                        // Parabolic function to interpolate between max_strafe_angle and 1.19
+                        desired_velocity_magnitude = cfg.strafe_gain * (4 * angle_progress * (1 - angle_progress));
+
+                        log<NUClear::DEBUG>("Backwards velocity magnitude:", velocity_magnitude);
+                        log<NUClear::DEBUG>("Desired velocity magnitude (interpolated):", desired_velocity_magnitude);
+
+                        // Step backwards while keeping the forward direction
                         rDRr = Eigen::Vector2d(-1, rDRr.y());
-                        // Do not rotate the robot
+
+                        // Keep the robot heading straight backward
                         desired_heading = 0.0;
-                        // Accelerate away from the target, faster when closer
-                        desired_velocity_magnitude = 1 - (cfg.strafe_gain * error * velocity_magnitude);
-                        // TODO: adjust velocity magnitude?
                     }
                     // Go towards target
                     else {
