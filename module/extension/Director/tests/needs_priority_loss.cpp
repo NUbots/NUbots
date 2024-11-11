@@ -50,42 +50,32 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // First complex task needs both simple tasks
-            on<Provide<ComplexTask<1>>, Needs<SimpleTask<1>>, Needs<SimpleTask<2>>>().then([this] {
-                events.push_back("emitting complex task 1");
-                emit<Task>(std::make_unique<SimpleTask<1>>("complex 1"));
-                emit<Task>(std::make_unique<SimpleTask<2>>("complex 1"));
-            });
+            on<Provide<ComplexTask<1>>, Needs<SimpleTask<1>>, Needs<SimpleTask<2>>>().then(
+                [this](const ComplexTask<1>& t) {
+                    emit<Task>(std::make_unique<SimpleTask<1>>(t));
+                    emit<Task>(std::make_unique<SimpleTask<2>>(t));
+                });
             // Second complex task only needs one
-            on<Provide<ComplexTask<2>>, Needs<SimpleTask<1>>>().then([this] {
-                events.push_back("emitting complex task 2");
-                emit<Task>(std::make_unique<SimpleTask<1>>("complex 2"));
-            });
+            on<Provide<ComplexTask<2>>, Needs<SimpleTask<1>>>().then(
+                [this](const ComplexTask<2>& t) { emit<Task>(std::make_unique<SimpleTask<1>>(t)); });
 
             // Monitor which events run and by who
-            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("p1: " + t.msg); });
-            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("p2: " + t.msg); });
-            on<Start<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("start 1: " + t.msg); });
-            on<Start<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("start 2: " + t.msg); });
-            on<Stop<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("stop 1: " + t.msg); });
-            on<Stop<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("stop 2: " + t.msg); });
-            on<Start<ComplexTask<1>>>().then([this] { events.push_back("start complex 1"); });
-            on<Start<ComplexTask<2>>>().then([this] { events.push_back("start complex 2"); });
-            on<Stop<ComplexTask<1>>>().then([this] { events.push_back("stop complex 1"); });
-            on<Stop<ComplexTask<2>>>().then([this] { events.push_back("stop complex 2"); });
+            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { finish(t, "Provide"); });
+            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { finish(t, "Provide"); });
+            on<Start<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { finish(t, "Start"); });
+            on<Start<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { finish(t, "Start"); });
+            on<Stop<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { finish(t, "Stop"); });
+            on<Stop<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { finish(t, "Stop"); });
+            on<Start<ComplexTask<1>>>().then([this](const ComplexTask<1>& t) { finish(t, "Start"); });
+            on<Start<ComplexTask<2>>>().then([this](const ComplexTask<2>& t) { finish(t, "Start"); });
+            on<Stop<ComplexTask<1>>>().then([this](const ComplexTask<1>& t) { finish(t, "Stop"); });
+            on<Stop<ComplexTask<2>>>().then([this](const ComplexTask<2>& t) { finish(t, "Stop"); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Emit a complex task that uses both simple tasks
-                events.push_back("requesting complex task 1");
-                emit<Task>(std::make_unique<ComplexTask<1>>(), 50);
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit a higher priority complex task that just uses one
-                events.push_back("requesting complex task 2");
-                emit<Task>(std::make_unique<ComplexTask<2>>(), 100);
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<ComplexTask<1>>(), 50); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<ComplexTask<2>>(), 100); });
         }
     };
 

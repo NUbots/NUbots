@@ -129,7 +129,7 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 events.push_back("emitting initial task");
                 emit<Task>(std::make_unique<Level<1, 1>>());
             });

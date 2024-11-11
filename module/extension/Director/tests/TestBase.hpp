@@ -28,6 +28,7 @@
 #ifndef MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 #define MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 
+#include <fmt/format.h>
 #include <iostream>
 #include <nuclear>
 
@@ -48,6 +49,46 @@ public:
     // ensure that everything has finished changing before the next step is run
     template <int i>
     struct Step {};
+
+    template <typename Base>
+    struct Message {
+
+        template <typename... Args>
+        explicit Message(const Args&... args) {
+            std::stringstream ss;
+
+            // Comma separated list of the arguments
+            ((ss << args << ", "), ...);
+            std::string str = ss.str();
+            if (!str.empty()) {
+                str.pop_back();  // Remove the trailing comma
+                str.pop_back();  // Remove the trailing space
+            }
+
+            msg = fmt::format("{}({})", NUClear::util::demangle(typeid(Base).name()), str);
+        }
+
+        template <typename T, int S, typename... Args>
+        explicit Message(const TestBase<T, S>& m, Args&&... args) {
+            std::stringstream ss;
+
+            // Comma separated list of the arguments
+            ((ss << args << ", "), ...);
+            std::string str = ss.str();
+            if (!str.empty()) {
+                str.pop_back();  // Remove the trailing comma
+                str.pop_back();  // Remove the trailing space
+            }
+
+            msg = fmt::format("{}->{}({})", m.msg, NUClear::util::demangle(typeid(T).name()), str);
+        }
+
+        std::string msg;
+
+        friend std::ostream& operator<<(std::ostream& os, const Message& m) {
+            return os << m.msg;
+        }
+    };
 
     /**
      * Emit this struct to fail the test
@@ -76,6 +117,35 @@ public:
         });
         emit<Scope::DELAY>(std::make_unique<Fail>("Test did not complete successfully"), timeout);
     }
+
+    /**
+     * Override the standard emit function to add logging of the emitted event.
+     *
+     * These logs can then be used to check that the test is running as expected.
+     */
+    template <template <typename> class Scope, typename T, typename... Args>
+    void emit(std::unique_ptr<T>&& msg, Args&&... args) {
+        std::stringstream ss;
+
+        ss << "Emitting " << *msg;
+
+        events.push_back(ss.str());
+        BehaviourReactor::emit<Scope>(std::forward<Args>(args)...);
+    }
+
+    /**
+     * A function to specify the end of a chain of emits.
+     */
+    template <typename T, typename... Args>
+    void finish(T&& msg, Args&&... args) {
+        std::stringstream ss;
+
+        ss << "End " << NUClear::util::demangle(typeid(T).name()) << std::forward<T>(msg);
+
+        events.push_back(ss.str());
+    }
+
+    std::vector<std::string> events;
 
 private:
     /**

@@ -52,17 +52,11 @@ namespace {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::ALLOW>>().then([this] {
-                // Task has been executed!
-                events.push_back("task executed");
-            });
+            on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::ALLOW>>().then(
+                [this] { events.push_back("task executed"); });
 
-            on<Provide<Helper>>().then([this] {
-                // Task has been executed!
-                events.push_back("helper waiting");
-            });
+            on<Provide<Helper>>().then([this] { events.push_back("helper waiting"); });
             on<Provide<Helper>, Causing<Condition, Condition::ALLOW>>().then([this] {
-                // Task has been executed!
                 events.push_back("helper causing allow");
                 emit(std::make_unique<Condition>(Condition::ALLOW));
             });
@@ -70,26 +64,14 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>>().then([this] {
-                // Start up the helper
-                events.push_back("emitting helper task");
-                emit<Task>(std::make_unique<Helper>(), 10);
-            });
-            on<Trigger<Step<2>>>().then([this] {
-                // Emitting a blocked condition
-                events.push_back("emitting blocked condition");
-                emit(std::make_unique<Condition>(Condition::BLOCK));
-            });
-            on<Trigger<Step<3>>>().then([this] {
-                // Emit the task at a lower priority than the helper and it shouldn't be able to push it and be blocked
-                events.push_back("emitting task at low priority");
-                emit<Task>(std::make_unique<SimpleTask>(), 1);
-            });
-            on<Trigger<Step<4>>>().then([this] {
-                // Increase the priority of the task so it can push the helper
-                events.push_back("emitting task at high priority");
-                emit<Task>(std::make_unique<SimpleTask>(), 100);
-            });
+            // Start up the helper
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<Helper>(), 10); });
+            // Emitting a blocked condition
+            on<Trigger<Step<2>>>().then([this] { emit(std::make_unique<Condition>(Condition::BLOCK)); });
+            // Emit the task at a lower priority than the helper and it shouldn't be able to push it and be blocked
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(), 1); });
+            // Increase the priority of the task so it can push the helper
+            on<Trigger<Step<4>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(), 100); });
         }
     };
 }  // namespace

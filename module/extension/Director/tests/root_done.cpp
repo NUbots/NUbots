@@ -35,39 +35,34 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {};
-    struct SubTask {
-        SubTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-    struct Finished {
-        Finished(const bool& f_) : f(f_) {}
-        bool f;
-    };
-
-    std::vector<std::string> events;
 
     class TestReactor : public TestBase<TestReactor, 4> {
     public:
+        struct SimpleTask {};
+        struct SubTask {
+            SubTask(const std::string& msg_) : msg(msg_) {}
+            std::string msg;
+        };
+        struct Finished {
+            Finished(const bool& f_) : f(f_) {}
+            bool f;
+        };
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SubTask>, Trigger<Finished>>().then([this](const SubTask& t, const Finished& f) {
-                events.push_back("subtask executed by " + t.msg);
-                if (f.f) {
-                    events.push_back("finished with " + t.msg);
+                finish(t, f);
+                if (finished == true) {
                     emit<Task>(std::make_unique<Done>());
                 }
             });
 
-            on<Provide<SimpleTask>>().then([this] {
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {
                 if (!executed) {
-                    // Task has been executed!
                     executed = true;
-                    events.push_back("simple task executed");
-                    emit<Task>(std::make_unique<SubTask>("simple task"));
+                    emit<Task>(std::make_unique<SubTask>(t));
                 }
                 else {
-                    events.push_back("simple task reexecuted");
                     emit<Task>(std::make_unique<Done>());
                 }
             });
@@ -75,22 +70,10 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting finished with false");
-                emit(std::make_unique<Finished>(false));
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting root subtask");
-                emit<Task>(std::make_unique<SubTask>("root"), 20);
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting simple task");
-                emit<Task>(std::make_unique<SimpleTask>(), 10);
-            });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                events.push_back("emitting finished with true");
-                emit(std::make_unique<Finished>(true));
-            });
+            on<Trigger<Step<1>>>().then([this] { emit(std::make_unique<Finished>(false)); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<SubTask>("root"), 20); });
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(), 10); });
+            on<Trigger<Step<4>>>().then([this] { emit(std::make_unique<Finished>(true)); });
         }
 
         bool executed = false;

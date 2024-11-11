@@ -50,12 +50,12 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 // Emit a task to execute
                 events.push_back("initiating");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 // Emit a null task to remove the task
                 events.push_back("finishing");
                 emit<Task>(std::unique_ptr<SimpleTask>(nullptr));

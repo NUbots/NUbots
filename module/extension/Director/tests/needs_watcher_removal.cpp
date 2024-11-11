@@ -35,66 +35,39 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct PrimaryTask {};
-    struct SecondaryTask {};
-
-    struct SubTask {
-        SubTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-
-    template <int i>
-    struct SimpleTask {
-        SimpleTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-
-    std::vector<std::string> events;
-
     class TestReactor : public TestBase<TestReactor, 3> {
     public:
+        struct PrimaryTask : Message<PrimaryTask> {};
+        struct SecondaryTask : Message<SecondaryTask> {};
+        struct SubTask : Message<SubTask> {};
+        template <int i>
+        struct SimpleTask : Message<SimpleTask<i>> {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // Store the tasks we are given to run
-            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) {  //
-                events.push_back("simple task 1 from " + t.msg);
-            });
-            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) {  //
-                events.push_back("simple task 2 from " + t.msg);
+            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { finish(t); });
+            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { finish(t); });
+
+            on<Provide<PrimaryTask>, SimpleTask<2>, Needs<SubTask>>().then([this](const PrimaryTask& t) {
+                emit<Task>(std::make_unique<SimpleTask<2>>(t));
+                emit<Task>(std::make_unique<SubTask>(t));
             });
 
-            on<Provide<PrimaryTask>, SimpleTask<2>, Needs<SubTask>>().then([this]() {
-                events.push_back("emitting from primary task");
-                emit<Task>(std::make_unique<SimpleTask<2>>("primary task"));
-                emit<Task>(std::make_unique<SubTask>("primary task"));
-            });
-
-            on<Provide<SubTask>, Needs<SimpleTask<1>>>().then([this](const SubTask& t) {
-                events.push_back("emitting from subtask");
-                emit<Task>(std::make_unique<SimpleTask<1>>(t.msg));
-            });
+            on<Provide<SubTask>, Needs<SimpleTask<1>>>().then(
+                [this](const SubTask& t) { emit<Task>(std::make_unique<SimpleTask<1>>(t)); });
 
             on<Provide<SecondaryTask>, Needs<SimpleTask<1>>, Needs<SimpleTask<2>>>().then([this] {
-                events.push_back("emitting from secondary task");
-                emit<Task>(std::make_unique<SimpleTask<1>>("secondary task"));
-                emit<Task>(std::make_unique<SimpleTask<2>>("secondary task"));
+                emit<Task>(std::make_unique<SimpleTask<1>>(t));
+                emit<Task>(std::make_unique<SimpleTask<2>>(t));
             });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting primary task");
-                emit<Task>(std::make_unique<PrimaryTask>());
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting secondary task");
-                emit<Task>(std::make_unique<SecondaryTask>());
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("removing primary task");
-                emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<PrimaryTask>()); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<SecondaryTask>()); });
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::unique_ptr<PrimaryTask>(nullptr)); });
         }
     };
 

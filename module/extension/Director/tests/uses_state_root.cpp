@@ -84,44 +84,44 @@ namespace {
              * TEST STEPS *
              **************/
             // Emit the trigger to run the subtask
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 events.push_back("emitting run trigger");
                 emit<Scope::INLINE>(std::make_unique<RunTrigger>());
             });
 
             // Check the uses state of the subtask
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 events.push_back("emit uses trigger");
                 emit<Scope::INLINE>(std::make_unique<UsesTrigger>());
             });
 
             // Run the simple task, which has a lower priority than the root trigger subtask
             // This should give a queued subtask state on the next run
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 events.push_back("emitting simple task");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
 
             // Run the simple task again to get the queued state
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 events.push_back("emitting simple task again");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
 
             // Remove the root subtask to detect a running subtask on the secondary task
-            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<5>>>().then([this] {
                 events.push_back("emit remove trigger");
                 emit<Scope::INLINE>(std::make_unique<RemoveTrigger>());
             });
 
             // Run the simple task again to see the running state
-            on<Trigger<Step<6>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<6>>>().then([this] {
                 events.push_back("emitting simple task again");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
 
             // Emit the uses trigger to check the non-running state
-            on<Trigger<Step<7>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<7>>>().then([this] {
                 events.push_back("emit uses trigger");
                 emit<Scope::INLINE>(std::make_unique<UsesTrigger>());
             });

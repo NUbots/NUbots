@@ -44,30 +44,22 @@ namespace {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SubTask>>().then([this] {
-                events.push_back("subtask executed");
-                emit<Task>(std::make_unique<Done>());
-            });
+            on<Provide<SubTask>>().then([this] { emit<Task>(std::make_unique<Done>()); });
 
-            on<Provide<SimpleTask>>().then([this] {
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& m) {
                 if (!executed) {
-                    // Task has been executed!
                     executed = true;
-                    events.push_back("task executed");
-                    emit<Task>(std::make_unique<SubTask>());
+                    emit<Task>(std::make_unique<SubTask>(m));
                 }
                 else {
-                    events.push_back("task reexecuted");
+                    finish(m, "reexecuted");
                 }
             });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task");
-                emit<Task>(std::make_unique<SimpleTask>());
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>()); });
         }
 
         bool executed = false;

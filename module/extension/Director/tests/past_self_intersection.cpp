@@ -55,42 +55,27 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<MainTask>>().then([this](const MainTask& task) {
-                events.push_back("running main task");
                 if (task.subtask == 1) {
-                    events.push_back("requesting subtask 1");
                     emit<Task>(std::make_unique<Subtask<1>>());
                 }
                 else if (task.subtask == 2) {
-                    events.push_back("requesting subtask 2");
                     emit<Task>(std::make_unique<Subtask<2>>());
                 }
             });
 
-            on<Provide<Subtask<1>>, Needs<CommonDependency>>().then([this] {
-                events.push_back("running subtask 1");
-                emit<Task>(std::make_unique<CommonDependency>("from subtask 1"));
-            });
+            on<Provide<Subtask<1>>, Needs<CommonDependency>>().then(
+                [this](const Subtask<1>& t) { emit<Task>(std::make_unique<CommonDependency>(t)); });
 
-            on<Provide<Subtask<2>>, Needs<CommonDependency>>().then([this] {
-                events.push_back("running subtask 2");
-                emit<Task>(std::make_unique<CommonDependency>("from subtask 2"));
-            });
+            on<Provide<Subtask<2>>, Needs<CommonDependency>>().then(
+                [this](const Subtask<2>& t) { emit<Task>(std::make_unique<CommonDependency>(t)); });
 
-            on<Provide<CommonDependency>>().then([this](const CommonDependency& t) {  //
-                events.push_back("running common dependency from " + t.msg);
-            });
+            on<Provide<CommonDependency>>().then([this](const CommonDependency& t) { finish(t); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("requesting main task with subtask 1");
-                emit<Task>(std::make_unique<MainTask>(1));
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("requesting main task with subtask 2");
-                emit<Task>(std::make_unique<MainTask>(2));
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<MainTask>("1")); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<MainTask>("2")); });
         }
     };
 

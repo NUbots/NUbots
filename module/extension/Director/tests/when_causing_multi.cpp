@@ -88,24 +88,24 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 // Start up the helper
                 events.push_back("emitting helper tasks");
                 emit<Task>(std::make_unique<Helper<1>>(), 10);
                 emit<Task>(std::make_unique<Helper<2>>(), 10);
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 // Emitting a blocked condition
                 events.push_back("emitting blocked conditions");
                 emit(std::make_unique<Condition<1>>(Condition<1>::BLOCK));
                 emit(std::make_unique<Condition<2>>(Condition<2>::BLOCK));
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 // Emit the task at a lower priority than the helper and it shouldn't be able to push it and be blocked
                 events.push_back("emitting task at low priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 1);
             });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 // Increase the priority of the task so it can push the helper
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);

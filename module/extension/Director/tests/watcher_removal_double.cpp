@@ -72,25 +72,25 @@ namespace {
              * TEST STEPS *
              **************/
             // PrimaryTask takes ahold of SubTask and SubSubTask
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 events.push_back("emitting primary task");
                 emit<Task>(std::make_unique<PrimaryTask>(), 2);
             });
 
             // SecondaryTask needs SubTask, so it will watch
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 events.push_back("emitting secondary task");
                 emit<Task>(std::make_unique<SecondaryTask>(), 1);
             });
 
             // TertiaryTask needs SubTask, so it will watch
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 events.push_back("emitting tertiary task");
                 emit<Task>(std::make_unique<TertiaryTask>(), 0);
             });
 
             // Remove PrimaryTask so SecondaryTask can take over
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 events.push_back("removing primary task");
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr), 2);
             });

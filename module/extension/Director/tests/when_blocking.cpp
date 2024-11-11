@@ -68,32 +68,32 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 // At this point condition hasn't been emitted, so this task should be blocked by default
                 events.push_back("emitting task #1");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 // Emitting a blocked condition
                 events.push_back("emitting blocked condition #1");
                 emit(std::make_unique<Condition>(Condition::BLOCK));
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 // Emitting the task again to ensure it's not executed
                 events.push_back("emitting task #2");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 // This should make it run since it's now allowed
                 events.push_back("emitting allowed condition");
                 emit(std::make_unique<Condition>(Condition::ALLOW));
             });
-            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<5>>>().then([this] {
                 // This task should run fine since it's allowed
                 events.push_back("emitting task #3");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Trigger<Step<6>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<6>>>().then([this] {
                 // This should stop the running task
                 events.push_back("emitting blocked condition #2");
                 emit(std::make_unique<Condition>(Condition::BLOCK));

@@ -56,34 +56,22 @@ namespace {
             on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back(t.msg); });
 
             on<Provide<ComplexTask>>().then([this](const ComplexTask& t) {
-                events.push_back("emitting tasks from complex " + t.msg);
-                emit<Task>(std::make_unique<SimpleTask<0>>("from complex " + t.msg));
-                emit<Task>(std::make_unique<SimpleTask<1>>("from complex " + t.msg));
+                emit<Task>(std::make_unique<SimpleTask<0>>(t));
+                emit<Task>(std::make_unique<SimpleTask<1>>(t));
             });
 
-            on<Provide<BlockerTask>>().then([this] {
-                events.push_back("emitting blocker simple task");
-                emit<Task>(std::make_unique<SimpleTask<0>>("from blocker"));
-            });
+            on<Provide<BlockerTask>>().then(
+                [this](const BlockerTask& t) { emit<Task>(std::make_unique<SimpleTask<0>>(t)); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Emit a blocker task that will use SimpleTask<0> to block the complex task
-                events.push_back("emitting blocker task");
-                emit<Task>(std::make_unique<BlockerTask>(), 50);
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit the complex task that should be blocked by the blocker task
-                events.push_back("emitting low priority complex task");
-                emit<Task>(std::make_unique<ComplexTask>("low priority"), 10);
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                // Emit another complex task that should have high enough priority to execute over the blocker
-                events.push_back("emitting high priority complex task");
-                emit<Task>(std::make_unique<ComplexTask>("high priority"), 100);
-            });
+            // Emit a blocker task that will use SimpleTask<0> to block the complex task
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<BlockerTask>(), 50); });
+            // Emit the complex task that should be blocked by the blocker task
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<ComplexTask>("low priority"), 10); });
+            // Emit another complex task that should have high enough priority to execute over the blocker
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<ComplexTask>("high priority"), 100); });
         }
     };
 

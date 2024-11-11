@@ -53,49 +53,29 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // Store the tasks we are given to run
-            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) { events.push_back(t.msg); });
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) { finish(t); });
 
             // Unique providers to be siblings of each other in terms of priority
-            on<Provide<UniqueProvider<1>>>().then([this](const UniqueProvider<1>& t) {  //
-                events.push_back("trying: " + t.msg);
-                emit<Task>(std::make_unique<SimpleTask>(t.msg));
-            });
-            on<Provide<UniqueProvider<2>>>().then([this](const UniqueProvider<2>& t) {  //
-                events.push_back("trying: " + t.msg);
-                emit<Task>(std::make_unique<SimpleTask>(t.msg));
-            });
-            on<Provide<UniqueProvider<3>>>().then([this](const UniqueProvider<3>& t) {  //
-                events.push_back("trying: " + t.msg);
-                emit<Task>(std::make_unique<SimpleTask>(t.msg));
-            });
-            on<Provide<UniqueProvider<4>>>().then([this](const UniqueProvider<4>& t) {  //
-                events.push_back("trying: " + t.msg);
-                emit<Task>(std::make_unique<SimpleTask>(t.msg));
-            });
+            on<Provide<UniqueProvider<1>>>().then(
+                [this](const UniqueProvider<1>& t) { emit<Task>(std::make_unique<SimpleTask>(t.msg)); });
+            on<Provide<UniqueProvider<2>>>().then(
+                [this](const UniqueProvider<2>& t) { emit<Task>(std::make_unique<SimpleTask>(t.msg)); });
+            on<Provide<UniqueProvider<3>>>().then(
+                [this](const UniqueProvider<3>& t) { emit<Task>(std::make_unique<SimpleTask>(t.msg)); });
+            on<Provide<UniqueProvider<4>>>().then(
+                [this](const UniqueProvider<4>& t) { emit<Task>(std::make_unique<SimpleTask>(t.msg)); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Emit a task with low priority
-                events.push_back("Starting low priority provider");
-                emit<Task>(std::make_unique<UniqueProvider<1>>("low"), 1);
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit a task with high priority
-                events.push_back("Starting high priority provider");
-                emit<Task>(std::make_unique<UniqueProvider<2>>("high"), 100);
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                // Emit a third task with middling priority that should't displace the high priority task
-                events.push_back("Starting middling priority provider");
-                emit<Task>(std::make_unique<UniqueProvider<3>>("middling"), 50);
-            });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                // Emit a fourth task with very high priority that should't displace the high priority task
-                events.push_back("Starting very high priority provider");
-                emit<Task>(std::make_unique<UniqueProvider<4>>("very high"), 200);
-            });
+            // Emit a task with low priority
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<UniqueProvider<1>>("low"), 1); });
+            // Emit a task with high priority
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<UniqueProvider<2>>("high"), 100); });
+            // Emit a third task with middling priority that should't displace the high priority task
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<UniqueProvider<3>>("middling"), 50); });
+            // Emit a fourth task with very high priority that should't displace the high priority task
+            on<Trigger<Step<4>>>().then([this] { emit<Task>(std::make_unique<UniqueProvider<4>>("very high"), 200); });
         }
     };
 

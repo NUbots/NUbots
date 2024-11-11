@@ -35,35 +35,21 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    template <int i>
-    struct SimpleTask {};
-
-    std::vector<std::string> events;
-
     class TestReactor : public TestBase<TestReactor, 3> {
     public:
+        template <int i>
+        struct SimpleTask {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask<2>>>().then([this] { events.push_back("simple task 2"); });
+            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { finish(t); });
 
             /**************
              * TEST STEPS *
              **************/
-            // PrimaryTask takes ahold of SubTask and SubSubTask
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting simple task 1");
-                emit<Task>(std::make_unique<SimpleTask<1>>());
-            });
-
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting simple task 2");
-                emit<Task>(std::make_unique<SimpleTask<2>>());
-            });
-
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting simple task 3");
-                emit<Task>(std::make_unique<SimpleTask<3>>());
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<SimpleTask<1>>()); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<SimpleTask<2>>()); });
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<SimpleTask<3>>()); });
         }
     };
 
@@ -75,7 +61,7 @@ TEST_CASE("Test that a Task can be emitted when no Provider exists for it", "[di
     config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
-    powerplant.install<TestReactor>();
+    const auto& reactor = powerplant.install<TestReactor>();
     powerplant.start();
 
     std::vector<std::string> expected = {"emitting simple task 1",
@@ -84,8 +70,8 @@ TEST_CASE("Test that a Task can be emitted when no Provider exists for it", "[di
                                          "emitting simple task 3"};
 
     // Make an info print the diff in an easy to read way if we fail
-    INFO(util::diff_string(expected, events));
+    INFO(util::diff_string(expected, reactor.events));
 
     // Check the events fired in order and only those events
-    REQUIRE(events == expected);
+    REQUIRE(reactor.events == expected);
 }

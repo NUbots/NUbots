@@ -35,21 +35,18 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct DependentTask {
-        DependentTask(const int& id_) : id(id_) {}
-        int id;
-    };
-    struct SimpleTask {
-        SimpleTask(const int& id_) : id(id_) {}
-        int id;
-    };
-    struct TriggerTest {};
-
-
-    std::vector<std::string> events;
-
-    class TestReactor : public TestBase<TestReactor, 8> {
+    class TestReactor : public TestBase<TestReactor, 9> {
     public:
+        struct DependentTask {
+            DependentTask(const int& id_) : id(id_) {}
+            int id;
+        };
+        struct SimpleTask {
+            SimpleTask(const int& id_) : id(id_) {}
+            int id;
+        };
+        struct TriggerTest {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {
@@ -88,43 +85,15 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting trigger 0");
-                emit(std::make_unique<TriggerTest>());
-                events.push_back("emitting task 1");
-                emit<Task>(std::make_unique<SimpleTask>(1));
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting trigger 1");
-                emit(std::make_unique<TriggerTest>());
-            });
-
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 2");
-                emit<Task>(std::make_unique<SimpleTask>(2));
-            });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                events.push_back("emitting trigger 2");
-                emit(std::make_unique<TriggerTest>());
-            });
-
-            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 3");
-                emit<Task>(std::make_unique<SimpleTask>(3));
-            });
-            on<Trigger<Step<6>>, Priority::LOW>().then([this] {
-                events.push_back("emitting trigger 3");
-                emit(std::make_unique<TriggerTest>());
-            });
-
-            on<Trigger<Step<7>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 4");
-                emit<Task>(std::make_unique<SimpleTask>(4));
-            });
-            on<Trigger<Step<8>>, Priority::LOW>().then([this] {
-                events.push_back("emitting trigger 4");
-                emit(std::make_unique<TriggerTest>());
-            });
+            on<Trigger<Step<1>>>().then([this] { emit(std::make_unique<TriggerTest>(0)); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(1)); });
+            on<Trigger<Step<3>>>().then([this] { emit(std::make_unique<TriggerTest>(1)); });
+            on<Trigger<Step<4>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(2)); });
+            on<Trigger<Step<5>>>().then([this] { emit(std::make_unique<TriggerTest>(2)); });
+            on<Trigger<Step<6>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(3)); });
+            on<Trigger<Step<7>>>().then([this] { emit(std::make_unique<TriggerTest>(3)); });
+            on<Trigger<Step<8>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>(4)); });
+            on<Trigger<Step<9>>>().then([this] { emit(std::make_unique<TriggerTest>(5)); });
         }
     };
 

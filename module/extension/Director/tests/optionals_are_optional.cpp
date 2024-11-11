@@ -35,75 +35,43 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    template <int i>
-    struct SimpleTask {
-        SimpleTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-    struct ComplexTask {
-        ComplexTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-    struct BlockerTask {
-        BlockerTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-
-    std::vector<std::string> events;
-
     class TestReactor : public TestBase<TestReactor, 5> {
     public:
+        template <int i>
+        struct SimpleTask : Message<SimpleTask<i>> {};
+        struct ComplexTask : Message<ComplexTask> {};
+        struct BlockerTask : Message<BlockerTask> {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask<0>>>().then([this](const SimpleTask<0>& t) {  //
-                events.push_back("task 0 " + t.msg);
-            });
-            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) {  //
-                events.push_back("task 1 " + t.msg);
-            });
+            on<Provide<SimpleTask<0>>>().then([this](const SimpleTask<0>& t) { finish(t); });
+            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { finish(t); });
 
             on<Provide<ComplexTask>>().then([this](const ComplexTask& t) {
                 events.push_back("emitting tasks from complex " + t.msg);
                 // One required, one optional
-                emit<Task>(std::make_unique<SimpleTask<0>>("from complex " + t.msg), 1, true);
-                emit<Task>(std::make_unique<SimpleTask<1>>("from complex " + t.msg), 1, false);
+                emit<Task>(std::make_unique<SimpleTask<0>>(t), 1, true);
+                emit<Task>(std::make_unique<SimpleTask<1>>(t), 1, false);
             });
 
-            on<Provide<BlockerTask>>().then([this](const BlockerTask& t) {  //
-                events.push_back("emitting " + t.msg + " blocker simple task");
-                emit<Task>(std::make_unique<SimpleTask<0>>("from blocker " + t.msg));
-            });
+            on<Provide<BlockerTask>>().then(
+                [this](const BlockerTask& t) { emit<Task>(std::make_unique<SimpleTask<0>>(t)); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Emit an initial complex task which should run
-                events.push_back("emitting initial complex task");
-                emit<Task>(std::make_unique<ComplexTask>("initial task"), 10);
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit a blocker task that will use SimpleTask<0> to block the optional part of the complex task
-                events.push_back("emitting required blocker task");
-                emit<Task>(std::make_unique<BlockerTask>("required"), 50);
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                // Emit an updated complex task that should be blocked by the blocker task
-                // However the non optional part should still run
-                events.push_back("emitting updated complex task");
-                emit<Task>(std::make_unique<ComplexTask>("updated task"), 10);
-            });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                // Emit another complex task that should have high enough priority to execute over the blocker
-                // except that since it's optional it won't be able to
-                events.push_back("emitting high priority complex task");
-                emit<Task>(std::make_unique<ComplexTask>("high priority"), 100);
-            });
-            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
-                // Emit an optional blocker task which the complex task should override
-                events.push_back("emitting optional blocker task");
-                emit<Task>(std::make_unique<BlockerTask>("optional"), 50, true);
-            });
+            // Emit an initial complex task which should run
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<ComplexTask>("initial task"), 10); });
+            // Emit a blocker task that will use SimpleTask<0> to block the optional part of the complex task
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<BlockerTask>("required"), 50); });
+            // Emit an updated complex task that should be blocked by the blocker task
+            // However the non optional part should still run
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<ComplexTask>("updated task"), 10); });
+            // Emit another complex task that should have high enough priority to execute over the blocker
+            // except that since it's optional it won't be able to
+            on<Trigger<Step<4>>>().then([this] { emit<Task>(std::make_unique<ComplexTask>("high priority"), 100); });
+            // Emit an optional blocker task which the complex task should override
+            on<Trigger<Step<5>>>().then([this] { emit<Task>(std::make_unique<BlockerTask>("optional"), 50, true); });
         }
     };
 

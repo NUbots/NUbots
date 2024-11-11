@@ -52,39 +52,24 @@ namespace {
 
             // Store the tasks we are given to run
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
-                events.push_back("simple task - " + t.msg);
+                finish(t);
             });
 
-            on<Provide<ComplexTask<1>>, Needs<SimpleTask>>().then([this] {
-                events.push_back("emitting tasks from complex task 1");
-                emit<Task>(std::make_unique<SimpleTask>("complex task 1"));
-            });
+            on<Provide<ComplexTask<1>>, Needs<SimpleTask>>().then(
+                [this](const ComplexTask<1>& t) { emit<Task>(std::make_unique<SimpleTask>(t)); });
 
-            on<Provide<ComplexTask<2>>, Needs<SimpleTask>>().then([this] {
-                events.push_back("emitting tasks from complex task 2");
-                emit<Task>(std::make_unique<SimpleTask>("complex task 2"));
-            });
+            on<Provide<ComplexTask<2>>, Needs<SimpleTask>>().then(
+                [this](const ComplexTask<2>& t) { emit<Task>(std::make_unique<SimpleTask>(t)); });
 
-            on<Provide<VeryComplexTask>, Needs<ComplexTask<2>>>().then([this] {
-                events.push_back("emitting tasks from very complex task");
-                emit<Task>(std::make_unique<ComplexTask<2>>());
-            });
+            on<Provide<VeryComplexTask>, Needs<ComplexTask<2>>>().then(
+                [this](const VeryComplexTask& t) { emit<Task>(std::make_unique<ComplexTask<2>>(t)); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting complex task 1");
-                emit<Task>(std::make_unique<ComplexTask<1>>(), 50);
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting very complex task");
-                emit<Task>(std::make_unique<VeryComplexTask>(), 40);
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("removing complex task 1");
-                emit<Task>(std::unique_ptr<ComplexTask<1>>(nullptr));
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<ComplexTask<1>>(), 50); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<VeryComplexTask>(), 40); });
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::unique_ptr<ComplexTask<1>>(nullptr)); });
         }
     };
 

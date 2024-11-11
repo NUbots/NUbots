@@ -35,53 +35,25 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {
-        SimpleTask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
-
-    template <char id>
-    struct Runner {};
-
-    std::vector<std::string> events;
-
     class TestReactor : public TestBase<TestReactor, 4> {
     public:
+        template <int id>
+        struct Runner : Message<Runner<id>> {};
+        struct SimpleTask : Message<SimpleTask> {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
-                events.push_back("simple task from " + t.msg);
-            });
-
-            on<Provide<Runner<'a'>>>().then([this] {
-                events.push_back("runner a");
-                emit<Task>(std::make_unique<SimpleTask>("a"));
-            });
-
-            on<Provide<Runner<'b'>>>().then([this] {
-                events.push_back("runner b");
-                emit<Task>(std::make_unique<SimpleTask>("b"));
-            });
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) { finish(t); });
+            on<Provide<Runner<1>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("a")); });
+            on<Provide<Runner<2>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("b")); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("starting a");
-                emit<Task>(std::make_unique<Runner<'a'>>(), 10);
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("starting b");
-                emit<Task>(std::make_unique<Runner<'b'>>(), 10);
-            });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("upping b priority");
-                emit<Task>(std::make_unique<Runner<'b'>>(), 20);
-            });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                events.push_back("upping a priority");
-                emit<Task>(std::make_unique<Runner<'a'>>(), 20);
-            });
+            on<Trigger<Step<1>>>().then([this] { log_emit<Task>(std::make_unique<Runner<1>>(), 10); });
+            on<Trigger<Step<2>>>().then([this] { log_emit<Task>(std::make_unique<Runner<2>>(), 10); });
+            on<Trigger<Step<3>>>().then([this] { log_emit<Task>(std::make_unique<Runner<2>>(), 20); });
+            on<Trigger<Step<4>>>().then([this] { log_emit<Task>(std::make_unique<Runner<1>>(), 20); });
         }
     };
 }  // namespace

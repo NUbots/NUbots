@@ -35,55 +35,33 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct ParentTask {
-        ParentTask(int subtask_) : subtask(subtask_) {}
-        int subtask = 0;
-    };
-
-    template <int N>
-    struct SubTask {
-        SubTask(const std::string& msg) : msg(msg) {}
-        std::string msg;
-    };
-
-    std::vector<std::string> events;
-
     class TestReactor : public TestBase<TestReactor, 2> {
     public:
+        struct ParentTask : Message<ParentTask> {};
+        template <int N>
+        struct SubTask : Message<SubTask<N>> {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<ParentTask>>().then([this](const ParentTask& task) {
-                if (task.subtask == 1) {
-                    events.push_back("parent task with subtask 1");
-                    emit<Task>(std::make_unique<SubTask<1>>("from parent task"));
+            on<Provide<ParentTask>>().then([this](const ParentTask& t) {
+                if (t.m == "ParentTask(1)") {
+                    emit<Task>(std::make_unique<SubTask<1>>(t))
                 }
                 else {
-                    events.push_back("parent task with subtask 2");
-                    emit<Task>(std::make_unique<SubTask<2>>("from parent task"));
+                    emit<Task>(std::make_unique<SubTask<2>>(t));
                 }
             });
 
-            on<Provide<SubTask<1>>>().then([this](const SubTask<1>& t) {  //
-                events.push_back("subtask 1 " + t.msg);
-                emit<Task>(std::make_unique<SubTask<2>>("from subtask 1"));
-            });
+            on<Provide<SubTask<1>>>().then(
+                [this](const SubTask<1>& t) { emit<Task>(std::make_unique<SubTask<2>>(t)); });
 
-            on<Provide<SubTask<2>>>().then([this](const SubTask<2>& t) {  //
-                events.push_back("subtask 2 " + t.msg);
-            });
+            on<Provide<SubTask<2>>>().then([this](const SubTask<2>& t) { finish(t); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting parent task with subtask 1");
-                emit<Task>(std::make_unique<ParentTask>(1));
-            });
-
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting parent task with subtask 2");
-                emit<Task>(std::make_unique<ParentTask>(2));
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<ParentTask>(1)); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<ParentTask>(2)); });
         }
 
     private:

@@ -75,38 +75,38 @@ namespace {
              * TEST STEPS *
              **************/
             // Start the primary task, subtask will initially not be running
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 events.push_back("emitting primary task");
                 emit<Task>(std::make_unique<PrimaryTask>(), 1);
             });
 
             // Run the primary task again, subtask will now be running
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 events.push_back("emitting primary task again");
                 emit<Task>(std::make_unique<PrimaryTask>(), 1);
             });
 
             // Run the secondary task with lower priority than the primary task
             // This should give a queued subtask state on the next run
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 events.push_back("emitting secondary task");
                 emit<Task>(std::make_unique<SecondaryTask>());
             });
 
             // Run the secondary task again to get the queued state
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 events.push_back("emitting secondary task again");
                 emit<Task>(std::make_unique<SecondaryTask>());
             });
 
             // Remove the primary task to detect a running subtask on the secondary task
-            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<5>>>().then([this] {
                 events.push_back("removing primary task");
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
             });
 
             // Run the secondary task again to see the running state
-            on<Trigger<Step<6>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<6>>>().then([this] {
                 events.push_back("emitting secondary task again");
                 emit<Task>(std::make_unique<SecondaryTask>());
             });

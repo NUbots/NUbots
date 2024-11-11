@@ -35,35 +35,28 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {};
-
-    struct SubTask {};
-
-    std::vector<std::string> events;
-
     class TestReactor : public TestBase<TestReactor, 2> {
     public:
+        struct SimpleTask : Message<SimpleTask> {
+            using Message::Message;
+        };
+        struct SubTask : Message<SubTask> {
+            using Message::Message;
+        };
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask>, Needs<SubTask>>().then([this] {
-                // Task has been executed!
-                events.push_back("simple task executed");
-                emit<Task>(std::make_unique<SubTask>());
+            on<Provide<SimpleTask>, Needs<SubTask>>().then([this](const SimpleTask& task) {  //
+                emit<Task>(std::make_unique<SubTask>(task));
             });
 
-            on<Provide<SubTask>>().then([this] { events.push_back("subtask executed"); });
+            on<Provide<SubTask>>().then([this](const SubTask& t) { finish(t); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 1");
-                emit<Task>(std::make_unique<SimpleTask>());
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 2");
-                emit<Task>(std::make_unique<SimpleTask>());
-            });
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("1")); });
+            on<Trigger<Step<2>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("2")); });
         }
     };
 }  // namespace
@@ -74,7 +67,7 @@ TEST_CASE("Test that a parent task wins when challenging its child task", "[dire
     config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
-    powerplant.install<TestReactor>();
+    const auto& reactor = powerplant.install<TestReactor>();
     powerplant.start();
 
     std::vector<std::string> expected = {
@@ -87,8 +80,8 @@ TEST_CASE("Test that a parent task wins when challenging its child task", "[dire
     };
 
     // Make an info print the diff in an easy to read way if we fail
-    INFO(util::diff_string(expected, events));
+    INFO(util::diff_string(expected, reactor.events));
 
     // Check the events fired in order and only those events
-    REQUIRE(events == expected);
+    REQUIRE(reactor.events == expected);
 }

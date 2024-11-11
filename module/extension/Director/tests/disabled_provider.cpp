@@ -35,45 +35,30 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {};
-
-    std::vector<std::string> events;
 
     class TestReactor : public TestBase<TestReactor, 5> {
     public:
+        struct SimpleTask : Message<SimpleTask> {};
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            a_handle = on<Provide<SimpleTask>>().then([this] {  //
-                events.push_back("version a");
-            });
-
-            on<Provide<SimpleTask>>().then([this] {  //
-                events.push_back("version b");
-            });
+            a_handle = on<Provide<SimpleTask>>().then([this](const SimpleTask& m) { finish(m, "a") });
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& m) { finish(m, "b"); });
 
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 1");
-                emit<Task>(std::make_unique<SimpleTask>());
-            });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("1")); });
+            on<Trigger<Step<2>>>().then([this] {
                 events.push_back("disabling a");
                 a_handle.disable();
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 2");
-                emit<Task>(std::make_unique<SimpleTask>());
-            });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("2")); });
+            on<Trigger<Step<4>>>().then([this] {
                 events.push_back("enabling a");
                 a_handle.enable();
             });
-            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task 3");
-                emit<Task>(std::make_unique<SimpleTask>());
-            });
+            on<Trigger<Step<5>>>().then([this] { emit<Task>(std::make_unique<SimpleTask>("3")); });
         }
 
     private:
@@ -87,7 +72,7 @@ TEST_CASE("Test that disabled providers are not considered when choosing a provi
     config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
-    powerplant.install<TestReactor>();
+    const auto& reactor = powerplant.install<TestReactor>();
     powerplant.start();
 
     std::vector<std::string> expected = {
@@ -102,8 +87,8 @@ TEST_CASE("Test that disabled providers are not considered when choosing a provi
     };
 
     // Make an info print the diff in an easy to read way if we fail
-    INFO(util::diff_string(expected, events));
+    INFO(util::diff_string(expected, reactor.events));
 
     // Check the events fired in order and only those events
-    REQUIRE(events == expected);
+    REQUIRE(reactor.events == expected);
 }

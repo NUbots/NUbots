@@ -78,7 +78,7 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 // Emit inital data so it's in the cache and the triggers can run
                 events.push_back("emitting data 0");
                 emit(std::make_unique<OtherData>(0));
@@ -89,17 +89,17 @@ namespace {
                 events.push_back("emitting simple task");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 // Emit a trigger test to see if the dependent tasks are blocked
                 events.push_back("emitting Trigger Test");
                 emit(std::make_unique<TriggerTest>());
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 // Emit another data
                 events.push_back("emitting data 1");
                 emit(std::make_unique<OtherData>(1));
             });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 // Emit a trigger test to see if the dependent tasks are blocked
                 events.push_back("emitting Trigger Test");
                 emit(std::make_unique<TriggerTest>());

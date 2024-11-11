@@ -97,14 +97,14 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 // Emit initial trigger test so we can run the task
                 emit(std::make_unique<TriggerTest>());
                 // Checks STARTED, NEW_TASK, SUBTASK_DONE and STOPPED for subtask
                 events.push_back("emitting simple task");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 // Checks OTHER_TRIGGER and STOPPED for simple task
                 events.push_back("emitting trigger test");
                 emit(std::make_unique<TriggerTest>());

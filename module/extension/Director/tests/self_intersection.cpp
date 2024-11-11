@@ -86,19 +86,19 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 events.push_back("emitting main task");
                 emit<Task>(std::make_unique<MainTask>());
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 events.push_back("removing main task");
                 emit<Task>(std::unique_ptr<MainTask>(nullptr));
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 events.push_back("emitting main task");
                 emit<Task>(std::make_unique<MainTask>());
             });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 events.push_back("removing main task");
                 emit<Task>(std::unique_ptr<MainTask>(nullptr));
             });
