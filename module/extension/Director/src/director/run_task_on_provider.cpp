@@ -52,7 +52,7 @@ namespace module::extension {
                     group.active_provider = provider;
 
                     auto lock = group.update_data(RunReason::STARTED);
-                    powerplant.submit(provider->reaction->get_task(true));
+                    powerplant.submit(provider->reaction->get_task());
                 }
             }
         }

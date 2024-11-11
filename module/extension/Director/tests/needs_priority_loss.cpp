@@ -106,15 +106,15 @@ TEST_CASE("Tests that if a provider loses one of its dependent needs it stops ru
         "start complex 1",
         "emitting complex task 1",
         "start 1: complex 1",
-        "start 2: complex 1",
         "p1: complex 1",
+        "start 2: complex 1",
         "p2: complex 1",
         "requesting complex task 2",
         "start complex 2",
         "emitting complex task 2",
+        "p1: complex 2",
         "stop complex 1",
         "stop 2: complex 1",
-        "p1: complex 2",
     };
 
     // Make an info print the diff in an easy to read way if we fail
