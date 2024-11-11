@@ -54,7 +54,7 @@ namespace extension::behaviour {
         TaskInfo active_task = TaskInfo();
 
         /// Queue of tasks that are waiting to be run on this provider group
-        std::vector<TaskInfo> watchers{};
+        std::vector<TaskInfo> watchers;
 
         /// Whether the provider group is done or not
         bool done = false;
