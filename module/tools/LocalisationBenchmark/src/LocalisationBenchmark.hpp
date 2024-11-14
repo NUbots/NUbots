@@ -45,11 +45,19 @@ namespace module::tools {
             std::vector<std::string> messages;
         } config;
 
-        /// @brief The total error in the translation
-        double total_translation_error = 0.0;
+        /// @brief The total error in the localisation translation
+        double total_localisation_translation_error = 0.0;
 
-        /// @brief The total error in the rotation
-        double total_rotation_error = 0.0;
+        /// @brief The total error in the localisation rotation
+        double total_localisation_rotation_error = 0.0;
+
+        // Error accumulations for each individual DoF
+        double total_error_x     = 0.0;
+        double total_error_y     = 0.0;
+        double total_error_z     = 0.0;
+        double total_error_roll  = 0.0;
+        double total_error_pitch = 0.0;
+        double total_error_yaw   = 0.0;
 
         /// @brief The total number of field messages
         size_t count = 0;

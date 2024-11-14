@@ -28,6 +28,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <tinyrobotics/math.hpp>
 
 #include "extension/Configuration.hpp"
 
@@ -87,9 +88,9 @@ namespace module::tools {
             }
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this](const ResetFieldLocalisation& reset) {
-            total_translation_error = 0.0;
-            total_rotation_error    = 0.0;
+        on<Trigger<ResetFieldLocalisation>>().then([this]() {
+            total_localisation_translation_error = 0.0;
+            total_localisation_rotation_error    = 0.0;
         });
 
         on<Startup, With<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
@@ -98,13 +99,16 @@ namespace module::tools {
             set_mode_request->mode = config.mode;
             emit<Scope::DIRECT>(set_mode_request);
 
+            // Delay
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
             // Load the files
             auto load_request      = std::make_unique<LoadRequest>();
             load_request->files    = std::vector<std::string>(std::next(args.begin()), args.end());
             load_request->messages = config.messages;
             emit<Scope::DIRECT>(std::move(load_request));
 
-            // Delay for .1 seconds
+            // Delay
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
             // Start playback
@@ -121,24 +125,49 @@ namespace module::tools {
                 Eigen::Isometry3d Hft_gt = Eigen::Isometry3d(raw_sensors.localisation_ground_truth.Hfw)
                                            * Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
 
-                // Compute translation error
-                double translation_error = (Hft_gt.translation() - Hft_est.translation()).norm();
-                total_translation_error += translation_error * translation_error;
+                // Compute localisation error
+                auto localisation_error               = tinyrobotics::homogeneous_error(Hft_gt, Hft_est);
+                double localisation_translation_error = localisation_error.head<3>().norm();
+                total_localisation_translation_error += localisation_translation_error * localisation_translation_error;
 
-                // Compute rotation error
-                Eigen::AngleAxisd rotation_diff(Hft_gt.linear() * Hft_est.linear().inverse());
-                double rotation_error = rotation_diff.angle();  // in radians
-                total_rotation_error += rotation_error * rotation_error;
+                // Compute localisation rotation error
+                double localisation_rotation_error = localisation_error.tail<3>().norm();
+                total_localisation_rotation_error += localisation_rotation_error * localisation_rotation_error;
+
+                // Accumulate squared errors for each individual DoF
+                total_error_x += std::pow(localisation_error(0), 2);
+                total_error_y += std::pow(localisation_error(1), 2);
+                total_error_z += std::pow(localisation_error(2), 2);
+                total_error_roll += std::pow(localisation_error(3), 2);
+                total_error_pitch += std::pow(localisation_error(4), 2);
+                total_error_yaw += std::pow(localisation_error(5), 2);
 
                 // Increment counter
                 count++;
             });
 
         on<Trigger<PlaybackFinished>>().then([this] {
-            double rmse_translation = std::sqrt(total_translation_error / count);
-            double rmse_rotation    = std::sqrt(total_rotation_error / count);
-            std::cout << "translation rmse error: " << rmse_translation << std::endl;
-            std::cout << "rotation rmse error: " << rmse_rotation * 180.0 / M_PI << std::endl;
+            double localisation_rmse_translation = std::sqrt(total_localisation_translation_error / count);
+            double localisation_rmse_rotation    = std::sqrt(total_localisation_rotation_error / count);
+
+            // Calculate RMSE for each DoF
+            double rmse_x     = std::sqrt(total_error_x / count);
+            double rmse_y     = std::sqrt(total_error_y / count);
+            double rmse_z     = std::sqrt(total_error_z / count);
+            double rmse_roll  = std::sqrt(total_error_roll / count);
+            double rmse_pitch = std::sqrt(total_error_pitch / count);
+            double rmse_yaw   = std::sqrt(total_error_yaw / count);
+
+            std::cout << "translation rmse error: " << localisation_rmse_translation << std::endl;
+            std::cout << "rotation rmse error: " << localisation_rmse_rotation * 180.0 / M_PI << " degrees"
+                      << std::endl;
+            std::cout << "RMSE (x): " << rmse_x << std::endl;
+            std::cout << "RMSE (y): " << rmse_y << std::endl;
+            std::cout << "RMSE (z): " << rmse_z << std::endl;
+            std::cout << "RMSE (roll): " << rmse_roll * 180.0 / M_PI << " degrees" << std::endl;
+            std::cout << "RMSE (pitch): " << rmse_pitch * 180.0 / M_PI << " degrees" << std::endl;
+            std::cout << "RMSE (yaw): " << rmse_yaw * 180.0 / M_PI << " degrees" << std::endl;
+
             // Kill program
             powerplant.shutdown();
         });
