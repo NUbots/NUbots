@@ -115,6 +115,7 @@ export class LocalisationModel {
   @observable fieldIntersectionsVisible = true;
   @observable walkToDebugVisible = true;
   @observable boundedBoxVisible = true;
+  @observable trajectoryVisible = true;
 
   constructor(
     appModel: AppModel,

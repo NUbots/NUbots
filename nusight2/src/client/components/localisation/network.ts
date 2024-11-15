@@ -29,6 +29,7 @@ export class LocalisationNetwork {
     this.network.on(message.localisation.AssociationLines, this.onAssociationLines);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -85,6 +86,22 @@ export class LocalisationNetwork {
       minY: boundedBox.yMin,
       maxY: boundedBox.yMax,
     };
+  }
+
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walkState: message.behaviour.state.WalkState) {
+    console.log("WalkState", walkState);
+    const robot = LocalisationRobotModel.of(robotModel);
+    // Add trajectory points to history if support switch occurred
+    if (robot.walkPhase != walkState.phase) {
+      robot.swingFootTrajectoryHistory.trajectories.push({ trajectory: robot.rSFf, walkPhase: robot.walkPhase });
+      robot.torsoTrajectoryHistory.trajectories.push(robot.rTFf);
+    }
+    robot.walkPhase = walkState.phase;
+    // Add current trajectory points
+    robot.Hwp = Matrix4.from(walkState.Hwp);
+    robot.swingFootTrajectory.rSPp = walkState.swingFootTrajectory.map((rSPp) => Vector3.from(rSPp));
+    robot.torsoTrajectory.rTPp = walkState.torsoTrajectory.map((rTPp) => Vector3.from(rTPp));
   }
 
   @action.bound

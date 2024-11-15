@@ -375,4 +375,9 @@ export class LocalisationController {
   toggleBoundedBoxVisibility = (model: LocalisationModel) => {
     model.boundedBoxVisible = !model.boundedBoxVisible;
   };
+
+  @action
+  toggleTrajectoryVisibility = (model: LocalisationModel) => {
+    model.trajectoryVisible = !model.trajectoryVisible;
+  };
 }
