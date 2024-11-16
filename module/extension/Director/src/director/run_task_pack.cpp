@@ -181,6 +181,31 @@ namespace module::extension {
             }
         }
 
+        // Check if a Wait command was emitted and schedule to run the Provider again
+        //
+        for (const auto& t : requested_tasks) {
+            if (t->type == typeid(::extension::behaviour::Wait)) {
+                if (requested_tasks.size() > 1) {
+                    log<NUClear::WARN>("Wait task was emitted with other tasks, the other tasks will be ignored");
+                }
+
+                // Schedule the Provider to run again
+                std::chrono::nanoseconds delay = std::chrono::nanoseconds(t->data->time - NUClear::clock::now());
+
+                // If the delay is over, just run the provider
+                if (delay <= std::chrono::nanoseconds(0)) {
+                    run_task_on_provider(group.active_task, provider, RunReason::WAIT);
+                    return;
+                }
+
+                // Otherwise, emit a delay event
+                emit<Scope::DELAY>(std::make_unique<WaitDelay>(provider->id), delay);
+
+                // We don't do anything else on wait
+                return;
+            }
+        }
+
         // See if a done command was emitted
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {

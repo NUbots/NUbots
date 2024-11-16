@@ -57,6 +57,10 @@ namespace module::extension {
         static constexpr int concurrency = 1;
 
     private:
+        struct WaitDelay {
+            std::shared_ptr<component::Provider> provider;
+        };
+
         /**
          * Adds a Provider for a type
          *

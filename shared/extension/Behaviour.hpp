@@ -375,6 +375,25 @@ namespace extension::behaviour {
     struct Continue {};
 
     /**
+     * This is a special task that can be emitted to trigger the Provider to run again at a given time.
+     *
+     * ```
+     * emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(100)));
+     * ```
+     */
+    struct Wait {
+        /// The time at which the Provider should run again
+        NUClear::clock::time_point time;
+
+        /**
+         * Create a new Wait task with the time at which the Provider should run again.
+         *
+         * @param time the time at which the Provider should run again
+         */
+        explicit Wait(const NUClear::clock::time_point& time) : time(time) {}
+    };
+
+    /**
      * A reactor subtype that can be used when making a behaviour reactor.
      *
      * It exposes the additional DSL words that are added by the Behaviour DSL so they can be used without the need for
@@ -405,6 +424,7 @@ namespace extension::behaviour {
         using RunState  = ::extension::behaviour::RunState;
         using Done      = ::extension::behaviour::Done;
         using Continue  = ::extension::behaviour::Continue;
+        using Wait      = ::extension::behaviour::Wait;
     };
 
 }  // namespace extension::behaviour
