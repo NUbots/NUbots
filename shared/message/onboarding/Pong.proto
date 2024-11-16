@@ -3,4 +3,6 @@ syntax = "proto3";
 package message.onboarding;
 
 message Pong {
+    int32 count = 1;
+    int32 val = 2;
 }

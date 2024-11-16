@@ -5,5 +5,6 @@ package message.onboarding;
 message Ping{
     // TODO: Fill this message with an int32 field named "count". What should its tag be?
     // HINT: Look at the format of other proto messages in the code base for reference.
-    int32 count = 0;
+    int32 count = 1;
+    int32 val = 2;
 }
