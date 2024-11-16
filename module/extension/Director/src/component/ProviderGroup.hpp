@@ -83,6 +83,7 @@ namespace module::extension::component {
 
         std::shared_ptr<WatchHandle> add_watcher(const std::shared_ptr<DirectorTask>& task) {
             watchers.push_back(task);
+            update_data();
 
             return std::make_shared<WatchHandle>([this, task] {
                 auto it = std::find(watchers.begin(), watchers.end(), task);
