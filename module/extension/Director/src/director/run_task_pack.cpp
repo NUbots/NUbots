@@ -190,7 +190,8 @@ namespace module::extension {
                 }
 
                 // Schedule the Provider to run again
-                std::chrono::nanoseconds delay = std::chrono::nanoseconds(t->data->time - NUClear::clock::now());
+                auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
+                std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
 
                 // If the delay is over, just run the provider
                 if (delay <= std::chrono::nanoseconds(0)) {
@@ -199,7 +200,7 @@ namespace module::extension {
                 }
 
                 // Otherwise, emit a delay event
-                emit<Scope::DELAY>(std::make_unique<WaitDelay>(provider->id), delay);
+                emit<Scope::DELAY>(std::make_unique<WaitDelay>(provider), delay);
 
                 // We don't do anything else on wait
                 return;
