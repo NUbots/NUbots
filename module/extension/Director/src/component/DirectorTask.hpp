@@ -49,10 +49,12 @@ namespace module::extension::component {
          *
          * @param task                  the BehaviourTask to use as a base
          */
-        DirectorTask(const ::extension::behaviour::commands::BehaviourTask& task)
+        DirectorTask(const NUClear::id_t& requester_id,
+                     const NUClear::id_t& requester_task_id,
+                     const ::extension::behaviour::commands::BehaviourTask& task)
             : type(task.type)
-            , requester_id(task.requester_id)
-            , requester_task_id(task.requester_task_id)
+            , requester_id(requester_id)
+            , requester_task_id(requester_task_id)
             , data(task.data)
             , name(task.name)
             , priority(task.priority)
@@ -60,11 +62,11 @@ namespace module::extension::component {
             , dying(false) {}
 
         /// The Provider type this task is for
-        std::type_index type;
+        const std::type_index type;
         /// The Provider id of the requester
-        uint64_t requester_id;
+        NUClear::id_t requester_id;
         /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
-        uint64_t requester_task_id;
+        NUClear::id_t requester_task_id;
         /// The data for the command, (the data that will be given to the Provider) if null counts as no task
         std::shared_ptr<void> data;
         /// A name for this task to be shown in debugging systems

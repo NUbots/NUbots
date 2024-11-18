@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<ParentTask>>().then([this](const ParentTask& task) {
                 if (task.subtask == 1) {
@@ -84,11 +83,6 @@ namespace {
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 events.push_back("emitting parent task with subtask 2");
                 emit<Task>(std::make_unique<ParentTask>(2));
-            });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
             });
         }
 

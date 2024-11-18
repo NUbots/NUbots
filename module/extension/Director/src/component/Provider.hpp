@@ -73,7 +73,7 @@ namespace module::extension::component {
         };
 
         Provider(ProviderGroup& group_,
-                 const uint64_t& id_,
+                 const NUClear::id_t& id_,
                  const Classification& classification_,
                  const std::type_index& type_,
                  std::shared_ptr<NUClear::threading::Reaction> reaction_)
@@ -82,7 +82,7 @@ namespace module::extension::component {
         /// The provider group this provider belongs to
         ProviderGroup& group;
         /// The id for this provider. Will either be reaction->id or a generated one for root providers
-        uint64_t id;
+        NUClear::id_t id;
         /// The classification of this Provider
         Classification classification;
         /// The data type this Provider is for

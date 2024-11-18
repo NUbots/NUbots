@@ -31,11 +31,12 @@ namespace module::extension {
 
     using component::DirectorTask;
     using component::Provider;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::GroupInfo;
+    using ::extension::behaviour::RunReason;
 
     void Director::run_task_on_provider(const std::shared_ptr<DirectorTask>& task,
                                         const std::shared_ptr<component::Provider>& provider,
-                                        const RunInfo::RunReason& run_reason) {
+                                        const RunReason& run_reason) {
 
         // Update the active provider and task
         auto& group              = provider->group;
@@ -50,8 +51,8 @@ namespace module::extension {
                     // We have to swap to this as the active provider so it can actually run
                     group.active_provider = provider;
 
-                    auto lock = hold_run_reason(RunInfo::RunReason::STARTED);
-                    powerplant.submit(provider->reaction->get_task(true));
+                    auto lock = group.update_data(RunReason::STARTED);
+                    powerplant.submit(provider->reaction->get_task());
                 }
             }
         }
@@ -59,12 +60,9 @@ namespace module::extension {
         // Set the active provider ready for running
         group.active_provider = provider;
 
-        // Run the reaction
-        auto lock          = hold_run_reason(run_reason);
-        auto reaction_task = provider->reaction->get_task();
-        if (reaction_task) {
-            powerplant.submit(std::move(reaction_task));
-        }
+        // Run the provider
+        auto lock = group.update_data(run_reason);
+        powerplant.submit(provider->reaction->get_task());
     }
 
 }  // namespace module::extension

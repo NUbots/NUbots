@@ -108,7 +108,7 @@ namespace module::skill {
         });
 
         on<Provide<Kick>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then(
-            [this](const Kick& kick, const RunInfo& info) {
+            [this](const Kick& kick, const RunReason& run_reason) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -119,15 +119,13 @@ namespace module::skill {
                 kick_generator.update(time_delta, kick.leg);
 
                 // If this is not a new task and time has elapsed, then we are done kicking.
-                if ((info.run_reason != RunInfo::RunReason::NEW_TASK)
-                    && kick_generator.get_time() == kick_generator.get_duration()) {
+                if ((run_reason != RunReason::NEW_TASK) && kick_generator.get_time() == kick_generator.get_duration()) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
 
                 // If this is a new task and time has elapsed, then we need to start a new kick
-                if ((info.run_reason == RunInfo::RunReason::NEW_TASK)
-                    && kick_generator.get_time() == kick_generator.get_duration()) {
+                if ((run_reason == RunReason::NEW_TASK) && kick_generator.get_time() == kick_generator.get_duration()) {
                     // Start a new kick
                     kick_generator.reset();
                 }
