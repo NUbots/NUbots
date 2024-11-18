@@ -165,8 +165,8 @@ namespace module::planning {
 
                 double desired_velocity_magnitude = 0.0;
                 if (translational_error > cfg.max_align_radius) {
-                    // "Accelerate"
-                    velocity_magnitude += cfg.acceleration;
+                    // "Accelerate", assuring velocity is always positive
+                    velocity_magnitude += std::max(0.0, cfg.acceleration);
                     // Limit the velocity magnitude to the maximum velocity
                     velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
                     // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
@@ -185,26 +185,25 @@ namespace module::planning {
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
                     // "Decelerate"
-                    velocity_magnitude -= cfg.acceleration;
+                    velocity_magnitude -= 0.1;
+                    log<NUClear::DEBUG>("Velocity magnitude", velocity_magnitude);
                     // If we are aligned with the final heading, we are close to the target
                     // and the angle to the target is too large, step backwards
-                    if ((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)) {
+                    if (((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)
+                         || (velocity_magnitude > -0.4 && velocity_magnitude < 0.0))) {
                         log<NUClear::DEBUG>("Stepping backwards, angle to target:", angle_to_target);
+                        // TODO: Need to go to complete halt before attempting stepping backwards
+                        if (velocity_magnitude > -0.4) {
+                            // Emit a stand still task to stop the robot
+                            log<NUClear::DEBUG>("Stopping robot before stepping backwards");
+                            emit<Task>(std::make_unique<StandStill>());
+                            return;
+                        }
 
                         // Ensure the backwards velocity magnitude does not exceed the maximum
-                        velocity_magnitude = std::clamp(velocity_magnitude, -cfg.max_velocity_magnitude, 0.0);
+                        velocity_magnitude = std::clamp(velocity_magnitude, -cfg.max_velocity_magnitude, -0.6);
 
-                        // Map angle_to_target to a range for interpolation between max_strafe_angle and 1.19
-                        const double angle_progress = std::clamp(
-                            (std::abs(angle_to_target) - cfg.max_strafe_angle) / (1.19 - cfg.max_strafe_angle),
-                            0.05,
-                            0.95);
-
-                        // Parabolic function to interpolate between max_strafe_angle and 1.19
-                        desired_velocity_magnitude = cfg.strafe_gain * (4 * angle_progress * (1 - angle_progress));
-
-                        log<NUClear::DEBUG>("Backwards velocity magnitude:", velocity_magnitude);
-                        log<NUClear::DEBUG>("Desired velocity magnitude (interpolated):", desired_velocity_magnitude);
+                        desired_velocity_magnitude = cfg.strafe_gain * error;
 
                         // Step backwards while keeping the forward direction
                         rDRr = Eigen::Vector2d(-1, rDRr.y());
@@ -215,9 +214,13 @@ namespace module::planning {
                     // Go towards target
                     else {
                         // Limit the velocity to zero
-                        velocity_magnitude = std::max(velocity_magnitude, 0.0);
+                        velocity_magnitude = std::max(velocity_magnitude, 0.5);
                         // "Proportional control" to strafe towards the target inside align radius
-                        desired_velocity_magnitude = cfg.strafe_gain * error;
+                        desired_velocity_magnitude = cfg.strafe_gain * error * velocity_magnitude;
+                        log<NUClear::DEBUG>("Strafe gain",
+                                            cfg.strafe_gain,
+                                            "desired_velocity_magnitude",
+                                            desired_velocity_magnitude);
                     }
                 }
 
