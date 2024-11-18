@@ -166,7 +166,7 @@ namespace module::planning {
                 double desired_velocity_magnitude = 0.0;
                 if (translational_error > cfg.max_align_radius) {
                     // "Accelerate", assuring velocity is always positive
-                    velocity_magnitude += std::max(0.0, cfg.acceleration);
+                    velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
                     // Limit the velocity magnitude to the maximum velocity
                     velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
                     // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
@@ -182,18 +182,21 @@ namespace module::planning {
                                         desired_velocity_magnitude);
                 }
                 else {
+
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
                     // "Decelerate"
                     velocity_magnitude -= 0.1;
-                    log<NUClear::DEBUG>("Velocity magnitude", velocity_magnitude);
+                    log<NUClear::DEBUG>("Inner circle velocity mangitude ", velocity_magnitude);
                     // If we are aligned with the final heading, we are close to the target
                     // and the angle to the target is too large, step backwards
                     if (((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)
-                         || (velocity_magnitude > -0.4 && velocity_magnitude < 0.0))) {
+                         || (velocity_magnitude > -3 && velocity_magnitude < 0.0))) {
+
+                        velocity_magnitude = std::min(velocity_magnitude, 0.0);
                         log<NUClear::DEBUG>("Stepping backwards, angle to target:", angle_to_target);
                         // TODO: Need to go to complete halt before attempting stepping backwards
-                        if (velocity_magnitude > -0.4) {
+                        if (velocity_magnitude > -0.3) {
                             // Emit a stand still task to stop the robot
                             log<NUClear::DEBUG>("Stopping robot before stepping backwards");
                             emit<Task>(std::make_unique<StandStill>());
@@ -201,7 +204,8 @@ namespace module::planning {
                         }
 
                         // Ensure the backwards velocity magnitude does not exceed the maximum
-                        velocity_magnitude = std::clamp(velocity_magnitude, -cfg.max_velocity_magnitude, -0.6);
+                        velocity_magnitude -= 0.025;
+                        log<NUClear::DEBUG>("Stepping backwards, velocity magnitude:", velocity_magnitude);
 
                         desired_velocity_magnitude = cfg.strafe_gain * error;
 
