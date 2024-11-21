@@ -14,6 +14,7 @@ namespace module::onboarding {
         using message::onboarding::Ping;
         using message::onboarding::Pong;
 
+
         on<Configuration>("Ping.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Ping.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();

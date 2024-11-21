@@ -13,4 +13,5 @@ nuclear_role(
   actuation::Servos
   onboarding::Ping
   onboarding::Pong
+  onboarding::Judge
 )
