@@ -28,14 +28,17 @@ namespace module::onboarding {
             ping_msg->k = 1;
             // Set starting sum
             ping_msg->tempSum = 0;
+
+            // Emite ping to start the reaction
+            emit(ping_msg);
         });
 
         on<Trigger<Pong>>().then([this](const Pong& pong_msg) {
             auto ping_msg = std::make_unique<Ping>();
             // Add k to sum
-            ping_msg->tempSum = ping_msg->tempSum + ping_msg->k;
+            ping_msg->tempSum = pong_msg->tempSum + pong_msg->k;
             // bring k forward 1
-            ping_msg->k = ping_msg->k + 1;
+            ping_msg->k = pong_msg->k + 1;
             log<NUClear::INFO>("Ping");
             emit(ping_msg);
         });
