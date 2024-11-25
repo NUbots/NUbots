@@ -1,7 +1,10 @@
 import { Vector2 } from "./vector2";
 
 export class Matrix2 {
-  constructor(readonly x: Vector2, readonly y: Vector2) {}
+  constructor(
+    readonly x: Vector2,
+    readonly y: Vector2,
+  ) {}
 
   static of() {
     return new Matrix2(new Vector2(1, 0), new Vector2(0, 1));

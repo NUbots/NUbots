@@ -89,7 +89,10 @@ describe("disposableComputed", () => {
     }
 
     class ViewModel {
-      constructor(private readonly factory: TriangleFactory, private readonly model: { color: string }) {}
+      constructor(
+        private readonly factory: TriangleFactory,
+        private readonly model: { color: string },
+      ) {}
 
       @disposableComputed
       get value(): Triangle {
@@ -155,7 +158,10 @@ class TriangleFactory {
 }
 
 class Triangle {
-  constructor(public color: string, private onDispose: () => void) {}
+  constructor(
+    public color: string,
+    private onDispose: () => void,
+  ) {}
 
   dispose() {
     this.onDispose();
