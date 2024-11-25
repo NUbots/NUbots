@@ -7,11 +7,12 @@ const pbts = require("protobufjs-cli/pbts");
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const NUSIGHT_ROOT = path.resolve(__dirname, "..");
 
+const rootDir = path.resolve(REPO_ROOT, "shared");
 const messagesDir = path.resolve(REPO_ROOT, "shared/message");
 const nuclearMessagesDir = path.resolve(REPO_ROOT, "nuclear/message/proto");
 const googleMessagesDir = path.resolve(NUSIGHT_ROOT, "src/shared/messages/proto");
 
-const messageSourceDirs = [messagesDir, nuclearMessagesDir, googleMessagesDir];
+const messageSourceDirs = [rootDir, messagesDir, nuclearMessagesDir, googleMessagesDir];
 
 const messageSourceFiles = [
   `${messagesDir}/**/*.proto`,
