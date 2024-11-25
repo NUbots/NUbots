@@ -1,4 +1,4 @@
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-Server=https://archive.archlinux.org/repos/2022/07/10/$repo/os/$arch
+Server=https://archive.archlinux.org/repos/2024/11/17/$repo/os/$arch
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
