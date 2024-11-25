@@ -41,7 +41,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
+FROM --platform=linux/amd64 archlinux:base-devel-20241117.0.280007
 
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
