@@ -27,8 +27,18 @@ namespace module::onboarding {
 
         on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
             // TODO: Log a INFO level message with the text "Pong"
-            log<NUClear::INFO>("Ping");
             // TODO: Emit a Pong message
+            auto pong = std::make_unique<Pong>();
+            if (cfg.num == 10) {
+                log<NUClear::INFO>("Stop bounce");
+                log<NUClear::INFO>(cfg.total);
+            }
+            else {
+                cfg.num += 1;
+                cfg.total *= cfg.num;
+                log<NUClear::INFO>("Size1", cfg.total);
+                emit(pong);
+            }
         });
     }
 

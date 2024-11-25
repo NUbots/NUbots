@@ -5,16 +5,18 @@
 
 namespace module::onboarding {
 
-class Pong : public NUClear::Reactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    class Pong : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            int num   = 1;
+            int total = 1;
+        } cfg;
 
-public:
-    /// @brief Called by the powerplant to build and setup the Pong reactor.
-    explicit Pong(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the Pong reactor.
+        explicit Pong(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::onboarding
 
