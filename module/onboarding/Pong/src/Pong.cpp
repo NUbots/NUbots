@@ -16,6 +16,7 @@ namespace module::onboarding
 
         using message::onboarding::Ping;
         using message::onboarding::Pong;
+        using message::onboarding::Task;
 
         on<Configuration>("Pong.yaml").then([this](const Configuration& config)
         {
@@ -36,19 +37,23 @@ namespace module::onboarding
             log<NUClear::INFO>("Pong");
 
             // Read k value from ping & check if k = n
-            pong_msg->k = ping_msg->k;
-            if(ping_msg->k == ping_msg->n)
+            if(ping_msg.k == 10+1)
             {
                 // Stop computing sum
                 pong_msg->judgeMe = 1;
 
                 // Define final answer
-                // pong_msg->finalAnswer = ping_msg->tempSum;
-                pong_msg->finalAnswer = 6969;
+                pong_msg->finalAnswer = ping_msg.tempSum;
+            }
+            else
+            {
+                // Return the temporary sum recieved from ping
+                pong_msg->tempSum = ping_msg.tempSum;
+                pong_msg->k = ping_msg.k;
             };
 
             // Read (and set) tempSum from pin
-            pong_msg->tempSum = ping_msg->tempSum;
+            // pong_msg.tempSum = ping_msg.tempSum;
 
             // Emit a Pong message
             emit(pong_msg);

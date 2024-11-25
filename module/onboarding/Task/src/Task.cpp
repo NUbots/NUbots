@@ -13,6 +13,9 @@ using extension::Configuration;
 
 Task::Task(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment))
 {
+    using message::onboarding::Ping;
+    using message::onboarding::Pong;
+    using message::onboarding::Task;
 
     on<Configuration>("Task.yaml").then([this](const Configuration& config)
     {
@@ -30,14 +33,28 @@ Task::Task(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::mov
     {
         auto task_msg = std::make_unique<Task>();
         // Check judgeMe flag from pong_msg
-        if(pong_msg->judgeMe == 1)
+        if(pong_msg.judgeMe == 1)
         {
             // Read final answer
-            // str ans = pong_msg->finalAnswer;
-            // log final answer as str
-            log<NUClear::INFO>("%f", pong_msg->finalAnswer);
+            float ans = pong_msg.finalAnswer;
+            // Check if soln is correct
+            if(ans == 55)
+            {
+                // Set isCorrect flag to true
+                task_msg->isCorrect = 1;
+                // log final answer as str
+                log<NUClear::INFO>("Final answer:", ans);
+            }
+            else
+            {
+                // Log that provided soln was incorrect
+                log<NUClear::INFO>("Incorrect solution");
+            }
         }
-
+        else
+        {
+            // Do nothing
+        }
 
     });
 }

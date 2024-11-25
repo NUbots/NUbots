@@ -6,4 +6,6 @@ message Task{
     int32 judgeMe = 1;
 
     int32 finalAnswer = 2;
+
+    int32 isCorrect = 3;
 }

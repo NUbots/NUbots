@@ -14,6 +14,7 @@ namespace module::onboarding {
 
         using message::onboarding::Ping;
         using message::onboarding::Pong;
+        using message::onboarding::Task;
 
         on<Configuration>("Ping.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Ping.yaml
@@ -35,12 +36,21 @@ namespace module::onboarding {
 
         on<Trigger<Pong>>().then([this](const Pong& pong_msg) {
             auto ping_msg = std::make_unique<Ping>();
-            // Add k to sum
-            ping_msg->tempSum = pong_msg->tempSum + pong_msg->k;
-            // bring k forward 1
-            ping_msg->k = pong_msg->k + 1;
-            log<NUClear::INFO>("Ping");
-            emit(ping_msg);
+            // Check judgeMe flag
+            if(pong_msg.judgeMe == 1)
+            {
+                // Do nothing
+            }
+            else
+            {
+                // Add k to sum
+                ping_msg->tempSum = pong_msg.tempSum + pong_msg.k;
+                // bring k forward 1
+                ping_msg->k = pong_msg.k + 1;
+                log<NUClear::INFO>("Ping");
+                emit(ping_msg);
+            };
+
         });
     }
 
