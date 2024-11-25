@@ -3,4 +3,11 @@ syntax = "proto3";
 package message.onboarding;
 
 message Ping{
+    int32 n = 1;
+
+    int32 k = 2;
+
+    int32 tempSum = 3;
+
+    int32 finalAnswer = 4;
 }

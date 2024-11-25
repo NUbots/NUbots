@@ -21,11 +21,21 @@ namespace module::onboarding {
         });
 
         on<Startup>().then([this] {
-            // Vibe
+            auto ping_msg = std::make_unique<Ping>();
+            // Set what n value to run the sum to
+            ping_msg->n = 10;
+            // Set starting k value
+            ping_msg->k = 1;
+            // Set starting sum
+            ping_msg->tempSum = 0;
         });
 
         on<Trigger<Pong>>().then([this](const Pong& pong_msg) {
             auto ping_msg = std::make_unique<Ping>();
+            // Add k to sum
+            ping_msg->tempSum = ping_msg->tempSum + ping_msg->k;
+            // bring k forward 1
+            ping_msg->k = ping_msg->k + 1;
             log<NUClear::INFO>("Ping");
             emit(ping_msg);
         });

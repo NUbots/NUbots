@@ -21,19 +21,19 @@ namespace module::onboarding {
         });
 
         on<Startup>().then([this] {
-            // Start the ping pong chain
+            // Send pong msg to start the reaction
             auto pong_msg = std::make_unique<Pong>();
             emit(pong_msg);
         });
 
-        on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
-            // TODO: Log a INFO level message with the text "Pong"
-            auto pong_msg = std::make_unique<Pong>();
-            log<NUClear::INFO>("Pong");
+        // on<Trigger<Ping>>().then([this](const Ping& ping_msg) {
+        //     // Log a INFO level message with the text "Pong"
+        //     auto pong_msg = std::make_unique<Pong>();
+        //     log<NUClear::INFO>("Pong");
 
-            // TODO: Emit a Pong message
-            emit(pong_msg);
-        });
+        //     // Emit a Pong message
+        //     emit(pong_msg);
+        // });
     }
 
 }  // namespace module::onboarding
