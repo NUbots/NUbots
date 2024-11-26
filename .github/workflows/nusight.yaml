@@ -67,7 +67,7 @@ jobs:
 
     # Run on the Node container
     container:
-      image: node:18
+      image: node:20
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
