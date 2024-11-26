@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from "vitest";
 import { NUClearNetPacket } from "nuclearnet.js";
 
 import { message } from "../../../shared/messages";
@@ -31,7 +32,7 @@ describe("NUClearNetPacketProcessor", () => {
     const payload = Test.encode({ message: "Test" }).finish();
     const packet = makePacket(typeName, { payload, reliable: true });
 
-    const send = jest.fn();
+    const send = vi.fn();
 
     const processor = new NUClearNetPacketProcessor(
       send,
@@ -65,7 +66,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const processor = new NUClearNetPacketProcessor(
       send,
@@ -105,7 +106,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const processor = new NUClearNetPacketProcessor(
       send,
@@ -153,7 +154,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const clock = new FakeClock(0);
 
@@ -213,7 +214,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const clock = new FakeClock(0);
 

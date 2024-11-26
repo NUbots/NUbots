@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { computed } from "mobx";
 import { observe } from "mobx";
 import { observable } from "mobx";
@@ -55,7 +56,7 @@ describe("createUpdatableComputed", () => {
   beforeEach(() => {
     model = new Model({ color: "red" });
     viewModel = new ViewModel(model);
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   it("returns computed value", () => {

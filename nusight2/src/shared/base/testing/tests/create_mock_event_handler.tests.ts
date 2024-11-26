@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createMockEventHandler } from "../create_mock_event_handler";
 import { createMockInstance } from "../create_mock_instance";
 
@@ -8,14 +10,14 @@ describe("createMockEventHandler", () => {
     testMock.onTestEvent = onTestEvent;
 
     // Setup event listeners.
-    const cb1 = jest.fn();
+    const cb1 = vi.fn();
     testMock.onTestEvent(cb1);
 
-    const cb2 = jest.fn();
+    const cb2 = vi.fn();
     testMock.onTestEvent(cb2);
 
     // Unsubscribe from one of them.
-    const cb3 = jest.fn();
+    const cb3 = vi.fn();
     const off = testMock.onTestEvent(cb3);
     off();
 

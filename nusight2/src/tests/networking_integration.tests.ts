@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppModel } from "../client/components/app/model";
 import { AppNetwork } from "../client/components/app/network";
 import { Network } from "../client/network/network";
@@ -44,7 +45,7 @@ describe("Networking Integration", () => {
     });
 
     it("receives a Sensors message after subscribing and a robot sending it", () => {
-      const onSensors = jest.fn();
+      const onSensors = vi.fn();
       network.on(Sensors, onSensors);
 
       sendMessages();
@@ -54,8 +55,8 @@ describe("Networking Integration", () => {
     });
 
     it("does not receive any messages after unsubscribing", () => {
-      const onSensors1 = jest.fn();
-      const onSensors2 = jest.fn();
+      const onSensors1 = vi.fn();
+      const onSensors2 = vi.fn();
       network.on(Sensors, onSensors1);
       network.on(Sensors, onSensors2);
 
@@ -68,8 +69,8 @@ describe("Networking Integration", () => {
     });
 
     it("does not receive message on specific unsubscribed callback", async () => {
-      const onSensors1 = jest.fn();
-      const onSensors2 = jest.fn();
+      const onSensors1 = vi.fn();
+      const onSensors2 = vi.fn();
       const off1 = network.on(Sensors, onSensors1);
       network.on(Sensors, onSensors2);
 
@@ -90,7 +91,7 @@ describe("Networking Integration", () => {
     });
 
     it("handles reconnects", () => {
-      const onSensors = jest.fn();
+      const onSensors = vi.fn();
       network.on(Sensors, onSensors);
 
       disconnectNusightNetwork();
@@ -107,10 +108,10 @@ describe("Networking Integration", () => {
       nusightNetwork2.connect({ name: "nusight" });
       const network2 = new Network(nusightNetwork2);
 
-      const onSensors1 = jest.fn();
+      const onSensors1 = vi.fn();
       network.on(Sensors, onSensors1);
 
-      const onSensors2 = jest.fn();
+      const onSensors2 = vi.fn();
       network2.on(Sensors, onSensors2);
 
       sendMessages();
@@ -132,7 +133,7 @@ describe("Networking Integration", () => {
     });
 
     it("subscribes and unsubscribes as expected when switching between components", () => {
-      const onSensors = jest.fn();
+      const onSensors = vi.fn();
       localisationNetwork.on(Sensors, onSensors);
 
       sendMessages();
@@ -141,7 +142,7 @@ describe("Networking Integration", () => {
 
       localisationNetwork.off();
 
-      const onCompressedImage = jest.fn();
+      const onCompressedImage = vi.fn();
       visionNetwork.on(CompressedImage, onCompressedImage);
 
       sendMessages();
@@ -151,7 +152,7 @@ describe("Networking Integration", () => {
 
       visionNetwork.off();
 
-      const onOverview = jest.fn();
+      const onOverview = vi.fn();
       dashboardNetwork.on(Overview, onOverview);
 
       expect(onOverview).toHaveBeenCalledTimes(0);

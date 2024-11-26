@@ -1,10 +1,11 @@
+import { vi } from "vitest";
 /** Create an event emitter through which mock events can be emitted */
 export function createMockEventEmitter() {
   /** The event listeners that have been registered on this emitter, keyed by the event name */
   const allListeners = new Map<string, Set<(...args: any[]) => void>>();
 
   /** Used to remove an event listener */
-  const off = jest
+  const off = vi
     .fn<void, [event: string, callback: (...args: any[]) => void]>()
     .mockImplementation((event, callback) => {
       const listenersForThisEvent = allListeners.get(event);
@@ -12,7 +13,7 @@ export function createMockEventEmitter() {
     });
 
   /** Used to add a new an event listener */
-  const on = jest
+  const on = vi
     .fn<() => void, [event: string, callback: (...args: any[]) => void]>()
     .mockImplementation((event: string, callback) => {
       const listenersForThisEvent = allListeners.get(event) ?? new Set();

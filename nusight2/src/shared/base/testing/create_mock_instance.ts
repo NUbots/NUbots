@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import Mocked = jest.Mocked;
 
 export function createMockInstance<T>(ctor: new (...args: any[]) => T): Mocked<T> {
@@ -9,7 +10,7 @@ function stubMethods<T>(obj: Mocked<T>, mock: Mocked<T> = obj, stubbed: Set<stri
     if (!stubbed.has(prop)) {
       const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
       if (obj !== Object.prototype && prop !== "constructor" && descriptor && typeof descriptor.value === "function") {
-        Object.defineProperty(mock, prop, { ...descriptor, value: jest.fn() });
+        Object.defineProperty(mock, prop, { ...descriptor, value: vi.fn() });
       }
       stubbed.add(prop);
     }

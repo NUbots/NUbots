@@ -1,3 +1,5 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parseEventString() > throws for event with invalid subtype by default 1`] = `[Error: invalid subtype in event "my.type#not-a-number". subtype "not-a-number" is not a number]`;
 
 exports[`parseEventString() throws for event with invalid subtype by default 1`] = `"invalid subtype in event "my.type#not-a-number". subtype "not-a-number" is not a number"`;

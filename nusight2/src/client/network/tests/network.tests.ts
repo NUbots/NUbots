@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from "vitest";
 import { NUClearNetSend } from "nuclearnet.js";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
@@ -13,16 +14,16 @@ describe("Network", () => {
     const nusightNetwork = createMockInstance(NUsightNetwork);
     const network = new Network(nusightNetwork);
 
-    const cb1 = jest.fn();
-    const cb2 = jest.fn();
+    const cb1 = vi.fn();
+    const cb2 = vi.fn();
 
-    const off1 = jest.fn();
+    const off1 = vi.fn();
     nusightNetwork.onNUClearMessage.mockReturnValue(off1);
 
     network.on(Sensors, cb1);
     expect(nusightNetwork.onNUClearMessage).toHaveBeenCalledWith(Sensors, cb1);
 
-    const off2 = jest.fn();
+    const off2 = vi.fn();
     nusightNetwork.onNUClearMessage.mockReturnValue(off2);
 
     network.on(Sensors, cb2);
@@ -52,7 +53,7 @@ describe("Network", () => {
 
   it("emit() forwards the given message and options to NUsightNetwork", () => {
     const nusightNetwork = Object.assign(createMockInstance(NUsightNetwork), {
-      emit: jest.fn(),
+      emit: vi.fn(),
     });
     const network = new Network(nusightNetwork);
 

@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeClock } from "../fake_clock";
 
 describe("FakeClock", () => {
@@ -48,27 +50,27 @@ describe("FakeClock", () => {
 
   describe("#setTimeout", () => {
     it("does not invoke callback synchronously", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.setTimeout(spy, 0);
       expect(spy).not.toHaveBeenCalled();
     });
 
     it("does not invoke callback before expected time", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.setTimeout(spy, 2);
       clock.tick(1);
       expect(spy).not.toHaveBeenCalled();
     });
 
     it("invokes callback at expected time", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.setTimeout(spy, 2);
       clock.tick(2);
       expect(spy).toHaveBeenCalled();
     });
 
     it("does not invoke callback when cancelled", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       const cancel = clock.setTimeout(spy, 2);
 
       cancel();
@@ -79,13 +81,13 @@ describe("FakeClock", () => {
 
   describe("#setInterval", () => {
     it("does not invoke callback synchronously", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.setInterval(spy, 2);
       expect(spy).not.toHaveBeenCalled();
     });
 
     it("invokes callback regularly at expected times", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.setInterval(spy, 2);
 
       clock.tick(2);
@@ -99,7 +101,7 @@ describe("FakeClock", () => {
     });
 
     it("does not invoke callback when cancelled", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       const cancel = clock.setInterval(spy, 2);
 
       cancel();
@@ -110,13 +112,13 @@ describe("FakeClock", () => {
 
   describe("#nextTick", () => {
     it("does not invoke callback synchronously", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.nextTick(spy);
       expect(spy).not.toHaveBeenCalled();
     });
 
     it("invokes callback after any tick", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       clock.nextTick(spy);
 
       clock.tick(0.1);
@@ -124,7 +126,7 @@ describe("FakeClock", () => {
     });
 
     it("does not invoke callback when cancelled", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       const cancel = clock.nextTick(spy);
 
       cancel();
@@ -135,9 +137,9 @@ describe("FakeClock", () => {
 
   describe("#runAllTimers", () => {
     it("invokes all scheduled timers", () => {
-      const spy1 = jest.fn();
-      const spy2 = jest.fn();
-      const spy3 = jest.fn();
+      const spy1 = vi.fn();
+      const spy2 = vi.fn();
+      const spy3 = vi.fn();
 
       clock.setTimeout(spy1, 1);
       clock.setTimeout(spy2, 10);
@@ -150,8 +152,8 @@ describe("FakeClock", () => {
     });
 
     it("invokes all scheduled timers, including any new timers that were scheduled from running them", () => {
-      const spy1 = jest.fn();
-      const spy2 = jest.fn();
+      const spy1 = vi.fn();
+      const spy2 = vi.fn();
 
       clock.setTimeout(() => {
         spy1();
@@ -165,7 +167,7 @@ describe("FakeClock", () => {
 
     it("throws an exception where there are too many scheduled tasks", () => {
       for (let i = 0; i < 2000; i++) {
-        clock.setTimeout(jest.fn(), 1);
+        clock.setTimeout(vi.fn(), 1);
       }
 
       expect(() => clock.runAllTimers()).toThrow(/Exceeded clock task limit/);
@@ -174,9 +176,9 @@ describe("FakeClock", () => {
 
   describe("#runOnlyPendingTimers", () => {
     it("invokes all scheduled timers", () => {
-      const spy1 = jest.fn();
-      const spy2 = jest.fn();
-      const spy3 = jest.fn();
+      const spy1 = vi.fn();
+      const spy2 = vi.fn();
+      const spy3 = vi.fn();
 
       clock.setTimeout(spy1, 1);
       clock.setTimeout(spy2, 10);
@@ -189,9 +191,9 @@ describe("FakeClock", () => {
     });
 
     it("invokes all scheduled timers, excluding any new timers that were scheduled from running them", () => {
-      const spy1 = jest.fn();
-      const spy2 = jest.fn();
-      const spy3 = jest.fn();
+      const spy1 = vi.fn();
+      const spy2 = vi.fn();
+      const spy3 = vi.fn();
 
       clock.setTimeout(() => {
         spy1();
@@ -208,7 +210,7 @@ describe("FakeClock", () => {
 
     it("throws an exception where there are too many scheduled tasks", () => {
       for (let i = 0; i < 2000; i++) {
-        clock.setTimeout(jest.fn(), 1);
+        clock.setTimeout(vi.fn(), 1);
       }
 
       expect(() => clock.runOnlyPendingTimers()).toThrow(/Exceeded clock task limit/);
@@ -217,9 +219,9 @@ describe("FakeClock", () => {
 
   describe("#runTimersToTime", () => {
     it("invokes all scheduled timers before the given time", () => {
-      const spy1 = jest.fn();
-      const spy2 = jest.fn();
-      const spy3 = jest.fn();
+      const spy1 = vi.fn();
+      const spy2 = vi.fn();
+      const spy3 = vi.fn();
 
       clock.setTimeout(spy1, 1);
       clock.setTimeout(spy2, 10);
@@ -233,7 +235,7 @@ describe("FakeClock", () => {
 
     it("throws an exception where there are too many scheduled tasks", () => {
       for (let i = 0; i < 2000; i++) {
-        clock.setTimeout(jest.fn(), 1);
+        clock.setTimeout(vi.fn(), 1);
       }
 
       expect(() => clock.runTimersToTime(2000)).toThrow(/Exceeded clock task limit/);

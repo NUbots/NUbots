@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from "vitest";
 import { NUClearNetPacket } from "nuclearnet.js";
 
 import { message } from "../../../shared/messages";

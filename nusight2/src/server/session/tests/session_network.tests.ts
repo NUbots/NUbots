@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NUClearNetPacket, NUClearNetSend } from "nuclearnet.js";
 
 import { message } from "../../../shared/messages";
@@ -135,7 +136,7 @@ describe("NUsightSessionNetwork", () => {
 
   it("onNUClearMessage() listens for incoming messages from NUClearNet", () => {
     // Add a NUClearNet listener and check that it returns a function to remove the listener
-    const onTest = jest.fn();
+    const onTest = vi.fn();
     const off = network.onNUClearMessage({ type: Test }, onTest);
     expect(typeof off).toBe("function");
 
@@ -155,7 +156,7 @@ describe("NUsightSessionNetwork", () => {
 
   it("onClientMessage() listens for incoming messages from a client in the session", () => {
     // Add a client listener and check that it returns a function to remove the listener
-    const onTest = jest.fn();
+    const onTest = vi.fn();
     const off = network.onClientMessage({ type: Test }, onTest);
     expect(typeof off).toBe("function");
 
@@ -184,7 +185,7 @@ describe("NUsightSessionNetwork", () => {
 
   it("onClientRpc() listens for incoming RPC requests from a client and sends a response on success", async () => {
     // Create a handler for the RPC request
-    const onScrubberLoadRequest = jest.fn().mockImplementation((request: ScrubberLoadRequest) => {
+    const onScrubberLoadRequest = vi.fn().mockImplementation((request: ScrubberLoadRequest) => {
       return new ScrubberLoadRequest.Response({
         rpc: {
           token: request.rpc?.token,
@@ -242,7 +243,7 @@ describe("NUsightSessionNetwork", () => {
 
   it("onClientRpc() listens for incoming RPC requests from a client and sends an error response on error", async () => {
     // Create a handler for the RPC request that throws an error
-    const onScrubberLoadRequest = jest.fn().mockImplementation(() => {
+    const onScrubberLoadRequest = vi.fn().mockImplementation(() => {
       throw new Error("Something went wrong");
     });
 

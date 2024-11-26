@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { NUClearNetPacket, NUClearNetPeer, NUClearNetSend } from "nuclearnet.js";
 
 import { AwaitableMock, createAwaitableMock } from "../../../shared/base/testing/awaitable_mock";
@@ -25,7 +26,7 @@ export function createMockWebSocket(): {
 
   return {
     connection: {
-      onDisconnect: jest.fn(),
+      onDisconnect: vi.fn(),
       on: mockEmitter.on,
       send: createAwaitableMock<void, [string, ...any[]]>(),
     },
@@ -57,7 +58,7 @@ export function createMockNUClearNetClient(): {
   const mockEmitter = createMockEventEmitter();
   nuclearnetClient.on = mockEmitter.on;
 
-  nuclearnetClient.send = jest.fn();
+  nuclearnetClient.send = vi.fn();
 
   return { nuclearnetClient: nuclearnetClient as any, nuclearnetMockEmit: mockEmitter.emit };
 }

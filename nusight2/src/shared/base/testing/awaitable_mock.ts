@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { WaitForWrappedFn, wrapFnToAwaitCalls } from "./wrap_fn_to_await_calls";
 
 export type AwaitableMock<MockReturn, MockArgs extends any[]> = jest.Mock<MockReturn, MockArgs> & {
@@ -17,7 +18,7 @@ export function createAwaitableMock<MockReturn = void, MockArgs extends any[] = 
 ): AwaitableMock<MockReturn, MockArgs> {
   const [implementationWrapped, waitForCall] = wrapFnToAwaitCalls(implementation);
 
-  return Object.assign(jest.fn<MockReturn, MockArgs>(implementationWrapped), {
+  return Object.assign(vi.fn<MockReturn, MockArgs>(implementationWrapped), {
     waitForCall,
     waitForCalls: (count: number, timeout?: number) => waitForCall(undefined, { count, timeout }),
   });

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
 import { DirectWebSocketClient } from "../direct_web_socket_client";
 import { WebSocketProxyNUClearNetClient } from "../web_socket_proxy_nuclearnet_client";
@@ -32,40 +33,40 @@ describe("WebSocketProxyNUClearNetClient", () => {
     });
 
     it("forwards onJoin add listener requests to socket", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       client.onJoin(cb);
       expect(mockWebSocket.on).toHaveBeenCalledWith("nuclear_join", expect.any(Function));
     });
 
     it("forwards onJoin remove listener requests to socket", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       const off = client.onJoin(cb);
       off();
       expect(mockWebSocket.off).toHaveBeenCalledWith("nuclear_join", expect.any(Function));
     });
 
     it("forwards onLeave add listener requests to socket", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       client.onLeave(cb);
       expect(mockWebSocket.on).toHaveBeenCalledWith("nuclear_leave", expect.any(Function));
     });
 
     it("forwards onLeave remove listener requests to socket", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       const off = client.onLeave(cb);
       off();
       expect(mockWebSocket.off).toHaveBeenCalledWith("nuclear_leave", expect.any(Function));
     });
 
     it("forwards generic event add listener requests to socket", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       client.on("foo", cb);
       expect(mockWebSocket.on).toHaveBeenCalledWith("foo", expect.any(Function));
       expect(mockWebSocket.send).toHaveBeenCalledWith("listen", "foo", "0");
     });
 
     it("increments message id per message", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       client.on("foo", cb);
       client.on("bar", cb);
       client.on("baz", cb);
@@ -75,7 +76,7 @@ describe("WebSocketProxyNUClearNetClient", () => {
     });
 
     it("forwards generic event remove listener requests to socket", () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       const off = client.on("foo", cb);
       off();
       expect(mockWebSocket.off).toHaveBeenCalledWith("foo", expect.any(Function));

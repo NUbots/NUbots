@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IComputedValue } from "mobx";
 import { observable } from "mobx";
 import { autorun } from "mobx";
@@ -10,13 +11,13 @@ describe("disposableComputed", () => {
 
   beforeEach(() => {
     model = observable({ a: 1, b: 1 });
-    expr = disposableComputed(() => ({ sum: model.a + model.b, dispose: jest.fn<void, []>() }));
+    expr = disposableComputed(() => ({ sum: model.a + model.b, dispose: vi.fn<void, []>() }));
   });
 
   const countUnique = <T extends unknown>(arr: T[]): number => new Set(arr).size;
 
   it("returns value on evaluation", () => {
-    const value = { foo: "bar", dispose: jest.fn() };
+    const value = { foo: "bar", dispose: vi.fn() };
     const expr = disposableComputed(() => value);
     expect(expr.get()).toBe(value);
   });

@@ -56,4 +56,9 @@ export default defineConfig({
     }),
     glslPlugin(),
   ],
+  test: {
+    include: [
+      '**/tests/**/*.tests.{ts,tsx}',
+    ]
+  }
 });

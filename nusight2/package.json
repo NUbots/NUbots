@@ -81,7 +81,7 @@
     "@types/xxhashjs": "0.2.4",
     "@typescript-eslint/eslint-plugin": "7.7.1",
     "@typescript-eslint/parser": "7.7.1",
-    "@vitejs/plugin-react": "^2.0.1",
+    "@vitejs/plugin-react": "^4.3.3",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-react": "7.34.1",
@@ -101,7 +101,8 @@
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
     "typescript": "5.4.5",
-    "vite": "^3.0.9"
+    "vite": "^5.4.11",
+    "vitest": "^2.1.5"
   },
   "dependencies": {
     "@react-three/fiber": "^8.13.0",
