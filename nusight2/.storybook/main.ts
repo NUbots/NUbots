@@ -1,14 +1,9 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-import { mergeConfig } from "vite";
+import { mergeConfig, UserConfig } from "vite";
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(js|jsx|ts|tsx)"],
   addons: ["@storybook/addon-essentials", "@storybook/addon-interactions"],
-  typescript: {
-    // Needed for legacy decorators.
-    // TODO (Annable): Remove after upgrade to modern decorators.
-    reactDocgen: "react-docgen-typescript",
-  },
   framework: {
     name: "@storybook/react-vite",
     options: {},
@@ -30,7 +25,7 @@ const config: StorybookConfig = {
           plugins: [require("tailwindcss")()],
         },
       },
-    });
+    } as UserConfig);
   },
 };
 
