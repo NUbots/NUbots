@@ -111,7 +111,7 @@ formatters["eslint"] = {
 }
 formatters["prettier"] = {
     "format": [["prettier", "--write", "{path}"]],
-    "include": ["*.js", "*.cjs", "*.jsx", "*.ts", "*.tsx", "*.json", "*.css", "*.scss", "*.html", "*.md", "*.yaml", "*.yml"],
+    "include": ["*.js", "*.cjs", "*.jsx", "*.ts", "*.tsx", "*.json", "*.css", "*.html", "*.md", "*.yaml", "*.yml"],
     "exclude": ["*.min.*"],
 }
 
