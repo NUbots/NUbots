@@ -9,7 +9,7 @@ interface AppModelOpts {
 }
 
 export class AppModel {
-  @observable robots: RobotModel[];
+  @observable accessor robots: RobotModel[];
   readonly scrubbersModel: NbsScrubbersModel;
 
   constructor({ robots, scrubbersModel }: AppModelOpts) {

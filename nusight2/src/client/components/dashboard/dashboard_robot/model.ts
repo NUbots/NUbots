@@ -16,54 +16,54 @@ import Phase = message.input.GameState.Data.Phase;
 
 export class DashboardRobotModel {
   // Parameters that influence the display
-  @observable camera: Transform;
-  @observable ballColor: string;
-  @observable ballSightColor: string;
-  @observable kickTargetColor: string;
-  @observable private robot: RobotModel;
-  @observable robotColor: string;
-  @observable textColor: string;
+  @observable accessor camera: Transform;
+  @observable accessor ballColor: string;
+  @observable accessor ballSightColor: string;
+  @observable accessor kickTargetColor: string;
+  @observable private accessor robot: RobotModel;
+  @observable accessor robotColor: string;
+  @observable accessor textColor: string;
 
   // Parameters from the network
   // The timestamp of the last message from the robot (in seconds since an arbitrary time)
-  @observable time: number;
+  @observable accessor time: number;
 
   // The player id of the robot, typically 1 through N
-  @observable playerId: number;
+  @observable accessor playerId: number;
 
   // The name of the role the robot is executing
-  @observable roleName: string;
+  @observable accessor roleName: string;
 
   // Battery as a value between 0 and 1 (percentage)
-  @observable battery: number;
+  @observable accessor battery: number;
 
   // The voltage of the battery
-  @observable voltage: number;
+  @observable accessor voltage: number;
 
   // The robots position and heading and associated covariance
-  @observable robotPosition: Vector3; // x,y,theta
-  @observable robotPositionCovariance: Matrix3;
+  @observable accessor robotPosition: Vector3; // x,y,theta
+  @observable accessor robotPositionCovariance: Matrix3;
 
   // The position of the ball on the field and associated covariance
-  @observable ballPosition: Vector2;
-  @observable ballCovariance: Matrix2;
+  @observable accessor ballPosition: Vector2;
+  @observable accessor ballCovariance: Matrix2;
 
   // The position on the field the robot is kicking towards
-  @observable kickTarget: Vector2;
+  @observable accessor kickTarget: Vector2;
 
   // The game state information
-  @observable gameMode: Mode;
-  @observable gamePhase: Phase;
-  @observable penaltyReason: PenaltyReason;
+  @observable accessor gameMode: Mode;
+  @observable accessor gamePhase: Phase;
+  @observable accessor penaltyReason: PenaltyReason;
 
   // The timestamp of when we last had an image, saw the ball and saw a goal
   // Measured in seconds compared to the variable `time`
-  @observable lastCameraImage: number;
-  @observable lastSeenBall: number;
-  @observable lastSeenGoal: number;
+  @observable accessor lastCameraImage: number;
+  @observable accessor lastSeenBall: number;
+  @observable accessor lastSeenGoal: number;
 
   // The current walk command
-  @observable walkCommand: Vector3;
+  @observable accessor walkCommand: Vector3;
 
   constructor(
     robot: RobotModel,

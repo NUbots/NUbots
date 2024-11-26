@@ -11,10 +11,10 @@ import { Canvas } from "../../three/three";
 
 export class GreenHorizonModel {
   /** A list of world space camera unit-vector rays. */
-  @observable.ref horizon: Vector3[];
+  @observable.ref accessor horizon: Vector3[];
 
   /** The world to camera transform, at the time the green horizon was measured. */
-  @observable.ref Hcw: Matrix4;
+  @observable.ref accessor Hcw: Matrix4;
 
   constructor({ horizon, Hcw }: { horizon?: Vector3[]; Hcw?: Matrix4 }) {
     this.horizon = horizon ?? [];

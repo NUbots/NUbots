@@ -3,7 +3,7 @@ import { observable } from "mobx";
 import { Vector2 } from "../../../shared/math/vector2";
 
 export class PathGeometry {
-  @observable points: Vector2[];
+  @observable accessor points: Vector2[];
 
   constructor(opts: PathGeometry) {
     this.points = opts.points;

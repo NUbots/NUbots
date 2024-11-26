@@ -8,9 +8,9 @@ export type LineChartModelOpts = {
 };
 
 export class LineChartModel {
-  @observable model: ChartModel;
-  @observable yMin: number | "auto";
-  @observable yMax: number | "auto";
+  @observable accessor model: ChartModel;
+  @observable accessor yMin: number | "auto";
+  @observable accessor yMax: number | "auto";
 
   constructor(opts: LineChartModelOpts) {
     this.model = opts.model;

@@ -35,20 +35,20 @@ export interface VisionCameraModelOpts {
 }
 
 export class VisionCameraModel implements CameraModel {
-  @observable.ref id: number;
-  @observable.ref selected: boolean;
-  @observable.ref name: string;
-  @observable.ref image: Image;
-  @observable.ref params: CameraParams;
+  @observable.ref accessor id: number;
+  @observable.ref accessor selected: boolean;
+  @observable.ref accessor name: string;
+  @observable.ref accessor image: Image;
+  @observable.ref accessor params: CameraParams;
 
-  @observable.ref visualMesh?: VisualMeshModel;
-  @observable.ref greenHorizon?: GreenHorizonModel;
-  @observable.ref balls?: BallModel[];
-  @observable.ref goals?: GoalModel[];
-  @observable.ref robots?: OtherRobotsModel[];
-  @observable.ref boundingBoxes?: BoundingBoxesModel[];
+  @observable.ref accessor visualMesh: VisualMeshModel | undefined;
+  @observable.ref accessor greenHorizon: GreenHorizonModel | undefined;
+  @observable.ref accessor balls: BallModel[] | undefined;
+  @observable.ref accessor goals: GoalModel[] | undefined;
+  @observable.ref accessor robots: OtherRobotsModel[] | undefined;
+  @observable.ref accessor boundingBoxes: BoundingBoxesModel[] | undefined;
 
-  @observable drawOptions: DrawOptions;
+  @observable accessor drawOptions: DrawOptions;
 
   constructor(opts: VisionCameraModelOpts & { drawOptions: DrawOptions }) {
     this.id = opts.id;

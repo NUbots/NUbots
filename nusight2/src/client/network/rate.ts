@@ -10,7 +10,7 @@ type RateOpts = {
 };
 
 export class Rate {
-  @observable rate = 0;
+  @observable accessor rate = 0;
   private smoothing: number;
   private currentRate: number = 0;
   private currentUpdateCount: number = 0;

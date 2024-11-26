@@ -19,7 +19,7 @@ describe("createUpdatableComputed", () => {
   );
 
   class Model {
-    @observable.ref color: string;
+    @observable.ref accessor color: string;
 
     constructor({ color }: { color: string }) {
       this.color = color;

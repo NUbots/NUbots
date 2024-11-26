@@ -10,8 +10,8 @@ import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
 
 export class TimeModel {
-  @observable time: number; // seconds
-  @observable lastPhysicsUpdate: number; // seconds
+  @observable accessor time: number; // seconds
+  @observable accessor lastPhysicsUpdate: number; // seconds
 
   constructor({ time, lastPhysicsUpdate }: { time: number; lastPhysicsUpdate: number }) {
     this.time = time;
@@ -37,10 +37,10 @@ export enum ViewMode {
 }
 
 class CameraModel {
-  @observable position: Vector3;
-  @observable yaw: number;
-  @observable pitch: number;
-  @observable distance: number;
+  @observable accessor position: Vector3;
+  @observable accessor yaw: number;
+  @observable accessor pitch: number;
+  @observable accessor distance: number;
 
   constructor({ position, yaw, pitch, distance }: { position: Vector3; yaw: number; pitch: number; distance: number }) {
     this.position = position;
@@ -60,14 +60,14 @@ class CameraModel {
 }
 
 export class ControlsModel {
-  @observable forward: boolean;
-  @observable left: boolean;
-  @observable right: boolean;
-  @observable back: boolean;
-  @observable up: boolean;
-  @observable down: boolean;
-  @observable pitch: number;
-  @observable yaw: number;
+  @observable accessor forward: boolean;
+  @observable accessor left: boolean;
+  @observable accessor right: boolean;
+  @observable accessor back: boolean;
+  @observable accessor up: boolean;
+  @observable accessor down: boolean;
+  @observable accessor pitch: number;
+  @observable accessor yaw: number;
 
   constructor({ forward, left, right, back, up, down, pitch, yaw }: ControlsModel) {
     this.forward = forward;
@@ -95,26 +95,26 @@ export class ControlsModel {
 }
 
 export class LocalisationModel {
-  @observable private appModel: AppModel;
-  @observable field: FieldModel;
-  @observable skybox: SkyboxModel;
-  @observable camera: CameraModel;
-  @observable locked: boolean;
-  @observable controls: ControlsModel;
-  @observable viewMode: ViewMode;
-  @observable target?: LocalisationRobotModel;
-  @observable time: TimeModel;
+  @observable private accessor appModel: AppModel;
+  @observable accessor field: FieldModel;
+  @observable accessor skybox: SkyboxModel;
+  @observable accessor camera: CameraModel;
+  @observable accessor locked: boolean;
+  @observable accessor controls: ControlsModel;
+  @observable accessor viewMode: ViewMode;
+  @observable accessor target: LocalisationRobotModel | undefined;
+  @observable accessor time: TimeModel;
 
-  @observable fieldVisible = true;
-  @observable gridVisible = true;
-  @observable robotVisible = true;
-  @observable ballVisible = true;
-  @observable particlesVisible = true;
-  @observable goalsVisible = true;
-  @observable fieldLinePointsVisible = true;
-  @observable fieldIntersectionsVisible = true;
-  @observable walkToDebugVisible = true;
-  @observable boundedBoxVisible = true;
+  @observable accessor fieldVisible = true;
+  @observable accessor gridVisible = true;
+  @observable accessor robotVisible = true;
+  @observable accessor ballVisible = true;
+  @observable accessor particlesVisible = true;
+  @observable accessor goalsVisible = true;
+  @observable accessor fieldLinePointsVisible = true;
+  @observable accessor fieldIntersectionsVisible = true;
+  @observable accessor walkToDebugVisible = true;
+  @observable accessor boundedBoxVisible = true;
 
   constructor(
     appModel: AppModel,

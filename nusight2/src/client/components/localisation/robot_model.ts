@@ -8,7 +8,7 @@ import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
 class ServoMotor {
-  @observable angle: number;
+  @observable accessor angle: number;
 
   constructor({ angle }: ServoMotor) {
     this.angle = angle;
@@ -20,26 +20,26 @@ class ServoMotor {
 }
 
 export class ServoMotorSet {
-  @observable rightShoulderPitch: ServoMotor;
-  @observable leftShoulderPitch: ServoMotor;
-  @observable rightShoulderRoll: ServoMotor;
-  @observable leftShoulderRoll: ServoMotor;
-  @observable rightElbow: ServoMotor;
-  @observable leftElbow: ServoMotor;
-  @observable rightHipYaw: ServoMotor;
-  @observable leftHipYaw: ServoMotor;
-  @observable rightHipRoll: ServoMotor;
-  @observable leftHipRoll: ServoMotor;
-  @observable rightHipPitch: ServoMotor;
-  @observable leftHipPitch: ServoMotor;
-  @observable rightKnee: ServoMotor;
-  @observable leftKnee: ServoMotor;
-  @observable rightAnklePitch: ServoMotor;
-  @observable leftAnklePitch: ServoMotor;
-  @observable rightAnkleRoll: ServoMotor;
-  @observable leftAnkleRoll: ServoMotor;
-  @observable headPan: ServoMotor;
-  @observable headTilt: ServoMotor;
+  @observable accessor rightShoulderPitch: ServoMotor;
+  @observable accessor leftShoulderPitch: ServoMotor;
+  @observable accessor rightShoulderRoll: ServoMotor;
+  @observable accessor leftShoulderRoll: ServoMotor;
+  @observable accessor rightElbow: ServoMotor;
+  @observable accessor leftElbow: ServoMotor;
+  @observable accessor rightHipYaw: ServoMotor;
+  @observable accessor leftHipYaw: ServoMotor;
+  @observable accessor rightHipRoll: ServoMotor;
+  @observable accessor leftHipRoll: ServoMotor;
+  @observable accessor rightHipPitch: ServoMotor;
+  @observable accessor leftHipPitch: ServoMotor;
+  @observable accessor rightKnee: ServoMotor;
+  @observable accessor leftKnee: ServoMotor;
+  @observable accessor rightAnklePitch: ServoMotor;
+  @observable accessor leftAnklePitch: ServoMotor;
+  @observable accessor rightAnkleRoll: ServoMotor;
+  @observable accessor leftAnkleRoll: ServoMotor;
+  @observable accessor headPan: ServoMotor;
+  @observable accessor headTilt: ServoMotor;
 
   constructor({
     rightShoulderPitch,
@@ -112,8 +112,8 @@ export class ServoMotorSet {
 }
 
 export class FieldIntersection {
-  @observable type: string;
-  @observable position: Vector3;
+  @observable accessor type: string;
+  @observable accessor position: Vector3;
   constructor({ type, position }: { type: string; position: Vector3 }) {
     this.type = type;
     this.position = position;
@@ -121,10 +121,10 @@ export class FieldIntersection {
 }
 
 export class BoundingBox {
-  @observable minX: number;
-  @observable minY: number;
-  @observable maxX: number;
-  @observable maxY: number;
+  @observable accessor minX: number;
+  @observable accessor minY: number;
+  @observable accessor maxX: number;
+  @observable accessor maxY: number;
 
   constructor({ minX, minY, maxX, maxY }: { minX: number; minY: number; maxX: number; maxY: number }) {
     this.minX = minX;
@@ -135,33 +135,33 @@ export class BoundingBox {
 }
 
 export class LocalisationRobotModel {
-  @observable private model: RobotModel;
-  @observable name: string;
-  @observable color: string;
-  @observable Htw: Matrix4; // World to torso
-  @observable Hrw: Matrix4; // World to robot
-  @observable Hfw: Matrix4; // World to field
-  @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
-  @observable Rwt: Quaternion; // Torso to world rotation.
-  @observable motors: ServoMotorSet;
-  @observable fieldLinePoints: { rPWw: Vector3[] };
-  @observable particles: Vector3[]; // Particle filter particles.
-  @observable ball?: { rBWw: Vector3 };
-  @observable fieldIntersections?: FieldIntersection[];
+  @observable private accessor model: RobotModel;
+  @observable accessor name: string;
+  @observable accessor color: string;
+  @observable accessor Htw: Matrix4; // World to torso
+  @observable accessor Hrw: Matrix4; // World to robot
+  @observable accessor Hfw: Matrix4; // World to field
+  @observable accessor Hrd: Matrix4 | undefined; // Walk path desired pose in robot space.
+  @observable accessor Rwt: Quaternion; // Torso to world rotation.
+  @observable accessor motors: ServoMotorSet;
+  @observable accessor fieldLinePoints: { rPWw: Vector3[] };
+  @observable accessor particles: Vector3[]; // Particle filter particles.
+  @observable accessor ball: { rBWw: Vector3 } | undefined;
+  @observable accessor fieldIntersections: FieldIntersection[] | undefined;
   // Both bottom and top points of goal are in world space.
-  @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
-  @observable robots: { id: number; rRWw: Vector3 }[];
-  @observable purpose: string;
-  @observable max_align_radius: number;
-  @observable min_align_radius: number;
-  @observable angle_to_final_heading: number;
-  @observable angle_to_target: number;
-  @observable translational_error: number;
-  @observable min_angle_error: number;
-  @observable max_angle_error: number;
-  @observable velocity_target: Vector3;
-  @observable boundingBox?: BoundingBox;
-  @observable player_id: number;
+  @observable accessor goals: { points: { bottom: Vector3; top: Vector3 }[] };
+  @observable accessor robots: { id: number; rRWw: Vector3 }[];
+  @observable accessor purpose: string;
+  @observable accessor max_align_radius: number;
+  @observable accessor min_align_radius: number;
+  @observable accessor angle_to_final_heading: number;
+  @observable accessor angle_to_target: number;
+  @observable accessor translational_error: number;
+  @observable accessor min_angle_error: number;
+  @observable accessor max_angle_error: number;
+  @observable accessor velocity_target: Vector3;
+  @observable accessor boundingBox: BoundingBox | undefined;
+  @observable accessor player_id: number;
 
   constructor({
     model,

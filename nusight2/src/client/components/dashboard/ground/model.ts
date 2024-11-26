@@ -3,11 +3,11 @@ import { observable } from "mobx";
 import { FieldDimensions } from "../../../../shared/field/dimensions";
 
 export class GroundModel {
-  @observable bottomGoalColor: string;
-  @observable dimensions: FieldDimensions;
-  @observable fieldColor: string;
-  @observable lineColor: string;
-  @observable topGoalColor: string;
+  @observable accessor bottomGoalColor: string;
+  @observable accessor dimensions: FieldDimensions;
+  @observable accessor fieldColor: string;
+  @observable accessor lineColor: string;
+  @observable accessor topGoalColor: string;
 
   constructor({ bottomGoalColor, dimensions, fieldColor, lineColor, topGoalColor }: GroundModel) {
     this.bottomGoalColor = bottomGoalColor;

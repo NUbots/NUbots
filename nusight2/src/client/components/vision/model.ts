@@ -8,8 +8,8 @@ import { RobotModel } from "../robot/model";
 import { VisionCameraModel } from "./vision_camera/model";
 
 export class VisionModel {
-  @observable.ref selectedRobot?: VisionRobotModel;
-  @observable.ref selectedCameraIndex = -1;
+  @observable.ref accessor selectedRobot: VisionRobotModel | undefined;
+  @observable.ref accessor selectedCameraIndex = -1;
 
   constructor(private appModel: AppModel) {}
 
@@ -35,7 +35,7 @@ export class VisionModel {
 
 export class VisionRobotModel {
   /** A map of camera ids to their associated model */
-  @observable cameras: Map<number, VisionCameraModel> = new Map();
+  @observable accessor cameras: Map<number, VisionCameraModel> = new Map();
 
   constructor(readonly robotModel: RobotModel) {}
 

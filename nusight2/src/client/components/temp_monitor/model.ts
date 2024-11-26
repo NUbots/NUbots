@@ -28,7 +28,7 @@ export const ServoNames: { [key: number]: string } = {
 };
 
 export class TempMonitorModel {
-  @observable.ref selectedRobot?: TempMonitorRobotModel;
+  @observable.ref accessor selectedRobot: TempMonitorRobotModel | undefined;
 
   constructor(private appModel: AppModel) {}
 
@@ -44,7 +44,7 @@ export class TempMonitorModel {
 
 export class TempMonitorRobotModel {
   robotModel: RobotModel;
-  @observable servoTemperatures: Map<number, number> = new Map();
+  @observable accessor servoTemperatures: Map<number, number> = new Map();
 
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;

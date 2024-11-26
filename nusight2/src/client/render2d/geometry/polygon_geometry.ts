@@ -3,7 +3,7 @@ import { observable } from "mobx";
 import { Vector2 } from "../../../shared/math/vector2";
 
 export class PolygonGeometry {
-  @observable points: Vector2[];
+  @observable accessor points: Vector2[];
 
   constructor(opts: PolygonGeometry) {
     const points = opts.points;

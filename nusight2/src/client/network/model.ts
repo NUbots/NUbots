@@ -7,10 +7,10 @@ import { BrowserSystemClock } from "../time/browser_clock";
 import { Rate } from "./rate";
 
 export class RobotNetworkStatsModel {
-  @observable.ref packets: number;
-  @observable.ref packetsPerSecond: Rate;
-  @observable.ref bytes: number;
-  @observable.ref bytesPerSecond: Rate;
+  @observable.ref accessor packets: number;
+  @observable.ref accessor packetsPerSecond: Rate;
+  @observable.ref accessor bytes: number;
+  @observable.ref accessor bytesPerSecond: Rate;
 
   constructor({
     packets,

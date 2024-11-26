@@ -10,7 +10,6 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "experimentalDecorators": true,
     "declaration": false,
     "removeComments": true,
     "strict": true,

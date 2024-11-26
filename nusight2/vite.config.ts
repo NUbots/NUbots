@@ -20,6 +20,11 @@ export default defineConfig({
       port: 3010,
     },
   },
+  esbuild: {
+    supported: {
+      decorators: false,
+    }
+  },
   build: {
     target: "es2020",
     emptyOutDir: false,
@@ -39,7 +44,7 @@ export default defineConfig({
       babel: {
         parserOpts: {
           // Enable decorators, since we use them for mobx
-          plugins: ["decorators-legacy"],
+          plugins: ["decorators", "decoratorAutoAccessors"],
         },
         env: {
           development: {

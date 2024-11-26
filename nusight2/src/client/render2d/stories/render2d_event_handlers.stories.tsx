@@ -37,11 +37,11 @@ interface ShapeData {
 }
 
 class ShapeModel {
-  @observable mouseDown = false;
-  @observable lastMouse?: Vector2;
-  @observable cameraPos = Vector2.of(0, 0);
-  @observable cameraScale = Vector2.of(1, 1);
-  @observable heldShape?: ShapeData;
+  @observable accessor mouseDown = false;
+  @observable accessor lastMouse: Vector2 | undefined;
+  @observable accessor cameraPos = Vector2.of(0, 0);
+  @observable accessor cameraScale = Vector2.of(1, 1);
+  @observable accessor heldShape: ShapeData | undefined;
 
   @observable
   shapes: ShapeData[] = [

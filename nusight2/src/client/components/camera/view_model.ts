@@ -23,12 +23,12 @@ export class CameraViewModel {
   static readonly minZoom = 1;
   static readonly maxZoom = 10;
 
-  @observable canvas: Canvas = { width: 0, height: 0 };
-  @observable zoom = 1;
-  @observable pan = new Vector2(0, 0);
+  @observable accessor canvas: Canvas = { width: 0, height: 0 };
+  @observable accessor zoom = 1;
+  @observable accessor pan = new Vector2(0, 0);
 
-  @observable lastMousePosition?: Vector2;
-  @observable isPanning: boolean = false;
+  @observable accessor lastMousePosition: Vector2 | undefined;
+  @observable accessor isPanning: boolean = false;
 
   constructor(protected readonly model: CameraModel) {}
 

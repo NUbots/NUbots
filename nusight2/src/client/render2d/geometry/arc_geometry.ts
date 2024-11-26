@@ -3,11 +3,11 @@ import { observable } from "mobx";
 import { Vector2 } from "../../../shared/math/vector2";
 
 export class ArcGeometry {
-  @observable origin: Vector2;
-  @observable radius: number;
-  @observable startAngle: number;
-  @observable endAngle: number;
-  @observable anticlockwise: boolean;
+  @observable accessor origin: Vector2;
+  @observable accessor radius: number;
+  @observable accessor startAngle: number;
+  @observable accessor endAngle: number;
+  @observable accessor anticlockwise: boolean;
 
   constructor(opts: ArcGeometry) {
     this.origin = opts.origin;

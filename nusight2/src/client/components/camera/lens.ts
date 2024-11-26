@@ -4,10 +4,10 @@ import { Projection } from "../../../shared/math/projection";
 import { Vector2 } from "../../../shared/math/vector2";
 
 export class Lens {
-  @observable.ref projection: Projection;
-  @observable.ref focalLength: number;
-  @observable.ref centre: Vector2;
-  @observable.ref distortionCoeffecients: Vector2;
+  @observable.ref accessor projection: Projection;
+  @observable.ref accessor focalLength: number;
+  @observable.ref accessor centre: Vector2;
+  @observable.ref accessor distortionCoeffecients: Vector2;
 
   constructor({
     projection,

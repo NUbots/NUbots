@@ -3,13 +3,13 @@ import { observable } from "mobx";
 import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
 
 export class RobotModel {
-  @observable id: string;
-  @observable connected: boolean;
-  @observable type: NUClearNetPeerWithType["type"];
-  @observable enabled: boolean;
-  @observable name: string;
-  @observable address: string;
-  @observable port: number;
+  @observable accessor id: string;
+  @observable accessor connected: boolean;
+  @observable accessor type: NUClearNetPeerWithType["type"];
+  @observable accessor enabled: boolean;
+  @observable accessor name: string;
+  @observable accessor address: string;
+  @observable accessor port: number;
 
   constructor({ id, connected, type, enabled, name, address, port }: RobotModel) {
     this.id = id;

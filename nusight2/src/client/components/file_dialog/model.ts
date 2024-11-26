@@ -53,38 +53,38 @@ const entryComparison: Record<string, EntryComparison> = {
 
 export class FileDialogModel {
   /** Whether or not the file dialog is shown */
-  @observable isShown: boolean;
+  @observable accessor isShown: boolean;
 
   /** Error to show in the file dialog, e.g. when attempting to navigate to a non-existent path */
-  @observable error: string;
+  @observable accessor error: string;
 
   /** The current path of the file dialog */
-  @observable currentPath: string;
+  @observable accessor currentPath: string;
 
   /** The entries (files and folders) at the current path */
-  @observable currentPathEntries?: FileDialogEntry[];
+  @observable accessor currentPathEntries: FileDialogEntry[] | undefined;
 
   /** The previously visited path, to highlight where we have come from */
-  @observable lastVisitedPath: PathSegments;
+  @observable accessor lastVisitedPath: PathSegments;
 
   /** How to sort entries for display */
-  @observable sortEntries: FileDialogSort;
+  @observable accessor sortEntries: FileDialogSort;
 
   /** List of quick paths to show in the sidebar */
-  @observable quickPaths: FileDialogPath[];
+  @observable accessor quickPaths: FileDialogPath[];
 
   /** List of recent paths to show in the sidebar */
-  @observable recentPaths: FileDialogPath[];
+  @observable accessor recentPaths: FileDialogPath[];
 
   /** Currently selected entries of the current path */
-  @observable selectedEntries: FileDialogEntry[];
+  @observable accessor selectedEntries: FileDialogEntry[];
 
   /** The index of the last selected file in the current path entries */
-  @observable lastSelectedEntryIndex?: number;
+  @observable accessor lastSelectedEntryIndex: number | undefined;
 
   /** The navigation history of the file dialog: keeps track of the paths that
    *  were visited in the back and forward directions */
-  @observable navigationHistory: FileDialogNavigationHistory;
+  @observable accessor navigationHistory: FileDialogNavigationHistory;
 
   constructor(opts: {
     isShown: boolean;

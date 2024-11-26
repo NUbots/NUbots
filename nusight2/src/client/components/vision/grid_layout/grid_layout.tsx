@@ -15,8 +15,8 @@ export class GridLayout extends Component<{
   itemAspectRatio: number;
   children: React.ReactNode;
 }> {
-  @observable.ref private width?: number;
-  @observable.ref private height?: number;
+  @observable.ref private accessor width: number | undefined;
+  @observable.ref private accessor height: number | undefined;
 
   render() {
     const gridTemplateColumns = this.gridTemplate;

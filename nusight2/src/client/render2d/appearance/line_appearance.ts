@@ -15,7 +15,7 @@ export type LineAppearanceOpts = {
 };
 
 export class LineAppearance {
-  @observable stroke: Stroke;
+  @observable accessor stroke: Stroke;
 
   constructor({ stroke }: { stroke: Stroke }) {
     this.stroke = stroke;
