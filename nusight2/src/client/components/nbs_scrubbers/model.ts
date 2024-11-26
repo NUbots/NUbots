@@ -9,7 +9,7 @@ import { timestampToPercentage } from "./util";
 
 export class NbsScrubbersModel {
   @observable accessor scrubbers = new Map<NbsScrubber["id"], NbsScrubberModel>();
-  @observable.ref accessor lastActiveScrubber?: NbsScrubberModel;
+  @observable.ref accessor lastActiveScrubber: NbsScrubberModel | undefined;
 
   constructor(scrubbers: NbsScrubberModel[]) {
     scrubbers.forEach((scrubber) => this.scrubbers.set(scrubber.id, scrubber));

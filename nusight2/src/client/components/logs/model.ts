@@ -17,7 +17,7 @@ export interface LogMessage {
 export class LogsModel {
   private appModel: AppModel;
 
-  @observable.ref accessor selectedRobot?: RobotModel;
+  @observable.ref accessor selectedRobot: RobotModel | undefined;
 
   constructor(appModel: AppModel) {
     this.appModel = appModel;

@@ -9,7 +9,7 @@ import { RobotModel } from "../robot/model";
 import { OdometryVisualizerModel } from "./odometry_visualizer/model";
 
 export class OdometryModel {
-  @observable.ref accessor selectedRobot?: OdometryRobotModel;
+  @observable.ref accessor selectedRobot: OdometryRobotModel | undefined;
 
   constructor(private appModel: AppModel) {}
 

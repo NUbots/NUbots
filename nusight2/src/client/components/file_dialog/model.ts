@@ -62,7 +62,7 @@ export class FileDialogModel {
   @observable accessor currentPath: string;
 
   /** The entries (files and folders) at the current path */
-  @observable accessor currentPathEntries?: FileDialogEntry[];
+  @observable accessor currentPathEntries: FileDialogEntry[] | undefined;
 
   /** The previously visited path, to highlight where we have come from */
   @observable accessor lastVisitedPath: PathSegments;
@@ -80,7 +80,7 @@ export class FileDialogModel {
   @observable accessor selectedEntries: FileDialogEntry[];
 
   /** The index of the last selected file in the current path entries */
-  @observable accessor lastSelectedEntryIndex?: number;
+  @observable accessor lastSelectedEntryIndex: number | undefined;
 
   /** The navigation history of the file dialog: keeps track of the paths that
    *  were visited in the back and forward directions */

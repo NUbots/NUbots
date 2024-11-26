@@ -79,7 +79,7 @@ function hexToVec4(hexColor: string) {
 }
 
 class TextCameraViewModel extends CameraViewModel {
-  @observable accessor textData?: TextOpts;
+  @observable accessor textData: TextOpts | undefined;
 
   @computed
   private get textViewModel() {

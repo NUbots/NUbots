@@ -27,7 +27,7 @@ export class CameraViewModel {
   @observable accessor zoom = 1;
   @observable accessor pan = new Vector2(0, 0);
 
-  @observable accessor lastMousePosition?: Vector2;
+  @observable accessor lastMousePosition: Vector2 | undefined;
   @observable accessor isPanning: boolean = false;
 
   constructor(protected readonly model: CameraModel) {}

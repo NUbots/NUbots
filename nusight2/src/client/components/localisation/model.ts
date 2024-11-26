@@ -102,7 +102,7 @@ export class LocalisationModel {
   @observable accessor locked: boolean;
   @observable accessor controls: ControlsModel;
   @observable accessor viewMode: ViewMode;
-  @observable accessor target?: LocalisationRobotModel;
+  @observable accessor target: LocalisationRobotModel | undefined;
   @observable accessor time: TimeModel;
 
   @observable accessor fieldVisible = true;

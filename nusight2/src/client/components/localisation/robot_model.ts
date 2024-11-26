@@ -141,13 +141,13 @@ export class LocalisationRobotModel {
   @observable accessor Htw: Matrix4; // World to torso
   @observable accessor Hrw: Matrix4; // World to robot
   @observable accessor Hfw: Matrix4; // World to field
-  @observable accessor Hrd?: Matrix4; // Walk path desired pose in robot space.
+  @observable accessor Hrd: Matrix4 | undefined; // Walk path desired pose in robot space.
   @observable accessor Rwt: Quaternion; // Torso to world rotation.
   @observable accessor motors: ServoMotorSet;
   @observable accessor fieldLinePoints: { rPWw: Vector3[] };
   @observable accessor particles: Vector3[]; // Particle filter particles.
-  @observable accessor ball?: { rBWw: Vector3 };
-  @observable accessor fieldIntersections?: FieldIntersection[];
+  @observable accessor ball: { rBWw: Vector3 } | undefined;
+  @observable accessor fieldIntersections: FieldIntersection[] | undefined;
   // Both bottom and top points of goal are in world space.
   @observable accessor goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable accessor robots: { id: number; rRWw: Vector3 }[];
@@ -160,7 +160,7 @@ export class LocalisationRobotModel {
   @observable accessor min_angle_error: number;
   @observable accessor max_angle_error: number;
   @observable accessor velocity_target: Vector3;
-  @observable accessor boundingBox?: BoundingBox;
+  @observable accessor boundingBox: BoundingBox | undefined;
   @observable accessor player_id: number;
 
   constructor({

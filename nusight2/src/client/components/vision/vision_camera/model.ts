@@ -41,12 +41,12 @@ export class VisionCameraModel implements CameraModel {
   @observable.ref accessor image: Image;
   @observable.ref accessor params: CameraParams;
 
-  @observable.ref accessor visualMesh?: VisualMeshModel;
-  @observable.ref accessor greenHorizon?: GreenHorizonModel;
-  @observable.ref accessor balls?: BallModel[];
-  @observable.ref accessor goals?: GoalModel[];
-  @observable.ref accessor robots?: OtherRobotsModel[];
-  @observable.ref accessor boundingBoxes?: BoundingBoxesModel[];
+  @observable.ref accessor visualMesh: VisualMeshModel | undefined;
+  @observable.ref accessor greenHorizon: GreenHorizonModel | undefined;
+  @observable.ref accessor balls: BallModel[] | undefined;
+  @observable.ref accessor goals: GoalModel[] | undefined;
+  @observable.ref accessor robots: OtherRobotsModel[] | undefined;
+  @observable.ref accessor boundingBoxes: BoundingBoxesModel[] | undefined;
 
   @observable accessor drawOptions: DrawOptions;
 

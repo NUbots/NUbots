@@ -11,10 +11,10 @@ export type BasicAppearanceOpts = {
 };
 
 export class BasicAppearance {
-  @observable accessor fill?: Fill;
-  @observable accessor stroke?: Stroke;
-  @observable accessor cursor?: Property.Cursor;
-  @observable accessor nonScaling?: boolean;
+  @observable accessor fill: Fill | undefined;
+  @observable accessor stroke: Stroke | undefined;
+  @observable accessor cursor: Property.Cursor | undefined;
+  @observable accessor nonScaling: boolean | undefined;
 
   constructor({ fill, stroke, cursor }: { fill?: Fill; stroke?: Stroke; cursor?: Property.Cursor }) {
     this.fill = fill;

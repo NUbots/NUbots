@@ -8,7 +8,7 @@ import { RobotModel } from "../robot/model";
 import { VisionCameraModel } from "./vision_camera/model";
 
 export class VisionModel {
-  @observable.ref accessor selectedRobot?: VisionRobotModel;
+  @observable.ref accessor selectedRobot: VisionRobotModel | undefined;
   @observable.ref accessor selectedCameraIndex = -1;
 
   constructor(private appModel: AppModel) {}

@@ -28,7 +28,7 @@ export const ServoNames: { [key: number]: string } = {
 };
 
 export class TempMonitorModel {
-  @observable.ref accessor selectedRobot?: TempMonitorRobotModel;
+  @observable.ref accessor selectedRobot: TempMonitorRobotModel | undefined;
 
   constructor(private appModel: AppModel) {}
 

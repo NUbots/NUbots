@@ -6,7 +6,7 @@ import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
 
 export class ProfilerModel {
-  @observable.ref accessor selectedRobot?: ProfilerRobotModel;
+  @observable.ref accessor selectedRobot: ProfilerRobotModel | undefined;
 
   constructor(private appModel: AppModel) {}
 
