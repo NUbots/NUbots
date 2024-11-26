@@ -1,6 +1,6 @@
 /* eslint-env node */
 import * as fs from "fs";
-import { createRequire } from 'module';
+import { createRequire } from "module";
 import * as path from "path";
 const require = createRequire(import.meta.url);
 const pbjs = require("protobufjs-cli/pbjs");

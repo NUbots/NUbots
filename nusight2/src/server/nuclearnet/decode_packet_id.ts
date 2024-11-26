@@ -1,4 +1,4 @@
-import { createRequire } from 'module';
+import { createRequire } from "module";
 import { NUClearNetPacket } from "nuclearnet.js";
 const require = createRequire(import.meta.url);
 const { Reader } = require("protobufjs/minimal");

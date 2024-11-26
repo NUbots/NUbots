@@ -1,4 +1,4 @@
-import $protobuf from 'protobufjs/minimal.js';
+import $protobuf from "protobufjs/minimal.js";
 
 $OUTPUT;
 
