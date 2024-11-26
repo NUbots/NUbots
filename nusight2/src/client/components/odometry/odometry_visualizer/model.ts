@@ -4,9 +4,9 @@ import { Matrix4 } from "../../../../shared/math/matrix4";
 import { Vector3 } from "../../../../shared/math/vector3";
 
 export class OdometryVisualizerModel {
-  @observable.ref Hwt: Matrix4;
-  @observable.ref accelerometer: Vector3;
-  @observable.ref camera: OdometryCamera;
+  @observable.ref accessor Hwt: Matrix4;
+  @observable.ref accessor accelerometer: Vector3;
+  @observable.ref accessor camera: OdometryCamera;
 
   constructor({ Hwt, accelerometer, camera }: { Hwt: Matrix4; accelerometer: Vector3; camera: OdometryCamera }) {
     this.Hwt = Hwt;
@@ -24,9 +24,9 @@ export class OdometryVisualizerModel {
 }
 
 export class OdometryCamera {
-  @observable.ref distance: number;
-  @observable.ref pitch: number;
-  @observable.ref yaw: number;
+  @observable.ref accessor distance: number;
+  @observable.ref accessor pitch: number;
+  @observable.ref accessor yaw: number;
 
   constructor({ distance, pitch, yaw }: { distance: number; pitch: number; yaw: number }) {
     this.distance = distance;

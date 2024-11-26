@@ -3,8 +3,8 @@ import { observable } from "mobx";
 import { Vector2 } from "../../../shared/math/vector2";
 
 export class LineGeometry {
-  @observable origin: Vector2;
-  @observable target: Vector2;
+  @observable accessor origin: Vector2;
+  @observable accessor target: Vector2;
 
   constructor(opts: LineGeometry) {
     this.origin = opts.origin;

@@ -6,7 +6,7 @@ import { RobotNetworkStatsModel } from "../../../network/model";
 import { RobotModel } from "../../robot/model";
 
 export class RobotLabelModel {
-  @observable statsOpen = false;
+  @observable accessor statsOpen = false;
 
   constructor(private robotModel: RobotModel) {}
 

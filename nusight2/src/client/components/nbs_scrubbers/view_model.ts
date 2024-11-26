@@ -3,8 +3,8 @@ import { action, computed, observable, reaction } from "mobx";
 import { NbsScrubbersModel } from "./model";
 
 export class NbsScrubbersViewModel {
-  @observable areScrubbersVisible = false;
-  @observable isFileDialogVisible = false;
+  @observable accessor areScrubbersVisible = false;
+  @observable accessor isFileDialogVisible = false;
 
   private previousScrubberCount: number;
 

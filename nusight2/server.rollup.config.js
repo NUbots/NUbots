@@ -7,7 +7,7 @@ import url from "@rollup/plugin-url";
 import minimist from "minimist";
 import * as path from "path";
 
-const rootDir = __dirname;
+const rootDir = import.meta.dirname;
 
 const isProduction = process.env.BUILD === "production";
 const isContinuousIntegration = Boolean(process.env.CI);

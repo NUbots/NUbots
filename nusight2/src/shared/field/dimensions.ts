@@ -1,5 +1,3 @@
-import { observable } from "mobx";
-
 interface FieldModelValues {
   lineWidth: number;
   markWidth: number;
@@ -20,22 +18,22 @@ interface FieldModelValues {
 }
 
 export class FieldDimensions {
-  @observable lineWidth: number;
-  @observable markWidth: number;
-  @observable fieldLength: number;
-  @observable fieldWidth: number;
-  @observable goalDepth: number;
-  @observable goalWidth: number;
-  @observable goalAreaLength: number;
-  @observable goalAreaWidth: number;
-  @observable penaltyAreaLength: number;
-  @observable penaltyAreaWidth: number;
-  @observable goalCrossbarHeight: number;
-  @observable goalPostDiameter: number;
-  @observable goalNetHeight: number;
-  @observable penaltyMarkDistance: number;
-  @observable centerCircleDiameter: number;
-  @observable borderStripMinWidth: number;
+  readonly lineWidth: number;
+  readonly markWidth: number;
+  readonly fieldLength: number;
+  readonly fieldWidth: number;
+  readonly goalDepth: number;
+  readonly goalWidth: number;
+  readonly goalAreaLength: number;
+  readonly goalAreaWidth: number;
+  readonly penaltyAreaLength: number;
+  readonly penaltyAreaWidth: number;
+  readonly goalCrossbarHeight: number;
+  readonly goalPostDiameter: number;
+  readonly goalNetHeight: number;
+  readonly penaltyMarkDistance: number;
+  readonly centerCircleDiameter: number;
+  readonly borderStripMinWidth: number;
 
   constructor(values: FieldModelValues) {
     this.lineWidth = values.lineWidth;

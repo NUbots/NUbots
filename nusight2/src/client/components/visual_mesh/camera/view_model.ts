@@ -22,7 +22,7 @@ import meshFragmentShader from "./shaders/mesh.frag";
 import meshVertexShader from "./shaders/mesh.vert";
 
 export class CameraViewModel {
-  @observable.ref canvas: HTMLCanvasElement | null = null;
+  @observable.ref accessor canvas: HTMLCanvasElement | null = null;
 
   readonly camera: Camera;
   readonly destroy: () => void;

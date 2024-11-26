@@ -37,8 +37,8 @@ export class Three extends Component<{
   onWheel?(deltaY: number, preventDefault: () => void): void;
   renderScheduler?: (callback: () => void) => any;
 }> {
-  @observable private containerSize = { width: 0, height: 0 };
-  @observable private canvas: Canvas = { width: 0, height: 0 };
+  @observable private accessor containerSize = { width: 0, height: 0 };
+  @observable private accessor canvas: Canvas = { width: 0, height: 0 };
   private ref: HTMLCanvasElement | null = null;
   private renderer?: WebGLRenderer;
 

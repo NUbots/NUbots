@@ -17,7 +17,7 @@ import style from "./style.module.css";
 
 @observer
 export class CanvasRenderer extends Component<RendererProps> {
-  @observable private resolution: Transform = Transform.of();
+  @observable private accessor resolution: Transform = Transform.of();
   private canvas: HTMLCanvasElement | null = null;
   private stopAutorun?: IReactionDisposer;
 

@@ -3,10 +3,10 @@ import { observable } from "mobx";
 import { FieldDimensions } from "../../../../../shared/field/dimensions";
 
 export class FieldModel {
-  @observable dimensions: FieldDimensions;
-  @observable fieldColor: string;
-  @observable lineColor: string;
-  @observable fieldType: string;
+  @observable accessor dimensions: FieldDimensions;
+  @observable accessor fieldColor: string;
+  @observable accessor lineColor: string;
+  @observable accessor fieldType: string;
 
   constructor({ dimensions, fieldColor, lineColor, fieldType }: FieldModelOpts) {
     this.dimensions = dimensions;

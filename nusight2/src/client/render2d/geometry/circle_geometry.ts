@@ -1,9 +1,9 @@
 import { observable } from "mobx";
 
 export class CircleGeometry {
-  @observable radius: number;
-  @observable x: number;
-  @observable y: number;
+  @observable accessor radius: number;
+  @observable accessor x: number;
+  @observable accessor y: number;
 
   constructor(opts: CircleGeometry) {
     this.radius = opts.radius;

@@ -15,8 +15,8 @@ interface TreeViewModelOpts {
 
 export class TreeViewModel implements TreeNodeModel {
   private model: TreeData | DataSeries;
-  @observable label: string;
-  @observable expanded: boolean;
+  @observable accessor label: string;
+  @observable accessor expanded: boolean;
 
   constructor(opts: TreeViewModelOpts) {
     this.model = opts.model;

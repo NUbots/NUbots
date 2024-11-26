@@ -17,7 +17,7 @@ export interface LogMessage {
 export class LogsModel {
   private appModel: AppModel;
 
-  @observable.ref selectedRobot?: RobotModel;
+  @observable.ref accessor selectedRobot?: RobotModel;
 
   constructor(appModel: AppModel) {
     this.appModel = appModel;
@@ -56,10 +56,10 @@ export interface FilterLevels {
 export class LogsRobotModel {
   robotModel: RobotModel;
 
-  @observable.shallow messages: LogMessage[] = [];
+  @observable.shallow accessor messages: LogMessage[] = [];
 
-  @observable showTimestamps = false;
-  @observable filters: {
+  @observable accessor showTimestamps = false;
+  @observable accessor filters: {
     search: string;
     levels: FilterLevels;
   };

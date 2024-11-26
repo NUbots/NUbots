@@ -1,14 +1,14 @@
 import { observable } from "mobx";
 
 export class SkyboxModel {
-  @observable turbidity: number;
-  @observable rayleigh: number;
-  @observable mieCoefficient: number;
-  @observable mieDirectionalG: number; // default 0.8
-  @observable luminance: number;
-  @observable inclination: number; // elevation / inclination
-  @observable azimuth: number; // Facing front,
-  @observable showSun: boolean;
+  @observable accessor turbidity: number;
+  @observable accessor rayleigh: number;
+  @observable accessor mieCoefficient: number;
+  @observable accessor mieDirectionalG: number; // default 0.8
+  @observable accessor luminance: number;
+  @observable accessor inclination: number; // elevation / inclination
+  @observable accessor azimuth: number; // Facing front,
+  @observable accessor showSun: boolean;
 
   constructor({
     turbidity,

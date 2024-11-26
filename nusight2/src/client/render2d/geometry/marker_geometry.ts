@@ -3,10 +3,10 @@ import { observable } from "mobx";
 import { Vector2 } from "../../../shared/math/vector2";
 
 export class MarkerGeometry {
-  @observable heading: Vector2;
-  @observable radius: number;
-  @observable x: number;
-  @observable y: number;
+  @observable accessor heading: Vector2;
+  @observable accessor radius: number;
+  @observable accessor x: number;
+  @observable accessor y: number;
 
   constructor(opts: MarkerGeometry) {
     this.heading = opts.heading;

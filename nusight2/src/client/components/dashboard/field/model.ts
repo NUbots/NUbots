@@ -12,9 +12,9 @@ export type FieldModelOpts = {
 };
 
 export class FieldModel {
-  @observable orientation: "left" | "right";
-  @observable ground: GroundModel;
-  @observable robots: DashboardRobotModel[];
+  @observable accessor orientation: "left" | "right";
+  @observable accessor ground: GroundModel;
+  @observable accessor robots: DashboardRobotModel[];
 
   constructor(opts: FieldModelOpts) {
     this.orientation = opts.orientation;

@@ -19,9 +19,9 @@ type CameraModelOpts = {
 export class CameraModel {
   readonly id: number;
 
-  @observable.shallow mesh?: VisualMesh;
-  @observable.shallow image?: Image;
-  @observable name: string;
+  @observable.shallow accessor mesh?: VisualMesh;
+  @observable.shallow accessor image?: Image;
+  @observable accessor name: string;
 
   constructor(private model: VisualMeshRobotModel, { id, name }: CameraModelOpts) {
     this.id = id;

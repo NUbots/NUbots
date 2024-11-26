@@ -21,7 +21,7 @@ export class VisualMeshModel {
 }
 
 export class VisualMeshRobotModel {
-  @observable cameras: Map<number, CameraModel> = new Map();
+  @observable accessor cameras: Map<number, CameraModel> = new Map();
 
   constructor(private robotModel: RobotModel) {}
 

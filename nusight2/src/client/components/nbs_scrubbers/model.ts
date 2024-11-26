@@ -8,8 +8,8 @@ import { RobotModel } from "../robot/model";
 import { timestampToPercentage } from "./util";
 
 export class NbsScrubbersModel {
-  @observable scrubbers = new Map<NbsScrubber["id"], NbsScrubberModel>();
-  @observable.ref lastActiveScrubber?: NbsScrubberModel;
+  @observable accessor scrubbers = new Map<NbsScrubber["id"], NbsScrubberModel>();
+  @observable.ref accessor lastActiveScrubber?: NbsScrubberModel;
 
   constructor(scrubbers: NbsScrubberModel[]) {
     scrubbers.forEach((scrubber) => this.scrubbers.set(scrubber.id, scrubber));
@@ -30,18 +30,18 @@ export class NbsScrubbersModel {
 }
 
 export class NbsScrubberModel {
-  @observable id: NbsScrubber["id"];
-  @observable name: NbsScrubber["name"];
-  @observable startTs: NbsScrubber["start"];
-  @observable endTs: NbsScrubber["end"];
-  @observable playbackState: NbsScrubber["playbackState"] = "paused";
-  @observable playbackSpeed: NbsScrubber["playbackSpeed"] = 0;
-  @observable playbackRepeat: NbsScrubber["playbackRepeat"] = false;
+  @observable accessor id: NbsScrubber["id"];
+  @observable accessor name: NbsScrubber["name"];
+  @observable accessor startTs: NbsScrubber["start"];
+  @observable accessor endTs: NbsScrubber["end"];
+  @observable accessor playbackState: NbsScrubber["playbackState"] = "paused";
+  @observable accessor playbackSpeed: NbsScrubber["playbackSpeed"] = 0;
+  @observable accessor playbackRepeat: NbsScrubber["playbackRepeat"] = false;
 
-  @observable current = 0n;
+  @observable accessor current = 0n;
 
   /** This indicates if this scrubber is currently waiting for a seek response from the network */
-  @observable isSeeking = false;
+  @observable accessor isSeeking = false;
 
   constructor(opts: NbsScrubber) {
     this.id = opts.id;

@@ -11,8 +11,8 @@ export type GroupOpts = {
 };
 
 export class Group {
-  @observable children: (Group | Shape<Geometry>)[];
-  @observable transform: Transform;
+  @observable accessor children: (Group | Shape<Geometry>)[];
+  @observable accessor transform: Transform;
 
   constructor(opts: GroupOpts) {
     this.children = opts.children;

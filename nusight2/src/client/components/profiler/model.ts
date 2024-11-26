@@ -6,7 +6,7 @@ import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
 
 export class ProfilerModel {
-  @observable.ref selectedRobot?: ProfilerRobotModel;
+  @observable.ref accessor selectedRobot?: ProfilerRobotModel;
 
   constructor(private appModel: AppModel) {}
 
@@ -36,11 +36,11 @@ export type ProfileSort = {
 
 export class ProfilerRobotModel {
   robotModel: RobotModel;
-  @observable profiles: Profile[] = [];
-  @observable totalTime: number;
-  @observable totalCount: number;
-  @observable sortProfile: ProfileSort;
-  @observable search: string;
+  @observable accessor profiles: Profile[] = [];
+  @observable accessor totalTime: number;
+  @observable accessor totalCount: number;
+  @observable accessor sortProfile: ProfileSort;
+  @observable accessor search: string;
 
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;
@@ -80,15 +80,15 @@ export class ProfilerRobotModel {
 }
 
 export class Profile {
-  @observable name: string;
-  @observable reactionId: number;
-  @observable reactor: string;
-  @observable total_time: number;
-  @observable count: number;
-  @observable min_time: number;
-  @observable max_time: number;
-  @observable avg_time: number;
-  @observable percentage: number;
+  @observable accessor name: string;
+  @observable accessor reactionId: number;
+  @observable accessor reactor: string;
+  @observable accessor total_time: number;
+  @observable accessor count: number;
+  @observable accessor min_time: number;
+  @observable accessor max_time: number;
+  @observable accessor avg_time: number;
+  @observable accessor percentage: number;
 
   constructor(
     name: string,

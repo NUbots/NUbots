@@ -1,5 +1,4 @@
 /* eslint-env node */
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 import glslPlugin from "./build_scripts/glsl_plugin";
@@ -20,6 +19,11 @@ export default defineConfig({
       port: 3010,
     },
   },
+  esbuild: {
+    supported: {
+      decorators: false,
+    }
+  },
   build: {
     target: "es2020",
     emptyOutDir: false,
@@ -35,25 +39,6 @@ export default defineConfig({
     },
   },
   plugins: [
-    react({
-      babel: {
-        parserOpts: {
-          // Enable decorators, since we use them for mobx
-          plugins: ["decorators-legacy"],
-        },
-        env: {
-          development: {
-            // Don't attempt to strip whitespace from generated code,
-            // since Babel gives up on bundles > 500kb and complains.
-            // Same for `production.compact` below.
-            compact: false,
-          },
-          production: {
-            compact: false,
-          },
-        },
-      },
-    }),
     glslPlugin(),
   ],
 });

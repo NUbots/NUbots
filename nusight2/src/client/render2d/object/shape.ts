@@ -13,9 +13,9 @@ export type ShapeOpts<T extends Geometry> = {
 };
 
 export class Shape<T extends Geometry> {
-  @observable geometry: T;
-  @observable appearance: Appearance;
-  @observable eventHandlers: Render2DEventHandlers;
+  @observable accessor geometry: T;
+  @observable accessor appearance: Appearance;
+  @observable accessor eventHandlers: Render2DEventHandlers;
 
   constructor(opts: Required<ShapeOpts<T>>) {
     this.geometry = opts.geometry;

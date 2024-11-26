@@ -1,15 +1,15 @@
 import { observable } from "mobx";
 
 export class TextGeometry {
-  @observable worldAlignment: boolean;
-  @observable worldScale: boolean;
-  @observable fontFamily: string;
-  @observable fontSize: string;
-  @observable text: string;
-  @observable textAlign: "start" | "middle" | "end" | "left" | "right" | "center";
-  @observable textBaseline: "top" | "hanging" | "middle" | "alphabetic" | "ideographic" | "bottom";
-  @observable x: number;
-  @observable y: number;
+  @observable accessor worldAlignment: boolean;
+  @observable accessor worldScale: boolean;
+  @observable accessor fontFamily: string;
+  @observable accessor fontSize: string;
+  @observable accessor text: string;
+  @observable accessor textAlign: "start" | "middle" | "end" | "left" | "right" | "center";
+  @observable accessor textBaseline: "top" | "hanging" | "middle" | "alphabetic" | "ideographic" | "bottom";
+  @observable accessor x: number;
+  @observable accessor y: number;
 
   constructor(opts: TextGeometry) {
     this.worldAlignment = opts.worldAlignment;

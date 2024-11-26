@@ -23,7 +23,7 @@ export const dropdownContainer = (WrappedComponent: ComponentType<DropdownProps>
   @observer
   class EnhancedDropdown extends React.Component<DropdownContainerProps> {
     private dropdown?: HTMLDivElement;
-    @observable private isOpen: boolean = false;
+    @observable private accessor isOpen: boolean = false;
     private removeListeners?: () => void;
 
     componentDidMount() {

@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof CheckboxTree>;
 
 class TreeData {
-  @observable checked: CheckedState;
+  @observable accessor checked: CheckedState;
   // This is where data for the tree node would be stored, e.g. on a `value` property.
   // Omitted here as it's not necessary for demonstrating the CheckboxTree component.
 
@@ -31,9 +31,9 @@ class TreeData {
 type ToggleTreeChildren = { [key: string]: TreeData | ToggleTreeChildren };
 
 class ToggleTree {
-  @observable model: ToggleTreeChildren | TreeData;
-  @observable label: string;
-  @observable expanded: boolean;
+  @observable accessor model: ToggleTreeChildren | TreeData;
+  @observable accessor label: string;
+  @observable accessor expanded: boolean;
 
   constructor(opts: { label: string; model: ToggleTreeChildren | TreeData }) {
     this.model = opts.model;

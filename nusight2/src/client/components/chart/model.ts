@@ -13,13 +13,13 @@ export interface TreeData extends Map<string, TreeData | DataSeries> {}
 export class DataSeries {
   private kf: { processNoise: number; measurementNoise: number };
 
-  @observable highlight: boolean = false;
-  @observable color: string;
-  @observable startTime: number;
-  @observable timeDelta: number;
-  @observable timeVariance: number;
-  @observable checked: CheckedState;
-  @observable series: Vector2[];
+  @observable accessor highlight: boolean = false;
+  @observable accessor color: string;
+  @observable accessor startTime: number;
+  @observable accessor timeDelta: number;
+  @observable accessor timeVariance: number;
+  @observable accessor checked: CheckedState;
+  @observable accessor series: Vector2[];
 
   constructor({
     color,
@@ -77,11 +77,11 @@ type ChartModelOpts = {
 };
 
 export class ChartModel {
-  @observable private robotModels: RobotModel[];
+  @observable private accessor robotModels: RobotModel[];
 
-  @observable treeData: TreeData;
-  @observable startTime: number;
-  @observable bufferSeconds: number;
+  @observable accessor treeData: TreeData;
+  @observable accessor startTime: number;
+  @observable accessor bufferSeconds: number;
 
   constructor({
     robotModels,
