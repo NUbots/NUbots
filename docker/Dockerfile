@@ -158,7 +158,7 @@ RUN pip install pyyaml mako
 
 # intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
-    # --patch https://gist.githubusercontent.com/TrentHouliston/acc374481f58800a4d409725f49b5247/raw/687fa40cf693b6f38daeded623ec89ad77311bf3/built_tools_target.patch \
+    --patch https://gist.githubusercontent.com/ysims/3775531601b210507c478bca083b768d/raw/fa435e70c2870f2539c0da973a161ad7968d4696/built_tools_target.patch \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
