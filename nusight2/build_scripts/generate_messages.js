@@ -124,7 +124,7 @@ function generateMessagesJs(outputFilePath) {
     '--es6',
     // Use a custom wrapper, as the builtin es6 wrapper produces invalid output
     // Refer to https://github.com/protobufjs/protobuf.js/issues/1862#issuecomment-1660014799
-    '--wrap', path.join(__dirname, 'proto_wrapper.js'),
+    '--wrap', path.join(__dirname, 'proto_wrapper.jst'),
     '--out', outputFilePath,
     '--no-create', '--no-verify', '--no-convert', '--no-delimited',
     ...messageSourceDirs.map(dir => ['--path', dir]).flat(),
