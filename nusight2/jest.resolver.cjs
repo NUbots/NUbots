@@ -1,5 +1,5 @@
 /* eslint-env node */
-const url = require('url');
+const url = require("url");
 
 module.exports = (request, options) => {
   // Remove any query parameters in the request path
