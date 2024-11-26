@@ -4,8 +4,9 @@
   "license": "MIT",
   "private": true,
   "repository": "github:NUbots/NUbots",
+  "type": "module",
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=20.0.0",
     "yarn": "1.x"
   },
   "scripts": {
@@ -17,10 +18,10 @@
     "coverage:ci": "yarn test:ci --coverage",
     "eslint": "eslint \"**/*.ts{,x}\" --cache",
     "eslint:fix": "eslint \"**/*.ts{,x}\" --cache --fix",
-    "format:check": "prettier --check --cache \"**/*.{ts,tsx,js,jsx,json,css,md,html}\" \"!src/shared/message*\"",
-    "format": "prettier --write --cache \"**/*.{ts,tsx,js,jsx,json,css,md,html}\" \"!src/shared/message*\"",
-    "tscheck": "tsc --project tsconfig.test.json",
-    "tscheck:watch": "yarn tsc --project tsconfig.test.json --watch",
+    "format:check": "prettier --check --cache \"**/*.{ts,tsx,js,cjs,jsx,json,css,md,html}\" \"!src/shared/message*\" \"!dist\"",
+    "format": "prettier --write --cache \"**/*.{ts,tsx,js,cjs,jsx,json,css,md,html}\" \"!src/shared/message*\" \"!dist\"",
+    "tscheck": "tsc",
+    "tscheck:watch": "yarn tsc --watch",
     "protobuf": "node build_scripts/generate_messages.js",
     "postinstall": "yarn protobuf",
     "rollup": "rollup --watch --config server.rollup.config.js --run",
@@ -97,7 +98,7 @@
     "rollup": "2.77.0",
     "storybook": "^8.4.5",
     "tailwindcss": "3.4.15",
-    "ts-jest": "28.0.8",
+    "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
     "typescript": "5.4.5",
     "vite": "^3.0.9"
@@ -138,5 +139,6 @@
     "throttle-debounce": "5.0.2",
     "urdf-loader": "0.12.3",
     "xxhashjs": "0.2.2"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

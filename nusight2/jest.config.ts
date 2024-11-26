@@ -1,5 +1,7 @@
 /* eslint-env node */
-module.exports = {
+import { Config } from "jest";
+
+const config: Config = {
   coverageDirectory: "coverage",
   coveragePathIgnorePatterns: ["/node_modules/"],
   collectCoverageFrom: [
@@ -9,11 +11,6 @@ module.exports = {
     "!**/node_modules/**",
     "!**/tests/**",
   ],
-  globals: {
-    "ts-jest": {
-      tsConfig: "./tsconfig.test.json",
-    },
-  },
   moduleDirectories: ["node_modules", "<rootDir>/src"],
   transformIgnorePatterns: ["/node_modules/(?!mobx-utils/lib)"],
   moduleFileExtensions: ["js", "ts", "tsx"],
@@ -26,5 +23,7 @@ module.exports = {
   modulePaths: ["<rootDir>/src"],
   testMatch: ["**/tests/**/*.tests.{ts,tsx}"],
   preset: "ts-jest/presets/js-with-ts",
-  resolver: "<rootDir>/jest.resolver.js",
+  resolver: "<rootDir>/jest.resolver.cjs",
 };
+
+export default config;

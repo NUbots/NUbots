@@ -1,8 +1,12 @@
 /* eslint-env node */
-const fs = require("fs");
-const path = require("path");
+import * as fs from "fs";
+import { createRequire } from "module";
+import * as path from "path";
+const require = createRequire(import.meta.url);
 const pbjs = require("protobufjs-cli/pbjs");
 const pbts = require("protobufjs-cli/pbts");
+
+const __dirname = import.meta.dirname;
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const NUSIGHT_ROOT = path.resolve(__dirname, "..");
@@ -117,7 +121,10 @@ function generateMessagesJs(outputFilePath) {
   // prettier-ignore
   const args = [
     '--target', 'static-module',
-    '--wrap', 'es6',
+    '--es6',
+    // Use a custom wrapper, as the builtin es6 wrapper produces invalid output
+    // Refer to https://github.com/protobufjs/protobuf.js/issues/1862#issuecomment-1660014799
+    '--wrap', path.join(__dirname, 'proto_wrapper.jst'),
     '--out', outputFilePath,
     '--no-create', '--no-verify', '--no-convert', '--no-delimited',
     ...messageSourceDirs.map(dir => ['--path', dir]).flat(),
