@@ -250,7 +250,7 @@ describe("ScrubberSet and Scrubber", () => {
   });
 
   it("throttles emits separately by type and callback", async () => {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const scrubberSet = ScrubberSet.of();
 
       // Keep track of resolves for acknowledging message sends
@@ -265,7 +265,7 @@ describe("ScrubberSet and Scrubber", () => {
       scrubberSet.on("message.Pong", onPong);
 
       // Load a scrubber
-      const {id} = loadScrubber(scrubberSet);
+      const { id } = loadScrubber(scrubberSet);
 
       // Ack the packet from the load, and reset the resolves array
       onPingResolves[0]();
@@ -277,14 +277,14 @@ describe("ScrubberSet and Scrubber", () => {
         for (let i = 0; i <= 10; i++) {
           // The first seek should be synchronous, so the resolve following this loop works
           if (i === 0) {
-            scrubberSet.update({id, type: "seek", timestamp: computeTimestampForMessageSet(i)});
+            scrubberSet.update({ id, type: "seek", timestamp: computeTimestampForMessageSet(i) });
             continue;
           }
 
           // Do the other seeks asynchronously with setImmediate(), so they don't all run in the
           // same tick, to allow the listener promises to have the chance to run in between.
           setImmediate(() => {
-            scrubberSet.update({id, type: "seek", timestamp: computeTimestampForMessageSet(i)});
+            scrubberSet.update({ id, type: "seek", timestamp: computeTimestampForMessageSet(i) });
           });
         }
 
@@ -309,7 +309,7 @@ describe("ScrubberSet and Scrubber", () => {
           }
         });
       });
-    }));
+    });
   });
 
   it("supports removing event listeners", async () => {
