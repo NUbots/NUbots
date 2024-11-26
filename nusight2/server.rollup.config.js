@@ -59,7 +59,6 @@ const config = {
       limit: 0, // Don't inline any assets, always copy and link
     }),
     typescript({
-      module: "esnext",
       include: ["./src/**/*"],
       exclude: ["./node_modules/**/*", "./src/client/**/*", "./src/tests/**/*"],
       ...(isContinuousIntegration ? { sourceMap: false } : {}),
