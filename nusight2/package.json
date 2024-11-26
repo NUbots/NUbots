@@ -4,6 +4,7 @@
   "license": "MIT",
   "private": true,
   "repository": "github:NUbots/NUbots",
+  "type": "module",
   "engines": {
     "node": ">=16.0.0",
     "yarn": "1.x"

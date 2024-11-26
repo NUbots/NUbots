@@ -47,7 +47,7 @@ const config = {
   input: path.join(rootDir, "src", "server", isProduction ? "prod.ts" : "dev.ts"),
   output: {
     dir: path.join(rootDir, "dist"),
-    format: "cjs",
+    format: "es",
     name: "NUsightServer",
     sourcemap: isContinuousIntegration ? false : true,
   },
