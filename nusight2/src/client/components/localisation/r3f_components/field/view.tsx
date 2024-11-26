@@ -20,7 +20,7 @@ export class FieldView extends React.Component<{
     return (
       <object3D>
         <mesh>
-          <planeBufferGeometry
+          <planeGeometry
             args={[
               dim.fieldLength + dim.goalDepth * 2 + dim.borderStripMinWidth * 2,
               dim.fieldWidth + dim.borderStripMinWidth * 2,
@@ -92,7 +92,7 @@ export class FieldView extends React.Component<{
     const yellowHalfGoal = this.buildRectangle(halfLength, -halfGoalWidth, goalDepth, goalWidth, lineWidth);
     const yellowHalfPenaltyMark = this.buildRectangle(halfLength - penaltyMarkDistance, 0, 0, 0, lineWidth);
 
-    return BufferGeometryUtils.mergeBufferGeometries([
+    return BufferGeometryUtils.mergeGeometries([
       centerCircle,
       blueHalf,
       blueHalfPenaltyArea,
@@ -109,7 +109,7 @@ export class FieldView extends React.Component<{
 
   @computed
   private get centerCircle() {
-    return new THREE.RingBufferGeometry(
+    return new THREE.RingGeometry(
       (this.model.dimensions.centerCircleDiameter - this.model.dimensions.lineWidth) * 0.5,
       (this.model.dimensions.centerCircleDiameter + this.model.dimensions.lineWidth) * 0.5,
       128,
@@ -126,7 +126,7 @@ export class FieldView extends React.Component<{
     const leftLine = this.buildVerticalLine(y, y + h, x, lw);
     const rightLine = this.buildVerticalLine(y, y + h, x + w, lw);
 
-    return BufferGeometryUtils.mergeBufferGeometries([topLine, bottomLine, leftLine, rightLine]);
+    return BufferGeometryUtils.mergeGeometries([topLine, bottomLine, leftLine, rightLine]);
   }
 
   private buildHorizontalLine(x1: number, x2: number, y: number, width: number) {
