@@ -122,7 +122,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN install-from-source https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-14.0.5.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -131,20 +131,20 @@ RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v14.0.0.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
-RUN install-from-source https://github.com/intel/opencl-clang/archive/v14.0.0.tar.gz \
-    --patch https://gist.githubusercontent.com/TrentHouliston/4281ecb27d1990f77cc43659ac888aaf/raw/4ddad7c87feb38e5c53917cc06036d0fead97791/resource_linker_skip_cross.patch
+RUN install-from-source https://github.com/intel/opencl-clang/archive/470cf0018e1ef6fc92eda1356f5f31f7da452abc.tar.gz \
+    --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
 
 # Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.5.0.tar.gz \
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/sdk-1.3.216.0.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2022.2.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
     -DSPIRV_WERROR=Off \
     -DBUILD_SHARED_LIBS=ON \
     -DSPIRV_TOOLS_BUILD_STATIC=OFF \
@@ -154,22 +154,15 @@ RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package ncurses
 
+RUN pip install pyyaml mako
+
 # intel graphics compiler
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.11485.tar.gz \
-    --patch https://raw.githubusercontent.com/archlinux/svntogit-community/f557b1f70d15c5f991ca6b20c06113069ac5c30b/trunk/fix-zlib-linking.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/12c99343388eba6e6275856b25e0fa8978585dfb.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/1d5ceafdbc005f3adc58be5af1dc92f068908e16.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/d9535cc5c3e54b21d56c492d4e21cb13c80b9b7a.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/49f4d4e3e904179bf3a0b880732b92f8bfb2c64a.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/12332c1ee8e92238c919ad7c2aa36119259cb622.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/6a13fa903f380e17378286a7cd43995b0ae162ad.patch \
-    --patch https://raw.githubusercontent.com/archlinux/svntogit-community/49c729c11b765c19bc8cc5d3f38022efd5078204/trunk/fix-AlignmentAnalysis-test-failures-on-LLVM-14.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/8b49f42e8148284815b4c31bf1c280e7ae2b03be.patch \
-    --patch https://gist.githubusercontent.com/TrentHouliston/acc374481f58800a4d409725f49b5247/raw/687fa40cf693b6f38daeded623ec89ad77311bf3/built_tools_target.patch \
+RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
+    # --patch https://gist.githubusercontent.com/TrentHouliston/acc374481f58800a4d409725f49b5247/raw/687fa40cf693b6f38daeded623ec89ad77311bf3/built_tools_target.patch \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.6' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.5' \
     -DIGC_OPTION__LLVM_MODE=Prebuilds \
     -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
     -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
