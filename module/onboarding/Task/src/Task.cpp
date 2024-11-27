@@ -43,7 +43,7 @@ Task::Task(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::mov
                 // Set isCorrect flag to true
                 task_msg->isCorrect = 1;
                 // log final answer as str
-                log<NUClear::INFO>("Final answer:", ans);
+                log<NUClear::INFO>("Final answer:", ans, "\n NodYes");
             }
             else
             {
