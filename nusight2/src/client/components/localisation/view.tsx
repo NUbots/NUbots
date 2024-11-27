@@ -76,12 +76,11 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 
 const EnhancedDropdown = dropdownContainer();
 
-
 const addDocListener = <K extends keyof DocumentEventMap>(
   type: K,
   listener: (this: Document, ev: DocumentEventMap[K]) => any,
-  options?: boolean | AddEventListenerOptions
-): () => void => {
+  options?: boolean | AddEventListenerOptions,
+): (() => void) => {
   document.addEventListener(type, listener, options);
   return () => document.removeEventListener(type, listener, options);
 };

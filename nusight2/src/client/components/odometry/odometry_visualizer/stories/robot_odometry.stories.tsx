@@ -36,14 +36,16 @@ class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
 
   componentDidMount() {
     this.dispose?.();
-    this.dispose = this.props.animate ? reaction(
+    this.dispose = this.props.animate
+      ? reaction(
           () => now("frame") / 1000,
           (t) => {
             this.model.Hwt = Matrix4.fromThree(
               new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(t) / 5, 0, t)).setPosition(0, 0, 1),
             );
           },
-      ) : undefined;
+        )
+      : undefined;
   }
 
   componentWillUnmount() {
