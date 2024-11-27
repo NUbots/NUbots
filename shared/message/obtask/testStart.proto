@@ -2,6 +2,6 @@ syntax = "proto3";
 
 package message.obtask;
 
-message testStart {
+message testStart{
     int32 num = 1;
 }

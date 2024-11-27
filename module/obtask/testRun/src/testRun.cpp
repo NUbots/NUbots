@@ -2,8 +2,8 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/obtask/testRun.proto"
-#include "message/obtask/testStart.proto"
+#include "message/obtask/testRun.hpp"
+#include "message/obtask/testStart.hpp"
 
 namespace module::obtask {
 
@@ -27,10 +27,12 @@ namespace module::obtask {
             auto run = std::make_unique<testRun>();
             if (start_msg.num == 10) {
                 // send nod msg to other module
+                run->num = start_msg.num;
                 log<NUClear::INFO>("nod");
-                // emit(run);
+                emit(run);
             }
             else {
+                // log<NUClear::INFO>(start_msg.num);
                 emit(run);
             }
         });

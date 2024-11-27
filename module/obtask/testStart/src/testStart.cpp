@@ -2,8 +2,8 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/obtask/testRun.proto"
-#include "message/obtask/testStart.proto"
+#include "message/obtask/testRun.hpp"
+#include "message/obtask/testStart.hpp"
 
 namespace module::obtask {
 
@@ -25,19 +25,22 @@ namespace module::obtask {
             emit(startup);
         });
 
-        on<Trigger<testRun>>().then([this](const testStart& testStart_msg) {
+        on<Trigger<testRun>>().then([this](const testRun& run_msg) {
             auto start = std::make_unique<testStart>();
             if (cfg.num == 10) {
                 log<NUClear::INFO>("stop");
-                log<NUClear::INFO>(cfg.total);
+                cfg.num = -1;
+            }
+            else if (cfg.num < 0) {
+                // nothing
             }
             else {
                 cfg.num++;
-                testStart->num = cfg.num;
+                start->num = cfg.num;
                 cfg.total *= cfg.num;
                 log<NUClear::INFO>(cfg.total);
+                emit(start);
             }
-            emit(start);
         });
     }
 
