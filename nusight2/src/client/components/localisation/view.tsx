@@ -1,6 +1,6 @@
 import React, { ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import { now } from "mobx-utils";
 
 import { Button } from "../button/button";
@@ -24,6 +24,7 @@ import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
+import { compose } from "../../../shared/base/compose";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -75,29 +76,37 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 
 const EnhancedDropdown = dropdownContainer();
 
+
+const addDocListener = <K extends keyof DocumentEventMap>(
+  type: K,
+  listener: (this: Document, ev: DocumentEventMap[K]) => any,
+  options?: boolean | AddEventListenerOptions
+): () => void => {
+  document.addEventListener(type, listener, options);
+  return () => document.removeEventListener(type, listener, options);
+};
+
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
+  private dispose?: () => void;
 
   componentDidMount(): void {
-    document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
-    document.addEventListener("mousemove", this.onMouseMove, false);
-    document.addEventListener("keydown", this.onKeyDown, false);
-    document.addEventListener("keyup", this.onKeyUp, false);
-    document.addEventListener("wheel", this.onWheel, false);
-    disposeOnUnmount(
-      this,
+    this.dispose?.();
+    this.dispose = compose([
+      addDocListener("pointerlockchange", this.onPointerLockChange, false),
+      addDocListener("mousemove", this.onMouseMove, false),
+      addDocListener("keydown", this.onKeyDown, false),
+      addDocListener("keyup", this.onKeyUp, false),
+      addDocListener("wheel", this.onWheel, false),
       reaction(() => now("frame"), this.onAnimationFrame),
-    );
+      () => this.props.network.destroy(),
+    ]);
   }
 
   componentWillUnmount(): void {
-    document.removeEventListener("pointerlockchange", this.onPointerLockChange, false);
-    document.removeEventListener("mousemove", this.onMouseMove, false);
-    document.removeEventListener("keydown", this.onKeyDown, false);
-    document.removeEventListener("keyup", this.onKeyUp, false);
-    document.removeEventListener("wheel", this.onWheel, false);
-    this.props.network.destroy();
+    this.dispose?.();
+    this.dispose = undefined;
   }
 
   render(): JSX.Element {

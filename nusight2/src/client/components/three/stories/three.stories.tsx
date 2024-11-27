@@ -5,7 +5,6 @@ import { action } from "mobx";
 import { computed } from "mobx";
 import { reaction } from "mobx";
 import { observable } from "mobx";
-import { disposeOnUnmount } from "mobx-react";
 import { createTransformer } from "mobx-utils";
 import { now } from "mobx-utils";
 import { Color } from "three";
@@ -54,6 +53,8 @@ type Model = { boxes: BoxModel[] };
 type BoxModel = { color: string; size: number; position: Vector3; rotation: Vector3 };
 
 class BoxVisualiser extends Component<{ animate?: boolean }> {
+  private dispose?: () => void;
+
   @observable
   private readonly model = {
     boxes: [
@@ -65,11 +66,13 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
 
   componentDidMount() {
     this.update(0);
-    this.props.animate &&
-      disposeOnUnmount(
-        this,
-        reaction(() => now("frame"), this.update),
-      );
+    this.dispose?.();
+    this.dispose = this.props.animate ? reaction(() => now("frame"), this.update) : undefined;
+  }
+
+  componentWillUnmount() {
+    this.dispose?.();
+    this.dispose = undefined;
   }
 
   render() {
