@@ -3,6 +3,7 @@ import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { now } from "mobx-utils";
 
+import { compose } from "../../../shared/base/compose";
 import { Button } from "../button/button";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
@@ -24,7 +25,6 @@ import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
-import { compose } from "../../../shared/base/compose";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
