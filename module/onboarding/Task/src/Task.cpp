@@ -21,6 +21,7 @@ Task::Task(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::mov
     {
         // Use configuration here from file Task.yaml
         this->log_level = config["log_level"].as<NUClear::LogLevel>();
+        cfg.answer      = config["answer"].as<int>();
     });
 
     on<Startup>().then([this]
@@ -38,7 +39,7 @@ Task::Task(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::mov
             // Read final answer
             float ans = pong_msg.finalAnswer;
             // Check if soln is correct
-            if(ans == 55)
+            if(ans == cfg.answer)
             {
                 // Set isCorrect flag to true
                 task_msg->isCorrect = 1;

@@ -23,10 +23,8 @@ namespace module::onboarding {
 
         on<Startup>().then([this] {
             auto ping_msg = std::make_unique<Ping>();
-            // Set what n value to run the sum to
-            ping_msg->n = 10;
-            // Set starting k value
-            ping_msg->k = 1;
+            // Assign initial k value
+            ping_msg->k = 0;
             // Set starting sum
             ping_msg->tempSum = 0;
 

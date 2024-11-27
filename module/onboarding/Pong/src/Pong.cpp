@@ -22,6 +22,7 @@ namespace module::onboarding
         {
             // Use configuration here from file Pong.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.nFinal      = config["answer"].as<int>();
         });
 
         on<Startup>().then([this]
@@ -36,8 +37,8 @@ namespace module::onboarding
             auto pong_msg = std::make_unique<Pong>();
             log<NUClear::INFO>("Pong");
 
-            // Read k value from ping & check if k = n
-            if(ping_msg.k == 10+1)
+            // Read k value from ping & check if k = n+1
+            if(ping_msg.k == cfg.nFinal + 1)
             {
                 // Stop computing sum
                 pong_msg->judgeMe = 1;

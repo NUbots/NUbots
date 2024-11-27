@@ -9,6 +9,7 @@ class Task : public NUClear::Reactor {
 private:
     /// @brief Stores configuration values
     struct Config {
+        int answer = 55;
     } cfg;
 
 public:

@@ -9,6 +9,7 @@ class Pong : public NUClear::Reactor {
 private:
     /// @brief Stores configuration values
     struct Config {
+        int nFinal = 10;
     } cfg;
 
 public:
