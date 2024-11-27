@@ -35,7 +35,6 @@ class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
   });
 
   componentDidMount() {
-    this.dispose?.();
     this.dispose = this.props.animate
       ? reaction(
           () => now("frame") / 1000,

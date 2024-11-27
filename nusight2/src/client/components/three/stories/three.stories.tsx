@@ -66,7 +66,6 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
 
   componentDidMount() {
     this.update(0);
-    this.dispose?.();
     this.dispose = this.props.animate ? reaction(() => now("frame"), this.update) : undefined;
   }
 

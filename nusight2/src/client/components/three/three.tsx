@@ -52,7 +52,6 @@ export class Three extends Component<{
     this.props.clearColor && this.renderer.setClearColor(this.props.clearColor);
     const stages = this.props.stage!(this.canvas);
     // TODO (Annable): Extract this and add unit tests.
-    this.dispose?.();
     this.dispose = compose([
       reaction(
         () => stages.get(),

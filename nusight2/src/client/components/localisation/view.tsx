@@ -89,7 +89,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private dispose?: () => void;
 
   componentDidMount(): void {
-    this.dispose?.();
     this.dispose = compose([
       addDocListener("pointerlockchange", this.onPointerLockChange, false),
       addDocListener("mousemove", this.onMouseMove, false),

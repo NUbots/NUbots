@@ -123,7 +123,6 @@ export class UpdatingStatsStory extends React.Component<{ robots: RobotModel[] }
   };
 
   componentDidMount() {
-    this.dispose?.();
     this.dispose = reaction(() => now("frame"), this.updateStats, { fireImmediately: true });
   }
 
