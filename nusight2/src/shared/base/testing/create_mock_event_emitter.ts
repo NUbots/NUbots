@@ -6,7 +6,7 @@ export function createMockEventEmitter() {
 
   /** Used to remove an event listener */
   const off = vi
-    .fn<void, [event: string, callback: (...args: any[]) => void]>()
+    .fn<(event: string, callback: (...args: any[]) => void) => void>()
     .mockImplementation((event, callback) => {
       const listenersForThisEvent = allListeners.get(event);
       listenersForThisEvent?.delete(callback);
@@ -14,7 +14,7 @@ export function createMockEventEmitter() {
 
   /** Used to add a new an event listener */
   const on = vi
-    .fn<() => void, [event: string, callback: (...args: any[]) => void]>()
+    .fn<(event: string, callback: (...args: any[]) => void) => () => void>()
     .mockImplementation((event: string, callback) => {
       const listenersForThisEvent = allListeners.get(event) ?? new Set();
       listenersForThisEvent.add(callback);

@@ -1,5 +1,4 @@
-import { vi } from "vitest";
-import Mocked = jest.Mocked;
+import { Mocked, vi } from "vitest";
 
 export function createMockInstance<T>(ctor: new (...args: any[]) => T): Mocked<T> {
   return stubMethods<T>(Object.create(ctor.prototype));

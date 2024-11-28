@@ -1,7 +1,6 @@
-import { vi } from "vitest";
-import Mock = jest.Mock;
+import { Mock, vi } from "vitest";
 
-export type MockEventHandler<Y extends any[]> = Mock<() => void, [(...args: Y) => void]> & {
+export type MockEventHandler<Y extends any[]> = Mock<(handler: (...args: Y) => void) => () => void> & {
   mockEvent(...args: Y): void;
 };
 
