@@ -196,21 +196,22 @@ namespace module::planning {
                         velocity_magnitude = std::min(velocity_magnitude, 0.0);
                         log<NUClear::DEBUG>("Stepping backwards, angle to target:", angle_to_target);
                         // TODO: Need to go to complete halt before attempting stepping backwards
-                        if (velocity_magnitude > -0.3) {
+                        if (velocity_magnitude > -0.6) {
                             // Emit a stand still task to stop the robot
                             log<NUClear::DEBUG>("Stopping robot before stepping backwards");
-                            emit<Task>(std::make_unique<StandStill>());
+                            // Emit very very slow walk
+                            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0.001, 0.001, 0.0)));
                             return;
                         }
 
                         // Ensure the backwards velocity magnitude does not exceed the maximum
-                        velocity_magnitude -= 0.025;
+                        velocity_magnitude -= 0.010;
                         log<NUClear::DEBUG>("Stepping backwards, velocity magnitude:", velocity_magnitude);
 
                         desired_velocity_magnitude = cfg.strafe_gain * error;
 
                         // Step backwards while keeping the forward direction
-                        rDRr = Eigen::Vector2d(-1, rDRr.y());
+                        rDRr = Eigen::Vector2d(-0.3, rDRr.y());
 
                         // Keep the robot heading straight backward
                         desired_heading = 0.0;
