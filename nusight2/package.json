@@ -10,12 +10,12 @@
     "yarn": "1.x"
   },
   "scripts": {
-    "test": "vitest",
-    "test:debug": "node --inspect-brk node_modules/.bin/vitest --runInBand",
-    "test:ci": "yarn test",
-    "test:watch": "yarn test --watch",
-    "coverage": "yarn test --coverage",
-    "coverage:ci": "yarn test:ci --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest dev",
+    "test:debug": "vitest --no-file-parallelism --inspect-brk --test-timeout 3_600_000",
+    "test:ci": "vitest run",
+    "coverage": "vitest run --coverage",
+    "coverage:ci": "vitest run --coverage",
     "eslint": "eslint \"**/*.ts{,x}\" --cache",
     "eslint:fix": "eslint \"**/*.ts{,x}\" --cache --fix",
     "format:check": "prettier --check --cache \"**/*.{ts,tsx,js,cjs,jsx,json,css,md,html}\" \"!src/shared/message*\" \"!dist\"",
