@@ -1,59 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { Object3DProps } from "@react-three/fiber";
 import { observer } from "mobx-react";
 import * as THREE from "three";
 
-import { Vector2 } from "../../../../shared/math/vector2";
 import { Vector3 } from "../../../../shared/math/vector3";
 import { PerspectiveCamera, ThreeFiber } from "../../three/three_fiber";
 
+import { useDragger } from "./dragger";
 import { OdometryVisualizerModel } from "./model";
 import styles from "./style.module.css";
 
 export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualizerModel }) => {
-  const [dragger, setDragger] = useState<Dragger | undefined>(undefined);
   const rTWw = model.Hwt.t.vec3();
 
   const cameraPosition = React.useMemo(() => {
     const { distance, pitch, yaw } = model.camera;
     const p = pitch - Math.PI / 2;
     const y = -yaw + Math.PI;
-    const orbitPosition = new Vector3(Math.sin(p) * Math.cos(y), Math.sin(p) * Math.sin(y), Math.cos(p)).multiplyScalar(
-      -distance,
-    ); // rCTw
+    // prettier-ignore
+    const orbitPosition = new Vector3(
+      Math.sin(p) * Math.cos(y),
+      Math.sin(p) * Math.sin(y),
+      Math.cos(p),
+    ).multiplyScalar(-distance); // rCTw
     return orbitPosition.add(rTWw);
   }, [model.camera.distance, model.camera.yaw, model.camera.pitch]);
 
-  const onWheel = (event: React.WheelEvent) => {
-    const { camera } = model;
-    camera.distance = clamp(camera.distance + event.deltaY / 200, 0.01, 10, 0);
-  };
-
-  const onMouseDown = (event: React.MouseEvent) => {
-    const {
-      camera: { pitch, yaw },
-    } = model;
-    setDragger(new Dragger(model, pitch, yaw, Vector2.of(event.nativeEvent.layerX, event.nativeEvent.layerY)));
-  };
-
-  const onMouseMove = (event: React.MouseEvent) => {
-    if (!dragger) {
-      return;
-    }
-    dragger.to = Vector2.of(event.nativeEvent.layerX, event.nativeEvent.layerY);
-  };
-
-  const onMouseUp = (event: React.MouseEvent) => {
-    if (!dragger) {
-      return;
-    }
-    dragger.to = Vector2.of(event.nativeEvent.layerX, event.nativeEvent.layerY);
-    setDragger(undefined);
-  };
-
+  const draggerEventListeners = useDragger(model);
   return (
     <div className={styles.visualizer}>
-      <ThreeFiber onWheel={onWheel} onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
+      <ThreeFiber {...draggerEventListeners}>
         <PerspectiveCamera
           fov={75}
           aspect={1}
@@ -115,32 +91,3 @@ const Accelerometer = ({ accelerometer }: { accelerometer: Vector3 }) => (
 );
 
 const Floor = () => <gridHelper args={[100, 100]} rotation={[Math.PI / 2, 0, 0]} />;
-
-class Dragger {
-  private _to: Vector2;
-
-  constructor(
-    private readonly model: OdometryVisualizerModel,
-    private readonly fromPitch: number,
-    private readonly fromYaw: number,
-    private readonly from: Vector2,
-  ) {
-    this._to = from;
-  }
-
-  set to(to: Vector2) {
-    this._to = to;
-    this.update();
-  }
-
-  private update() {
-    const delta = this._to.subtract(this.from);
-    const scale = 1 / 100;
-    this.model.camera.pitch = clamp(this.fromPitch - delta.y / 100, -Math.PI / 2, Math.PI / 2);
-    this.model.camera.yaw = this.fromYaw + scale * delta.x;
-  }
-}
-
-const clamp = (x: number, min: number, max: number, eps = 1e-9): number => {
-  return Math.max(min + eps, Math.min(max - eps, x));
-};
