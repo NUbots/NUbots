@@ -12,7 +12,7 @@
   "scripts": {
     "test": "vitest",
     "test:debug": "node --inspect-brk node_modules/.bin/vitest --runInBand",
-    "test:ci": "yarn test --ci --runInBand",
+    "test:ci": "yarn test",
     "test:watch": "yarn test --watch",
     "coverage": "yarn test --coverage",
     "coverage:ci": "yarn test:ci --coverage",
