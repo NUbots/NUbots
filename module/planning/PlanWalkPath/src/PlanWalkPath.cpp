@@ -182,38 +182,30 @@ namespace module::planning {
                                         desired_velocity_magnitude);
                 }
                 else {
-
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
                     // "Decelerate"
                     velocity_magnitude -= 0.1;
-                    log<NUClear::DEBUG>("Inner circle velocity mangitude ", velocity_magnitude);
                     // If we are aligned with the final heading, we are close to the target
                     // and the angle to the target is too large, step backwards
                     if (((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)
                          || (velocity_magnitude > -3 && velocity_magnitude < 0.0))) {
 
                         velocity_magnitude = std::min(velocity_magnitude, 0.0);
-                        log<NUClear::DEBUG>("Stepping backwards, angle to target:", angle_to_target);
-                        // TODO: Need to go to complete halt before attempting stepping backwards
+
                         if (velocity_magnitude > -0.6) {
-                            // Emit a stand still task to stop the robot
-                            log<NUClear::DEBUG>("Stopping robot before stepping backwards");
-                            // Emit very very slow walk
-                            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0.001, 0.001, 0.0)));
-                            return;
+                            // Equal forward and sideways velocity
+                            rDRr = Eigen::Vector2d(1.0, 1.0);
+                            // Arbitrary small velocity to keep the robot moving
+                            desired_velocity_magnitude = 0.001;
                         }
-
-                        // Ensure the backwards velocity magnitude does not exceed the maximum
-                        velocity_magnitude -= 0.010;
-                        log<NUClear::DEBUG>("Stepping backwards, velocity magnitude:", velocity_magnitude);
-
-                        desired_velocity_magnitude = cfg.strafe_gain * error;
-
-                        // Step backwards while keeping the forward direction
-                        rDRr = Eigen::Vector2d(-0.3, rDRr.y());
-
-                        // Keep the robot heading straight backward
+                        else {
+                            // Ensure the backwards velocity magnitude does not exceed the maximum
+                            desired_velocity_magnitude = cfg.strafe_gain * error;
+                            // Step backwards while keeping the forward direction
+                            rDRr = Eigen::Vector2d(-0.3, rDRr.y());
+                            // Keep the robot heading straight backward
+                        }
                         desired_heading = 0.0;
                     }
                     // Go towards target
@@ -222,10 +214,6 @@ namespace module::planning {
                         velocity_magnitude = std::max(velocity_magnitude, 0.5);
                         // "Proportional control" to strafe towards the target inside align radius
                         desired_velocity_magnitude = cfg.strafe_gain * error * velocity_magnitude;
-                        log<NUClear::DEBUG>("Strafe gain",
-                                            cfg.strafe_gain,
-                                            "desired_velocity_magnitude",
-                                            desired_velocity_magnitude);
                     }
                 }
 
