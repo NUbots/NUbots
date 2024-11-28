@@ -1,4 +1,5 @@
 import React from "react";
+import { OrbitControls } from "@react-three/drei";
 import { Object3DProps } from "@react-three/fiber";
 import { observer } from "mobx-react";
 import * as THREE from "three";
@@ -8,7 +9,6 @@ import { PerspectiveCamera, ThreeFiber } from "../../three/three_fiber";
 
 import { OdometryVisualizerModel } from "./model";
 import styles from "./style.module.css";
-import { OrbitControls } from "@react-three/drei";
 
 export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualizerModel }) => {
   const rTWw = model.Hwt.t.vec3();
