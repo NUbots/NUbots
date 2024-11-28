@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+
 /** Create an event emitter through which mock events can be emitted */
 export function createMockEventEmitter() {
   /** The event listeners that have been registered on this emitter, keyed by the event name */
