@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describe, expect, it } from "vitest";
+
 import { createSingletonFactory } from "../create_singleton_factory";
 
 describe("createSingletonFactory", () => {

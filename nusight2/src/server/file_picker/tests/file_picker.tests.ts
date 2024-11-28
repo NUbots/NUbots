@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import path from "path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
 import { samplesDir } from "../../nbs_scrubber/tests/test_utils";

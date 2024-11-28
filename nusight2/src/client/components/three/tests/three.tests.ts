@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describe, expect, it } from "vitest";
+
 import { objectFit } from "../three";
 
 describe("objectFit", () => {

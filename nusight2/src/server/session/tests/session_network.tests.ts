@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NUClearNetPacket, NUClearNetSend } from "nuclearnet.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { message } from "../../../shared/messages";
 import { messageTypeToName } from "../../../shared/messages/type_converters";

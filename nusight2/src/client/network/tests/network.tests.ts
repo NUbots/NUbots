@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { NUClearNetSend } from "nuclearnet.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
 import { message } from "../../../shared/messages";

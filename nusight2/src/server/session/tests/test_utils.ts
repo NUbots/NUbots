@@ -1,5 +1,5 @@
-import { vi } from "vitest";
 import { NUClearNetPacket, NUClearNetPeer, NUClearNetSend } from "nuclearnet.js";
+import { vi } from "vitest";
 
 import { AwaitableMock, createAwaitableMock } from "../../../shared/base/testing/awaitable_mock";
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";

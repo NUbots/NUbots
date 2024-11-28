@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { NUClearNetPacket } from "nuclearnet.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { message } from "../../../shared/messages";
 import { FakeClock } from "../../../shared/time/fake_clock";

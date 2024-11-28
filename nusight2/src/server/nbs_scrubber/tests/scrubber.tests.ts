@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { ScrubberPacketListenerCallback, ScrubberSet } from "../scrubber_set";
 import { nanosToTimestampObject, timestampObjectToNanos } from "../utils";

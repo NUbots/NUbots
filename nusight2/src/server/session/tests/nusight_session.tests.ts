@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
 import { NUClearNetPacket } from "nuclearnet.js";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
 import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber/tests/test_utils";

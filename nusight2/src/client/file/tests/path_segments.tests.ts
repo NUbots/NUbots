@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describe, expect, it } from "vitest";
+
 import { PathSegments } from "../path_segments";
 
 describe("PathSegments (with Posix-style paths)", () => {

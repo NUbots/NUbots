@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { AppModel } from "../client/components/app/model";
 import { AppNetwork } from "../client/components/app/network";
 import { Network } from "../client/network/network";

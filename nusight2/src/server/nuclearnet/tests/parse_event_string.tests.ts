@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describe, expect, it } from "vitest";
+
 import { parseEventString } from "../parse_event_string";
 
 describe.only("parseEventString()", () => {

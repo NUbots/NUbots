@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { describe, expect, it } from "vitest";
 import { NUClearNetPacket } from "nuclearnet.js";
+import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
 import { decodePacketId } from "../decode_packet_id";

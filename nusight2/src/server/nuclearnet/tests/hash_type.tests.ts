@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describe, expect, it } from "vitest";
+
 import { hashType } from "../hash_type";
 
 describe("hashType()", () => {
