@@ -6,9 +6,9 @@ import * as THREE from "three";
 import { Vector3 } from "../../../../shared/math/vector3";
 import { PerspectiveCamera, ThreeFiber } from "../../three/three_fiber";
 
-import { useDragger } from "./dragger";
 import { OdometryVisualizerModel } from "./model";
 import styles from "./style.module.css";
+import { OrbitControls } from "@react-three/drei";
 
 export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualizerModel }) => {
   const rTWw = model.Hwt.t.vec3();
@@ -26,10 +26,9 @@ export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualiz
     return orbitPosition.add(rTWw);
   }, [model.camera.distance, model.camera.yaw, model.camera.pitch]);
 
-  const draggerEventListeners = useDragger(model);
   return (
     <div className={styles.visualizer}>
-      <ThreeFiber {...draggerEventListeners}>
+      <ThreeFiber>
         <PerspectiveCamera
           fov={75}
           aspect={1}
@@ -39,6 +38,7 @@ export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualiz
           position={cameraPosition.toArray()}
           lookAt={rTWw}
         />
+        <OrbitControls target={rTWw.toArray()} />
         <Torso
           accelerometer={model.accelerometer}
           position={rTWw.toArray()}

@@ -104,6 +104,7 @@
     "vite": "^3.0.9"
   },
   "dependencies": {
+    "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.13.0",
     "@use-it/interval": "1.0.0",
     "binary": "0.3.0",
