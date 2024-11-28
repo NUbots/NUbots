@@ -1,6 +1,8 @@
 import React from "react";
 import { action } from "mobx";
 import { computed } from "mobx";
+import { observer } from "mobx-react";
+import * as THREE from "three";
 
 import { Vector2 } from "../../../../shared/math/vector2";
 import { Vector3 } from "../../../../shared/math/vector3";
@@ -8,8 +10,6 @@ import { PerspectiveCamera, ThreeFiber } from "../../three/three_fiber";
 
 import { OdometryVisualizerModel } from "./model";
 import styles from "./style.module.css";
-import * as THREE from "three";
-import { observer } from "mobx-react";
 
 @observer
 export class OdometryVisualizer extends React.Component<{ model: OdometryVisualizerModel }> {
