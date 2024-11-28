@@ -14,7 +14,7 @@ _del
 # Sublime Text
 NUsight2.sublime-workspace
 
-# Jest coverage report
+# Testing coverage report
 /coverage
 
 # Log files

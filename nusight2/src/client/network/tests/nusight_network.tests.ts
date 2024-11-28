@@ -1,5 +1,5 @@
 import { NUClearNetSend } from "nuclearnet.js";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Mock, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FakeNUClearNetClient } from "../../../server/nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../../server/nuclearnet/fake_nuclearnet_server";
@@ -80,8 +80,8 @@ describe("NUsightNetwork", () => {
  */
 function createMockNUClearNetClient(): {
   nuclearnetClient: NUClearNetClient & {
-    on: jest.Mock<() => void, [event: string, callback: (...args: any[]) => void]>;
-    send: jest.Mock<void, [event: string, ...args: any[]]>;
+    on: Mock<(event: string, callback: (...args: any[]) => void) => () => void>;
+    send: Mock<(event: string, ...args: any[]) => void>;
   };
   nuclearnetMockEmit: (event: string, ...args: any[]) => void;
 } {

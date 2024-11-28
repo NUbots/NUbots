@@ -1,9 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, Mocked, vi } from "vitest";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
 import { DirectWebSocketClient } from "../direct_web_socket_client";
 import { WebSocketProxyNUClearNetClient } from "../web_socket_proxy_nuclearnet_client";
-import Mocked = jest.Mocked;
 
 describe("WebSocketProxyNUClearNetClient", () => {
   let mockWebSocket: Mocked<DirectWebSocketClient>;

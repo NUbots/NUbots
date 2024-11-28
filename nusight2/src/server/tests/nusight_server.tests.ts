@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it,Mocked } from "vitest";
 
 import { MockEventHandler } from "../../shared/base/testing/create_mock_event_handler";
 import { createMockEventHandler } from "../../shared/base/testing/create_mock_event_handler";
@@ -9,7 +9,7 @@ import { NUsightServer } from "../nusight_server";
 import { WebSocket, WebSocketServer } from "../web_socket/web_socket_server";
 
 describe("NUsightServer", () => {
-  let webSocketServer: jest.Mocked<WebSocketServer>;
+  let webSocketServer: Mocked<WebSocketServer>;
   let onClientConnection: MockEventHandler<[WebSocket]>;
   let nuclearnetServer: FakeNUClearNetServer;
   let nuclearnetClient: FakeNUClearNetClient;
