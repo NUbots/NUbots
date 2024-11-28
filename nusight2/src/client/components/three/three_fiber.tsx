@@ -41,7 +41,7 @@ export const PerspectiveCamera = ({
       three.setSize(three.gl.domElement.clientWidth, three.gl.domElement.clientHeight);
       lookAt && camera.lookAt(lookAt.toThree());
     }
-  }, [lookAt]);
+  }, [lookAt, props.position, props.rotation]);
   return <perspectiveCamera ref={ref} {...props} />;
 };
 
