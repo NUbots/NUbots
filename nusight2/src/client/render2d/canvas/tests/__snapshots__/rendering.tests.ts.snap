@@ -3,7 +3,3 @@
 exports[`hexToRGB > throws if not a hex colour 1`] = `[Error: Color #FFF is not a hex color]`;
 
 exports[`hexToRGB > throws if not a hex colour 2`] = `[Error: Color red is not a hex color]`;
-
-exports[`hexToRGB throws if not a hex colour 1`] = `"Color #FFF is not a hex color"`;
-
-exports[`hexToRGB throws if not a hex colour 2`] = `"Color red is not a hex color"`;
