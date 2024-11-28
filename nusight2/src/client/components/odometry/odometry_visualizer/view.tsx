@@ -15,6 +15,10 @@ import styles from "./style.module.css";
 export class OdometryVisualizer extends React.Component<{ model: OdometryVisualizerModel }> {
   private dragger?: Dragger;
 
+  private get model(): OdometryVisualizerModel {
+    return this.props.model;
+  }
+
   render() {
     return (
       <div className={styles.visualizer}>
@@ -100,10 +104,6 @@ export class OdometryVisualizer extends React.Component<{ model: OdometryVisuali
 
   private get floor() {
     return <gridHelper args={[100, 100]} rotation={[Math.PI / 2, 0, 0]} />;
-  }
-
-  private get model(): OdometryVisualizerModel {
-    return this.props.model;
   }
 
   @computed
