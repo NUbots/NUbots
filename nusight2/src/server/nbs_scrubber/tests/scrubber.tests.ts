@@ -346,7 +346,7 @@ describe("ScrubberSet and Scrubber", () => {
     let ackFirstSend: (() => Promise<void>) | undefined = undefined;
 
     // Add a Ping listener stores an ack callback for the first send
-    const onPing = vi.fn<ReturnType<ScrubberPacketListenerCallback>, Parameters<ScrubberPacketListenerCallback>>(
+    const onPing = vi.fn<ScrubberPacketListenerCallback>(
       () =>
         new Promise((resolve) => {
           if (!ackFirstSend) {
