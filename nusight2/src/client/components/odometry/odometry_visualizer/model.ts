@@ -37,8 +37,4 @@ export class OdometryCamera {
   static of({ distance }: { distance: number }) {
     return new OdometryCamera({ distance, pitch: 0, yaw: 0 });
   }
-
-  clone(): OdometryCamera {
-    return new OdometryCamera({ distance: this.distance, pitch: this.pitch, yaw: this.yaw });
-  }
 }
