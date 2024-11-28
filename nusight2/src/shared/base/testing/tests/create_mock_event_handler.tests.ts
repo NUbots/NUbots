@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { describe, expect, it, vi } from "vitest";
 
 import { createMockEventHandler } from "../create_mock_event_handler";

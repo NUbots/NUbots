@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { beforeEach, describe, expect, it } from "vitest";
 
 import { createMockInstance } from "../../../../shared/base/testing/create_mock_instance";
 import { AppModel } from "../../app/model";

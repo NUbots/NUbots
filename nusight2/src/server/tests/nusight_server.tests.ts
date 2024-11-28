@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { beforeEach, describe, expect, it } from "vitest";
 
 import { MockEventHandler } from "../../shared/base/testing/create_mock_event_handler";
 import { createMockEventHandler } from "../../shared/base/testing/create_mock_event_handler";
