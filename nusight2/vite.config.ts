@@ -37,7 +37,7 @@ export default defineConfig({
   test: {
     isolate: false,
     poolOptions: { useAtomics: true },
-    include: ["src/**/tests/**/*.tests.{ts,tsx}"],
+    include: ["src/**/*.tests.{ts,tsx}"],
     reporters: ["default", ["junit", { outputFile: "reports/test-report.xml" }]],
     coverage: {
       provider: "v8",
