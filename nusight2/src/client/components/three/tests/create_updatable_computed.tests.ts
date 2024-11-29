@@ -1,7 +1,7 @@
 import { computed } from "mobx";
 import { observe } from "mobx";
 import { observable } from "mobx";
-import { Mock } from 'vitest'
+import { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createUpdatableComputed } from "../create_updatable_computed";

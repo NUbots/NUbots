@@ -1,5 +1,5 @@
 import { NUClearNetSend } from "nuclearnet.js";
-import { Mock, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { FakeNUClearNetClient } from "../../../server/nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../../server/nuclearnet/fake_nuclearnet_server";

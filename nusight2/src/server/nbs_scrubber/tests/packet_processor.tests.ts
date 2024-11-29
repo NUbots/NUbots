@@ -1,4 +1,4 @@
-import { Mock, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, Mock, vi } from "vitest";
 
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { NbsPacketProcessor, PacketSend } from "../packet_processor";
