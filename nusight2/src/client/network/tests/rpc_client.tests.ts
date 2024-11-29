@@ -1,4 +1,5 @@
 import { NUClearNetPacket } from "nuclearnet.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
 import { message } from "../../../shared/messages";
@@ -187,11 +188,11 @@ function createNetwork(robots: RobotModel[] = []) {
   const nuclearnetMockEmitter = createMockEventEmitter();
   const nuclearnetClient: NUClearNetClient = {
     on: nuclearnetMockEmitter.on,
-    onJoin: jest.fn(),
-    onLeave: jest.fn(),
-    connect: jest.fn(),
-    onPacket: jest.fn(),
-    send: jest.fn(),
+    onJoin: vi.fn(),
+    onLeave: vi.fn(),
+    connect: vi.fn(),
+    onPacket: vi.fn(),
+    send: vi.fn(),
   };
 
   const nusightNetwork = new NUsightNetwork(nuclearnetClient, AppModel.of({ robots }));
