@@ -5,15 +5,15 @@ foot_down:
   threshold: 0.01
 log_level: DEBUG
 mahony:
-  Ki: 0.1
-  Kp: 0.3
+  Ki: 0.4325313657343745
+  Kp: 0.1942891618305163
   initial_bias:
     - 0
     - 0
     - 0
   initial_rpy:
     - 0
-    - 0.2
+    - 0.21
     - 0
 max_servo_change: 0.1
 urdf_path: models/robot.urdf
