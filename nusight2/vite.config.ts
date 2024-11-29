@@ -1,6 +1,6 @@
 /* eslint-env node */
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 import glslPlugin from "./build_scripts/glsl_plugin";
 
@@ -34,6 +34,18 @@ export default defineConfig({
       external: ["geotiff", "geotiff/src/compression", "fs", "http", "https", "url"],
     },
   },
+  test: {
+    isolate: false,
+    poolOptions: { useAtomics: true },
+    reporters: ["default", ["junit", { outputFile: "reports/test-report.xml" }]],
+    coverage: {
+      provider: "v8",
+      reportOnFailure: true,
+      reporter: ["text", "lcovonly", "html"],
+      reportsDirectory: "./reports",
+    },
+    include: ["**/tests/**/*.tests.{ts,tsx}"],
+  },
   plugins: [
     react({
       babel: {
@@ -56,7 +68,4 @@ export default defineConfig({
     }),
     glslPlugin(),
   ],
-  test: {
-    include: ["**/tests/**/*.tests.{ts,tsx}"],
-  },
 });
