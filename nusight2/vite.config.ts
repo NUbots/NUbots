@@ -37,6 +37,7 @@ export default defineConfig({
   test: {
     isolate: false,
     poolOptions: { useAtomics: true },
+    include: ["src/**/tests/**/*.tests.{ts,tsx}"],
     reporters: ["default", ["junit", { outputFile: "reports/test-report.xml" }]],
     coverage: {
       provider: "v8",
@@ -44,7 +45,6 @@ export default defineConfig({
       reporter: ["text", "lcovonly", "html"],
       reportsDirectory: "./reports",
     },
-    include: ["**/tests/**/*.tests.{ts,tsx}"],
   },
   plugins: [
     react({
