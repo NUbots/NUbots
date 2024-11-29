@@ -115,7 +115,7 @@ describe("File Picker", () => {
       "message.eye.ListFilesRequest.Response",
       createPacketFromServer(
         new ListFilesRequest.Response({
-          rpc: { token: 1, ok: false, error: "Error: ENOENT: no such file or directory, scandir '/invalid/directory'" },
+          rpc: { token: 1, ok: false, error: "ENOENT: no such file or directory, scandir '/invalid/directory'" },
         }),
       ),
     );

@@ -270,7 +270,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
           rpc: {
             token: 1,
             ok: false,
-            error: "Error: nbs index not found for file: /file/that/does/not/exist.nbs",
+            error: "nbs index not found for file: /file/that/does/not/exist.nbs",
           },
         }),
       ),
