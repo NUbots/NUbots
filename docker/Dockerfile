@@ -172,7 +172,7 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DINSTALL_GENX_IR=ON
 
 # gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.1.7.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
     --build-system cmake \
     -DRUN_TEST_SUITE=OFF
 
@@ -184,9 +184,9 @@ RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz
     -Dvalgrind=false
 
 # Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.15.0.tar.gz
+RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
 
-RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-22.4.4.tar.gz \
+RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
@@ -197,8 +197,8 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
     -DENABLE_NONFREE_KERNELS=ON
 
 # Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/22.29.23750.tar.gz \
-    --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
+RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
+    # --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
