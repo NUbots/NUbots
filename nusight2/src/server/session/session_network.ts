@@ -18,6 +18,7 @@ export type ClientMessageCallback<T> = (client: NUsightSessionClient, message: T
 export interface RpcResponse {
   rpc?: IRpcResponseMeta | null;
 }
+
 export type RpcRequestHandler<T> = (request: T, sender: NUsightSessionClient) => RpcResponse | Promise<RpcResponse>;
 
 /** Used for messages from the current NUsight server */
@@ -46,7 +47,7 @@ export class NUsightSessionNetwork {
     const messageType = message.constructor as MessageType<any>;
     const messageTypeName = messageTypeToName(messageType);
 
-    const payload = messageType.encode(message).finish() as Buffer;
+    const payload = Buffer.from(messageType.encode(message).finish());
     const hash = hashType(messageTypeName);
     const reliable = options.reliable ?? true;
     const peer = NUSIGHT_SERVER_PEER;
