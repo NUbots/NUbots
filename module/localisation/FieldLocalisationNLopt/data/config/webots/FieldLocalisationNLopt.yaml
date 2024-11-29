@@ -1,3 +1,16 @@
+log_level: INFO
+max_association_distance: 1.7415311901858588
+min_field_line_intersections: 3
+min_field_line_points: 50
+opt:
+  ftol_rel: 1e-6
+  maxeval: 1000
+  xtol_rel: 1e-6
+save_map: false
+start_time_delay: 1
+starting_side: EITHER
+state_change_weight: 0.921829339205462
+use_ground_truth_localisation: false
 change_limit:
   - 0.8089336479857134
   - 0.6285285250343745
@@ -34,11 +47,11 @@ kalman:
       - 0
       - 1
   Q:
-    - - 1e-3
+    - - 1e-2
       - 0
       - 0
     - - 0
-      - 1e-3
+      - 1e-2
       - 0
     - - 0
       - 0
@@ -53,16 +66,3 @@ kalman:
     - - 0
       - 0
       - 2.1363860657428577
-log_level: INFO
-max_association_distance: 1.7415311901858588
-min_field_line_intersections: 3
-min_field_line_points: 50
-opt:
-  ftol_rel: 1e-6
-  maxeval: 1000
-  xtol_rel: 1e-6
-save_map: false
-start_time_delay: 1
-starting_side: EITHER
-state_change_weight: 0.921829339205462
-use_ground_truth_localisation: false
