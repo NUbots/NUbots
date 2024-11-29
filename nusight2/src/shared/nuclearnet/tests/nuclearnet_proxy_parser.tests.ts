@@ -1,9 +1,9 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { Packet, PacketType } from "socket.io-parser";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { SeededRandom } from "../../../shared/base/random/seeded_random";
-import { Encoder } from "../nuclearnet_proxy_parser";
-import { Decoder } from "../nuclearnet_proxy_parser";
+import { Decoder, Encoder } from "../nuclearnet_proxy_parser";
 
 describe("NUClearNetProxyParser", () => {
   let e: Encoder;
