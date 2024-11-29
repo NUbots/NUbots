@@ -16,7 +16,10 @@ export class Rate {
   private currentUpdateCount: number = 0;
   private lastUpdateTime?: number;
 
-  constructor({ smoothing }: RateOpts, private clock: Clock) {
+  constructor(
+    { smoothing }: RateOpts,
+    private clock: Clock,
+  ) {
     this.smoothing = smoothing;
   }
 

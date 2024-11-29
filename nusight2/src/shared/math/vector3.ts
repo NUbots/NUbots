@@ -4,7 +4,11 @@ import { Matrix4 } from "./matrix4";
 import { Vector } from "./vector";
 
 export class Vector3 extends Vector {
-  constructor(readonly x: number, readonly y: number, readonly z: number) {
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly z: number,
+  ) {
     super();
   }
 
