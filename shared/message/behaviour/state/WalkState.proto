@@ -28,6 +28,7 @@ syntax = "proto3";
 package message.behaviour.state;
 
 import "Vector.proto";
+import "Transform.proto";
 
 message WalkState {
     enum State {
@@ -52,4 +53,12 @@ message WalkState {
 
     /// Walk phase
     Phase phase = 3;
+
+    /// Set of swing foot trajectory points rSPp for duration of step
+    repeated vec3 swing_foot_trajectory = 4;
+
+    /// Set of torso trajectory points rTPp for duration of step
+    repeated vec3 torso_trajectory = 5;
+
+    iso3 Hwp = 6;
 }

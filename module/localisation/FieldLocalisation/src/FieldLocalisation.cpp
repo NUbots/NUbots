@@ -110,6 +110,9 @@ namespace module::localisation {
         on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
             "Particle Filter",
             [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
+                log<NUClear::DEBUG>("Running particle filter");
+                log<NUClear::DEBUG>("Field lines: ", field_lines.rPWw.size());
+                log<NUClear::DEBUG>("Field localisation state: ", filter.get_state().transpose());
                 auto time_since_startup =
                     std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
                 bool fallen = stability <= Stability::FALLING;
@@ -123,10 +126,10 @@ namespace module::localisation {
                 }
 
                 // Not a valid time to run localisation
-                if (fallen || field_lines.rPWw.size() < cfg.min_observations
-                    || time_since_startup < cfg.start_time_delay) {
-                    return;
-                }
+                // if (fallen || field_lines.rPWw.size() < cfg.min_observations
+                //     || time_since_startup < cfg.start_time_delay) {
+                //     return;
+                // }
 
                 // Measurement update (using field line observations)
                 for (int i = 0; i < cfg.n_particles; i++) {
@@ -137,7 +140,11 @@ namespace module::localisation {
                 // Time update (includes resampling)
                 const double dt =
                     duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
+                log<NUClear::DEBUG>("Time since last update: ", dt);
                 last_time_update_time = NUClear::clock::now();
+                if (dt <= 0.0) {
+                    return;
+                }
                 filter.time(dt);
 
                 auto field(std::make_unique<Field>());

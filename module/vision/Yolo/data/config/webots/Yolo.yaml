@@ -23,4 +23,4 @@ nms_threshold: 0.5
 nms_score_threshold: 0.1
 
 # OpenVino device (CPU, GPU)
-device: CPU
+device: GPU

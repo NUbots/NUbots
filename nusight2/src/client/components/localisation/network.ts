@@ -13,6 +13,7 @@ import { RobotModel } from "../robot/model";
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
+import { Line } from "./robot_model";
 
 export class LocalisationNetwork {
   constructor(
@@ -28,8 +29,10 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.localisation.AssociationLines, this.onAssociationLines);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -51,6 +54,16 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+  };
+
+  @action onAssociationLines = (robotModel: RobotModel, associationLines: message.localisation.AssociationLines) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.association_lines = associationLines.lines.map((line) => {
+      return new Line({
+        start: Vector3.from(line.start),
+        end: Vector3.from(line.end),
+      });
+    });
   };
 
   @action
@@ -76,6 +89,22 @@ export class LocalisationNetwork {
       minY: boundedBox.yMin,
       maxY: boundedBox.yMax,
     };
+  }
+
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walkState: message.behaviour.state.WalkState) {
+    console.log("WalkState", walkState);
+    const robot = LocalisationRobotModel.of(robotModel);
+    // Add trajectory points to history if support switch occurred
+    if (robot.walkPhase != walkState.phase) {
+      robot.swingFootTrajectoryHistory.trajectories.push({ trajectory: robot.rSFf, walkPhase: robot.walkPhase });
+      robot.torsoTrajectoryHistory.trajectories.push(robot.rTFf);
+    }
+    robot.walkPhase = walkState.phase;
+    // Add current trajectory points
+    robot.Hwp = Matrix4.from(walkState.Hwp);
+    robot.swingFootTrajectory.rSPp = walkState.swingFootTrajectory.map((rSPp) => Vector3.from(rSPp));
+    robot.torsoTrajectory.rTPp = walkState.torsoTrajectory.map((rTPp) => Vector3.from(rTPp));
   }
 
   @action.bound
