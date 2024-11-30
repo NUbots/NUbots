@@ -6,7 +6,7 @@ import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber
 import { sampleFileA } from "../../nbs_scrubber/tests/test_utils";
 import { scrubberPeerName } from "../../nbs_scrubber/tests/test_utils";
 import { tick } from "../../nbs_scrubber/tests/test_utils";
-import { hashType } from "../../nuclearnet/hash_type";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUsightSession } from "../session";
 
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
