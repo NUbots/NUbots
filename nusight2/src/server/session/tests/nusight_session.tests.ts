@@ -11,14 +11,14 @@ import { NUsightSession } from "../session";
 
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
 
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 import ScrubberCloseRequest = message.eye.ScrubberCloseRequest;
 import ScrubberSeekRequest = message.eye.ScrubberSeekRequest;
 import ScrubberClosed = message.eye.ScrubberClosed;
 import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
 
-const testPacketType = "message.support.nusight.Test";
+const testPacketType = "message.network.Test";
 
 function createTestPacket(opts: { reliable?: boolean } = {}) {
   const payload = Test.encode({ message: "Test" }).finish();
@@ -52,7 +52,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocket.connection);
 
     // when the client sends a packet to the server, ...
-    const packetFromClient = { type: "message.support.nusight.Test" };
+    const packetFromClient = { type: "message.network.Test" };
     mockSocket.emit("packet", packetFromClient);
 
     // the server should forward the packet to NUClearNet.
@@ -98,7 +98,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
     mockSocket.emit("unlisten", "some-listen-token");
 
     const packet = createTestPacket();
-    nuclearnetMockEmit("message.support.nusight.Test", packet);
+    nuclearnetMockEmit("message.network.Test", packet);
 
     // the packet should not be forwarded to the client since it's no longer listening
     expect(mockSocket.connection.send).not.toHaveBeenCalled();
