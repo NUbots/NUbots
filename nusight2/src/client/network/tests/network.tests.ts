@@ -7,7 +7,7 @@ import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 
 import Sensors = message.input.Sensors;
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 
 describe("Network", () => {
   it("off() unregisters all callbacks", () => {
@@ -40,7 +40,7 @@ describe("Network", () => {
 
     const payload = Test.encode({ message: "hello world" }).finish();
     const packet: NUClearNetSend = {
-      type: "message.support.nusight.Test",
+      type: "message.network.Test",
       payload: payload as Buffer,
       reliable: true,
       target: "nusight",
