@@ -1,22 +1,23 @@
 import { IComputedValue } from "mobx";
 import { observable } from "mobx";
 import { autorun } from "mobx";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { disposableComputed } from "../disposable_computed";
 
 describe("disposableComputed", () => {
   let model: { a: number; b: number };
-  let expr: IComputedValue<{ sum: number; dispose: jest.Mock<void, []> }>;
+  let expr: IComputedValue<{ sum: number; dispose: Mock<() => void> }>;
 
   beforeEach(() => {
     model = observable({ a: 1, b: 1 });
-    expr = disposableComputed(() => ({ sum: model.a + model.b, dispose: jest.fn<void, []>() }));
+    expr = disposableComputed(() => ({ sum: model.a + model.b, dispose: vi.fn<() => void>() }));
   });
 
   const countUnique = <T extends unknown>(arr: T[]): number => new Set(arr).size;
 
   it("returns value on evaluation", () => {
-    const value = { foo: "bar", dispose: jest.fn() };
+    const value = { foo: "bar", dispose: vi.fn() };
     const expr = disposableComputed(() => value);
     expect(expr.get()).toBe(value);
   });
@@ -89,7 +90,10 @@ describe("disposableComputed", () => {
     }
 
     class ViewModel {
-      constructor(private readonly factory: TriangleFactory, private readonly model: { color: string }) {}
+      constructor(
+        private readonly factory: TriangleFactory,
+        private readonly model: { color: string },
+      ) {}
 
       @disposableComputed
       get value(): Triangle {
@@ -155,7 +159,10 @@ class TriangleFactory {
 }
 
 class Triangle {
-  constructor(public color: string, private onDispose: () => void) {}
+  constructor(
+    public color: string,
+    private onDispose: () => void,
+  ) {}
 
   dispose() {
     this.onDispose();

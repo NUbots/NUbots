@@ -32,7 +32,10 @@ import Side = message.vision.Goal.Side;
 import Goals = message.vision.Goals;
 
 export class VisionSimulator extends Simulator {
-  constructor(nuclearnetClient: NUClearNetClient, private readonly images: Uint8Array[]) {
+  constructor(
+    nuclearnetClient: NUClearNetClient,
+    private readonly images: Uint8Array[],
+  ) {
     super(nuclearnetClient);
   }
 

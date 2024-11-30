@@ -1,4 +1,5 @@
 import { NUClearNetSend } from "nuclearnet.js";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { FakeNUClearNetClient } from "../../../server/nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../../server/nuclearnet/fake_nuclearnet_server";
@@ -59,16 +60,16 @@ describe("NUsightNetwork", () => {
   });
 
   it("onNUClearMessage() registers a callback for the given message type", () => {
-    const off = jest.fn();
+    const off = vi.fn();
     nuclearnetClient.on.mockReturnValue(off);
 
-    expect(nusightNetwork.onNUClearMessage(Test, jest.fn())).toBe(off);
+    expect(nusightNetwork.onNUClearMessage(Test, vi.fn())).toBe(off);
     expect(nuclearnetClient.on).toHaveBeenCalledWith("message.support.nusight.Test", expect.any(Function));
 
-    const off2 = jest.fn();
+    const off2 = vi.fn();
     nuclearnetClient.on.mockReturnValue(off2);
 
-    expect(nusightNetwork.onNUClearMessage({ type: Test, subtype: 1 }, jest.fn())).toBe(off2);
+    expect(nusightNetwork.onNUClearMessage({ type: Test, subtype: 1 }, vi.fn())).toBe(off2);
     expect(nuclearnetClient.on).toHaveBeenCalledWith("message.support.nusight.Test#1", expect.any(Function));
   });
 });
@@ -79,8 +80,8 @@ describe("NUsightNetwork", () => {
  */
 function createMockNUClearNetClient(): {
   nuclearnetClient: NUClearNetClient & {
-    on: jest.Mock<() => void, [event: string, callback: (...args: any[]) => void]>;
-    send: jest.Mock<void, [event: string, ...args: any[]]>;
+    on: Mock<(event: string, callback: (...args: any[]) => void) => () => void>;
+    send: Mock<(event: string, ...args: any[]) => void>;
   };
   nuclearnetMockEmit: (event: string, ...args: any[]) => void;
 } {
@@ -90,7 +91,7 @@ function createMockNUClearNetClient(): {
   const mockEmitter = createMockEventEmitter();
   nuclearnetClient.on = mockEmitter.on;
 
-  nuclearnetClient.send = jest.fn();
+  nuclearnetClient.send = vi.fn();
 
   return {
     nuclearnetClient: nuclearnetClient as any,

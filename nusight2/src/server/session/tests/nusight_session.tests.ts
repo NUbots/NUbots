@@ -1,4 +1,5 @@
 import { NUClearNetPacket } from "nuclearnet.js";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
 import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber/tests/test_utils";
@@ -269,7 +270,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
           rpc: {
             token: 1,
             ok: false,
-            error: "Error: nbs index not found for file: /file/that/does/not/exist.nbs",
+            error: "nbs index not found for file: /file/that/does/not/exist.nbs",
           },
         }),
       ),
