@@ -2,9 +2,9 @@ import { EventEmitter } from "events";
 import { NUClearNetSend } from "nuclearnet.js";
 
 import { createSingletonFactory } from "../../shared/base/create_singleton_factory";
+import { hashType } from "../../shared/nuclearnet/hash_type";
 
 import { FakeNUClearNetClient } from "./fake_nuclearnet_client";
-import { hashType } from "./hash_type";
 
 /**
  * A fake in-memory NUClearNet 'server' which routes messages between each FakeNUClearNetClient.
@@ -60,7 +60,7 @@ export class FakeNUClearNetServer {
 
   send(client: FakeNUClearNetClient, opts: NUClearNetSend) {
     if (!client.peer) {
-      throw new Error("Cannot send a packaet to a client who has not connected to the network");
+      throw new Error("Cannot send a packet to a client who has not connected to the network");
     }
 
     const hash: Buffer = typeof opts.type === "string" ? hashType(opts.type) : opts.type;

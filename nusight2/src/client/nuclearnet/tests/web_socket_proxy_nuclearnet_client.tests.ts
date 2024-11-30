@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, Mocked, vi } from "vitest";
+import { beforeEach, describe, expect, it, type Mocked, vi } from "vitest";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
 import { DirectWebSocketClient } from "../direct_web_socket_client";

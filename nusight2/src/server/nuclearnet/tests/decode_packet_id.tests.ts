@@ -2,8 +2,8 @@ import { NUClearNetPacket } from "nuclearnet.js";
 import { describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { decodePacketId } from "../decode_packet_id";
-import { hashType } from "../hash_type";
 
 const DataPoint = message.eye.DataPoint;
 const Test = message.support.nusight.Test;
