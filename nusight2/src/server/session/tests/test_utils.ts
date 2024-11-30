@@ -5,10 +5,10 @@ import { AwaitableMock, createAwaitableMock } from "../../../shared/base/testing
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
 import { MessageType } from "../../../shared/messages";
 import { messageTypeToName } from "../../../shared/messages/type_converters";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { FakeNUClearNetClient } from "../../nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../nuclearnet/fake_nuclearnet_server";
-import { hashType } from "../../nuclearnet/hash_type";
 import { ClientConnection } from "../../web_socket/client_connection";
 
 /**
