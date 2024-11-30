@@ -1,7 +1,5 @@
-import { IComputedValue } from "mobx";
-import { observable } from "mobx";
-import { autorun } from "mobx";
-import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
+import { autorun, IComputedValue, observable } from "mobx";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import { disposableComputed } from "../disposable_computed";
 

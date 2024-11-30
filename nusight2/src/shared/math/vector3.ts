@@ -60,6 +60,15 @@ export class Vector3 extends Vector {
     return Vector3.from(this.toThree().applyMatrix4(m.toThree()));
   }
 
+  cross(v: Vector3): Vector3 {
+    // prettier-ignore
+    return new Vector3(
+      this.y * v.z - this.z * v.y,
+      this.z * v.x - this.x * v.z,
+      this.x * v.y - this.y * v.x,
+    );
+  }
+
   static fromThree(vec3: THREE.Vector3 | THREE.Euler): Vector3 {
     return new Vector3(vec3.x, vec3.y, vec3.z);
   }

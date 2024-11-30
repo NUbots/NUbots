@@ -42,6 +42,10 @@ export class Matrix3 {
     return Matrix3.fromThree(this.toThree().invert());
   }
 
+  transpose() {
+    return Matrix3.fromThree(this.toThree().transpose());
+  }
+
   static fromThree(mat4: THREE.Matrix3) {
     return new Matrix3(
       new Vector3(mat4.elements[0], mat4.elements[1], mat4.elements[2]),
@@ -65,6 +69,15 @@ export class Matrix3 {
       `${format(this.x.y)} ${format(this.y.y)} ${format(this.z.y)}`,
       `${format(this.x.z)} ${format(this.y.z)} ${format(this.z.z)}`,
     ].join("\n");
+  }
+
+  toArray() {
+    // prettier-ignore
+    return [
+      this.x.x, this.x.y, this.x.z,
+      this.y.x, this.y.y, this.y.z,
+      this.z.x, this.z.y, this.z.z,
+    ]
   }
 }
 

@@ -13,7 +13,7 @@ import {
   createPacketFromServer,
 } from "./test_utils";
 
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 
 const testPacketType = messageTypeToName(Test);

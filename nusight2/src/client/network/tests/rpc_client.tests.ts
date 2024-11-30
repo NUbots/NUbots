@@ -10,7 +10,7 @@ import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 import { nextRpcToken, RpcClient, RpcError } from "../rpc_client";
 
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 
 describe("RpcClient", () => {

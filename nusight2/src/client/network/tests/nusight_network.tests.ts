@@ -10,7 +10,7 @@ import { AppModel } from "../../components/app/model";
 import { NbsScrubbersModel } from "../../components/nbs_scrubbers/model";
 import { NUsightNetwork } from "../nusight_network";
 
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 
 describe("NUsightNetwork", () => {
   let nuclearnetClient: ReturnType<typeof createMockNUClearNetClient>["nuclearnetClient"];
@@ -27,7 +27,7 @@ describe("NUsightNetwork", () => {
   it("send() forwards the given packet to NUClearNet", () => {
     const payload = Test.encode({ message: "hello world" }).finish();
     const packet: NUClearNetSend = {
-      type: "message.support.nusight.Test",
+      type: "message.network.Test",
       payload: payload as Buffer,
       reliable: true,
       target: "nusight",
@@ -44,7 +44,7 @@ describe("NUsightNetwork", () => {
 
     nusightNetwork.emit(new Test(data));
     expect(nuclearnetClient.send).toHaveBeenCalledWith({
-      type: "message.support.nusight.Test",
+      type: "message.network.Test",
       payload: expectedPayload as Buffer,
       reliable: false,
       target: undefined,
@@ -52,7 +52,7 @@ describe("NUsightNetwork", () => {
 
     nusightNetwork.emit(new Test(data), { reliable: true, target: "nusight" });
     expect(nuclearnetClient.send).toHaveBeenCalledWith({
-      type: "message.support.nusight.Test",
+      type: "message.network.Test",
       payload: expectedPayload as Buffer,
       reliable: true,
       target: "nusight",
@@ -64,13 +64,13 @@ describe("NUsightNetwork", () => {
     nuclearnetClient.on.mockReturnValue(off);
 
     expect(nusightNetwork.onNUClearMessage(Test, vi.fn())).toBe(off);
-    expect(nuclearnetClient.on).toHaveBeenCalledWith("message.support.nusight.Test", expect.any(Function));
+    expect(nuclearnetClient.on).toHaveBeenCalledWith("message.network.Test", expect.any(Function));
 
     const off2 = vi.fn();
     nuclearnetClient.on.mockReturnValue(off2);
 
     expect(nusightNetwork.onNUClearMessage({ type: Test, subtype: 1 }, vi.fn())).toBe(off2);
-    expect(nuclearnetClient.on).toHaveBeenCalledWith("message.support.nusight.Test#1", expect.any(Function));
+    expect(nuclearnetClient.on).toHaveBeenCalledWith("message.network.Test#1", expect.any(Function));
   });
 });
 
