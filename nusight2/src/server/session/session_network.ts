@@ -4,7 +4,7 @@ import { NUClearNetPeer } from "nuclearnet.js";
 import { message, MessageType } from "../../shared/messages";
 import { Emit } from "../../shared/messages/emit";
 import { messageTypeToName } from "../../shared/messages/type_converters";
-import { hashType } from "../nuclearnet/hash_type";
+import { hashType } from "../../shared/nuclearnet/hash_type";
 
 import { NUsightSession } from "./session";
 import { NUsightSessionClient } from "./session_client";
