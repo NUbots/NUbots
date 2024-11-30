@@ -40,7 +40,15 @@ class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
           () => now("frame") / 1000,
           (t) => {
             this.model.Hwt = Matrix4.fromThree(
-              new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(t) / 5, 0, t)).setPosition(0, 0, 1),
+              new THREE.Matrix4()
+                .makeRotationFromEuler(new THREE.Euler(Math.cos(t) / 5, 0, t))
+                .multiply(
+                  new THREE.Matrix4().makeTranslation(
+                    Math.cos((7 * t) / 10),
+                    Math.cos((5 * t) / 10),
+                    Math.cos((3 * t) / 10) + 2,
+                  ),
+                ),
             );
           },
         )

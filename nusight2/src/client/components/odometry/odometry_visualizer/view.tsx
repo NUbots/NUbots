@@ -12,33 +12,11 @@ import styles from "./style.module.css";
 
 export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualizerModel }) => {
   const rTWw = model.Hwt.t.vec3();
-
-  const cameraPosition = React.useMemo(() => {
-    const { distance, pitch, yaw } = model.camera;
-    const p = pitch - Math.PI / 2;
-    const y = -yaw + Math.PI;
-    // prettier-ignore
-    const orbitPosition = new Vector3(
-      Math.sin(p) * Math.cos(y),
-      Math.sin(p) * Math.sin(y),
-      Math.cos(p),
-    ).multiplyScalar(-distance); // rCTw
-    return orbitPosition.add(rTWw);
-  }, [model.camera.distance, model.camera.yaw, model.camera.pitch]);
-
   return (
     <div className={styles.visualizer}>
       <ThreeFiber>
-        <PerspectiveCamera
-          fov={75}
-          aspect={1}
-          near={0.001}
-          far={100}
-          up={[0, 0, 1]}
-          position={cameraPosition.toArray()}
-          lookAt={rTWw}
-        />
-        <OrbitControls target={rTWw.toArray()} />
+        <PerspectiveCamera fov={75} aspect={1} near={0.001} far={100} up={[0, 0, 1]} />
+        <OrbitControls enableDamping={true} enablePan={false} target={rTWw.toArray()} />
         <Torso
           accelerometer={model.accelerometer}
           position={rTWw.toArray()}
