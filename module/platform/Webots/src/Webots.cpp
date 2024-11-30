@@ -123,8 +123,8 @@ namespace module::platform {
         if (name == "right_shoulder_roll_sensor") { return servos.r_shoulder_roll; }
         if (name == "right_shoulder_pitch_sensor") { return servos.r_shoulder_pitch; }
         // Neck and head
-        if (name == "neck_yaw_sensor") { return servos.head_pan; }
-        if (name == "head_pitch_sensor") { return servos.head_tilt; }
+        if (name == "neck_yaw_sensor") { return servos.neck_yaw; }
+        if (name == "head_pitch_sensor") { return servos.neck_pitch; }
         // clang-format on
 
         throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
