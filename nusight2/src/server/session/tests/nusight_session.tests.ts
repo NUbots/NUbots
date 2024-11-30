@@ -2,11 +2,11 @@ import { NUClearNetPacket } from "nuclearnet.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber/tests/test_utils";
 import { sampleFileA } from "../../nbs_scrubber/tests/test_utils";
 import { scrubberPeerName } from "../../nbs_scrubber/tests/test_utils";
 import { tick } from "../../nbs_scrubber/tests/test_utils";
-import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUsightSession } from "../session";
 
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
