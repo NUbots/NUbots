@@ -156,7 +156,7 @@ RUN install-package ncurses
 
 RUN pip install pyyaml mako
 
-# intel graphics compiler
+# Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
     --patch https://gist.githubusercontent.com/ysims/3775531601b210507c478bca083b768d/raw/fa435e70c2870f2539c0da973a161ad7968d4696/built_tools_target.patch \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
@@ -185,7 +185,6 @@ RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz
 
 # Libva and the iHD driver for hardware compression
 RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
-
 RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
@@ -198,7 +197,6 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
 
 # Install intel compute runtime (OpenCL implementation)
 RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
-    # --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
@@ -299,10 +297,9 @@ RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
     --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.72.3/glib-2.72.3.tar.bz2 \
-    -Ddefault_library=both && \
-    cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
-RUN install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
+RUN install-package glib2-devel
+RUN  ls ${prefix}/include && \
+     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
     -Ddefault_library=both \
     -Dusb=enabled \
     -Ddocumentation=disabled \
