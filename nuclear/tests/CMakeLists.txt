@@ -29,11 +29,13 @@ SOFTWARE.
 cmake_policy(SET CMP0076 NEW)
 
 find_package(Catch2 REQUIRED)
+find_package(NUClear REQUIRED)
 
 add_executable(TestNUClearRoles)
 
 # Add all of the tests
 add_subdirectory(message)
+target_link_libraries(TestNUClearRoles PUBLIC NUClear::nuclear)
 target_link_libraries(TestNUClearRoles PUBLIC nuclear::message)
 target_link_libraries(TestNUClearRoles PUBLIC Catch2::Catch2WithMain)
 

@@ -51,7 +51,7 @@ namespace module::extension {
                     group.active_provider = provider;
 
                     auto lock = hold_run_reason(RunInfo::RunReason::STARTED);
-                    powerplant.submit(provider->reaction->get_task(), true);
+                    powerplant.submit(provider->reaction->get_task(true));
                 }
             }
         }

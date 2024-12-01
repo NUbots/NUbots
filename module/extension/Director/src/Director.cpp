@@ -178,7 +178,7 @@ namespace module::extension {
                 bool valid = w->validator(state);
                 if (valid != w->current) {
                     w->current = valid;
-                    emit<Scope::DIRECT>(std::make_unique<StateUpdate>(id, w->type, state));
+                    emit<Scope::INLINE>(std::make_unique<StateUpdate>(id, w->type, state));
                 }
             });
 
@@ -286,7 +286,7 @@ namespace module::extension {
             }
             else {
                 auto& p = providers.at(task->requester_id);
-                auto id = p->reaction->identifiers.name;
+                auto id = p->reaction->identifiers->name;
                 if (p->classification == Provider::Classification::START) {
                     log<NUClear::WARN>("The task",
                                        task->name,

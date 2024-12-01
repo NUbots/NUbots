@@ -54,15 +54,15 @@ namespace extension::behaviour {
          * @param reaction the reaction object that we are binding the Provider to
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                r.reactor.emit<NUClear::dsl::word::emit::Inline>(
                     std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvideReaction>>(r.id));
             });
         }
@@ -77,11 +77,11 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
-            NUClear::threading::Reaction& r) {
+        static std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
+            NUClear::threading::ReactionTask& t) {
 
-            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(r.id));
-            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
+            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(t.parent->id));
+            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(t.parent->id));
             return std::make_tuple(run_data, run_info);
         }
 
@@ -93,10 +93,10 @@ namespace extension::behaviour {
          * @param task The reaction task object that just finished
          */
         template <typename DSL>
-        static inline void postcondition(NUClear::threading::ReactionTask& task) {
+        static void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+            task.parent->reactor.emit<NUClear::dsl::word::emit::Inline>(
+                std::make_unique<commands::ProviderDone>(task.parent->id, task.id));
         }
     };
 
@@ -152,10 +152,10 @@ namespace extension::behaviour {
          * @param reaction the reaction that is having this when condition bound to it
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director about this when condition
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(std::make_unique<commands::WhenExpression>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(std::make_unique<commands::WhenExpression>(
                 reaction,
                 // typeindex of the enum value
                 typeid(State),
@@ -164,7 +164,7 @@ namespace extension::behaviour {
                 // Function that uses get to get the current state of the condition
                 [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
-                    auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
+                    auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction->get_task());
                     if (ptr == nullptr) {
                         throw std::runtime_error("The state requested has not been emitted yet");
                     }
@@ -198,9 +198,9 @@ namespace extension::behaviour {
          * @param reaction the reaction that is having this when condition bound to it
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
     };
@@ -224,9 +224,9 @@ namespace extension::behaviour {
         bool done;
 
         template <typename DSL>
-        static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
+        static std::shared_ptr<Uses<Provider>> get(NUClear::threading::ReactionTask& t) {
 
-            auto group_info = information::InformationSource::get_group_info(r.id,
+            auto group_info = information::InformationSource::get_group_info(t.parent->id,
                                                                              typeid(Provider),
                                                                              typeid(commands::RootType<Provider>));
 
@@ -259,8 +259,8 @@ namespace extension::behaviour {
          * @param reaction the reaction that is having this needs condition bound to it
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
@@ -312,10 +312,10 @@ namespace extension::behaviour {
 
             // Work out who is sending the task so we can determine if it's a subtask
             const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
+            uint64_t reaction_id = (task != nullptr) ? task->parent->id : -1;
             uint64_t task_id     = (task != nullptr) ? task->id : -1;
 
-            NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
+            NUClear::dsl::word::emit::Inline<commands::BehaviourTask>::emit(
                 powerplant,
                 std::make_shared<commands::BehaviourTask>(typeid(T),
                                                           typeid(commands::RootType<T>),

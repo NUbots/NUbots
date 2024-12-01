@@ -45,7 +45,7 @@ namespace module::support::logging {
             /// The type hash generated via NUClear serialise
             uint64_t hash{};
             /// The id field of the message or, if id does not exist, 0.
-            uint32_t id = 0;
+            uint32_t subtype = 0;
             /// The raw data we will be writing
             std::vector<uint8_t> data;
 
@@ -67,6 +67,8 @@ namespace module::support::logging {
                 std::string binary;
                 /// The threshold of bytes where after this we split the file
                 uint64_t split_size{};
+                /// The encryption passphrase to use or empty if not encrypting
+                std::string passphrase;
             } output;
         } config;
 
@@ -81,7 +83,6 @@ namespace module::support::logging {
         /// The reaction handles for types we have currently bound that we are recording
         std::map<std::string, ReactionHandle> handles;
     };
-
 }  // namespace module::support::logging
 
 #endif  // MODULE_SUPPORT_LOGGING_DATALOGGING_HPP

@@ -87,13 +87,13 @@ namespace {
             // Emit the trigger to run the subtask
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 events.push_back("emitting run trigger");
-                emit<Scope::DIRECT>(std::make_unique<RunTrigger>());
+                emit<Scope::INLINE>(std::make_unique<RunTrigger>());
             });
 
             // Check the uses state of the subtask
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 events.push_back("emit uses trigger");
-                emit<Scope::DIRECT>(std::make_unique<UsesTrigger>());
+                emit<Scope::INLINE>(std::make_unique<UsesTrigger>());
             });
 
             // Run the simple task, which has a lower priority than the root trigger subtask
@@ -112,7 +112,7 @@ namespace {
             // Remove the root subtask to detect a running subtask on the secondary task
             on<Trigger<Step<5>>, Priority::LOW>().then([this] {
                 events.push_back("emit remove trigger");
-                emit<Scope::DIRECT>(std::make_unique<RemoveTrigger>());
+                emit<Scope::INLINE>(std::make_unique<RemoveTrigger>());
             });
 
             // Run the simple task again to see the running state
@@ -124,7 +124,7 @@ namespace {
             // Emit the uses trigger to check the non-running state
             on<Trigger<Step<7>>, Priority::LOW>().then([this] {
                 events.push_back("emit uses trigger");
-                emit<Scope::DIRECT>(std::make_unique<UsesTrigger>());
+                emit<Scope::INLINE>(std::make_unique<UsesTrigger>());
             });
 
             on<Startup>().then([this] {
@@ -145,7 +145,7 @@ namespace {
 TEST_CASE("Test that the Uses run state information is correct with root tasks", "[director][uses][state][root]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();
