@@ -12,7 +12,7 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
 
   const commonCircle = (
     <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
-      <circleBufferGeometry args={[0.04, 20]} />
+      <circleGeometry args={[0.04, 20]} />
       <meshBasicMaterial color="red" />
     </mesh>
   );
@@ -23,11 +23,11 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
         <>
           {commonCircle}
           <mesh position={[basePosition[0], basePosition[1] - 0.05, basePosition[2]]}>
-            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+            <boxGeometry args={[0.1, 0.02, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
           <mesh position={[basePosition[0] - 0.04, basePosition[1], basePosition[2]]}>
-            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
+            <boxGeometry args={[0.02, 0.1, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
         </>
@@ -37,11 +37,11 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
         <>
           {commonCircle}
           <mesh position={[basePosition[0], basePosition[1] + 0.05, basePosition[2]]}>
-            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+            <boxGeometry args={[0.1, 0.02, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
           <mesh position={[basePosition[0], basePosition[1], basePosition[2]]}>
-            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
+            <boxGeometry args={[0.02, 0.1, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
         </>
@@ -51,11 +51,11 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
         <>
           {commonCircle}
           <mesh position={[basePosition[0], basePosition[1], basePosition[2]]} rotation={[0, 0, Math.PI / 4]}>
-            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+            <boxGeometry args={[0.1, 0.02, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
           <mesh position={[basePosition[0], basePosition[1], basePosition[2]]} rotation={[0, 0, -Math.PI / 4]}>
-            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+            <boxGeometry args={[0.1, 0.02, 0.02]} />
             <meshBasicMaterial color="black" />
           </mesh>
         </>

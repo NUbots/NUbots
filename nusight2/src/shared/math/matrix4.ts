@@ -5,7 +5,12 @@ import { Vector3 } from "./vector3";
 import { Vector4 } from "./vector4";
 
 export class Matrix4 {
-  constructor(readonly x: Vector4, readonly y: Vector4, readonly z: Vector4, readonly t: Vector4) {}
+  constructor(
+    readonly x: Vector4,
+    readonly y: Vector4,
+    readonly z: Vector4,
+    readonly t: Vector4,
+  ) {}
 
   static of() {
     return new Matrix4(

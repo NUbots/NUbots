@@ -95,11 +95,11 @@ const Joins = observer(({ polylines, camera }: { polylines: Polyline[]; camera: 
   const { size: canvas } = useThree();
   return (
     <instancedMesh count={joins.length} frustumCulled={false}>
-      <circleBufferGeometry args={[0.5, 12]}>
+      <circleGeometry args={[0.5, 12]}>
         <instancedBufferAttribute attach="attributes-lineJoin" args={[positions, 2]} />
         <instancedBufferAttribute attach="attributes-color" args={[colors, 4]} />
         <instancedBufferAttribute attach="attributes-radius" args={[radii, 1]} />
-      </circleBufferGeometry>
+      </circleGeometry>
       <RawShaderMaterial
         vertexShader={joinVertexShader}
         fragmentShader={joinFragmentShader}
