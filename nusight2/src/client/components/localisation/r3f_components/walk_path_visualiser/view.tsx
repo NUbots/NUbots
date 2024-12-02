@@ -53,19 +53,19 @@ export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
   return (
     <object3D>
       <mesh position={[rDFf?.x, rDFf?.y, 0.005]}>
-        <circleBufferGeometry args={[min_align_radius, 40]} />
+        <circleGeometry args={[min_align_radius, 40]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rDFf?.x, rDFf?.y, 0.006]}>
-        <circleBufferGeometry args={[max_align_radius, 40]} />
+        <circleGeometry args={[max_align_radius, 40]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.007]} rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
-        <circleBufferGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
+        <circleGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
-        <circleBufferGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
+        <circleGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.009]}>

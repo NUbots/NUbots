@@ -26,9 +26,9 @@
 
 syntax = "proto3";
 
-package message.support.nusight;
+package message.network;
 
-/// This is used as a basic message that NUsight can use to test its network functionality
+/// This is used as a basic message for testing network functionality
 message Test {
     string message = 1;
 }
