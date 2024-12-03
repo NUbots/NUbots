@@ -95,6 +95,14 @@ namespace module::planning {
         const std::vector<Eigen::Vector2d> get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                          const Eigen::Vector2d& rDRr);
 
+        /// @brief Adjust the target direction to avoid obstacles
+        /// @param robots vector of all robots in the world
+        /// @param rDRr vector from robot to final target
+        /// @param obstacles vector of obstacles in the path to avoid
+        /// @return adjusted target direction
+        Eigen::Vector2d adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
+                                                              const std::vector<Eigen::Vector2d>& obstacles);
+
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
         explicit PlanWalkPath(std::unique_ptr<NUClear::Environment> environment);
