@@ -21,7 +21,6 @@ export default function IconPendulum(props: { className?: string }) {
 
       <line x1="50" y1="10" x2="85" y2="50" />
       <circle cx="85" cy="60" r="10" fill="currentColor" />
-
     </svg>
   );
 }

@@ -8,7 +8,6 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
 
-
 @observer
 export class KinematicsView extends React.Component<{
   controller: KinematicsController;
