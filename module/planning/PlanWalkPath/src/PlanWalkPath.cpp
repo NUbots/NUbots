@@ -80,7 +80,10 @@ namespace module::planning {
             cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
             cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
             cfg.strafe_gain      = config["strafe_gain"].as<double>();
-            cfg.max_strafe_angle = config["max_strafe_angle"].as<Expression>();
+
+            // Backwards tuning
+            cfg.max_strafe_angle      = config["max_strafe_angle"].as<Expression>();
+            cfg.backward_acceleration = config["backward_acceleration"].as<double>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -155,20 +158,20 @@ namespace module::planning {
                         0.0,
                         1.0);
                     desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
-                    log<NUClear::DEBUG>("Normal, angle error gain: ",
-                                        angle_error_gain,
-                                        "desired_velocity_magnitude: ",
-                                        desired_velocity_magnitude);
                 }
                 else {
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
-                    // "Decelerate"
-                    velocity_magnitude -= 0.1;
+
                     // If we are aligned with the final heading, we are close to the target
                     // and the angle to the target is too large, step backwards
+                    // Travel backwards until we reach min backwards velocity magnitude
+                    // Once started stepping backwards, keep stepping backwards until we reach the target
+                    // TODO: use actual velocity magnitude as bell curve + bool?
                     if (((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)
                          || (velocity_magnitude > -3 && velocity_magnitude < 0.0))) {
+                        // "Decelerate"
+                        velocity_magnitude -= cfg.backward_acceleration;
 
                         velocity_magnitude = std::min(velocity_magnitude, 0.0);
 

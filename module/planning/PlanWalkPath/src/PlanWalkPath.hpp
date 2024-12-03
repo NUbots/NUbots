@@ -59,7 +59,10 @@ namespace module::planning {
             double min_angle_error = 0.0;
             // Proportional gain for strafing to target point
             double strafe_gain = 0.0;
-            // Maximum angle to target for strafing backwards
+
+            /// @brief Crude acceleration when travelling backwards
+            double backward_acceleration = 0.0;
+            /// @brief Maximum angle to target for strafing backwards
             double max_strafe_angle = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
@@ -82,6 +85,9 @@ namespace module::planning {
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
+
+        /// @brief Boolean value to determine if the robot is walking backwards
+        bool is_walking_backwards = false;
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain
