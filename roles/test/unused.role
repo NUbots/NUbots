@@ -1,0 +1,39 @@
+# This role is used to test individual modules that are not used in other roles
+nuclear_role(
+  #Motion
+  motion::IKKick
+  #Skill
+  skill::GPT
+  skill::QuinticWalk
+  skill::ScriptKick
+  skill::Say
+  #Platform
+  platform::Webots
+  platform::HardwareSimulator
+  platform::OpenCR::HardwareIO
+  platform::NUSense::HardwareIO
+  #Strategy
+  strategy::Ready
+  #Purpose
+  purpose::Tester
+  #Tools
+  tools::FirmwareInstaller
+  tools::NBSPlayback
+  #NBS
+  nbs::Player
+  #Input
+  input::FakeCamera
+  input::ImageDecompressor
+  #Support
+  support::ReactionTimer
+  support::Profiler
+  support::NUsightHarness
+  support::LocalisationSimulator
+  support::logging::DataPlayback
+  support::logging::DataLogging
+  support::logging::FileLogHandler
+  #Vision
+  vision::RobotDetector
+  #localisation
+  localisation::FieldLocalisation
+)
