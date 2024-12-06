@@ -79,18 +79,19 @@ def run(**kwargs):
                                 break
 
     # Find all of the used modules
-    for role in os.listdir(roles_path):
-        if role.endswith(".role"):
-            with open(os.path.join(roles_path, role), "r") as f:
-                for line in f:
-                    if "#" in line:
-                        line = line[: line.find("#")]
-                    line = line.strip()
-                    reg = re.findall(r"(\w+::(?:\w+(::)?)*)", line)
-                    for modules in reg:
-                        for module in modules:
-                            if module != "" and module != "::":
-                                used_modules.add(module)
+    for folder, _, files in os.walk(roles_path):
+        for role in files:
+            if role.endswith(".role"):
+                with open(os.path.join(folder, role), "r") as f:
+                    for line in f:
+                        if "#" in line:
+                            line = line[: line.find("#")]
+                        line = line.strip()
+                        reg = re.findall(r"(\w+::(?:\w+(::)?)*)", line)
+                        for modules in reg:
+                            for module in modules:
+                                if module != "" and module != "::":
+                                    used_modules.add(module)
 
     # Find out which modules are unused
     unused_modules = existing_modules.difference(used_modules)
