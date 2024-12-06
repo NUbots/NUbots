@@ -1,40 +1,32 @@
-# This role is used to test individual modules that are not used in other roles
-# commented modules wont allow role to compile
+# This role is used to test modules that are not used in other roles commented modules wont compile
 nuclear_role(
-  #Motion
-  #motion::IKKick
-  #Skill
+  # Motion
+  # Skill
   skill::GPT
-  #skill::QuinticWalk
   skill::ScriptKick
   skill::Say
-  #Platform
+  # Platform
   platform::Webots
   platform::HardwareSimulator
   platform::OpenCR::HardwareIO
-  #platform::NUSense::HardwareIO
-  #Strategy
+  # Strategy
   strategy::Ready
-  #Purpose
+  # Purpose
   purpose::Tester
-  #Tools
+  # Tools
   tools::FirmwareInstaller
   tools::NBSPlayback
-  #NBS
-  #nbs::Player
-  #Input
+  # NBS
+  # Input
   input::FakeCamera
   input::ImageDecompressor
-  #Support
+  # Support
   support::ReactionTimer
   support::Profiler
   support::NUsightHarness
-  #support::LocalisationSimulator
   support::logging::DataPlayback
-  #support::logging::DataLogging
   support::logging::FileLogHandler
-  #Vision
+  # Vision
   vision::RobotDetector
-  #localisation
-  #localisation::FieldLocalisation
+  # localisation
 )

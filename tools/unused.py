@@ -78,7 +78,6 @@ def run(**kwargs):
                                 existing_modules.add(path)
                                 break
 
-
     # Find all of the used modules
     for folder, _, files in os.walk(roles_path):
         for role in files:
