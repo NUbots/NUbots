@@ -78,6 +78,7 @@ def run(**kwargs):
                                 existing_modules.add(path)
                                 break
 
+
     # Find all of the used modules
     for folder, _, files in os.walk(roles_path):
         for role in files:
@@ -97,13 +98,13 @@ def run(**kwargs):
     unused_modules = existing_modules.difference(used_modules)
 
     cprint("Existing Modules", attrs=["bold"])
-    print("\n".join(existing_modules))
+    print("\n".join(sorted(existing_modules)))
     print("\n")
 
     cprint("Used Modules", "green", attrs=["bold"])
-    cprint("\n".join(used_modules), "green")
+    cprint("\n".join(sorted(used_modules)), "green")
     print("\n")
 
     cprint("Unused Modules", "red", attrs=["bold"])
-    cprint("\n".join(unused_modules), "red", attrs=["bold"])
+    cprint("\n".join(sorted(unused_modules)), "red", attrs=["bold"])
     print("\n")
