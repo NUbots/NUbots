@@ -195,9 +195,9 @@ namespace module::planning {
                         walk_on_spot_counter = 0;
 
                         // "Accelerate", assuring velocity is always positive
-                        velocity_magnitude = std::max(velocity_magnitude, 0.5);
+                        velocity_magnitude = std::max(velocity_magnitude, 0.1);
                         // "Proportional control" to strafe towards the target inside align radius
-                        desired_velocity_magnitude = cfg.strafe_gain * error * velocity_magnitude;
+                        desired_velocity_magnitude = cfg.strafe_gain * error;
                     }
                 }
 
