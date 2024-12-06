@@ -60,10 +60,10 @@ namespace module::planning {
             // Proportional gain for strafing to target point
             double strafe_gain = 0.0;
 
-            /// @brief Crude acceleration when travelling backwards
-            double backward_acceleration = 0.0;
             /// @brief Maximum angle to target for strafing backwards
             double max_strafe_angle = 0.0;
+            /// @brief Buffer to prevent oscillation between forwards and backwards movement
+            double backward_buffer = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
@@ -85,6 +85,12 @@ namespace module::planning {
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
+
+        /// @brief Amount of cycles to walk on the spot
+        int WALK_ON_SPOT_CYCLES = 10;
+
+        /// @brief Counter for the amount of cycles to walk on the spot
+        int walk_on_spot_counter = 0;
 
         /// @brief Boolean value to determine if the robot is walking backwards
         bool is_walking_backwards = false;

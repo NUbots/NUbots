@@ -82,8 +82,7 @@ namespace module::planning {
             cfg.strafe_gain      = config["strafe_gain"].as<double>();
 
             // Backwards tuning
-            cfg.max_strafe_angle      = config["max_strafe_angle"].as<Expression>();
-            cfg.backward_acceleration = config["backward_acceleration"].as<double>();
+            cfg.max_strafe_angle = config["max_strafe_angle"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -163,19 +162,18 @@ namespace module::planning {
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
 
-                    // If we are aligned with the final heading, we are close to the target
-                    // and the angle to the target is too large, step backwards
-                    // Travel backwards until we reach min backwards velocity magnitude
-                    // Once started stepping backwards, keep stepping backwards until we reach the target
-                    // TODO: use actual velocity magnitude as bell curve + bool?
-                    if (((std::abs(angle_to_final_heading < 0.2) && std::abs(angle_to_target) > cfg.max_strafe_angle)
-                         || (velocity_magnitude > -3 && velocity_magnitude < 0.0))) {
-                        // "Decelerate"
-                        velocity_magnitude -= cfg.backward_acceleration;
+                    // Add a buffer to prevent oscillation between forwards and backwards movement
+                    const double max_strafe_angle = is_walking_backwards == true
+                                                        ? cfg.max_strafe_angle - cfg.backward_buffer
+                                                        : cfg.max_strafe_angle;
 
-                        velocity_magnitude = std::min(velocity_magnitude, 0.0);
+                    // If we are aligned with the final heading and the angle to the target is too large, step backwards
+                    if (((std::abs(angle_to_final_heading) < 0.2 && std::abs(angle_to_target) > max_strafe_angle))) {
+                        is_walking_backwards = true;
+                        walk_on_spot_counter++;
+                        velocity_magnitude = 0.0;
 
-                        if (velocity_magnitude > -0.6) {
+                        if (walk_on_spot_counter < WALK_ON_SPOT_CYCLES) {
                             // Equal forward and sideways velocity
                             rDRr = Eigen::Vector2d(1.0, 1.0);
                             // Arbitrary small velocity to keep the robot moving
@@ -185,13 +183,18 @@ namespace module::planning {
                             // Ensure the backwards velocity magnitude does not exceed the maximum
                             desired_velocity_magnitude = cfg.strafe_gain * error;
                             // Step backwards while keeping the forward direction
-                            rDRr = Eigen::Vector2d(-0.3, rDRr.y());
+                            rDRr = Eigen::Vector2d(-0.3, 0.001);
                         }
+                        // Do not rotate when stepping backwards
                         desired_heading = 0.0;
                     }
                     // Go towards target
                     else {
-                        // Limit the velocity to zero
+                        // Reset the backwards walking state
+                        is_walking_backwards = false;
+                        walk_on_spot_counter = 0;
+
+                        // "Accelerate", assuring velocity is always positive
                         velocity_magnitude = std::max(velocity_magnitude, 0.5);
                         // "Proportional control" to strafe towards the target inside align radius
                         desired_velocity_magnitude = cfg.strafe_gain * error * velocity_magnitude;

@@ -25,6 +25,7 @@ max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turnin
 min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
 strafe_gain: 0.4
 max_strafe_angle: 65 * pi / 180 # Maximum angle to strafe at
+backward_buffer: 20 * pi / 180 # Buffer angle to keep direction of strafe
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.5
