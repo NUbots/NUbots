@@ -92,27 +92,27 @@ namespace module::skill {
 
                         if (on_front) {
                             log<NUClear::INFO>("Getting up from front");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_front));
+                            // emit<Task>(load_script<BodySequence>(cfg.getup_front));
                         }
                         else if (on_back) {
                             log<NUClear::INFO>("Getting up from back");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_back));
+                            // emit<Task>(load_script<BodySequence>(cfg.getup_back));
                         }
                         else if (on_right) {
                             log<NUClear::INFO>("Getting up from right");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_right));
+                            // emit<Task>(load_script<BodySequence>(cfg.getup_right));
                         }
                         else if (on_left) {
                             log<NUClear::INFO>("Getting up from left");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_left));
+                            // emit<Task>(load_script<BodySequence>(cfg.getup_left));
                         }
                         else if (upright) {
                             log<NUClear::INFO>("Getting up from upright");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_upright));
+                            // emit<Task>(load_script<BodySequence>(cfg.getup_upright));
                         }
                         else if (upside_down) {
                             log<NUClear::INFO>("Getting up from upside_down");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
+                            // emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
                         }
 
                     } break;
