@@ -20,6 +20,6 @@ export class KinematicsNetwork {
 
   @action.bound
   private onMessageReceived(data: any) {
-    console.log("Message received:", data);
+    console.log(data);
   }
 }

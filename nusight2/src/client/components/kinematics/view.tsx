@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useRef, PropsWithChildren } from "react";
+import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { action } from "mobx";
 import { observer } from "mobx-react";
-import { Canvas, useThree, useFrame } from "@react-three/fiber";
-
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import * as THREE from "three";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
-import { Nugus } from "./r3f_components/nugus/view";
 
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
+import { Nugus } from "./r3f_components/nugus/view";
+import { KinematicsRobotModel } from "./robot_model";
 
 // CameraControls component
 const CameraControls = () => {
   const { camera, gl } = useThree();
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(camera.fov)
+  const [zoom, setZoom] = useState(camera.fov);
   const spherical = useRef(new THREE.Spherical(20, Math.PI / 2.75, Math.PI / 4)).current;
 
   useEffect(() => {
@@ -87,15 +87,25 @@ const CameraControls = () => {
 };
 
 // Arrow component
-const Arrow = ({ dir, color, length, thickness }: { dir: [number, number, number], color: number, length: number, thickness: number }) => {
+const Arrow = ({
+  dir,
+  color,
+  length,
+  thickness,
+}: {
+  dir: [number, number, number];
+  color: number;
+  length: number;
+  thickness: number;
+}) => {
   const shaftLength = length * 0.95;
   const headLength = length * 0.05;
 
   // Determine rotation for each direction
   const rotation = (() => {
     if (dir[0] === 1) return [0, 0, -Math.PI / 2]; // Rotate X-axis arrow
-    if (dir[1] === 1) return [0, 0, 0];             // No rotation for Y-axis arrow
-    if (dir[2] === 1) return [Math.PI / 2, 0, 0];   // Rotate Z-axis arrow
+    if (dir[1] === 1) return [0, 0, 0]; // No rotation for Y-axis arrow
+    if (dir[2] === 1) return [Math.PI / 2, 0, 0]; // Rotate Z-axis arrow
     return [0, 0, 0];
   })();
 
@@ -157,13 +167,13 @@ const PositiveGridPlanes = () => {
 };
 
 // Each coordinate label component
-const CoordinateLabel = ({ text, position }: { text: string, position: [number, number, number] }) => {
+const CoordinateLabel = ({ text, position }: { text: string; position: [number, number, number] }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
 
   useEffect(() => {
     const loader = new FontLoader();
-    loader.load('/fonts/roboto/Roboto Medium_Regular.json', (font: THREE.Font) => {
+    loader.load("/fonts/roboto/Roboto Medium_Regular.json", (font: THREE.Font) => {
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: 0.3,
@@ -198,14 +208,14 @@ const AxisLabels = ({ length }: { length: number }) => {
   for (let i = 1; i <= length; i++) {
     labels.push(
       <React.Fragment key={`x-${i}`}>
-        <CoordinateLabel text={(i - length/2).toString()} position={[i, 0, -0.25]} />
+        <CoordinateLabel text={(i - length / 2).toString()} position={[i, 0, -0.25]} />
       </React.Fragment>,
       <React.Fragment key={`y-${i}`}>
-        <CoordinateLabel text={(i - length/2).toString()} position={[0.25, i, 0]} />
+        <CoordinateLabel text={(i - length / 2).toString()} position={[0.25, i, 0]} />
       </React.Fragment>,
       <React.Fragment key={`z-${i}`}>
-        <CoordinateLabel text={(i - length/2).toString()} position={[-0.25, 0, i]} />
-      </React.Fragment>
+        <CoordinateLabel text={(i - length / 2).toString()} position={[-0.25, 0, i]} />
+      </React.Fragment>,
     );
   }
 
@@ -219,6 +229,16 @@ const AxisLabels = ({ length }: { length: number }) => {
     </>
   );
 };
+
+const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
+  if (!robot.visible) return null;
+
+  return (
+    <object3D key={robot.id}>
+      <Nugus model={robot} />
+    </object3D>
+  );
+});
 
 @observer
 export class KinematicsView extends React.Component<{
@@ -238,7 +258,7 @@ export class KinematicsView extends React.Component<{
           <div className="h-full flex items-center justify-end">
             <RobotSelectorSingle
               autoSelect={true}
-              robots={robots}
+              robots={robots.map((r) => r.robotModel)}
               selected={selectedRobot?.robotModel}
               onSelect={this.onSelectRobot}
             />
@@ -256,7 +276,7 @@ export class KinematicsView extends React.Component<{
             <AxisArrows length={10} />
             <AxisLabels length={10} />
 
-            <Nugus />
+            {selectedRobot && <RobotComponents robot={selectedRobot} />}
           </Canvas>
         </div>
       </div>

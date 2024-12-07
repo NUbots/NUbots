@@ -1,7 +1,7 @@
 import { RobotModel } from "../robot/model";
 
 import { KinematicsModel } from "./model";
-import { KinematicsRobotModel } from "./model";
+import { KinematicsRobotModel } from "./robot_model";
 
 export class KinematicsController {
   static of() {

@@ -11,6 +11,7 @@ import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
 import { installDashboard } from "./components/dashboard/install";
+import { installKinematics } from "./components/kinematics/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
 import { withRobotSelectorMenuBar } from "./components/menu_bar/view";
@@ -19,7 +20,6 @@ import { installProfiler } from "./components/profiler/install";
 import { installTempMonitor } from "./components/temp_monitor/install";
 import { installVision } from "./components/vision/install";
 import { installVisualMesh } from "./components/visual_mesh/install";
-import { installKinematics } from "./components/kinematics/install";
 import { NavigationConfiguration } from "./navigation";
 import { NUsightNetwork } from "./network/nusight_network";
 

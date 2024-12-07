@@ -3,7 +3,8 @@ import { observable } from "mobx";
 
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
-import { RobotModel } from "../robot/model";
+
+import { KinematicsRobotModel } from "./robot_model";
 
 export class KinematicsModel {
   @observable.ref selectedRobot?: KinematicsRobotModel;
@@ -15,15 +16,7 @@ export class KinematicsModel {
   });
 
   @computed
-  get robots(): RobotModel[] {
-    return this.appModel.robots.filter((r) => r.enabled);
+  get robots(): KinematicsRobotModel[] {
+    return this.appModel.robots.filter((robot) => robot.enabled).map((robot) => KinematicsRobotModel.of(robot));
   }
-}
-
-export class KinematicsRobotModel {
-  constructor(readonly robotModel: RobotModel) {}
-
-  static of = memoize((robotModel: RobotModel) => {
-    return new KinematicsRobotModel(robotModel);
-  });
 }
