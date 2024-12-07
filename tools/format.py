@@ -106,12 +106,12 @@ formatters["black"] = {
 }
 formatters["eslint"] = {
     "format": [["eslint", "--color", "--fix", "{path}"]],
-    "include": ["*.js", "*.jsx", "*.ts", "*.tsx"],
+    "include": ["*.js", "*.cjs", "*.jsx", "*.ts", "*.tsx"],
     "exclude": ["*.min.*", "doc/**"],
 }
 formatters["prettier"] = {
     "format": [["prettier", "--write", "{path}"]],
-    "include": ["*.js", "*.jsx", "*.ts", "*.tsx", "*.json", "*.css", "*.scss", "*.html", "*.md", "*.yaml", "*.yml"],
+    "include": ["*.js", "*.cjs", "*.jsx", "*.ts", "*.tsx", "*.json", "*.css", "*.html", "*.md", "*.yaml", "*.yml"],
     "exclude": ["*.min.*"],
 }
 

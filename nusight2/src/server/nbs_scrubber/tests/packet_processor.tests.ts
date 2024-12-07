@@ -1,3 +1,5 @@
+import { describe, expect, it, Mock, vi } from "vitest";
+
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { NbsPacketProcessor, PacketSend } from "../packet_processor";
 import { ScrubberSet } from "../scrubber_set";
@@ -13,7 +15,7 @@ describe("NbsPacketProcessor", () => {
     const scrubberSet = ScrubberSet.of();
 
     let ack = async () => {};
-    const send: jest.Mock<ReturnType<PacketSend>, Parameters<PacketSend>> = jest.fn((event, packet, ackSend) => {
+    const send: Mock<PacketSend> = vi.fn((event, packet, ackSend) => {
       ack = async () => {
         ackSend(clientAcknowledgedAt, clientReceivedAt);
         await tick();
@@ -72,7 +74,7 @@ describe("NbsPacketProcessor", () => {
     const scrubberSet = ScrubberSet.of({ clock });
 
     let ack = async () => {};
-    const send: jest.Mock<ReturnType<PacketSend>, Parameters<PacketSend>> = jest.fn((event, packet, ackSend) => {
+    const send: Mock<PacketSend> = vi.fn((event, packet, ackSend) => {
       ack = async () => {
         ackSend(clientAcknowledgedAt, clientReceivedAt);
         await tick();
@@ -129,7 +131,7 @@ describe("NbsPacketProcessor", () => {
   it("can stop listening for packets of a specific type", async () => {
     const scrubberSet = ScrubberSet.of();
 
-    const send: jest.Mock<ReturnType<PacketSend>, Parameters<PacketSend>> = jest.fn((packet, timestamp, ack) => {
+    const send: Mock<PacketSend> = vi.fn((packet, timestamp, ack) => {
       // Ack immediately on send
       ack(clientAcknowledgedAt, clientReceivedAt);
     });
@@ -167,7 +169,7 @@ describe("NbsPacketProcessor", () => {
   it("stops listening for all packet types when destroyed", async () => {
     const scrubberSet = ScrubberSet.of();
 
-    const send: jest.Mock<ReturnType<PacketSend>, Parameters<PacketSend>> = jest.fn((packet, timestamp, ack) => {
+    const send: Mock<PacketSend> = vi.fn((packet, timestamp, ack) => {
       // Ack immediately on send
       ack(clientAcknowledgedAt, clientReceivedAt);
     });

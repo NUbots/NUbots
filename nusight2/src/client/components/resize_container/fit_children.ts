@@ -47,8 +47,8 @@ export function fitChildren(
       atMinimum[i]
         ? minSizes[i] / containerSize
         : atMaximum[i]
-        ? maxSizes[i] / containerSize
-        : ratio * remainingPercent,
+          ? maxSizes[i] / containerSize
+          : ratio * remainingPercent,
     );
   }
 

@@ -2,11 +2,18 @@ import React from "react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { LocalisationRobotModel } from "../../robot_model";
+import { Matrix4 } from "../../../../../shared/math/matrix4";
+import { ServoMotorSet } from "../../robot_model";
+
+interface WalkPathGoalProps {
+  Hfd: Matrix4;
+  Hft: Matrix4;
+  motors: ServoMotorSet;
+}
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
-export const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
+export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once
@@ -19,19 +26,19 @@ export const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
     });
   }, []);
 
-  const rDFf = model.Hfd?.decompose().translation;
-  const rTFf = model.Hft.decompose().translation;
+  const rDFf = Hfd.decompose().translation;
+  const rTFf = Hft.decompose().translation;
   const Rfd_quat = new THREE.Quaternion(
-    model.Hfd?.decompose().rotation.x,
-    model.Hfd?.decompose().rotation.y,
-    model.Hfd?.decompose().rotation.z,
-    model.Hfd?.decompose().rotation.w,
+    Hfd.decompose().rotation.x,
+    Hfd.decompose().rotation.y,
+    Hfd.decompose().rotation.z,
+    Hfd.decompose().rotation.w,
   );
   const Rft_quat = new THREE.Quaternion(
-    model.Hft.decompose().rotation.x,
-    model.Hft.decompose().rotation.y,
-    model.Hft.decompose().rotation.z,
-    model.Hft.decompose().rotation.w,
+    Hft.decompose().rotation.x,
+    Hft.decompose().rotation.y,
+    Hft.decompose().rotation.z,
+    Hft.decompose().rotation.w,
   );
 
   // Get euler angles from quaternion
@@ -40,8 +47,6 @@ export const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
   // Fuse the euler angles into a single quaternion
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(Rft_euler.x, Rft_euler.y, Rfz_euler.z, "ZYX"));
   const position = new THREE.Vector3(rDFf?.x, rDFf?.y, rTFf.z);
-
-  const motors = model.motors;
 
   // Update the position of the robot to match the walk path goal
   React.useEffect(() => {
@@ -76,8 +81,7 @@ export const WalkPathGoal = ({ model }: { model: LocalisationRobotModel }) => {
         if (child instanceof THREE.Mesh) {
           // Set opacity for all mesh children
           child.material.transparent = true;
-          // Red
-          child.material.color = "rgb(0, 100, 100)";
+          child.material.color.setStyle("rgb(0, 100, 100)");
           child.material.opacity = 0.2;
         }
       });
