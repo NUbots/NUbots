@@ -117,6 +117,13 @@ namespace module::skill {
                             // emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
                         }
 
+                        while(1)
+                        {
+                            // Do nothing and stay here
+                        }
+
+                        log<NUClear::DEBUG>("!!! Made it past while loop !!!");
+
                     } break;
                     case RunInfo::SUBTASK_DONE: {
                         // When the subtask is done, we are done
