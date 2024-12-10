@@ -169,22 +169,17 @@ namespace module::planning {
 
                     // If we are aligned with the final heading and the angle to the target is too large, step backwards
                     if (((std::abs(angle_to_final_heading) < 0.2 && std::abs(angle_to_target) > max_strafe_angle))) {
-                        is_walking_backwards = true;
-                        walk_on_spot_counter++;
-                        velocity_magnitude = 0.0;
-
-                        if (walk_on_spot_counter < WALK_ON_SPOT_CYCLES) {
-                            // Equal forward and sideways velocity
-                            rDRr = Eigen::Vector2d(1.0, 1.0);
-                            // Arbitrary small velocity to keep the robot moving
-                            desired_velocity_magnitude = 0.001;
+                        if (is_walking_backwards == false) {
+                            velocity_magnitude   = 0.0001;
+                            is_walking_backwards = true;
                         }
-                        else {
-                            // Ensure the backwards velocity magnitude does not exceed the maximum
-                            desired_velocity_magnitude = cfg.strafe_gain * error;
-                            // Step backwards while keeping the forward direction
-                            rDRr = Eigen::Vector2d(-0.3, 0.001);
-                        }
+                        // Walk on spot, then walk backwards
+                        double k = 0.5;
+                        velocity_magnitude *= (1 + k);
+                        velocity_magnitude         = std::min(velocity_magnitude, 0.1);
+                        desired_velocity_magnitude = velocity_magnitude;
+                        // Step backwards while keeping the forward direction
+                        rDRr = Eigen::Vector2d(-1, 0.001);
                         // Do not rotate when stepping backwards
                         desired_heading = 0.0;
                     }
@@ -192,8 +187,6 @@ namespace module::planning {
                     else {
                         // Reset the backwards walking state
                         is_walking_backwards = false;
-                        walk_on_spot_counter = 0;
-
                         // "Accelerate", assuring velocity is always positive
                         velocity_magnitude = std::max(velocity_magnitude, 0.1);
                         // "Proportional control" to strafe towards the target inside align radius
