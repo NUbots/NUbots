@@ -116,6 +116,7 @@ namespace module::localisation {
             // Make a vector to store kept robots
             std::vector<TrackedRobot> new_tracked_robots;
             // Only keep robots that are not missing or too close to others
+            // TODO: add logic to remove robots if outside of the field
             for (const auto& tracked_robot : tracked_robots) {
                 if (tracked_robot.missed_count > cfg.max_missed_count) {
                     log<NUClear::DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
