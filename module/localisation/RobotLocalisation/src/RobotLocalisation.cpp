@@ -82,44 +82,53 @@ namespace module::localisation {
                    const GreenHorizon& horizon,
                    const FieldDescription& field_description,
                    const LocalisationField& localisation_field) {
-                // Print tracked_robots ids
-                log<NUClear::DEBUG>("Robots tracked:");
-                for (const auto& tracked_robot : tracked_robots) {
-                    log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
+            // Print tracked_robots ids
+            log<NUClear::DEBUG>("Robots tracked:");
+            for (const auto& tracked_robot : tracked_robots) {
+                log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
+            }
+
+            // Set all tracked robots to unseen
+            for (auto& tracked_robot : tracked_robots) {
+                tracked_robot.seen = false;
+            }
+
+            // **************** Data association ****************
+            if (!vision_robots.robots.empty()) {
+                Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
+                for (const auto& vision_robot : vision_robots.robots) {
+                    // Position of robot {r} in world {w} space
+                    auto rRWw = Hwc * vision_robot.rRCc;
+
+                    // Data association: find tracked robot which is associated with the vision measurement
+                    data_association(rRWw);
+                }
+            }
+
+            // **************** Robot tracking maintenance ****************
+            for (auto& tracked_robot : tracked_robots) {
+                auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+
+                // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
+                // A robot is outside of view if it is not within the green horizon
+                // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
+                if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+                    tracked_robot.seen = true;
                 }
 
-                // Set all tracked robots to unseen
-                for (auto& tracked_robot : tracked_robots) {
-                    tracked_robot.seen = false;
+                // If the tracked robot has not been seen, increment the consecutively missed count
+                tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
+            }
+
+            // Make a vector to store kept robots
+            std::vector<TrackedRobot> new_tracked_robots;
+            // Only keep robots that are not missing or too close to others
+            // TODO: add logic to remove robots if outside of the field
+            for (const auto& tracked_robot : tracked_robots) {
+                if (tracked_robot.missed_count > cfg.max_missed_count) {
+                    log<NUClear::DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                    continue;
                 }
-
-                // **************** Data association ****************
-                if (!vision_robots.robots.empty()) {
-                    Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
-                    for (const auto& vision_robot : vision_robots.robots) {
-                        // Position of robot {r} in world {w} space
-                        auto rRWw = Hwc * vision_robot.rRCc;
-
-                        // Data association: find tracked robot which is associated with the vision measurement
-                        data_association(rRWw);
-                    }
-                }
-
-                // **************** Robot tracking maintenance ****************
-                for (auto& tracked_robot : tracked_robots) {
-                    auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
-
-                    // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
-                    // A robot is outside of view if it is not within the green horizon
-                    // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
-                    if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
-                        tracked_robot.seen = true;
-                    }
-
-                    // If the tracked robot has not been seen, increment the consecutively missed count
-                    tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
-                }
-
                 // Make a vector to store kept robots
                 std::vector<TrackedRobot> new_tracked_robots;
                 // Only keep robots that are not missing or too close to others
@@ -171,43 +180,43 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::data_association(const Eigen::Vector3d& rRWw) {
-        // If we have no robots yet, this must be a new robot
-        if (tracked_robots.empty()) {
-            tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-            return;
-        }
+            // If we have no robots yet, this must be a new robot
+            if (tracked_robots.empty()) {
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
+                return;
+            }
 
-        // Get the closest robot we have to the given vision measurement
-        auto closest_robot_itr =
-            std::min_element(tracked_robots.begin(),
-                             tracked_robots.end(),
-                             [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
-                                 // Get each robot's x-y 2D position in the world
-                                 auto a_rRWw = a.get_rRWw();
-                                 auto b_rRWw = b.get_rRWw();
-                                 // Compare to see which is closer to the robot vision measurement position
-                                 return (rRWw.head<2>() - a_rRWw).norm() < (rRWw.head<2>() - b_rRWw).norm();
-                             });
-        double closest_distance = (rRWw.head<2>() - closest_robot_itr->get_rRWw()).norm();
+            // Get the closest robot we have to the given vision measurement
+            auto closest_robot_itr =
+                std::min_element(tracked_robots.begin(),
+                                 tracked_robots.end(),
+                                 [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
+                                     // Get each robot's x-y 2D position in the world
+                                     auto a_rRWw = a.get_rRWw();
+                                     auto b_rRWw = b.get_rRWw();
+                                     // Compare to see which is closer to the robot vision measurement position
+                                     return (rRWw.head<2>() - a_rRWw).norm() < (rRWw.head<2>() - b_rRWw).norm();
+                                 });
+            double closest_distance = (rRWw.head<2>() - closest_robot_itr->get_rRWw()).norm();
 
-        // If the closest robot is far enough away, add this as a new robot
-        if (closest_distance > cfg.association_distance) {
-            tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-            return;
-        }
+            // If the closest robot is far enough away, add this as a new robot
+            if (closest_distance > cfg.association_distance) {
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
+                return;
+            }
 
-        // Update the filter on the robot associated with the vision measurement
-        auto now = NUClear::clock::now();
-        const auto dt =
-            std::chrono::duration_cast<std::chrono::duration<double>>(now - closest_robot_itr->last_time_update)
-                .count();
-        closest_robot_itr->last_time_update = now;
-        closest_robot_itr->ukf.time(dt);
-        closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                       cfg.ukf.noise.measurement.position,
-                                       MeasurementType::ROBOT_POSITION());
-        closest_robot_itr->seen = true;
+            // Update the filter on the robot associated with the vision measurement
+            auto now = NUClear::clock::now();
+            const auto dt =
+                std::chrono::duration_cast<std::chrono::duration<double>>(now - closest_robot_itr->last_time_update)
+                    .count();
+            closest_robot_itr->last_time_update = now;
+            closest_robot_itr->ukf.time(dt);
+            closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
+                                           cfg.ukf.noise.measurement.position,
+                                           MeasurementType::ROBOT_POSITION());
+            closest_robot_itr->seen = true;
     }
 
 
-}  // namespace module::localisation
+    }  // namespace module::localisation
