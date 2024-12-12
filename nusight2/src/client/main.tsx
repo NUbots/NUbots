@@ -11,7 +11,6 @@ import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
 import { installDashboard } from "./components/dashboard/install";
-import { installKinematics } from "./components/kinematics/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
 import { withRobotSelectorMenuBar } from "./components/menu_bar/view";
@@ -43,7 +42,6 @@ installVisualMesh({ nav, appModel, nusightNetwork, Menu });
 installProfiler({ nav, appModel, nusightNetwork, Menu });
 installTempMonitor({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
-installKinematics({ nav, appModel, nusightNetwork, Menu });
 
 configure({ enforceActions: "observed" });
 createRoot(document.getElementById("root")!).render(<AppView nav={nav} />);
