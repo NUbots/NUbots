@@ -141,22 +141,16 @@ namespace module::planning {
                     (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
                     0.0,
                     1.0);
+
+                // Calculate the desired angle to go towards the target point
                 double desired_heading =
                     (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
 
                 double desired_velocity_magnitude = 0.0;
+
+                // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
-                    // "Accelerate", assuring velocity is always positive
-                    velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
-                    // Limit the velocity magnitude to the maximum velocity
-                    velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
-                    // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
-                    // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
-                    const double angle_error_gain = std::clamp(
-                        (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
-                        0.0,
-                        1.0);
-                    desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
+                    desired_velocity_magnitude = accelerate_to_target(desired_heading);
                 }
                 else {
                     // Normalise error between [0, 1] inside align radius
@@ -169,28 +163,14 @@ namespace module::planning {
 
                     // If we are aligned with the final heading and the angle to the target is too large, step backwards
                     if (((std::abs(angle_to_final_heading) < 0.2 && std::abs(angle_to_target) > max_strafe_angle))) {
-                        if (is_walking_backwards == false) {
-                            velocity_magnitude   = 0.0001;
-                            is_walking_backwards = true;
-                        }
-                        // Walk on spot, then walk backwards
-                        double k = 0.5;
-                        velocity_magnitude *= (1 + k);
-                        velocity_magnitude         = std::min(velocity_magnitude, 0.1);
+                        rDRr                       = walk_backwards();
                         desired_velocity_magnitude = velocity_magnitude;
-                        // Step backwards while keeping the forward direction
-                        rDRr = Eigen::Vector2d(-1, 0.001);
                         // Do not rotate when stepping backwards
                         desired_heading = 0.0;
                     }
-                    // Go towards target
+                    // Go towards target without any rotation
                     else {
-                        // Reset the backwards walking state
-                        is_walking_backwards = false;
-                        // "Accelerate", assuring velocity is always positive
-                        velocity_magnitude = std::max(velocity_magnitude, 0.1);
-                        // "Proportional control" to strafe towards the target inside align radius
-                        desired_velocity_magnitude = cfg.strafe_gain * error;
+                        desired_velocity_magnitude = strafe_to_target(error);
                     }
                 }
 
@@ -215,9 +195,9 @@ namespace module::planning {
                 debug_information->max_align_radius = cfg.max_align_radius;
                 debug_information->min_angle_error  = cfg.min_angle_error;
                 debug_information->max_angle_error  = cfg.max_angle_error;
-                debug_information->angle_to_target  = angle_to_target;
+                debug_information->angle_to_target  = angle_to_target;  // this one
                 debug_information->angle_to_final_heading = angle_to_final_heading;
-                debug_information->translational_error    = translational_error;
+                debug_information->translational_error    = translational_error;  // this one
                 debug_information->velocity_target        = velocity_target;
                 emit(debug_information);
             });
@@ -239,6 +219,40 @@ namespace module::planning {
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
         });
+    }
+
+    double PlanWalkPath::strafe_to_target(const double error) {
+        // Reset the backwards walking state
+        is_walking_backwards = false;
+        // "Accelerate", assuring velocity is always positive
+        velocity_magnitude = std::max(velocity_magnitude, 0.1);
+        // "Proportional control" to strafe towards the target inside align radius
+        return cfg.strafe_gain * error;
+    }
+
+    Eigen::Vector2d PlanWalkPath::walk_backwards() {
+        if (is_walking_backwards == false) {
+            velocity_magnitude   = 0.0001;
+            is_walking_backwards = true;
+        }
+        // Walk on spot, then walk backwards
+        velocity_magnitude *= 1.5;
+        // Step backwards while keeping the forward direction
+        return Eigen::Vector2d(-1, 0.001);
+    }
+
+    double PlanWalkPath::accelerate_to_target(double desired_heading) {
+        // "Accelerate", assuring velocity is always positive
+        velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
+        // Limit the velocity magnitude to the maximum velocity
+        velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
+        // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
+        // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
+        const double angle_error_gain =
+            std::clamp((cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
+                       0.0,
+                       1.0);
+        return angle_error_gain * velocity_magnitude;
     }
 
     Eigen::Vector2d PlanWalkPath::adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,

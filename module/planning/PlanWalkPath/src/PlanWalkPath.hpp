@@ -94,6 +94,18 @@ namespace module::planning {
         /// @return Constrained velocity vector
         Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v);
 
+        /// @brief Head towards the target point without rotation
+        /// @return desired velocity magnitude
+        double strafe_to_target(const double error);
+
+        /// @brief Walk straight backwards when the robot is next to the target
+        /// @return adjusted target direction
+        Eigen::Vector2d walk_backwards();
+
+        /// @brief Accelerate and rotate the robot towards the target point
+        /// @return desired velocity magnitude
+        double accelerate_to_target(double desired_heading);
+
         /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
         /// @param all_obstacles vector of all obstacles in the world
         /// @param rDRr vector from robot to final target
