@@ -82,7 +82,9 @@ namespace module::planning {
             cfg.strafe_gain      = config["strafe_gain"].as<double>();
 
             // Backwards tuning
-            cfg.max_strafe_angle = config["max_strafe_angle"].as<Expression>();
+            cfg.max_strafe_angle  = config["max_strafe_angle"].as<Expression>();
+            cfg.backward_buffer   = config["backward_buffer"].as<Expression>();
+            cfg.max_aligned_angle = config["max_aligned_angle"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -162,7 +164,8 @@ namespace module::planning {
                                                         : cfg.max_strafe_angle;
 
                     // If we are aligned with the final heading and the angle to the target is too large, step backwards
-                    if (((std::abs(angle_to_final_heading) < 0.2 && std::abs(angle_to_target) > max_strafe_angle))) {
+                    if (((std::abs(angle_to_final_heading) < cfg.max_aligned_angle
+                          && std::abs(angle_to_target) > max_strafe_angle))) {
                         rDRr                       = walk_backwards();
                         desired_velocity_magnitude = velocity_magnitude;
                         // Do not rotate when stepping backwards

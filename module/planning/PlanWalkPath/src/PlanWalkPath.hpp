@@ -64,6 +64,8 @@ namespace module::planning {
             double max_strafe_angle = 0.0;
             /// @brief Buffer to prevent oscillation between forwards and backwards movement
             double backward_buffer = 0.0;
+            /// @brief Maximum angle that we are considered to be aligned with the final heading
+            double max_aligned_angle = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
