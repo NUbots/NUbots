@@ -454,6 +454,7 @@ namespace module::input {
 
         // Fuse the velocity estimates
         sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
+        sensors->Hwp = Hwp;
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {

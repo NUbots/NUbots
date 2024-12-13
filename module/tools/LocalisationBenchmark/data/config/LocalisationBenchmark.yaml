@@ -4,7 +4,7 @@ log_level: INFO
 # FAST - as fast as possible
 # REALTIME - as fast as the messages were recorded
 # SEQUENTIAL - one message at a time, waits for all message sub tasks to complete before continuing
-playback_mode: REALTIME
+playback_mode: SEQUENTIAL
 
 # You can put any messages that is emitted in the system here and it will be played back
 # The below ones are just the most common and here as an example
@@ -25,7 +25,7 @@ messages:
   message.localisation.Ball: false
   message.localisation.Field: false
   message.localisation.Robot: false
-  message.input.Sensors: true
+  message.input.Sensors: false
   message.support.FieldDescription: false
   # Behaviour state
   message.behaviour.state.WalkState: false

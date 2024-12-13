@@ -120,6 +120,15 @@ export class FieldIntersection {
   }
 }
 
+export class Line {
+  @observable start: Vector3;
+  @observable end: Vector3;
+  constructor({ start, end }: { start: Vector3; end: Vector3 }) {
+    this.start = start;
+    this.end = end;
+  }
+}
+
 export class BoundingBox {
   @observable minX: number;
   @observable minY: number;
@@ -152,6 +161,14 @@ export class LocalisationRobotModel {
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
   @observable purpose: string;
+  @observable association_lines?: Line[];
+  @observable Hwp: Matrix4; // Anchor point (planted foot) to world
+  @observable swingFootTrajectory: { rSPp: Vector3[] };
+  @observable swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[]; walkPhase: number }[] };
+  @observable torsoTrajectory: { rTPp: Vector3[] };
+  @observable torsoTrajectoryHistory: { trajectories: Vector3[][] };
+  @observable walkPhase: number;
+
   @observable max_align_radius: number;
   @observable min_align_radius: number;
   @observable angle_to_final_heading: number;
@@ -171,6 +188,12 @@ export class LocalisationRobotModel {
     Hrw,
     Hfw,
     Hrd,
+    Hwp,
+    swingFootTrajectory,
+    swingFootTrajectoryHistory,
+    torsoTrajectory,
+    torsoTrajectoryHistory,
+    walkPhase,
     Rwt,
     motors,
     fieldLinePoints,
@@ -180,6 +203,7 @@ export class LocalisationRobotModel {
     goals,
     robots,
     purpose,
+    association_lines,
     max_align_radius,
     min_align_radius,
     angle_to_final_heading,
@@ -198,6 +222,12 @@ export class LocalisationRobotModel {
     Hrw: Matrix4;
     Hfw: Matrix4;
     Hrd?: Matrix4;
+    Hwp: Matrix4;
+    swingFootTrajectory: { rSPp: Vector3[] };
+    swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[]; walkPhase: number }[] };
+    torsoTrajectory: { rTPp: Vector3[] };
+    torsoTrajectoryHistory: { trajectories: Vector3[][] };
+    walkPhase: number;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
@@ -207,6 +237,7 @@ export class LocalisationRobotModel {
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
     purpose: string;
+    association_lines?: Line[];
     max_align_radius: number;
     min_align_radius: number;
     angle_to_final_heading: number;
@@ -226,6 +257,7 @@ export class LocalisationRobotModel {
     this.Hfw = Hfw;
     this.Hrd = Hrd;
     this.Rwt = Rwt;
+    this.Hwp = Hwp;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.particles = particles;
@@ -234,6 +266,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.association_lines = association_lines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
     this.angle_to_final_heading = angle_to_final_heading;
@@ -244,6 +277,11 @@ export class LocalisationRobotModel {
     this.velocity_target = velocity_target;
     this.boundingBox = boundingBox;
     this.player_id = player_id;
+    this.swingFootTrajectory = swingFootTrajectory;
+    this.swingFootTrajectoryHistory = swingFootTrajectoryHistory;
+    this.torsoTrajectory = torsoTrajectory;
+    this.torsoTrajectoryHistory = torsoTrajectoryHistory;
+    this.walkPhase = walkPhase;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -255,12 +293,14 @@ export class LocalisationRobotModel {
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
+      Hwp: Matrix4.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
       particles: [],
       goals: { points: [] },
       robots: [],
       purpose: "",
+      association_lines: [],
       max_align_radius: 0,
       min_align_radius: 0,
       angle_to_final_heading: 0,
@@ -270,6 +310,11 @@ export class LocalisationRobotModel {
       max_angle_error: 0,
       velocity_target: Vector3.of(),
       player_id: -1,
+      swingFootTrajectory: { rSPp: [] },
+      swingFootTrajectoryHistory: { trajectories: [] },
+      torsoTrajectory: { rTPp: [] },
+      torsoTrajectoryHistory: { trajectories: [] },
+      walkPhase: 0,
     });
   });
 
@@ -285,6 +330,24 @@ export class LocalisationRobotModel {
   @computed
   get Hft(): Matrix4 {
     return this.Hfw.multiply(this.Htw.invert());
+  }
+
+  /** Anchor point to field transformation */
+  @computed
+  get Hfp(): Matrix4 {
+    return this.Hfw.multiply(this.Hwp);
+  }
+
+  /** Swing foot trajectory in field space */
+  @computed
+  get rSFf(): Vector3[] {
+    return this.swingFootTrajectory.rSPp.map((rSPp) => rSPp.applyMatrix4(this.Hfp));
+  }
+
+  /** Torso trajectory in field space */
+  @computed
+  get rTFf(): Vector3[] {
+    return this.torsoTrajectory.rTPp.map((rTPp) => rTPp.applyMatrix4(this.Hfp));
   }
 
   /** Field line points in field space */
