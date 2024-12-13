@@ -1,7 +1,7 @@
 import { NbsPacket, NbsTypeSubtypeBuffer } from "nbsdecoder.js";
 
 import { message } from "../../shared/messages";
-import { hashType } from "../nuclearnet/hash_type";
+import { hashType } from "../../shared/nuclearnet/hash_type";
 
 import { Scrubber } from "./scrubber";
 import { nanosToTimestampObject } from "./utils";

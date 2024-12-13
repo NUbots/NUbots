@@ -1,4 +1,5 @@
 import { NUClearNetSend } from "nuclearnet.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
 import { message } from "../../../shared/messages";
@@ -6,23 +7,23 @@ import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 
 import Sensors = message.input.Sensors;
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 
 describe("Network", () => {
   it("off() unregisters all callbacks", () => {
     const nusightNetwork = createMockInstance(NUsightNetwork);
     const network = new Network(nusightNetwork);
 
-    const cb1 = jest.fn();
-    const cb2 = jest.fn();
+    const cb1 = vi.fn();
+    const cb2 = vi.fn();
 
-    const off1 = jest.fn();
+    const off1 = vi.fn();
     nusightNetwork.onNUClearMessage.mockReturnValue(off1);
 
     network.on(Sensors, cb1);
     expect(nusightNetwork.onNUClearMessage).toHaveBeenCalledWith(Sensors, cb1);
 
-    const off2 = jest.fn();
+    const off2 = vi.fn();
     nusightNetwork.onNUClearMessage.mockReturnValue(off2);
 
     network.on(Sensors, cb2);
@@ -39,7 +40,7 @@ describe("Network", () => {
 
     const payload = Test.encode({ message: "hello world" }).finish();
     const packet: NUClearNetSend = {
-      type: "message.support.nusight.Test",
+      type: "message.network.Test",
       payload: payload as Buffer,
       reliable: true,
       target: "nusight",
@@ -52,7 +53,7 @@ describe("Network", () => {
 
   it("emit() forwards the given message and options to NUsightNetwork", () => {
     const nusightNetwork = Object.assign(createMockInstance(NUsightNetwork), {
-      emit: jest.fn(),
+      emit: vi.fn(),
     });
     const network = new Network(nusightNetwork);
 

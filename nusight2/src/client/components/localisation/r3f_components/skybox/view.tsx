@@ -2,7 +2,7 @@ import React from "react";
 import { computed } from "mobx";
 import * as THREE from "three";
 
-import { Vector3 } from "../../../../shared/math/vector3";
+import { Vector3 } from "../../../../../shared/math/vector3";
 
 import { SkyboxModel } from "./model";
 import skyboxFrag from "./skybox.frag";
@@ -20,8 +20,8 @@ export class SkyboxView extends React.Component<{
     return (
       <object3D>
         <mesh name="skyboxSky">
-          <sphereBufferGeometry args={[40, 32, 15]} />
-          <shaderMaterial
+          <sphereGeometry args={[40, 32, 15]} />
+          <rawShaderMaterial
             vertexShader={skyboxVert}
             fragmentShader={skyboxFrag}
             uniforms={{
@@ -36,7 +36,7 @@ export class SkyboxView extends React.Component<{
           />
         </mesh>
         <mesh name="skyboxSun" position={this.sunPosition.toArray()} visible={this.model.showSun}>
-          <sphereBufferGeometry args={[40, 16, 8]} />
+          <sphereGeometry args={[40, 16, 8]} />
           <meshBasicMaterial color="white" />
         </mesh>
       </object3D>
