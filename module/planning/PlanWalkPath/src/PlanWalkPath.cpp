@@ -73,6 +73,7 @@ namespace module::planning {
             cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
             cfg.max_velocity_magnitude = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
             cfg.max_angular_velocity   = config["max_angular_velocity"].as<double>();
+            cfg.starting_velocity      = config["starting_velocity"].as<double>();
             cfg.acceleration           = config["acceleration"].as<double>();
 
             cfg.max_align_radius = config["max_align_radius"].as<double>();
@@ -164,8 +165,8 @@ namespace module::planning {
                                                         : cfg.max_strafe_angle;
 
                     // If we are aligned with the final heading and the angle to the target is too large, step backwards
-                    if (((std::abs(angle_to_final_heading) < cfg.max_aligned_angle
-                          && std::abs(angle_to_target) > max_strafe_angle))) {
+                    if (std::abs(angle_to_final_heading) < cfg.max_aligned_angle
+                        && std::abs(angle_to_target) > max_strafe_angle) {
                         rDRr                       = walk_backwards();
                         desired_velocity_magnitude = velocity_magnitude;
                         // Do not rotate when stepping backwards
@@ -228,6 +229,7 @@ namespace module::planning {
         // Reset the backwards walking state
         is_walking_backwards = false;
         // "Accelerate", assuring velocity is always positive
+        // TODO: check if we want to use the velocity magnitude here, starting at the starting velocity
         velocity_magnitude = std::max(velocity_magnitude, 0.1);
         // "Proportional control" to strafe towards the target inside align radius
         return cfg.strafe_gain * error;
@@ -235,7 +237,7 @@ namespace module::planning {
 
     Eigen::Vector2d PlanWalkPath::walk_backwards() {
         if (is_walking_backwards == false) {
-            velocity_magnitude   = 0.0001;
+            velocity_magnitude   = cfg.starting_velocity;
             is_walking_backwards = true;
         }
         // Walk on spot, then walk backwards
