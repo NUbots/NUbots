@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
+import React, { PropsWithChildren, useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { action } from "mobx";
 import { observer } from "mobx-react";
@@ -20,7 +20,7 @@ const CameraControls = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(camera.fov);
-  const spherical = useRef(new THREE.Spherical(20, Math.PI / 2.75, Math.PI / 4)).current;
+  const spherical = useRef(new THREE.Spherical(20, Math.PI / 2.5, Math.PI / 4)).current;
 
   useEffect(() => {
     camera.position.setFromSpherical(spherical);
@@ -98,8 +98,8 @@ const Arrow = ({
   length: number;
   thickness: number;
 }) => {
-  const shaftLength = length * 0.95;
-  const headLength = length * 0.05;
+  const shaftLength = length * 0.90;
+  const headLength = length * 0.1;
 
   // Determine rotation for each direction
   const rotation = (() => {
@@ -136,32 +136,61 @@ const AxisArrows = ({ length }: { length: number }) => (
     <Arrow dir={[1, 0, 0]} color={0xff0000} length={length + 1} thickness={0.03} />
     <Arrow dir={[0, 1, 0]} color={0x00ff00} length={length + 1} thickness={0.03} />
     <Arrow dir={[0, 0, 1]} color={0x0000ff} length={length + 1} thickness={0.03} />
+    <CoordinateLabel text="X" position={[length + 1, 0, -0.25]} />
+    <CoordinateLabel text="Y" position={[0.25, length + 1, 0]} />
+    <CoordinateLabel text="Z" position={[-0.25, 0, length + 1]} />
   </>
 );
 
-// Grid component
-const PositiveGridPlanes = () => {
-  const gridSize = 10;
-  const divisions = 10;
+// Grid with labels component
+const GridWithLabels = ({ gridSize, divisions }: { gridSize: number; divisions: number }) => {
+  const labels = [];
+
+  for (let i = 0; i <= divisions; i++) {
+    const value = (i - gridSize / 2) / 10;
+
+    labels.push(
+      // X-axis labels
+      <React.Fragment key={`x-${i}`}>
+        <CoordinateLabel text={value.toFixed(1)} position={[value * 10, -gridSize / 2, (gridSize / 2) + 1]} />
+      </React.Fragment>,
+
+      // Y-axis labels
+      <React.Fragment key={`y-${i}`}>
+        <CoordinateLabel text={value.toFixed(1)} position={[(-gridSize / 2) - 0.5, value * 10, (gridSize / 2) + 0.5]} />
+      </React.Fragment>,
+
+      // Z-axis labels
+      <React.Fragment key={`z-${i}`}>
+        <CoordinateLabel text={value.toFixed(1)} position={[(gridSize / 2) + 0.5, -gridSize / 2, value * 10] } />
+      </React.Fragment>,
+    );
+  }
 
   return (
     <>
+      {/* Grid for Positive X and Z axes */}
       <gridHelper
         args={[gridSize, divisions, 0x888888, 0x888888]}
-        position={[gridSize / 2, 0, gridSize / 2]} // Positive X and Z axes
+        position={[0, -gridSize / 2, 0]}
       />
 
+      {/* Grid for Positive X and Y axes */}
       <gridHelper
         args={[gridSize, divisions, 0x888888, 0x888888]}
-        position={[gridSize / 2, gridSize / 2, 0]} // Positive X and Y axes
-        rotation={[Math.PI / 2, 0, 0]} // Rotate to XY plane
+        position={[0, 0, -gridSize / 2]}
+        rotation={[Math.PI / 2, 0, 0]}
       />
 
+      {/* Grid for Positive Y and Z axes */}
       <gridHelper
         args={[gridSize, divisions, 0x888888, 0x888888]}
-        position={[0, gridSize / 2, gridSize / 2]} // Positive Y and Z axes
-        rotation={[0, 0, Math.PI / 2]} // Rotate to YZ plane
+        position={[-gridSize / 2, 0, 0]}
+        rotation={[0, 0, Math.PI / 2]}
       />
+
+      {/* Labels */}
+      {labels}
     </>
   );
 };
@@ -170,13 +199,28 @@ const PositiveGridPlanes = () => {
 const CoordinateLabel = ({ text, position }: { text: string; position: [number, number, number] }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
+  const [color, setColor] = useState<THREE.Color>(new THREE.Color(0xffffff));
 
+  // Observe theme changes using MutationObserver and update the label color
+  useEffect(() => {
+    const updateColor = () => {
+      const computedColor = window.getComputedStyle(document.documentElement).getPropertyValue("color");
+      setColor(new THREE.Color(computedColor));
+    };
+
+    const observer = new MutationObserver(updateColor);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Load the font and create the text geometry
   useEffect(() => {
     const loader = new FontLoader();
     loader.load("/fonts/roboto/Roboto Medium_Regular.json", (font: THREE.Font) => {
       const textGeometry = new TextGeometry(text, {
         font: font,
-        size: 0.3,
+        size: 0.2,
         height: 0,
       });
 
@@ -186,55 +230,26 @@ const CoordinateLabel = ({ text, position }: { text: string; position: [number, 
     });
   }, [text]);
 
+  // Update the labels to always face the camera
   useFrame(() => {
-    const handleUpdateRotation = () => {
-      if (meshRef.current) {
-        meshRef.current.lookAt(camera.position);
-      }
-    };
-    handleUpdateRotation();
+    if (meshRef.current) {
+      meshRef.current.lookAt(camera.position);
+    }
   }, [camera]);
 
   return (
     <mesh ref={meshRef} position={position}>
-      <meshBasicMaterial color={0xffffff} />
+      <meshBasicMaterial color={color} />
     </mesh>
   );
 };
 
-// Axis labels component with dynamically created labels
-const AxisLabels = ({ length }: { length: number }) => {
-  const labels = [];
-  for (let i = 1; i <= length; i++) {
-    labels.push(
-      <React.Fragment key={`x-${i}`}>
-        <CoordinateLabel text={(i - length / 2).toString()} position={[i, 0, -0.25]} />
-      </React.Fragment>,
-      <React.Fragment key={`y-${i}`}>
-        <CoordinateLabel text={(i - length / 2).toString()} position={[0.25, i, 0]} />
-      </React.Fragment>,
-      <React.Fragment key={`z-${i}`}>
-        <CoordinateLabel text={(i - length / 2).toString()} position={[-0.25, 0, i]} />
-      </React.Fragment>,
-    );
-  }
-
-  return (
-    <>
-      <CoordinateLabel text={(-length / 2).toString()} position={[0.25, 0.1, 0]} />
-      <CoordinateLabel text="X" position={[length + 1, 0, -0.25]} />
-      <CoordinateLabel text="Y" position={[0.25, length + 1, 0]} />
-      <CoordinateLabel text="Z" position={[-0.25, 0, length + 1]} />
-      {labels}
-    </>
-  );
-};
-
+// NUgus robot components
 const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
   if (!robot.visible) return null;
 
   return (
-    <object3D key={robot.id}>
+    <object3D key={robot.id} rotation={[-Math.PI / 2, 0, -Math.PI / 2]} scale={[5, 5, 5]}>
       <Nugus model={robot} />
     </object3D>
   );
@@ -266,15 +281,14 @@ export class KinematicsView extends React.Component<{
         </Menu>
 
         <div className="flex-1 relative">
-          <Canvas camera={{ position: [10, 10, 10], fov: 70 }} className="w-full h-full">
+          <Canvas camera={{ position: [10, 10, 10], fov: 60 }} className="w-full h-full">
             <CameraControls />
 
             <ambientLight intensity={0.5} />
             <directionalLight position={[10, 10, 5]} />
 
-            <PositiveGridPlanes />
-            <AxisArrows length={10} />
-            <AxisLabels length={10} />
+            <GridWithLabels gridSize={10} divisions={10} />
+            <AxisArrows length={2} />
 
             {selectedRobot && <RobotComponents robot={selectedRobot} />}
           </Canvas>

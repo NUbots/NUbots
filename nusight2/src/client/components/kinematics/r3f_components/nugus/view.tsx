@@ -20,7 +20,6 @@ export const Nugus = ({ model }: { model: KinematicsRobotModel }) => {
     });
   }, [nugusUrdfPath]);
 
-  const position = model.Hft.decompose().translation;
   const rotation = model.Hft.decompose().rotation;
   const motors = model.motors;
 
@@ -53,7 +52,7 @@ export const Nugus = ({ model }: { model: KinematicsRobotModel }) => {
         joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
       }
     }
-  }, [position, rotation, motors]);
+  }, [rotation, motors]);
 
   // Update the material of the robot
   const material = new THREE.MeshStandardMaterial({
