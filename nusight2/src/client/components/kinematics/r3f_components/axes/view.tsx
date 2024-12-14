@@ -1,4 +1,5 @@
 import React from 'react';
+import { Euler } from 'three';
 import { CoordinateLabel } from '../coordinates/view';
 
 const Arrow = ({ dir, color, length, thickness }: {
@@ -12,10 +13,10 @@ const Arrow = ({ dir, color, length, thickness }: {
 
   // Determine rotation for each axis direction
   const rotation = (() => {
-    if (dir[0] === 1) return [0, 0, -Math.PI / 2];
-    if (dir[1] === 1) return [0, 0, 0];
-    if (dir[2] === 1) return [Math.PI / 2, 0, 0];
-    return [0, 0, 0];
+    if (dir[0] === 1) return new Euler(0, 0, -Math.PI / 2);
+    if (dir[1] === 1) return new Euler(0, 0, 0);
+    if (dir[2] === 1) return new Euler(Math.PI / 2, 0, 0);
+    return new Euler(0, 0, 0);
   })();
 
   return (

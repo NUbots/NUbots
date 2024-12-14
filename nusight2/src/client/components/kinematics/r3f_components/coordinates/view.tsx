@@ -6,7 +6,7 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 export const CoordinateLabel = ({ text, position }: { text: string; position: [number, number, number] }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { camera } = useThree();
+  const { camera } = useThree() as { camera: THREE.PerspectiveCamera; gl: THREE.WebGLRenderer };
   const [color, setColor] = useState<THREE.Color>(new THREE.Color(0xffffff));
 
   // Observe theme changes using MutationObserver and update the label color
@@ -25,7 +25,7 @@ export const CoordinateLabel = ({ text, position }: { text: string; position: [n
   // Load the font and create the text geometry
   useEffect(() => {
     const loader = new FontLoader();
-    loader.load("/fonts/roboto/Roboto Medium_Regular.json", (font: THREE.Font) => {
+    loader.load("/fonts/roboto/Roboto Medium_Regular.json", (font: any) => {
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: 0.2,
@@ -43,7 +43,7 @@ export const CoordinateLabel = ({ text, position }: { text: string; position: [n
     if (meshRef.current) {
       meshRef.current.lookAt(camera.position);
     }
-  }, [camera]);
+  });
 
   return (
     <mesh ref={meshRef} position={position}>
