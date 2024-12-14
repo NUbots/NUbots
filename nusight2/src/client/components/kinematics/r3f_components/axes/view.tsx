@@ -1,14 +1,20 @@
-import React from 'react';
-import { Euler } from 'three';
-import { CoordinateLabel } from '../coordinates/view';
+import React from "react";
+import { Euler } from "three";
 
-const Arrow = ({ dir, color, length, thickness }: {
+import { CoordinateLabel } from "../coordinates/view";
+
+const Arrow = ({
+  dir,
+  color,
+  length,
+  thickness,
+}: {
   dir: [number, number, number];
   color: number;
   length: number;
   thickness: number;
 }) => {
-  const shaftLength = length * 0.90;
+  const shaftLength = length * 0.9;
   const headLength = length * 0.1;
 
   // Determine rotation for each axis direction
@@ -23,17 +29,13 @@ const Arrow = ({ dir, color, length, thickness }: {
     <group rotation={rotation}>
       {/* Arrow shaft (cylinder) */}
       <mesh position={[0, shaftLength / 2, 0]}>
-        <cylinderGeometry
-          args={[thickness, thickness, shaftLength, 32]}
-        />
+        <cylinderGeometry args={[thickness, thickness, shaftLength, 32]} />
         <meshBasicMaterial color={color} />
       </mesh>
 
       {/* Arrow head (cone) */}
       <mesh position={[0, shaftLength + headLength / 2, 0]}>
-        <coneGeometry
-          args={[thickness * 2, headLength, 32]}
-        />
+        <coneGeometry args={[thickness * 2, headLength, 32]} />
         <meshBasicMaterial color={color} />
       </mesh>
     </group>

@@ -1,12 +1,12 @@
-import React from 'react';
-import { observer } from 'mobx-react';
+import React from "react";
 import { Canvas } from "@react-three/fiber";
+import { observer } from "mobx-react";
 
+import { KinematicsRobotModel } from "../../robot_model";
+import { Axes } from "../axes/view";
 import { CameraControls } from "../camera/view";
 import { Grid } from "../grid/view";
-import { Axes } from "../axes/view";
 import { Nugus } from "../nugus/view";
-import { KinematicsRobotModel } from "../../robot_model";
 
 const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
   if (!robot.visible) return null;

@@ -17,7 +17,6 @@ export const TextGeometryHelper = (text: string): TextGeometry => {
       });
       setGeometry(newGeometry);
     });
-
   }, [text]);
 
   return geometry || new TextGeometry("");
