@@ -97,7 +97,7 @@ TEST_CASE("Test when two tasks of equal priority are emitted the one that was em
           "[director][priority][equal]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

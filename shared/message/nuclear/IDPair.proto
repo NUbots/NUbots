@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package message.nuclear;
+
+/**
+ * Replicates the NUClear::IDPair class from NUClear
+ */
+message IDPair {
+    /// The id of the reaction
+    uint64 reaction_id = 1;
+    /// The id of the task
+    uint64 task_id = 2;
+}

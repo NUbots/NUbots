@@ -1,69 +1,57 @@
-// MIT License
-//
-// Copyright (c) 2023 NUbots
-//
-// This file is part of the NUbots codebase.
-// See https://github.com/NUbots/NUbots for further info.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 syntax = "proto3";
 
 package message.nuclear;
 
 import "google/protobuf/timestamp.proto";
+import "message/nuclear/GroupDescriptor.proto";
+import "message/nuclear/IDPair.proto";
+import "message/nuclear/ReactionIdentifiers.proto";
+import "message/nuclear/ThreadPoolDescriptor.proto";
 
 /**
- * Replicates the ReactionStatistics class from NUClear as a protobuf message
+ * Replicates the NUClear::message::ReactionStatistics class from NUClear
  */
 message ReactionStatistics {
 
-    /**
-     * The identifiers of the reaction
-     */
-    message Identifiers {
-        /// The name of the reaction provided by the user
-        string name = 1;
-        /// The name of the reactor that this reaction belongs to
-        string reactor = 2;
-        /// The DSL that this reaction was created from
-        string dsl = 3;
-        /// The callback function that this reaction is bound to
-        string function = 4;
+    message Event {
+        message ThreadInfo {
+            /// The ID of the thread
+            string thread_id = 1;
+            /// The descriptor of the thread pool
+            ThreadPoolDescriptor pool = 2;
+        }
+
+        /// The thread this event was executed on
+        ThreadInfo thread = 1;
+        /// The NUClear clock at the time of the event
+        google.protobuf.Timestamp nuclear_time = 2;
+        /// The real time clock at the time of the event
+        google.protobuf.Timestamp real_time = 3;
+        /// The thread clock at the time of the event
+        google.protobuf.Timestamp thread_time = 4;
     }
 
     /// The identifiers of the reaction
-    Identifiers identifiers = 1;
-    /// The id of the reaction
-    uint64 reaction_id = 2;
-    /// The id of the task
-    uint64 task_id = 3;
-    /// The id of the reaction that caused this task to be run
-    uint64 cause_reaction_id = 4;
-    /// The id of the task that caused this task to be run
-    uint64 cause_task_id = 5;
-    /// The time that this reaction was emitted
-    google.protobuf.Timestamp emitted = 6;
-    /// The time that this reaction started processing
-    google.protobuf.Timestamp started = 7;
-    /// The time that this reaction finished processing
-    google.protobuf.Timestamp finished = 8;
+    ReactionIdentifiers identifiers = 1;
+
+    /// The IDs of the reaction and task that caused this reaction to be run
+    /// Will be 0 if it was caused by a non reaction source
+    IDPair cause = 2;
+    /// The IDs of the reaction and task of this reaction
+    IDPair target = 3;
+
+    /// The thread pool that this reaction was intended to be run on
+    ThreadPoolDescriptor target_pool = 4;
+    /// The groups that this reaction was intended to be run in
+    repeated GroupDescriptor target_groups = 5;
+
+    /// The time and thread that this reaction was created on
+    Event created = 6;
+    /// The time and thread that this reaction was commenced on
+    Event started = 7;
+    /// The time and thread that this reaction was finished on
+    Event finished = 8;
+
     /// The exception that was thrown by this reaction (if any)
     string exception = 9;
 }
