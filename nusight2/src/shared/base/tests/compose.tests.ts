@@ -1,10 +1,12 @@
+import { describe, expect, it, vi } from "vitest";
+
 import { compose } from "../compose";
 
 describe("compose", () => {
   it("returns a function which calls all functions", () => {
-    const a = jest.fn();
-    const b = jest.fn();
-    const c = jest.fn();
+    const a = vi.fn();
+    const b = vi.fn();
+    const c = vi.fn();
     const f = compose([a, b, c]);
     f();
     expect(a).toBeCalledTimes(1);

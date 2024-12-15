@@ -36,7 +36,10 @@ const nusightServerRobotModel = RobotModel.of({
  * instead create their own ComponentNetwork class which uses the Network helper class.
  */
 export class NUsightNetwork {
-  constructor(private nuclearnetClient: NUClearNetClient, private appModel: AppModel) {}
+  constructor(
+    private nuclearnetClient: NUClearNetClient,
+    private appModel: AppModel,
+  ) {}
 
   static of = memoize((appModel: AppModel) => {
     const nuclearnetClient: NUClearNetClient = WebSocketProxyNUClearNetClient.of();

@@ -1,14 +1,15 @@
 import { NUClearNetPacket } from "nuclearnet.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { message } from "../../../shared/messages";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { NodeSystemClock } from "../../time/node_clock";
-import { hashType } from "../hash_type";
 import { LruPriorityQueue } from "../lru_priority_queue";
 import { NUClearNetPacketProcessor } from "../packet_processor";
 
 const DataPoint = message.eye.DataPoint;
-const Test = message.support.nusight.Test;
+const Test = message.network.Test;
 
 function makePacket(typeName: string, opts: { payload: Uint8Array; reliable?: boolean }): NUClearNetPacket {
   return {
@@ -27,11 +28,11 @@ type SendArgs = [event: string, packet: NUClearNetPacket, ack: () => void | unde
 
 describe("NUClearNetPacketProcessor", () => {
   it("sends reliable packets through immediately without queuing or dropping when queue capacity is exceeded", () => {
-    const typeName = "message.support.nusight.Test";
+    const typeName = "message.network.Test";
     const payload = Test.encode({ message: "Test" }).finish();
     const packet = makePacket(typeName, { payload, reliable: true });
 
-    const send = jest.fn();
+    const send = vi.fn();
 
     const processor = new NUClearNetPacketProcessor(
       send,
@@ -55,7 +56,7 @@ describe("NUClearNetPacketProcessor", () => {
   });
 
   it("sends unreliable packets immediately through the queue if the outgoing packet limit is not yet exceeded", () => {
-    const typeName = "message.support.nusight.Test";
+    const typeName = "message.network.Test";
     const packetA = makePacket(typeName, {
       payload: Test.encode({ message: "Packet A" }).finish(),
       reliable: false,
@@ -65,7 +66,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const processor = new NUClearNetPacketProcessor(
       send,
@@ -91,7 +92,7 @@ describe("NUClearNetPacketProcessor", () => {
   });
 
   it("queues unreliable packets and waits for ack before sending more if the outgoing packet limit is exceeded", () => {
-    const typeName = "message.support.nusight.Test";
+    const typeName = "message.network.Test";
     const packetA = makePacket(typeName, {
       payload: Test.encode({ message: "Packet A" }).finish(),
       reliable: false,
@@ -105,7 +106,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const processor = new NUClearNetPacketProcessor(
       send,
@@ -139,7 +140,7 @@ describe("NUClearNetPacketProcessor", () => {
   });
 
   it("gives up on waiting for ack after the configured timeout", () => {
-    const typeName = "message.support.nusight.Test";
+    const typeName = "message.network.Test";
     const packetA = makePacket(typeName, {
       payload: Test.encode({ message: "Packet A" }).finish(),
       reliable: false,
@@ -153,7 +154,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const clock = new FakeClock(0);
 
@@ -185,7 +186,7 @@ describe("NUClearNetPacketProcessor", () => {
 
   it("uses an LRU queue to ensure high frequency packets don't dominate low frequency packets", () => {
     const dataPointType = "message.eye.DataPoint";
-    const testType = "message.support.nusight.Test";
+    const testType = "message.network.Test";
 
     const dataPointA = makePacket(dataPointType, {
       payload: DataPoint.encode({ label: "DataPoint A" }).finish(),
@@ -213,7 +214,7 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const send = jest.fn<void, SendArgs>();
+    const send = vi.fn<void, SendArgs>();
 
     const clock = new FakeClock(0);
 
