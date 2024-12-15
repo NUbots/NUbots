@@ -386,7 +386,7 @@ RUN pip install \
     stringcase \
     Pillow \
     protobuf==4.21.2 \
-    mycroft-mimic3-tts \
+    piper-tts \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
