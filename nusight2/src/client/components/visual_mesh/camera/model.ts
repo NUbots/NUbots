@@ -23,7 +23,10 @@ export class CameraModel {
   @observable.shallow image?: Image;
   @observable name: string;
 
-  constructor(private model: VisualMeshRobotModel, { id, name }: CameraModelOpts) {
+  constructor(
+    private model: VisualMeshRobotModel,
+    { id, name }: CameraModelOpts,
+  ) {
     this.id = id;
     this.name = name;
   }

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from "vitest";
+
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { ScrubberPacketListenerCallback, ScrubberSet } from "../scrubber_set";
 import { nanosToTimestampObject, timestampObjectToNanos } from "../utils";
@@ -63,10 +65,10 @@ describe("ScrubberSet and Scrubber", () => {
     scrubberSet.update({ id: scrubberB.id, type: "seek", timestamp: scrubberB.halfwayTimestamp });
 
     // Add listeners for Ping and Pong messages
-    const onPing = jest.fn(() => Promise.resolve());
+    const onPing = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Ping", onPing);
 
-    const onPong = jest.fn(() => Promise.resolve());
+    const onPong = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Pong", onPong);
 
     const startMessageSet = 0;
@@ -94,13 +96,13 @@ describe("ScrubberSet and Scrubber", () => {
     const scrubberSet = ScrubberSet.of();
 
     // Set listeners for Ping, Pong, and Pang messages
-    const onPing = jest.fn(() => Promise.resolve());
+    const onPing = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Ping", onPing);
 
-    const onPong = jest.fn(() => Promise.resolve());
+    const onPong = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Pong", onPong);
 
-    const onPang = jest.fn(() => Promise.resolve());
+    const onPang = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Pang", onPang);
 
     // Load a scrubber
@@ -135,10 +137,10 @@ describe("ScrubberSet and Scrubber", () => {
     const { id, makePacketFromScrubber } = loadScrubber(scrubberSet);
 
     // Add Ping and Pong listeners after loading scrubber
-    const onPing = jest.fn(() => Promise.resolve());
+    const onPing = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Ping", onPing);
 
-    const onPong = jest.fn(() => Promise.resolve());
+    const onPong = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Pong", onPong);
 
     // Check that we got the messages from adding the listeners
@@ -161,7 +163,7 @@ describe("ScrubberSet and Scrubber", () => {
     const scrubberSet = ScrubberSet.of();
 
     // Register a listener for Pang#100 that acks immediately
-    const onPangSubtype100 = jest.fn(() => Promise.resolve());
+    const onPangSubtype100 = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Pang#100", onPangSubtype100);
 
     // Load the scrubber and wait for ack of initial message
@@ -182,7 +184,7 @@ describe("ScrubberSet and Scrubber", () => {
     const scrubberSet = ScrubberSet.of();
 
     // Register a listener for Pang that acks immediately
-    const onPang = jest.fn(() => Promise.resolve());
+    const onPang = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Pang", onPang);
 
     // Load a scrubber, and wait for ack of initial messages
@@ -212,7 +214,7 @@ describe("ScrubberSet and Scrubber", () => {
     let resolves: Array<() => void> = [];
 
     // Register a Ping listener that stores the resolve callback for each call
-    const onPing = jest.fn(() => new Promise<void>((resolve) => resolves.push(resolve)));
+    const onPing = vi.fn(() => new Promise<void>((resolve) => resolves.push(resolve)));
     scrubberSet.on("message.Ping", onPing);
 
     // Load a scrubber
@@ -248,63 +250,65 @@ describe("ScrubberSet and Scrubber", () => {
     expect(onPing).toHaveBeenNthCalledWith(3, makePacketFromScrubber("message.Ping", "ping.10"));
   });
 
-  it("throttles emits separately by type and callback", (done) => {
-    const scrubberSet = ScrubberSet.of();
+  it("throttles emits separately by type and callback", async () => {
+    return new Promise((resolve, reject) => {
+      const scrubberSet = ScrubberSet.of();
 
-    // Keep track of resolves for acknowledging message sends
-    let onPingResolves: Array<() => void> = [];
+      // Keep track of resolves for acknowledging message sends
+      let onPingResolves: Array<() => void> = [];
 
-    // Register a Ping listener that stores the resolve callback for each call
-    const onPing = jest.fn(() => new Promise<void>((resolve) => onPingResolves.push(resolve)));
-    scrubberSet.on("message.Ping", onPing);
+      // Register a Ping listener that stores the resolve callback for each call
+      const onPing = vi.fn(() => new Promise<void>((resolve) => onPingResolves.push(resolve)));
+      scrubberSet.on("message.Ping", onPing);
 
-    // Register a Pong listener that resolves immediately
-    const onPong = jest.fn(() => Promise.resolve());
-    scrubberSet.on("message.Pong", onPong);
+      // Register a Pong listener that resolves immediately
+      const onPong = vi.fn(() => Promise.resolve());
+      scrubberSet.on("message.Pong", onPong);
 
-    // Load a scrubber
-    const { id } = loadScrubber(scrubberSet);
+      // Load a scrubber
+      const { id } = loadScrubber(scrubberSet);
 
-    // Ack the packet from the load, and reset the resolves array
-    onPingResolves[0]();
-    onPingResolves = [];
-
-    // Wait for the ack to be handled
-    setImmediate(() => {
-      // Seek to every message set up until the 10th message set (ping.10, pong.10, pang.10)
-      for (let i = 0; i <= 10; i++) {
-        // The first seek should be synchronous, so the resolve following this loop works
-        if (i === 0) {
-          scrubberSet.update({ id, type: "seek", timestamp: computeTimestampForMessageSet(i) });
-          continue;
-        }
-
-        // Do the other seeks asynchronously with setImmediate(), so they don't all run in the
-        // same tick, to allow the listener promises to have the chance to run in between.
-        setImmediate(() => {
-          scrubberSet.update({ id, type: "seek", timestamp: computeTimestampForMessageSet(i) });
-        });
-      }
-
-      // Ack the Ping message from the first seek
+      // Ack the packet from the load, and reset the resolves array
       onPingResolves[0]();
+      onPingResolves = [];
 
-      // Wait for ack to be handled
+      // Wait for the ack to be handled
       setImmediate(() => {
-        try {
-          // onPing should have been called only three times:
-          // on load, first seek, last seek
-          expect(onPing).toHaveBeenCalledTimes(3);
-          expect(onPing.mock.calls).toMatchSnapshot();
+        // Seek to every message set up until the 10th message set (ping.10, pong.10, pang.10)
+        for (let i = 0; i <= 10; i++) {
+          // The first seek should be synchronous, so the resolve following this loop works
+          if (i === 0) {
+            scrubberSet.update({ id, type: "seek", timestamp: computeTimestampForMessageSet(i) });
+            continue;
+          }
 
-          // onPong should have been called for the initial load
-          // and for every seek, since it resolved each seek right away
-          expect(onPong).toHaveBeenCalledTimes(12);
-
-          done();
-        } catch (error) {
-          done(error);
+          // Do the other seeks asynchronously with setImmediate(), so they don't all run in the
+          // same tick, to allow the listener promises to have the chance to run in between.
+          setImmediate(() => {
+            scrubberSet.update({ id, type: "seek", timestamp: computeTimestampForMessageSet(i) });
+          });
         }
+
+        // Ack the Ping message from the first seek
+        onPingResolves[0]();
+
+        // Wait for ack to be handled
+        setImmediate(() => {
+          try {
+            // onPing should have been called only three times:
+            // on load, first seek, last seek
+            expect(onPing).toHaveBeenCalledTimes(3);
+            expect(onPing.mock.calls).toMatchSnapshot();
+
+            // onPong should have been called for the initial load
+            // and for every seek, since it resolved each seek right away
+            expect(onPong).toHaveBeenCalledTimes(12);
+
+            resolve(undefined);
+          } catch (error) {
+            reject(error);
+          }
+        });
       });
     });
   });
@@ -313,7 +317,7 @@ describe("ScrubberSet and Scrubber", () => {
     const scrubberSet = ScrubberSet.of();
 
     // Register a Ping listener
-    const onPing = jest.fn(() => Promise.resolve());
+    const onPing = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Ping", onPing);
 
     // Load a scrubber and wait for the resulting emit to be acked
@@ -342,7 +346,7 @@ describe("ScrubberSet and Scrubber", () => {
     let ackFirstSend: (() => Promise<void>) | undefined = undefined;
 
     // Add a Ping listener stores an ack callback for the first send
-    const onPing = jest.fn<ReturnType<ScrubberPacketListenerCallback>, Parameters<ScrubberPacketListenerCallback>>(
+    const onPing = vi.fn<ScrubberPacketListenerCallback>(
       () =>
         new Promise((resolve) => {
           if (!ackFirstSend) {
@@ -375,7 +379,7 @@ describe("ScrubberSet and Scrubber", () => {
     const scrubberSet = ScrubberSet.of();
 
     // Register a Ping listener that resolves immediately
-    const onPing = jest.fn(() => Promise.resolve());
+    const onPing = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Ping", onPing);
 
     // Load a scrubber and wait for the resulting emit to be acked
@@ -399,7 +403,7 @@ describe("ScrubberSet and Scrubber", () => {
     const scrubberSet = ScrubberSet.of();
 
     // Register a Ping listener that resolves immediately
-    const onPing = jest.fn(() => Promise.resolve());
+    const onPing = vi.fn(() => Promise.resolve());
     scrubberSet.on("message.Ping", onPing);
 
     // Load two scrubbers and wait for the resulting emits to be acked
@@ -441,8 +445,8 @@ describe("ScrubberSet and Scrubber", () => {
     };
 
     // Save the resolve callback when we get Ping and ScrubberState messages
-    const onPing = jest.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
-    const onScrubberState = jest.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
+    const onPing = vi.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
+    const onScrubberState = vi.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
 
     // Listen for Ping and ScrubberState messages
     scrubberSet.on("message.Ping", onPing);
@@ -497,8 +501,8 @@ describe("ScrubberSet and Scrubber", () => {
     };
 
     // Save the resolve callback when we get Ping and ScrubberState messages
-    const onPing = jest.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
-    const onScrubberState = jest.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
+    const onPing = vi.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
+    const onScrubberState = vi.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
 
     // Listen for Ping and ScrubberState messages
     scrubberSet.on("message.Ping", onPing);
@@ -566,8 +570,8 @@ describe("ScrubberSet and Scrubber", () => {
     };
 
     // Save the ack function when we get Ping and ScrubberState messages
-    const onPing = jest.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
-    const onScrubberState = jest.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
+    const onPing = vi.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
+    const onScrubberState = vi.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
 
     // Listen for Ping and ScrubberState messages
     scrubberSet.on("message.Ping", onPing);
@@ -700,8 +704,8 @@ describe("ScrubberSet and Scrubber", () => {
     };
 
     // Save the ack function when we get Ping and ScrubberState messages
-    const onPing = jest.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
-    const onScrubberState = jest.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
+    const onPing = vi.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
+    const onScrubberState = vi.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
 
     // Listen for Ping and ScrubberState messages
     scrubberSet.on("message.Ping", onPing);
@@ -859,8 +863,8 @@ describe("ScrubberSet and Scrubber", () => {
     };
 
     // Save the ack function when we get Ping and ScrubberState messages
-    const onPing = jest.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
-    const onScrubberState = jest.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
+    const onPing = vi.fn(() => new Promise<void>((resolve) => (resolves["Ping"] = resolve)));
+    const onScrubberState = vi.fn(() => new Promise<void>((resolve) => (resolves["ScrubberState"] = resolve)));
 
     // Listen for Ping and ScrubberState messages
     scrubberSet.on("message.Ping", onPing);

@@ -1,13 +1,15 @@
 import { computed } from "mobx";
 import { observe } from "mobx";
 import { observable } from "mobx";
+import { Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createUpdatableComputed } from "../create_updatable_computed";
 
 describe("createUpdatableComputed", () => {
   let model: Model;
   let viewModel: ViewModel;
-  let onChange: jest.Mock;
+  let onChange: Mock;
 
   const computedTriangle = createUpdatableComputed(
     (opts: TriangleOpts) => new Triangle(opts),
@@ -55,7 +57,7 @@ describe("createUpdatableComputed", () => {
   beforeEach(() => {
     model = new Model({ color: "red" });
     viewModel = new ViewModel(model);
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   it("returns computed value", () => {
