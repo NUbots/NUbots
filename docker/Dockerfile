@@ -407,7 +407,7 @@ RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O 
     node-v20.13.1-linux-x64/bin/ node-v20.13.1-linux-x64/include/ node-v20.13.1-linux-x64/lib/
 RUN npm install -g \
     yarn@1.22.19 \
-    prettier@2.7.1 \
+    prettier@3.4.1 \
     eslint@8.57.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container

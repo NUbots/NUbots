@@ -1,6 +1,8 @@
+import { describe, expect, it } from "vitest";
+
 import { parseEventString } from "../parse_event_string";
 
-describe.only("parseEventString()", () => {
+describe("parseEventString()", () => {
   it("parses event without subtype", () => {
     expect(parseEventString("my.type")).toStrictEqual({
       type: "my.type",

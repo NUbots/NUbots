@@ -4,7 +4,6 @@ import { action } from "mobx";
 import { reaction } from "mobx";
 import { computed } from "mobx";
 import { observable } from "mobx";
-import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import { WebGLRenderTarget } from "three";
 import { TextureLoader } from "three";
@@ -60,6 +59,8 @@ export const AnimatedSceneWithRenderTargets: StoryObj<StoryComponent> = {
 type Model = { time: number };
 
 class RenderTargetHarness extends React.Component<{ animate?: boolean }> {
+  private dispose?: () => void;
+
   @observable
   private readonly model: Model = {
     time: 0,
@@ -67,11 +68,12 @@ class RenderTargetHarness extends React.Component<{ animate?: boolean }> {
 
   componentDidMount() {
     this.update(0);
-    this.props.animate &&
-      disposeOnUnmount(
-        this,
-        reaction(() => now("frame"), this.update),
-      );
+    this.dispose = this.props.animate ? reaction(() => now("frame"), this.update) : undefined;
+  }
+
+  componentWillUnmount() {
+    this.dispose?.();
+    this.dispose = undefined;
   }
 
   render() {
