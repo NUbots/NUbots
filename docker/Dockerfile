@@ -210,6 +210,15 @@ RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
+# Protobuf
+RUN install-package protobuf && \
+    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
+    -DWITH_PROTOC="/usr/sbin/protoc" \
+    -Dprotobuf_BUILD_TESTS=OFF \
+    -Dprotobuf_BUILD_LIBPROTOC=ON \
+    -DBUILD_SHARED_LIBS=OFF
+
 # OpenVino - Dependencies
 RUN install-package opencl-clhpp \
     shellcheck \
@@ -240,12 +249,23 @@ RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.5.0 
             -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
             -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
             -DENABLE_CPPLINT:BOOL='OFF' \
+            -DCMAKE_CXX_STANDARD='17' \
             -Wno-dev && \
-    make -j$(nproc) && \
+    make -j1 && \
     make install
 
+    # protobuf v21 lots of errors
+    # protobuf v22 produces error error: ‘uint32_t’ was not declared in this scope
+    # protobuf v23 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
+    # protobuf v24 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
+    # v25 has CMake error with protobuf "/protobuf/java/core/src/main/java/com/google/java_features.proto": No such file or directory.\
+    # v26 has OpenVINO error relocation R_X86_64_TPOFF32 against hidden symbol `_ZN6google8protobuf8internal22allocate_at_least_hookE' can not be used when making a shared object
+    # v27 has fatal error: google/protobuf/stubs/logging.h: No such file or directory
+    # v28 fatal error: google/protobuf/stubs/logging.h: No such file or directory
+    # v29 fatal error: google/protobuf/stubs/logging.h: No such file or directory
+
 # Move OpenVino libraries to our library path
-# RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -255,15 +275,6 @@ RUN install-from-source https://github.com/gperftools/gperftools/releases/downlo
     --build-system autotools \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
-
-# Protobuf
-RUN install-package protobuf && \
-    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
-    --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
-    -DWITH_PROTOC="/usr/sbin/protoc" \
-    -Dprotobuf_BUILD_TESTS=OFF \
-    -Dprotobuf_BUILD_LIBPROTOC=ON \
-    -DBUILD_SHARED_LIBS=OFF
 
 # Libjpeg
 RUN install-package yasm
