@@ -323,21 +323,21 @@ namespace module::input {
         if (left_state_change) {
             if (left_down) {
                 log<NUClear::INFO>("Left Button Down");
-                emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
+                emit<Scope::INLINE>(std::make_unique<ButtonLeftDown>());
             }
             else {
                 log<NUClear::INFO>("Left Button Up");
-                emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
+                emit<Scope::INLINE>(std::make_unique<ButtonLeftUp>());
             }
         }
         if (mid_state_change) {
             if (middle_down) {
                 log<NUClear::INFO>("Middle Button Down");
-                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
+                emit<Scope::INLINE>(std::make_unique<ButtonMiddleDown>());
             }
             else {
                 log<NUClear::INFO>("Middle Button Up");
-                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
+                emit<Scope::INLINE>(std::make_unique<ButtonMiddleUp>());
             }
         }
     }

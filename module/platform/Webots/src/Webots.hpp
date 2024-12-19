@@ -112,7 +112,7 @@ namespace module::platform {
             int id;
 
             /// @brief Name of the servo
-            std::string name;
+            std::string servo_name;
 
             double p_gain = 32.0 / 255.0;
             // `i` and `d` gains are always 0
