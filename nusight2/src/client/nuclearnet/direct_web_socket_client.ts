@@ -34,8 +34,8 @@ export class DirectWebSocketClient implements WebSocketClient {
     this.socket.on(event, fn);
   }
 
-  off(event: string, fn?: Function) {
-    this.socket.off(event, fn);
+  off(event: string, fn?: (...args: any[]) => void) {
+    fn && this.socket.off(event, fn);
   }
 
   send(event: string, ...args: any[]) {

@@ -51,14 +51,13 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<PrimaryTask>, Trigger<TriggerTest>>().then([this](const RunInfo& info) {
+            on<Provide<PrimaryTask>, Trigger<TriggerTest>>().then([this](const RunReason& run_reason) {
                 // Run SubTask when task is trigger, but not when the TriggerTest triggers the provider
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                if (run_reason == RunReason::NEW_TASK) {
                     emit<Task>(std::make_unique<SubTask>("primary task"));
                 }
             });
@@ -91,12 +90,6 @@ namespace {
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 events.push_back("removing primary task");
                 emit(std::make_unique<TriggerTest>());
-            });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
             });
         }
     };

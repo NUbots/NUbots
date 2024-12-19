@@ -1,13 +1,14 @@
 import { NUClearNetPacket, NUClearNetPeer, NUClearNetSend } from "nuclearnet.js";
+import { Mock, vi } from "vitest";
 
 import { AwaitableMock, createAwaitableMock } from "../../../shared/base/testing/awaitable_mock";
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
 import { MessageType } from "../../../shared/messages";
 import { messageTypeToName } from "../../../shared/messages/type_converters";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { FakeNUClearNetClient } from "../../nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../nuclearnet/fake_nuclearnet_server";
-import { hashType } from "../../nuclearnet/hash_type";
 import { ClientConnection } from "../../web_socket/client_connection";
 
 /**
@@ -16,7 +17,7 @@ import { ClientConnection } from "../../web_socket/client_connection";
  */
 export function createMockWebSocket(): {
   connection: ClientConnection & {
-    send: AwaitableMock<void, [string, ...any[]]>;
+    send: AwaitableMock<(event: string, ...args: any[]) => void>;
   };
   emit: (event: string, ...args: any[]) => void;
   emitMessage: (message: any) => void;
@@ -25,9 +26,9 @@ export function createMockWebSocket(): {
 
   return {
     connection: {
-      onDisconnect: jest.fn(),
+      onDisconnect: vi.fn(),
       on: mockEmitter.on,
-      send: createAwaitableMock<void, [string, ...any[]]>(),
+      send: createAwaitableMock<(event: string, ...args: any[]) => void>(),
     },
     emit: mockEmitter.emit,
     emitMessage: (message: any) => {
@@ -46,8 +47,8 @@ export function createMockWebSocket(): {
  */
 export function createMockNUClearNetClient(): {
   nuclearnetClient: NUClearNetClient & {
-    on: jest.Mock<() => void, [event: string, callback: (...args: any[]) => void]>;
-    send: jest.Mock<void, [event: string, ...args: any[]]>;
+    on: Mock<(event: string, callback: (...args: any[]) => void) => () => void>;
+    send: Mock<(event: string, ...args: any[]) => void>;
   };
   nuclearnetMockEmit: (event: string, ...args: any[]) => void;
 } {
@@ -57,7 +58,7 @@ export function createMockNUClearNetClient(): {
   const mockEmitter = createMockEventEmitter();
   nuclearnetClient.on = mockEmitter.on;
 
-  nuclearnetClient.send = jest.fn();
+  nuclearnetClient.send = vi.fn();
 
   return { nuclearnetClient: nuclearnetClient as any, nuclearnetMockEmit: mockEmitter.emit };
 }
@@ -104,7 +105,7 @@ export function createPacketFromNUClearNet(message: any, opts: { reliable?: bool
 
 /** Find the first packet of the given type in the mock function's call arguments */
 export function findPacketFromCalls(
-  mockFn: jest.Mock,
+  mockFn: Mock,
   packetType: MessageType<any>,
   nthMatchingPacket: number = 1,
 ): NUClearNetPacket | undefined {
@@ -124,7 +125,7 @@ export function findPacketFromCalls(
 
 /** Find the first packet of the given type in the mock function's call arguments, and decode it */
 export function findAndDecodePacketFromCalls<T>(
-  mockFn: jest.Mock,
+  mockFn: Mock,
   packetType: MessageType<T>,
   nthMatchingPacket: number = 1,
 ):

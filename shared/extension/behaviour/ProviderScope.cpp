@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,9 +24,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "ProviderScope.hpp"
 
-#include "InformationSource.hpp"
+namespace extension::behaviour {
 
-namespace extension::behaviour::information {
-    InformationSource* InformationSource::source = nullptr;
-}
+    thread_local ProviderScope* ProviderScope::current_scope = nullptr;
+
+}  // namespace extension::behaviour

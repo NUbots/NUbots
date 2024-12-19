@@ -1,4 +1,4 @@
-import { CircleBufferGeometry } from "three";
+import { CircleGeometry, EulerOrder, MagnificationTextureFilter, MinificationTextureFilter } from "three";
 import { InstancedBufferGeometry } from "three";
 import { InstancedBufferAttribute } from "three";
 import { InterleavedBufferAttribute } from "three";
@@ -25,7 +25,6 @@ import { OrthographicCamera } from "three";
 import { PixelFormat } from "three";
 import { PerspectiveCamera } from "three";
 import { Scene } from "three";
-import { TextureFilter } from "three";
 import { Wrapping } from "three";
 import { Mapping } from "three";
 import { TextureDataType } from "three";
@@ -48,7 +47,7 @@ import { createUpdatableComputed } from "./create_updatable_computed";
 type Object3DOpts = {
   position?: Vector3;
   rotation?: Vector3;
-  rotationOrder?: string;
+  rotationOrder?: EulerOrder;
   scale?: Vector3;
   up?: Vector3;
   children?: (Object3D | false | undefined)[];
@@ -292,8 +291,8 @@ type DataTextureOpts = {
   mapping?: Mapping;
   wrapS?: Wrapping;
   wrapT?: Wrapping;
-  magFilter?: TextureFilter;
-  minFilter?: TextureFilter;
+  magFilter?: MagnificationTextureFilter;
+  minFilter?: MinificationTextureFilter;
   flipY?: boolean;
 };
 
@@ -318,8 +317,8 @@ type TextureOpts = {
   type?: TextureDataType;
   wrapS?: Wrapping;
   wrapT?: Wrapping;
-  magFilter?: TextureFilter;
-  minFilter?: TextureFilter;
+  magFilter?: MagnificationTextureFilter;
+  minFilter?: MinificationTextureFilter;
 };
 
 type ImageTextureOpts = TextureOpts & {
@@ -419,19 +418,19 @@ export const planeGeometry = createUpdatableComputed(
   (plane) => plane.dispose(),
 );
 
-type CircleBufferGeometryOpts = {
+type CircleGeometryOpts = {
   radius: number;
   segments: number;
 };
 
-export const circleBufferGeometry = createUpdatableComputed(
-  (opts: CircleBufferGeometryOpts) => {
-    return new CircleBufferGeometry(opts.radius, opts.segments, 0, 2 * Math.PI);
+export const circleGeometry = createUpdatableComputed(
+  (opts: CircleGeometryOpts) => {
+    return new CircleGeometry(opts.radius, opts.segments, 0, 2 * Math.PI);
   },
   (geometry, opts) => {
     const { radius, segments } = geometry.parameters;
     if (opts.radius !== radius || opts.segments !== segments) {
-      geometry.copy(new CircleBufferGeometry(opts.radius, opts.segments, 0, 2 * Math.PI));
+      geometry.copy(new CircleGeometry(opts.radius, opts.segments, 0, 2 * Math.PI));
     }
   },
   (geometry) => geometry.dispose(),

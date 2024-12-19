@@ -1,4 +1,6 @@
-import { hashType } from "../hash_type";
+import { describe, expect, it } from "vitest";
+
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 
 describe("hashType()", () => {
   it("matches previous snapshots", () => {

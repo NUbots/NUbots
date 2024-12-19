@@ -1,5 +1,6 @@
-import { fourcc } from "../fourcc";
-import { fourccToString } from "../fourcc";
+import { describe, expect, it } from "vitest";
+
+import { fourcc, fourccToString } from "../fourcc";
 
 describe("fourcc", () => {
   it("Calculates fourcc codes from strings", () => {

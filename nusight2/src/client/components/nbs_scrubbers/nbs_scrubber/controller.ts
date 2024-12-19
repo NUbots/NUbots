@@ -8,7 +8,10 @@ import { NbsScrubberModel } from "../model";
 import { percentageToTimestamp } from "../util";
 
 export class NbsScrubberController {
-  constructor(private scrubber: NbsScrubberModel, private network: RpcNetwork) {}
+  constructor(
+    private scrubber: NbsScrubberModel,
+    private network: RpcNetwork,
+  ) {}
 
   close = () => {
     this.network.call(new message.eye.ScrubberCloseRequest({ id: this.scrubber.id })).then((result) => {

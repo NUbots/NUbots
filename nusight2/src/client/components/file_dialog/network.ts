@@ -29,7 +29,10 @@ export function useFileDialogNetwork(model: FileDialogModel) {
 }
 
 export class FileDialogNetwork {
-  constructor(private network: Network, private model: FileDialogModel) {}
+  constructor(
+    private network: Network,
+    private model: FileDialogModel,
+  ) {}
 
   static of(nusightNetwork: NUsightNetwork, model: FileDialogModel): FileDialogNetwork {
     const network = Network.of(nusightNetwork);

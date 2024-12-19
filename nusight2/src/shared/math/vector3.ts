@@ -4,7 +4,11 @@ import { Matrix4 } from "./matrix4";
 import { Vector } from "./vector";
 
 export class Vector3 extends Vector {
-  constructor(readonly x: number, readonly y: number, readonly z: number) {
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly z: number,
+  ) {
     super();
   }
 
@@ -54,6 +58,15 @@ export class Vector3 extends Vector {
 
   applyMatrix4(m: Matrix4): Vector3 {
     return Vector3.from(this.toThree().applyMatrix4(m.toThree()));
+  }
+
+  cross(v: Vector3): Vector3 {
+    // prettier-ignore
+    return new Vector3(
+      this.y * v.z - this.z * v.y,
+      this.z * v.x - this.x * v.z,
+      this.x * v.y - this.y * v.x,
+    );
   }
 
   static fromThree(vec3: THREE.Vector3 | THREE.Euler): Vector3 {

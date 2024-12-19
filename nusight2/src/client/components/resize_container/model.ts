@@ -59,7 +59,10 @@ export class ResizeContainerModel {
   /** The state of each child panel */
   readonly childStates: ResizePanelState[];
 
-  constructor(public childProps: ResizePanelProps[], private saveKey?: string) {
+  constructor(
+    public childProps: ResizePanelProps[],
+    private saveKey?: string,
+  ) {
     // Attempt to load existing state
     const savedState = saveKey !== undefined ? loadState(saveKey, childProps.length) : undefined;
 

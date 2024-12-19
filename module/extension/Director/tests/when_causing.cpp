@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::ALLOW>>().then([this] {
                 // Task has been executed!
@@ -71,37 +70,31 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<1>>>().then([this] {
                 // Start up the helper
                 events.push_back("emitting helper task");
                 emit<Task>(std::make_unique<Helper>(), 10);
             });
-            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<2>>>().then([this] {
                 // Emitting a blocked condition
                 events.push_back("emitting blocked condition");
                 emit(std::make_unique<Condition>(Condition::BLOCK));
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<3>>>().then([this] {
                 // Emit the task at a lower priority than the helper and it shouldn't be able to push it and be blocked
                 events.push_back("emitting task at low priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 1);
             });
-            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>>().then([this] {
                 // Increase the priority of the task so it can push the helper
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);
-            });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
             });
         }
     };
 }  // namespace
 
-TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][!mayfail]") {
+TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][!mayfail][.]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;

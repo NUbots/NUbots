@@ -151,7 +151,7 @@ export class CameraViewModel {
       const geometry = new BufferGeometry();
       geometry.setIndex(triangles);
       // geometry.addAttribute('position', new Float32BufferAttribute(position, 2))
-      geometry.addAttribute("uv", new Float32BufferAttribute(uvs, 2));
+      geometry.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
 
       // Read each class into a separate attribute
       const buffer = new InterleavedBuffer(
@@ -160,12 +160,12 @@ export class CameraViewModel {
       );
 
       // Add our classification objects
-      geometry.addAttribute("ball", new InterleavedBufferAttribute(buffer, 1, 0));
-      geometry.addAttribute("goal", new InterleavedBufferAttribute(buffer, 1, 1));
-      geometry.addAttribute("fieldLine", new InterleavedBufferAttribute(buffer, 1, 2));
-      geometry.addAttribute("field", new InterleavedBufferAttribute(buffer, 1, 3));
-      geometry.addAttribute("robot", new InterleavedBufferAttribute(buffer, 1, 4));
-      geometry.addAttribute("environment", new InterleavedBufferAttribute(buffer, 1, 5));
+      geometry.setAttribute("ball", new InterleavedBufferAttribute(buffer, 1, 0));
+      geometry.setAttribute("goal", new InterleavedBufferAttribute(buffer, 1, 1));
+      geometry.setAttribute("fieldLine", new InterleavedBufferAttribute(buffer, 1, 2));
+      geometry.setAttribute("field", new InterleavedBufferAttribute(buffer, 1, 3));
+      geometry.setAttribute("robot", new InterleavedBufferAttribute(buffer, 1, 4));
+      geometry.setAttribute("environment", new InterleavedBufferAttribute(buffer, 1, 5));
 
       return geometry;
     },

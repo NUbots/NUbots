@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // Store the tasks we are given to run
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) { events.push_back(t.msg); });
@@ -96,12 +95,6 @@ namespace {
                 // Emit a fourth task with very high priority that should't displace the high priority task
                 events.push_back("Starting very high priority provider");
                 emit<Task>(std::make_unique<UniqueProvider<4>>("very high"), 200);
-            });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
             });
         }
     };

@@ -3,8 +3,8 @@ import path from "path";
 
 import { message } from "../../../shared/messages";
 import { NbsScrubber } from "../../../shared/nbs_scrubber";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetPacketMaybeEmpty } from "../../../shared/nuclearnet/nuclearnet_client";
-import { hashType } from "../../nuclearnet/hash_type";
 
 import ScrubberState = message.eye.ScrubberState;
 

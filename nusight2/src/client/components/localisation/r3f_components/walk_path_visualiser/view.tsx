@@ -1,29 +1,51 @@
 import React from "react";
 import * as THREE from "three";
 
-import { LocalisationRobotModel } from "../../robot_model";
+import { Matrix4 } from "../../../../../shared/math/matrix4";
+import { Vector3 } from "../../../../../shared/math/vector3";
 import { ArrowGeometry } from "../arrow_geometry/ArrowGeometry";
 
-export const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel }) => {
-  if (!model.Hfd || !model.Hfr) {
+interface WalkPathVisualiserProps {
+  Hfd: Matrix4;
+  Hfr: Matrix4;
+  Hft: Matrix4;
+  min_align_radius: number;
+  max_align_radius: number;
+  min_angle_error: number;
+  max_angle_error: number;
+  angle_to_final_heading: number;
+  velocity_target: Vector3;
+}
+
+export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
+  const {
+    Hfd: hfd,
+    Hfr: hfr,
+    Hft: hft,
+    min_align_radius,
+    max_align_radius,
+    min_angle_error,
+    max_angle_error,
+    angle_to_final_heading,
+    velocity_target,
+  } = props;
+
+  if (!hfd || !hfr) {
     return null;
   }
-  const rDFf = model.Hfd?.decompose().translation;
-  const rTFf = model.Hft.decompose().translation;
-  const robot_rotation = new THREE.Euler().setFromQuaternion(model.Hft.decompose().rotation.toThree(), "XYZ");
-  const target_rotation = new THREE.Euler().setFromQuaternion(model.Hfd.decompose().rotation.toThree(), "XYZ");
-  const min_align_radius = model.min_align_radius;
-  const max_align_radius = model.max_align_radius;
-  const min_angle_error = model.min_angle_error;
-  const max_angle_error = model.max_angle_error;
-  const angle_to_final_heading = model.angle_to_final_heading;
+
+  const rDFf = hfd.decompose().translation;
+  const rTFf = hft.decompose().translation;
+  const robot_rotation = new THREE.Euler().setFromQuaternion(hft.decompose().rotation.toThree(), "XYZ");
+  const target_rotation = new THREE.Euler().setFromQuaternion(hfd.decompose().rotation.toThree(), "XYZ");
+
   const Rfr = new THREE.Quaternion(
-    model.Hfr?.decompose().rotation.x,
-    model.Hfr?.decompose().rotation.y,
-    model.Hfr?.decompose().rotation.z,
-    model.Hfr?.decompose().rotation.w,
+    hfr.decompose().rotation.x,
+    hfr.decompose().rotation.y,
+    hfr.decompose().rotation.z,
+    hfr.decompose().rotation.w,
   );
-  const vRf = model.velocity_target.toThree().applyQuaternion(Rfr);
+  const vRf = velocity_target.toThree().applyQuaternion(Rfr);
 
   const velocity_direction = Math.atan2(vRf.y, vRf.x);
   const speed = Math.sqrt(vRf.x ** 2 + vRf.y ** 2) * 1.5;
@@ -31,19 +53,19 @@ export const WalkPathVisualiser = ({ model }: { model: LocalisationRobotModel })
   return (
     <object3D>
       <mesh position={[rDFf?.x, rDFf?.y, 0.005]}>
-        <circleBufferGeometry args={[min_align_radius, 40]} />
+        <circleGeometry args={[min_align_radius, 40]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rDFf?.x, rDFf?.y, 0.006]}>
-        <circleBufferGeometry args={[max_align_radius, 40]} />
+        <circleGeometry args={[max_align_radius, 40]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.007]} rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
-        <circleBufferGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
+        <circleGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
-        <circleBufferGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
+        <circleGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.009]}>

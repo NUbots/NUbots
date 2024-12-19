@@ -202,7 +202,7 @@ export class TextViewModel {
 
   private readonly material = shaderMaterial((opts: TextOpts) => {
     const ray = opts.type === "ray" ? opts.ray : Vector3.of();
-    const pixel = opts.type === "pixel" ? opts.pixel : opts.pixelOffset ?? Vector2.of();
+    const pixel = opts.type === "pixel" ? opts.pixel : (opts.pixelOffset ?? Vector2.of());
     return {
       shader: TextViewModel.shader,
       uniforms: {

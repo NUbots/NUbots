@@ -2,7 +2,7 @@ import { IAtom } from "mobx";
 import { createAtom } from "mobx";
 import { createTransformer } from "mobx-utils";
 import { BufferGeometry } from "three";
-import { PlaneBufferGeometry } from "three";
+import { PlaneGeometry } from "three";
 import { RawShaderMaterial } from "three";
 import { WebGLRenderTarget } from "three";
 import { Scene } from "three";
@@ -171,7 +171,7 @@ export class ImageDecoder {
       this.bayerDecoder = {
         scene: new Scene(),
         camera: new OrthographicCamera(-1, 1, 1, -1, 0, 1),
-        geometry: new PlaneBufferGeometry(2, 2),
+        geometry: new PlaneGeometry(2, 2),
         shader: new RawShaderMaterial({
           vertexShader: bayerVertexShader,
           fragmentShader: bayerFragmentShader,
@@ -214,7 +214,7 @@ export class ImageDecoder {
       this.bayerDecoder = {
         scene: new Scene(),
         camera: new OrthographicCamera(-1, 1, 1, -1, 0, 1),
-        geometry: new PlaneBufferGeometry(2, 2),
+        geometry: new PlaneGeometry(2, 2),
         shader: new RawShaderMaterial({
           vertexShader: bayerVertexShader,
           fragmentShader: bayerFragmentShader,

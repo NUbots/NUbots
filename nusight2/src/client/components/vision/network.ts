@@ -150,8 +150,8 @@ export class VisionNetwork {
         goal.side === message.vision.Goal.Side.LEFT
           ? "left"
           : goal.side === message.vision.Goal.Side.RIGHT
-          ? "right"
-          : "unknown",
+            ? "right"
+            : "unknown",
       post: {
         top: Vector3.from(goal.post?.top),
         bottom: Vector3.from(goal.post?.bottom),

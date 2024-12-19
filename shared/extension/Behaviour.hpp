@@ -30,8 +30,12 @@
 
 #include <memory>
 #include <nuclear>
+#include <optional>
 
-#include "behaviour/InformationSource.hpp"
+#include "behaviour/GroupInfo.hpp"
+#include "behaviour/ProviderScope.hpp"
+#include "behaviour/RunReason.hpp"
+#include "behaviour/TaskData.hpp"
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
@@ -58,7 +62,20 @@ namespace extension::behaviour {
 
             // Tell the Director
             reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
+                std::make_unique<commands::ProvideReaction>(
+                    reaction,
+                    typeid(T),
+                    classification,
+                    [](const NUClear::id_t& allowed_id,
+                       const RunReason& run_reason,
+                       const std::shared_ptr<const void>& data,
+                       const std::shared_ptr<const GroupInfo>& info) -> Lock {
+                        return {
+                            information::RunReasonStore::set(run_reason),  // Make clang-format not be dumb
+                            information::TaskDataStore<T>::set(allowed_id, data),
+                            information::GroupInfoStore<T>::set(info),
+                        };
+                    }));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
@@ -77,26 +94,25 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
-            NUClear::threading::ReactionTask& t) {
-
-            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(t.parent->id));
-            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(t.parent->id));
-            return std::make_tuple(run_data, run_info);
+        static std::tuple<std::shared_ptr<const T>, std::optional<RunReason>> get(NUClear::threading::ReactionTask& t) {
+            return {
+                information::TaskDataStore<T>::get(t.parent->id),
+                information::RunReasonStore::get(),
+            };
         }
 
         /**
-         * Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted
+         * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done.
          *
-         * @tparam DSL the NUClear dsl for the on statement
+         * @tparam DSL the DSL from NUClear for the on statement
          *
-         * @param task The reaction task object that just finished
+         * @param t the reaction task that is being scoped
+         *
+         * @return the scope object that will accumulate tasks to be emitted together
          */
         template <typename DSL>
-        static void postcondition(NUClear::threading::ReactionTask& task) {
-            // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent->reactor.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::ProviderDone>(task.parent->id, task.id));
+        static std::unique_ptr<ProviderScope> scope(NUClear::threading::ReactionTask& t) {
+            return std::make_unique<ProviderScope>(typeid(T), t);
         }
     };
 
@@ -205,6 +221,15 @@ namespace extension::behaviour {
         }
     };
 
+    enum class RunState {
+        /// The group has not emitted the task
+        NO_TASK,
+        /// The group is running the task
+        RUNNING,
+        /// The group has the task queued
+        QUEUED
+    };
+
     /**
      * Adds a Uses object to the callback to allow access to information from the context of this provider.
      *
@@ -216,24 +241,38 @@ namespace extension::behaviour {
      *   It allows you to see what has happened in previous calls, e.g. are we re-running because our previous task
      *   emitted that it was done
      *
-     * @tparam Provider the type of the provider this uses is for
+     * @tparam T the type of the provider this uses is for
      */
-    template <typename Provider>
+    template <typename T>
     struct Uses {
-        GroupInfo::RunState run_state;
+
+        /// The current run state of the group
+        RunState run_state;
+        /// Whether the task is done or not, regardless of if this provider group is running it
         bool done;
 
         template <typename DSL>
-        static std::shared_ptr<Uses<Provider>> get(NUClear::threading::ReactionTask& t) {
+        static std::optional<Uses<T>> get(NUClear::threading::ReactionTask& t) {
 
-            auto group_info = information::InformationSource::get_group_info(t.parent->id,
-                                                                             typeid(Provider),
-                                                                             typeid(commands::RootType<Provider>));
 
-            auto data = std::make_shared<Uses<Provider>>();
+            // Default values if we can't find the group info
+            Uses<T> data;
+            data.run_state = RunState::NO_TASK;
+            data.done      = false;
 
-            data->run_state = group_info.run_state;
-            data->done      = group_info.done;
+            auto is_target_task = [&t](const auto& task) {
+                return task.requester_id == t.parent->id && task.type == typeid(T);
+            };
+
+            auto group_info = information::GroupInfoStore<T>::get();
+            if (group_info != nullptr) {
+                data.run_state = group_info->active_task.requester_id == t.parent->id ? RunState::RUNNING
+                                 : std::any_of(group_info->watchers.begin(), group_info->watchers.end(), is_target_task)
+                                     ? RunState::QUEUED
+                                     : RunState::NO_TASK;
+
+                data.done = group_info->done;
+            }
 
             return data;
         }
@@ -310,21 +349,8 @@ namespace extension::behaviour {
                          const bool& optional    = false,
                          const std::string& name = "") {
 
-            // Work out who is sending the task so we can determine if it's a subtask
-            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = (task != nullptr) ? task->parent->id : -1;
-            uint64_t task_id     = (task != nullptr) ? task->id : -1;
-
-            NUClear::dsl::word::emit::Inline<commands::BehaviourTask>::emit(
-                powerplant,
-                std::make_shared<commands::BehaviourTask>(typeid(T),
-                                                          typeid(commands::RootType<T>),
-                                                          reaction_id,
-                                                          task_id,
-                                                          data,
-                                                          name,
-                                                          priority,
-                                                          optional));
+            /// Emit using the provider scope as it will know how to handle the task
+            ProviderScope::emit<T>(powerplant, data, priority, optional, name);
         }
     };
 
@@ -343,10 +369,10 @@ namespace extension::behaviour {
      * When this is emitted the director will just continue with whatever was previously emitted by this provider.
      *
      * ```
-     * emit<Task>(std::make_unique<Idle>());
+     * emit<Task>(std::make_unique<Continue>());
      * ```
      */
-    struct Idle {};
+    struct Continue {};
 
     /**
      * A reactor subtype that can be used when making a behaviour reactor.
@@ -375,10 +401,10 @@ namespace extension::behaviour {
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
         using Task      = ::extension::behaviour::Task<T>;
-        using RunInfo   = ::extension::behaviour::RunInfo;
-        using GroupInfo = ::extension::behaviour::GroupInfo;
+        using RunReason = ::extension::behaviour::RunReason;
+        using RunState  = ::extension::behaviour::RunState;
         using Done      = ::extension::behaviour::Done;
-        using Idle      = ::extension::behaviour::Idle;
+        using Continue  = ::extension::behaviour::Continue;
     };
 
 }  // namespace extension::behaviour

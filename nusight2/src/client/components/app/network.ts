@@ -16,7 +16,10 @@ import ScrubberState = message.eye.ScrubberState;
 export class AppNetwork {
   private nextRobotId: number;
 
-  constructor(private nusightNetwork: NUsightNetwork, private model: AppModel) {
+  constructor(
+    private nusightNetwork: NUsightNetwork,
+    private model: AppModel,
+  ) {
     this.nextRobotId = 0;
 
     nusightNetwork.onNUClearJoin(this.onJoin);
