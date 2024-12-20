@@ -321,7 +321,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/3350a93a13d6841e8220eba098287af15ef1781b.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/8496dcad1b197f5d6b0d95b8cc8c60d956459d49.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
