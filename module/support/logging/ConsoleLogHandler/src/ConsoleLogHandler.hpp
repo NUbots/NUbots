@@ -30,20 +30,40 @@
 
 #include <mutex>
 #include <nuclear>
+#include <string>
+#include <vector>
+
+#include "utility/support/evil/pure_evil.hpp"
 
 namespace module::support::logging {
 
     /**
      * Handles the logging of log messages to the console in a thread safe manner.
      *
-     * @author Jake Woods
+     * @author Trent Houliston
      */
     class ConsoleLogHandler : public NUClear::Reactor {
-    private:
-        std::mutex mutex;
-
     public:
         explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
+
+    private:
+        /**
+         * Print a log to the console in a thread safe manner.
+         *
+         * @param level         the log level of the message
+         * @param reactor       the name of the reactor that emitted the message
+         * @param name          the name of the reaction that emitted the message
+         * @param message       the message that was emitted
+         * @param stack_trace   the stack trace of the message
+         */
+        void print_log(const NUClear::LogLevel& level,
+                       const std::string& reactor,
+                       const std::string& name,
+                       const std::string& message,
+                       const std::vector<utility::support::evil::StackFrame>& stack_trace);
+
+        /// A mutex for accessing the std::cerr stream
+        std::mutex mutex;
     };
 
 }  // namespace module::support::logging
