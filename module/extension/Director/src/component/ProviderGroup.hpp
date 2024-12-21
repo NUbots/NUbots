@@ -93,7 +93,8 @@ namespace module::extension::component {
             });
         }
 
-        ::extension::behaviour::Lock update_data(const RunReason& reason = RunReason::OTHER_TRIGGER) {
+        ::extension::behaviour::Lock update_data(std::map<std::type_index, component::ProviderGroup> groups = {},
+                                                 const RunReason& reason = RunReason::OTHER_TRIGGER) {
             // Root providers don't have a data_setter
             if (data_setter == nullptr) {
                 return ::extension::behaviour::Lock();
@@ -101,15 +102,23 @@ namespace module::extension::component {
             return data_setter(active_provider != nullptr ? active_provider->id : 0,
                                reason,
                                active_task != nullptr ? active_task->data : nullptr,
-                               get_group_info());
+                               get_group_info(groups));
         }
 
-        std::shared_ptr<const GroupInfo> get_group_info() const {
-            auto is_root_provider = [this](NUClear::id_t requester_id) {
-                auto it = std::find_if(providers.begin(), providers.end(), [requester_id](const auto& provider) {
-                    return provider->id == requester_id;
+        std::shared_ptr<const GroupInfo> get_group_info(
+            const std::map<std::type_index, component::ProviderGroup>& groups) const {
+
+            // Check if the requester is a root provider
+            auto is_root_provider = [this, &groups](NUClear::id_t requester_id) {
+                return std::any_of(groups.begin(), groups.end(), [requester_id](const auto& group_pair) {
+                    const auto& group = group_pair.second;
+                    return std::any_of(group.providers.begin(),
+                                       group.providers.end(),
+                                       [requester_id](const auto& provider) {
+                                           return provider->id == requester_id
+                                                  && provider->classification == Provider::Classification::ROOT;
+                                       });
                 });
-                return it != providers.end() && (*it)->classification == Provider::Classification::ROOT;
             };
 
             auto group_info                      = std::make_shared<GroupInfo>();

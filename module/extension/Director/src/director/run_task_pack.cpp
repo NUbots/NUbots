@@ -198,7 +198,7 @@ namespace module::extension {
 
                 // This provider is now in the done state
                 group.done = true;
-                group.update_data();
+                group.update_data(groups);
 
                 auto& parent_group = parent_provider->group;
 
@@ -227,7 +227,7 @@ namespace module::extension {
 
         // If we get here, the provider is not done and we are running new tasks
         group.done = false;
-        group.update_data();
+        group.update_data(groups);
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
