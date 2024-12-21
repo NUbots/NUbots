@@ -194,7 +194,7 @@ export class VisionNetwork {
   }
 }
 
-async function jpegBufferToBitmap(buffer: ArrayBuffer): Promise<ImageBitmap> {
+async function jpegBufferToBitmap(buffer: Uint8Array): Promise<ImageBitmap> {
   const blob = new Blob([buffer], { type: "image/jpeg" });
   return createImageBitmap(blob, {
     colorSpaceConversion: "none",
