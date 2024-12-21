@@ -209,6 +209,17 @@ namespace module::skill {
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
                 }
+                if (walk_task.velocity_target.norm() > 0) {
+                    double t = 0;
+                    while (t < cfg.walk_generator_parameters.step_period) {
+                        auto Hps = walk_generator.get_swing_foot_pose(t);
+                        auto Hpt = walk_generator.get_torso_pose(t);
+                        walk_state->swing_foot_trajectory.push_back(Hps.translation());
+                        walk_state->torso_trajectory.push_back(Hpt.translation());
+                        t += cfg.walk_generator_parameters.step_period / 10;
+                    }
+                }
+                walk_state->Hwp = sensors.Hwp;
                 emit(walk_state);
             });
     }
