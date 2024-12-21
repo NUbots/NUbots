@@ -1,32 +1,21 @@
-#!/usr/bin/env python3
-#
-# MIT License
-#
-# Copyright (c) 2019 NUbots
-#
-# This file is part of the NUbots codebase.
-# See https://github.com/NUbots/NUbots for further info.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-
 import pandas as pd
+import symfit
+
+def fourier_series(x, f, n=0):
+    """
+    Returns a symbolic fourier series of order `n`.
+
+    :param n: Order of the fourier series.
+    :param x: Independent variable
+    :param f: Frequency of the fourier series
+    """
+    # Make the parameter objects for all the terms
+    a0, *cos_a = symfit.parameters(','.join(['a{}'.format(i) for i in range(0, n + 1)]))
+    sin_b = symfit.parameters(','.join(['b{}'.format(i) for i in range(1, n + 1)]))
+    # Construct the series
+    series = a0 + sum(ai * symfit.cos(i * f * x) + bi * symfit.sin(i * f * x)
+                     for i, (ai, bi) in enumerate(zip(cos_a, sin_b), start=1))
+    return series
 
 def register(command):
     command.description = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
@@ -39,6 +28,35 @@ def run(file, output, **kwargs):
     # Open the file
     df = pd.read_csv(file)
 
-    # Print everything in the DataFrame
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(df)
+    # Sort the data frame by timestamp
+    df = df.sort_values(by="timestamp")
+
+    ts_data = (df["timestamp"] - df["timestamp"].iloc[0]) / 1e9
+
+    print(ts_data)
+
+    with open("position_models.yaml", "w") as f:
+        f.write("# Fourier series models for the position data - theta = a0 + sum(ai * sin(i*w*t) + bi * cos(i*w*t))\n")
+        for col in df.columns:
+            if "head" not in col and col != "timestamp":
+                position_data = df[col].to_numpy()
+
+                # Fit a Fourier series to our data
+                t, theta = symfit.variables('x, y')
+                w, = symfit.parameters('w')
+                model_dict = {theta: fourier_series(t, f=w, n=3)}
+
+                print(model_dict)
+
+                fit = symfit.Fit(model_dict, x=ts_data, y=position_data)
+                fit_result = fit.execute()
+
+                print(f"Column: {col}")
+                print(fit_result)
+
+                # Write the model to the yaml file
+                f.write(f"{col}:\n")
+                for param, value in fit_result.params.items():
+                    print(f"{param}: {value}")
+                    f.write(f"  {param}: {value}\n")
+                f.write("\n")
