@@ -80,7 +80,7 @@ namespace module::extension {
         // If we aren't running any task we need to clear our watch handles
         if (group.active_task == nullptr) {
             group.watch_handles.clear();
-            group.update_data(groups);
+            group.update_data();
         }
 
         return group.active_task != initial_task;

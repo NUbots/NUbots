@@ -93,8 +93,7 @@ namespace module::extension::component {
             });
         }
 
-        ::extension::behaviour::Lock update_data(std::map<std::type_index, component::ProviderGroup> groups = {},
-                                                 const RunReason& reason = RunReason::OTHER_TRIGGER) {
+        ::extension::behaviour::Lock update_data(const RunReason& reason = RunReason::OTHER_TRIGGER) {
             // Root providers don't have a data_setter
             if (data_setter == nullptr) {
                 return ::extension::behaviour::Lock();
@@ -102,38 +101,24 @@ namespace module::extension::component {
             return data_setter(active_provider != nullptr ? active_provider->id : 0,
                                reason,
                                active_task != nullptr ? active_task->data : nullptr,
-                               get_group_info(groups));
+                               get_group_info());
         }
 
-        std::shared_ptr<const GroupInfo> get_group_info(
-            const std::map<std::type_index, component::ProviderGroup>& groups) const {
+        std::shared_ptr<const GroupInfo> get_group_info() const {
+            auto group_info = std::make_shared<GroupInfo>();
 
-            // Check if the requester is a root provider
-            auto is_root_provider = [this, &groups](NUClear::id_t requester_id) {
-                return std::any_of(groups.begin(), groups.end(), [requester_id](const auto& group_pair) {
-                    const auto& group = group_pair.second;
-                    return std::any_of(group.providers.begin(),
-                                       group.providers.end(),
-                                       [requester_id](const auto& provider) {
-                                           return provider->id == requester_id
-                                                  && provider->classification == Provider::Classification::ROOT;
-                                       });
-                });
-            };
-
-            auto group_info                      = std::make_shared<GroupInfo>();
             group_info->active_provider_id       = active_provider != nullptr ? active_provider->id : 0;
             group_info->active_task.id           = active_task != nullptr ? active_task->requester_task_id : 0;
             group_info->active_task.type         = active_task != nullptr ? active_task->type : typeid(void);
             group_info->active_task.requester_id = active_task != nullptr ? active_task->requester_id : 0;
-            group_info->active_task.root = active_task != nullptr && is_root_provider(active_task->requester_id);
+            group_info->active_task.root         = active_task != nullptr && active_task->root;
 
             for (auto& watcher : watchers) {
                 group_info->watchers.emplace_back(GroupInfo::TaskInfo{
                     .id           = watcher->requester_task_id,
                     .type         = watcher->type,
                     .requester_id = watcher->requester_id,
-                    .root         = is_root_provider(watcher->requester_id),
+                    .root         = watcher->root,
                 });
             }
 

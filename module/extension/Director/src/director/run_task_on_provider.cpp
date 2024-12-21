@@ -51,7 +51,7 @@ namespace module::extension {
                     // We have to swap to this as the active provider so it can actually run
                     group.active_provider = provider;
 
-                    auto lock = group.update_data(groups, RunReason::STARTED);
+                    auto lock = group.update_data(RunReason::STARTED);
                     powerplant.submit(provider->reaction->get_task());
                 }
             }
@@ -61,7 +61,7 @@ namespace module::extension {
         group.active_provider = provider;
 
         // Run the provider
-        auto lock = group.update_data(groups, run_reason);
+        auto lock = group.update_data(run_reason);
         powerplant.submit(provider->reaction->get_task());
     }
 
