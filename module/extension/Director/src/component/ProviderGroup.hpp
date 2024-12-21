@@ -98,7 +98,6 @@ namespace module::extension::component {
             if (data_setter == nullptr) {
                 return ::extension::behaviour::Lock();
             }
-
             return data_setter(active_provider != nullptr ? active_provider->id : 0,
                                reason,
                                active_task != nullptr ? active_task->data : nullptr,
@@ -106,20 +105,29 @@ namespace module::extension::component {
         }
 
         std::shared_ptr<const GroupInfo> get_group_info() const {
-            auto group_info                = std::make_shared<GroupInfo>();
-            group_info->active_provider_id = active_provider != nullptr ? active_provider->id : 0;
+            auto is_root_provider = [this](NUClear::id_t requester_id) {
+                auto it = std::find_if(providers.begin(), providers.end(), [requester_id](const auto& provider) {
+                    return provider->id == requester_id;
+                });
+                return it != providers.end() && (*it)->classification == Provider::Classification::ROOT;
+            };
 
+            auto group_info                      = std::make_shared<GroupInfo>();
+            group_info->active_provider_id       = active_provider != nullptr ? active_provider->id : 0;
             group_info->active_task.id           = active_task != nullptr ? active_task->requester_task_id : 0;
             group_info->active_task.type         = active_task != nullptr ? active_task->type : typeid(void);
             group_info->active_task.requester_id = active_task != nullptr ? active_task->requester_id : 0;
+            group_info->active_task.root = active_task != nullptr && is_root_provider(active_task->requester_id);
 
             for (auto& watcher : watchers) {
                 group_info->watchers.emplace_back(GroupInfo::TaskInfo{
                     .id           = watcher->requester_task_id,
                     .type         = watcher->type,
                     .requester_id = watcher->requester_id,
+                    .root         = is_root_provider(watcher->requester_id),
                 });
             }
+
             group_info->done = done;
 
             return group_info;

@@ -46,6 +46,8 @@ namespace extension::behaviour {
             std::type_index type = std::type_index(typeid(void));
             /// The ID of the provider that requested the task
             NUClear::id_t requester_id = 0;
+            // If the requester of this task is a root provider
+            bool root = false;
         };
 
         /// The ID of the active provider
