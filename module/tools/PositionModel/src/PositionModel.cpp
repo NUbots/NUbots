@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <fmt/format.h>
+#include <cmath>
 
 namespace module::tools {
 
@@ -71,6 +72,87 @@ PositionModel::PositionModel(std::unique_ptr<NUClear::Environment> environment) 
         csv_ofs << raw_sensors.servo.l_ankle_roll.present_position << ",";
         csv_ofs << raw_sensors.servo.head_pan.present_position << ",";
         csv_ofs << raw_sensors.servo.head_tilt.present_position << "\n";
+
+    if (std::isnan(raw_sensors.servo.r_shoulder_pitch.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_shoulder_pitch");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_shoulder_pitch.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_shoulder_pitch");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_shoulder_roll.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_shoulder_roll");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_shoulder_roll.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_shoulder_roll");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_elbow.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_elbow");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_elbow.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_elbow");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_hip_yaw.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_hip_yaw");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_hip_yaw.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_hip_yaw");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_hip_roll.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_hip_roll");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_hip_roll.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_hip_roll");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_hip_pitch.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_hip_pitch");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_hip_pitch.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_hip_pitch");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_knee.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_knee");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_knee.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_knee");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_ankle_pitch.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_ankle_pitch");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_ankle_pitch.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_ankle_pitch");
+
+    }
+    if (std::isnan(raw_sensors.servo.r_ankle_roll.present_position)) {
+        log<NUClear::ERROR>("NaN detected: r_ankle_roll");
+
+    }
+    if (std::isnan(raw_sensors.servo.l_ankle_roll.present_position)) {
+        log<NUClear::ERROR>("NaN detected: l_ankle_roll");
+
+    }
+    if (std::isnan(raw_sensors.servo.head_pan.present_position)) {
+        log<NUClear::ERROR>("NaN detected: head_pan");
+
+    }
+    if (std::isnan(raw_sensors.servo.head_tilt.present_position)) {
+        log<NUClear::ERROR>("NaN detected: head_tilt");
+
+    }
 
         // Write data to the file right away
         csv_ofs.flush();
