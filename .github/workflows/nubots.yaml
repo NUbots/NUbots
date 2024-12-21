@@ -44,7 +44,7 @@ jobs:
           # Considers any non-NUsight and non-VSCode config change to be a c++ change
           filters: |
             workflow_changes:
-              - '.github/workflows/horus.yaml'
+              - '.github/workflows/nubots.yaml'
             docker_changes:
               - 'docker/**'
             cpp_changes:
