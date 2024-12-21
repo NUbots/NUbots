@@ -1,4 +1,4 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-file_name: straight.csv
+file_name: right_turn.csv
