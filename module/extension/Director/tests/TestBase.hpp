@@ -32,7 +32,7 @@
 
 #include "extension/Behaviour.hpp"
 
-template <typename BaseClass, int timeout = 1000>
+template <typename BaseClass, bool idle_shutdown = true, int timeout = 1000>
 class TestBase : public extension::behaviour::BehaviourReactor {
 public:
     // Struct to use to emit each step of the test, by doing each step in a separate reaction with low priority, it will
@@ -51,8 +51,10 @@ public:
         });
 
         // Shutdown if the system is idle
-        on<Trigger<ShutdownOnIdle>, Priority::IDLE>().then([this] { powerplant.shutdown(); });
-        on<Startup>().then([this] { emit(std::make_unique<ShutdownOnIdle>()); });
+        if (idle_shutdown) {
+            on<Trigger<ShutdownOnIdle>, Priority::IDLE>().then([this] { powerplant.shutdown(); });
+            on<Startup>().then([this] { emit(std::make_unique<ShutdownOnIdle>()); });
+        }
     }
 };
 

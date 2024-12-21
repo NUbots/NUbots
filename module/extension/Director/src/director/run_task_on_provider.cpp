@@ -51,7 +51,10 @@ namespace module::extension {
                     group.active_provider = provider;
 
                     auto lock = hold_run_reason(RunInfo::RunReason::STARTED);
-                    powerplant.submit(provider->reaction->get_task(), true);
+                    auto task = provider->reaction->get_task();
+                    if (task) {
+                        powerplant.submit(std::move(task), true);
+                    }
                 }
             }
         }
