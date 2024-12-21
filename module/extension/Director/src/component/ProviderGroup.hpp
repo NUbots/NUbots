@@ -34,14 +34,27 @@
 
 #include "Provider.hpp"
 
+#include "extension/behaviour/GroupInfo.hpp"
+#include "extension/behaviour/commands.hpp"
+
 namespace module::extension::component {
 
     struct ProviderGroup {
 
+        using DataSetter = ::extension::behaviour::commands::ProvideReaction::DataSetter;
+        using GroupInfo  = ::extension::behaviour::GroupInfo;
+        using RunReason  = ::extension::behaviour::RunReason;
+
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<DirectorTask>>;
 
-        ProviderGroup(const std::type_index& type_) : type(type_) {}
+        ProviderGroup(const std::type_index& type_, const DataSetter& data_setter)
+            : type(type_), data_setter(data_setter) {
+            // Call data_setter to initialise the GroupInfo cache unless this is a root provider
+            if (data_setter != nullptr) {
+                update_data();
+            }
+        }
 
         struct WatchHandle {
             WatchHandle(const std::function<void()>& deleter_) : deleter(deleter_) {}
@@ -70,6 +83,7 @@ namespace module::extension::component {
 
         std::shared_ptr<WatchHandle> add_watcher(const std::shared_ptr<DirectorTask>& task) {
             watchers.push_back(task);
+            update_data();
 
             return std::make_shared<WatchHandle>([this, task] {
                 auto it = std::find(watchers.begin(), watchers.end(), task);
@@ -79,8 +93,45 @@ namespace module::extension::component {
             });
         }
 
+        ::extension::behaviour::Lock update_data(const RunReason& reason = RunReason::OTHER_TRIGGER) {
+            // Root providers don't have a data_setter
+            if (data_setter == nullptr) {
+                return ::extension::behaviour::Lock();
+            }
+            return data_setter(active_provider != nullptr ? active_provider->id : 0,
+                               reason,
+                               active_task != nullptr ? active_task->data : nullptr,
+                               get_group_info());
+        }
+
+        std::shared_ptr<const GroupInfo> get_group_info() const {
+            auto group_info = std::make_shared<GroupInfo>();
+
+            group_info->active_provider_id       = active_provider != nullptr ? active_provider->id : 0;
+            group_info->active_task.id           = active_task != nullptr ? active_task->requester_task_id : 0;
+            group_info->active_task.type         = active_task != nullptr ? active_task->type : typeid(void);
+            group_info->active_task.requester_id = active_task != nullptr ? active_task->requester_id : 0;
+            group_info->active_task.root         = active_task != nullptr && active_task->root;
+
+            for (auto& watcher : watchers) {
+                group_info->watchers.emplace_back(GroupInfo::TaskInfo{
+                    .id           = watcher->requester_task_id,
+                    .type         = watcher->type,
+                    .requester_id = watcher->requester_id,
+                    .root         = watcher->root,
+                });
+            }
+
+            group_info->done = done;
+
+            return group_info;
+        }
+
         /// The type that this provider group manages
         std::type_index type;
+
+        /// The data setter for this provider group
+        DataSetter data_setter;
 
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;

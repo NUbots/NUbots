@@ -81,7 +81,7 @@ namespace module::planning {
                 search_idx = (search_idx + 1) % cfg.search_positions.size();
             }
             else {
-                emit<Task>(std::make_unique<Idle>());
+                emit<Task>(std::make_unique<Continue>());
             }
         });
 
