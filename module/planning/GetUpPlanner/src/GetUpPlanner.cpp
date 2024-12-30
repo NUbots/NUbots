@@ -55,7 +55,7 @@ namespace module::planning {
             [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
-                    log<NUClear::DEBUG>("Idle");
+                    log<DEBUG>("Idle");
                     return;
                 }
                 // Transform to torso{t} from world{w} space
@@ -65,13 +65,13 @@ namespace module::planning {
 
                 // Get the angle of the robot with the world z axis
                 double angle = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
-                log<NUClear::DEBUG>("Angle: ", angle);
+                log<DEBUG>("Angle: ", angle);
 
                 // // Check if angle between torso z axis and world z axis is greater than config value
                 // Only emit if we're not already requesting a getup
                 if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
                     emit<Task>(std::make_unique<GetUp>());
-                    log<NUClear::DEBUG>("Execute getup");
+                    log<DEBUG>("Execute getup");
                 }
                 // Otherwise do not need to get up so emit no tasks
             });

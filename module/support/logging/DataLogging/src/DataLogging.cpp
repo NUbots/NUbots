@@ -114,16 +114,16 @@ namespace module::support::logging {
             for (const auto& dir_entry :
                  std::filesystem::directory_iterator{config.output.directory / config.output.binary, ec}) {
                 if (dir_entry.path().extension() == ".lock") {
-                    log<NUClear::WARN>(fmt::format("Removing old lock file: {}", dir_entry.path().string()));
+                    log<WARN>(fmt::format("Removing old lock file: {}", dir_entry.path().string()));
                     std::filesystem::remove(dir_entry.path());
                 }
             }
 
             // Check for any errors that occurred and report them
             if (ec) {
-                log<NUClear::ERROR>(fmt::format("Error iterating through '{}': {}",
-                                                (config.output.directory / config.output.binary).string(),
-                                                ec.message()));
+                log<ERROR>(fmt::format("Error iterating through '{}': {}",
+                                       (config.output.directory / config.output.binary).string(),
+                                       ec.message()));
             }
         });
 
@@ -166,7 +166,7 @@ namespace module::support::logging {
 
                 // Unbind any recorders we didn't save
                 for (auto& handle : handles) {
-                    log<NUClear::INFO>("Data logging for type", handle.first, "disabled");
+                    log<INFO>("Data logging for type", handle.first, "disabled");
                     handle.second.unbind();
                 }
 
@@ -177,7 +177,7 @@ namespace module::support::logging {
 
                     // If we are enabling this, and it wasn't already enabled, enable it
                     if (!new_handles.contains(name) && enabled) {
-                        log<NUClear::INFO>("Data logging for type", name, "enabled");
+                        log<INFO>("Data logging for type", name, "enabled");
                         new_handles.insert(std::make_pair(name, activate_recorder(name)));
                     }
                 }

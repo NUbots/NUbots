@@ -54,7 +54,7 @@ namespace module::actuation {
             on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
                 [this](const Servo& servo, const RunReason& run_reason) {
                     if (run_reason == RunReason::NEW_TASK) {
-                        if (log_level <= NUClear::DEBUG) {
+                        if (log_level <= DEBUG) {
                             emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
                                        servo.command.position,
                                        servo.command.state.gain,
@@ -106,8 +106,8 @@ namespace module::actuation {
                                     group.servos.at(utility::actuation::ServoMap<Elements>::value)));
                             }
                             else {  // if a servo was not filled in the map for this group, log it
-                                log<NUClear::TRACE>("Requested a Servo Group Task but did not provide values for Servo",
-                                                    ServoID(utility::actuation::ServoMap<Elements>::value));
+                                log<TRACE>("Requested a Servo Group Task but did not provide values for Servo",
+                                           ServoID(utility::actuation::ServoMap<Elements>::value));
                             }
                         }(),
                         ...);

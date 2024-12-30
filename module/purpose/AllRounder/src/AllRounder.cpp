@@ -109,7 +109,7 @@ namespace module::purpose {
                         case GameMode::CORNER_KICK: emit<Task>(std::make_unique<CornerKickAllRounder>()); break;
                         case GameMode::GOAL_KICK: emit<Task>(std::make_unique<GoalKickAllRounder>()); break;
                         case GameMode::THROW_IN: emit<Task>(std::make_unique<ThrowInAllRounder>()); break;
-                        default: log<NUClear::WARN>("Game mode unknown.");
+                        default: log<WARN>("Game mode unknown.");
                     }
                 }
             });
@@ -125,7 +125,7 @@ namespace module::purpose {
 
         // Normal UNKNOWN state
         on<Provide<NormalAllRounder>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-            [this] { log<NUClear::WARN>("Unknown normal game phase."); });
+            [this] { log<WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
         on<Provide<NormalAllRounder>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
@@ -135,7 +135,7 @@ namespace module::purpose {
 
         // Penalty shootout UNKNOWN state
         on<Provide<PenaltyShootoutAllRounder>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-            [this] { log<NUClear::WARN>("Unknown penalty shootout game phase."); });
+            [this] { log<WARN>("Unknown penalty shootout game phase."); });
 
         // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
         on<Provide<PenaltyShootoutAllRounder>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });

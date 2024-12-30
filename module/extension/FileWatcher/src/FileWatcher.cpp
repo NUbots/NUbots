@@ -73,7 +73,8 @@ namespace module::extension {
 
         // Check for any errors that occurred and report them
         if (ec) {
-            NUClear::log<NUClear::ERROR>(fmt::format("Error iterating through '{}': {}", root.string(), ec.message()));
+            NUClear::log<NUClear::LogLevel::ERROR>(
+                fmt::format("Error iterating through '{}': {}", root.string(), ec.message()));
         }
     }
 
@@ -116,7 +117,8 @@ namespace module::extension {
 
         // Check for any errors that occurred and report them
         if (ec) {
-            NUClear::log<NUClear::ERROR>(fmt::format("Error iterating through '{}': {}", root.string(), ec.message()));
+            NUClear::log<NUClear::LogLevel::ERROR>(
+                fmt::format("Error iterating through '{}': {}", root.string(), ec.message()));
         }
     }
 
@@ -185,14 +187,14 @@ namespace module::extension {
                 return false;
             });
             if (reaction_it == reactor.watches.end()) {
-                reactor.log<NUClear::DEBUG>(
+                reactor.log<DEBUG>(
                     fmt::format("Watch for {} has already been removed. Skipping ...", event_path.string()));
                 return;
             }
             auto& current_reaction              = reactor.watches[reaction_it->first];
             auto& current_watch                 = current_reaction.watches[handle_path];
             std::filesystem::path reaction_path = std::filesystem::absolute((current_reaction.path).lexically_normal());
-            reactor.log<NUClear::DEBUG>(dedent(fmt::format(
+            reactor.log<DEBUG>(dedent(fmt::format(
                 R"(
                     Reaction: {}
                         Got event for watch {}
@@ -214,7 +216,7 @@ namespace module::extension {
             if (!std::filesystem::exists(event_path)) {
                 // Check to see if the event path matches a known file
                 if (current_reaction.files.contains(rel_path)) {
-                    reactor.log<NUClear::DEBUG>(fmt::format("\tRemoving known file {}", rel_path.string()));
+                    reactor.log<DEBUG>(fmt::format("\tRemoving known file {}", rel_path.string()));
                     current_reaction.files.erase(rel_path);
                     if (renamed
                         && (current_reaction.events & ::extension::FileWatch::DELETED)
@@ -230,7 +232,7 @@ namespace module::extension {
                 for (auto& watch : current_reaction.watches) {
                     if (watch.second.path == rel_path) {
                         if (!std::filesystem::exists(event_path) && watch.second.active) {
-                            reactor.log<NUClear::DEBUG>(fmt::format("\tRemoving watch {}", rel_path.string()));
+                            reactor.log<DEBUG>(fmt::format("\tRemoving watch {}", rel_path.string()));
                             reactor.remove_queue.push_back(std::move(watch.second.handle));
                             watch.second.active = false;
                             prefix              = watch.second.path;
@@ -244,8 +246,7 @@ namespace module::extension {
                 if (!reactor.remove_queue.empty()) {
                     auto err = ::uv_async_send(reactor.remove_watch.get());
                     if (err < 0) {
-                        reactor.log<NUClear::ERROR>(
-                            fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
+                        reactor.log<ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
                     }
                 }
 
@@ -254,7 +255,7 @@ namespace module::extension {
                     for (auto it = current_reaction.files.begin(); it != current_reaction.files.end();) {
                         if ((prefix != "." && it->string().starts_with(prefix))
                             || (prefix == "." && it->string().find('/') == std::string::npos)) {
-                            reactor.log<NUClear::DEBUG>(fmt::format("\tRemoving known file {}", it->string()));
+                            reactor.log<DEBUG>(fmt::format("\tRemoving known file {}", it->string()));
                             if (renamed
                                 && (current_reaction.events & ::extension::FileWatch::DELETED)
                                        == ::extension::FileWatch::DELETED) {
@@ -279,7 +280,7 @@ namespace module::extension {
                 if (std::filesystem::is_regular_file(event_path)
                     && std::regex_match(event_path.lexically_relative(watch_path).string(), current_reaction.re)) {
 
-                    reactor.log<NUClear::DEBUG>(fmt::format("\tAdding {} to known files", rel_path.string()));
+                    reactor.log<DEBUG>(fmt::format("\tAdding {} to known files", rel_path.string()));
 
                     // If the file was already known about and this is a change event
                     // Or the file was not already known about and this is a rename event
@@ -295,7 +296,7 @@ namespace module::extension {
                 // to the root directory for the reaction
                 else if (std::filesystem::is_directory(event_path)
                          && (event_path == current_reaction.path || current_reaction.recursive)) {
-                    reactor.log<NUClear::DEBUG>(fmt::format("\tSetting up new watch for {}", rel_path.string()));
+                    reactor.log<DEBUG>(fmt::format("\tSetting up new watch for {}", rel_path.string()));
 
                     // Find all paths underneath the event path, this will return paths relative to the event path
                     std::vector<std::filesystem::path> paths;
@@ -340,8 +341,7 @@ namespace module::extension {
 
                 auto err = ::uv_async_send(reactor.add_watch.get());
                 if (err < 0) {
-                    reactor.log<NUClear::ERROR>(
-                        fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
+                    reactor.log<ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
                 }
             }
         }
@@ -380,10 +380,10 @@ namespace module::extension {
                 for (auto& watch : reaction->watches) {
                     int err = ::uv_fs_event_init(async_handle->loop, watch.second.handle.get());
                     if (err < 0) {
-                        reactor.log<NUClear::ERROR>(fmt::format("uv_fs_event_init error for '{}': ({}) {}",
-                                                                (reaction->path / watch.second.path).string(),
-                                                                err,
-                                                                ::uv_strerror(err)));
+                        reactor.log<ERROR>(fmt::format("uv_fs_event_init error for '{}': ({}) {}",
+                                                       (reaction->path / watch.second.path).string(),
+                                                       err,
+                                                       ::uv_strerror(err)));
                         watch.second.active = false;
                         reactor.remove_queue.push_back(std::move(watch.second.handle));
                         error = true;
@@ -394,10 +394,10 @@ namespace module::extension {
                                                   (reaction->path / watch.second.path).c_str(),
                                                   UV_FS_EVENT_RECURSIVE);
                         if (err < 0) {
-                            reactor.log<NUClear::ERROR>(fmt::format("uv_fs_event_start error for '{}': ({}) {}",
-                                                                    (reaction->path / watch.second.path).string(),
-                                                                    err,
-                                                                    ::uv_strerror(err)));
+                            reactor.log<ERROR>(fmt::format("uv_fs_event_start error for '{}': ({}) {}",
+                                                           (reaction->path / watch.second.path).string(),
+                                                           err,
+                                                           ::uv_strerror(err)));
                             watch.second.active = false;
                             reactor.remove_queue.push_back(std::move(watch.second.handle));
                             error = true;
@@ -414,8 +414,7 @@ namespace module::extension {
             if (error) {
                 auto err = ::uv_async_send(reactor.remove_watch.get());
                 if (err < 0) {
-                    reactor.log<NUClear::ERROR>(
-                        fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
+                    reactor.log<ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
                 }
             }
         });
@@ -471,7 +470,7 @@ namespace module::extension {
             // Send an event to shutdown
             auto err = ::uv_async_send(shutdown.get());
             if (err < 0) {
-                log<NUClear::ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
+                log<ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
             }
         });
 
@@ -484,7 +483,7 @@ namespace module::extension {
                 if (watch.first->id == fw.id) {
                     // Unwatch all paths for this reaction
                     for (auto& w : watch.second.watches) {
-                        log<NUClear::DEBUG>(fmt::format("Removing watch for '{}'", w.second.path.string()));
+                        log<DEBUG>(fmt::format("Removing watch for '{}'", w.second.path.string()));
                         remove_queue.push_back(std::move(w.second.handle));
                     }
 
@@ -492,8 +491,7 @@ namespace module::extension {
                     if (!remove_queue.empty()) {
                         auto err = ::uv_async_send(remove_watch.get());
                         if (err < 0) {
-                            log<NUClear::ERROR>(
-                                fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
+                            log<ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
                         }
                     }
 
@@ -509,7 +507,7 @@ namespace module::extension {
         on<Trigger<FileWatchRequest>>().then("Add FileWatch", [this](const FileWatchRequest& req) {
             // Get the real path
             std::filesystem::path path = std::filesystem::absolute(req.path);
-            log<NUClear::DEBUG>(fmt::format("Adding watch for {}", path.string()));
+            log<DEBUG>(fmt::format("Adding watch for {}", path.string()));
 
             std::filesystem::path current_directory{std::filesystem::current_path()};
             std::regex re{"", std::regex_constants::ECMAScript};
@@ -601,8 +599,7 @@ namespace module::extension {
                     add_queue.push_back(&p);
                     auto err = ::uv_async_send(add_watch.get());
                     if (err < 0) {
-                        log<NUClear::ERROR>(
-                            fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
+                        log<ERROR>(fmt::format("uv_async_send returned error {}: {}", err, ::uv_strerror(err)));
                     }
                 }
             }
