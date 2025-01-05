@@ -34,24 +34,25 @@ var hierarchy =
     [ "dynamixel::v2::WriteCommand< T >", "structdynamixel_1_1v2_1_1WriteCommand.html", null ],
     [ "extension::behaviour::Causing< State, value >", "structextension_1_1behaviour_1_1Causing.html", null ],
     [ "extension::behaviour::commands::BehaviourTask", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html", null ],
+    [ "extension::behaviour::commands::BehaviourTasks", "structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html", null ],
     [ "extension::behaviour::commands::CausingExpression", "structextension_1_1behaviour_1_1commands_1_1CausingExpression.html", null ],
     [ "extension::behaviour::commands::NeedsExpression", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html", null ],
     [ "extension::behaviour::commands::ProviderDone", "structextension_1_1behaviour_1_1commands_1_1ProviderDone.html", null ],
     [ "extension::behaviour::commands::ProvideReaction", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html", null ],
-    [ "extension::behaviour::commands::RootType< T >", "structextension_1_1behaviour_1_1commands_1_1RootType.html", null ],
+    [ "extension::behaviour::commands::RootProvider< T >", "structextension_1_1behaviour_1_1commands_1_1RootProvider.html", null ],
     [ "extension::behaviour::commands::WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", null ],
+    [ "extension::behaviour::Continue", "structextension_1_1behaviour_1_1Continue.html", null ],
     [ "extension::behaviour::Done", "structextension_1_1behaviour_1_1Done.html", null ],
     [ "extension::behaviour::GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", null ],
-    [ "extension::behaviour::Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
-    [ "extension::behaviour::information::InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", [
-      [ "module::extension::Director", "classmodule_1_1extension_1_1Director.html", null ]
-    ] ],
+    [ "extension::behaviour::GroupInfo::TaskInfo", "structextension_1_1behaviour_1_1GroupInfo_1_1TaskInfo.html", null ],
+    [ "extension::behaviour::information::GroupInfoStore< T >", "structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html", null ],
+    [ "extension::behaviour::information::RunReasonStore", "structextension_1_1behaviour_1_1information_1_1RunReasonStore.html", null ],
+    [ "extension::behaviour::information::TaskDataStore< T >", "structextension_1_1behaviour_1_1information_1_1TaskDataStore.html", null ],
+    [ "extension::behaviour::Lock", "classextension_1_1behaviour_1_1Lock.html", null ],
     [ "extension::behaviour::ProviderBase< T, classification >", "structextension_1_1behaviour_1_1ProviderBase.html", null ],
-    [ "extension::behaviour::RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", null ],
+    [ "extension::behaviour::ProviderScope", "structextension_1_1behaviour_1_1ProviderScope.html", null ],
     [ "extension::behaviour::Task< T >", "structextension_1_1behaviour_1_1Task.html", null ],
-    [ "extension::behaviour::Uses< Provider >", "structextension_1_1behaviour_1_1Uses.html", [
-      [ "extension::behaviour::Needs< Provider >", "structextension_1_1behaviour_1_1Needs.html", null ]
-    ] ],
+    [ "extension::behaviour::Uses< T >", "structextension_1_1behaviour_1_1Uses.html", null ],
     [ "extension::behaviour::When< State, expr, value >", "structextension_1_1behaviour_1_1When.html", null ],
     [ "extension::Configuration", "structextension_1_1Configuration.html", null ],
     [ "extension::FileWatch", "structextension_1_1FileWatch.html", null ],
@@ -78,6 +79,7 @@ var hierarchy =
     [ "module::extension::Director::RunResult", "structmodule_1_1extension_1_1Director_1_1RunResult.html", null ],
     [ "module::extension::Director::Solution", "structmodule_1_1extension_1_1Director_1_1Solution.html", null ],
     [ "module::extension::Director::Solution::Option", "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html", null ],
+    [ "module::extension::Director::TaskPack", "structmodule_1_1extension_1_1Director_1_1TaskPack.html", null ],
     [ "module::extension::FileWatcher::Watch", "structmodule_1_1extension_1_1FileWatcher_1_1Watch.html", null ],
     [ "module::extension::FileWatcher::WatchMap", "structmodule_1_1extension_1_1FileWatcher_1_1WatchMap.html", null ],
     [ "module::extension::StateUpdate", "structmodule_1_1extension_1_1StateUpdate.html", null ],
@@ -420,6 +422,9 @@ var hierarchy =
       [ "module::output::compressor::vaapi::cl::opencl_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html", null ],
       [ "module::output::compressor::vaapi::vaapi_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html", null ]
     ] ],
+    [ "std::false_type", null, [
+      [ "NUClear::dsl::operation::EmitStats<::extension::behaviour::commands::BehaviourTasks >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html", null ]
+    ] ],
     [ "std::runtime_error", null, [
       [ "utility::reflection::unknown_message", "structutility_1_1reflection_1_1unknown__message.html", null ]
     ] ],
@@ -493,6 +498,9 @@ var hierarchy =
     ] ],
     [ "utility::math::filter::UKF< double, module::localisation::BallModel >", "classutility_1_1math_1_1filter_1_1UKF.html", null ],
     [ "utility::math::filter::UKF< double, module::localisation::RobotModel >", "classutility_1_1math_1_1filter_1_1UKF.html", null ],
+    [ "extension::behaviour::Uses< Provider >", "structextension_1_1behaviour_1_1Uses.html", [
+      [ "extension::behaviour::Needs< Provider >", "structextension_1_1behaviour_1_1Needs.html", null ]
+    ] ],
     [ "utility::actuation::ServoMap< Servo >", "structutility_1_1actuation_1_1ServoMap.html", null ],
     [ "utility::actuation::ServoMap< HeadPitch >", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html", null ],
     [ "utility::actuation::ServoMap< HeadYaw >", "structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html", null ],

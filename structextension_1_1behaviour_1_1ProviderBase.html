@@ -185,14 +185,18 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae027d8828caf62973265960481a98bcc"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc">bind</a> (const std::shared_ptr&lt; NUClear::threading::Reaction &gt; &amp;reaction)</td></tr>
 <tr class="memdesc:ae027d8828caf62973265960481a98bcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Binds a Provider object, sending it to the Director so it can control its execution.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc">More...</a><br /></td></tr>
 <tr class="separator:ae027d8828caf62973265960481a98bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48c914581b023e907ba40d1764bd645a"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
-<tr class="memitem:a48c914581b023e907ba40d1764bd645a"><td class="memTemplItemLeft" align="right" valign="top">static std::tuple&lt; std::shared_ptr&lt; const T &gt;, std::shared_ptr&lt; const <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a> &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a48c914581b023e907ba40d1764bd645a">get</a> (NUClear::threading::ReactionTask &amp;t)</td></tr>
-<tr class="memdesc:a48c914581b023e907ba40d1764bd645a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the information needed by the callbacks of the Provider.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#a48c914581b023e907ba40d1764bd645a">More...</a><br /></td></tr>
-<tr class="separator:a48c914581b023e907ba40d1764bd645a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30fdf46c679f9478d646d0c8f6dfce45"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
-<tr class="memitem:a30fdf46c679f9478d646d0c8f6dfce45"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a30fdf46c679f9478d646d0c8f6dfce45">postcondition</a> (NUClear::threading::ReactionTask &amp;task)</td></tr>
-<tr class="memdesc:a30fdf46c679f9478d646d0c8f6dfce45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#a30fdf46c679f9478d646d0c8f6dfce45">More...</a><br /></td></tr>
-<tr class="separator:a30fdf46c679f9478d646d0c8f6dfce45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae648cbbff7536af4f363c27e1e4265f6"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
+<tr class="memitem:ae648cbbff7536af4f363c27e1e4265f6"><td class="memTemplItemLeft" align="right" valign="top">static std::tuple&lt; std::shared_ptr&lt; const T &gt;, std::optional&lt; RunReason &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae648cbbff7536af4f363c27e1e4265f6">get</a> (NUClear::threading::ReactionTask &amp;t)</td></tr>
+<tr class="memdesc:ae648cbbff7536af4f363c27e1e4265f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the information needed by the callbacks of the Provider.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#ae648cbbff7536af4f363c27e1e4265f6">More...</a><br /></td></tr>
+<tr class="separator:ae648cbbff7536af4f363c27e1e4265f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e26a64213aa83e54bc8424a4663732b"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
+<tr class="memitem:a6e26a64213aa83e54bc8424a4663732b"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a6e26a64213aa83e54bc8424a4663732b">precondition</a> (NUClear::threading::ReactionTask &amp;t)</td></tr>
+<tr class="memdesc:a6e26a64213aa83e54bc8424a4663732b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Precondition that sets the current task id into a thread local variable.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#a6e26a64213aa83e54bc8424a4663732b">More...</a><br /></td></tr>
+<tr class="separator:a6e26a64213aa83e54bc8424a4663732b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7c18560e4bd4fef0fd0fc2373b2178d"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
+<tr class="memitem:ae7c18560e4bd4fef0fd0fc2373b2178d"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; <a class="el" href="structextension_1_1behaviour_1_1ProviderScope.html">ProviderScope</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae7c18560e4bd4fef0fd0fc2373b2178d">scope</a> (NUClear::threading::ReactionTask &amp;t)</td></tr>
+<tr class="memdesc:ae7c18560e4bd4fef0fd0fc2373b2178d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#ae7c18560e4bd4fef0fd0fc2373b2178d">More...</a><br /></td></tr>
+<tr class="separator:ae7c18560e4bd4fef0fd0fc2373b2178d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename T, commands::ProviderClassification classification&gt;<br />
@@ -251,8 +255,8 @@ template&lt;typename DSL &gt; </div>
 
 </div>
 </div>
-<a id="a48c914581b023e907ba40d1764bd645a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48c914581b023e907ba40d1764bd645a">&#9670;&nbsp;</a></span>get()</h2>
+<a id="ae648cbbff7536af4f363c27e1e4265f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae648cbbff7536af4f363c27e1e4265f6">&#9670;&nbsp;</a></span>get()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -265,7 +269,7 @@ template&lt;typename DSL &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static std::tuple&lt;std::shared_ptr&lt;const T&gt;, std::shared_ptr&lt;const <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a>&gt; &gt; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::get </td>
+          <td class="memname">static std::tuple&lt;std::shared_ptr&lt;const T&gt;, std::optional&lt;RunReason&gt; &gt; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::get </td>
           <td>(</td>
           <td class="paramtype">NUClear::threading::ReactionTask &amp;&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -296,8 +300,8 @@ template&lt;typename DSL &gt; </div>
 
 </div>
 </div>
-<a id="a30fdf46c679f9478d646d0c8f6dfce45"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a30fdf46c679f9478d646d0c8f6dfce45">&#9670;&nbsp;</a></span>postcondition()</h2>
+<a id="a6e26a64213aa83e54bc8424a4663732b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e26a64213aa83e54bc8424a4663732b">&#9670;&nbsp;</a></span>precondition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -310,10 +314,10 @@ template&lt;typename DSL &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::postcondition </td>
+          <td class="memname">static bool <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::precondition </td>
           <td>(</td>
           <td class="paramtype">NUClear::threading::ReactionTask &amp;&#160;</td>
-          <td class="paramname"><em>task</em></td><td>)</td>
+          <td class="paramname"><em>t</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -324,19 +328,66 @@ template&lt;typename DSL &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted. </p>
+<p>Precondition that sets the current task id into a thread local variable. </p>
+<p>Within the Get function it can be checked against to see if the reactor is a provider. This is specifically because of the ordering of execution when it comes to NUClear.</p>
+<p>&mdash; Thread 1 &mdash; emit&lt;Task&gt;(); <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a6e26a64213aa83e54bc8424a4663732b" title="Precondition that sets the current task id into a thread local variable.">precondition()</a>; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae648cbbff7536af4f363c27e1e4265f6" title="Gets the information needed by the callbacks of the Provider.">get()</a>; &mdash; Thread 2 &mdash; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae7c18560e4bd4fef0fd0fc2373b2178d" title="Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider ...">scope()</a> { run(); }</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">DSL</td><td>the NUClear dsl for the on statement</td></tr>
+    <tr><td class="paramname">DSL</td><td>the DSL from NUClear for the on statement</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">task</td><td>The reaction task object that just finished </td></tr>
+    <tr><td class="paramname">t</td><td>the reaction task that is being scoped </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ae7c18560e4bd4fef0fd0fc2373b2178d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7c18560e4bd4fef0fd0fc2373b2178d">&#9670;&nbsp;</a></span>scope()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , commands::ProviderClassification classification&gt; </div>
+<div class="memtemplate">
+template&lt;typename DSL &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::unique_ptr&lt;<a class="el" href="structextension_1_1behaviour_1_1ProviderScope.html">ProviderScope</a>&gt; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::scope </td>
+          <td>(</td>
+          <td class="paramtype">NUClear::threading::ReactionTask &amp;&#160;</td>
+          <td class="paramname"><em>t</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">DSL</td><td>the DSL from NUClear for the on statement</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>the reaction task that is being scoped</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the scope object that will accumulate tasks to be emitted together </dd></dl>
 
 </div>
 </div>
@@ -349,7 +400,7 @@ template&lt;typename DSL &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">ProviderBase</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

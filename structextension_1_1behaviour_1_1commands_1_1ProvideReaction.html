@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1comman
 
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction-members.html">List of all members</a>  </div>
@@ -179,12 +180,28 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1comman
  <a href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="commands_8hpp_source.html">commands.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for extension::behaviour::commands::ProvideReaction:</div>
+<div class="dyncontent">
+<div class="center"><img src="structextension_1_1behaviour_1_1commands_1_1ProvideReaction__coll__graph.png" border="0" usemap="#aextension_1_1behaviour_1_1commands_1_1ProvideReaction_coll__map" alt="Collaboration graph"/></div>
+<map name="aextension_1_1behaviour_1_1commands_1_1ProvideReaction_coll__map" id="aextension_1_1behaviour_1_1commands_1_1ProvideReaction_coll__map">
+<area shape="rect" title="Message used to tell the behaviour system about a new Provides reaction." alt="" coords="5,109,221,151"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1Lock.html" title=" " alt="" coords="34,5,193,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:ad7b383db0a6bde1f36b8d58b8041de16"><td class="memItemLeft" align="right" valign="top"><a id="ad7b383db0a6bde1f36b8d58b8041de16"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad7b383db0a6bde1f36b8d58b8041de16">DataSetter</a> = <a class="el" href="classextension_1_1behaviour_1_1Lock.html">Lock</a>(*)(const NUClear::id_t &amp;, const RunReason &amp;, const std::shared_ptr&lt; const void &gt; &amp;, const std::shared_ptr&lt; const <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a> &gt; &amp;)</td></tr>
+<tr class="memdesc:ad7b383db0a6bde1f36b8d58b8041de16"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function that can be used to set data into the correct caches and return a <a class="el" href="classextension_1_1behaviour_1_1Lock.html">Lock</a> for when the task is executed. This is provided as a function pointer rather than an std::function to ensure that it is stateless for the given Provider type (ProviderGroup). <br /></td></tr>
+<tr class="separator:ad7b383db0a6bde1f36b8d58b8041de16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad5c88753067206589d6ae97b903bf2b1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad5c88753067206589d6ae97b903bf2b1">ProvideReaction</a> (std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_, const std::type_index &amp;type_, const <a class="el" href="namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4">ProviderClassification</a> &amp;classification_)</td></tr>
-<tr class="memdesc:ad5c88753067206589d6ae97b903bf2b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new <a class="el" href="structextension_1_1behaviour_1_1Provide.html" title="Define a Provider for a type.">Provide</a> Reaction object to send to the behaviour system.  <a href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad5c88753067206589d6ae97b903bf2b1">More...</a><br /></td></tr>
-<tr class="separator:ad5c88753067206589d6ae97b903bf2b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb01f2688d26770c24b8b592c25c8aff"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#abb01f2688d26770c24b8b592c25c8aff">ProvideReaction</a> (std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_, const std::type_index &amp;type_, const <a class="el" href="namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4">ProviderClassification</a> &amp;classification_, const <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad7b383db0a6bde1f36b8d58b8041de16">DataSetter</a> &amp;data_setter_)</td></tr>
+<tr class="memdesc:abb01f2688d26770c24b8b592c25c8aff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new <a class="el" href="structextension_1_1behaviour_1_1Provide.html" title="Define a Provider for a type.">Provide</a> Reaction object to send to the behaviour system.  <a href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#abb01f2688d26770c24b8b592c25c8aff">More...</a><br /></td></tr>
+<tr class="separator:abb01f2688d26770c24b8b592c25c8aff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -192,6 +209,10 @@ Public Attributes</h2></td></tr>
 <a class="el" href="namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4">ProviderClassification</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#a13118e843e13c31c8197a68897677b04">classification</a></td></tr>
 <tr class="memdesc:a13118e843e13c31c8197a68897677b04"><td class="mdescLeft">&#160;</td><td class="mdescRight">The action type that this Provider is using. <br /></td></tr>
 <tr class="separator:a13118e843e13c31c8197a68897677b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a997395ceabc28c7966bb12347aa1fe6e"><td class="memItemLeft" align="right" valign="top"><a id="a997395ceabc28c7966bb12347aa1fe6e"></a>
+<a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad7b383db0a6bde1f36b8d58b8041de16">DataSetter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#a997395ceabc28c7966bb12347aa1fe6e">data_setter</a></td></tr>
+<tr class="memdesc:a997395ceabc28c7966bb12347aa1fe6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function that will place data into the correct caches and return a <a class="el" href="classextension_1_1behaviour_1_1Lock.html">Lock</a>. <br /></td></tr>
+<tr class="separator:a997395ceabc28c7966bb12347aa1fe6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d667ca8805f46b59584422c419bde2b"><td class="memItemLeft" align="right" valign="top"><a id="a7d667ca8805f46b59584422c419bde2b"></a>
 std::shared_ptr&lt; NUClear::threading::Reaction &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#a7d667ca8805f46b59584422c419bde2b">reaction</a></td></tr>
 <tr class="memdesc:a7d667ca8805f46b59584422c419bde2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction for this Provider. <br /></td></tr>
@@ -204,8 +225,8 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Message used to tell the behaviour system about a new Provides reaction. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ad5c88753067206589d6ae97b903bf2b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5c88753067206589d6ae97b903bf2b1">&#9670;&nbsp;</a></span>ProvideReaction()</h2>
+<a id="abb01f2688d26770c24b8b592c25c8aff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb01f2688d26770c24b8b592c25c8aff">&#9670;&nbsp;</a></span>ProvideReaction()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -229,7 +250,13 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4">ProviderClassification</a> &amp;&#160;</td>
-          <td class="paramname"><em>classification_</em>&#160;</td>
+          <td class="paramname"><em>classification_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad7b383db0a6bde1f36b8d58b8041de16">DataSetter</a> &amp;&#160;</td>
+          <td class="paramname"><em>data_setter_</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -250,6 +277,7 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
     <tr><td class="paramname">reaction_</td><td>the reaction for this provides object </td></tr>
     <tr><td class="paramname">type_</td><td>the type that this Provider provides for </td></tr>
     <tr><td class="paramname">classification_</td><td>what kind of provider this <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html" title="Message used to tell the behaviour system about a new Provides reaction.">ProvideReaction</a> is for </td></tr>
+    <tr><td class="paramname">data_setter_</td><td>a function that will set the data for this Provider Group </td></tr>
   </table>
   </dd>
 </dl>
@@ -265,7 +293,7 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="namespaceextension_1_1behaviour_1_1commands.html">commands</a></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html">ProvideReaction</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

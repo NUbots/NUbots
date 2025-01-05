@@ -1,4 +1,4 @@
 <map id="extension::behaviour::Needs&lt; Provider &gt;" name="extension::behaviour::Needs&lt; Provider &gt;">
 <area shape="rect" id="node1" title="Create a Needs relationship between this provider and the provider specified by T." alt="" coords="5,95,164,136"/>
-<area shape="rect" id="node2" href="$structextension_1_1behaviour_1_1Uses.html" title="Adds a Uses object to the callback to allow access to information from the context of this provider." alt="" coords="5,5,164,47"/>
+<area shape="rect" id="node2" href="$structextension_1_1behaviour_1_1Uses.html" title=" " alt="" coords="5,5,164,47"/>
 </map>

@@ -193,6 +193,9 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 <li>reaction_profiles
 : <a class="el" href="classmodule_1_1support_1_1Profiler.html#adf84a0decbdbe25feba71a43af789186">module::support::Profiler</a>
 </li>
+<li>reaction_task
+: <a class="el" href="structextension_1_1behaviour_1_1ProviderScope.html#ad589f0affa93ceca01bc1c40393fbf96">extension::behaviour::ProviderScope</a>
+</li>
 <li>ReactionTimer()
 : <a class="el" href="classmodule_1_1support_1_1ReactionTimer.html#ac87535eae4b269f9b8ef9b67d9c89ba1">module::support::ReactionTimer</a>
 </li>
@@ -255,7 +258,7 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 : <a class="el" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;</a>
 </li>
 <li>remove_provider()
-: <a class="el" href="classmodule_1_1extension_1_1Director.html#ac71aac2110faf4406b7c01b2eeeb79e6">module::extension::Director</a>
+: <a class="el" href="classmodule_1_1extension_1_1Director.html#ab5cb1189cc1ccd5680fdc36dcbf47178">module::extension::Director</a>
 </li>
 <li>remove_task()
 : <a class="el" href="classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73">module::extension::Director</a>
@@ -264,14 +267,20 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 : <a class="el" href="classmodule_1_1extension_1_1FileWatcher.html#ab590ab888457137847beb5a4df1cdbf2">module::extension::FileWatcher</a>
 </li>
 <li>requester_id
-: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a62b7ef45286bff29fa23f049e0332399">extension::behaviour::commands::BehaviourTask</a>
-, <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProviderDone.html#a7b674a2c2e9d3ec13e7aa7bb5506550a">extension::behaviour::commands::ProviderDone</a>
-, <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a59ae8f60d8d1b29fe1ebf26f7a26d6ab">module::extension::component::DirectorTask</a>
+: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProviderDone.html#ab673305b42f7805bcc00c851e8da383d">extension::behaviour::commands::ProviderDone</a>
+, <a class="el" href="structextension_1_1behaviour_1_1GroupInfo_1_1TaskInfo.html#a1312429e7504c9d316d15ae8e516f2f4">extension::behaviour::GroupInfo::TaskInfo</a>
+, <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a67b412a9a8ed91787d062b17425b2aaf">module::extension::component::DirectorTask</a>
+</li>
+<li>requester_reaction_id
+: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a1ff9ae542387df2d86e5cb05fa14996d">extension::behaviour::commands::BehaviourTasks</a>
 </li>
 <li>requester_task_id
-: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a554790d4a1450ca309ea1f37cdab6b1c">extension::behaviour::commands::BehaviourTask</a>
-, <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProviderDone.html#a73e5d3ac628ab3c9094a1fa121e1d036">extension::behaviour::commands::ProviderDone</a>
-, <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#ae9c19b131ab8698210622fc44d69250c">module::extension::component::DirectorTask</a>
+: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a9dc3000930b8545a6a8beb8cd819020b">extension::behaviour::commands::BehaviourTasks</a>
+, <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProviderDone.html#a9f5ded1be1159286ca54aed596dcd017">extension::behaviour::commands::ProviderDone</a>
+, <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a352608db8307c57064e010c3a1093086">module::extension::component::DirectorTask</a>
+</li>
+<li>requester_type
+: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#ab696f4adf00c7ab4dd84c74d1999fca1">extension::behaviour::commands::BehaviourTasks</a>
 </li>
 <li>requirements
 : <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html#a0469602c61bcf704b7263b5c6c7375bc">module::extension::Director::OkSolution</a>
@@ -366,8 +375,9 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 <li>robots
 : <a class="el" href="classmodule_1_1purpose_1_1Soccer.html#a1d04e66e3377468ab960fddcc725af4b">module::purpose::Soccer</a>
 </li>
-<li>root_type
-: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a0520f064d2d0eaeacb3f63c8ae5aad6c">extension::behaviour::commands::BehaviourTask</a>
+<li>root
+: <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a4521af43a4f06308a877690598f6ba0b">extension::behaviour::commands::BehaviourTasks</a>
+, <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a5f5124e45a7d4f97056e3e2a82fc600d">module::extension::component::DirectorTask</a>
 </li>
 <li>ROT_DIFF
 : <a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a02cbec0396b1c4f5450291b2137d4056">module::purpose::KeyboardWalk</a>
@@ -396,14 +406,11 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 <li>run_level
 : <a class="el" href="structmodule_1_1extension_1_1Director_1_1RunResult.html#af7b01fbfcc80e9878ad8e637c9888b28">module::extension::Director::RunResult</a>
 </li>
-<li>run_reason
-: <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#a89e4374641a941b88b784b33defc3c8b">extension::behaviour::RunInfo</a>
-</li>
 <li>run_state
-: <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370">extension::behaviour::GroupInfo</a>
+: <a class="el" href="structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707">extension::behaviour::Uses&lt; T &gt;</a>
 </li>
 <li>run_task_on_provider()
-: <a class="el" href="classmodule_1_1extension_1_1Director.html#a7bd00630d43e26bcc654b131a9f9724a">module::extension::Director</a>
+: <a class="el" href="classmodule_1_1extension_1_1Director.html#afaa3e4a164097d1ca11e840072c261f9">module::extension::Director</a>
 </li>
 <li>run_task_pack()
 : <a class="el" href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">module::extension::Director</a>
@@ -420,18 +427,6 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 <li>runners
 : <a class="el" href="structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html#a63aeedcaed39f62c6ce7f7cc9b3e1194">module::vision::VisualMesh::EngineContext</a>
 </li>
-<li>RUNNING
-: <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4">extension::behaviour::GroupInfo</a>
-</li>
-<li>RunReason
-: <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo</a>
-</li>
-<li>RunReasonLock
-: <a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">module::extension::Director</a>
-</li>
-<li>RunState
-: <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4">extension::behaviour::GroupInfo</a>
-</li>
 <li>Rwb
 : <a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8fea4c5a6e7d496517218e571a5d1983">utility::math::filter::MahonyFilter&lt; Scalar &gt;</a>
 </li>
@@ -441,7 +436,7 @@ $(document).ready(function(){initNavTree('functions_r.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:41 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -182,9 +182,9 @@ $(document).ready(function(){initNavTree('structmodule_1_1extension_1_1component
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af3d49eb2dd4db3bb4cfe6ddc45359997"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#af3d49eb2dd4db3bb4cfe6ddc45359997">DirectorTask</a> (const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a> &amp;task)</td></tr>
-<tr class="memdesc:af3d49eb2dd4db3bb4cfe6ddc45359997"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new Task object for use in the director algorithm using a given BehaviourTask.  <a href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#af3d49eb2dd4db3bb4cfe6ddc45359997">More...</a><br /></td></tr>
-<tr class="separator:af3d49eb2dd4db3bb4cfe6ddc45359997"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a845cdb57df04980a4b3431ae4b7d2fb2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a845cdb57df04980a4b3431ae4b7d2fb2">DirectorTask</a> (const NUClear::id_t &amp;<a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a67b412a9a8ed91787d062b17425b2aaf">requester_id</a>, const NUClear::id_t &amp;<a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a352608db8307c57064e010c3a1093086">requester_task_id</a>, const bool <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a5f5124e45a7d4f97056e3e2a82fc600d">root</a>, const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a> &amp;task)</td></tr>
+<tr class="memdesc:a845cdb57df04980a4b3431ae4b7d2fb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new Task object for use in the director algorithm using a given BehaviourTask.  <a href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a845cdb57df04980a4b3431ae4b7d2fb2">More...</a><br /></td></tr>
+<tr class="separator:a845cdb57df04980a4b3431ae4b7d2fb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -208,24 +208,28 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a567b7ec479f0fab978fa2984453c6651">priority</a></td></tr>
 <tr class="memdesc:a567b7ec479f0fab978fa2984453c6651"><td class="mdescLeft">&#160;</td><td class="mdescRight">The priority with which this task is to be executed. <br /></td></tr>
 <tr class="separator:a567b7ec479f0fab978fa2984453c6651"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59ae8f60d8d1b29fe1ebf26f7a26d6ab"><td class="memItemLeft" align="right" valign="top"><a id="a59ae8f60d8d1b29fe1ebf26f7a26d6ab"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a59ae8f60d8d1b29fe1ebf26f7a26d6ab">requester_id</a></td></tr>
-<tr class="memdesc:a59ae8f60d8d1b29fe1ebf26f7a26d6ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> id of the requester. <br /></td></tr>
-<tr class="separator:a59ae8f60d8d1b29fe1ebf26f7a26d6ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9c19b131ab8698210622fc44d69250c"><td class="memItemLeft" align="right" valign="top"><a id="ae9c19b131ab8698210622fc44d69250c"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#ae9c19b131ab8698210622fc44d69250c">requester_task_id</a></td></tr>
-<tr class="memdesc:ae9c19b131ab8698210622fc44d69250c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction task id of the requester (if it is a <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> later a ProviderDone will be emitted) <br /></td></tr>
-<tr class="separator:ae9c19b131ab8698210622fc44d69250c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeebcbc183adbf48ccb982c8b8d02c648"><td class="memItemLeft" align="right" valign="top"><a id="aeebcbc183adbf48ccb982c8b8d02c648"></a>
-std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#aeebcbc183adbf48ccb982c8b8d02c648">type</a></td></tr>
-<tr class="memdesc:aeebcbc183adbf48ccb982c8b8d02c648"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> type this task is for. <br /></td></tr>
-<tr class="separator:aeebcbc183adbf48ccb982c8b8d02c648"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67b412a9a8ed91787d062b17425b2aaf"><td class="memItemLeft" align="right" valign="top"><a id="a67b412a9a8ed91787d062b17425b2aaf"></a>
+NUClear::id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a67b412a9a8ed91787d062b17425b2aaf">requester_id</a></td></tr>
+<tr class="memdesc:a67b412a9a8ed91787d062b17425b2aaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> id of the requester. <br /></td></tr>
+<tr class="separator:a67b412a9a8ed91787d062b17425b2aaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a352608db8307c57064e010c3a1093086"><td class="memItemLeft" align="right" valign="top"><a id="a352608db8307c57064e010c3a1093086"></a>
+NUClear::id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a352608db8307c57064e010c3a1093086">requester_task_id</a></td></tr>
+<tr class="memdesc:a352608db8307c57064e010c3a1093086"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction task id of the requester (if it is a <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> later a ProviderDone will be emitted) <br /></td></tr>
+<tr class="separator:a352608db8307c57064e010c3a1093086"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f5124e45a7d4f97056e3e2a82fc600d"><td class="memItemLeft" align="right" valign="top"><a id="a5f5124e45a7d4f97056e3e2a82fc600d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#a5f5124e45a7d4f97056e3e2a82fc600d">root</a></td></tr>
+<tr class="memdesc:a5f5124e45a7d4f97056e3e2a82fc600d"><td class="mdescLeft">&#160;</td><td class="mdescRight">If this task is a root task. <br /></td></tr>
+<tr class="separator:a5f5124e45a7d4f97056e3e2a82fc600d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb1302e116df0c4ca3d3027b90fe5e84"><td class="memItemLeft" align="right" valign="top"><a id="afb1302e116df0c4ca3d3027b90fe5e84"></a>
+const std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html#afb1302e116df0c4ca3d3027b90fe5e84">type</a></td></tr>
+<tr class="memdesc:afb1302e116df0c4ca3d3027b90fe5e84"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> type this task is for. <br /></td></tr>
+<tr class="separator:afb1302e116df0c4ca3d3027b90fe5e84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A Task to use in the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> algorithm based on the BehaviourTask, with added state fields for the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> algorithm. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="af3d49eb2dd4db3bb4cfe6ddc45359997"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3d49eb2dd4db3bb4cfe6ddc45359997">&#9670;&nbsp;</a></span>DirectorTask()</h2>
+<a id="a845cdb57df04980a4b3431ae4b7d2fb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a845cdb57df04980a4b3431ae4b7d2fb2">&#9670;&nbsp;</a></span>DirectorTask()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -236,9 +240,31 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="memname">module::extension::component::DirectorTask::DirectorTask </td>
           <td>(</td>
-          <td class="paramtype">const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a> &amp;&#160;</td>
-          <td class="paramname"><em>task</em></td><td>)</td>
+          <td class="paramtype">const NUClear::id_t &amp;&#160;</td>
+          <td class="paramname"><em>requester_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const NUClear::id_t &amp;&#160;</td>
+          <td class="paramname"><em>requester_task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>root</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a> &amp;&#160;</td>
+          <td class="paramname"><em>task</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -267,7 +293,7 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><b>component</b></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">DirectorTask</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

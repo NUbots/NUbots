@@ -1,11 +1,14 @@
 var searchData=
 [
-  ['mean_5ffrom_5fsigmas_2169',['mean_from_sigmas',['../classutility_1_1math_1_1filter_1_1UKF.html#a59365b6bd835668b528827896905062e',1,'utility::math::filter::UKF']]],
-  ['measure_2170',['measure',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#a06169cf7118ac58ecb86caeb5944c279',1,'utility::math::filter::KalmanFilter::measure()'],['../classutility_1_1math_1_1filter_1_1ParticleFilter.html#a05fd8f821f4ba41ae7c4a775445915a2',1,'utility::math::filter::ParticleFilter::measure()'],['../classutility_1_1math_1_1filter_1_1UKF.html#a32425791859741f957b6f5d27181603e',1,'utility::math::filter::UKF::measure()']]],
-  ['messageloghandler_2171',['MessageLogHandler',['../classmodule_1_1support_1_1logging_1_1MessageLogHandler.html#acb1cdea2eb0c48000ad9dc0c99e5eed4',1,'module::support::logging::MessageLogHandler']]],
-  ['min_2172',['min',['../classutility_1_1motion_1_1splines_1_1Spline.html#ae314be64838e2b26c76338c522d855c5',1,'utility::motion::splines::Spline::min()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#ad568289b5b860467d32c1b215c02529b',1,'utility::motion::splines::SplineContainer::min()']]],
-  ['mirror_5fscript_2173',['mirror_script',['../classmodule_1_1purpose_1_1ScriptTuner.html#a9f194395aeb3e09545a848486d15c379',1,'module::purpose::ScriptTuner']]],
-  ['move_5fnugus_5fselection_2174',['move_nugus_selection',['../classmodule_1_1purpose_1_1ScriptTuner.html#ab597bed733671504a799f54389f17a35',1,'module::purpose::ScriptTuner']]],
-  ['multinomial_2175',['Multinomial',['../structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#ae30be3368e1246984cea521820fdc155',1,'utility::math::stats::resample::Multinomial']]],
-  ['multivariatenormal_2176',['MultivariateNormal',['../structutility_1_1math_1_1stats_1_1MultivariateNormal.html#a7f35837a461fac7d85d4699d45ec6ea2',1,'utility::math::stats::MultivariateNormal::MultivariateNormal(const Eigen::Matrix&lt; Scalar, N, N &gt; &amp;covariance_)'],['../structutility_1_1math_1_1stats_1_1MultivariateNormal.html#a2c075062ad1b378628b69a4ce52b92b3',1,'utility::math::stats::MultivariateNormal::MultivariateNormal(Eigen::Matrix&lt; Scalar, N, 1 &gt; mean_, const Eigen::Matrix&lt; Scalar, N, N &gt; &amp;covariance_)']]]
+  ['native_5fhandle_2177',['native_handle',['../classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039',1,'utility::io::uart']]],
+  ['natnet_2178',['NatNet',['../classmodule_1_1input_1_1NatNet.html#af91ccca272638d23211dd7eb8e69c461',1,'module::input::NatNet']]],
+  ['nbsplayback_2179',['NBSPlayback',['../classmodule_1_1tools_1_1NBSPlayback.html#a6dbbd681d14cd03565cdac6ebfcea8a2',1,'module::tools::NBSPlayback']]],
+  ['needsexpression_2180',['NeedsExpression',['../structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html#a1efdf2b92898e547d34f46f1a71b884d',1,'extension::behaviour::commands::NeedsExpression']]],
+  ['networkforwarder_2181',['NetworkForwarder',['../classmodule_1_1network_1_1NetworkForwarder.html#a34504105c0c1798f990e9ac5258ea993',1,'module::network::NetworkForwarder']]],
+  ['new_5fframe_2182',['new_frame',['../classmodule_1_1purpose_1_1ScriptTuner.html#ac93ba3407b55686131335cd8f44bc6cd',1,'module::purpose::ScriptTuner']]],
+  ['nextcombination_2183',['nextCombination',['../classutility_1_1motion_1_1splines_1_1Combination.html#aab92c37f0b145cff0d513cc481f352ae',1,'utility::motion::splines::Combination']]],
+  ['normalizeangle_2184',['normalizeAngle',['../namespaceutility_1_1math_1_1angle.html#a8dde4f83b354755ccea82a77538302e3',1,'utility::math::angle']]],
+  ['nsga2evaluator_2185',['NSGA2Evaluator',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a0a0883f8676617279d42c2b439f38ef4',1,'module::support::optimisation::NSGA2Evaluator']]],
+  ['nsga2optimiser_2186',['NSGA2Optimiser',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html#a8cd94981344287343fb68b04839b8838',1,'module::support::optimisation::NSGA2Optimiser']]],
+  ['nuclearnet_2187',['NUClearNet',['../classmodule_1_1network_1_1NUClearNet.html#a7ca7f8d938afaafe6f17c2c4c4397306',1,'module::network::NUClearNet']]]
 ];

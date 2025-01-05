@@ -1,0 +1,4 @@
+<map id="extension::behaviour::GroupInfo" name="extension::behaviour::GroupInfo">
+<area shape="rect" id="node1" title="Provides information about the current state of a provider group." alt="" coords="5,109,164,151"/>
+<area shape="rect" id="node2" href="$structextension_1_1behaviour_1_1GroupInfo_1_1TaskInfo.html" title=" " alt="" coords="5,5,164,47"/>
+</map>

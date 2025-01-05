@@ -1,14 +1,18 @@
 var searchData=
 [
-  ['native_5fhandle_2177',['native_handle',['../classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039',1,'utility::io::uart']]],
-  ['natnet_2178',['NatNet',['../classmodule_1_1input_1_1NatNet.html#af91ccca272638d23211dd7eb8e69c461',1,'module::input::NatNet']]],
-  ['nbsplayback_2179',['NBSPlayback',['../classmodule_1_1tools_1_1NBSPlayback.html#a6dbbd681d14cd03565cdac6ebfcea8a2',1,'module::tools::NBSPlayback']]],
-  ['needsexpression_2180',['NeedsExpression',['../structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html#a1efdf2b92898e547d34f46f1a71b884d',1,'extension::behaviour::commands::NeedsExpression']]],
-  ['networkforwarder_2181',['NetworkForwarder',['../classmodule_1_1network_1_1NetworkForwarder.html#a34504105c0c1798f990e9ac5258ea993',1,'module::network::NetworkForwarder']]],
-  ['new_5fframe_2182',['new_frame',['../classmodule_1_1purpose_1_1ScriptTuner.html#ac93ba3407b55686131335cd8f44bc6cd',1,'module::purpose::ScriptTuner']]],
-  ['nextcombination_2183',['nextCombination',['../classutility_1_1motion_1_1splines_1_1Combination.html#aab92c37f0b145cff0d513cc481f352ae',1,'utility::motion::splines::Combination']]],
-  ['normalizeangle_2184',['normalizeAngle',['../namespaceutility_1_1math_1_1angle.html#a8dde4f83b354755ccea82a77538302e3',1,'utility::math::angle']]],
-  ['nsga2evaluator_2185',['NSGA2Evaluator',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a0a0883f8676617279d42c2b439f38ef4',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['nsga2optimiser_2186',['NSGA2Optimiser',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html#a8cd94981344287343fb68b04839b8838',1,'module::support::optimisation::NSGA2Optimiser']]],
-  ['nuclearnet_2187',['NUClearNet',['../classmodule_1_1network_1_1NUClearNet.html#a7ca7f8d938afaafe6f17c2c4c4397306',1,'module::network::NUClearNet']]]
+  ['on_2188',['on',['../classutility_1_1nbs_1_1Decoder.html#af3fc6e739ed8e79110a59b7dd6931872',1,'utility::nbs::Decoder']]],
+  ['onboardwalkoptimisation_2189',['OnboardWalkOptimisation',['../classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html#a4c602fd8e12ef7a5c276b4052681c62a',1,'module::support::optimisation::OnboardWalkOptimisation']]],
+  ['opencr_5fwaiting_2190',['opencr_waiting',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a47a28ef16226a6275efb5a034f692847',1,'module::platform::OpenCR::HardwareIO']]],
+  ['operator_20bool_2191',['operator bool',['../classutility_1_1vision_1_1Mosaic.html#aeeda811ebe518c7b870b2c0c58adecff',1,'utility::vision::Mosaic']]],
+  ['operator_21_3d_2192',['operator!=',['../structutility_1_1support_1_1enumerate_1_1iterator.html#a7abf5710ee0828fc6a682988838f2e72',1,'utility::support::enumerate::iterator']]],
+  ['operator_28_29_2193',['operator()',['../structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a54ccb2195783aaaf68b60792ada5c23f',1,'module::platform::NUSense::NUSenseParser::operator()()'],['../structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a02da430d6476d129b0d286683f3581a0',1,'utility::math::stats::resample::Multinomial::operator()()'],['../structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a7ad7c28624b01d74e44d535619ed5610',1,'utility::math::stats::resample::Stratified::operator()()'],['../structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a0c49b5064ce01ef70243553e6326d393',1,'utility::math::stats::resample::Systematic::operator()()'],['../classutility_1_1motion_1_1splines_1_1Polynom.html#a93dc366324586e4a5c64282bd170408d',1,'utility::motion::splines::Polynom::operator()()']]],
+  ['operator_2a_2194',['operator*',['../structutility_1_1support_1_1enumerate_1_1iterator.html#ad16e6af5601595421ced43fb968f39e6',1,'utility::support::enumerate::iterator']]],
+  ['operator_2a_3d_2195',['operator*=',['../classutility_1_1motion_1_1splines_1_1Polynom.html#a1e1af727e5234961dbc157f3b2885e97',1,'utility::motion::splines::Polynom']]],
+  ['operator_2b_2b_2196',['operator++',['../structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html#a03ac6bcc6149c8d69ea5fe95f877ff60',1,'module::tools::RoboCupConfiguration::Position::operator++()'],['../structutility_1_1support_1_1enumerate_1_1iterator.html#a7894a5d75414e8055d0cde6dd352536d',1,'utility::support::enumerate::iterator::operator++()']]],
+  ['operator_3c_3c_2197',['operator&lt;&lt;',['../classutility_1_1math_1_1geometry_1_1Quad.html#a36ac28683b5354a1a22de163899c005d',1,'utility::math::geometry::Quad::operator&lt;&lt;(std::ostream &amp;output, const Quad&lt; Scalar, R, C &gt; &amp;quad)'],['../classutility_1_1math_1_1geometry_1_1Quad.html#a4b825e3a419c099083fa482842b17f2c',1,'utility::math::geometry::Quad::operator&lt;&lt;(std::ostream &amp;output, const std::vector&lt; Quad&lt; Scalar, R, C &gt;&gt; &amp;quads)']]],
+  ['operator_3d_2198',['operator=',['../classextension_1_1behaviour_1_1Lock.html#a5aabfd7b2f27fd548e9dcd1607ac20c6',1,'extension::behaviour::Lock::operator=()'],['../classutility_1_1io_1_1uart.html#a0169a92d12650bf5d6701d7efae3a887',1,'utility::io::uart::operator=()']]],
+  ['operator_5b_5d_2199',['operator[]',['../classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a67a03d38221e26440cdd8cd404096fd6',1,'module::platform::OpenCR::NUgus']]],
+  ['orientation_2200',['orientation',['../classutility_1_1motion_1_1splines_1_1Trajectory.html#aa771294d83506c8c91b121957810fe27',1,'utility::motion::splines::Trajectory']]],
+  ['overview_2201',['Overview',['../classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10',1,'module::output::Overview']]],
+  ['string_2202',['string',['../structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html#ab71b153df8a5a364c31bb6be6ea5a4ae',1,'module::tools::RoboCupConfiguration::Position']]]
 ];

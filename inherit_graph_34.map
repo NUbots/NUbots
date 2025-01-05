@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structextension_1_1behaviour_1_1When.html" title="Limit access to this Provider unless a condition is true." alt="" coords="5,5,164,61"/>
+<area shape="rect" id="node1" href="$structextension_1_1behaviour_1_1ProviderBase.html" title=" " alt="" coords="5,5,224,76"/>
+<area shape="rect" id="node2" href="$structextension_1_1behaviour_1_1Start.html" title="Define a Start provider for a type It will execute before a task is first provided to the provider gr..." alt="" coords="272,20,431,61"/>
 </map>

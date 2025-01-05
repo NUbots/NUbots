@@ -184,6 +184,15 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
+<tr class="memitem:a27b0dc855b6e05e3860708945f66249c"><td class="memItemLeft" align="right" valign="top"><a id="a27b0dc855b6e05e3860708945f66249c"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>DataSetter</b> = ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html#ad7b383db0a6bde1f36b8d58b8041de16">extension::behaviour::commands::ProvideReaction::DataSetter</a></td></tr>
+<tr class="separator:a27b0dc855b6e05e3860708945f66249c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6544e0915d477ff3bf9f6f8b8099786"><td class="memItemLeft" align="right" valign="top"><a id="ac6544e0915d477ff3bf9f6f8b8099786"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>GroupInfo</b> = ::<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">extension::behaviour::GroupInfo</a></td></tr>
+<tr class="separator:ac6544e0915d477ff3bf9f6f8b8099786"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa7cae0b0a54bc40febc8079a947e005"><td class="memItemLeft" align="right" valign="top"><a id="afa7cae0b0a54bc40febc8079a947e005"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>RunReason</b> = ::extension::behaviour::RunReason</td></tr>
+<tr class="separator:afa7cae0b0a54bc40febc8079a947e005"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6425eec5b47f8e4b97d3fc9410808219"><td class="memItemLeft" align="right" valign="top"><a id="a6425eec5b47f8e4b97d3fc9410808219"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a6425eec5b47f8e4b97d3fc9410808219">TaskList</a> = std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">DirectorTask</a> &gt; &gt;</td></tr>
 <tr class="memdesc:a6425eec5b47f8e4b97d3fc9410808219"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task list holds a list of tasks. <br /></td></tr>
@@ -191,12 +200,18 @@ using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="str
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1ad059ea95c1274e5f6318aeda8b21a3"><td class="memItemLeft" align="right" valign="top"><a id="a1ad059ea95c1274e5f6318aeda8b21a3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ProviderGroup</b> (const std::type_index &amp;type_)</td></tr>
-<tr class="separator:a1ad059ea95c1274e5f6318aeda8b21a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c1dde1084d6255a0464766060bf7ea5"><td class="memItemLeft" align="right" valign="top"><a id="a5c1dde1084d6255a0464766060bf7ea5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ProviderGroup</b> (const std::type_index &amp;type_, const DataSetter &amp;<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a3339eac62960ea4691e82b1eb3027a65">data_setter</a>)</td></tr>
+<tr class="separator:a5c1dde1084d6255a0464766060bf7ea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ddaf9d616c2b3bc09b0c1a0a25dd811"><td class="memItemLeft" align="right" valign="top"><a id="a3ddaf9d616c2b3bc09b0c1a0a25dd811"></a>
 std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html">WatchHandle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>add_watcher</b> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">DirectorTask</a> &gt; &amp;task)</td></tr>
 <tr class="separator:a3ddaf9d616c2b3bc09b0c1a0a25dd811"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f1b12e8e4d22059d2920018f08da5fc"><td class="memItemLeft" align="right" valign="top"><a id="a9f1b12e8e4d22059d2920018f08da5fc"></a>
+std::shared_ptr&lt; const <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>get_group_info</b> () const</td></tr>
+<tr class="separator:a9f1b12e8e4d22059d2920018f08da5fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae91b5b97221b59f0b9fd57c78b498f67"><td class="memItemLeft" align="right" valign="top"><a id="ae91b5b97221b59f0b9fd57c78b498f67"></a>
+::<a class="el" href="classextension_1_1behaviour_1_1Lock.html">extension::behaviour::Lock</a>&#160;</td><td class="memItemRight" valign="bottom"><b>update_data</b> (const RunReason &amp;reason=RunReason::OTHER_TRIGGER)</td></tr>
+<tr class="separator:ae91b5b97221b59f0b9fd57c78b498f67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -208,6 +223,10 @@ std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1
 std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">DirectorTask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#adb6a16adde9a2fa04087a7c82098e6f2">active_task</a></td></tr>
 <tr class="memdesc:adb6a16adde9a2fa04087a7c82098e6f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current task that is running on this <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. <br /></td></tr>
 <tr class="separator:adb6a16adde9a2fa04087a7c82098e6f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3339eac62960ea4691e82b1eb3027a65"><td class="memItemLeft" align="right" valign="top"><a id="a3339eac62960ea4691e82b1eb3027a65"></a>
+DataSetter&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a3339eac62960ea4691e82b1eb3027a65">data_setter</a></td></tr>
+<tr class="memdesc:a3339eac62960ea4691e82b1eb3027a65"><td class="mdescLeft">&#160;</td><td class="mdescRight">The data setter for this provider group. <br /></td></tr>
+<tr class="separator:a3339eac62960ea4691e82b1eb3027a65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1369b1168dda1ed86b998807afd22a3"><td class="memItemLeft" align="right" valign="top"><a id="ae1369b1168dda1ed86b998807afd22a3"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ae1369b1168dda1ed86b998807afd22a3">done</a> = false</td></tr>
 <tr class="memdesc:ae1369b1168dda1ed86b998807afd22a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores if the last thing this group did was to emit a done task. <br /></td></tr>
@@ -254,7 +273,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><b>component</b></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">ProviderGroup</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

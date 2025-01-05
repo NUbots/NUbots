@@ -11,5 +11,6 @@ var searchData=
   ['goalpost_1615',['GoalPost',['../structmodule_1_1localisation_1_1GoalPost.html',1,'module::localisation']]],
   ['gpt_1616',['GPT',['../classmodule_1_1skill_1_1GPT.html',1,'module::skill']]],
   ['greenhorizondetector_1617',['GreenHorizonDetector',['../classmodule_1_1vision_1_1GreenHorizonDetector.html',1,'module::vision']]],
-  ['groupinfo_1618',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]]
+  ['groupinfo_1618',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]],
+  ['groupinfostore_1619',['GroupInfoStore',['../structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html',1,'extension::behaviour::information']]]
 ];

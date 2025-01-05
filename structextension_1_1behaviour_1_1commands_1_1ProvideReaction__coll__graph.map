@@ -1,0 +1,4 @@
+<map id="extension::behaviour::commands::ProvideReaction" name="extension::behaviour::commands::ProvideReaction">
+<area shape="rect" id="node1" title="Message used to tell the behaviour system about a new Provides reaction." alt="" coords="5,109,221,151"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1Lock.html" title=" " alt="" coords="34,5,193,47"/>
+</map>

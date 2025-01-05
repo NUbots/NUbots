@@ -170,12 +170,11 @@ $(document).ready(function(){initNavTree('classmodule_1_1extension_1_1Director.h
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-static-methods">Static Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
-<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
-<a href="#friends">Friends</a> &#124;
 <a href="classmodule_1_1extension_1_1Director-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::extension::Director Class Reference</div>  </div>
@@ -186,9 +185,8 @@ Inheritance diagram for module::extension::Director:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1extension_1_1Director__inherit__graph.png" border="0" usemap="#amodule_1_1extension_1_1Director_inherit__map" alt="Inheritance graph"/></div>
 <map name="amodule_1_1extension_1_1Director_inherit__map" id="amodule_1_1extension_1_1Director_inherit__map">
-<area shape="rect" title=" " alt="" coords="101,95,252,136"/>
-<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
-<area shape="rect" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="165,5,399,47"/>
+<area shape="rect" title=" " alt="" coords="5,80,156,121"/>
+<area shape="rect" title=" " alt="" coords="13,5,148,32"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -196,9 +194,8 @@ Collaboration diagram for module::extension::Director:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1extension_1_1Director__coll__graph.png" border="0" usemap="#amodule_1_1extension_1_1Director_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1extension_1_1Director_coll__map" id="amodule_1_1extension_1_1Director_coll__map">
-<area shape="rect" title=" " alt="" coords="13,96,164,137"/>
-<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
-<area shape="rect" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="165,5,399,47"/>
+<area shape="rect" title=" " alt="" coords="5,80,156,121"/>
+<area shape="rect" title=" " alt="" coords="13,5,148,32"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -213,6 +210,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An object which holds the possible solutions to running a task.  <a href="structmodule_1_1extension_1_1Director_1_1Solution.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1Director_1_1TaskPack.html">TaskPack</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task pack is the result of a set of tasks emitted by a provider that should be run together.  <a href="structmodule_1_1extension_1_1Director_1_1TaskPack.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -220,10 +220,6 @@ Public Types</h2></td></tr>
 using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> = std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &gt;</td></tr>
 <tr class="memdesc:a7021252f80d525cec056bec1adfa81eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task list holds a list of tasks. <br /></td></tr>
 <tr class="separator:a7021252f80d525cec056bec1adfa81eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ce3ff604f6ea87b215f803efb7b13e5"><td class="memItemLeft" align="right" valign="top"><a id="a2ce3ff604f6ea87b215f803efb7b13e5"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> = std::pair&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt;, <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &gt;</td></tr>
-<tr class="memdesc:a2ce3ff604f6ea87b215f803efb7b13e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task pack is the result of a set of tasks emitted by a provider that should be run together. <br /></td></tr>
-<tr class="separator:a2ce3ff604f6ea87b215f803efb7b13e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -231,15 +227,12 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3">Director</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> reactor. <br /></td></tr>
 <tr class="separator:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d803628b2906684e24023eec714475d"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">extension::behaviour::GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5d803628b2906684e24023eec714475d">_get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type, const std::type_index &amp;root_type) override</td></tr>
-<tr class="memdesc:a5d803628b2906684e24023eec714475d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the ProviderGroup data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a5d803628b2906684e24023eec714475d">More...</a><br /></td></tr>
-<tr class="separator:a5d803628b2906684e24023eec714475d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06c8ef9a24944778876165b8b9a49160"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">extension::behaviour::RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">_get_run_info</a> (const uint64_t &amp;reaction_id) override</td></tr>
-<tr class="memdesc:a06c8ef9a24944778876165b8b9a49160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the RunInfo data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">More...</a><br /></td></tr>
-<tr class="separator:a06c8ef9a24944778876165b8b9a49160"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac75deae1643268535343886608a697ea"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ac75deae1643268535343886608a697ea">_get_task_data</a> (const uint64_t &amp;reaction_id) override</td></tr>
-<tr class="memdesc:ac75deae1643268535343886608a697ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the task data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#ac75deae1643268535343886608a697ea">More...</a><br /></td></tr>
-<tr class="separator:ac75deae1643268535343886608a697ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a774a9943509e7bd672ac9e54c8aa7026"><td class="memItemLeft" align="right" valign="top"><a id="a774a9943509e7bd672ac9e54c8aa7026"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>concurrency</b> = 1</td></tr>
+<tr class="separator:a774a9943509e7bd672ac9e54c8aa7026"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
 Private Types</h2></td></tr>
@@ -249,9 +242,6 @@ Private Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a058f702f618f27cceb1ade5526ad2c77"><td class="mdescLeft">&#160;</td><td class="mdescRight">The level of solution that we can run at.  <a href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">More...</a><br /></td></tr>
 <tr class="separator:a058f702f618f27cceb1ade5526ad2c77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa5a1b8dd16d408ba29eb454ec86f438"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">RunReasonLock</a> = std::unique_ptr&lt; void, std::function&lt; void(void *)&gt; &gt;</td></tr>
-<tr class="memdesc:afa5a1b8dd16d408ba29eb454ec86f438"><td class="mdescLeft">&#160;</td><td class="mdescRight">A RunReasonLock instance will reset the current_run_reason back to OTHER_TRIGGER when it is destroyed.  <a href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">More...</a><br /></td></tr>
-<tr class="separator:afa5a1b8dd16d408ba29eb454ec86f438"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -282,25 +272,22 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a553b675b4947fe028b198285a393d778"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">get_root_provider</a> (const std::type_index &amp;root_type)</td></tr>
 <tr class="memdesc:a553b675b4947fe028b198285a393d778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds or creates a root provider for a task and returns it.  <a href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">More...</a><br /></td></tr>
 <tr class="separator:a553b675b4947fe028b198285a393d778"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d47a23014bcaeeac4df16728128b9af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">RunReasonLock</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af">hold_run_reason</a> (const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;reason)</td></tr>
-<tr class="memdesc:a4d47a23014bcaeeac4df16728128b9af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds a run reason as the current run reason for the current thread.  <a href="classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af">More...</a><br /></td></tr>
-<tr class="separator:a4d47a23014bcaeeac4df16728128b9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2525565f36ac81678c9987d70bfa35e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e">reevaluate_children</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group)</td></tr>
 <tr class="memdesc:aa2525565f36ac81678c9987d70bfa35e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a reevaluation on not only the passed group, but any groups that it is using.  <a href="classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e">More...</a><br /></td></tr>
 <tr class="separator:aa2525565f36ac81678c9987d70bfa35e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98348af06fa8b1126bc28e2d21695668"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a98348af06fa8b1126bc28e2d21695668">reevaluate_group</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group)</td></tr>
 <tr class="memdesc:a98348af06fa8b1126bc28e2d21695668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reevaluates all of the tasks that are queued to execute on a provider group.  <a href="classmodule_1_1extension_1_1Director.html#a98348af06fa8b1126bc28e2d21695668">More...</a><br /></td></tr>
 <tr class="separator:a98348af06fa8b1126bc28e2d21695668"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac71aac2110faf4406b7c01b2eeeb79e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ac71aac2110faf4406b7c01b2eeeb79e6">remove_provider</a> (const uint64_t &amp;id)</td></tr>
-<tr class="memdesc:ac71aac2110faf4406b7c01b2eeeb79e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a Provider for a type.  <a href="classmodule_1_1extension_1_1Director.html#ac71aac2110faf4406b7c01b2eeeb79e6">More...</a><br /></td></tr>
-<tr class="separator:ac71aac2110faf4406b7c01b2eeeb79e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5cb1189cc1ccd5680fdc36dcbf47178"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab5cb1189cc1ccd5680fdc36dcbf47178">remove_provider</a> (const NUClear::id_t &amp;id)</td></tr>
+<tr class="memdesc:ab5cb1189cc1ccd5680fdc36dcbf47178"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a Provider for a type.  <a href="classmodule_1_1extension_1_1Director.html#ab5cb1189cc1ccd5680fdc36dcbf47178">More...</a><br /></td></tr>
+<tr class="separator:ab5cb1189cc1ccd5680fdc36dcbf47178"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a310d77d2ee390e96e2e35db3d3a45a73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73">remove_task</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;task)</td></tr>
 <tr class="memdesc:a310d77d2ee390e96e2e35db3d3a45a73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the provided task from the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a>.  <a href="classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73">More...</a><br /></td></tr>
 <tr class="separator:a310d77d2ee390e96e2e35db3d3a45a73"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7bd00630d43e26bcc654b131a9f9724a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a7bd00630d43e26bcc654b131a9f9724a">run_task_on_provider</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;task, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &amp;provider, const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;run_reason)</td></tr>
-<tr class="memdesc:a7bd00630d43e26bcc654b131a9f9724a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the passed task on the passed provider.  <a href="classmodule_1_1extension_1_1Director.html#a7bd00630d43e26bcc654b131a9f9724a">More...</a><br /></td></tr>
-<tr class="separator:a7bd00630d43e26bcc654b131a9f9724a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a867e019bba1e28cf210a89d786452bf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">run_task_pack</a> (const <a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> &amp;pack)</td></tr>
+<tr class="memitem:afaa3e4a164097d1ca11e840072c261f9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#afaa3e4a164097d1ca11e840072c261f9">run_task_on_provider</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;task, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &amp;provider, const ::extension::behaviour::RunReason &amp;run_reason)</td></tr>
+<tr class="memdesc:afaa3e4a164097d1ca11e840072c261f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the passed task on the passed provider.  <a href="classmodule_1_1extension_1_1Director.html#afaa3e4a164097d1ca11e840072c261f9">More...</a><br /></td></tr>
+<tr class="separator:afaa3e4a164097d1ca11e840072c261f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a867e019bba1e28cf210a89d786452bf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">run_task_pack</a> (const <a class="el" href="structmodule_1_1extension_1_1Director_1_1TaskPack.html">TaskPack</a> &amp;pack)</td></tr>
 <tr class="memdesc:a867e019bba1e28cf210a89d786452bf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.  <a href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">More...</a><br /></td></tr>
 <tr class="separator:a867e019bba1e28cf210a89d786452bf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af83cc11c92a845bfcd7810873b731dda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1RunResult.html">RunResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af83cc11c92a845bfcd7810873b731dda">run_tasks</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &amp;pack, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a> &amp;run_level, const std::set&lt; std::type_index &gt; &amp;used)</td></tr>
@@ -324,83 +311,22 @@ Static Private Member Functions</h2></td></tr>
 <tr class="memitem:aadabed75b770382026823c49eba00812"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812">direct_priority</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;incumbent, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;challenger)</td></tr>
 <tr class="memdesc:aadabed75b770382026823c49eba00812"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the direct priorities of two director tasks and returns true if the challenger has priority over the incumbent.  <a href="classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812">More...</a><br /></td></tr>
 <tr class="separator:aadabed75b770382026823c49eba00812"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Member Functions inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
-<tr class="memitem:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type, const std::type_index &amp;root_type)</td></tr>
-<tr class="memdesc:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the group info object.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">More...</a><br /></td></tr>
-<tr class="separator:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">get_run_info</a> (const uint64_t &amp;reaction_id)</td></tr>
-<tr class="memdesc:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about why the current task is running from the information source.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">More...</a><br /></td></tr>
-<tr class="separator:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade48b09cd7c578384ed21137d17ad453 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">get_task_data</a> (const uint64_t &amp;reaction_id)</td></tr>
-<tr class="memdesc:ade48b09cd7c578384ed21137d17ad453 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the data for the passed providers reaction id from the information source.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">More...</a><br /></td></tr>
-<tr class="separator:ade48b09cd7c578384ed21137d17ad453 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:adf79e402d0c8f9daee55f5be9ea994e9"><td class="memItemLeft" align="right" valign="top"><a id="adf79e402d0c8f9daee55f5be9ea994e9"></a>
-std::recursive_mutex&#160;</td><td class="memItemRight" valign="bottom"><b>director_mutex</b> {}</td></tr>
-<tr class="separator:adf79e402d0c8f9daee55f5be9ea994e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="memItemLeft" align="right" valign="top"><a id="ab2350ea1c07f3e9dd54776dcadf29e4d"></a>
 std::map&lt; std::type_index, <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d">groups</a></td></tr>
 <tr class="memdesc:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of Provider groups. <br /></td></tr>
 <tr class="separator:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af67f44bba504fa0f8872d6e04f3b4776"><td class="memItemLeft" align="right" valign="top"><a id="af67f44bba504fa0f8872d6e04f3b4776"></a>
-std::multimap&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af67f44bba504fa0f8872d6e04f3b4776">pack_builder</a></td></tr>
-<tr class="memdesc:af67f44bba504fa0f8872d6e04f3b4776"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit all these as a pack so that the director can work out when Providers change which subtasks they emit. <br /></td></tr>
-<tr class="separator:af67f44bba504fa0f8872d6e04f3b4776"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f196b09a6c1b4c27930a2d2d36f0be9"><td class="memItemLeft" align="right" valign="top"><a id="a5f196b09a6c1b4c27930a2d2d36f0be9"></a>
-std::map&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5f196b09a6c1b4c27930a2d2d36f0be9">providers</a></td></tr>
-<tr class="memdesc:a5f196b09a6c1b4c27930a2d2d36f0be9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps reaction_id to the Provider which implements it. <br /></td></tr>
-<tr class="separator:a5f196b09a6c1b4c27930a2d2d36f0be9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d146d3ea9f1fb47cb37d9bc0dcee07d"><td class="memItemLeft" align="right" valign="top"><a id="a5d146d3ea9f1fb47cb37d9bc0dcee07d"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5d146d3ea9f1fb47cb37d9bc0dcee07d">unique_id_source</a> = 0</td></tr>
-<tr class="memdesc:a5d146d3ea9f1fb47cb37d9bc0dcee07d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue. <br /></td></tr>
-<tr class="separator:a5d146d3ea9f1fb47cb37d9bc0dcee07d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
-Static Private Attributes</h2></td></tr>
-<tr class="memitem:aa01b93fccaf7b4ddab18ca0cff81057e"><td class="memItemLeft" align="right" valign="top"><a id="aa01b93fccaf7b4ddab18ca0cff81057e"></a>
-static thread_local ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#aa01b93fccaf7b4ddab18ca0cff81057e">current_run_reason</a> = RunInfo::RunReason::OTHER_TRIGGER</td></tr>
-<tr class="memdesc:aa01b93fccaf7b4ddab18ca0cff81057e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current run reason this thread is executing for. Defaults to OTHER_TRIGGER as that will be what it is if a non <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> execution occurs. <br /></td></tr>
-<tr class="separator:aa01b93fccaf7b4ddab18ca0cff81057e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Attributes inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
-<tr class="memitem:ad1978e857d2131c1fc57e5b9ff896028 inherit pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top"><a id="ad1978e857d2131c1fc57e5b9ff896028"></a>
-static <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">InformationSource</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ad1978e857d2131c1fc57e5b9ff896028">source</a> = nullptr</td></tr>
-<tr class="memdesc:ad1978e857d2131c1fc57e5b9ff896028 inherit pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">This static variable gets set by whatever class is acting as the information source. <br /></td></tr>
-<tr class="separator:ad1978e857d2131c1fc57e5b9ff896028 inherit pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
-Friends</h2></td></tr>
-<tr class="memitem:a8bb1cbbac1238620c272ee22344093e9"><td class="memItemLeft" align="right" valign="top"><a id="a8bb1cbbac1238620c272ee22344093e9"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b></td></tr>
-<tr class="separator:a8bb1cbbac1238620c272ee22344093e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77eb6bb5d67d9956c0cce227bcc38276"><td class="memItemLeft" align="right" valign="top"><a id="a77eb6bb5d67d9956c0cce227bcc38276"></a>
+std::map&lt; NUClear::id_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a77eb6bb5d67d9956c0cce227bcc38276">providers</a></td></tr>
+<tr class="memdesc:a77eb6bb5d67d9956c0cce227bcc38276"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps reaction_id to the Provider which implements it. <br /></td></tr>
+<tr class="separator:a77eb6bb5d67d9956c0cce227bcc38276"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5ef90d64bf20ee88eec5c956790d55b"><td class="memItemLeft" align="right" valign="top"><a id="af5ef90d64bf20ee88eec5c956790d55b"></a>
+NUClear::id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af5ef90d64bf20ee88eec5c956790d55b">unique_id_source</a> = 0</td></tr>
+<tr class="memdesc:af5ef90d64bf20ee88eec5c956790d55b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue. <br /></td></tr>
+<tr class="separator:af5ef90d64bf20ee88eec5c956790d55b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="afa5a1b8dd16d408ba29eb454ec86f438"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa5a1b8dd16d408ba29eb454ec86f438">&#9670;&nbsp;</a></span>RunReasonLock</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">module::extension::Director::RunReasonLock</a> =  std::unique_ptr&lt;void, std::function&lt;void(void*)&gt; &gt;</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>A RunReasonLock instance will reset the current_run_reason back to OTHER_TRIGGER when it is destroyed. </p>
-<p>This is used so that the run reason can temporarily be set to something else, and then reset back to the default if there is an exception or other error. </p>
-
-</div>
-</div>
 <h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a058f702f618f27cceb1ade5526ad2c77"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a058f702f618f27cceb1ade5526ad2c77">&#9670;&nbsp;</a></span>RunLevel</h2>
@@ -435,135 +361,6 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a5d803628b2906684e24023eec714475d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d803628b2906684e24023eec714475d">&#9670;&nbsp;</a></span>_get_group_info()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">GroupInfo module::extension::Director::_get_group_info </td>
-          <td>(</td>
-          <td class="paramtype">const uint64_t &amp;&#160;</td>
-          <td class="paramname"><em>reaction_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::type_index &amp;&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::type_index &amp;&#160;</td>
-          <td class="paramname"><em>root_type</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Provides the ProviderGroup data via the InformationSource interface so it can be accessed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">reaction_id</td><td>the provider reaction that is requesting its information. </td></tr>
-    <tr><td class="paramname">type</td><td>the type of provider group that is being requested </td></tr>
-    <tr><td class="paramname">root_type</td><td>the secondary type to use if this is a root task</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the information about the provider group that this task is running on </dd></dl>
-
-<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#afb11f57bbc4cf64aa0f0f0ff96f2020d">extension::behaviour::information::InformationSource</a>.</p>
-
-</div>
-</div>
-<a id="a06c8ef9a24944778876165b8b9a49160"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a06c8ef9a24944778876165b8b9a49160">&#9670;&nbsp;</a></span>_get_run_info()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">RunInfo module::extension::Director::_get_run_info </td>
-          <td>(</td>
-          <td class="paramtype">const uint64_t &amp;&#160;</td>
-          <td class="paramname"><em>reaction_id</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Provides the RunInfo data via the InformationSource interface so it can be accessed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">reaction_id</td><td>the provider reaction that is requesting its information.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the information about why this task has been executed </dd></dl>
-
-<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ae0a241ca949acab1dbf830f8f7f2a75f">extension::behaviour::information::InformationSource</a>.</p>
-
-</div>
-</div>
-<a id="ac75deae1643268535343886608a697ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac75deae1643268535343886608a697ea">&#9670;&nbsp;</a></span>_get_task_data()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::shared_ptr&lt; void &gt; module::extension::Director::_get_task_data </td>
-          <td>(</td>
-          <td class="paramtype">const uint64_t &amp;&#160;</td>
-          <td class="paramname"><em>reaction_id</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Provides the task data via the InformationSource interface so it can be accessed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">reaction_id</td><td>the provider reaction that is requesting its information.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the data that is stored in this reaction, or nullptr if it shouldn't be executing </dd></dl>
-
-<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a58c78909ce4539d686ca4eee8318760b">extension::behaviour::information::InformationSource</a>.</p>
-
-</div>
-</div>
 <a id="ae38a0f87a58faec7521d61eb4faaae7a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae38a0f87a58faec7521d61eb4faaae7a">&#9670;&nbsp;</a></span>add_causing()</h2>
 
@@ -989,42 +786,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the root provider </dd></dl>
-
-</div>
-</div>
-<a id="a4d47a23014bcaeeac4df16728128b9af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d47a23014bcaeeac4df16728128b9af">&#9670;&nbsp;</a></span>hold_run_reason()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">Director::RunReasonLock</a> module::extension::Director::hold_run_reason </td>
-          <td>(</td>
-          <td class="paramtype">const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;&#160;</td>
-          <td class="paramname"><em>reason</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Holds a run reason as the current run reason for the current thread. </p>
-<p>It returns a lock object that acts as an RAII object that will reset the current run reason when it is destroyed.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">reason</td><td>the reason to hold until the lock is destroyed</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>a lock object that will reset <code>current_run_reason</code> to its default when destroyed </dd></dl>
+<p>Can leave the data_setter as nullptr as nobody should ever issue tasks to a root provider</p>
 
 </div>
 </div>
@@ -1099,8 +861,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="ac71aac2110faf4406b7c01b2eeeb79e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac71aac2110faf4406b7c01b2eeeb79e6">&#9670;&nbsp;</a></span>remove_provider()</h2>
+<a id="ab5cb1189cc1ccd5680fdc36dcbf47178"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5cb1189cc1ccd5680fdc36dcbf47178">&#9670;&nbsp;</a></span>remove_provider()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1111,7 +873,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">void module::extension::Director::remove_provider </td>
           <td>(</td>
-          <td class="paramtype">const uint64_t &amp;&#160;</td>
+          <td class="paramtype">const NUClear::id_t &amp;&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1174,8 +936,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a7bd00630d43e26bcc654b131a9f9724a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7bd00630d43e26bcc654b131a9f9724a">&#9670;&nbsp;</a></span>run_task_on_provider()</h2>
+<a id="afaa3e4a164097d1ca11e840072c261f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afaa3e4a164097d1ca11e840072c261f9">&#9670;&nbsp;</a></span>run_task_on_provider()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1198,7 +960,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;&#160;</td>
+          <td class="paramtype">const ::extension::behaviour::RunReason &amp;&#160;</td>
           <td class="paramname"><em>run_reason</em>&#160;</td>
         </tr>
         <tr>
@@ -1238,7 +1000,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">void module::extension::Director::run_task_pack </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="structmodule_1_1extension_1_1Director_1_1TaskPack.html">TaskPack</a> &amp;&#160;</td>
           <td class="paramname"><em>pack</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1526,16 +1288,12 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <li>module/extension/Director/src/director/challenge_priority.cpp</li>
 <li>module/extension/Director/src/director/direct_priority.cpp</li>
 <li>module/extension/Director/src/director/find_ok_solution.cpp</li>
-<li>module/extension/Director/src/director/hold_run_reason.cpp</li>
 <li>module/extension/Director/src/director/reevaluate_group.cpp</li>
 <li>module/extension/Director/src/director/remove_task.cpp</li>
 <li>module/extension/Director/src/director/run_task_on_provider.cpp</li>
 <li>module/extension/Director/src/director/run_task_pack.cpp</li>
 <li>module/extension/Director/src/director/solve.cpp</li>
 <li>module/extension/Director/src/Director.cpp</li>
-<li>module/extension/Director/src/information/get_group_info.cpp</li>
-<li>module/extension/Director/src/information/get_run_info.cpp</li>
-<li>module/extension/Director/src/information/get_task_data.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -1543,7 +1301,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

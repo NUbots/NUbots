@@ -23,25 +23,29 @@ var annotated_dup =
       [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", [
           [ "BehaviourTask", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask" ],
+          [ "BehaviourTasks", "structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html", "structextension_1_1behaviour_1_1commands_1_1BehaviourTasks" ],
           [ "CausingExpression", "structextension_1_1behaviour_1_1commands_1_1CausingExpression.html", "structextension_1_1behaviour_1_1commands_1_1CausingExpression" ],
           [ "NeedsExpression", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression" ],
           [ "ProviderDone", "structextension_1_1behaviour_1_1commands_1_1ProviderDone.html", "structextension_1_1behaviour_1_1commands_1_1ProviderDone" ],
           [ "ProvideReaction", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction" ],
-          [ "RootType", "structextension_1_1behaviour_1_1commands_1_1RootType.html", "structextension_1_1behaviour_1_1commands_1_1RootType" ],
+          [ "RootProvider", "structextension_1_1behaviour_1_1commands_1_1RootProvider.html", "structextension_1_1behaviour_1_1commands_1_1RootProvider" ],
           [ "WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", "structextension_1_1behaviour_1_1commands_1_1WhenExpression" ]
         ] ],
         [ "information", null, [
-          [ "InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", "classextension_1_1behaviour_1_1information_1_1InformationSource" ]
+          [ "GroupInfoStore", "structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html", "structextension_1_1behaviour_1_1information_1_1GroupInfoStore" ],
+          [ "RunReasonStore", "structextension_1_1behaviour_1_1information_1_1RunReasonStore.html", "structextension_1_1behaviour_1_1information_1_1RunReasonStore" ],
+          [ "TaskDataStore", "structextension_1_1behaviour_1_1information_1_1TaskDataStore.html", "structextension_1_1behaviour_1_1information_1_1TaskDataStore" ]
         ] ],
         [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
         [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
+        [ "Continue", "structextension_1_1behaviour_1_1Continue.html", null ],
         [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
         [ "GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", "structextension_1_1behaviour_1_1GroupInfo" ],
-        [ "Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
+        [ "Lock", "classextension_1_1behaviour_1_1Lock.html", "classextension_1_1behaviour_1_1Lock" ],
         [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],
         [ "Provide", "structextension_1_1behaviour_1_1Provide.html", null ],
         [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
-        [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
+        [ "ProviderScope", "structextension_1_1behaviour_1_1ProviderScope.html", "structextension_1_1behaviour_1_1ProviderScope" ],
         [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
         [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
         [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
@@ -345,7 +349,8 @@ var annotated_dup =
       [ "dsl", null, [
         [ "operation", null, [
           [ "DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4" ],
-          [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ]
+          [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ],
+          [ "EmitStats<::extension::behaviour::commands::BehaviourTasks >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html", null ]
         ] ],
         [ "trait", null, [
           [ "is_transient< std::shared_ptr<::extension::Configuration > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Configuration_01_4_01_4.html", null ],

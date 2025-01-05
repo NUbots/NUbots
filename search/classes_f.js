@@ -32,5 +32,6 @@ var searchData=
   ['providerdone_1752',['ProviderDone',['../structextension_1_1behaviour_1_1commands_1_1ProviderDone.html',1,'extension::behaviour::commands']]],
   ['providereaction_1753',['ProvideReaction',['../structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html',1,'extension::behaviour::commands']]],
   ['providergroup_1754',['ProviderGroup',['../structmodule_1_1extension_1_1component_1_1ProviderGroup.html',1,'module::extension::component']]],
-  ['ps3walk_1755',['PS3Walk',['../classmodule_1_1purpose_1_1PS3Walk.html',1,'module::purpose']]]
+  ['providerscope_1755',['ProviderScope',['../structextension_1_1behaviour_1_1ProviderScope.html',1,'extension::behaviour']]],
+  ['ps3walk_1756',['PS3Walk',['../classmodule_1_1purpose_1_1PS3Walk.html',1,'module::purpose']]]
 ];

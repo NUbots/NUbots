@@ -208,9 +208,9 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab9cd7bddf9e2968a91e43e268dae533b"><td class="memItemLeft" align="right" valign="top"><a id="ab9cd7bddf9e2968a91e43e268dae533b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Provider</b> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">ProviderGroup</a> &amp;group_, const uint64_t &amp;id_, const <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html#a8457b72e0f98da5dbfdb20632cbdbd96">Classification</a> &amp;classification_, const std::type_index &amp;type_, std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_)</td></tr>
-<tr class="separator:ab9cd7bddf9e2968a91e43e268dae533b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9c84eea69b272c9beef7051232be778"><td class="memItemLeft" align="right" valign="top"><a id="ad9c84eea69b272c9beef7051232be778"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Provider</b> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">ProviderGroup</a> &amp;group_, const NUClear::id_t &amp;id_, const <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html#a8457b72e0f98da5dbfdb20632cbdbd96">Classification</a> &amp;classification_, const std::type_index &amp;type_, std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_)</td></tr>
+<tr class="separator:ad9c84eea69b272c9beef7051232be778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -226,10 +226,10 @@ std::map&lt; std::type_index, int &gt;&#160;</td><td class="memItemRight" valign
 <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">ProviderGroup</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html#a7d170dc5268b9ff31ef13af2f48f17ac">group</a></td></tr>
 <tr class="memdesc:a7d170dc5268b9ff31ef13af2f48f17ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">The provider group this provider belongs to. <br /></td></tr>
 <tr class="separator:a7d170dc5268b9ff31ef13af2f48f17ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70c13f469ab7b29678f02231b112e2be"><td class="memItemLeft" align="right" valign="top"><a id="a70c13f469ab7b29678f02231b112e2be"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html#a70c13f469ab7b29678f02231b112e2be">id</a></td></tr>
-<tr class="memdesc:a70c13f469ab7b29678f02231b112e2be"><td class="mdescLeft">&#160;</td><td class="mdescRight">The id for this provider. Will either be reaction-&gt;id or a generated one for root providers. <br /></td></tr>
-<tr class="separator:a70c13f469ab7b29678f02231b112e2be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23217d5ff27c785fec982f6e94533892"><td class="memItemLeft" align="right" valign="top"><a id="a23217d5ff27c785fec982f6e94533892"></a>
+NUClear::id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html#a23217d5ff27c785fec982f6e94533892">id</a></td></tr>
+<tr class="memdesc:a23217d5ff27c785fec982f6e94533892"><td class="mdescLeft">&#160;</td><td class="mdescRight">The id for this provider. Will either be reaction-&gt;id or a generated one for root providers. <br /></td></tr>
+<tr class="separator:a23217d5ff27c785fec982f6e94533892"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7150373ac9ac55ad2dd633ab244dbe27"><td class="memItemLeft" align="right" valign="top"><a id="a7150373ac9ac55ad2dd633ab244dbe27"></a>
 std::set&lt; std::type_index &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html#a7150373ac9ac55ad2dd633ab244dbe27">needs</a></td></tr>
 <tr class="memdesc:a7150373ac9ac55ad2dd633ab244dbe27"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of provider types that this provider needs in order to run. <br /></td></tr>
@@ -291,7 +291,7 @@ std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extensio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><b>component</b></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">Provider</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

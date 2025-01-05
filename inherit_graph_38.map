@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structextension_1_1FileWatchRequest.html" title=" " alt="" coords="5,5,216,32"/>
+<area shape="rect" id="node1" href="$structextension_1_1behaviour_1_1Uses.html" title=" " alt="" coords="5,5,164,47"/>
+<area shape="rect" id="node2" href="$structextension_1_1behaviour_1_1Needs.html" title="Create a Needs relationship between this provider and the provider specified by T." alt="" coords="212,5,371,47"/>
 </map>

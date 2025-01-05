@@ -198,7 +198,9 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 : <a class="el" href="classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a9218ffd8b912bb392997a1f1a832c98d">module::support::optimisation::NSGA2Evaluator</a>
 </li>
 <li>get()
-: <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a48c914581b023e907ba40d1764bd645a">extension::behaviour::ProviderBase&lt; T, classification &gt;</a>
+: <a class="el" href="structextension_1_1behaviour_1_1information_1_1RunReasonStore.html#a59ad6299403971c8ac52eecb1d65a0e6">extension::behaviour::information::RunReasonStore</a>
+, <a class="el" href="structextension_1_1behaviour_1_1information_1_1TaskDataStore.html#a40ce1eab0bd22d862f44bf9da2d9998d">extension::behaviour::information::TaskDataStore&lt; T &gt;</a>
+, <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae648cbbff7536af4f363c27e1e4265f6">extension::behaviour::ProviderBase&lt; T, classification &gt;</a>
 , <a class="el" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#ae2e8dde06be1f5ad85c431e985fa7fba">NUClear::dsl::operation::DSLProxy&lt;::extension::Configuration &gt;</a>
 , <a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a9fe9d6118a29fe64f6ce8537182b5526">utility::file::FileDescriptor</a>
 , <a class="el" href="classutility_1_1motion_1_1splines_1_1SplineContainer.html#aef51569b679a47beaf6ab72aa971eed0">utility::motion::splines::SplineContainer&lt; T, U, Scalar &gt;</a>
@@ -224,16 +226,13 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 </li>
 <li>get_foot_pose()
 : <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#acd19026ad0f8655722a4b6fdd59cc31a">utility::skill::KickGenerator&lt; Scalar &gt;</a>
-, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af5dee0f79529dc611ca665ae84dd0c35">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ae4a2cf23845d5ccc8550db4b29028447">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_foot_width_offset()
 : <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_footstep()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#a9fd5e9448b761bfbc304330616a0474a">utility::skill::QuinticWalkEngine</a>
-</li>
-<li>get_group_info()
-: <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">extension::behaviour::information::InformationSource</a>
 </li>
 <li>get_last()
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1Footstep.html#af306ae96c0d5c4d9ac1a1deb5c6f7fc3">utility::motion::splines::Footstep</a>
@@ -278,9 +277,6 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <li>get_root_provider()
 : <a class="el" href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">module::extension::Director</a>
 </li>
-<li>get_run_info()
-: <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">extension::behaviour::information::InformationSource</a>
-</li>
 <li>get_state()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#a25a9f5c2a24da5aad77dc728769a0087">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#aa632e1f6df3cb5545769050af80236ae">utility::math::filter::MahonyFilter&lt; Scalar &gt;</a>
@@ -289,10 +285,7 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 </li>
 <li>get_swing_foot_pose()
 : <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a9b45e1f0f5545062f80c3e83ff3795d9">utility::skill::KickGenerator&lt; Scalar &gt;</a>
-, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a5090024ceeb8df8ad9f23b3f2e53a5f9">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
-</li>
-<li>get_task_data()
-: <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">extension::behaviour::information::InformationSource</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a619111a6b275259e3a66873f72771a6c">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_time()
 : <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a9f2bafa831db292709df608b719e3b01">utility::skill::KickGenerator&lt; Scalar &gt;</a>
@@ -439,7 +432,7 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:41 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

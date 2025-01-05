@@ -51,22 +51,41 @@ var namespaces_dup =
       [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
         [ "information", null, [
-          [ "InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", "classextension_1_1behaviour_1_1information_1_1InformationSource" ]
+          [ "GroupInfoStore", "structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html", "structextension_1_1behaviour_1_1information_1_1GroupInfoStore" ],
+          [ "RunReasonStore", "structextension_1_1behaviour_1_1information_1_1RunReasonStore.html", "structextension_1_1behaviour_1_1information_1_1RunReasonStore" ],
+          [ "TaskDataStore", "structextension_1_1behaviour_1_1information_1_1TaskDataStore.html", "structextension_1_1behaviour_1_1information_1_1TaskDataStore" ]
+        ] ],
+        [ "state", null, [
+          [ "current_task_id", "Behaviour_8hpp.html#a7fcfa3dcd950e04c7506b261355446ca", null ]
         ] ],
         [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
         [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
+        [ "Continue", "structextension_1_1behaviour_1_1Continue.html", null ],
         [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
         [ "GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", "structextension_1_1behaviour_1_1GroupInfo" ],
-        [ "Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
+        [ "Lock", "classextension_1_1behaviour_1_1Lock.html", "classextension_1_1behaviour_1_1Lock" ],
         [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],
         [ "Provide", "structextension_1_1behaviour_1_1Provide.html", null ],
         [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
-        [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
+        [ "ProviderScope", "structextension_1_1behaviour_1_1ProviderScope.html", "structextension_1_1behaviour_1_1ProviderScope" ],
         [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
         [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
         [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
         [ "Uses", "structextension_1_1behaviour_1_1Uses.html", "structextension_1_1behaviour_1_1Uses" ],
-        [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
+        [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ],
+        [ "RunReason", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025", [
+          [ "OTHER_TRIGGER", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025a9a560cff958464317656b23a6c09d043", null ],
+          [ "NEW_TASK", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025a14096580400321c4f54f39e8f9e22922", null ],
+          [ "STARTED", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025a17130e6c806885e23770df1519b18eb7", null ],
+          [ "STOPPED", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025a09d4d696b4e935115b9313e3c412509a", null ],
+          [ "SUBTASK_DONE", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025ae90ae0096112e5af5dc03913a9e90f4f", null ],
+          [ "PUSHED", "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025a8c0e8e05c68fa9e8e968cfece0f8d4a9", null ]
+        ] ],
+        [ "RunState", "Behaviour_8hpp.html#acd6916652e8cd3cd31eaf81a8c679b48", [
+          [ "NO_TASK", "Behaviour_8hpp.html#acd6916652e8cd3cd31eaf81a8c679b48abf7bdc16679f8e9f063a69a21cc2a590", null ],
+          [ "RUNNING", "Behaviour_8hpp.html#acd6916652e8cd3cd31eaf81a8c679b48a43491564ebcfd38568918efbd6e840fd", null ],
+          [ "QUEUED", "Behaviour_8hpp.html#acd6916652e8cd3cd31eaf81a8c679b48a9df29ce7ca629ff1d47bca1149d9faae", null ]
+        ] ]
       ] ],
       [ "Configuration", "structextension_1_1Configuration.html", "structextension_1_1Configuration" ],
       [ "FileWatch", "structextension_1_1FileWatch.html", "structextension_1_1FileWatch" ],
@@ -772,6 +791,7 @@ var namespaces_dup =
         [ "operation", null, [
           [ "DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4" ],
           [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ],
+          [ "EmitStats<::extension::behaviour::commands::BehaviourTasks >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html", null ],
           [ "get_first_command_line_arg", "Configuration_8hpp.html#a6800b2e4fd4666da559233ceeb8f3958", null ]
         ] ],
         [ "trait", null, [

@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['x_1445',['x',['../classmodule_1_1localisation_1_1FieldModel.html#a9d097894a0efb5193f1bbe3afd852580a2f177a86b3429631abbd6dba97ca3d15',1,'module::localisation::FieldModel']]],
-  ['x_5fcut_5foff_5ffrequency_1446',['x_cut_off_frequency',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#a02436cc09adb50603316b75335fb7d96',1,'module::input::SensorFilter::Config']]],
-  ['x_5fmax_1447',['x_max',['../structmodule_1_1purpose_1_1BoundingBox.html#a6a3aab2156304f1e444a44ec633e7ab2',1,'module::purpose::BoundingBox']]],
-  ['x_5fmin_1448',['x_min',['../structmodule_1_1purpose_1_1BoundingBox.html#a2f6efb9eb0501b13328384f57047d1dc',1,'module::purpose::BoundingBox']]],
-  ['xh540_5fw270_1449',['XH540_W270',['../structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html',1,'module::platform::OpenCR']]],
-  ['xtol_5frel_1450',['xtol_rel',['../structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a7a15457bdf13245bd8f816e5a80e836a',1,'module::localisation::FieldLocalisationNLopt::Config']]]
+  ['y_1447',['y',['../classmodule_1_1localisation_1_1FieldModel.html#a9d097894a0efb5193f1bbe3afd852580acff83c1f331f3d025b98f3760210b1e0',1,'module::localisation::FieldModel']]],
+  ['y_5fcut_5foff_5ffrequency_1448',['y_cut_off_frequency',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#ac3d2ee6283e42f282b2b81ff89e3b5c8',1,'module::input::SensorFilter::Config']]],
+  ['y_5fmax_1449',['y_max',['../structmodule_1_1purpose_1_1BoundingBox.html#a4032b1a3fe2d15fa30cb4234050cbbe9',1,'module::purpose::BoundingBox']]],
+  ['y_5fmin_1450',['y_min',['../structmodule_1_1purpose_1_1BoundingBox.html#a3e8cc08e4e0c4da35b3d17a45f392f95',1,'module::purpose::BoundingBox']]],
+  ['yolo_1451',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision::Yolo'],['../classmodule_1_1vision_1_1Yolo.html#a4ce7b2c2301535b1f56f46efe9c6d4a7',1,'module::vision::Yolo::Yolo()']]],
+  ['yolococo_1452',['YoloCoco',['../classmodule_1_1vision_1_1YoloCoco.html',1,'module::vision::YoloCoco'],['../classmodule_1_1vision_1_1YoloCoco.html#aaacd052d864f8fd9cdab78b4a419765d',1,'module::vision::YoloCoco::YoloCoco()']]]
 ];

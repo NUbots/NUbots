@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: extension::behaviour::Uses&lt; Provider &gt; Struct Template Reference</title>
+    <title>NUbots: extension::behaviour::Uses&lt; T &gt; Struct Template Reference</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -171,7 +171,7 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1Uses.h
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structextension_1_1behaviour_1_1Uses-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">extension::behaviour::Uses&lt; Provider &gt; Struct Template Reference</div>  </div>
+<div class="title">extension::behaviour::Uses&lt; T &gt; Struct Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -179,42 +179,35 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1Uses.h
  <a href="structextension_1_1behaviour_1_1Uses.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="Behaviour_8hpp_source.html">Behaviour.hpp</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for extension::behaviour::Uses&lt; Provider &gt;:</div>
-<div class="dyncontent">
-<div class="center"><img src="structextension_1_1behaviour_1_1Uses__inherit__graph.png" border="0" usemap="#aextension_1_1behaviour_1_1Uses_3_01Provider_01_4_inherit__map" alt="Inheritance graph"/></div>
-<map name="aextension_1_1behaviour_1_1Uses_3_01Provider_01_4_inherit__map" id="aextension_1_1behaviour_1_1Uses_3_01Provider_01_4_inherit__map">
-<area shape="rect" title="Adds a Uses object to the callback to allow access to information from the context of this provider." alt="" coords="5,5,164,47"/>
-<area shape="rect" href="structextension_1_1behaviour_1_1Needs.html" title="Create a Needs relationship between this provider and the provider specified by T." alt="" coords="5,95,164,136"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a46e350b1e211ac765bf749de7c36170f"><td class="memTemplParams" colspan="2"><a id="a46e350b1e211ac765bf749de7c36170f"></a>
+<tr class="memitem:a92b8b468b32e2ad3c6c16a52aaace1f5"><td class="memTemplParams" colspan="2"><a id="a92b8b468b32e2ad3c6c16a52aaace1f5"></a>
 template&lt;typename DSL &gt; </td></tr>
-<tr class="memitem:a46e350b1e211ac765bf749de7c36170f"><td class="memTemplItemLeft" align="right" valign="top">static std::shared_ptr&lt; <a class="el" href="structextension_1_1behaviour_1_1Uses.html">Uses</a>&lt; Provider &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>get</b> (NUClear::threading::ReactionTask &amp;t)</td></tr>
-<tr class="separator:a46e350b1e211ac765bf749de7c36170f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92b8b468b32e2ad3c6c16a52aaace1f5"><td class="memTemplItemLeft" align="right" valign="top">static std::optional&lt; <a class="el" href="structextension_1_1behaviour_1_1Uses.html">Uses</a>&lt; T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>get</b> (NUClear::threading::ReactionTask &amp;t)</td></tr>
+<tr class="separator:a92b8b468b32e2ad3c6c16a52aaace1f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a45032e2e6558111dd9394e63b0731f0e"><td class="memItemLeft" align="right" valign="top"><a id="a45032e2e6558111dd9394e63b0731f0e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>done</b></td></tr>
-<tr class="separator:a45032e2e6558111dd9394e63b0731f0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63c29c76b4a657d6a3385116e4499112"><td class="memItemLeft" align="right" valign="top"><a id="a63c29c76b4a657d6a3385116e4499112"></a>
-<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4">GroupInfo::RunState</a>&#160;</td><td class="memItemRight" valign="bottom"><b>run_state</b></td></tr>
-<tr class="separator:a63c29c76b4a657d6a3385116e4499112"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf8a4311472c0e4a3fbf6d0849621307"><td class="memItemLeft" align="right" valign="top"><a id="aaf8a4311472c0e4a3fbf6d0849621307"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Uses.html#aaf8a4311472c0e4a3fbf6d0849621307">done</a></td></tr>
+<tr class="memdesc:aaf8a4311472c0e4a3fbf6d0849621307"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the task is done or not, regardless of if this provider group is running it. <br /></td></tr>
+<tr class="separator:aaf8a4311472c0e4a3fbf6d0849621307"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a665a7abe83011c6ef29f4dcbb30a1707"><td class="memItemLeft" align="right" valign="top"><a id="a665a7abe83011c6ef29f4dcbb30a1707"></a>
+RunState&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707">run_state</a></td></tr>
+<tr class="memdesc:a665a7abe83011c6ef29f4dcbb30a1707"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current run state of the group. <br /></td></tr>
+<tr class="separator:a665a7abe83011c6ef29f4dcbb30a1707"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename Provider&gt;<br />
-struct extension::behaviour::Uses&lt; Provider &gt;</h3>
+<div class="textblock"><h3>template&lt;typename T&gt;<br />
+struct extension::behaviour::Uses&lt; T &gt;</h3>
 
 <p>Adds a <a class="el" href="structextension_1_1behaviour_1_1Uses.html" title="Adds a Uses object to the callback to allow access to information from the context of this provider.">Uses</a> object to the callback to allow access to information from the context of this provider. </p>
 <p>The uses object provides information about what would happen if you were to emit a specific task from this provider as well as what has happened in previous calls.</p>
 <p>It has two main uses It allows you to see what would happen if you emitted a task (run, block proxy, etc) It allows you to see what has happened in previous calls, e.g. are we re-running because our previous task emitted that it was done</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Provider</td><td>the type of the provider this uses is for </td></tr>
+    <tr><td class="paramname">T</td><td>the type of the provider this uses is for </td></tr>
   </table>
   </dd>
 </dl>
@@ -227,7 +220,7 @@ struct extension::behaviour::Uses&lt; Provider &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1Uses.html">Uses</a></li>
-    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 09:04:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

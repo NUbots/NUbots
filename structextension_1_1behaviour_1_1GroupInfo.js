@@ -1,10 +1,8 @@
 var structextension_1_1behaviour_1_1GroupInfo =
 [
-    [ "RunState", "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4", [
-      [ "NO_TASK", "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2", null ],
-      [ "RUNNING", "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4", null ],
-      [ "QUEUED", "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe", null ]
-    ] ],
+    [ "TaskInfo", "structextension_1_1behaviour_1_1GroupInfo_1_1TaskInfo.html", "structextension_1_1behaviour_1_1GroupInfo_1_1TaskInfo" ],
+    [ "active_provider_id", "structextension_1_1behaviour_1_1GroupInfo.html#aed5801acfff2cb849ef7707df0dc4297", null ],
+    [ "active_task", "structextension_1_1behaviour_1_1GroupInfo.html#aca212a97cc13d4fa53b27e11c8209dae", null ],
     [ "done", "structextension_1_1behaviour_1_1GroupInfo.html#a2a976c93e0b219a0c6eb9a3a98b5f2d8", null ],
-    [ "run_state", "structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370", null ]
+    [ "watchers", "structextension_1_1behaviour_1_1GroupInfo.html#ad9092635c8b485a62b86ac3aca04a956", null ]
 ];

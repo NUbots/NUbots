@@ -1,5 +1,4 @@
 <map id="module::extension::Director" name="module::extension::Director">
-<area shape="rect" id="node1" title=" " alt="" coords="13,96,164,137"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,13,140,39"/>
-<area shape="rect" id="node3" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="165,5,399,47"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,80,156,121"/>
+<area shape="rect" id="node2" title=" " alt="" coords="13,5,148,32"/>
 </map>
