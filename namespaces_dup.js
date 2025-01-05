@@ -93,7 +93,10 @@ var namespaces_dup =
         [ "Director", "classmodule_1_1extension_1_1Director.html", "classmodule_1_1extension_1_1Director" ],
         [ "FileWatcher", "classmodule_1_1extension_1_1FileWatcher.html", "classmodule_1_1extension_1_1FileWatcher" ],
         [ "StateUpdate", "structmodule_1_1extension_1_1StateUpdate.html", "structmodule_1_1extension_1_1StateUpdate" ],
-        [ "Unbind", "Director_8cpp.html#a72fecba6dbc4e65918a912766a908cac", null ]
+        [ "Unbind", "Director_8cpp.html#a72fecba6dbc4e65918a912766a908cac", null ],
+        [ "list_directories", "FileWatcher_8cpp.html#af5efef03ebdaa88f546fdbf12430aba9", null ],
+        [ "list_files", "FileWatcher_8cpp.html#abc6681062c35cce47c1670ba56e7cf40", null ],
+        [ "translate", "translate_8cpp.html#a7dbd955435d8334340cf13ef8cff9c9c", null ]
       ] ],
       [ "input", null, [
         [ "arv", null, [
@@ -668,6 +671,23 @@ var namespaces_dup =
           [ "FileLogHandler", "classmodule_1_1support_1_1logging_1_1FileLogHandler.html", "classmodule_1_1support_1_1logging_1_1FileLogHandler" ],
           [ "MessageLogHandler", "classmodule_1_1support_1_1logging_1_1MessageLogHandler.html", "classmodule_1_1support_1_1logging_1_1MessageLogHandler" ],
           [ "Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", "structmodule_1_1support_1_1logging_1_1Packet" ],
+          [ "MessageEvent", "MessageLogHandler_8cpp.html#abf9b7794323c4564e571e82f5331f9b7", null ],
+          [ "MessageGroup", "MessageLogHandler_8cpp.html#a478eae01b17644e0852c66e66e786cd3", null ],
+          [ "MessageID", "MessageLogHandler_8cpp.html#ad20bf4e39234ba71ad3795fce373194e", null ],
+          [ "MessageIdentifiers", "MessageLogHandler_8cpp.html#aa8ac43add04adf484f9d0be5b38d3dc1", null ],
+          [ "MessageLog", "MessageLogHandler_8cpp.html#ad3f0f07a32669f774b3fad0fa6fbe001", null ],
+          [ "MessageLogLevel", "MessageLogHandler_8cpp.html#a12c051b8464238ed78e31946008a088e", null ],
+          [ "MessagePool", "MessageLogHandler_8cpp.html#a944365212dec06d3ab8cf97e55feb002", null ],
+          [ "MessageStatistics", "MessageLogHandler_8cpp.html#aa16e4f29c630e98b6a7524763e57b849", null ],
+          [ "NUClearEvent", "MessageLogHandler_8cpp.html#ac2320e73268bb597138d58d20c2ce674", null ],
+          [ "NUClearGroup", "MessageLogHandler_8cpp.html#a97f47504bb9f95e931fedae73573af87", null ],
+          [ "NUClearID", "MessageLogHandler_8cpp.html#a3ae02dcdeab97f87dcea08696fae24ef", null ],
+          [ "NUClearIdentifiers", "MessageLogHandler_8cpp.html#a24003d2945f08c7ed513fcd83d735183", null ],
+          [ "NUClearLog", "MessageLogHandler_8cpp.html#a20fbcf94471fda99fa4a8873c371206d", null ],
+          [ "NUClearLogLevel", "MessageLogHandler_8cpp.html#a3c8e536cac420ee27b7cb2a0dbc872f7", null ],
+          [ "NUClearPool", "MessageLogHandler_8cpp.html#adcdcb240f3bb0a35a9abd4c2b569c49a", null ],
+          [ "NUClearStatistics", "MessageLogHandler_8cpp.html#acad29ac79770f34e44639e201f8b0a5b", null ],
+          [ "exception_what", "ConsoleLogHandler_8cpp.html#adc068ccd2b105cfeebd168b7ff64e243", null ],
           [ "formatted_time", "DataLogging_8cpp.html#a31101356c34dad13c8d4985675f0dcb9", null ],
           [ "read_packet", "read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e", null ]
         ] ],
@@ -1063,8 +1083,10 @@ var namespaces_dup =
       [ "support", null, [
         [ "evil", null, [
           [ "StackFrame", "structutility_1_1support_1_1evil_1_1StackFrame.html", "structutility_1_1support_1_1evil_1_1StackFrame" ],
+          [ "last_exception_name", "pure__evil_8cpp.html#a3a7b2382880bff01ddeb05ba9ff00582", null ],
+          [ "last_exception_stack_trace", "pure__evil_8cpp.html#ad74dfced5c973c11f038b155c86faaef", null ],
           [ "exception_name", "pure__evil_8cpp.html#a3fd8278f34dc4be3729275c2082fa569", null ],
-          [ "stack", "pure__evil_8cpp.html#ae19fa2fe95aea29bb47634a53b5b5341", null ]
+          [ "stack", "pure__evil_8cpp.html#aa7e293aab1aacd997c8c444c6cd483cf", null ]
         ] ],
         [ "enumerate", "structutility_1_1support_1_1enumerate.html", "structutility_1_1support_1_1enumerate" ],
         [ "Expression", "structutility_1_1support_1_1Expression.html", "structutility_1_1support_1_1Expression" ],

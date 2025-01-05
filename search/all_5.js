@@ -30,11 +30,12 @@ var searchData=
   ['evaluation_5frunning_359',['evaluation_running',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#acd78616a7b086bc7e5d9361b58c18dc3',1,'module::support::optimisation::NSGA2Evaluator']]],
   ['evaluatortask_360',['EvaluatorTask',['../classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html',1,'module::support::optimisation']]],
   ['event_361',['Event',['../structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1Event.html',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['executekick_362',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
-  ['exist_363',['exist',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b',1,'utility::motion::splines::SplineContainer']]],
-  ['expandbinomial_364',['expandBinomial',['../classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c',1,'utility::motion::splines::Polynom']]],
-  ['expected_5fgoal_5fpost_5fdistance_365',['expected_goal_post_distance',['../classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e540cd6107e3a69f0b6672c92359f7e',1,'module::localisation::FieldLocalisationNLopt']]],
-  ['exportdata_366',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]],
-  ['expression_367',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]],
-  ['eye_5fled_368',['eye_led',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]]
+  ['events_362',['events',['../structmodule_1_1extension_1_1FileWatcher_1_1Watch.html#a9d3b04f32b4b0a2e50f197811d8959be',1,'module::extension::FileWatcher::Watch']]],
+  ['executekick_363',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
+  ['exist_364',['exist',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b',1,'utility::motion::splines::SplineContainer']]],
+  ['expandbinomial_365',['expandBinomial',['../classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c',1,'utility::motion::splines::Polynom']]],
+  ['expected_5fgoal_5fpost_5fdistance_366',['expected_goal_post_distance',['../classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e540cd6107e3a69f0b6672c92359f7e',1,'module::localisation::FieldLocalisationNLopt']]],
+  ['exportdata_367',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]],
+  ['expression_368',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]],
+  ['eye_5fled_369',['eye_led',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]]
 ];

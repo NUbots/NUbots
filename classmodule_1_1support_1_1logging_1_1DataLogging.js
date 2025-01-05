@@ -11,5 +11,6 @@ var classmodule_1_1support_1_1logging_1_1DataLogging =
     [ "index_file_path", "classmodule_1_1support_1_1logging_1_1DataLogging.html#a14372a0c6ddb4bb659810a4afe53d608", null ],
     [ "output", "classmodule_1_1support_1_1logging_1_1DataLogging.html#a66078175eddc48c8e3b4dac7db56145e", null ],
     [ "output_file_path", "classmodule_1_1support_1_1logging_1_1DataLogging.html#a1e28b802510291ebad72daedfc7ed2a1", null ],
+    [ "passphrase", "classmodule_1_1support_1_1logging_1_1DataLogging.html#a7a21c07c53486da61b5e96dc620af672", null ],
     [ "split_size", "classmodule_1_1support_1_1logging_1_1DataLogging.html#a1f957f20a75d0601c350b95e7641aef4", null ]
 ];

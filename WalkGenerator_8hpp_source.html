@@ -421,7 +421,7 @@ $(document).ready(function(){initNavTree('WalkGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;                    <span class="comment">// We do not update the time here because we want to remain in the stopped state</span></div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;                    <a class="code" href="classutility_1_1skill_1_1WalkGenerator.html#ad8ad2da1eeeae5b00f87eb1b3b06a641">reset</a>();</div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                <span class="keywordflow">default</span>: NUClear::log&lt;NUClear::WARN&gt;(<span class="stringliteral">&quot;Unknown state&quot;</span>, <a class="code" href="classutility_1_1skill_1_1WalkGenerator.html#a74bc403fbcbd75c02e1d671db00f33ae">engine_state</a>.value);</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                <span class="keywordflow">default</span>: NUClear::log&lt;NUClear::LogLevel::WARN&gt;(<span class="stringliteral">&quot;Unknown state&quot;</span>, <a class="code" href="classutility_1_1skill_1_1WalkGenerator.html#a74bc403fbcbd75c02e1d671db00f33ae">engine_state</a>.value);</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;            }</div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160; </div>
 <div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160; </div>
@@ -662,13 +662,13 @@ $(document).ready(function(){initNavTree('WalkGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00490"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1WalkGenerator.html#abc8142387c3a276fe9df4b11a3585c95">  490</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1skill_1_1WalkGenerator.html#abc8142387c3a276fe9df4b11a3585c95">update_time</a>(<span class="keyword">const</span> Scalar&amp; dt) {</div>
 <div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;            <span class="comment">// Check for negative time step</span></div>
 <div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;            <span class="keywordflow">if</span> (dt &lt;= 0.0f) {</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;                NUClear::log&lt;NUClear::WARN&gt;(<span class="stringliteral">&quot;dt &lt;= 0.0f&quot;</span>);</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;                NUClear::log&lt;NUClear::LogLevel::WARN&gt;(<span class="stringliteral">&quot;dt &lt;= 0.0f&quot;</span>);</div>
 <div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;                <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;            }</div>
 <div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160; </div>
 <div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;            <span class="comment">// Check for too long dt</span></div>
 <div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;            <span class="keywordflow">if</span> (dt &gt; <a class="code" href="classutility_1_1skill_1_1WalkGenerator.html#a8e84d6ae317dd7cb6fde160ea3bf0875">p</a>.<a class="code" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#ada94c46b45b0ae64894afc6457bab96f">step_period</a>) {</div>
-<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;                NUClear::log&lt;NUClear::WARN&gt;(<span class="stringliteral">&quot;dt &gt; params.p.step_period&quot;</span>);</div>
+<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;                NUClear::log&lt;NUClear::LogLevel::WARN&gt;(<span class="stringliteral">&quot;dt &gt; params.p.step_period&quot;</span>);</div>
 <div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;                <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;            }</div>
 <div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160; </div>
@@ -741,7 +741,7 @@ $(document).ready(function(){initNavTree('WalkGenerator_8hpp_source.html',''); i
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_e74f07e607724dbb2b9c42172be2da51.html">skill</a></li><li class="navelem"><b>WalkGenerator.hpp</b></li>
-    <li class="footer">Generated on Sun Jan 5 2025 04:35:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

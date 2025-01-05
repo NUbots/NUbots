@@ -197,104 +197,109 @@ $(document).ready(function(){initNavTree('FileWatch_8hpp_source.html',''); initR
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#ifndef EXTENSION_FILEWATCH_HPP</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#define EXTENSION_FILEWATCH_HPP</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>extension {</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="structextension_1_1FileWatch.html">   35</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structextension_1_1FileWatch.html">FileWatch</a> {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        <span class="keyword">using</span> FileWatchStore = NUClear::dsl::store::ThreadStore&lt;FileWatch&gt;;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#ifndef EXTENSION_FILEWATCH_HPP</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#define EXTENSION_FILEWATCH_HPP</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;filesystem&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;span&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">namespace </span>extension {</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keyword">enum</span> Event {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            NO_OP   = 0,  <span class="comment">// No event</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;            RENAMED = 1,  <span class="comment">// File created or renamed</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            CHANGED = 2   <span class="comment">// File modified</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        };</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        std::string path;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordtype">int</span> events{};</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">inline</span> <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            <span class="comment">// Empty path is invalid</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            <span class="keywordflow">return</span> !path.empty();</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        }</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    };</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="structextension_1_1FileWatchRequest.html">   53</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structextension_1_1FileWatchRequest.html">FileWatchRequest</a> {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        std::string path;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordtype">int</span> events{};</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        std::shared_ptr&lt;NUClear::threading::Reaction&gt; reaction;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    };</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">    /// Emitted once the FileWatcher has started up and is watching files</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="structextension_1_1FileWatcherReady.html">   60</a></span>&#160;<span class="comment"></span>    <span class="keyword">struct </span><a class="code" href="structextension_1_1FileWatcherReady.html">FileWatcherReady</a> {};</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}  <span class="comment">// namespace extension</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">// NUClear configuration extension</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword">namespace </span>NUClear::dsl {</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keyword">namespace </span>operation {</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html">   68</a></span>&#160;        <span class="keyword">struct </span>DSLProxy&lt;::<a class="code" href="structextension_1_1FileWatch.html">extension::FileWatch</a>&gt; {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> DSL&gt;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;            <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> bind(<span class="keyword">const</span> std::shared_ptr&lt;threading::Reaction&gt;&amp; reaction,</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                                    <span class="keyword">const</span> std::string&amp; path,</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                                    <span class="keywordtype">int</span> events) {</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                <span class="comment">// Add our unbinder</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                reaction-&gt;unbinders.emplace_back([](<span class="keyword">const</span> threading::Reaction&amp; r) {</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                    r.reactor.emit&lt;word::emit::Direct&gt;(</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                        std::make_unique&lt;operation::Unbind&lt;::extension::FileWatch&gt;&gt;(r.id));</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                });</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                <span class="comment">// Make a request to watch our file</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                <span class="keyword">auto</span> fw      = std::make_unique&lt;::extension::FileWatchRequest&gt;();</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                fw-&gt;path     = path;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                fw-&gt;events   = events;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                fw-&gt;reaction = reaction;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                <span class="comment">// Send our file watcher to the extension</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                reaction-&gt;reactor.powerplant.emit&lt;word::emit::Direct&gt;(fw);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;            }</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="structextension_1_1FileWatch.html">   38</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structextension_1_1FileWatch.html">FileWatch</a> {</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keyword">using</span> FileWatchStore = NUClear::dsl::store::ThreadStore&lt;FileWatch&gt;;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keyword">enum</span> Event {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;            NO_OP   = 0,  <span class="comment">// No event</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;            RENAMED = 1,  <span class="comment">// File created or renamed</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            CHANGED = 2,  <span class="comment">// File modified</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            DELETED = 3   <span class="comment">// File was deleted</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        };</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        std::filesystem::path path;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keywordtype">int</span> events{};</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keyword">inline</span> <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            <span class="comment">// Empty path is invalid</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keywordflow">return</span> !path.empty();</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        }</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    };</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="structextension_1_1FileWatchRequest.html">   57</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structextension_1_1FileWatchRequest.html">FileWatchRequest</a> {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        std::filesystem::path path;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordtype">int</span> events{};</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        std::shared_ptr&lt;NUClear::threading::Reaction&gt; reaction;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    };</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">    /// Emitted once the FileWatcher has started up and is watching files</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="structextension_1_1FileWatcherReady.html">   64</a></span>&#160;<span class="comment"></span>    <span class="keyword">struct </span><a class="code" href="structextension_1_1FileWatcherReady.html">FileWatcherReady</a> {};</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;}  <span class="comment">// namespace extension</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment">// NUClear configuration extension</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="keyword">namespace </span>NUClear::dsl {</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keyword">namespace </span>operation {</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html">   72</a></span>&#160;        <span class="keyword">struct </span>DSLProxy&lt;::<a class="code" href="structextension_1_1FileWatch.html">extension::FileWatch</a>&gt; {</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> DSL&gt;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;            <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> bind(<span class="keyword">const</span> std::shared_ptr&lt;threading::Reaction&gt;&amp; reaction,</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                                    <span class="keyword">const</span> std::filesystem::path&amp; path,</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                                    <span class="keywordtype">int</span> events) {</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="comment">// Add our unbinder</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                reaction-&gt;unbinders.emplace_back([](<span class="keyword">const</span> threading::Reaction&amp; r) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                    r.reactor.emit&lt;word::emit::Inline&gt;(</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                        std::make_unique&lt;operation::Unbind&lt;::extension::FileWatch&gt;&gt;(r.id));</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                });</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="comment">// Make a request to watch our file</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                <span class="keyword">auto</span> fw      = std::make_unique&lt;::extension::FileWatchRequest&gt;();</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                fw-&gt;path     = path;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                fw-&gt;events   = events;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                fw-&gt;reaction = reaction;</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> DSL&gt;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            <span class="keyword">static</span> inline ::extension::FileWatch get(threading::Reaction&amp; <span class="comment">/*reaction*/</span>) {</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                <span class="comment">// Get our File Watch store value</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                <span class="keyword">auto</span>* ptr = ::extension::FileWatch::FileWatchStore::value;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                <span class="comment">// If there was something in the store</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                <span class="keywordflow">if</span> (ptr != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                    <span class="keywordflow">return</span> *ptr;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                }</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                <span class="comment">// Return an invalid file watch element</span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                return ::extension::FileWatch{<span class="stringliteral">&quot;&quot;</span>, 0};</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            }</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        };</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    }  <span class="comment">// namespace operation</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="comment">// FileWatch is transient</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="keyword">namespace </span>trait {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00111"></a><span class="lineno"><a class="line" href="structNUClear_1_1dsl_1_1trait_1_1is__transient_3_1_1extension_1_1FileWatch_01_4.html">  111</a></span>&#160;        <span class="keyword">struct </span>is_transient&lt;::<a class="code" href="structextension_1_1FileWatch.html">extension::FileWatch</a>&gt; : <span class="keyword">public</span> std::true_type {};</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    }  <span class="comment">// namespace trait</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;}  <span class="comment">// namespace NUClear::dsl</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// EXTENSION_FILEWATCH_HPP</span></div>
-<div class="ttc" id="astructextension_1_1FileWatchRequest_html"><div class="ttname"><a href="structextension_1_1FileWatchRequest.html">extension::FileWatchRequest</a></div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:53</div></div>
-<div class="ttc" id="astructextension_1_1FileWatch_html"><div class="ttname"><a href="structextension_1_1FileWatch.html">extension::FileWatch</a></div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:35</div></div>
-<div class="ttc" id="astructextension_1_1FileWatcherReady_html"><div class="ttname"><a href="structextension_1_1FileWatcherReady.html">extension::FileWatcherReady</a></div><div class="ttdoc">Emitted once the FileWatcher has started up and is watching files.</div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:60</div></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                <span class="comment">// Send our file watcher to the extension</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                reaction-&gt;reactor.powerplant.emit&lt;word::emit::Inline&gt;(fw);</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> DSL&gt;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keyword">static</span> inline ::extension::FileWatch get(threading::ReactionTask&amp; <span class="comment">/*unused*/</span>) {</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                <span class="comment">// Get our File Watch store value</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                <span class="keyword">auto</span>* ptr = ::extension::FileWatch::FileWatchStore::value;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                <span class="comment">// If there was something in the store</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                <span class="keywordflow">if</span> (ptr) {</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                    <span class="keywordflow">return</span> *ptr;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                }</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                <span class="comment">// Return an invalid file watch element</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                <span class="keywordflow">return</span> {<span class="stringliteral">&quot;&quot;</span>, 0};</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;            }</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        };</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    }  <span class="comment">// namespace operation</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="comment">// FileWatch is transient</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keyword">namespace </span>trait {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00115"></a><span class="lineno"><a class="line" href="structNUClear_1_1dsl_1_1trait_1_1is__transient_3_1_1extension_1_1FileWatch_01_4.html">  115</a></span>&#160;        <span class="keyword">struct </span>is_transient&lt;::<a class="code" href="structextension_1_1FileWatch.html">extension::FileWatch</a>&gt; : <span class="keyword">public</span> std::true_type {};</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }  <span class="comment">// namespace trait</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160; </div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;}  <span class="comment">// namespace NUClear::dsl</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// EXTENSION_FILEWATCH_HPP</span></div>
+<div class="ttc" id="astructextension_1_1FileWatchRequest_html"><div class="ttname"><a href="structextension_1_1FileWatchRequest.html">extension::FileWatchRequest</a></div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:57</div></div>
+<div class="ttc" id="astructextension_1_1FileWatch_html"><div class="ttname"><a href="structextension_1_1FileWatch.html">extension::FileWatch</a></div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:38</div></div>
+<div class="ttc" id="astructextension_1_1FileWatcherReady_html"><div class="ttname"><a href="structextension_1_1FileWatcherReady.html">extension::FileWatcherReady</a></div><div class="ttdoc">Emitted once the FileWatcher has started up and is watching files.</div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:64</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_c23e0f9c1b229783d92a813e01cca46a.html">extension</a></li><li class="navelem"><b>FileWatch.hpp</b></li>
-    <li class="footer">Generated on Sun Jan 5 2025 04:35:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

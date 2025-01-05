@@ -36,6 +36,7 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
     [ "battery_state", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8672cf92d6e9ee88186ac42699bf3a46", null ],
     [ "byte_wait", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2ebc4364306b682710d79eb336f031ef", null ],
     [ "cfg", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2d37e6b4a076a7803e680c222fa6aecb", null ],
+    [ "concurrency", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a4855e4a5222bc49f9b9018009d957d42", null ],
     [ "model_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad8ea25319d77fd40ac8bba57a77f8cc8", null ],
     [ "nugus", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6540393b52b14f13229912638180c217", null ],
     [ "opencr", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a7e620f883e4f08dd9a3c1a6a1c0f84eb", null ],
@@ -44,6 +45,5 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
     [ "packet_wait", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58f19b0d15954f1f93f5b3ccd116cb3f", null ],
     [ "packet_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a28d80e07d1cac02aa2b2d2fb4dbfd260", null ],
     [ "servo_states", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c", null ],
-    [ "thread_count", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a39670cb63b50fe0a6cfda73c6126a3bc", null ],
     [ "UPDATE_FREQUENCY", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ade90fc00d6374310b21f057d75bd8753", null ]
 ];

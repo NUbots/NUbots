@@ -217,12 +217,12 @@ $(document).ready(function(){initNavTree('yaml__log__level_8hpp_source.html','')
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            Node node;</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            <span class="keywordflow">switch</span> (rhs) {</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                <span class="keywordflow">case</span> NUClear::TRACE: node = <span class="stringliteral">&quot;TRACE&quot;</span>; <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                <span class="keywordflow">case</span> NUClear::DEBUG: node = <span class="stringliteral">&quot;DEBUG&quot;</span>; <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                <span class="keywordflow">case</span> NUClear::INFO: node = <span class="stringliteral">&quot;INFO&quot;</span>; <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keywordflow">case</span> NUClear::WARN: node = <span class="stringliteral">&quot;WARN&quot;</span>; <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                <span class="keywordflow">case</span> NUClear::ERROR: node = <span class="stringliteral">&quot;ERROR&quot;</span>; <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="keywordflow">case</span> NUClear::FATAL: node = <span class="stringliteral">&quot;FATAL&quot;</span>; <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                <span class="keywordflow">case</span> NUClear::LogLevel::TRACE: node = <span class="stringliteral">&quot;TRACE&quot;</span>; <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                <span class="keywordflow">case</span> NUClear::LogLevel::DEBUG: node = <span class="stringliteral">&quot;DEBUG&quot;</span>; <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                <span class="keywordflow">case</span> NUClear::LogLevel::INFO: node = <span class="stringliteral">&quot;INFO&quot;</span>; <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keywordflow">case</span> NUClear::LogLevel::WARN: node = <span class="stringliteral">&quot;WARN&quot;</span>; <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                <span class="keywordflow">case</span> NUClear::LogLevel::ERROR: node = <span class="stringliteral">&quot;ERROR&quot;</span>; <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="keywordflow">case</span> NUClear::LogLevel::FATAL: node = <span class="stringliteral">&quot;FATAL&quot;</span>; <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                <span class="keywordflow">default</span>: node = <span class="stringliteral">&quot;DEBUG&quot;</span>; <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            }</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
@@ -234,12 +234,12 @@ $(document).ready(function(){initNavTree('yaml__log__level_8hpp_source.html','')
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            <span class="keywordflow">try</span> {</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                <span class="comment">// clang-format off</span></div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                <span class="keyword">auto</span> lvl = node.as&lt;std::string&gt;();</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                <span class="keywordflow">if</span>      (lvl == <span class="stringliteral">&quot;TRACE&quot;</span>)       { rhs = NUClear::TRACE; }</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;INFO&quot;</span>)        { rhs = NUClear::INFO;  }</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;WARN&quot;</span>)        { rhs = NUClear::WARN;  }</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;ERROR&quot;</span>)       { rhs = NUClear::ERROR; }</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;FATAL&quot;</span>)       { rhs = NUClear::FATAL; }</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                <span class="keywordflow">else</span> <span class="comment">/* or (lvl == &quot;DEBUG&quot;) */</span> { rhs = NUClear::DEBUG; }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                <span class="keywordflow">if</span>      (lvl == <span class="stringliteral">&quot;TRACE&quot;</span>)       { rhs = NUClear::LogLevel::TRACE; }</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;INFO&quot;</span>)        { rhs = NUClear::LogLevel::INFO;  }</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;WARN&quot;</span>)        { rhs = NUClear::LogLevel::WARN;  }</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;ERROR&quot;</span>)       { rhs = NUClear::LogLevel::ERROR; }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lvl == <span class="stringliteral">&quot;FATAL&quot;</span>)       { rhs = NUClear::LogLevel::FATAL; }</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                <span class="keywordflow">else</span> <span class="comment">/* or (lvl == &quot;DEBUG&quot;) */</span> { rhs = NUClear::LogLevel::DEBUG; }</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                <span class="comment">// clang-format on</span></div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;            }</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::invalid_argument&amp; ex) {</div>
@@ -260,7 +260,7 @@ $(document).ready(function(){initNavTree('yaml__log__level_8hpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_7a14655160e996e834c58137480ad3d2.html">support</a></li><li class="navelem"><b>yaml_log_level.hpp</b></li>
-    <li class="footer">Generated on Sun Jan 5 2025 04:35:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

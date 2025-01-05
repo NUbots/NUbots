@@ -259,7 +259,7 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                <span class="comment">// Log the reason we are reconnecting if it&#39;s not an empty string.</span></div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                <span class="comment">// empty string means we are just starting up</span></div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                <span class="keywordflow">if</span> (!rc.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#afe090fa86a65b4dc441dca2ba7e795a7">reason</a>.empty()) {</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                    log&lt;NUClear::WARN&gt;(rc.reason);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                    log&lt;WARN&gt;(rc.reason);</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                }</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                if (<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a719ae6fac95a1e5adc36b8eb13733bce">connection_valid</a>()) {</div>
@@ -293,13 +293,13 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                    }</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                    bytes_written += written;</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;                }</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                <span class="keywordflow">if</span> (log_level &lt;= NUClear::TRACE) {</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                <span class="keywordflow">if</span> (log_level &lt;= TRACE) {</div>
 <div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                    std::stringstream debug_string{};</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <span class="keywordtype">byte</span> : t.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>) {</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                        debug_string &lt;&lt; std::isprint(<span class="keywordtype">byte</span>) ? std::string(1, <span class="keywordtype">char</span>(<span class="keywordtype">byte</span>))</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;                                                           : fmt::format(<span class="stringliteral">&quot;\\{:#04x} &quot;</span>, <span class="keywordtype">byte</span>);</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                    }</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                    log&lt;NUClear::TRACE&gt;(<span class="stringliteral">&quot;Wrote:&quot;</span>, debug_string.str());</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                    log&lt;TRACE&gt;(<span class="stringliteral">&quot;Wrote:&quot;</span>, debug_string.str());</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                }</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;            });</div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
@@ -362,7 +362,7 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;                            emit(std::make_unique&lt;Reconnect&gt;(<span class="stringliteral">&quot;The device hung up&quot;</span>));</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                        }</div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;                        if ((event.events &amp; ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;                            log&lt;NUClear::ERROR&gt;(</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;                            log&lt;ERROR&gt;(</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;                                utility::strutil::dedent(fmt::format(<span class="stringliteral">&quot;Unknown IO event on {}valid connection: {}&quot;</span>,</div>
 <div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;                                                                     connection_valid() ? <span class="stringliteral">&quot;&quot;</span> : <span class="stringliteral">&quot;in&quot;</span>,</div>
 <div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;                                                                     event.events)));</div>
@@ -372,12 +372,12 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;                    <span class="comment">// Allow post-connection settings to be applied</span></div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;                    emit(std::make_unique&lt;PostConnect&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0">connection_attempt</a>));</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                    log&lt;NUClear::INFO&gt;(fmt::format(<span class="stringliteral">&quot;Successfully connected to the device at {}&quot;</span>, <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>()));</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                    log&lt;INFO&gt;(fmt::format(<span class="stringliteral">&quot;Successfully connected to the device at {}&quot;</span>, <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>()));</div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                }</div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::runtime_error&amp; ex) {</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                    log&lt;NUClear::WARN&gt;(fmt::format(<span class="stringliteral">&quot;Failed to connect to the device at {}\nError: {}&quot;</span>,</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                                                   <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>(),</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                                                   ex.what()));</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                    log&lt;WARN&gt;(fmt::format(<span class="stringliteral">&quot;Failed to connect to the device at {}\nError: {}&quot;</span>,</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                                          <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>(),</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                                          ex.what()));</div>
 <div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;                }</div>
 <div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;            });</div>
 <div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160; </div>
@@ -639,7 +639,7 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;            uint8_t <span class="keywordtype">byte</span> = 0;</div>
 <div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;            <span class="keywordflow">while</span> (::read(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>, &amp;<span class="keywordtype">byte</span>, 1) == 1) {</div>
 <div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160; </div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;                <span class="keywordflow">if</span> (log_level &lt;= NUClear::TRACE) {</div>
+<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;                <span class="keywordflow">if</span> (log_level &lt;= TRACE) {</div>
 <div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;                    debug_string &lt;&lt; std::isprint(<span class="keywordtype">byte</span>) ? std::string(1, <span class="keywordtype">char</span>(<span class="keywordtype">byte</span>)) : fmt::format(<span class="stringliteral">&quot;\\{:#04x} &quot;</span>, <span class="keywordtype">byte</span>);</div>
 <div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;                }</div>
 <div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160; </div>
@@ -653,11 +653,11 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;                    }</div>
 <div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;                }</div>
 <div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;                <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; ex) {</div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;                    log&lt;NUClear::WARN&gt;(ex.what());</div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;                    log&lt;WARN&gt;(ex.what());</div>
 <div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;                }</div>
 <div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;            }</div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;            <span class="keywordflow">if</span> (log_level &lt;= NUClear::TRACE) {</div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;                log&lt;NUClear::TRACE&gt;(<span class="stringliteral">&quot;Read:&quot;</span>, debug_string.str());</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;            <span class="keywordflow">if</span> (log_level &lt;= TRACE) {</div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;                log&lt;TRACE&gt;(<span class="stringliteral">&quot;Read:&quot;</span>, debug_string.str());</div>
 <div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;            }</div>
 <div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;        }</div>
 <div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;<span class="comment"></span> </div>
@@ -723,7 +723,7 @@ $(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); i
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_9684913f59199b6b691f8fa6be506247.html">reactor</a></li><li class="navelem"><b>StreamReactor.hpp</b></li>
-    <li class="footer">Generated on Sun Jan 5 2025 04:35:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jan 5 2025 08:59:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
