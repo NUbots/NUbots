@@ -41,10 +41,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, Needs<SubTask>>().then([this] {
                 // Task has been executed!
@@ -58,12 +57,12 @@ namespace {
              * TEST STEPS *
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task");
+                events.push_back("emitting task 1");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
-            on<Startup>().then([this] {  //
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<1>>());
+            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+                events.push_back("emitting task 2");
+                emit<Task>(std::make_unique<SimpleTask>());
             });
         }
     };
@@ -79,10 +78,10 @@ TEST_CASE("Test that a parent task wins when challenging its child task", "[dire
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "emitting task",
+        "emitting task 1",
         "simple task executed",
         "subtask executed",
-        "emitting task",
+        "emitting task 2",
         "simple task executed",
         "subtask executed",
     };

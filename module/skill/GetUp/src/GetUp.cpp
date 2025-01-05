@@ -61,9 +61,9 @@ namespace module::skill {
         });
 
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then(
-            [this](const RunInfo& info, const Sensors& sensors) {
-                switch (info.run_reason) {
-                    case RunInfo::NEW_TASK: {
+            [this](const RunReason& run_reason, const Sensors& sensors) {
+                switch (run_reason) {
+                    case RunReason::NEW_TASK: {
                         // If we're running getup we fell over
                         emit(std::make_unique<Stability>(Stability::FALLEN));
 
@@ -116,14 +116,14 @@ namespace module::skill {
                         }
 
                     } break;
-                    case RunInfo::SUBTASK_DONE: {
+                    case RunReason::SUBTASK_DONE: {
                         // When the subtask is done, we are done
                         log<INFO>("Finished getting up");
                         emit(std::make_unique<Stability>(Stability::STANDING));
                         emit<Task>(std::make_unique<Done>());
                     } break;
-                    // These shouldn't happen but if they do just idle
-                    default: emit<Task>(std::make_unique<Idle>()); break;
+                    // These shouldn't happen but if they do just continue doing the same thing
+                    default: emit<Task>(std::make_unique<Continue>()); break;
                 }
             });
     }

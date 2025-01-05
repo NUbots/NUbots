@@ -51,10 +51,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // Store the tasks we are given to run
             on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) {  //
@@ -95,11 +94,6 @@ namespace {
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 events.push_back("removing primary task");
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
-            });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
             });
         }
     };

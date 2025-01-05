@@ -60,8 +60,8 @@ namespace module::skill {
             utility::openai::start(cfg.openai_api_key);
         });
 
-        on<Provide<GPTChatRequest>>().then([this](const GPTChatRequest& gpt_request, const RunInfo& info) {
-            if (info.run_reason == RunInfo::NEW_TASK) {
+        on<Provide<GPTChatRequest>>().then([this](const GPTChatRequest& gpt_request, const RunReason& run_reason) {
+            if (run_reason == RunReason::NEW_TASK) {
                 // Send request to OpenAI API
                 nlohmann::json request = {
                     {"model", "gpt-3.5-turbo"},
@@ -81,8 +81,8 @@ namespace module::skill {
             }
         });
 
-        on<Provide<GPTAudioRequest>>().then([this](const GPTAudioRequest& gpt_request, const RunInfo& info) {
-            if (info.run_reason == RunInfo::NEW_TASK) {
+        on<Provide<GPTAudioRequest>>().then([this](const GPTAudioRequest& gpt_request, const RunReason& run_reason) {
+            if (run_reason == RunReason::NEW_TASK) {
                 // Record audio for requested time
                 log<INFO>("Recording audio...");
                 record_audio(std::string("audio.raw"), gpt_request.record_time, cfg.device_name);

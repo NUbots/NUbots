@@ -52,8 +52,8 @@ namespace module::actuation {
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
             on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
-                [this](const Servo& servo, const RunInfo& info) {
-                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                [this](const Servo& servo, const RunReason& run_reason) {
+                    if (run_reason == RunReason::NEW_TASK) {
                         if (log_level <= DEBUG) {
                             emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
                                        servo.command.position,
@@ -81,9 +81,9 @@ namespace module::actuation {
         template <typename Group, typename... Elements>
         void add_group_provider() {
             on<Provide<Group>, Needs<Elements>..., Priority::HIGH>().then(
-                [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
+                [this](const Group& group, const RunReason& run_reason, const Uses<Elements>... elements) {
                     // Check if any subtask is Done
-                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    if (run_reason == RunReason::SUBTASK_DONE) {
                         // If every servo task is done then emit Done (ignore servos that weren't included in the Task
                         // message)
                         if (((!group.servos.contains(utility::actuation::ServoMap<Elements>::value) || elements.done)
@@ -91,8 +91,8 @@ namespace module::actuation {
                             emit<Task>(std::make_unique<Done>());
                             return;
                         }
-                        // Emit Idle if all the servos are not Done yet
-                        emit<Task>(std::make_unique<Idle>());
+                        // Emit Continue if all the servos are not Done yet
+                        emit<Task>(std::make_unique<Continue>());
                         return;
                     }
 
@@ -133,19 +133,19 @@ namespace module::actuation {
             emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(0));
 
             on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Priority::HIGH>().then(
-                [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
+                [this](const Sequence& sequence, const RunReason& run_reason, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {
                         emit<Task>(std::make_unique<Done>());
                     }
                     // If this is a new task, run the first pack of servos and increment the counter
-                    else if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                    else if (run_reason == RunReason::NEW_TASK) {
                         emit<Task>(std::make_unique<Group>(sequence.frames[0]));
                         emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(1));
                     }
                     // If the subtask is done, we are done if it is the last servo frames, otherwise use the count to
                     // determine the current frame to emit
-                    else if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    else if (run_reason == RunReason::SUBTASK_DONE) {
                         if (count.count < sequence.frames.size()) {
                             emit<Task>(std::make_unique<Group>(sequence.frames[count.count]));
                             emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(count.count + 1));
@@ -156,7 +156,7 @@ namespace module::actuation {
                     }
                     // Any other run reason shouldn't happen
                     else {
-                        emit<Task>(std::make_unique<Idle>());
+                        emit<Task>(std::make_unique<Continue>());
                     }
                 });
         }

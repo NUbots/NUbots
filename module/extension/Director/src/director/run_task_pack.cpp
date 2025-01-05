@@ -32,7 +32,7 @@ namespace module::extension {
     using component::DirectorTask;
     using component::Provider;
     using component::ProviderGroup;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::RunReason;
 
     Director::RunResult Director::run_tasks(ProviderGroup& our_group,
                                             const TaskList& tasks,
@@ -97,7 +97,7 @@ namespace module::extension {
                         if (current_task != nullptr
                             && providers.at(current_task->requester_id)->type
                                    == providers.at(new_task->requester_id)->type) {
-                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
+                            run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
                         }
                         else {
                             if (current_task != nullptr) {
@@ -125,7 +125,7 @@ namespace module::extension {
                             }
 
                             // Run this specific task using this specific provider
-                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
+                            run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
                         }
                     }
                 }
@@ -160,8 +160,9 @@ namespace module::extension {
 
     void Director::run_task_pack(const TaskPack& pack) {
 
-        const auto& provider = pack.first;
-        auto& group          = provider->group;
+        const auto& provider        = pack.provider;
+        const auto& requested_tasks = pack.tasks;
+        auto& group                 = provider->group;
 
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
@@ -169,10 +170,9 @@ namespace module::extension {
         }
 
         // See if a Idle command was emitted
-        for (const auto& t : pack.second) {
-            if (t->type == typeid(::extension::behaviour::Idle)) {
-
-                if (pack.second.size() > 1) {
+        for (const auto& t : requested_tasks) {
+            if (t->type == typeid(::extension::behaviour::Continue)) {
+                if (requested_tasks.size() > 1) {
                     log<WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
                 }
 
@@ -182,12 +182,12 @@ namespace module::extension {
         }
 
         // See if a done command was emitted
-        for (const auto& t : pack.second) {
+        for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
                 auto parent_provider = providers.at(group.active_task->requester_id);
 
                 // Check if we are already done, and if so we don't want to pester the parent again
-                if (provider->group.done) {
+                if (group.done) {
                     // Running Done when already in a Done state shouldn't happen for a root task since it should
                     // already have been removed
                     if (parent_provider->classification == Provider::Classification::ROOT) {
@@ -197,7 +197,8 @@ namespace module::extension {
                 }
 
                 // This provider is now in the done state
-                provider->group.done = true;
+                group.done = true;
+                group.update_data();
 
                 auto& parent_group = parent_provider->group;
 
@@ -212,10 +213,10 @@ namespace module::extension {
                     // TODO(thouliston) check somehow if this provider is equipped to handle done
                     run_task_on_provider(parent_group.active_task,
                                          parent_group.active_provider,
-                                         RunInfo::RunReason::SUBTASK_DONE);
+                                         RunReason::SUBTASK_DONE);
                 }
 
-                if (pack.second.size() > 1) {
+                if (requested_tasks.size() > 1) {
                     log<WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 
@@ -225,12 +226,13 @@ namespace module::extension {
         }
 
         // If we get here, the provider is not done and we are running new tasks
-        provider->group.done = false;
+        group.done = false;
+        group.update_data();
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(pack.second.size());
-        for (const auto& t : pack.second) {
+        tasks.reserve(requested_tasks.size());
+        for (const auto& t : requested_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }

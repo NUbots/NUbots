@@ -40,14 +40,13 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 1> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<Level<1, 1>>, Uses<Level<2, 1>>, Uses<Level<2, 2>>>().then(
-                [this](const RunInfo& info, const Uses<Level<2, 1>>& a, const Uses<Level<2, 2>>& b) {
-                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                [this](const RunReason& run_reason, const Uses<Level<2, 1>>& a, const Uses<Level<2, 2>>& b) {
+                    if (run_reason == RunReason::SUBTASK_DONE) {
                         events.push_back("testing Level<1,1> children: a:" + std::to_string(a.done)
                                          + ", b:" + std::to_string(b.done));
                         if (a.done && b.done) {
@@ -55,7 +54,7 @@ namespace {
                             emit<Task>(std::make_unique<Done>());
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                     else {
@@ -68,8 +67,8 @@ namespace {
 
             // Provides for the level 2 tasks which emit two level 3 tasks each
             on<Provide<Level<2, 1>>, Needs<Level<3, 1>>, Needs<Level<3, 2>>>().then(
-                [this](const RunInfo& info, const Uses<Level<3, 1>>& a, const Uses<Level<3, 2>>& b) {
-                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                [this](const RunReason& run_reason, const Uses<Level<3, 1>>& a, const Uses<Level<3, 2>>& b) {
+                    if (run_reason == RunReason::SUBTASK_DONE) {
                         events.push_back("testing Level<2,1> children: a:" + std::to_string(a.done)
                                          + ", b:" + std::to_string(b.done));
                         if (a.done && b.done) {
@@ -77,7 +76,7 @@ namespace {
                             emit<Task>(std::make_unique<Done>());
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                     else {
@@ -89,8 +88,8 @@ namespace {
                 });
 
             on<Provide<Level<2, 2>>, Needs<Level<3, 3>>, Needs<Level<3, 4>>>().then(
-                [this](const RunInfo& info, const Uses<Level<3, 3>>& a, const Uses<Level<3, 4>>& b) {
-                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                [this](const RunReason& run_reason, const Uses<Level<3, 3>>& a, const Uses<Level<3, 4>>& b) {
+                    if (run_reason == RunReason::SUBTASK_DONE) {
                         events.push_back("testing Level<2,2> children: a:" + std::to_string(a.done)
                                          + ", b:" + std::to_string(b.done));
                         if (a.done && b.done) {
@@ -98,7 +97,7 @@ namespace {
                             emit<Task>(std::make_unique<Done>());
                         }
                         else {
-                            emit<Task>(std::make_unique<Idle>());
+                            emit<Task>(std::make_unique<Continue>());
                         }
                     }
                     else {
@@ -133,9 +132,6 @@ namespace {
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 events.push_back("emitting initial task");
                 emit<Task>(std::make_unique<Level<1, 1>>());
-            });
-            on<Startup>().then([this] {  //
-                emit(std::make_unique<Step<1>>());
             });
         }
 

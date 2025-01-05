@@ -41,58 +41,57 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
-        std::string decode_reason(const RunInfo::RunReason& reason) {
+        std::string decode_reason(const RunReason& reason) {
             switch (reason) {
-                case RunInfo::RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
-                case RunInfo::RunReason::NEW_TASK: return "NEW_TASK"; break;
-                case RunInfo::RunReason::STARTED: return "STARTED"; break;
-                case RunInfo::RunReason::STOPPED: return "STOPPED"; break;
-                case RunInfo::RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
-                case RunInfo::RunReason::PUSHED: return "PUSHED"; break;
+                case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
+                case RunReason::NEW_TASK: return "NEW_TASK"; break;
+                case RunReason::STARTED: return "STARTED"; break;
+                case RunReason::STOPPED: return "STOPPED"; break;
+                case RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
+                case RunReason::PUSHED: return "PUSHED"; break;
                 default: return "ERROR"; break;
             };
         }
 
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask>, Trigger<TriggerTest>>().then([this](const RunInfo& info) {
-                events.push_back("simple task ran because: " + decode_reason(info.run_reason));
+            on<Provide<SimpleTask>, Trigger<TriggerTest>>().then([this](const RunReason& run_reason) {
+                events.push_back("simple task ran because: " + decode_reason(run_reason));
 
                 // If we get a new task then emit a subtask
                 // When we re-run because of SUBTASK_DONE we won't re-emit this subtask making it stop
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                if (run_reason == RunReason::NEW_TASK) {
                     events.push_back("emitting subtask");
                     emit<Task>(std::make_unique<Subtask>());
                 }
 
-                if (info.run_reason == RunInfo::RunReason::OTHER_TRIGGER) {
+                if (run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("emitting simple task done");
                     emit<Task>(std::make_unique<Done>());
                 }
             });
 
-            on<Start<SimpleTask>>().then([this](const RunInfo& info) {  //
-                events.push_back("simple task started because: " + decode_reason(info.run_reason));
+            on<Start<SimpleTask>>().then([this](const RunReason& run_reason) {  //
+                events.push_back("simple task started because: " + decode_reason(run_reason));
             });
-            on<Stop<SimpleTask>>().then([this](const RunInfo& info) {  //
-                events.push_back("simple task stopped because: " + decode_reason(info.run_reason));
+            on<Stop<SimpleTask>>().then([this](const RunReason& run_reason) {  //
+                events.push_back("simple task stopped because: " + decode_reason(run_reason));
             });
 
             // This subtask will immediately return done
-            on<Provide<Subtask>, Trigger<TriggerTest>>().then([this](const RunInfo& info) {
-                events.push_back("subtask ran because: " + decode_reason(info.run_reason));
+            on<Provide<Subtask>, Trigger<TriggerTest>>().then([this](const RunReason& run_reason) {
+                events.push_back("subtask ran because: " + decode_reason(run_reason));
                 events.push_back("emitting subtask done");
                 emit<Task>(std::make_unique<Done>());
             });
 
-            on<Start<Subtask>>().then([this](const RunInfo& info) {  //
-                events.push_back("subtask started because: " + decode_reason(info.run_reason));
+            on<Start<Subtask>>().then([this](const RunReason& run_reason) {  //
+                events.push_back("subtask started because: " + decode_reason(run_reason));
             });
-            on<Stop<Subtask>>().then([this](const RunInfo& info) {  //
-                events.push_back("subtask stopped because: " + decode_reason(info.run_reason));
+            on<Stop<Subtask>>().then([this](const RunReason& run_reason) {  //
+                events.push_back("subtask stopped because: " + decode_reason(run_reason));
             });
 
             /**************
@@ -110,19 +109,13 @@ namespace {
                 events.push_back("emitting trigger test");
                 emit(std::make_unique<TriggerTest>());
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-            });
         }
     };
 
 }  // namespace
 
-TEST_CASE("Tests that the reason for a provider being executed can be provided in its RunInfo",
-          "[director][triggered][runinfo][runreason]") {
+TEST_CASE("Tests that the reason for a provider being executed can be provided in its RunReason",
+          "[director][triggered][RunReason][runreason]") {
 
     // Run the module
     NUClear::Configuration config;

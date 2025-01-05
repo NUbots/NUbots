@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::LEVEL_4>>().then([this] {  //
                 events.push_back("task executed");
@@ -99,15 +98,11 @@ namespace {
                 events.push_back("emitting task");
                 emit<Task>(std::make_unique<SimpleTask>(), 50);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-            });
         }
     };
 }  // namespace
 
-TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail]") {
+TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail][.]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
