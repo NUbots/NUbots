@@ -288,18 +288,10 @@ namespace module::extension {
                 auto& p = providers.at(task->requester_id);
                 auto id = p->reaction->identifiers->name;
                 if (p->classification == Provider::Classification::START) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a start provider.");
+                    log<WARN>("The task", task->name, "cannot be executed as Provider", id, "is a start provider.");
                 }
                 else if (p->classification == Provider::Classification::STOP) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a stop provider.");
+                    log<WARN>("The task", task->name, "cannot be executed as Provider", id, "is a stop provider.");
                 }
                 // Everything is fine
                 else {

@@ -216,8 +216,6 @@ namespace module::extension {
                 }
 
                 if (pack.second.size() > 1) {
-                    log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
-                if (requested_tasks.size() > 1) {
                     log<WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 

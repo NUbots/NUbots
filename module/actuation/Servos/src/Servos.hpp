@@ -52,8 +52,8 @@ namespace module::actuation {
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
             on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
-                [this](const Servo& servo, const RunReason& run_reason) {
-                    if (run_reason == RunReason::NEW_TASK) {
+                [this](const Servo& servo, const RunInfo& info) {
+                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
                         if (log_level <= DEBUG) {
                             emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
                                        servo.command.position,
