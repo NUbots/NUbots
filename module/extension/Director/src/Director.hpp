@@ -61,6 +61,7 @@ namespace module::extension {
             std::shared_ptr<component::Provider> provider;
         };
 
+    private:
         /**
          * Adds a Provider for a type
          *

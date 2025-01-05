@@ -28,6 +28,7 @@
 #ifndef EXTENSION_BEHAVIOUR_HPP
 #define EXTENSION_BEHAVIOUR_HPP
 
+#include <iostream>
 #include <memory>
 #include <nuclear>
 #include <optional>
@@ -39,6 +40,10 @@
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
+
+    namespace state {
+        static thread_local NUClear::id_t current_task_id = 0;
+    }
 
     /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
@@ -113,6 +118,31 @@ namespace extension::behaviour {
         template <typename DSL>
         static std::unique_ptr<ProviderScope> scope(NUClear::threading::ReactionTask& t) {
             return std::make_unique<ProviderScope>(typeid(T), t);
+        }
+
+        /**
+         * Precondition that sets the current task id into a thread local variable.
+         *
+         * Within the Get function it can be checked against to see if the reactor is a provider.
+         * This is specifically because of the ordering of execution when it comes to NUClear.
+         *
+         * --- Thread 1 ---
+         *  emit<Task>();
+         *  precondition();
+         *  get();
+         * --- Thread 2 ---
+         *  scope() {
+         *      run();
+         *  }
+         *
+         * @tparam DSL the DSL from NUClear for the on statement
+         *
+         * @param t the reaction task that is being scoped
+         */
+        template <typename DSL>
+        static bool precondition(NUClear::threading::ReactionTask& t) {
+            state::current_task_id = t.id;
+            return true;
         }
     };
 
@@ -254,25 +284,43 @@ namespace extension::behaviour {
         template <typename DSL>
         static std::optional<Uses<T>> get(NUClear::threading::ReactionTask& t) {
 
-
             // Default values if we can't find the group info
             Uses<T> data;
             data.run_state = RunState::NO_TASK;
             data.done      = false;
 
+            auto group_info    = information::GroupInfoStore<T>::get();
+            bool root_provider = t.id != state::current_task_id;
+            data.done          = group_info->done;
+
+            // If we can't find the group info then cannot fill the data
+            if (group_info == nullptr) {
+                return data;
+            }
+
+            // If it is a root provider, then the requester_id will not match the parent id
+            // Then if the active task is run from root, then it is running
+            // If a watcher is root, then it is queued
+            if (root_provider) {
+                data.run_state = group_info->active_task.root
+                                     ? RunState::RUNNING
+                                     : (std::any_of(group_info->watchers.begin(),
+                                                    group_info->watchers.end(),
+                                                    [&t](const auto& watcher) { return watcher.root; })
+                                            ? RunState::QUEUED
+                                            : RunState::NO_TASK);
+
+                return data;
+            }
+
+            // Not root, check against ids
             auto is_target_task = [&t](const auto& task) {
                 return task.requester_id == t.parent->id && task.type == typeid(T);
             };
-
-            auto group_info = information::GroupInfoStore<T>::get();
-            if (group_info != nullptr) {
-                data.run_state = group_info->active_task.requester_id == t.parent->id ? RunState::RUNNING
-                                 : std::any_of(group_info->watchers.begin(), group_info->watchers.end(), is_target_task)
-                                     ? RunState::QUEUED
-                                     : RunState::NO_TASK;
-
-                data.done = group_info->done;
-            }
+            data.run_state = group_info->active_task.requester_id == t.parent->id ? RunState::RUNNING
+                             : std::any_of(group_info->watchers.begin(), group_info->watchers.end(), is_target_task)
+                                 ? RunState::QUEUED
+                                 : RunState::NO_TASK;
 
             return data;
         }

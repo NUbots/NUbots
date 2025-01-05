@@ -112,7 +112,7 @@ namespace module::purpose {
 
                 // Decide which player we are
                 player_id = global_config.player_id;
-                log<NUClear::DEBUG>("Configure Player ID ", int(player_id));
+                log<DEBUG>("Configure Player ID ", int(player_id));
 
                 if (cfg.position == Position::DYNAMIC) {
                     robots[player_id - 1].dynamic = true;
@@ -175,7 +175,7 @@ namespace module::purpose {
                     robots[player_id - 1].position = Position("DEFENDER");
                     break;
                 case Position::DYNAMIC: determine_purpose(); break;
-                default: log<NUClear::ERROR>("Invalid robot position");
+                default: log<ERROR>("Invalid robot position");
             }
         });
 
@@ -228,7 +228,7 @@ namespace module::purpose {
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            log<NUClear::INFO>("Idle mode enabled");
+            log<INFO>("Idle mode enabled");
         });
 
         // Middle button resumes the soccer scenario
@@ -247,7 +247,7 @@ namespace module::purpose {
             if (!idle) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 emit<Task>(std::make_unique<FallRecovery>(), 2);
-                log<NUClear::INFO>("Idle mode disabled");
+                log<INFO>("Idle mode disabled");
             }
         });
 
@@ -272,14 +272,14 @@ namespace module::purpose {
 
     void Soccer::determine_purpose() {
         // Print all robots if in debug
-        if (log_level <= NUClear::DEBUG) {
-            log<NUClear::DEBUG>("\nRobot positions:");
+        if (log_level <= DEBUG) {
+            log<DEBUG>("\nRobot positions:");
             for (size_t i = 0; i < robots.size(); i++) {
-                log<NUClear::DEBUG>(fmt::format("Robot {}\tPosition: {}\tActive: {}\tDynamic: {}",
-                                                i + 1,
-                                                std::string(robots[i].position),
-                                                robots[i].active ? "Yes" : "No",
-                                                robots[i].dynamic ? "Yes" : "No"));
+                log<DEBUG>(fmt::format("Robot {}\tPosition: {}\tActive: {}\tDynamic: {}",
+                                       i + 1,
+                                       std::string(robots[i].position),
+                                       robots[i].active ? "Yes" : "No",
+                                       robots[i].dynamic ? "Yes" : "No"));
             }
         }
 
@@ -352,7 +352,7 @@ namespace module::purpose {
                                                      cfg.goalie_bounding_box.x_max,
                                                      cfg.striker_bounding_box.y_min,
                                                      cfg.striker_bounding_box.y_max));
-            log<NUClear::DEBUG>("Full field player");
+            log<DEBUG>("Full field player");
             return;
         }
 
@@ -364,7 +364,7 @@ namespace module::purpose {
                                                      cfg.striker_bounding_box.x_max,
                                                      cfg.striker_bounding_box.y_min,
                                                      cfg.striker_bounding_box.y_max));
-            log<NUClear::DEBUG>("Default striker");
+            log<DEBUG>("Default striker");
             return;
         }
 
@@ -375,7 +375,7 @@ namespace module::purpose {
                                                      cfg.defender_bounding_box.x_max,
                                                      cfg.striker_bounding_box.y_min,
                                                      cfg.striker_bounding_box.y_max));
-            log<NUClear::DEBUG>("Extended striker");
+            log<DEBUG>("Extended striker");
             return;
         }
 
@@ -386,7 +386,7 @@ namespace module::purpose {
                                                      cfg.defender_bounding_box.x_max,
                                                      cfg.defender_bounding_box.y_min,
                                                      cfg.defender_bounding_box.y_max));
-            log<NUClear::DEBUG>("Default defender");
+            log<DEBUG>("Default defender");
             return;
         }
 
@@ -397,7 +397,7 @@ namespace module::purpose {
                                                      cfg.goalie_bounding_box.x_max,
                                                      cfg.defender_bounding_box.y_min,
                                                      cfg.defender_bounding_box.y_max));
-            log<NUClear::DEBUG>("Extended defender");
+            log<DEBUG>("Extended defender");
             return;
         }
     }

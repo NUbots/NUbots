@@ -51,6 +51,7 @@ namespace module::extension::component {
          */
         DirectorTask(const NUClear::id_t& requester_id,
                      const NUClear::id_t& requester_task_id,
+                     const bool root,
                      const ::extension::behaviour::commands::BehaviourTask& task)
             : type(task.type)
             , requester_id(requester_id)
@@ -59,7 +60,8 @@ namespace module::extension::component {
             , name(task.name)
             , priority(task.priority)
             , optional(task.optional)
-            , dying(false) {}
+            , dying(false)
+            , root(root) {}
 
         /// The Provider type this task is for
         const std::type_index type;
@@ -77,6 +79,8 @@ namespace module::extension::component {
         bool optional;
         /// Whether this task is currently about to be removed
         bool dying;
+        /// If this task is a root task
+        bool root;
     };
 }  // namespace module::extension::component
 

@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { action, computed } from "mobx";
 import { observer } from "mobx-react";
 import { Object3D } from "three";
-import { Event } from "three";
 
 import { SwitchesMenu, SwitchesMenuOption } from "../switches_menu/view";
 import { Canvas, ObjectFit, Three } from "../three/three";
@@ -12,7 +11,7 @@ import { CameraController } from "./controller";
 import { IconZoomIn, IconZoomOut, IconZoomReset } from "./icons";
 import { CameraViewModel } from "./view_model";
 
-export type Renderable = false | Object3D<Event> | undefined;
+export type Renderable = false | Object3D | undefined;
 
 export interface CameraViewProps {
   switchMenuOptions?: SwitchesMenuOption[];

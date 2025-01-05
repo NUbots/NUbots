@@ -45,7 +45,7 @@ namespace nsga2 {
         gene.resize(config.bin_vars);
 
         if (int(config.bin_bits.size()) != config.bin_vars) {
-            NUClear::log<NUClear::WARN>(
+            NUClear::log<NUClear::LogLevel::WARN>(
                 fmt::format("bin_bits size ({}) != bin_vars ({})", config.bin_bits.size(), config.bin_vars));
         }
 

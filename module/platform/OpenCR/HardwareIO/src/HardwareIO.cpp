@@ -114,13 +114,13 @@ namespace module::platform::OpenCR {
 
             // Check we can process this packet
             if (packet_queue.find(packet_id) == packet_queue.end()) {
-                log<NUClear::WARN>(fmt::format("received packet for unexpected ID {}.", packet.id));
+                log<WARN>(fmt::format("received packet for unexpected ID {}.", packet.id));
                 return;
             }
 
             // Check we're expecting the packet
             if (packet_queue[packet_id].empty()) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
+                log<WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
                 return;
             }
 
@@ -196,14 +196,14 @@ namespace module::platform::OpenCR {
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
-                        log<NUClear::TRACE>("Initial data received, kickstarting system");
+                        log<TRACE>("Initial data received, kickstarting system");
 
                         // Stop the model watchdog since we have it now
                         // Start the packet watchdog since the main loop is now starting
                         model_watchdog.disable();
                         model_watchdog.unbind();
 
-                        log<NUClear::INFO>("Packet watchdog enabled");
+                        log<INFO>("Packet watchdog enabled");
 
                         packet_watchdog = create_packet_watchdog();
 
@@ -227,7 +227,7 @@ namespace module::platform::OpenCR {
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
-                        log<NUClear::TRACE>("OpenCR data received, requesting servo data");
+                        log<TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }
 
@@ -241,13 +241,13 @@ namespace module::platform::OpenCR {
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
-                        log<NUClear::TRACE>("All servos received, requesting OpenCR data");
+                        log<TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
                     }
 
                     break;
 
-                default: log<NUClear::WARN>("Unknown packet data received"); break;
+                default: log<WARN>("Unknown packet data received"); break;
             }
         });
 
@@ -317,7 +317,7 @@ namespace module::platform::OpenCR {
         });
 
         on<Trigger<Buzzer>, Pool<HardwareIO>>().then([this](const Buzzer& buzzer_msg) {
-            log<NUClear::DEBUG>("Received Buzzer message");
+            log<DEBUG>("Received Buzzer message");
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = buzzer_msg.frequency;
             opencr_state.dirty  = true;

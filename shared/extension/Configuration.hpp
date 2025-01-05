@@ -185,9 +185,9 @@ namespace extension {
                         case YAML::NodeType::Null: [[fallthrough]];
                         case YAML::NodeType::Undefined: [[fallthrough]];
                         default: {
-                            NUClear::log<NUClear::WARN>("Unsetting key",
-                                                        "'" + key + "'",
-                                                        "in YAML file. Is this what you intended?");
+                            NUClear::log<NUClear::LogLevel::WARN>("Unsetting key",
+                                                                  "'" + key + "'",
+                                                                  "in YAML file. Is this what you intended?");
                             ret[key] = item.second;
                             break;
                         }
@@ -331,8 +331,8 @@ namespace NUClear::dsl {
                 // Check if there is a default config. If there isn't, try to make one
                 const fs::path default_config = fs::path("config") / file_name;
                 if (!fs::exists(default_config)) {
-                    NUClear::log<NUClear::WARN>("Configuration file '" + default_config.string()
-                                                + "' does not exist. Creating it.");
+                    NUClear::log<NUClear::LogLevel::WARN>("Configuration file '" + default_config.string()
+                                                          + "' does not exist. Creating it.");
 
                     // Check for a directory.
                     if (fs::is_directory(default_config)) {

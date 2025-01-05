@@ -57,20 +57,20 @@ namespace module::network {
             forwarder_reaction.enable(forward_datapoints);
 
             if (forward_datapoints) {
-                log<NUClear::INFO>("DataPoint forwarding setup for PlotJuggler. Sending to UDP server at",
-                                   send_address,
-                                   "port",
-                                   send_port);
+                log<INFO>("DataPoint forwarding setup for PlotJuggler. Sending to UDP server at",
+                          send_address,
+                          "port",
+                          send_port);
             }
             else {
-                log<NUClear::WARN>("DataPoint forwarding via UDP disabled in PlotJuggler.yaml config file");
+                log<WARN>("DataPoint forwarding via UDP disabled in PlotJuggler.yaml config file");
             }
 
             bool send_debug_waves = cfg["send_debug_waves"].as<bool>();
             debug_waves_reaction.enable(send_debug_waves);
 
             if (send_debug_waves) {
-                log<NUClear::INFO>("Debug waves enabled");
+                log<INFO>("Debug waves enabled");
             }
         });
 

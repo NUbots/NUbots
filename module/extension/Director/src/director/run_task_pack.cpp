@@ -173,7 +173,7 @@ namespace module::extension {
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Continue)) {
                 if (requested_tasks.size() > 1) {
-                    log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
+                    log<WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
                 }
 
                 // We don't do anything else on idle
@@ -217,7 +217,7 @@ namespace module::extension {
                     // Running Done when already in a Done state shouldn't happen for a root task since it should
                     // already have been removed
                     if (parent_provider->classification == Provider::Classification::ROOT) {
-                        log<NUClear::ERROR>("Done task was emitted twice, this should never happen for a root task");
+                        log<ERROR>("Done task was emitted twice, this should never happen for a root task");
                     }
                     return;
                 }
@@ -243,7 +243,7 @@ namespace module::extension {
                 }
 
                 if (requested_tasks.size() > 1) {
-                    log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
+                    log<WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 
                 // We don't do anything else on done

@@ -5160,7 +5160,7 @@
   "boundingBox": { "yMin": -376, "xMin": -1017, "yMax": 1467, "xMax": 1625 },
   "resolution": 1000,
   "original_font_information": {
-    "format": 0,
+    "format": "0",
     "copyright": "Copyright 2011 Google Inc. All Rights Reserved.",
     "fontFamily": "Roboto Medium",
     "fontSubfamily": "Regular",

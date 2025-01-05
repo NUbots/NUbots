@@ -51,13 +51,20 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Priority::HIGH>().then([this](const Servo& servo, const RunReason& run_reason) {
-                if (run_reason == RunReason::NEW_TASK) {
-                    if (log_level <= NUClear::DEBUG) {
-                        emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
-                                   servo.command.position,
-                                   servo.command.state.gain,
-                                   servo.command.state.torque));
+            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
+                [this](const Servo& servo, const RunReason& run_reason) {
+                    if (run_reason == RunReason::NEW_TASK) {
+                        if (log_level <= DEBUG) {
+                            emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
+                                       servo.command.position,
+                                       servo.command.state.gain,
+                                       servo.command.state.torque));
+                        }
+                        emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                           ID,
+                                                           servo.command.position,
+                                                           servo.command.state.gain,
+                                                           servo.command.state.torque));
                     }
                     emit(std::make_unique<ServoTarget>(servo.command.time,
                                                        ID,
@@ -107,8 +114,8 @@ namespace module::actuation {
                                     group.servos.at(utility::actuation::ServoMap<Elements>::value)));
                             }
                             else {  // if a servo was not filled in the map for this group, log it
-                                log<NUClear::TRACE>("Requested a Servo Group Task but did not provide values for Servo",
-                                                    ServoID(utility::actuation::ServoMap<Elements>::value));
+                                log<TRACE>("Requested a Servo Group Task but did not provide values for Servo",
+                                           ServoID(utility::actuation::ServoMap<Elements>::value));
                             }
                         }(),
                         ...);

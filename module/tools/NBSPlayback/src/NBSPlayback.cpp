@@ -63,7 +63,7 @@ namespace module::tools {
                 config.mode = REALTIME;
             }
             else {
-                log<NUClear::ERROR>("Playback mode is invalid, stopping playback");
+                log<ERROR>("Playback mode is invalid, stopping playback");
                 powerplant.shutdown();
             }
 
@@ -99,7 +99,7 @@ namespace module::tools {
         });
 
         on<Trigger<Finished>>().then([this] {
-            log<NUClear::INFO>("Finished playback");
+            log<INFO>("Finished playback");
             progress_bar.close();
             powerplant.shutdown();
         });

@@ -1,5 +1,7 @@
+import { createRequire } from "module";
 import { NUClearNetPacket } from "nuclearnet.js";
-import { Reader } from "protobufjs/minimal";
+const require = createRequire(import.meta.url);
+const { Reader } = require("protobufjs/minimal");
 
 import { messageFieldsIndex } from "../../shared/messages/fields_index";
 

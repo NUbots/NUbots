@@ -50,9 +50,7 @@ namespace extension::behaviour {
         /// A subtask has finished and emitted a Done message
         SUBTASK_DONE,
         /// Another task requires a causing from this provider and pushed it to run
-        PUSHED,
-        /// A Wait task has caused the provider to run again after a set time
-        WAIT
+        PUSHED
     };
 
     namespace information {
