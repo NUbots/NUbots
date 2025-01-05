@@ -258,33 +258,38 @@ namespace module::extension {
         });
 
         // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>>().then("State Updated", [this](const StateUpdate& u) {
-            // Get the group that had a state update
-            auto p  = providers.at(u.provider_id);
-            auto& g = p->group;
+        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
+            "State Updated",
+            [this](const StateUpdate& u) {
+                // Get the group that had a state update
+                auto p  = providers.at(u.provider_id);
+                auto& g = p->group;
 
-            // Go check if this state update has changed
-            // any of the tasks that are queued
-            reevaluate_group(g);
-        });
+                // Go check if this state update has
+                // changed any of the tasks that are
+                // queued
+                reevaluate_group(g);
+            });
 
         // We have a new task pack to run
-        on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>>().then("Run", [this](const BehaviourTasks& p) {
-            // Convert the task pack to a Director task pack
-            TaskPack pack;
+        on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
+            "Run",
+            [this](const BehaviourTasks& p) {
+                // Convert the task pack to a Director task pack
+                TaskPack pack;
 
-            // Root providers are identified by being declared root and their requester type will be RootProvider<T>
-            pack.provider =
-                p.root ? get_root_provider(p.requester_type) : pack.provider = providers.at(p.requester_reaction_id);
+                // Root providers are identified by being declared root and their requester type will be RootProvider<T>
+                pack.provider = p.root ? get_root_provider(p.requester_type)
+                                       : pack.provider = providers.at(p.requester_reaction_id);
 
-            // Convert the Behaviour tasks to Director tasks
-            for (auto& task : p.tasks) {
-                pack.tasks.push_back(
-                    std::make_shared<DirectorTask>(pack.provider->id, p.requester_task_id, p.root, task));
-            }
+                // Convert the Behaviour tasks to Director tasks
+                for (auto& task : p.tasks) {
+                    pack.tasks.push_back(
+                        std::make_shared<DirectorTask>(pack.provider->id, p.requester_task_id, p.root, task));
+                }
 
-            run_task_pack(pack);
-        });
+                run_task_pack(pack);
+            });
     }
 
 }  // namespace module::extension
