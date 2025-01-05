@@ -229,10 +229,10 @@ namespace module::platform {
 
         const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
         if (error != 0) {
-            log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
-                                            server_address,
-                                            gai_strerror(error),
-                                            error));
+            log<ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
+                                   server_address,
+                                   gai_strerror(error),
+                                   error));
             return -1;
         }
 
@@ -255,7 +255,7 @@ namespace module::platform {
 
         // No connection was successful
         freeaddrinfo(address);
-        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
+        log<ERROR>(fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
         return -1;
     }
 
@@ -278,7 +278,7 @@ namespace module::platform {
 
             on<Watchdog<Webots, 30, std::chrono::seconds>, Sync<Webots>>().then([this, config] {
                 // We haven't received any messages lately
-                log<NUClear::WARN>("Connection timed out. Attempting reconnect");
+                log<WARN>("Connection timed out. Attempting reconnect");
                 setup_connection();
             });
 
@@ -291,7 +291,7 @@ namespace module::platform {
             // The camera's name is the filename of the config, with the .yaml stripped off
             const std::string name = config.file_name.stem();
 
-            log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
+            log<INFO>(fmt::format("Connected to the webots {} camera", name));
 
             CameraContext context;
             context.name = name;
@@ -397,9 +397,9 @@ namespace module::platform {
                     || servo_state[target.id].goal_position != target.position
                     || servo_state[target.id].torque != target.torque) {
 
-                    servo_state[target.id].dirty = true;
-                    servo_state[target.id].id    = target.id;
-                    servo_state[target.id].name  = id_to_joint_name[target.id];
+                    servo_state[target.id].dirty      = true;
+                    servo_state[target.id].id         = target.id;
+                    servo_state[target.id].servo_name = id_to_joint_name[target.id];
 
                     servo_state[target.id].p_gain = target.gain;
                     // `i` and `d` gains are always 0
@@ -418,7 +418,7 @@ namespace module::platform {
             targets->targets.emplace_back(target);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(targets);
+            emit<Scope::INLINE>(targets);
         });
 
         on<Shutdown>().then([this] {
@@ -452,7 +452,7 @@ namespace module::platform {
             }
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(targets);
+            emit<Scope::INLINE>(targets);
         });
 
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
@@ -497,7 +497,7 @@ namespace module::platform {
 
             if (fd == -1) {
                 // Connection failed
-                log<NUClear::ERROR>("Failed to connect to server.");
+                log<ERROR>("Failed to connect to server.");
                 active_reconnect.store(false);
                 return;
             }
@@ -518,11 +518,10 @@ namespace module::platform {
                                 if (n >= 0) {
                                     if (initial_message.data() == std::string("Welcome")) {
                                         // good
-                                        log<NUClear::INFO>(
-                                            fmt::format("Connected to {}:{}", server_address, server_port));
+                                        log<INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
                                     }
                                     else if (initial_message.data() == std::string("Refused")) {
-                                        log<NUClear::FATAL>(
+                                        log<FATAL>(
                                             fmt::format("Connection to {}:{} refused: your IP is not white listed.",
                                                         server_address,
                                                         server_port));
@@ -531,9 +530,9 @@ namespace module::platform {
                                         powerplant.shutdown();
                                     }
                                     else {
-                                        log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message",
-                                                                        server_address,
-                                                                        server_port));
+                                        log<FATAL>(fmt::format("{}:{} sent unknown initial message",
+                                                               server_address,
+                                                               server_port));
                                         // Halt and don't retry as the other end is clearly not Webots
                                         close(fd);
                                         powerplant.shutdown();
@@ -541,7 +540,7 @@ namespace module::platform {
                                 }
                                 else {
                                     // There was nothing sent
-                                    log<NUClear::DEBUG>("Connection was closed.");
+                                    log<DEBUG>("Connection was closed.");
                                     active_reconnect.store(false);
                                     return;
                                 }
@@ -556,8 +555,7 @@ namespace module::platform {
                                 // enough space to read them in our data buffer
                                 unsigned long available = 0;
                                 if (::ioctl(fd, FIONREAD, &available) < 0) {
-                                    log<NUClear::ERROR>(
-                                        fmt::format("Error querying for available data, {}", strerror(errno)));
+                                    log<ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
                                     return;
                                 }
                                 const size_t old_size = buffer.size();
@@ -596,13 +594,13 @@ namespace module::platform {
                         // report the error
                         else if ((event.events & IO::ERROR) != 0) {
                             if (!active_reconnect.exchange(true)) {
-                                log<NUClear::WARN>(fmt::format(
+                                log<WARN>(fmt::format(
                                     "An invalid request or some other error occurred. Closing our connection"));
                             }
                         }
                         else if ((event.events & IO::CLOSE) != 0) {
                             if (!active_reconnect.exchange(true)) {
-                                log<NUClear::WARN>(fmt::format("The Remote hung up. Closing our connection"));
+                                log<WARN>(fmt::format("The Remote hung up. Closing our connection"));
                             }
                         }
                     });
@@ -624,21 +622,21 @@ namespace module::platform {
 
                             // Create servo position message
                             actuator_requests.motor_positions.emplace_back(
-                                MotorPosition(servo.name, servo.goal_position));
+                                MotorPosition(servo.servo_name, servo.goal_position));
 
                             // Create servo velocity message
                             actuator_requests.motor_velocities.emplace_back(
-                                MotorVelocity(servo.name, servo.moving_speed));
+                                MotorVelocity(servo.servo_name, servo.moving_speed));
 
                             // Create servo PID message
                             actuator_requests.motor_pids.emplace_back(
-                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                                MotorPID(servo.servo_name, {servo.p_gain, servo.i_gain, servo.d_gain}));
                         }
 
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk
                         // simulator
                         if (terminate_simulation) {
-                            log<NUClear::DEBUG>("Sending terminate on ActuatorRequests.");
+                            log<DEBUG>("Sending terminate on ActuatorRequests.");
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::TERMINATE;
                             terminate_simulation = false;
@@ -646,13 +644,13 @@ namespace module::platform {
 
                         // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
                         if (reset_simulation_world) {
-                            log<NUClear::DEBUG>("Sending RESET_ROBOT to ActuatorRequests.");
+                            log<DEBUG>("Sending RESET_ROBOT to ActuatorRequests.");
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_ROBOT;
                             reset_simulation_world = false;
                         }
                         else if (reset_simulation_time) {
-                            log<NUClear::DEBUG>("Sending RESET_TIME to ActuatorRequests.");
+                            log<DEBUG>("Sending RESET_TIME to ActuatorRequests.");
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_TIME;
                             reset_simulation_time = false;
@@ -670,17 +668,16 @@ namespace module::platform {
                     if (connection_active) {
                         // Send the message size first
                         if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                            log<NUClear::ERROR>(
+                            log<ERROR>(
                                 fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
                         }
 
 
                         // Now send the data
                         if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                            log<NUClear::ERROR>(
-                                fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                            log<ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
                         }
-                        log<NUClear::TRACE>("Sending actuator request.");
+                        log<TRACE>("Sending actuator request.");
                     }
                 });
 
@@ -696,8 +693,7 @@ namespace module::platform {
         // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
         // (which is something we do for the walk optimisation), so reset our local times
         if (sim_delta > 0 && sensor_measurements.time == 0) {
-            log<NUClear::DEBUG>("Webots sim time reset to zero, resetting local sim_time. time before reset:",
-                                current_sim_time);
+            log<DEBUG>("Webots sim time reset to zero, resetting local sim_time. time before reset:", current_sim_time);
             sim_delta         = 0;
             real_delta        = 0;
             current_sim_time  = 0;
@@ -736,94 +732,94 @@ namespace module::platform {
         emit(time_update_msg);
 
         // ************************* DEBUGGING LOGS *********************************
-        log<NUClear::TRACE>("received SensorMeasurements:");
-        log<NUClear::TRACE>("  sm.time:", sensor_measurements.time);
-        log<NUClear::TRACE>("  sm.real_time:", sensor_measurements.real_time);
+        log<TRACE>("received SensorMeasurements:");
+        log<TRACE>("  sm.time:", sensor_measurements.time);
+        log<TRACE>("  sm.real_time:", sensor_measurements.real_time);
 
-        log<NUClear::TRACE>("  sm.messages:");
+        log<TRACE>("  sm.messages:");
         for (int i = 0; i < int(sensor_measurements.messages.size()); ++i) {
             const auto& message = sensor_measurements.messages[i];
-            log<NUClear::TRACE>("    sm.messages #", i);
-            log<NUClear::TRACE>("      message_type:", message.message_type);
-            log<NUClear::TRACE>("      text:", message.text);
+            log<TRACE>("    sm.messages #", i);
+            log<TRACE>("      message_type:", message.message_type);
+            log<TRACE>("      text:", message.text);
         }
 
-        log<NUClear::TRACE>("  sm.accelerometers:");
+        log<TRACE>("  sm.accelerometers:");
         for (int i = 0; i < int(sensor_measurements.accelerometers.size()); ++i) {
             const auto& acc = sensor_measurements.accelerometers[i];
-            log<NUClear::TRACE>("    sm.accelerometers #", i);
-            log<NUClear::TRACE>("      name:", acc.name);
-            log<NUClear::TRACE>("      value:", acc.value.X, ",", acc.value.Y, ",", acc.value.Z);
+            log<TRACE>("    sm.accelerometers #", i);
+            log<TRACE>("      name:", acc.name);
+            log<TRACE>("      value:", acc.value.X, ",", acc.value.Y, ",", acc.value.Z);
         }
 
-        log<NUClear::TRACE>("  sm.bumpers:");
+        log<TRACE>("  sm.bumpers:");
         for (int i = 0; i < int(sensor_measurements.bumpers.size()); ++i) {
             const auto& bumper = sensor_measurements.bumpers[i];
-            log<NUClear::TRACE>("    sm.bumpers #", i);
-            log<NUClear::TRACE>("      name:", bumper.name);
-            log<NUClear::TRACE>("      value:", bumper.value);
+            log<TRACE>("    sm.bumpers #", i);
+            log<TRACE>("      name:", bumper.name);
+            log<TRACE>("      value:", bumper.value);
         }
 
-        log<NUClear::TRACE>("  sm.cameras:");
+        log<TRACE>("  sm.cameras:");
         for (int i = 0; i < int(sensor_measurements.cameras.size()); ++i) {
             const auto& camera = sensor_measurements.cameras[i];
-            log<NUClear::TRACE>("    sm.cameras #", i);
-            log<NUClear::TRACE>("      name:", camera.name);
-            log<NUClear::TRACE>("      width:", camera.width);
-            log<NUClear::TRACE>("      height:", camera.height);
-            log<NUClear::TRACE>("      quality:", camera.quality);
-            log<NUClear::TRACE>("      image (size):", camera.image.size());
+            log<TRACE>("    sm.cameras #", i);
+            log<TRACE>("      name:", camera.name);
+            log<TRACE>("      width:", camera.width);
+            log<TRACE>("      height:", camera.height);
+            log<TRACE>("      quality:", camera.quality);
+            log<TRACE>("      image (size):", camera.image.size());
         }
 
-        log<NUClear::TRACE>("  sm.forces:");
+        log<TRACE>("  sm.forces:");
         for (int i = 0; i < int(sensor_measurements.forces.size()); ++i) {
             const auto& force = sensor_measurements.forces[i];
-            log<NUClear::TRACE>("    sm.forces #", i);
-            log<NUClear::TRACE>("      name:", force.name);
-            log<NUClear::TRACE>("      value:", force.value);
+            log<TRACE>("    sm.forces #", i);
+            log<TRACE>("      name:", force.name);
+            log<TRACE>("      value:", force.value);
         }
 
-        log<NUClear::TRACE>("  sm.force3ds:");
+        log<TRACE>("  sm.force3ds:");
         for (int i = 0; i < int(sensor_measurements.force3ds.size()); ++i) {
             const auto& force = sensor_measurements.force3ds[i];
-            log<NUClear::TRACE>("    sm.force3ds #", i);
-            log<NUClear::TRACE>("      name:", force.name);
-            log<NUClear::TRACE>("      value:", force.value.X, ",", force.value.Y, ",", force.value.Z);
+            log<TRACE>("    sm.force3ds #", i);
+            log<TRACE>("      name:", force.name);
+            log<TRACE>("      value:", force.value.X, ",", force.value.Y, ",", force.value.Z);
         }
 
-        log<NUClear::TRACE>("  sm.force6ds:");
+        log<TRACE>("  sm.force6ds:");
         for (int i = 0; i < int(sensor_measurements.force6ds.size()); ++i) {
             const auto& force = sensor_measurements.force6ds[i];
-            log<NUClear::TRACE>("    sm.force6ds #", i);
-            log<NUClear::TRACE>("      name:", force.name);
-            log<NUClear::TRACE>("      force:", force.force.X, ",", force.force.Y, ",", force.force.Z);
-            log<NUClear::TRACE>("      torque:", force.torque.X, ",", force.force.Y, ",", force.force.Z);
+            log<TRACE>("    sm.force6ds #", i);
+            log<TRACE>("      name:", force.name);
+            log<TRACE>("      force:", force.force.X, ",", force.force.Y, ",", force.force.Z);
+            log<TRACE>("      torque:", force.torque.X, ",", force.force.Y, ",", force.force.Z);
         }
 
-        log<NUClear::TRACE>("  sm.gyros:");
+        log<TRACE>("  sm.gyros:");
         for (int i = 0; i < int(sensor_measurements.gyros.size()); ++i) {
             const auto& gyro = sensor_measurements.gyros[i];
-            log<NUClear::TRACE>("    sm.gyros #", i);
-            log<NUClear::TRACE>("      name:", gyro.name);
-            log<NUClear::TRACE>("      value:", gyro.value.X, ",", gyro.value.Y, ",", gyro.value.Z);
+            log<TRACE>("    sm.gyros #", i);
+            log<TRACE>("      name:", gyro.name);
+            log<TRACE>("      value:", gyro.value.X, ",", gyro.value.Y, ",", gyro.value.Z);
         }
 
-        log<NUClear::TRACE>("  sm.position_sensors:");
+        log<TRACE>("  sm.position_sensors:");
         for (int i = 0; i < int(sensor_measurements.position_sensors.size()); ++i) {
             const auto& sensor = sensor_measurements.position_sensors[i];
-            log<NUClear::TRACE>("    sm.position_sensors #", i);
-            log<NUClear::TRACE>("      name:", sensor.name);
-            log<NUClear::TRACE>("      value:", sensor.value);
+            log<TRACE>("    sm.position_sensors #", i);
+            log<TRACE>("      name:", sensor.name);
+            log<TRACE>("      value:", sensor.value);
         }
 
         if (sensor_measurements.odometry_ground_truth.exists) {
-            log<NUClear::TRACE>("  sm.odometry_ground_truth:");
-            log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
+            log<TRACE>("  sm.odometry_ground_truth:");
+            log<TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
         }
 
         if (sensor_measurements.localisation_ground_truth.exists) {
-            log<NUClear::TRACE>("  sm.localisation_ground_truth:");
-            log<NUClear::TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth.Hfw);
+            log<TRACE>("  sm.localisation_ground_truth:");
+            log<TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth.Hfw);
         }
 
         // Parse the errors and warnings from Webots and log them.
@@ -831,8 +827,8 @@ namespace module::platform {
         // Or check if those messages have specific information
         for (const auto& message : sensor_measurements.messages) {
             switch (int(message.message_type)) {
-                case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
-                case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+                case Message::MessageType::ERROR_MESSAGE: log<ERROR>(message.text); break;
+                case Message::MessageType::WARNING_MESSAGE: log<WARN>(message.text); break;
             }
         }
 

@@ -28,6 +28,7 @@
 #ifndef MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 #define MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 
+#include <iostream>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"

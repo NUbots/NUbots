@@ -54,7 +54,7 @@ namespace module::actuation {
             on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
                 [this](const Servo& servo, const RunInfo& info) {
                     if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-                        if (log_level <= NUClear::DEBUG) {
+                        if (log_level <= DEBUG) {
                             emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
                                        servo.command.position,
                                        servo.command.state.gain,
@@ -106,8 +106,8 @@ namespace module::actuation {
                                     group.servos.at(utility::actuation::ServoMap<Elements>::value)));
                             }
                             else {  // if a servo was not filled in the map for this group, log it
-                                log<NUClear::TRACE>("Requested a Servo Group Task but did not provide values for Servo",
-                                                    ServoID(utility::actuation::ServoMap<Elements>::value));
+                                log<TRACE>("Requested a Servo Group Task but did not provide values for Servo",
+                                           ServoID(utility::actuation::ServoMap<Elements>::value));
                             }
                         }(),
                         ...);
@@ -130,7 +130,7 @@ namespace module::actuation {
         void add_sequence_provider() {
             // Message to keep track of which position in the vector is to be emitted
             // Make an initial count message
-            emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(0));
+            emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(0));
 
             on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Priority::HIGH>().then(
                 [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
@@ -141,14 +141,14 @@ namespace module::actuation {
                     // If this is a new task, run the first pack of servos and increment the counter
                     else if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
                         emit<Task>(std::make_unique<Group>(sequence.frames[0]));
-                        emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(1));
+                        emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(1));
                     }
                     // If the subtask is done, we are done if it is the last servo frames, otherwise use the count to
                     // determine the current frame to emit
                     else if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
                         if (count.count < sequence.frames.size()) {
                             emit<Task>(std::make_unique<Group>(sequence.frames[count.count]));
-                            emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(count.count + 1));
+                            emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(count.count + 1));
                         }
                         else {
                             emit<Task>(std::make_unique<Done>());

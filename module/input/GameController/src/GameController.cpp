@@ -98,10 +98,10 @@ namespace module::input {
                                                         remote_addr)
                                               == ignored_ip_addresses.end()) {
                                               ignored_ip_addresses.insert(remote_addr);
-                                              log<NUClear::INFO>("Ignoring UDP packet from",
-                                                                 remote_addr,
-                                                                 "as it doesn't match configured filter address",
-                                                                 udp_filter_address);
+                                              log<INFO>("Ignoring UDP packet from",
+                                                        remote_addr,
+                                                        "as it doesn't match configured filter address",
+                                                        udp_filter_address);
                                           }
 
                                           return;

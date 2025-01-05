@@ -121,7 +121,7 @@ namespace module::planning {
 
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
-                        log<NUClear::DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+                        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
 
                         // Calculate a perpendicular vector to the direction of the target point
                         const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());

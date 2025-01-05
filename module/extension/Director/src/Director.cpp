@@ -109,7 +109,7 @@ namespace module::extension {
             if (provider == group.active_provider) {
                 if (group.providers.empty()) {
                     // This is now an error, there are no Providers to service the task
-                    log<NUClear::ERROR>("The last Provider for a type was removed while there were still tasks for it");
+                    log<ERROR>("The last Provider for a type was removed while there were still tasks for it");
                 }
                 else {
                     // Reevaluate the group to see if the loss of this provider changes anything
@@ -178,7 +178,7 @@ namespace module::extension {
                 bool valid = w->validator(state);
                 if (valid != w->current) {
                     w->current = valid;
-                    emit<Scope::DIRECT>(std::make_unique<StateUpdate>(id, w->type, state));
+                    emit<Scope::INLINE>(std::make_unique<StateUpdate>(id, w->type, state));
                 }
             });
 
@@ -286,20 +286,12 @@ namespace module::extension {
             }
             else {
                 auto& p = providers.at(task->requester_id);
-                auto id = p->reaction->identifiers.name;
+                auto id = p->reaction->identifiers->name;
                 if (p->classification == Provider::Classification::START) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a start provider.");
+                    log<WARN>("The task", task->name, "cannot be executed as Provider", id, "is a start provider.");
                 }
                 else if (p->classification == Provider::Classification::STOP) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a stop provider.");
+                    log<WARN>("The task", task->name, "cannot be executed as Provider", id, "is a stop provider.");
                 }
                 // Everything is fine
                 else {

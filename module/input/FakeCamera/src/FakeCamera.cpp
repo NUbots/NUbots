@@ -55,12 +55,12 @@ namespace module::input {
         on<Configuration>("FakeCamera.yaml").then([this](const Configuration& cfg) {
             // clang-format off
             auto lvl = cfg["log_level"].as<std::string>();
-            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            if (lvl == "TRACE") { this->log_level = TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = DEBUG; }
+            else if (lvl == "INFO") { this->log_level = INFO; }
+            else if (lvl == "WARN") { this->log_level = WARN; }
+            else if (lvl == "ERROR") { this->log_level = ERROR; }
+            else if (lvl == "FATAL") { this->log_level = FATAL; }
             // clang-format on
 
             const auto image_folder = cfg["image_folder"].as<std::string>();
@@ -94,11 +94,11 @@ namespace module::input {
                                                                                         config.image_prefix.length(),
                                                                                         config.lens_prefix))
                                 .replace_extension("yaml");
-                            log<NUClear::TRACE>(fmt::format("Looking for lens file '{}' for image '{}'",
-                                                            lens_file.string(),
-                                                            image_file.string()));
+                            log<TRACE>(fmt::format("Looking for lens file '{}' for image '{}'",
+                                                   lens_file.string(),
+                                                   image_file.string()));
                             if (std::filesystem::exists(lens_file)) {
-                                log<NUClear::TRACE>(fmt::format("Found lens file '{}'", lens_file.string()));
+                                log<TRACE>(fmt::format("Found lens file '{}'", lens_file.string()));
                                 images.emplace_back(image_file.string(), lens_file.string());
                             }
                         }
@@ -157,8 +157,8 @@ namespace module::input {
                         emit(msg);
                     }
                     else {
-                        log<NUClear::DEBUG>(fmt::format("Failed to extract image dimensions from JPEG data for '{}'",
-                                                        images[image_index].first));
+                        log<DEBUG>(fmt::format("Failed to extract image dimensions from JPEG data for '{}'",
+                                               images[image_index].first));
                     }
                 }
                 if (++image_index >= images.size()) {

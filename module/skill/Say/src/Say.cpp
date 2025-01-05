@@ -71,7 +71,7 @@ namespace module::skill {
                     sanitized_text.erase(std::remove(sanitized_text.begin(), sanitized_text.end(), c),
                                          sanitized_text.end());
                 }
-                log<NUClear::DEBUG>("Saying: ", sanitized_text);
+                log<DEBUG>("Saying: ", sanitized_text);
                 system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
                                    + cfg.device_name)
                            .c_str());

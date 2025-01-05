@@ -89,7 +89,7 @@ TEST_CASE("Test that a provider will be blocked if its needs aren't met but will
           "[director][needs][priority][blocking]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();
