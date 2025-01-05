@@ -270,4 +270,9 @@ namespace extension::behaviour::commands {
 
 }  // namespace extension::behaviour::commands
 
+namespace NUClear::dsl::operation {
+    template <>
+    struct EmitStats<::extension::behaviour::commands::BehaviourTasks> : std::false_type {};
+}  // namespace NUClear::dsl::operation
+
 #endif  // EXTENSION_BEHAVIOUR_COMMANDS_HPP
