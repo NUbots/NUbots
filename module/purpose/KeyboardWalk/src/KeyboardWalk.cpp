@@ -183,13 +183,13 @@ namespace module::purpose {
 
             LogColours colours;
             switch (message.level) {
-                case TRACE: colours = LogColours::TRACE_COLOURS; break;
-                case DEBUG: colours = LogColours::DEBUG_COLOURS; break;
-                case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
-                case WARN: colours = LogColours::WARN_COLOURS; break;
-                case ERROR: colours = LogColours::ERROR_COLOURS; break;
-                case NUClear::UNKNOWN:;
-                case FATAL: colours = LogColours::FATAL_COLOURS; break;
+                case NUClear::LogLevel::TRACE: colours = LogColours::TRACE_COLOURS; break;
+                case NUClear::LogLevel::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
+                case NUClear::LogLevel::INFO: colours = LogColours::INFO_COLOURS; break;
+                case NUClear::LogLevel::WARN: colours = LogColours::WARN_COLOURS; break;
+                case NUClear::LogLevel::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                case NUClear::LogLevel::UNKNOWN:;
+                case NUClear::LogLevel::FATAL: colours = LogColours::FATAL_COLOURS; break;
             }
 
             update_window(log_window, colours, source, message.message, true);
