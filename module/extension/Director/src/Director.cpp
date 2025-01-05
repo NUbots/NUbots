@@ -109,7 +109,7 @@ namespace module::extension {
             if (provider == group.active_provider) {
                 if (group.providers.empty()) {
                     // This is now an error, there are no Providers to service the task
-                    log<NUClear::ERROR>("The last Provider for a type was removed while there were still tasks for it");
+                    log<ERROR>("The last Provider for a type was removed while there were still tasks for it");
                 }
                 else {
                     // Reevaluate the group to see if the loss of this provider changes anything

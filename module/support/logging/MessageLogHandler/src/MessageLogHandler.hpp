@@ -36,7 +36,7 @@ namespace module::support::logging {
         /// The configuration variables for this reactor
         struct {
             /// The minimum log level to forward
-            NUClear::LogLevel min_level{NUClear::TRACE};
+            NUClear::LogLevel min_level{TRACE};
             /// If the display level should be ignored and all messages logged
             bool log_all{true};
         } cfg{};

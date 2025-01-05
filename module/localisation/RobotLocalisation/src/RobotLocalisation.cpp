@@ -76,9 +76,9 @@ namespace module::localisation {
         on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then([this](const VisionRobots& vision_robots,
                                                                             const GreenHorizon& horizon) {
             // Print tracked_robots ids
-            log<NUClear::DEBUG>("Robots tracked:");
+            log<DEBUG>("Robots tracked:");
             for (const auto& tracked_robot : tracked_robots) {
-                log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
+                log<DEBUG>("\tID: ", tracked_robot.id);
             }
 
             // Set all tracked robots to unseen
@@ -118,7 +118,7 @@ namespace module::localisation {
             // Only keep robots that are not missing or too close to others
             for (const auto& tracked_robot : tracked_robots) {
                 if (tracked_robot.missed_count > cfg.max_missed_count) {
-                    log<NUClear::DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                    log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
                     continue;
                 }
 
@@ -126,7 +126,7 @@ namespace module::localisation {
                         return &tracked_robot != &other_robot
                                && (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
                     })) {
-                    log<NUClear::DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+                    log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
                     continue;
                 }
 

@@ -57,11 +57,11 @@ namespace module::nbs {
 
         on<Trigger<LoadRequest>>().then([this](const LoadRequest& load_request) {
             if (!load_request.files.empty()) {
-                log<NUClear::INFO>("Loading NBS files:");
+                log<INFO>("Loading NBS files:");
                 std::vector<std::filesystem::path> file_paths;
                 for (const auto& path : load_request.files) {
                     file_paths.push_back(std::filesystem::path(path));
-                    log<NUClear::INFO>(" - ", path);
+                    log<INFO>(" - ", path);
                 }
                 decoder = utility::nbs::Decoder(file_paths, true);
                 // Get the total number of messages
@@ -77,19 +77,19 @@ namespace module::nbs {
             }
             else {
                 // If no NBS files are provided, don't continue
-                log<NUClear::ERROR>("No NBS files provided.");
+                log<ERROR>("No NBS files provided.");
                 return;
             }
 
             // Update which types we will be playing
-            log<NUClear::INFO>("Enabling messages:");
+            log<INFO>("Enabling messages:");
             for (const auto& message_name : load_request.messages) {
                 // Hash our type to work out our type on the wire
                 uint64_t hash =
                     NUClear::util::serialise::xxhash64(message_name.c_str(), message_name.size(), 0x4e55436c);
                 if (emitters.find(hash) != emitters.end()) {
                     emitters[hash](decoder);
-                    log<NUClear::INFO>(" - ", message_name);
+                    log<INFO>(" - ", message_name);
                 }
             }
 
@@ -106,7 +106,7 @@ namespace module::nbs {
 
         on<Trigger<SetModeRequest>>().then([this](const SetModeRequest& set_mode_request) {
             mode = set_mode_request.mode;
-            log<NUClear::INFO>("Playback mode set to: ", set_mode_request.mode);
+            log<INFO>("Playback mode set to: ", set_mode_request.mode);
         });
 
         on<Trigger<PauseRequest>>().then([this]() {

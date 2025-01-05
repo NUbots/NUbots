@@ -71,7 +71,7 @@ namespace module::actuation {
             nugus_model_right = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
 
             // Show the model if debug is enabled
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 nugus_model_left.show_details();
             }
 
@@ -115,11 +115,11 @@ namespace module::actuation {
                                                               q0,
                                                               options);
 
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     // Compute error between the IK solution and desired pose
                     auto Htf_sol = tinyrobotics::forward_kinematics(nugus_model_left, q_sol, cfg.left_foot_name);
                     auto error   = tinyrobotics::homogeneous_error(leg_ik.Htf, Htf_sol);
-                    log<NUClear::DEBUG>("IK left error: {}", error.squaredNorm());
+                    log<DEBUG>("IK left error: {}", error.squaredNorm());
                 }
 
                 // Convert the IK solution back to servo commands
@@ -157,11 +157,11 @@ namespace module::actuation {
                                                               q0,
                                                               options);
 
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     // Compute error between the IK solution and desired pose
                     auto Htf_sol = tinyrobotics::forward_kinematics(nugus_model_right, q_sol, cfg.right_foot_name);
                     auto error   = tinyrobotics::homogeneous_error(leg_ik.Htf, Htf_sol);
-                    log<NUClear::DEBUG>("IK right error: {}", error.squaredNorm());
+                    log<DEBUG>("IK right error: {}", error.squaredNorm());
                 }
 
                 // Convert the IK solution back to servo commands

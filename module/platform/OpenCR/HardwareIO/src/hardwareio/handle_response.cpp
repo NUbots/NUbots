@@ -66,13 +66,13 @@ namespace module::platform::OpenCR {
 
             // Check CRC
             if (dynamixel::v2::calculate_checksum(response) != msg->checksum) {
-                log<NUClear::WARN>("Invalid CRC detected.");
+                log<WARN>("Invalid CRC detected.");
                 return;  // without emit
             }
 
             // Check we're emitting a Status (return) packet
             if ((uint8_t) msg->instruction != dynamixel::v2::Instruction::STATUS_RETURN) {
-                log<NUClear::WARN>("Attempt to emit non Status(return) packet");
+                log<WARN>("Attempt to emit non Status(return) packet");
                 return;  // without emit
             }
 
@@ -188,7 +188,7 @@ namespace module::platform::OpenCR {
                 // Timeout phase
                 // It took too long to read in the full packet .... Giving up
                 case Phases::TIMEOUT:
-                    log<NUClear::WARN>("Packet timeout occurred.");
+                    log<WARN>("Packet timeout occurred.");
                     reset_state();
                     break;
 

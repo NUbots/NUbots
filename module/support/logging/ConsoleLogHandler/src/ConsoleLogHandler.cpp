@@ -56,13 +56,13 @@ namespace module::support::logging {
 
         // Output the level
         switch (level) {
-            case NUClear::TRACE: std::cerr << "TRACE: "; break;
-            case NUClear::DEBUG: std::cerr << Colour::green << "DEBUG: "; break;
-            case NUClear::INFO: std::cerr << Colour::brightblue << "INFO: "; break;
-            case NUClear::WARN: std::cerr << Colour::yellow << "WARN: "; break;
-            case NUClear::ERROR: std::cerr << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
-            case NUClear::UNKNOWN:  // Unknown shouldn't happen so we treat it as an error
-            case NUClear::FATAL: std::cerr << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
+            case NUClear::LogLevel::TRACE: std::cerr << "TRACE: "; break;
+            case NUClear::LogLevel::DEBUG: std::cerr << Colour::green << "DEBUG: "; break;
+            case NUClear::LogLevel::INFO: std::cerr << Colour::brightblue << "INFO: "; break;
+            case NUClear::LogLevel::WARN: std::cerr << Colour::yellow << "WARN: "; break;
+            case NUClear::LogLevel::ERROR: std::cerr << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
+            case NUClear::LogLevel::UNKNOWN:  // Unknown shouldn't happen so we treat it as an error
+            case NUClear::LogLevel::FATAL: std::cerr << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
         }
 
         // Output the message
@@ -102,7 +102,7 @@ namespace module::support::logging {
                 // Make sure we are on the thread that the exception was thrown on otherwise this will not work
                 auto stack_trace = utility::support::evil::last_exception_stack_trace();
 
-                print_log(NUClear::FATAL, reactor, name, msg, stack_trace);
+                print_log(NUClear::LogLevel::FATAL, reactor, name, msg, stack_trace);
             }
         });
 

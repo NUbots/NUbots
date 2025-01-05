@@ -151,7 +151,7 @@ namespace module::purpose {
                 case KEY_DOWN: look_down(); break;
                 case 'q': quit(); return;
                 default:
-                    log<NUClear::ERROR>("Unknown Command");
+                    log<ERROR>("Unknown Command");
                     print_status();
                     break;
             }
@@ -283,42 +283,42 @@ namespace module::purpose {
         walk_command.x() += DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("forward");
+        log<INFO>("forward");
     }
 
     void KeyboardWalk::left() {
         walk_command.y() += DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("left");
+        log<INFO>("left");
     }
 
     void KeyboardWalk::back() {
         walk_command.x() -= DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("back");
+        log<INFO>("back");
     }
 
     void KeyboardWalk::right() {
         walk_command.y() -= DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("right");
+        log<INFO>("right");
     }
 
     void KeyboardWalk::turn_left() {
         walk_command.z() += ROT_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("turn left");
+        log<INFO>("turn left");
     }
 
     void KeyboardWalk::turn_right() {
         walk_command.z() -= ROT_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("turn right");
+        log<INFO>("turn right");
     }
 
     void KeyboardWalk::kick(LimbID::Value l) {
@@ -326,7 +326,7 @@ namespace module::purpose {
         switch (l) {
             case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3); break;
             case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3); break;
-            default: log<NUClear::ERROR>("Invalid limb ID");
+            default: log<ERROR>("Invalid limb ID");
         }
     }
 
@@ -334,28 +334,28 @@ namespace module::purpose {
         head_yaw += HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look left");
+        log<INFO>("look left");
     }
 
     void KeyboardWalk::look_right() {
         head_yaw -= HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look right");
+        log<INFO>("look right");
     }
 
     void KeyboardWalk::look_up() {
         head_pitch += HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look up");
+        log<INFO>("look up");
     }
 
     void KeyboardWalk::look_down() {
         head_pitch -= HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look down");
+        log<INFO>("look down");
     }
 
     void KeyboardWalk::walk_toggle() {
@@ -376,7 +376,7 @@ namespace module::purpose {
         head_pitch   = 0.0f;
         update_command();
         print_status();
-        log<NUClear::INFO>("reset");
+        log<INFO>("reset");
     }
 
     void KeyboardWalk::quit() {

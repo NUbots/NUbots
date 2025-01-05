@@ -146,7 +146,8 @@ namespace utility::vision::visualmesh {
                 return intersect;
             }
             // Last option is it's neither in or out
-            NUClear::log<NUClear::ERROR>("Cluster is neither inside or outside the green horizon. This is bad.");
+            NUClear::log<NUClear::LogLevel::ERROR>(
+                "Cluster is neither inside or outside the green horizon. This is bad.");
             return false;
         };
 

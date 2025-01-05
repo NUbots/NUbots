@@ -83,9 +83,7 @@ namespace module::vision {
                     img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
                     cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
                     break;
-                default:
-                    log<NUClear::WARN>("Image format not supported: ", utility::vision::fourcc(img.format));
-                    return;
+                default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
             }
 
             // -------- Preprocess the image -------
@@ -177,12 +175,12 @@ namespace module::vision {
             emit(std::move(bounding_boxes));
 
             // -------- Benchmark --------
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 auto end      = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                log<NUClear::DEBUG>("Detected ", indices.size(), " objects");
-                log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
-                log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
+                log<DEBUG>("Detected ", indices.size(), " objects");
+                log<DEBUG>("Yolo took: ", duration, "ms");
+                log<DEBUG>("FPS: ", 1000.0 / duration);
             }
         });
     }

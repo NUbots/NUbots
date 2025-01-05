@@ -50,8 +50,8 @@ namespace module::platform::OpenCR {
     void HardwareIO::process_model_information(const StatusReturn& packet) {
         uint16_t model  = (packet.data[1] << 8) | packet.data[0];
         uint8_t version = packet.data[2];
-        log<NUClear::INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
-        log<NUClear::INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
+        log<INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
+        log<INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
     }
 
     void HardwareIO::process_opencr_data(const StatusReturn& packet) {
@@ -166,9 +166,9 @@ namespace module::platform::OpenCR {
         // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
         for (const auto& servo : servo_states) {
             if (servo.temperature > cfg.alarms.temperature.level) {
-                log<NUClear::WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
-                                   packet.id,
-                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)));
+                log<WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
+                          packet.id,
+                          nugus.device_name(static_cast<NUgus::ID>(packet.id)));
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
@@ -182,7 +182,7 @@ namespace module::platform::OpenCR {
         }
 
         // Emit plot for debugging
-        if (log_level == NUClear::DEBUG) {
+        if (log_level == DEBUG) {
             emit(graph(
                 fmt::format("{} ({}) Packet length", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
                 packet.length));

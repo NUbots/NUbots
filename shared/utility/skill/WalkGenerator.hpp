@@ -249,7 +249,7 @@ namespace utility::skill {
                     // We do not update the time here because we want to remain in the stopped state
                     reset();
                     break;
-                default: NUClear::log<NUClear::WARN>("Unknown state", engine_state.value);
+                default: NUClear::log<NUClear::LogLevel::WARN>("Unknown state", engine_state.value);
             }
 
 
@@ -490,13 +490,13 @@ namespace utility::skill {
         void update_time(const Scalar& dt) {
             // Check for negative time step
             if (dt <= 0.0f) {
-                NUClear::log<NUClear::WARN>("dt <= 0.0f");
+                NUClear::log<NUClear::LogLevel::WARN>("dt <= 0.0f");
                 return;
             }
 
             // Check for too long dt
             if (dt > p.step_period) {
-                NUClear::log<NUClear::WARN>("dt > params.p.step_period");
+                NUClear::log<NUClear::LogLevel::WARN>("dt > params.p.step_period");
                 return;
             }
 

@@ -102,7 +102,7 @@ namespace module::purpose {
 
         on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
             [this](const DefenderTask& defender_task, const std::shared_ptr<const GameState>& game_state) {
-                log<NUClear::DEBUG>("DEFENDER");
+                log<DEBUG>("DEFENDER");
                 // Do not use GameController information if force playing or force penalty shootout
                 if (defender_task.force_playing) {
                     play();
@@ -122,7 +122,7 @@ namespace module::purpose {
                         case GameMode::CORNER_KICK: emit<Task>(std::make_unique<CornerKickDefender>()); break;
                         case GameMode::GOAL_KICK: emit<Task>(std::make_unique<GoalKickDefender>()); break;
                         case GameMode::THROW_IN: emit<Task>(std::make_unique<ThrowInDefender>()); break;
-                        default: log<NUClear::WARN>("Game mode unknown.");
+                        default: log<WARN>("Game mode unknown.");
                     }
                 }
             });
@@ -131,7 +131,7 @@ namespace module::purpose {
         // Normal READY state
         on<Provide<NormalDefender>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // If we are stable, walk to the ready field position
-            log<NUClear::DEBUG>("READY");
+            log<DEBUG>("READY");
             emit<Task>(std::make_unique<WalkToFieldPosition>(cfg.Hfr, true));
         });
 
@@ -140,11 +140,11 @@ namespace module::purpose {
 
         // Normal UNKNOWN state
         on<Provide<NormalDefender>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-            [this] { log<NUClear::WARN>("Unknown normal game phase."); });
+            [this] { log<WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
         on<Provide<NormalDefender>>().then([this] {
-            log<NUClear::DEBUG>("INITIAL");
+            log<DEBUG>("INITIAL");
             emit<Task>(std::make_unique<StandStill>());
         });
 
