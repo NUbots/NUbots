@@ -112,14 +112,15 @@ namespace module::planning {
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
+                std::vector<Eigen::Vector2d> all_obstacles{};
                 // Avoiding goal posts and robots when theyre in the planned path
                 if (!goals.goals.empty() || robots != nullptr) {
-                    std::vector<Eigen::Vector2d> all_obstacles{};
-                    // if goal posts are in the planned path, avoid them
+
+                    // If the robot can see goal posts, try to avoid them
                     if (!goals.goals.empty()) {
-                        // the position of the goal post
+                        // The position of the goal post
                         Eigen::Vector3d goal_post = goals.goals[0].post.bottom * goals.goals[0].post.distance;
-                        // put this as an obstacle
+                        // Put this as an obstacle
                         all_obstacles.emplace_back(goal_post.head(2));
                     }
                     // If there are robots, check if there are obstacles in the way
@@ -140,8 +141,14 @@ namespace module::planning {
                     if (!obstacles.empty()) {
                         // Find the suitable vector in order to walk around the obstacles
                         rDRr = walk_around_obstacle(obstacles, rDRr);
-                        // log<NUClear::INFO>("Walking around obstacle");
-                        log<NUClear::INFO>("Goalpost at index 0 is ", goals.goals[0].side);
+
+                        // Sometimes, the robot can not choose the shortest path to avoid the obstacle but will have to
+                        // behave in a pre-defined manner (eg. when the shortest path bumps into the goalpost)
+                        // -> determine the situation where that could be using localisation (x axys of the field and
+                        // the vector position of the robot should not exceed a certain degree -> then act in the pre
+                        // defined way)
+
+
                         //  Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }

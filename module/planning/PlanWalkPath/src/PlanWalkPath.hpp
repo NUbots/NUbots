@@ -82,7 +82,10 @@ namespace module::planning {
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
 
-        /// @brief Just testing
+        /// @brief Plan an efficient path to avoid obstacles
+        /// @param obstacles list of obstacles sorted based on distance to robot
+        /// @param rDRr vector from robot final target
+        /// @return vector from robot to final target post obstacle avoidance analysis
         Eigen::Vector2d walk_around_obstacle(std::vector<Eigen::Vector2d> obstacles, Eigen::Vector2d rDRr);
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
