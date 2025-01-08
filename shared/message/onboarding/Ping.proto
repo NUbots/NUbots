@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package message.onboarding;
+
+message Ping{
+    // Create an int32 field named "count" (tag = 1) which iterates when pong msg is received in ping module.
+    int32 count = 1;
+
+    // HINT: Look at the format of other proto messages in the code base for reference.
+}
