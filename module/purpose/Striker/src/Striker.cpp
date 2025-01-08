@@ -90,8 +90,8 @@ namespace module::purpose {
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position              = config["ready_position"].as<Expression>();
             cfg.penalty_defence_position    = config["penalty_defence_position"].as<Expression>();
-            cfg.Hfr = pos_rpy_to_transform(Eigen::Vector3d(ready_position.x(), ready_position.y(), 0),
-                                           Eigen::Vector3d(0, 0, ready_position.z()));
+            cfg.Hfr = pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                           Eigen::Vector3d(0, 0, cfg.ready_position.z()));
             cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
 
             cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
