@@ -202,7 +202,7 @@ namespace module::purpose {
                     return;
                 }
                 // If the performing team is not us, find the ball and look at it
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (int(game_state.data.secondary_state.team_performing) != int(game_state.data.team.team_id)){
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
@@ -220,7 +220,7 @@ namespace module::purpose {
                     return;
                 }
                 // If the performing team is not us, find the ball and look at it
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (int(game_state.data.secondary_state.team_performing) != int(game_state.data.team.team_id)){
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
@@ -239,7 +239,7 @@ namespace module::purpose {
                 }
                 // If the performing team is not us, move to the penalty defence position (or bounded box edge) and look
                 // at the ball
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (int(game_state.data.secondary_state.team_performing) != int(game_state.data.team.team_id)){
                     emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
                                    Eigen::Vector3d(
                                        std::min(cfg.bounded_region_x_max, (double) cfg.penalty_defence_position.x()),
@@ -264,7 +264,7 @@ namespace module::purpose {
                     return;
                 }
                 // If the performing team is not us, find the ball and look at it
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (int(game_state.data.secondary_state.team_performing) != int(game_state.data.team.team_id)){
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
@@ -282,7 +282,7 @@ namespace module::purpose {
                     return;
                 }
                 // If the performing team is not us, find the ball and look at it
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (int(game_state.data.secondary_state.team_performing) != int(game_state.data.team.team_id)){
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
@@ -300,7 +300,7 @@ namespace module::purpose {
                     return;
                 }
                 // If the performing team is not us, find the ball and look at it
-                if ((int) game_state.data.secondary_state.team_performing != (int) game_state.data.team.team_id) {
+                if (int(game_state.data.secondary_state.team_performing) != int(game_state.data.team.team_id)){
                     emit<Task>(std::make_unique<FindBall>(), 1);
                     emit<Task>(std::make_unique<LookAtBall>(), 2);
                     return;
