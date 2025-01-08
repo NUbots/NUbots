@@ -28,6 +28,7 @@
 #define MODULE_PURPOSE_GOALIE_HPP
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -45,6 +46,8 @@ namespace module::purpose {
             Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
             /// @brief Penalty defence position to walk to when defending from a penalty kick from the opposing team
             Eigen::Vector3f penalty_defence_position = Eigen::Vector3f::Zero();
+            /// @brief Ready position to walk to
+            Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
             /// @brief x minimum bound on field to walk within
             double bounded_region_x_min = 0.0;
             /// @brief x maximum bound on field to walk within

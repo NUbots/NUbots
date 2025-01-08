@@ -90,6 +90,8 @@ namespace module::purpose {
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.ready_position              = config["ready_position"].as<Expression>();
             cfg.penalty_defence_position    = config["penalty_defence_position"].as<Expression>();
+            cfg.Hfr = pos_rpy_to_transform(Eigen::Vector3d(ready_position.x(), ready_position.y(), 0),
+                                           Eigen::Vector3d(0, 0, ready_position.z()));
             cfg.ball_kickoff_outside_radius = config["ball_kickoff_outside_radius"].as<double>();
 
             cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
@@ -104,13 +106,11 @@ namespace module::purpose {
             cfg.bounded_region_y_min = new_bounding_box.y_min;
             cfg.bounded_region_y_max = new_bounding_box.y_max;
             // Debugging
-            emit(std::make_unique<WalkInsideBoundedBox>(
-                cfg.bounded_region_x_min,
-                cfg.bounded_region_x_max,
-                cfg.bounded_region_y_min,
-                cfg.bounded_region_y_max,
-                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+            emit(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
+                                                        cfg.bounded_region_x_max,
+                                                        cfg.bounded_region_y_min,
+                                                        cfg.bounded_region_y_max,
+                                                        cfg.Hfr));
         });
 
         on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
@@ -143,9 +143,7 @@ namespace module::purpose {
         // Normal READY state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // If we are stable, walk to the ready field position
-            emit<Task>(std::make_unique<WalkToFieldPosition>(
-                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+            emit<Task>(std::make_unique<WalkToFieldPosition>(cfg.Hfr, true));
         });
 
         // Normal PLAYING state
@@ -168,9 +166,7 @@ namespace module::purpose {
                         return;
                     }
                     // Walk to ready so we are ready to play when kickoff finishes
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(
-                        pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                             Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(cfg.Hfr, true));
                     return;
                 }
                 play();
@@ -316,13 +312,11 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(
-                       cfg.bounded_region_x_min,
-                       cfg.bounded_region_x_max,
-                       cfg.bounded_region_y_min,
-                       cfg.bounded_region_y_max,
-                       pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                            Eigen::Vector3d(0, 0, cfg.ready_position.z()))),
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(cfg.bounded_region_x_min,
+                                                          cfg.bounded_region_x_max,
+                                                          cfg.bounded_region_y_min,
+                                                          cfg.bounded_region_y_max,
+                                                          cfg.Hfr),
                    4);  // Patrol bounded box region
     }
 

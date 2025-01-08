@@ -79,8 +79,10 @@ namespace module::purpose {
 
         on<Configuration>("AllRounder.yaml").then([this](const Configuration& config) {
             // Use configuration here from file AllRounder.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ready_position = config["ready_position"].as<Expression>();
+            this->log_level                = config["log_level"].as<NUClear::LogLevel>();
+            Eigen::Vector3d ready_position = config["ready_position"].as<Expression>();
+            cfg.Hfr = pos_rpy_to_transform(Eigen::Vector3d(ready_position.x(), ready_position.y(), 0),
+                                           Eigen::Vector3d(0, 0, ready_position.z()));
         });
 
         on<Provide<AllRounderTask>, Optional<Trigger<GameState>>>().then(
@@ -115,9 +117,7 @@ namespace module::purpose {
         // Normal READY state
         on<Provide<NormalAllRounder>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // If we are stable, walk to the ready field position
-            emit<Task>(std::make_unique<WalkToFieldPosition>(
-                pos_rpy_to_transform(Eigen::Vector3d(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                     Eigen::Vector3d(0, 0, cfg.ready_position.z()))));
+            emit<Task>(std::make_unique<WalkToFieldPosition>(cfg.Hfr, true));
         });
 
         // Normal PLAYING state

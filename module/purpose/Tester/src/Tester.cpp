@@ -135,11 +135,12 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<KickToGoal>(), cfg.kick_to_goal_priority);
                 }
                 if (cfg.walk_to_field_position_priority > 0) {
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
-                                   Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
-                                                   cfg.walk_to_field_position_position.y(),
-                                                   0),
-                                   Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z()))),
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                                   pos_rpy_to_transform(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
+                                                                        cfg.walk_to_field_position_position.y(),
+                                                                        0),
+                                                        Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z())),
+                                   true),
                                cfg.walk_to_field_position_priority);
                 }
                 if (cfg.walk_inside_bounded_box_priority > 0) {
