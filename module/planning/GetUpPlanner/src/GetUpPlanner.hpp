@@ -39,7 +39,11 @@ namespace module::planning {
         struct Config {
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
             float fallen_angle = 0.0f;
+            int delay_time = 1;
+            std::chrono::seconds start_delay = std::chrono::seconds(delay_time);
         } cfg;
+
+        struct StartGetUp {};
 
     public:
         /// @brief Called by the powerplant to build and setup the GetUpPlanner reactor.
@@ -48,5 +52,6 @@ namespace module::planning {
 
 
 }  // namespace module::planning
+
 
 #endif  // MODULE_PLANNING_GETUPPLANNER_HPP

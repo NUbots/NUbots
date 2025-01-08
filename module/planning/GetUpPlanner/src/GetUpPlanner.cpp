@@ -31,29 +31,36 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/planning/GetUpWhenFallen.hpp"
+#include "message/planning/StartGetUp.hpp"
 #include "message/skill/GetUp.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::planning {
+namespace module::planning
+{
 
     using extension::Configuration;
     using message::input::Sensors;
     using message::planning::GetUpWhenFallen;
+    using message::planning::StartGetUp;
     using message::skill::GetUp;
     using utility::support::Expression;
 
     GetUpPlanner::GetUpPlanner(std::unique_ptr<NUClear::Environment> environment)
-        : BehaviourReactor(std::move(environment)) {
+        : BehaviourReactor(std::move(environment))
+    {
 
-        on<Configuration>("GetUpPlanner.yaml").then([this](const Configuration& config) {
+        on<Configuration>("GetUpPlanner.yaml").then([this](const Configuration& config)
+        {
             this->log_level  = config["log_level"].as<NUClear::LogLevel>();
             cfg.fallen_angle = config["fallen_angle"].as<float>();
         });
 
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
-            [this](const Uses<GetUp>& getup, const Sensors& sensors) {
-                if (getup.run_state == RunState::RUNNING && !getup.done) {
+            [this](const Uses<GetUp>& getup, const Sensors& sensors)
+            {
+                if (getup.run_state == RunState::RUNNING && !getup.done)
+                {
                     emit<Task>(std::make_unique<Continue>());
                     log<DEBUG>("Idle");
                     return;
@@ -69,12 +76,25 @@ namespace module::planning {
 
                 // // Check if angle between torso z axis and world z axis is greater than config value
                 // Only emit if we're not already requesting a getup
-                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
-                    emit<Task>(std::make_unique<GetUp>());
-                    log<DEBUG>("Execute getup");
+                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK)
+                {
+                    // Start the getup after a small delay
+                    log<INFO>("Has fallen");
+                    emit<Scope::DELAY>(std::make_unique<StartGetUp>(), cfg.start_delay);
+                    log<INFO>("line 84");
                 }
                 // Otherwise do not need to get up so emit no tasks
             });
+
+
+        on<Trigger<StartGetUp>>().then([this]
+        {
+            log<DEBUG>("============================================================================================");
+            emit<Task>(std::make_unique<GetUp>());
+            log<DEBUG>("Execute getup");
+        });
+
+
     }
 
 }  // namespace module::planning
