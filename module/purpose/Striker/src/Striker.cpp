@@ -237,10 +237,9 @@ namespace module::purpose {
                 // at the ball
                 if (game_state.data.secondary_state.team_performing != game_state.data.team.team_id) {
                     emit<Task>(std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(
-                                   Eigen::Vector3d(
-                                       std::min(cfg.bounded_region_x_max, (double) cfg.penalty_defence_position.x()),
-                                       cfg.penalty_defence_position.y(),
-                                       cfg.penalty_defence_position.z()),
+                                   Eigen::Vector3d(std::min(cfg.bounded_region_x_max, cfg.penalty_defence_position.x()),
+                                                   cfg.penalty_defence_position.y(),
+                                                   cfg.penalty_defence_position.z()),
                                    Eigen::Vector3d(0, 0, cfg.penalty_defence_position.z()))),
                                1);
                     emit<Task>(std::make_unique<FindBall>(), 2);
