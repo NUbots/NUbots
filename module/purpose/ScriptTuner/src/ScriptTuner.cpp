@@ -202,7 +202,8 @@ namespace module::purpose {
             refresh_view();
         });
 
-        on<Always>().then([this] {
+        // on<Always>().then([this] {
+        on<IO>(STDIN_FILENO, IO::READ).then([this] {
             switch (getch()) {
                 case 'k':     // Change selection up
                 case KEY_UP:  // Change selection up
@@ -293,17 +294,22 @@ namespace module::purpose {
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
                     break;
-                case ERR:  // No input
-                    napms(100);
-                    refresh_view();
-                    break;
+                    // case ERR:  // No input
+                    //     napms(100);
+                    //     refresh_view();
+                    //     break;
             }
             // Update whatever visual changes we made
             refresh_view();
         });
 
         // When we shutdown end ncurses
-        on<Shutdown>().then(endwin);
+        on<Shutdown>().then([this] {
+            // End curses mode
+            endwin();
+            // Restore terminal state
+            refresh();
+        });
     }
 
     void ScriptTuner::activate_frame(int frame) {
