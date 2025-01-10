@@ -118,7 +118,7 @@ namespace module::purpose {
 
                 // Check if the script exists and load it if it does.
                 if (std::filesystem::exists(script_path)) {
-                    log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
+                    log<DEBUG>("Loading script: ", script_path, '\n');
                     load_script(script_path);
                     // Build our initial gui with context from loaded script
                     refresh_view();
@@ -126,7 +126,7 @@ namespace module::purpose {
             }
 
             else {
-                log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                log<DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                 powerplant.shutdown();
             }
         });
@@ -154,7 +154,7 @@ namespace module::purpose {
         });
 
         on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
-            log<NUClear::DEBUG>("Autosaving script if required...");
+            log<DEBUG>("Autosaving script if required...");
 
             // Only autosave if autosaving is enabled and we have unsaved changes
             if (!autosave_enabled || !unsaved_changes) {
@@ -164,11 +164,11 @@ namespace module::purpose {
             // Before we start, temp save the old path so we can delete it once we have a new autosave file.
             auto last_autosave_path = this->autosave_path;
 
-            log<NUClear::DEBUG>("-> Autosaving to: ", autosave_dir);
+            log<DEBUG>("-> Autosaving to: ", autosave_dir);
 
             // Check if autosave directory exists
             if (!std::filesystem::exists(this->autosave_dir)) {
-                log<NUClear::DEBUG>("-> Creating autosave directory: ", this->autosave_dir);
+                log<DEBUG>("-> Creating autosave directory: ", this->autosave_dir);
                 // Create the autosave directory
                 std::filesystem::create_directories(this->autosave_dir);
             }
@@ -185,13 +185,13 @@ namespace module::purpose {
             utility::file::writeToFile(this->autosave_path, n);
 
             // Log the autosave even though you can't see logs in script tuner
-            log<NUClear::INFO>("Autosaved script to:", this->autosave_path);
+            log<INFO>("Autosaved script to:", this->autosave_path);
 
             // Remove the old autosave file to ensure we don't create a massive list of
             // autosave files during a long session.
             if (!last_autosave_path.empty()) {
                 std::filesystem::remove(last_autosave_path);
-                log<NUClear::DEBUG>("Deleted old autosave file: ", last_autosave_path);
+                log<DEBUG>("Deleted old autosave file: ", last_autosave_path);
             }
 
             // This will make sure the alert is displayed on the screen
@@ -562,7 +562,7 @@ namespace module::purpose {
         // If we don't then save our current motor position as the position
         if (it == std::end(script.frames[frame].targets)) {
 
-            emit<Scope::DIRECT>(std::make_unique<LockServo>());
+            emit<Scope::INLINE>(std::make_unique<LockServo>());
         }
         else {
             // Remove this frame
@@ -660,7 +660,7 @@ namespace module::purpose {
         }
 
         // Log a success message
-        log<NUClear::DEBUG>("Successfully loaded script from:", path);
+        log<DEBUG>("Successfully loaded script from:", path);
     }
 
     void ScriptTuner::save_script() {
@@ -671,12 +671,12 @@ namespace module::purpose {
         // Delete autosave files now that we've saved
         if (!autosave_path.empty()) {
             std::filesystem::remove(autosave_path);
-            log<NUClear::DEBUG>("Deleted old autosave file: ", autosave_path);
+            log<DEBUG>("Deleted old autosave file: ", autosave_path);
         }
         // Remove the autosave directory if it's empty
         const auto autosave_dir = this->autosave_path.parent_path();
         if (std::filesystem::is_empty(autosave_dir)) {
-            log<NUClear::DEBUG>("Deleting empty autosave directory: ", autosave_dir);
+            log<DEBUG>("Deleting empty autosave directory: ", autosave_dir);
             std::filesystem::remove(autosave_dir);
         }
         // Clear the autosave path now that it doesn't exist anymore.

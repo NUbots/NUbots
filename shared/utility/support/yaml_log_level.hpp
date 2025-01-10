@@ -45,12 +45,12 @@ namespace YAML {
             Node node;
 
             switch (rhs) {
-                case NUClear::TRACE: node = "TRACE"; break;
-                case NUClear::DEBUG: node = "DEBUG"; break;
-                case NUClear::INFO: node = "INFO"; break;
-                case NUClear::WARN: node = "WARN"; break;
-                case NUClear::ERROR: node = "ERROR"; break;
-                case NUClear::FATAL: node = "FATAL"; break;
+                case NUClear::LogLevel::TRACE: node = "TRACE"; break;
+                case NUClear::LogLevel::DEBUG: node = "DEBUG"; break;
+                case NUClear::LogLevel::INFO: node = "INFO"; break;
+                case NUClear::LogLevel::WARN: node = "WARN"; break;
+                case NUClear::LogLevel::ERROR: node = "ERROR"; break;
+                case NUClear::LogLevel::FATAL: node = "FATAL"; break;
                 default: node = "DEBUG"; break;
             }
 
@@ -62,12 +62,12 @@ namespace YAML {
             try {
                 // clang-format off
                 auto lvl = node.as<std::string>();
-                if      (lvl == "TRACE")       { rhs = NUClear::TRACE; }
-                else if (lvl == "INFO")        { rhs = NUClear::INFO;  }
-                else if (lvl == "WARN")        { rhs = NUClear::WARN;  }
-                else if (lvl == "ERROR")       { rhs = NUClear::ERROR; }
-                else if (lvl == "FATAL")       { rhs = NUClear::FATAL; }
-                else /* or (lvl == "DEBUG") */ { rhs = NUClear::DEBUG; }
+                if      (lvl == "TRACE")       { rhs = NUClear::LogLevel::TRACE; }
+                else if (lvl == "INFO")        { rhs = NUClear::LogLevel::INFO;  }
+                else if (lvl == "WARN")        { rhs = NUClear::LogLevel::WARN;  }
+                else if (lvl == "ERROR")       { rhs = NUClear::LogLevel::ERROR; }
+                else if (lvl == "FATAL")       { rhs = NUClear::LogLevel::FATAL; }
+                else /* or (lvl == "DEBUG") */ { rhs = NUClear::LogLevel::DEBUG; }
                 // clang-format on
             }
             catch (const std::invalid_argument& ex) {
