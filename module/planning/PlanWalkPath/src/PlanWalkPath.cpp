@@ -120,17 +120,18 @@ namespace module::planning {
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
+                // Avoiding goal posts and robots when theyre in the planned path (lean more towards calculating the
+                // path that it will be moving)
 
-                // Avoiding goal posts and robots when theyre in the planned path
                 std::vector<Eigen::Vector2d> all_obstacles{};
                 if (!goals.goals.empty() || robots != nullptr) {
-
                     // If the robot can see goal posts, try to avoid them
                     if (!goals.goals.empty()) {
-                        // The position of the goal post
-                        Eigen::Vector3d goal_post = goals.goals[0].post.bottom * goals.goals[0].post.distance;
-                        // Put this as an obstacle
-                        all_obstacles.emplace_back(goal_post.head(2));
+                        // Calc the position of the goal posts, add them as obstacles
+                        for (const auto& goal : goals.goals) {
+                            auto goal_post = goal.post.bottom * goal.post.distance;
+                            all_obstacles.emplace_back(goal_post.head(2));
+                        }
                     }
                     // If there are robots, check if there are obstacles in the way
                     if (robots != nullptr) {
@@ -143,7 +144,6 @@ namespace module::planning {
                     std::sort(all_obstacles.begin(),
                               all_obstacles.end(),
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
-
                     // Get the obstacles in the way of the current path
                     const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
                     // If there are obstacles in the way, walk around them
@@ -155,6 +155,7 @@ namespace module::planning {
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
+                // check the final destination will make the bumping into goal post happen
 
 
                 // Calculate the translational error between the robot and the target point (x, y)
