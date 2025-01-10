@@ -125,6 +125,10 @@ namespace module::purpose {
                 }
             }
 
+            else if (args.size() == 1) {
+                log<WARN>("No script path provided. Did you forget to run with a script?");
+            }
+
             else {
                 log<DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                 powerplant.shutdown();
