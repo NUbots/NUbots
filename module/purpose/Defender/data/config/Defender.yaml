@@ -4,6 +4,9 @@ log_level: INFO
 # Position on field to walk to (x,y,theta)
 ready_position: [2.5, 0, -3.14]
 
+# Position on the field to walk to if the opposing team is awarded a penalty kick
+penalty_defence_position: [2, 2, -3.14]
+
 # Bounded area for WalkInsideBoundedBox to use
 bounded_region_x_min: 1.5
 bounded_region_x_max: 3.5
