@@ -1264,7 +1264,7 @@ namespace module::purpose {
                     }  // end KEY_ENTER else
                     mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                     break;  // end case KEY_ENTER
-            }               // switch
+            }  // switch
 
         }  // while
 
