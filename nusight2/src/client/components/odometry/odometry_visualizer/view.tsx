@@ -1,109 +1,71 @@
 import React from "react";
-import { action } from "mobx";
-import { computed } from "mobx";
+import { OrbitControls } from "@react-three/drei";
+import { Object3DProps } from "@react-three/fiber";
+import { observer } from "mobx-react";
+import * as THREE from "three";
 
-import { Vector2 } from "../../../../shared/math/vector2";
-import { Canvas } from "../../three/three";
-import { Three } from "../../three/three";
+import { Vector3 } from "../../../../shared/math/vector3";
+import { PerspectiveCamera, ThreeFiber } from "../../three/three_fiber";
 
 import { OdometryVisualizerModel } from "./model";
 import styles from "./style.module.css";
-import { OdometryVisualizerViewModel } from "./view_model";
 
-export class OdometryVisualizer extends React.Component<{ model: OdometryVisualizerModel }> {
-  private dragger?: Dragger;
-
-  render() {
-    return (
-      <div className={styles.visualizer}>
-        <Three
-          stage={this.stage}
-          onWheel={this.onWheel}
-          onMouseDown={this.onMouseDown}
-          onMouseMove={this.onMouseMove}
-          onMouseUp={this.onMouseUp}
+export const OdometryVisualizer = observer(({ model }: { model: OdometryVisualizerModel }) => {
+  const rTWw = model.Hwt.t.vec3();
+  return (
+    <div className={styles.visualizer}>
+      <ThreeFiber>
+        <PerspectiveCamera fov={75} aspect={1} near={0.001} far={100} up={[0, 0, 1]} />
+        <OrbitControls enableDamping={true} enablePan={false} target={rTWw.toArray()} />
+        <Torso
+          accelerometer={model.accelerometer}
+          position={rTWw.toArray()}
+          rotation={new THREE.Euler().setFromRotationMatrix(model.Hwt.toThree())}
         />
-        <div className={styles.legend}>
-          <div className={styles.item}>
-            <div className={styles.color} style={{ backgroundColor: "red" }} />
-            <div className={styles.color} style={{ backgroundColor: "green" }} />
-            <div className={styles.color} style={{ backgroundColor: "blue" }} />
-            <span>Hwt</span>
-          </div>
-          <div className={styles.item}>
-            <div className={styles.color} style={{ backgroundColor: "white" }} />
-            <span>Accelerometer</span>
-          </div>
+        <Floor />
+        <WorldFrame position={rTWw.toArray()} />
+      </ThreeFiber>
+      <div className={styles.legend}>
+        <div className={styles.item}>
+          <div className={styles.color} style={{ backgroundColor: "red" }} />
+          <div className={styles.color} style={{ backgroundColor: "green" }} />
+          <div className={styles.color} style={{ backgroundColor: "blue" }} />
+          <span>Hwt</span>
+        </div>
+        <div className={styles.item}>
+          <div className={styles.color} style={{ backgroundColor: "white" }} />
+          <span>Accelerometer</span>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+});
 
-  private readonly stage = (canvas: Canvas) => {
-    const cameraViewModel = OdometryVisualizerViewModel.of(canvas, this.props.model);
-    return computed(() => [cameraViewModel.stage]);
-  };
+const Torso = (props: { accelerometer: Vector3 } & Object3DProps) => (
+  <object3D {...props}>
+    <Basis />
+    <Accelerometer accelerometer={props.accelerometer} />
+  </object3D>
+);
 
-  @action.bound
-  private onWheel(deltaY: number) {
-    const { camera } = this.props.model;
-    camera.distance = clamp(camera.distance + deltaY / 200, 0.01, 10, 0);
-  }
+const Basis = () => (
+  <object3D>
+    <arrowHelper args={[new THREE.Vector3(1, 0, 0), undefined, 1, 0xff0000]} />
+    <arrowHelper args={[new THREE.Vector3(0, 1, 0), undefined, 1, 0x00ff00]} />
+    <arrowHelper args={[new THREE.Vector3(0, 0, 1), undefined, 1, 0x0000ff]} />
+  </object3D>
+);
 
-  @action.bound
-  private onMouseDown(x: number, y: number) {
-    const {
-      model,
-      model: {
-        camera: { pitch, yaw },
-      },
-    } = this.props;
-    this.dragger = new Dragger(model, pitch, yaw, Vector2.of(x, y));
-  }
+const WorldFrame = (props: Object3DProps) => (
+  <object3D {...props}>
+    <arrowHelper args={[new THREE.Vector3(1, 0, 0), undefined, 0.2, 0xff0000]} />
+    <arrowHelper args={[new THREE.Vector3(0, 1, 0), undefined, 0.2, 0x00ff00]} />
+    <arrowHelper args={[new THREE.Vector3(0, 0, 1), undefined, 0.2, 0x0000ff]} />
+  </object3D>
+);
 
-  @action.bound
-  private onMouseMove(x: number, y: number) {
-    if (!this.dragger) {
-      return;
-    }
-    this.dragger.to = Vector2.of(x, y);
-  }
+const Accelerometer = ({ accelerometer }: { accelerometer: Vector3 }) => (
+  <arrowHelper args={[accelerometer.normalize().toThree(), undefined, accelerometer.length / 9.8, 0xffffff]} />
+);
 
-  @action.bound
-  private onMouseUp(x: number, y: number) {
-    if (!this.dragger) {
-      return;
-    }
-    this.dragger.to = Vector2.of(x, y);
-    this.dragger = undefined;
-  }
-}
-
-class Dragger {
-  private _to: Vector2;
-
-  constructor(
-    private readonly model: OdometryVisualizerModel,
-    private readonly fromPitch: number,
-    private readonly fromYaw: number,
-    private readonly from: Vector2,
-  ) {
-    this._to = from;
-  }
-
-  set to(to: Vector2) {
-    this._to = to;
-    this.update();
-  }
-
-  private update() {
-    const delta = this._to.subtract(this.from);
-    const scale = 1 / 100;
-    this.model.camera.pitch = clamp(this.fromPitch - delta.y / 100, -Math.PI / 2, Math.PI / 2);
-    this.model.camera.yaw = this.fromYaw + scale * delta.x;
-  }
-}
-
-const clamp = (x: number, min: number, max: number, eps = 1e-9): number => {
-  return Math.max(min + eps, Math.min(max - eps, x));
-};
+const Floor = () => <gridHelper args={[100, 100]} rotation={[Math.PI / 2, 0, 0]} />;
