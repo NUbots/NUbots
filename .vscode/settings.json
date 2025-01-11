@@ -18,7 +18,11 @@
   "files.associations": {
     "*.role": "cmake",
     ".clang-tidy": "yaml",
-    ".Doxyfile": "properties"
+    ".Doxyfile": "properties",
+    "bitset": "cpp",
+    "chrono": "cpp",
+    "cmath": "cpp",
+    "complex": "cpp"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
