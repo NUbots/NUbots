@@ -40,6 +40,7 @@
       {
         "vars": "all",
         "args": "after-used",
+        "caughtErrors": "none",
         "ignoreRestSiblings": false,
         "varsIgnorePattern": "^_",
         "argsIgnorePattern": "^_"
