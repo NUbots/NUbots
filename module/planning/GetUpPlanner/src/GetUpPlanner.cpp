@@ -71,11 +71,12 @@ namespace module::planning {
 
                 // // Check if angle between torso z axis and world z axis is greater than config value
                 // Only emit if we're not already requesting a getup
-                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
+                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK && !cfg.start_getup_emitted) {
                     // Start the getup after a small delay
                     log<INFO>("Has fallen");
                     emit<Scope::DELAY>(std::make_unique<StartGetUp>(),
-                                       std::chrono::seconds(1 /* Using 1 second to test functionality */));
+                                       std::chrono::milliseconds(1000 /* Delay for 1 second */));
+                    cfg.start_getup_emitted = true;  // Precent multiple emissions
                 }
                 // Otherwise do not need to get up so emit no tasks
             });
@@ -85,6 +86,7 @@ namespace module::planning {
             log<INFO>("StartGetUp is triggered");
             // Emit GetUp task
             emit<Task>(std::make_unique<GetUp>());
+            cfg.start_getup_emitted = false;  // Reset so it can be triggered again after next fall
             log<DEBUG>("Execute getup");
         });
     }
