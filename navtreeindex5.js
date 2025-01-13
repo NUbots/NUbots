@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1platform_1_1Webots.html#afbb26cc2c24bd63b2fdc4b9f53e1cfb8":[2,0,3,9,3,9],
 "classmodule_1_1platform_1_1Webots.html#afbd3a1a09ee1fc6c9d42964d9fb9a24d":[2,0,3,9,3,3],
 "classmodule_1_1platform_1_1Webots.html#aff6bcefaac9f9579110d8fc9c8c1ce23":[2,0,3,9,3,15],
 "classmodule_1_1purpose_1_1AllRounder.html":[2,0,3,10,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html#ac4217c34ad76d12a96002fe2d6221bfe":[2,0,3,13,1,0,0],
 "classmodule_1_1support_1_1logging_1_1DataLogging.html":[2,0,3,13,1,1],
 "classmodule_1_1support_1_1logging_1_1DataLogging.html#a10d2fd93911d7e43c1f52ab0792b2419":[2,0,3,13,1,1,1],
-"classmodule_1_1support_1_1logging_1_1DataLogging.html#a14372a0c6ddb4bb659810a4afe53d608":[2,0,3,13,1,1,8],
-"classmodule_1_1support_1_1logging_1_1DataLogging.html#a1e28b802510291ebad72daedfc7ed2a1":[2,0,3,13,1,1,10]
+"classmodule_1_1support_1_1logging_1_1DataLogging.html#a14372a0c6ddb4bb659810a4afe53d608":[2,0,3,13,1,1,8]
 };

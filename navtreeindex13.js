@@ -1,5 +1,6 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca484148a4f5dc6f504c410f968f97fb89":[2,0,3,1,1,2,0,0,2],
 "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca8279e608bb823bcbcf51d08467b42ed2":[2,0,3,1,1,2,0,0,0],
 "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eecaf54a47d737a1dfe08f0222fc1cd8dcec":[2,0,3,1,1,2,0,0,3],
 "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a401358e52210d88121edf063cd493649":[2,0,3,1,1,2,0,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1input_1_1SensorFilter_1_1Config.html#af990e191913dc2974df0b0abcd55a0d9":[2,0,3,2,27,0,5],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html":[2,0,3,2,27,0,0],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html#aef8bb374d6c78e09dedd532c46d18530":[2,0,3,2,27,0,0,0],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html#afaf910cd23cb0d3a22cba3ea0ffe7c9a":[2,0,3,2,27,0,0,1],
-"structmodule_1_1input_1_1SettingsFunctions.html":[2,0,3,2,28]
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html#afaf910cd23cb0d3a22cba3ea0ffe7c9a":[2,0,3,2,27,0,0,1]
 };

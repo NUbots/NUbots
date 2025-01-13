@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"classmodule_1_1tools_1_1RoboCupConfiguration.html#a858336b38e53e960c44d3aa115875c31":[2,0,3,14,4,13],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#a8a1406cc894564c08ba8b84b5197051d":[2,0,3,14,4,3],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#aa4b37ae9123408e3088ced66790621ca":[2,0,3,14,4,5],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#aae2cf546846460b7b6a8eeb0e943b252":[2,0,3,14,4,25],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "classutility_1_1localisation_1_1OccupancyMap.html#aed9f6333ddddb2c14c2c6de925dbebfe":[2,0,7,4,1,3],
 "classutility_1_1localisation_1_1OccupancyMap.html#af91722d20cccd9d6ea3a38ac0df65183":[2,0,7,4,1,0],
 "classutility_1_1math_1_1filter_1_1KalmanFilter.html":[2,0,7,5,0,0],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a06169cf7118ac58ecb86caeb5944c279":[2,0,7,5,0,0,13],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a0eaaaf9cc3399cbcc275c4acc6f525b1":[2,0,7,5,0,0,19]
+"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a06169cf7118ac58ecb86caeb5944c279":[2,0,7,5,0,0,13]
 };

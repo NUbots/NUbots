@@ -5,5 +5,7 @@ var structmodule_1_1purpose_1_1Striker_1_1Config =
     [ "bounded_region_x_min", "structmodule_1_1purpose_1_1Striker_1_1Config.html#a2fdf0aee07e16b76895e36bbce47413c", null ],
     [ "bounded_region_y_max", "structmodule_1_1purpose_1_1Striker_1_1Config.html#aafcb47eb1452f47f9ffcc548df0f05ef", null ],
     [ "bounded_region_y_min", "structmodule_1_1purpose_1_1Striker_1_1Config.html#a94174de20ab9566019c6bf3b546fc8f4", null ],
-    [ "Hfr", "structmodule_1_1purpose_1_1Striker_1_1Config.html#ad6b34a367ae6cc15b0ea63b9fd1719ca", null ]
+    [ "Hfr", "structmodule_1_1purpose_1_1Striker_1_1Config.html#ad6b34a367ae6cc15b0ea63b9fd1719ca", null ],
+    [ "penalty_defence_position", "structmodule_1_1purpose_1_1Striker_1_1Config.html#aa6ddb4b0d5efe2dbf455c1e6091be84b", null ],
+    [ "ready_position", "structmodule_1_1purpose_1_1Striker_1_1Config.html#acc532fa8c6952d8cd84feac61e027082", null ]
 ];

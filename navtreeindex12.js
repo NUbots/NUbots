@@ -1,5 +1,6 @@
 var NAVTREEINDEX12 =
 {
+"structdynamixel_1_1v2_1_1PingCommand.html#a04318a230aea2e07864d5301c51c5ca1":[2,0,0,0,6,2],
 "structdynamixel_1_1v2_1_1PingCommand.html#a59bd605996318e1333bf728f19564afd":[2,0,0,0,6,3],
 "structdynamixel_1_1v2_1_1PingCommand.html#a891361d6737a0297e8d0bf6f6cfce51a":[2,0,0,0,6,0],
 "structdynamixel_1_1v2_1_1PingCommand.html#ac64bfd363509ff687f8a90c4a7ca591d":[2,0,0,0,6,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1extension_1_1Director_1_1Solution.html#abcff273d3b8e0e7613c512a6444f5609":[2,0,3,1,1,2,1],
 "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html":[2,0,3,1,1,2,0],
 "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eec":[2,0,3,1,1,2,0,0],
-"structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca401749dbb0f80e835f5992997d2af8ad":[2,0,3,1,1,2,0,0,1],
-"structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca484148a4f5dc6f504c410f968f97fb89":[2,0,3,1,1,2,0,0,2]
+"structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca401749dbb0f80e835f5992997d2af8ad":[2,0,3,1,1,2,0,0,1]
 };

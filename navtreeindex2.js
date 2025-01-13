@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classJoystick.html#a23429c0470e1a32b8de61e1ad7c251c1":[2,0,9,0],
 "classJoystick.html#a31278583db160eb463ad75669e9e645f":[2,0,9,6],
 "classJoystick.html#a34b4f12c9b867cdda4499b9b2cccc7a8":[2,0,9,5],
 "classJoystick.html#a3c3f62dd4a36f259dc20e0f18b668f82":[2,0,9,12],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1BallLocalisation.html#a06641d112c49b4ae99af56332554ffa8":[2,0,3,3,1,5],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a0d2ad24495d922de17be6a79bf308760":[2,0,3,3,1,6],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a1b74f959a8666a57fe02c9f877dc4c71":[2,0,3,3,1,1],
-"classmodule_1_1localisation_1_1BallLocalisation.html#a4346bd4a6a9a623344cb362e2892437f":[2,0,3,3,1,4],
-"classmodule_1_1localisation_1_1BallLocalisation.html#a5378b44efc6fa1084a16203eecd52c9b":[2,0,3,3,1,2]
+"classmodule_1_1localisation_1_1BallLocalisation.html#a4346bd4a6a9a623344cb362e2892437f":[2,0,3,3,1,4]
 };

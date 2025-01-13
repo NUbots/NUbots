@@ -620,6 +620,7 @@ var namespaces_dup =
         [ "LimbID", "ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
         [ "Phase", "AllRounder_8cpp.html#a19ac08a0be5f41ccc26e7b0186c14e68", null ],
+        [ "SecondaryState", "Striker_8cpp.html#a658d7998c7cd5095bad33a23528be0ac", null ],
         [ "ServoID", "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],

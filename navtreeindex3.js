@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1localisation_1_1BallLocalisation.html#a5378b44efc6fa1084a16203eecd52c9b":[2,0,3,3,1,2],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a9137a0a153965efcb8eb20dd75d6da22":[2,0,3,3,1,3],
 "classmodule_1_1localisation_1_1BallModel.html":[2,0,3,3,2],
 "classmodule_1_1localisation_1_1BallModel.html#a1275e4124413c906e869c242879d0cc0":[2,0,3,3,2,8],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html#a1ee0cf4d175c2dc8d2d718723090e85f":[2,0,3,7,0,1,4,9],
 "classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html#a3a992010564c98298c132ea0ce34aef8":[2,0,3,7,0,1,4,5],
 "classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html#a511034ce24c04e0e88a9744c6884e811":[2,0,3,7,0,1,4,2],
-"classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html#a5667339a1e064824d9eb9202b3461c48":[2,0,3,7,0,1,4,0],
-"classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html#a80d09f7b68d8fbd0c6b438ef7f90974e":[2,0,3,7,0,1,4,4]
+"classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html#a5667339a1e064824d9eb9202b3461c48":[2,0,3,7,0,1,4,0]
 };
