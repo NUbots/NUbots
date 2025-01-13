@@ -87,7 +87,7 @@ namespace module::planning {
             // Emit GetUp task
             emit<Task>(std::make_unique<GetUp>());
             cfg.start_getup_emitted = false;  // Reset so it can be triggered again after next fall
-            log<DEBUG>("Execute getup");
+            log<INFO>("Execute getup");
         });
     }
 
