@@ -476,6 +476,8 @@ namespace module::input {
         Eigen::Vector3d est_Rwt  = mat_to_rpy_intrinsic(Hwt.rotation());
         emit(graph("Hwt est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
         emit(graph("Rwt est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
+        log<NUClear::INFO>("Hwt est translation (rTWw): ", est_rTWw.x(), est_rTWw.y(), est_rTWw.z());
+        log<NUClear::INFO>("Rwt est angles (rpy): ", est_Rwt.x(), est_Rwt.y(), est_Rwt.z());
         emit(graph("vTw est", sensors->vTw.x(), sensors->vTw.y(), sensors->vTw.z()));
 
         Eigen::Isometry3d Hwr    = Eigen::Isometry3d(sensors->Hrw).inverse();

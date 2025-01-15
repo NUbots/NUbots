@@ -66,6 +66,8 @@ namespace module::planning {
             double backward_buffer = 0.0;
             /// @brief Maximum angle that we are considered to be aligned with the final heading
             double max_aligned_angle = 0.0;
+            /// @brief Starting velocity when walking backwards
+            double starting_velocity = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
@@ -103,6 +105,10 @@ namespace module::planning {
         /// @brief Walk straight backwards when the robot is next to the target
         /// @return adjusted target direction
         Eigen::Vector2d walk_backwards();
+
+        /// @brief Change the direction of the robot when walking backwards
+        /// @return adjusted target direction
+        Eigen::Vector2d change_direction();
 
         /// @brief Accelerate and rotate the robot towards the target point
         /// @return desired velocity magnitude

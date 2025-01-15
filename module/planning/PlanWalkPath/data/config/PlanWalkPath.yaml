@@ -26,6 +26,7 @@ strafe_gain: 1
 max_strafe_angle: 70 * pi / 180 # Maximum angle to strafe at
 max_aligned_angle: 120 * pi / 180 # Maximum angle to be considered aligned
 backward_buffer: 20 * pi / 180 # Buffer angle to keep direction of strafe
+starting_velocity: 0.0001 # Starting velocity for walking
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.6

@@ -91,6 +91,7 @@ namespace module::planning {
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
             cfg.rotate_velocity_x = config["rotate_velocity_x"].as<double>();
             cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
+            cfg.starting_velocity = config["starting_velocity"].as<double>();
 
             // PivotAroundPoint tuning
             cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
@@ -102,6 +103,7 @@ namespace module::planning {
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+                NUClear::log<NUClear::INFO>("Planning walk path velocity", velocity_magnitude);
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
@@ -153,7 +155,14 @@ namespace module::planning {
 
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
-                    desired_velocity_magnitude = accelerate_to_target(desired_heading);
+                    // If we are walking backwards, change direction
+                    if (is_walking_backwards) {
+                        rDRr                       = change_direction();
+                        desired_velocity_magnitude = velocity_magnitude;
+                    }
+                    else {
+                        desired_velocity_magnitude = accelerate_to_target(desired_heading);
+                    }
                 }
                 else {
                     // Normalise error between [0, 1] inside align radius
@@ -167,21 +176,35 @@ namespace module::planning {
                     // If we are aligned with the final heading and the angle to the target is too large, step backwards
                     if (std::abs(angle_to_final_heading) < cfg.max_aligned_angle
                         && std::abs(angle_to_target) > max_strafe_angle) {
-                        rDRr                       = walk_backwards();
+                        rDRr = walk_backwards();
+                        NUClear::log<NUClear::INFO>("Walking backwards");
                         desired_velocity_magnitude = velocity_magnitude;
                         // Do not rotate when stepping backwards
                         desired_heading = 0.0;
                     }
                     // Go towards target without any rotation
                     else {
-                        desired_velocity_magnitude = strafe_to_target(error);
+                        // If we are walking backwards, change direction
+                        if (is_walking_backwards) {
+                            NUClear::log<NUClear::INFO>("Changing direction while walking backwards");
+                            rDRr                       = change_direction();
+                            desired_velocity_magnitude = velocity_magnitude;
+                        }
+                        else {
+                            desired_velocity_magnitude = strafe_to_target(error);
+                        }
                     }
                 }
 
+                NUClear::log<NUClear::INFO>("Desired velocity magnitude", desired_velocity_magnitude);
+                NUClear::log<NUClear::INFO>("rDRr", rDRr);
+
                 // Calculate the target velocity
                 const Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
+                NUClear::log<NUClear::INFO>("Desired translational velocity", desired_translational_velocity);
                 Eigen::Vector3d velocity_target;
                 velocity_target << desired_translational_velocity, desired_heading;
+                NUClear::log<NUClear::INFO>("Velocity target", velocity_target);
 
                 // Limit the velocity to the maximum translational and angular velocity
                 velocity_target = constrain_velocity(velocity_target);
@@ -226,8 +249,6 @@ namespace module::planning {
     }
 
     double PlanWalkPath::strafe_to_target(const double error) {
-        // Reset the backwards walking state
-        is_walking_backwards = false;
         // "Accelerate", assuring velocity is always positive
         // TODO: check if we want to use the velocity magnitude here, starting at the starting velocity
         velocity_magnitude = std::max(velocity_magnitude, 0.1);
@@ -242,6 +263,19 @@ namespace module::planning {
         }
         // Walk on spot, then walk backwards
         velocity_magnitude *= 1.5;
+        // Step backwards while keeping the forward direction
+        return Eigen::Vector2d(-1, 0.001);
+    }
+
+    Eigen::Vector2d PlanWalkPath::change_direction() {
+        // Slow down velocity when changing direction
+        velocity_magnitude = std::max(velocity_magnitude * 0.5, 0.1);
+        NUClear::log<NUClear::INFO>("velocity_magnitude", velocity_magnitude);
+        // Hit a minimum velocity, then change direction
+        if (velocity_magnitude <= 0.1) {
+            // Change direction
+            is_walking_backwards = !is_walking_backwards;
+        }
         // Step backwards while keeping the forward direction
         return Eigen::Vector2d(-1, 0.001);
     }

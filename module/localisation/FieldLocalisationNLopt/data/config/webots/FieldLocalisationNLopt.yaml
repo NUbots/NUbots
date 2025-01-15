@@ -23,7 +23,7 @@ min_field_line_intersections: 3
 start_time_delay: 10
 
 # Bool to use ground truth for localisation
-use_ground_truth_localisation: false
+use_ground_truth_localisation: true
 
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 1
