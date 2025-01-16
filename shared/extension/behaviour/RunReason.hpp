@@ -49,6 +49,8 @@ namespace extension::behaviour {
         STOPPED,
         /// A subtask has finished and emitted a Done message
         SUBTASK_DONE,
+        /// The provider emitted a Wait message and the time has elapsed, causing the provider to run
+        WAIT,
         /// Another task requires a causing from this provider and pushed it to run
         PUSHED
     };

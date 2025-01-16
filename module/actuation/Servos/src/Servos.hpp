@@ -60,25 +60,20 @@ namespace module::actuation {
                                        servo.command.state.gain,
                                        servo.command.state.torque));
                         }
+                        // Emit the request to move the servo
                         emit(std::make_unique<ServoTarget>(servo.command.time,
                                                            ID,
                                                            servo.command.position,
                                                            servo.command.state.gain,
                                                            servo.command.state.torque));
+                        // Rerun the Provider when the servo is done moving
+                        emit<Task>(std::make_unique<Wait>(servo.command.time));
                     }
-                    emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                       ID,
-                                                       servo.command.position,
-                                                       servo.command.state.gain,
-                                                       servo.command.state.torque));
-                    // Rerun the Provider when the servo is done moving
-                    emit<Task>(std::make_unique<Wait>(servo.command.time));
-                }
-                // When the servo is done moving, emit Done
-                else if (run_reason == RunReason::WAIT) {
-                    emit<Task>(std::make_unique<Done>());
-                }
-            });
+                    // When the servo is done moving, emit Done
+                    else if (run_reason == RunReason::WAIT) {
+                        emit<Task>(std::make_unique<Done>());
+                    }
+                });
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.

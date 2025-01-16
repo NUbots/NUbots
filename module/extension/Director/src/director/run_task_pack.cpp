@@ -186,7 +186,7 @@ namespace module::extension {
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Wait)) {
                 if (requested_tasks.size() > 1) {
-                    log<NUClear::WARN>("Wait task was emitted with other tasks, the other tasks will be ignored");
+                    log<WARN>("Wait task was emitted with other tasks, the other tasks will be ignored");
                 }
 
                 // Schedule the Provider to run again
