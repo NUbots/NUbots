@@ -31,7 +31,6 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/planning/GetUpWhenFallen.hpp"
-#include "message/planning/StartGetUp.hpp"
 #include "message/skill/GetUp.hpp"
 
 #include "utility/support/yaml_expression.hpp"
@@ -41,7 +40,6 @@ namespace module::planning {
     using extension::Configuration;
     using message::input::Sensors;
     using message::planning::GetUpWhenFallen;
-    using message::planning::StartGetUp;
     using message::skill::GetUp;
     using utility::support::Expression;
 
@@ -51,15 +49,18 @@ namespace module::planning {
         on<Configuration>("GetUpPlanner.yaml").then([this](const Configuration& config) {
             this->log_level  = config["log_level"].as<NUClear::LogLevel>();
             cfg.fallen_angle = config["fallen_angle"].as<float>();
+            cfg.start_delay  = config["start_delay"].as<double>();
+            cfg._is_fallen   = config["_is_fallen"].as<bool>();
         });
 
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
             [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
-                    log<DEBUG>("Idle");
+                    log<INFO>("Getting up");
                     return;
                 }
+
                 // Transform to torso{t} from world{w} space
                 Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
                 // Basis Z vector of torso {t} in world {w} space
@@ -69,26 +70,38 @@ namespace module::planning {
                 double angle = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
                 log<DEBUG>("Angle: ", angle);
 
-                // // Check if angle between torso z axis and world z axis is greater than config value
-                // Only emit if we're not already requesting a getup
-                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK && !cfg.start_getup_emitted) {
-                    // Start the getup after a small delay
-                    log<INFO>("Has fallen");
-                    emit<Scope::DELAY>(std::make_unique<StartGetUp>(),
-                                       std::chrono::milliseconds(1000 /* Delay for 1 second */));
-                    cfg.start_getup_emitted = true;  // Precent multiple emissions
+                // Check if angle between torso z axis and world z axis is greater than config value, check if already
+                // fallen
+                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
+
+                    // If not already fallen
+                    if (!cfg._is_fallen) {
+                        // Set fall time
+                        cfg.fall_time  = std::chrono::system_clock::now();
+                        cfg._is_fallen = true;
+                    }
+
+                    // Else if fallen
+                    else {
+                        // If delay has passed
+                        if (std::chrono::system_clock::now() - cfg.fall_time
+                            >= std::chrono::duration<double>(cfg.start_delay)) {
+                            log<INFO>("Delay elapsed, emitting GetUp task");
+                            emit<Task>(std::make_unique<GetUp>());
+                        }
+                        // Else if delay not elapsed
+                        else if (std::chrono::system_clock::now() - cfg.fall_time
+                                 < std::chrono::duration<double>(cfg.start_delay)) {
+                            log<INFO>("Delaying GetUp...");
+                        }
+                    }
                 }
-                // Otherwise do not need to get up so emit no tasks
+                else {
+                    // Reset _is_fallen bool if robot has recovered its posture
+                    log<DEBUG>("Robot has recovered its posture");
+                    cfg._is_fallen = false;
+                }
             });
-
-
-        on<Trigger<StartGetUp>>().then([this] {
-            log<INFO>("StartGetUp is triggered");
-            // Emit GetUp task
-            emit<Task>(std::make_unique<GetUp>());
-            cfg.start_getup_emitted = false;  // Reset so it can be triggered again after next fall
-            log<INFO>("Execute getup");
-        });
     }
 
 }  // namespace module::planning

@@ -38,10 +38,10 @@ namespace module::planning {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
-            float fallen_angle               = 0.0f;
-            int delay_time                   = 1;
-            std::chrono::seconds start_delay = std::chrono::seconds(delay_time);
-            bool start_getup_emitted         = false;
+            float fallen_angle = 0.0f;
+            double start_delay = 0.1;    // seconds
+            bool _is_fallen    = false;  // To prevent against multiple instances
+            std::chrono::system_clock::time_point fall_time;
         } cfg;
 
         struct StartGetUp {};
