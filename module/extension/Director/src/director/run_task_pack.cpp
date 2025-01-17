@@ -190,6 +190,7 @@ namespace module::extension {
                 }
 
                 // Schedule the Provider to run again
+                // Get the time to wait for
                 auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
                 std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
 
@@ -199,8 +200,26 @@ namespace module::extension {
                     return;
                 }
 
-                // Otherwise, emit a delay event
-                emit<Scope::DELAY>(std::make_unique<WaitDelay>(provider), delay);
+                // Otherwise, send it to the ChronoController to handle
+                // Make a weak pointer to the task so we can check if it still exists when the task is run
+                std::weak_ptr<component::DirectorTask> weak_task = t;
+                emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
+                    [this, provider, weak_task](const NUClear::clock::time_point&) {
+                        // Check if the task still exists
+                        if (weak_task.expired()) {
+                            return false;
+                        }
+
+                        // Get the task
+                        auto task = weak_task.lock();
+                        emit(std::make_unique<WaitDelay>(provider));
+
+                        // We don't renew, remove us
+                        return false;
+                    },
+                    NUClear::clock::now() + delay,
+                    -1));  // Our ID is -1 as we will remove ourselves
+                // emit(msg);
 
                 // We don't do anything else on wait
                 return;
