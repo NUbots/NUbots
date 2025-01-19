@@ -23,9 +23,11 @@ This module is built when the subcontroller CMake flag is set to `NUSense`. Usin
 ## Dependencies
 
 ## Notes
+
 There are 2 ways to generate nanopb messages for NUSense. The generated files must then go into the NUSense NUController repo before building the binaries onto the board. This will be a temporary solution until a `./b install` pipeline for NUSense is set up. The guides below will assume that the OS is some linux based distro.
 
 ### b script
+
 For example, if a user wants to generate nanopb messages and specify that certain properties of messages must have max counts, the command below should put the generated files in the `recordings` directory.
 
 ```bash
@@ -33,9 +35,11 @@ For example, if a user wants to generate nanopb messages and specify that certai
     --selections ServoTargets:targets:max_count:20 \
                  SubcontrollerServoTargets:targets:max_count:20
 ```
+
 The `recordings` directory is convenient as it is symlinked to the docker container. It is also imperative to specify maximum counts for repeated fields as encoding a message without it takes significantly longer and introduces a lot of overhead that is undesired in terms of performance.
 
 ### Manual (and lazy)
+
 This way achieves the same outcome as the first one, but is objectively more tedious
 
 ```bash
@@ -46,6 +50,7 @@ cp ~/NUbots/shared/message/actuation/ServoTarget.proto .
 ```
 
 Then parsing the `.options` file as required
+
 ```bash
 cat << EOF > ServoTarget.options
 message.actuation.ServoTargets.targets max_count:20
