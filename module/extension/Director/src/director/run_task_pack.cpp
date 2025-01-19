@@ -246,9 +246,8 @@ namespace module::extension {
                 emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
                     [this, provider, weak_task](const NUClear::clock::time_point&) {
                         // Check if the task still exists
-                        auto task = weak_task.lock();
-                        if (weak_task) {
-                            emit(std::make_unique<WaitDelay>(provider));
+                        if (weak_task.lock() != nullptr) {
+                            emit(std::make_unique<RunProvider>(provider));
                         }
                         // Don't do anything else with this task
                         return false;
