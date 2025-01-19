@@ -101,7 +101,7 @@ private:
             if constexpr (I > 1) {  // Check the next step
                 next_step<I - 1>(v);
             }
-            else {  // Shutdown after the last step
+            else if (shutdown) {  // Shutdown after the last step
                 powerplant.shutdown();
             }
         }
@@ -109,6 +109,10 @@ private:
 
     /// The current step of the test
     int step = 0;
+
+protected:
+    /// Whether to shutdown the powerplant after the test automatically, or to handle it in the test
+    bool auto_shutdown = true;
 };
 
 #endif  // MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
