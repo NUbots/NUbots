@@ -277,12 +277,9 @@ namespace module::extension {
         on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::HIGH>().then(
             "Wait Delay",
             [this](const WaitFinished& w) {
-                // Get the provider that we are waiting on
-                auto provider = providers.at(w.provider->id);
-
                 // If the provider is still active, then we can run it
-                if (provider == provider->group.active_provider) {
-                    run_task_on_provider(provider->group.active_task, provider, RunReason::SUBTASK_DONE);
+                if (w.provider == w.provider->group.active_provider) {
+                    run_task_on_provider(w.provider->group.active_task, w.provider, RunReason::SUBTASK_DONE);
                 }
             });
 
