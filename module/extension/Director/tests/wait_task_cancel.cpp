@@ -35,28 +35,28 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {};
+    struct SimpleTask {
+        SimpleTask(const bool& wait_) : wait(wait_) {}
+        bool wait = false;
+    };
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor, 2> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask>>().then([this](const RunReason& run_reason) {
-                if (run_reason != RunReason::SUBTASK_DONE) {
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& task, const RunReason& run_reason) {
+                if (run_reason == RunReason::SUBTASK_DONE) {
+                    events.push_back("task executed, done waiting");
+                }
+                else if (task.wait) {
                     // Rerun the provider after 100ms with Wait
                     events.push_back("task executed, waiting");
                     emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(100)));
-
-                    // Advance time to when Wait should finish
-                    emit<Scope::INLINE>(std::make_unique<NUClear::message::TimeTravel>(
-                        NUClear::clock::now() + std::chrono::milliseconds(100),
-                        0.0,
-                        NUClear::message::TimeTravel::Action::RELATIVE));
                 }
                 else {
-                    events.push_back("task executed, done waiting");
+                    events.push_back("task executed, no wait");
                 }
             });
 
@@ -69,18 +69,32 @@ namespace {
                                                                     0.0,
                                                                     NUClear::message::TimeTravel::Action::RELATIVE));
 
-                events.push_back("emitting task");
-                emit<Task>(std::make_unique<SimpleTask>());
+                events.push_back("emitting simple task with wait");
+                emit<Task>(std::make_unique<SimpleTask>(true));
             });
 
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Freeze time
-                emit(std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                                    0.0,
-                                                                    NUClear::message::TimeTravel::Action::RELATIVE));
+                // Emit SimpleTask again and check that the Wait is cancelled
+                events.push_back("emitting simple task without wait");
+                emit<Task>(std::make_unique<SimpleTask>(false));
 
-                events.push_back("emitting task");
-                emit<Task>(std::make_unique<SimpleTask>());
+                // Advance time to when Wait would occur
+                emit(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::now() + std::chrono::milliseconds(100),
+                    0.0,
+                    NUClear::message::TimeTravel::Action::RELATIVE));
+            });
+
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+                // Emit SimpleTask again with wait
+                events.push_back("emitting simple task with wait again");
+                emit<Task>(std::make_unique<SimpleTask>(true));
+
+                // Advance time to when Wait should finish
+                emit(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::now() + std::chrono::milliseconds(200),
+                    0.0,
+                    NUClear::message::TimeTravel::Action::RELATIVE));
             });
         }
     };
@@ -88,7 +102,7 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that a Wait task will cause a provider to run again", "[director][wait][simple]") {
+TEST_CASE("Test that a Wait task will cause a provider to run again", "[director][wait][cancel]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
@@ -99,10 +113,11 @@ TEST_CASE("Test that a Wait task will cause a provider to run again", "[director
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "emitting task",
+        "emitting simple task with wait",
         "task executed, waiting",
-        "task executed, done waiting",
-        "emitting task",
+        "emitting simple task without wait",
+        "task executed, no wait",
+        "emitting simple task with wait again",
         "task executed, waiting",
         "task executed, done waiting",
     };
