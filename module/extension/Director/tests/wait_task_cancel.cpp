@@ -42,13 +42,16 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor, 3> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
+            // Wait does not want to shut down automatically at the end of the steps, to allow the chrono task to finish
+            auto_shutdown = false;
 
             on<Provide<SimpleTask>>().then([this](const SimpleTask& task, const RunReason& run_reason) {
                 if (run_reason == RunReason::SUBTASK_DONE) {
                     events.push_back("task executed, done waiting");
+                    powerplant.shutdown();
                 }
                 else if (task.wait) {
                     // Rerun the provider after 100ms with Wait
@@ -77,24 +80,28 @@ namespace {
                 // Emit SimpleTask again and check that the Wait is cancelled
                 events.push_back("emitting simple task without wait");
                 emit<Task>(std::make_unique<SimpleTask>(false));
+            });
 
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 // Advance time to when Wait would occur
                 emit(std::make_unique<NUClear::message::TimeTravel>(
                     NUClear::clock::now() + std::chrono::milliseconds(100),
                     0.0,
-                    NUClear::message::TimeTravel::Action::RELATIVE));
+                    NUClear::message::TimeTravel::Action::ABSOLUTE));
             });
 
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
                 // Emit SimpleTask again with wait
                 events.push_back("emitting simple task with wait again");
                 emit<Task>(std::make_unique<SimpleTask>(true));
+            });
 
+            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
                 // Advance time to when Wait should finish
                 emit(std::make_unique<NUClear::message::TimeTravel>(
                     NUClear::clock::now() + std::chrono::milliseconds(100),
                     0.0,
-                    NUClear::message::TimeTravel::Action::RELATIVE));
+                    NUClear::message::TimeTravel::Action::ABSOLUTE));
             });
         }
     };

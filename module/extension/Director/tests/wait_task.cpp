@@ -40,8 +40,11 @@ namespace {
     std::vector<std::string> events;
 
     class TestReactor : public TestBase<TestReactor, 2> {
+
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
+            // Wait does not want to shut down automatically at the end of the steps, to allow the chrono task to finish
+            auto_shutdown = false;
 
             on<Provide<SimpleTask>>().then([this](const RunReason& run_reason) {
                 if (run_reason != RunReason::SUBTASK_DONE) {
@@ -51,6 +54,7 @@ namespace {
                 }
                 else {
                     events.push_back("task executed, done waiting");
+                    powerplant.shutdown();
                 }
             });
 
@@ -65,23 +69,14 @@ namespace {
 
                 events.push_back("emitting task");
                 emit<Task>(std::make_unique<SimpleTask>());
-
-                // Advance time to when Wait should finish
-                emit(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::now() + std::chrono::milliseconds(100),
-                    0.0,
-                    NUClear::message::TimeTravel::Action::RELATIVE));
             });
 
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting task");
-                emit<Task>(std::make_unique<SimpleTask>());
-
                 // Advance time to when Wait should finish
                 emit(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::now() + std::chrono::milliseconds(100),
+                    NUClear::clock::now() + std::chrono::milliseconds(200),
                     0.0,
-                    NUClear::message::TimeTravel::Action::RELATIVE));
+                    NUClear::message::TimeTravel::Action::ABSOLUTE));
             });
         }
     };
@@ -100,9 +95,6 @@ TEST_CASE("Test that a Wait task will cause a provider to run again", "[director
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "emitting task",
-        "task executed, waiting",
-        "task executed, done waiting",
         "emitting task",
         "task executed, waiting",
         "task executed, done waiting",
