@@ -274,9 +274,9 @@ namespace module::extension {
                 reevaluate_group(g);
             });
 
-        on<Trigger<WaitDelay>, Sync<Director>, Pool<Director>, Priority::HIGH>().then(
+        on<Trigger<RunProvider>, Sync<Director>, Pool<Director>, Priority::HIGH>().then(
             "Wait Delay",
-            [this](const WaitDelay& w) {
+            [this](const RunProvider& w) {
                 // Get the provider that we are waiting on
                 auto provider = providers.at(w.provider->id);
 

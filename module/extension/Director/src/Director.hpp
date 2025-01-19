@@ -57,7 +57,8 @@ namespace module::extension {
         static constexpr int concurrency = 1;
 
     private:
-        struct WaitDelay {
+        /// A request to run the specified provider, after a `Wait` task's time has elapsed
+        struct RunProvider {
             std::shared_ptr<component::Provider> provider;
         };
 

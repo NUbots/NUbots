@@ -212,7 +212,7 @@ namespace module::extension {
 
                         // Get the task
                         auto task = weak_task.lock();
-                        emit(std::make_unique<WaitDelay>(provider));
+                        emit(std::make_unique<RunProvider>(provider));
 
                         // We don't renew, remove us
                         return false;
