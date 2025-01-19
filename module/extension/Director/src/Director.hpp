@@ -58,7 +58,7 @@ namespace module::extension {
 
     private:
         /// A request to run the specified provider, after a `Wait` task's time has elapsed
-        struct RunProvider {
+        struct WaitFinished {
             std::shared_ptr<component::Provider> provider;
         };
 
