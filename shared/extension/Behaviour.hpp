@@ -66,26 +66,24 @@ namespace extension::behaviour {
         static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::ProvideReaction>(
-                    reaction,
-                    typeid(T),
-                    classification,
-                    [](const NUClear::id_t& allowed_id,
-                       const RunReason& run_reason,
-                       const std::shared_ptr<const void>& data,
-                       const std::shared_ptr<const GroupInfo>& info) -> Lock {
-                        return {
-                            information::RunReasonStore::set(run_reason),  // Make clang-format not be dumb
-                            information::TaskDataStore<T>::set(allowed_id, data),
-                            information::GroupInfoStore<T>::set(info),
-                        };
-                    }));
+            reaction->reactor.powerplant.emit(std::make_unique<commands::ProvideReaction>(
+                reaction,
+                typeid(T),
+                classification,
+                [](const NUClear::id_t& allowed_id,
+                   const RunReason& run_reason,
+                   const std::shared_ptr<const void>& data,
+                   const std::shared_ptr<const GroupInfo>& info) -> Lock {
+                    return {
+                        information::RunReasonStore::set(run_reason),  // Make clang-format not be dumb
+                        information::TaskDataStore<T>::set(allowed_id, data),
+                        information::GroupInfoStore<T>::set(info),
+                    };
+                }));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Inline>(
-                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvideReaction>>(r.id));
+                r.reactor.emit(std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvideReaction>>(r.id));
             });
         }
 
@@ -201,7 +199,7 @@ namespace extension::behaviour {
         static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director about this when condition
-            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(std::make_unique<commands::WhenExpression>(
+            reaction->reactor.emit(std::make_unique<commands::WhenExpression>(
                 reaction,
                 // typeindex of the enum value
                 typeid(State),
@@ -246,8 +244,7 @@ namespace extension::behaviour {
         template <typename DSL>
         static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
-            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
+            reaction->reactor.emit(std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
     };
 
@@ -347,8 +344,7 @@ namespace extension::behaviour {
          */
         template <typename DSL>
         static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
+            reaction->reactor.emit(std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
 
