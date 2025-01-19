@@ -48,12 +48,6 @@ namespace {
                     // Rerun the provider after 100ms with Wait
                     events.push_back("task executed, waiting");
                     emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(100)));
-
-                    // Advance time to when Wait should finish
-                    emit<Scope::INLINE>(std::make_unique<NUClear::message::TimeTravel>(
-                        NUClear::clock::now() + std::chrono::milliseconds(100),
-                        0.0,
-                        NUClear::message::TimeTravel::Action::RELATIVE));
                 }
                 else {
                     events.push_back("task executed, done waiting");
@@ -71,16 +65,23 @@ namespace {
 
                 events.push_back("emitting task");
                 emit<Task>(std::make_unique<SimpleTask>());
+
+                // Advance time to when Wait should finish
+                emit(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::now() + std::chrono::milliseconds(100),
+                    0.0,
+                    NUClear::message::TimeTravel::Action::RELATIVE));
             });
 
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Freeze time
-                emit(std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                                    0.0,
-                                                                    NUClear::message::TimeTravel::Action::RELATIVE));
-
                 events.push_back("emitting task");
                 emit<Task>(std::make_unique<SimpleTask>());
+
+                // Advance time to when Wait should finish
+                emit(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::now() + std::chrono::milliseconds(100),
+                    0.0,
+                    NUClear::message::TimeTravel::Action::RELATIVE));
             });
         }
     };

@@ -92,7 +92,7 @@ namespace {
 
                 // Advance time to when Wait should finish
                 emit(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::now() + std::chrono::milliseconds(200),
+                    NUClear::clock::now() + std::chrono::milliseconds(100),
                     0.0,
                     NUClear::message::TimeTravel::Action::RELATIVE));
             });
