@@ -196,7 +196,7 @@ namespace module::extension {
 
                 // If the delay is over, just run the provider
                 if (delay <= std::chrono::nanoseconds(0)) {
-                    run_task_on_provider(group.active_task, provider, RunReason::WAIT);
+                    run_task_on_provider(group.active_task, provider, RunReason::SUBTASK_DONE);
                     return;
                 }
 

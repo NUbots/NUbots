@@ -44,7 +44,7 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>>().then([this](const RunReason& run_reason) {
-                if (run_reason != RunReason::WAIT) {
+                if (run_reason != RunReason::SUBTASK_DONE) {
                     events.push_back("task executed, waiting");
                     emit<Task>(std::make_unique<Wait>(NUClear::clock::now()));
                 }

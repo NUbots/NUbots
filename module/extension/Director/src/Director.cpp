@@ -282,7 +282,7 @@ namespace module::extension {
 
                 // If the provider is still active, then we can run it
                 if (provider == provider->group.active_provider) {
-                    run_task_on_provider(provider->group.active_task, provider, RunReason::WAIT);
+                    run_task_on_provider(provider->group.active_task, provider, RunReason::SUBTASK_DONE);
                 }
             });
 

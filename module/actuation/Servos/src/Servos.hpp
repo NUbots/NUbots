@@ -69,7 +69,7 @@ namespace module::actuation {
                     emit<Task>(std::make_unique<Wait>(servo.command.time));
                 }
                 // When the servo is done moving, emit Done
-                else if (run_reason == RunReason::WAIT) {
+                else if (run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                 }
             });
