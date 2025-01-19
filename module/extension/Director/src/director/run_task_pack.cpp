@@ -181,47 +181,6 @@ namespace module::extension {
             }
         }
 
-        // Check if a Wait command was emitted and schedule to run the Provider again
-        //
-        for (const auto& t : requested_tasks) {
-            if (t->type == typeid(::extension::behaviour::Wait)) {
-                if (requested_tasks.size() > 1) {
-                    log<WARN>("Wait task was emitted with other tasks, the other tasks will be ignored");
-                }
-
-                // Schedule the Provider to run again
-                // Get the time to wait for
-                auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
-                std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
-
-                // If the delay is over, just run the provider
-                if (delay <= std::chrono::nanoseconds(0)) {
-                    run_task_on_provider(group.active_task, provider, RunReason::SUBTASK_DONE);
-                    return;
-                }
-
-                // Otherwise, send it to the ChronoController to handle
-                // Make a weak pointer to the task so we can check if it still exists when the task is run
-                std::weak_ptr<component::DirectorTask> weak_task = t;
-                emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
-                    [this, provider, weak_task](const NUClear::clock::time_point&) {
-                        // Check if the task still exists
-                        auto task = weak_task.lock();
-                        if (weak_task) {
-                            emit(std::make_unique<WaitDelay>(provider));
-                        }
-                        // Don't do anything else with this task
-                        return false;
-                    },
-                    NUClear::clock::now() + delay,
-                    -1));  // Our ID is -1 as we will remove ourselves
-                // emit(msg);
-
-                // We don't do anything else on wait
-                return;
-            }
-        }
-
         // See if a done command was emitted
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
@@ -263,6 +222,39 @@ namespace module::extension {
 
                 // We don't do anything else on done
                 return;
+            }
+        }
+
+        // Check if a Wait command was emitted and schedule to run the Provider again
+        // Other tasks can run with Wait
+        for (const auto& t : requested_tasks) {
+            if (t->type == typeid(::extension::behaviour::Wait)) {
+                // Schedule the Provider to run again
+                // Get the time to wait for
+                auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
+                std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
+
+                // If the delay is over, just run the provider
+                if (delay <= std::chrono::nanoseconds(0)) {
+                    run_task_on_provider(group.active_task, provider, RunReason::SUBTASK_DONE);
+                    return;
+                }
+
+                // Otherwise, send it to the ChronoController to handle
+                // Make a weak pointer to the task so we can check if it still exists when the task is run
+                std::weak_ptr<component::DirectorTask> weak_task = t;
+                emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
+                    [this, provider, weak_task](const NUClear::clock::time_point&) {
+                        // Check if the task still exists
+                        auto task = weak_task.lock();
+                        if (weak_task) {
+                            emit(std::make_unique<WaitDelay>(provider));
+                        }
+                        // Don't do anything else with this task
+                        return false;
+                    },
+                    NUClear::clock::now() + delay,
+                    -1));  // Our ID is -1 as we will remove ourselves
             }
         }
 
