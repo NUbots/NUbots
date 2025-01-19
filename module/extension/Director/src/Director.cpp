@@ -233,48 +233,52 @@ namespace module::extension {
         });
 
         // Removes all the Providers for a reaction when it is unbound
-        on<Trigger<Unbind>, Sync<Director>>().then("Remove Provider", [this](const Unbind& unbind) {  //
-            remove_provider(unbind.id);
-        });
+        on<Trigger<Unbind>, Pool<Director>, Priority::REALTIME>().then("Remove Provider",
+                                                                       [this](const Unbind& unbind) {  //
+                                                                           remove_provider(unbind.id);
+                                                                       });
 
         // Add a Provider
-        on<Trigger<ProvideReaction>, Sync<Director>>().then("Add Provider", [this](const ProvideReaction& provide) {
-            add_provider(provide);
-        });
+        on<Trigger<ProvideReaction>, Pool<Director>, Priority::REALTIME>().then(
+            "Add Provider",
+            [this](const ProvideReaction& provide) { add_provider(provide); });
 
         // Add a when expression to this Provider
-        on<Trigger<WhenExpression>, Sync<Director>>().then("Add When", [this](const WhenExpression& when) {  //
-            add_when(when);
-        });
+        on<Trigger<WhenExpression>, Pool<Director>, Priority::REALTIME>().then("Add When",
+                                                                               [this](const WhenExpression& when) {  //
+                                                                                   add_when(when);
+                                                                               });
 
         // Add a causing condition to this Provider
-        on<Trigger<CausingExpression>, Sync<Director>>().then("Add Causing", [this](const CausingExpression& causing) {
-            add_causing(causing);
-        });
+        on<Trigger<CausingExpression>, Pool<Director>, Priority::REALTIME>().then(
+            "Add Causing",
+            [this](const CausingExpression& causing) { add_causing(causing); });
 
         // Add a needs relationship to this Provider
-        on<Trigger<NeedsExpression>, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
-            add_needs(needs);
-        });
-
-        // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
-            "State Updated",
-            [this](const StateUpdate& u) {
-                // Get the group that had a state update
-                auto p  = providers.at(u.provider_id);
-                auto& g = p->group;
-
-                // Go check if this state update has
-                // changed any of the tasks that are
-                // queued
-                reevaluate_group(g);
-                // Go check if this state update has changed
-                // any of the tasks that are queued
-                reevaluate_group(g);
+        on<Trigger<NeedsExpression>, Pool<Director>, Priority::REALTIME>().then(
+            "Add Needs",
+            [this](const NeedsExpression& needs) {  //
+                add_needs(needs);
             });
 
-        on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::HIGH>().then(
+        // A state that we were monitoring is updated, we might be able to run the task now
+        on<Trigger<StateUpdate>, Pool<Director>, Priority::REALTIME>().then("State Updated",
+                                                                            [this](const StateUpdate& u) {
+                                                                                // Get the group that had a state update
+                                                                                auto p  = providers.at(u.provider_id);
+                                                                                auto& g = p->group;
+
+                                                                                // Go check if this state update has
+                                                                                // changed any of the tasks that are
+                                                                                // queued
+                                                                                reevaluate_group(g);
+                                                                                // Go check if this state update has
+                                                                                // changed any of the tasks that are
+                                                                                // queued
+                                                                                reevaluate_group(g);
+                                                                            });
+
+        on<Trigger<WaitFinished>, Pool<Director>, Priority::REALTIME>().then(
             "Wait Delay",
             [this](const WaitFinished& w) {
                 // If the provider is still active, then we can run it
@@ -284,24 +288,22 @@ namespace module::extension {
             });
 
         // We have a new task pack to run
-        on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
-            "Run",
-            [this](const BehaviourTasks& p) {
-                // Convert the task pack to a Director task pack
-                TaskPack pack;
+        on<Trigger<BehaviourTasks>, Pool<Director>, Priority::REALTIME>().then("Run", [this](const BehaviourTasks& p) {
+            // Convert the task pack to a Director task pack
+            TaskPack pack;
 
-                // Root providers are identified by being declared root and their requester type will be RootProvider<T>
-                pack.provider = p.root ? get_root_provider(p.requester_type)
-                                       : pack.provider = providers.at(p.requester_reaction_id);
+            // Root providers are identified by being declared root and their requester type will be RootProvider<T>
+            pack.provider =
+                p.root ? get_root_provider(p.requester_type) : pack.provider = providers.at(p.requester_reaction_id);
 
-                // Convert the Behaviour tasks to Director tasks
-                for (auto& task : p.tasks) {
-                    pack.tasks.push_back(
-                        std::make_shared<DirectorTask>(pack.provider->id, p.requester_task_id, p.root, task));
-                }
+            // Convert the Behaviour tasks to Director tasks
+            for (auto& task : p.tasks) {
+                pack.tasks.push_back(
+                    std::make_shared<DirectorTask>(pack.provider->id, p.requester_task_id, p.root, task));
+            }
 
-                run_task_pack(pack);
-            });
+            run_task_pack(pack);
+        });
     }
 
 }  // namespace module::extension
