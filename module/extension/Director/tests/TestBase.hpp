@@ -101,7 +101,7 @@ private:
             if constexpr (I > 1) {  // Check the next step
                 next_step<I - 1>(v);
             }
-            else if (shutdown) {  // Shutdown after the last step
+            else if (auto_shutdown) {  // Shutdown after the last step
                 powerplant.shutdown();
             }
         }
