@@ -194,7 +194,6 @@ namespace module::planning {
                 }
 
                 // Calculate the target velocity
-                log<NUClear::INFO>("Desired velocity magnitude:", desired_velocity_magnitude);
                 const Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
                 Eigen::Vector3d velocity_target;
                 velocity_target << desired_translational_velocity, desired_heading;
