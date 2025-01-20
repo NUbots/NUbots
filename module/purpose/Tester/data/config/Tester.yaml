@@ -6,7 +6,7 @@ tasks:
   # Strategies
   start_safely_priority: 0
   align_ball_to_goal_priority: 0
-  find_ball_priority: 0
+  find_ball_priority: 2
   look_at_ball_priority: 1
   walk_to_ball_priority: 0
   walk_to_kick_ball_priority: 1

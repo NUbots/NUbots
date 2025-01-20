@@ -103,12 +103,9 @@ namespace module::planning {
         double strafe_to_target(const double error);
 
         /// @brief Walk straight backwards when the robot is next to the target
+        /// @param desired_direction desired direction to walk- true for backwards, false for forwards
         /// @return adjusted target direction
-        Eigen::Vector2d walk_backwards();
-
-        /// @brief Change the direction of the robot when walking backwards
-        /// @return adjusted target direction
-        Eigen::Vector2d change_direction();
+        Eigen::Vector2d walk_backwards(bool desired_direction);
 
         /// @brief Accelerate and rotate the robot towards the target point
         /// @return desired velocity magnitude

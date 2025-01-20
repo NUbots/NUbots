@@ -157,7 +157,7 @@ namespace module::planning {
                 if (translational_error > cfg.max_align_radius) {
                     // If we are walking backwards, change direction
                     if (is_walking_backwards) {
-                        rDRr                       = change_direction();
+                        rDRr                       = walk_backwards(false);
                         desired_velocity_magnitude = velocity_magnitude;
                     }
                     else {
@@ -176,7 +176,7 @@ namespace module::planning {
                     // If we are aligned with the final heading and the angle to the target is too large, step backwards
                     if (std::abs(angle_to_final_heading) < cfg.max_aligned_angle
                         && std::abs(angle_to_target) > max_strafe_angle) {
-                        rDRr = walk_backwards();
+                        rDRr = walk_backwards(true);
                         NUClear::log<NUClear::INFO>("Walking backwards");
                         desired_velocity_magnitude = velocity_magnitude;
                         // Do not rotate when stepping backwards
@@ -186,8 +186,7 @@ namespace module::planning {
                     else {
                         // If we are walking backwards, change direction
                         if (is_walking_backwards) {
-                            NUClear::log<NUClear::INFO>("Changing direction while walking backwards");
-                            rDRr                       = change_direction();
+                            rDRr                       = walk_backwards(false);
                             desired_velocity_magnitude = velocity_magnitude;
                         }
                         else {
@@ -256,25 +255,25 @@ namespace module::planning {
         return cfg.strafe_gain * error;
     }
 
-    Eigen::Vector2d PlanWalkPath::walk_backwards() {
-        if (is_walking_backwards == false) {
-            velocity_magnitude   = cfg.starting_velocity;
-            is_walking_backwards = true;
-        }
-        // Walk on spot, then walk backwards
-        velocity_magnitude *= 1.5;
-        // Step backwards while keeping the forward direction
-        return Eigen::Vector2d(-1, 0.001);
-    }
+    Eigen::Vector2d PlanWalkPath::walk_backwards(bool desired_direction) {
+        if (desired_direction) {
+            if (is_walking_backwards == false) {
+                velocity_magnitude   = cfg.starting_velocity;
+                is_walking_backwards = true;
+            }
 
-    Eigen::Vector2d PlanWalkPath::change_direction() {
-        // Slow down velocity when changing direction
-        velocity_magnitude = std::max(velocity_magnitude * 0.5, 0.1);
-        NUClear::log<NUClear::INFO>("velocity_magnitude", velocity_magnitude);
-        // Hit a minimum velocity, then change direction
-        if (velocity_magnitude <= 0.1) {
-            // Change direction
-            is_walking_backwards = !is_walking_backwards;
+            // Walk on spot, then walk backwards
+            velocity_magnitude *= 1.5;
+        }
+        else {
+            // Slow down velocity when changing direction
+            velocity_magnitude = std::max(velocity_magnitude * 0.5, 0.1);
+            NUClear::log<NUClear::INFO>("velocity_magnitude", velocity_magnitude);
+            // Hit a minimum velocity, then change direction
+            if (velocity_magnitude <= 0.1) {
+                // Change direction
+                is_walking_backwards = !is_walking_backwards;
+            }
         }
         // Step backwards while keeping the forward direction
         return Eigen::Vector2d(-1, 0.001);
