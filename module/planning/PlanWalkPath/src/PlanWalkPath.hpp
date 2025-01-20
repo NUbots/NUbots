@@ -68,6 +68,8 @@ namespace module::planning {
             double max_aligned_angle = 0.0;
             /// @brief Starting velocity when walking backwards
             double starting_velocity = 0.0;
+            /// @brief Multiplier for acceleration/deceleration when walking backwards
+            double acceleration_multiplier = 0.0;
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
