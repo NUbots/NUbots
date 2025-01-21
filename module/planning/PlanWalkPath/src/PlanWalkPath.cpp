@@ -172,25 +172,12 @@ namespace module::planning {
                                                         ? cfg.max_strafe_angle - cfg.backward_buffer
                                                         : cfg.max_strafe_angle;
 
-                    // If we are aligned with the final heading and the angle to the target is too large, step backwards
-                    if (std::abs(angle_to_final_heading) < cfg.max_aligned_angle
-                        && std::abs(angle_to_target) > max_strafe_angle) {
-                        rDRr                       = walk_backwards(true);
-                        desired_velocity_magnitude = velocity_magnitude;
-                        // Do not rotate when stepping backwards
-                        desired_heading = 0.0;
-                    }
-                    // Go towards target without any rotation
-                    else {
-                        // If we are walking backwards, change direction
-                        if (is_walking_backwards) {
-                            rDRr                       = walk_backwards(false);
-                            desired_velocity_magnitude = velocity_magnitude;
-                        }
-                        else {
-                            desired_velocity_magnitude = strafe_to_target(error);
-                        }
-                    }
+      bool aligned_large_angle = std::abs(angle_to_final_heading) < cfg.max_aligned_angle
+                              && std::abs(angle_to_target) > max_strafe_angle;
+      rDRr = aligned_large_angle ? walk_backwards(true) : is_walking_backwards ? walk_backwards(false) : rDRr;
+      desired_heading = aligned_large_angle ? 0.0 : desired_heading;
+      desired_velocity_magnitude = aligned_large_angle || is_walking_backwards ? velocity_magnitude :  strafe_to_target(error);
+
                 }
 
                 // Calculate the target velocity
