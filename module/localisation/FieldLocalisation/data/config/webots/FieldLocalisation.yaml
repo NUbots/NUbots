@@ -29,4 +29,4 @@ min_observations: 50
 start_time_delay: 5
 
 # Bool to use ground truth for localisation
-use_ground_truth_localisation: true
+use_ground_truth_localisation: false

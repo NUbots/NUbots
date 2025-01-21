@@ -172,12 +172,14 @@ namespace module::planning {
                                                         ? cfg.max_strafe_angle - cfg.backward_buffer
                                                         : cfg.max_strafe_angle;
 
-      bool aligned_large_angle = std::abs(angle_to_final_heading) < cfg.max_aligned_angle
-                              && std::abs(angle_to_target) > max_strafe_angle;
-      rDRr = aligned_large_angle ? walk_backwards(true) : is_walking_backwards ? walk_backwards(false) : rDRr;
-      desired_heading = aligned_large_angle ? 0.0 : desired_heading;
-      desired_velocity_magnitude = aligned_large_angle || is_walking_backwards ? velocity_magnitude :  strafe_to_target(error);
-
+                    bool aligned_large_angle = std::abs(angle_to_final_heading) < cfg.max_aligned_angle
+                                               && std::abs(angle_to_target) > max_strafe_angle;
+                    rDRr            = aligned_large_angle    ? walk_backwards(true)
+                                      : is_walking_backwards ? walk_backwards(false)
+                                                             : rDRr;
+                    desired_heading = aligned_large_angle ? 0.0 : desired_heading;
+                    desired_velocity_magnitude =
+                        aligned_large_angle || is_walking_backwards ? velocity_magnitude : strafe_to_target(error);
                 }
 
                 // Calculate the target velocity
@@ -201,9 +203,9 @@ namespace module::planning {
                 debug_information->max_align_radius = cfg.max_align_radius;
                 debug_information->min_angle_error  = cfg.min_angle_error;
                 debug_information->max_angle_error  = cfg.max_angle_error;
-                debug_information->angle_to_target  = angle_to_target;  // this one
+                debug_information->angle_to_target  = angle_to_target;
                 debug_information->angle_to_final_heading = angle_to_final_heading;
-                debug_information->translational_error    = translational_error;  // this one
+                debug_information->translational_error    = translational_error;
                 debug_information->velocity_target        = velocity_target;
                 emit(debug_information);
             });
@@ -237,26 +239,24 @@ namespace module::planning {
 
     Eigen::Vector2d PlanWalkPath::walk_backwards(bool desired_direction) {
         if (desired_direction) {
-            if (is_walking_backwards == false) {
-                velocity_magnitude   = cfg.starting_velocity;
-                is_walking_backwards = true;
-            }
+            // Start walking backwards slowly if not already walking backwards
+            velocity_magnitude   = !is_walking_backwards ? cfg.starting_velocity : velocity_magnitude;
+            is_walking_backwards = true;
 
             // Walk on spot, then walk backwards
             velocity_magnitude +=
                 std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
+
+            // Step backwards while keeping the forward direction
+            return Eigen::Vector2d(-1.0, 0.001);
         }
-        else {
-            // Slow down velocity when changing direction
-            velocity_magnitude = std::max(velocity_magnitude * cfg.acceleration_multiplier, cfg.starting_velocity);
-            // Hit a minimum velocity, then change direction
-            if (velocity_magnitude <= cfg.starting_velocity) {
-                // Change direction
-                is_walking_backwards = false;
-            }
-        }
+
+        // Slow down before changing direction
+        velocity_magnitude   = std::max(velocity_magnitude * cfg.acceleration_multiplier, cfg.starting_velocity);
+        is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
+
         // Step backwards while keeping the forward direction
-        return Eigen::Vector2d(-1, 0.001);
+        return Eigen::Vector2d(-1.0, 0.001);
     }
 
     double PlanWalkPath::accelerate_to_target(double desired_heading) {
