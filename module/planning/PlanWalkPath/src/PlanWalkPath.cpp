@@ -231,7 +231,6 @@ namespace module::planning {
 
     double PlanWalkPath::strafe_to_target(const double error) {
         // "Accelerate", assuring velocity is always positive
-        // TODO: check if we want to use the velocity magnitude here, starting at the starting velocity
         velocity_magnitude = std::max(velocity_magnitude, cfg.starting_velocity);
         // "Proportional control" to strafe towards the target inside align radius
         return cfg.strafe_gain * error;
