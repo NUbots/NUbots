@@ -220,7 +220,7 @@ namespace nsga2 {
 
     void Population::merge(const Population& pop_1_, const Population& pop_2_) {
         if (get_size() < pop_1_.get_size() + pop_2_.get_size()) {
-            NUClear::log<NUClear::WARN>("merge: target population not big enough");
+            NUClear::log<NUClear::LogLevel::WARN>("merge: target population not big enough");
             inds.reserve(pop_1_.get_size() + pop_2_.get_size());
         }
 

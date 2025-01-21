@@ -85,19 +85,19 @@ namespace module::network {
                         bool active  = handle->targets.contains(target);
 
                         if (enabled && !active) {
-                            log<NUClear::INFO>("Forwarding", name, "to", target);
+                            log<INFO>("Forwarding", name, "to", target);
                             handle->targets[target].period = period;
                         }
                         else if (!enabled && active) {
                             handle->targets.erase(target);
-                            log<NUClear::INFO>("Stopped forwarding", name, "to", target);
+                            log<INFO>("Stopped forwarding", name, "to", target);
                         }
 
                         // Enable if somebody wants this type
                         handle->reaction.enable(!handle->targets.empty());
                     }
                     else {
-                        log<NUClear::WARN>("Network Forwarder does not know about the message type", name);
+                        log<WARN>("Network Forwarder does not know about the message type", name);
                     }
                 }
             }

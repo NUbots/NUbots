@@ -28,13 +28,22 @@
 #ifndef EXTENSION_BEHAVIOUR_HPP
 #define EXTENSION_BEHAVIOUR_HPP
 
+#include <iostream>
 #include <memory>
 #include <nuclear>
+#include <optional>
 
-#include "behaviour/InformationSource.hpp"
+#include "behaviour/GroupInfo.hpp"
+#include "behaviour/ProviderScope.hpp"
+#include "behaviour/RunReason.hpp"
+#include "behaviour/TaskData.hpp"
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
+
+    namespace state {
+        static thread_local NUClear::id_t current_task_id = 0;
+    }
 
     /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
@@ -54,15 +63,28 @@ namespace extension::behaviour {
          * @param reaction the reaction object that we are binding the Provider to
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Inline>(
+                std::make_unique<commands::ProvideReaction>(
+                    reaction,
+                    typeid(T),
+                    classification,
+                    [](const NUClear::id_t& allowed_id,
+                       const RunReason& run_reason,
+                       const std::shared_ptr<const void>& data,
+                       const std::shared_ptr<const GroupInfo>& info) -> Lock {
+                        return {
+                            information::RunReasonStore::set(run_reason),  // Make clang-format not be dumb
+                            information::TaskDataStore<T>::set(allowed_id, data),
+                            information::GroupInfoStore<T>::set(info),
+                        };
+                    }));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                r.reactor.emit<NUClear::dsl::word::emit::Inline>(
                     std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvideReaction>>(r.id));
             });
         }
@@ -77,26 +99,50 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
-            NUClear::threading::Reaction& r) {
-
-            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(r.id));
-            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
-            return std::make_tuple(run_data, run_info);
+        static std::tuple<std::shared_ptr<const T>, std::optional<RunReason>> get(NUClear::threading::ReactionTask& t) {
+            return {
+                information::TaskDataStore<T>::get(t.parent->id),
+                information::RunReasonStore::get(),
+            };
         }
 
         /**
-         * Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted
+         * Scopes provider reaction calls so they can accumulate tasks to be emitted together when the provider is done.
          *
-         * @tparam DSL the NUClear dsl for the on statement
+         * @tparam DSL the DSL from NUClear for the on statement
          *
-         * @param task The reaction task object that just finished
+         * @param t the reaction task that is being scoped
+         *
+         * @return the scope object that will accumulate tasks to be emitted together
          */
         template <typename DSL>
-        static inline void postcondition(NUClear::threading::ReactionTask& task) {
-            // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+        static std::unique_ptr<ProviderScope> scope(NUClear::threading::ReactionTask& t) {
+            return std::make_unique<ProviderScope>(typeid(T), t);
+        }
+
+        /**
+         * Precondition that sets the current task id into a thread local variable.
+         *
+         * Within the Get function it can be checked against to see if the reactor is a provider.
+         * This is specifically because of the ordering of execution when it comes to NUClear.
+         *
+         * --- Thread 1 ---
+         *  emit<Task>();
+         *  precondition();
+         *  get();
+         * --- Thread 2 ---
+         *  scope() {
+         *      run();
+         *  }
+         *
+         * @tparam DSL the DSL from NUClear for the on statement
+         *
+         * @param t the reaction task that is being scoped
+         */
+        template <typename DSL>
+        static bool precondition(NUClear::threading::ReactionTask& t) {
+            state::current_task_id = t.id;
+            return true;
         }
     };
 
@@ -152,10 +198,10 @@ namespace extension::behaviour {
          * @param reaction the reaction that is having this when condition bound to it
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director about this when condition
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(std::make_unique<commands::WhenExpression>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(std::make_unique<commands::WhenExpression>(
                 reaction,
                 // typeindex of the enum value
                 typeid(State),
@@ -164,7 +210,7 @@ namespace extension::behaviour {
                 // Function that uses get to get the current state of the condition
                 [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
-                    auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
+                    auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction->get_task());
                     if (ptr == nullptr) {
                         throw std::runtime_error("The state requested has not been emitted yet");
                     }
@@ -198,11 +244,20 @@ namespace extension::behaviour {
          * @param reaction the reaction that is having this when condition bound to it
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
+    };
+
+    enum class RunState {
+        /// The group has not emitted the task
+        NO_TASK,
+        /// The group is running the task
+        RUNNING,
+        /// The group has the task queued
+        QUEUED
     };
 
     /**
@@ -216,24 +271,56 @@ namespace extension::behaviour {
      *   It allows you to see what has happened in previous calls, e.g. are we re-running because our previous task
      *   emitted that it was done
      *
-     * @tparam Provider the type of the provider this uses is for
+     * @tparam T the type of the provider this uses is for
      */
-    template <typename Provider>
+    template <typename T>
     struct Uses {
-        GroupInfo::RunState run_state;
+
+        /// The current run state of the group
+        RunState run_state;
+        /// Whether the task is done or not, regardless of if this provider group is running it
         bool done;
 
         template <typename DSL>
-        static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
+        static std::optional<Uses<T>> get(NUClear::threading::ReactionTask& t) {
 
-            auto group_info = information::InformationSource::get_group_info(r.id,
-                                                                             typeid(Provider),
-                                                                             typeid(commands::RootType<Provider>));
+            // Default values if we can't find the group info
+            Uses<T> data;
+            data.run_state = RunState::NO_TASK;
+            data.done      = false;
 
-            auto data = std::make_shared<Uses<Provider>>();
+            auto group_info    = information::GroupInfoStore<T>::get();
+            bool root_provider = t.id != state::current_task_id;
+            data.done          = group_info->done;
 
-            data->run_state = group_info.run_state;
-            data->done      = group_info.done;
+            // If we can't find the group info then cannot fill the data
+            if (group_info == nullptr) {
+                return data;
+            }
+
+            // If it is a root provider, then the requester_id will not match the parent id
+            // Then if the active task is run from root, then it is running
+            // If a watcher is root, then it is queued
+            if (root_provider) {
+                data.run_state = group_info->active_task.root
+                                     ? RunState::RUNNING
+                                     : (std::any_of(group_info->watchers.begin(),
+                                                    group_info->watchers.end(),
+                                                    [&t](const auto& watcher) { return watcher.root; })
+                                            ? RunState::QUEUED
+                                            : RunState::NO_TASK);
+
+                return data;
+            }
+
+            // Not root, check against ids
+            auto is_target_task = [&t](const auto& task) {
+                return task.requester_id == t.parent->id && task.type == typeid(T);
+            };
+            data.run_state = group_info->active_task.requester_id == t.parent->id ? RunState::RUNNING
+                             : std::any_of(group_info->watchers.begin(), group_info->watchers.end(), is_target_task)
+                                 ? RunState::QUEUED
+                                 : RunState::NO_TASK;
 
             return data;
         }
@@ -259,8 +346,8 @@ namespace extension::behaviour {
          * @param reaction the reaction that is having this needs condition bound to it
          */
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+        static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+            reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
                 std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
@@ -310,21 +397,8 @@ namespace extension::behaviour {
                          const bool& optional    = false,
                          const std::string& name = "") {
 
-            // Work out who is sending the task so we can determine if it's a subtask
-            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
-            uint64_t task_id     = (task != nullptr) ? task->id : -1;
-
-            NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
-                powerplant,
-                std::make_shared<commands::BehaviourTask>(typeid(T),
-                                                          typeid(commands::RootType<T>),
-                                                          reaction_id,
-                                                          task_id,
-                                                          data,
-                                                          name,
-                                                          priority,
-                                                          optional));
+            /// Emit using the provider scope as it will know how to handle the task
+            ProviderScope::emit<T>(powerplant, data, priority, optional, name);
         }
     };
 
@@ -343,10 +417,10 @@ namespace extension::behaviour {
      * When this is emitted the director will just continue with whatever was previously emitted by this provider.
      *
      * ```
-     * emit<Task>(std::make_unique<Idle>());
+     * emit<Task>(std::make_unique<Continue>());
      * ```
      */
-    struct Idle {};
+    struct Continue {};
 
     /**
      * A reactor subtype that can be used when making a behaviour reactor.
@@ -375,10 +449,10 @@ namespace extension::behaviour {
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
         using Task      = ::extension::behaviour::Task<T>;
-        using RunInfo   = ::extension::behaviour::RunInfo;
-        using GroupInfo = ::extension::behaviour::GroupInfo;
+        using RunReason = ::extension::behaviour::RunReason;
+        using RunState  = ::extension::behaviour::RunState;
         using Done      = ::extension::behaviour::Done;
-        using Idle      = ::extension::behaviour::Idle;
+        using Continue  = ::extension::behaviour::Continue;
     };
 
 }  // namespace extension::behaviour

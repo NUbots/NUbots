@@ -45,11 +45,13 @@ def register(command):
     command.add_argument(
         "--gdb", dest="use_gdb", action="store_true", default=False, help="Run the specified program using gdb"
     )
+    command.add_argument("--trace", action="store_true", default=False, help="Generate a trace file for the program")
+    command.add_argument("--trace-output", default="recordings/trace.pftrace", help="The output file for the trace")
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 
 
 @run_on_docker
-def run(args, use_gdb, **kwargs):
+def run(args, use_gdb, trace, trace_output, **kwargs):
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
@@ -61,6 +63,9 @@ def run(args, use_gdb, **kwargs):
 
     # Get current environment
     env = os.environ
+
+    if trace:
+        env["NUCLEAR_TRACE_FILE"] = trace_output
 
     # Make sure default log path exists
     if use_asan:
