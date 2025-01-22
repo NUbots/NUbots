@@ -231,41 +231,60 @@ RUN install-package opencl-clhpp \
     rapidjson \
     snappy
 
-# OpenVino
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.5.0 && \
-    cd openvino &&  \
-    git submodule update --init --recursive && \
-    mkdir build && \
-    cd build && \
-    cmake .. -DBUILD_TESTING:BOOL='OFF' \
-            -DCMAKE_BUILD_TYPE:STRING='Release' \
-            -DENABLE_AVX512F:BOOL='OFF' \
-            -DENABLE_PYTHON:BOOL='OFF' \
-            -DENABLE_CLANG_FORMAT:BOOL='OFF' \
-            -DENABLE_NCC_STYLE:BOOL='OFF' \
-            -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
-            -DENABLE_SYSTEM_TBB:BOOL='ON' \
-            -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
-            -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
-            -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
-            -DENABLE_CPPLINT:BOOL='OFF' \
-            -DCMAKE_CXX_STANDARD='17' \
-            -Wno-dev && \
-    make -j1 && \
-    make install
+# Clone OpenVINO repository
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
+    cd openvino && \
+    git submodule update --init --recursive
 
-    # protobuf v21 lots of errors
-    # protobuf v22 produces error error: ‘uint32_t’ was not declared in this scope
-    # protobuf v23 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
-    # protobuf v24 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
-    # v25 has CMake error with protobuf "/protobuf/java/core/src/main/java/com/google/java_features.proto": No such file or directory.\
-    # v26 has OpenVINO error relocation R_X86_64_TPOFF32 against hidden symbol `_ZN6google8protobuf8internal22allocate_at_least_hookE' can not be used when making a shared object
-    # v27 has fatal error: google/protobuf/stubs/logging.h: No such file or directory
-    # v28 fatal error: google/protobuf/stubs/logging.h: No such file or directory
-    # v29 fatal error: google/protobuf/stubs/logging.h: No such file or directory
+# Download AUR patches
+WORKDIR /openvino
+RUN curl -L -o 010-openvino-change-install-paths.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/010-openvino-change-install-paths.patch?h=openvino && \
+    curl -L -o 020-openvino-disable-werror.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/020-openvino-disable-werror.patch?h=openvino && \
+    curl -L -o 030-openvino-level-zero-disable-werror.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/030-openvino-level-zero-disable-werror.patch?h=openvino && \
+    curl -L -o 040-openvino-protobuf23-fix.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/040-openvino-protobuf23-fix.patch?h=openvino
+
+# Apply patches
+RUN cd /openvino && \
+    patch -d . -p1 < 010-openvino-change-install-paths.patch && \
+    patch -d . -p1 < 020-openvino-disable-werror.patch && \
+    patch -d thirdparty/level_zero/level-zero -p1 < 030-openvino-level-zero-disable-werror.patch && \
+    patch -d . -p1 < 040-openvino-protobuf23-fix.patch
+
+# Build OpenVINO
+RUN mkdir build && cd build && \
+    cmake .. -DBUILD_TESTING:BOOL='OFF' \
+    -DCMAKE_BUILD_TYPE:STRING='Release' \
+    -DENABLE_AVX512F:BOOL='OFF' \
+    -DENABLE_PYTHON:BOOL='OFF' \
+    -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+    -DENABLE_NCC_STYLE:BOOL='OFF' \
+    -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+    -DENABLE_INTEL_NPU:BOOL='OFF' \
+    -DENABLE_SYSTEM_TBB:BOOL='ON' \
+    -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+    -DENABLE_SYSTEM_PROTOBUF:BOOL='OFF' \
+    -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+    -DENABLE_CPPLINT:BOOL='OFF' \
+    -DCMAKE_CXX_STANDARD='17' \
+    -Wno-dev && \
+    make -j$(nproc) && make install
+
+# protobuf v21 lots of errors
+# protobuf v22 produces error error: ‘uint32_t’ was not declared in this scope
+# protobuf v23 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
+# protobuf v24 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
+# v25 has CMake error with protobuf "/protobuf/java/core/src/main/java/com/google/java_features.proto": No such file or directory.\
+# v26 has OpenVINO error relocation R_X86_64_TPOFF32 against hidden symbol `_ZN6google8protobuf8internal22allocate_at_least_hookE' can not be used when making a shared object
+# v27 has fatal error: google/protobuf/stubs/logging.h: No such file or directory
+# v28 fatal error: google/protobuf/stubs/logging.h: No such file or directory
+# v29 fatal error: google/protobuf/stubs/logging.h: No such file or directory
 
 # Move OpenVino libraries to our library path
-RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+# RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -317,7 +336,7 @@ RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
 RUN install-package glib2-devel
 RUN  ls ${prefix}/include && \
-     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
+    install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
     -Ddefault_library=both \
     -Dusb=enabled \
     -Ddocumentation=disabled \
