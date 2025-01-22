@@ -225,10 +225,19 @@ namespace module::extension {
             }
         }
 
+        // If we get here, the provider is not done and we are running new tasks
+        group.done = false;
+        group.update_data();
+
         // Check if a Wait command was emitted and schedule to run the Provider again
         // Other tasks can run with Wait
+        // Wait should be removed after it is run
+        TaskList non_wait_tasks;
+        TaskList wait_tasks;
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Wait)) {
+                wait_tasks.push_back(t);
+
                 // Schedule the Provider to run again
                 // Get the time to wait for
                 auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
@@ -245,8 +254,10 @@ namespace module::extension {
                 std::weak_ptr<component::DirectorTask> weak_task = t;
                 emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
                     [this, provider, weak_task](const NUClear::clock::time_point&) {
+                        log<INFO>("Checking wait task");
                         // Check if the task still exists
                         if (weak_task.lock() != nullptr) {
+                            log<INFO>("Wait task finished, running provider again");
                             emit(std::make_unique<WaitFinished>(provider));
                         }
                         // Don't do anything else with this task
@@ -255,16 +266,15 @@ namespace module::extension {
                     NUClear::clock::now() + delay,
                     -1));  // Our ID is -1 as we will remove ourselves
             }
+            else {
+                non_wait_tasks.push_back(t);
+            }
         }
-
-        // If we get here, the provider is not done and we are running new tasks
-        group.done = false;
-        group.update_data();
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(requested_tasks.size());
-        for (const auto& t : requested_tasks) {
+        tasks.reserve(non_wait_tasks.size());
+        for (const auto& t : non_wait_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
@@ -354,6 +364,10 @@ namespace module::extension {
 
         // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
         auto old_subtasks = group.subtasks;
+        // Add back in any waits
+        for (const auto& t : wait_tasks) {
+            tasks.push_back(t);
+        }
         // Update the group's subtasks to the new subtasks
         group.subtasks = tasks;
 
