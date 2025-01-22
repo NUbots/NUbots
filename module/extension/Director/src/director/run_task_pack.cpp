@@ -254,10 +254,8 @@ namespace module::extension {
                 std::weak_ptr<component::DirectorTask> weak_task = t;
                 emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
                     [this, provider, weak_task](const NUClear::clock::time_point&) {
-                        log<INFO>("Checking wait task");
                         // Check if the task still exists
                         if (weak_task.lock() != nullptr) {
-                            log<INFO>("Wait task finished, running provider again");
                             emit(std::make_unique<WaitFinished>(provider));
                         }
                         // Don't do anything else with this task
