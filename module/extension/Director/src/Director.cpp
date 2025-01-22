@@ -274,7 +274,7 @@ namespace module::extension {
                 reevaluate_group(g);
             });
 
-        on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::HIGH>().then(
+        on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
             "Wait Delay",
             [this](const WaitFinished& w) {
                 // If the provider is still active, then we can run it
