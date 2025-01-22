@@ -12,7 +12,10 @@ import { OtherRobotsViewModel } from "./other_robots";
 import { VisualMeshViewModel } from "./visual_mesh";
 
 export class VisionCameraViewModel extends CameraViewModel {
-  constructor(readonly model: VisionCameraModel, private robot: VisionRobotModel) {
+  constructor(
+    readonly model: VisionCameraModel,
+    private robot: VisionRobotModel,
+  ) {
     super(model);
   }
 

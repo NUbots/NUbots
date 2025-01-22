@@ -113,7 +113,7 @@ namespace module::vision {
 
                         if (result.indices.empty()) {
                             // The ground is not visible, hence the mesh cannot be drawn
-                            log<NUClear::TRACE>("Hcw resulted in no mesh points being on-screen.");
+                            log<TRACE>("Hcw resulted in no mesh points being on-screen.");
                         }
                         else {
                             // Convert rays to world space
@@ -161,7 +161,7 @@ namespace module::vision {
                 }
             }
             else {
-                log<NUClear::TRACE>("There is no network loaded for", image.name);
+                log<TRACE>("There is no network loaded for", image.name);
             }
 
             // We failed to process this image
@@ -169,11 +169,11 @@ namespace module::vision {
         });
 
         on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
-            log<NUClear::DEBUG>(fmt::format("Receiving {}/s, Processing {}/s,  Dropping {}/s ({}%)",
-                                            processed + dropped,
-                                            processed,
-                                            dropped,
-                                            100 * double(processed) / double(processed + dropped)));
+            log<DEBUG>(fmt::format("Receiving {}/s, Processing {}/s,  Dropping {}/s ({}%)",
+                                   processed + dropped,
+                                   processed,
+                                   dropped,
+                                   100 * double(processed) / double(processed + dropped)));
             processed = 0;
             dropped   = 0;
 

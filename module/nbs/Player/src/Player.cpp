@@ -104,14 +104,14 @@ namespace module::nbs {
             decoder_iterator = decoder.begin();
 
             // Update which types we will be playing
-            log<NUClear::INFO>("Enabling messages:");
+            log<INFO>("Enabling messages:");
             for (const auto& message_name : load_request.messages) {
                 // Hash our type to work out our type on the wire
                 uint64_t hash =
                     NUClear::util::serialise::xxhash64(message_name.c_str(), message_name.size(), 0x4e55436c);
                 if (emitters.find(hash) != emitters.end()) {
                     emitters[hash](decoder);
-                    log<NUClear::INFO>(" - ", message_name);
+                    log<INFO>(" - ", message_name);
                 }
                 else {
                     log<NUClear::ERROR>("Message type not found: ", message_name);
@@ -120,7 +120,7 @@ namespace module::nbs {
 
             // Synchronise the clock epoch to the first message timestamp
             if (decoder_iterator != decoder.end()) {
-                emit<Scope::DIRECT>(
+                emit<Scope::INLINE>(
                     std::make_unique<NUClear::message::TimeTravel>(start_time,
                                                                    playback_speed,
                                                                    NUClear::message::TimeTravel::Action::RELATIVE));
@@ -148,7 +148,7 @@ namespace module::nbs {
 
         on<Trigger<PauseRequest>>().then([this](const PauseRequest& pause_request) {
             // Set the clock rtf to 0.0 to pause time
-            emit<Scope::DIRECT>(
+            emit<Scope::INLINE>(
                 std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                0.0,
                                                                NUClear::message::TimeTravel::Action::RELATIVE));
@@ -203,7 +203,7 @@ namespace module::nbs {
                 case SEQUENTIAL:
                     // Set RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
                     playback_speed = 0.0;
-                    emit<Scope::DIRECT>(
+                    emit<Scope::INLINE>(
                         std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                        playback_speed,
                                                                        NUClear::message::TimeTravel::Action::RELATIVE));
@@ -230,7 +230,7 @@ namespace module::nbs {
         skip_idle_player_handle = on<Idle<>, Single>().then([this] {
             std::lock_guard<std::mutex> decoder_lock(decoder_mutex);
             if (NUClear::clock::now() < target_emit_time) {
-                emit<Scope::DIRECT>(
+                emit<Scope::INLINE>(
                     std::make_unique<NUClear::message::TimeTravel>(target_emit_time,
                                                                    playback_speed,
                                                                    NUClear::message::TimeTravel::Action::NEAREST));

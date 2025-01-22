@@ -1,8 +1,16 @@
+precision mediump float;
+
 // https://github.com/mrdoob/three.js/blob/dev/examples/js/SkyShader.js
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 modelMatrix;
 uniform vec3 sunPosition;
 uniform float rayleigh;
 uniform float turbidity;
 uniform float mieCoefficient;
+
+attribute vec3 worldPosition;
+attribute vec3 position;
 
 varying vec3 vWorldPosition;
 varying vec3 vSunDirection;

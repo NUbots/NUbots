@@ -78,7 +78,7 @@ namespace module::localisation {
             /// @brief Constructor that sets the state for the UKF
             TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
                 : id(next_id) {
-                NUClear::log<NUClear::DEBUG>("Making robot with id: ", id);
+                NUClear::log<NUClear::LogLevel::DEBUG>("Making robot with id: ", id);
                 RobotModel<double>::StateVec initial_state = Eigen::Matrix<double, 4, 1>::Zero();
                 initial_state.rRWw                         = initial_rRWw.head<2>();
 

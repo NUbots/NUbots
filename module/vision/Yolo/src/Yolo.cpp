@@ -323,11 +323,11 @@ namespace module::vision {
                 emit(std::move(bounding_boxes));
 
                 // -------- Benchmark --------
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     auto end      = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                    log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
-                    log<NUClear::DEBUG>("Yolo FPS: ", 1000.0 / duration);
+                    log<DEBUG>("Yolo took: ", duration, "ms");
+                    log<DEBUG>("FPS: ", 1000.0 / duration);
                 }
             });
     }

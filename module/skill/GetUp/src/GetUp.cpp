@@ -61,9 +61,9 @@ namespace module::skill {
         });
 
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then(
-            [this](const RunInfo& info, const Sensors& sensors) {
-                switch (info.run_reason) {
-                    case RunInfo::NEW_TASK: {
+            [this](const RunReason& run_reason, const Sensors& sensors) {
+                switch (run_reason) {
+                    case RunReason::NEW_TASK: {
                         // If we're running getup we fell over
                         emit(std::make_unique<Stability>(Stability::FALLEN));
 
@@ -91,39 +91,39 @@ namespace module::skill {
                         bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
 
                         if (on_front) {
-                            log<NUClear::INFO>("Getting up from front");
+                            log<INFO>("Getting up from front");
                             emit<Task>(load_script<BodySequence>(cfg.getup_front));
                         }
                         else if (on_back) {
-                            log<NUClear::INFO>("Getting up from back");
+                            log<INFO>("Getting up from back");
                             emit<Task>(load_script<BodySequence>(cfg.getup_back));
                         }
                         else if (on_right) {
-                            log<NUClear::INFO>("Getting up from right");
+                            log<INFO>("Getting up from right");
                             emit<Task>(load_script<BodySequence>(cfg.getup_right));
                         }
                         else if (on_left) {
-                            log<NUClear::INFO>("Getting up from left");
+                            log<INFO>("Getting up from left");
                             emit<Task>(load_script<BodySequence>(cfg.getup_left));
                         }
                         else if (upright) {
-                            log<NUClear::INFO>("Getting up from upright");
+                            log<INFO>("Getting up from upright");
                             emit<Task>(load_script<BodySequence>(cfg.getup_upright));
                         }
                         else if (upside_down) {
-                            log<NUClear::INFO>("Getting up from upside_down");
+                            log<INFO>("Getting up from upside_down");
                             emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
                         }
 
                     } break;
-                    case RunInfo::SUBTASK_DONE: {
+                    case RunReason::SUBTASK_DONE: {
                         // When the subtask is done, we are done
-                        log<NUClear::INFO>("Finished getting up");
+                        log<INFO>("Finished getting up");
                         emit(std::make_unique<Stability>(Stability::STANDING));
                         emit<Task>(std::make_unique<Done>());
                     } break;
-                    // These shouldn't happen but if they do just idle
-                    default: emit<Task>(std::make_unique<Idle>()); break;
+                    // These shouldn't happen but if they do just continue doing the same thing
+                    default: emit<Task>(std::make_unique<Continue>()); break;
                 }
             });
     }
