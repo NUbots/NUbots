@@ -432,4 +432,10 @@ namespace module::extension {
 
 }  // namespace module::extension
 
+namespace NUClear::dsl::operation {
+    template <>
+    struct EmitStats<module::extension::Director::WaitFinished> : std::false_type {};
+}  // namespace NUClear::dsl::operation
+
+
 #endif  // MODULE_EXTENSION_DIRECTOR_HPP
