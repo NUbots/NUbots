@@ -53,7 +53,7 @@ def register(command):
 @run_on_docker
 def run(args, use_gdb, trace, trace_output, **kwargs):
     # Check to see if ASan was enabled
-    use_asan = b.cmake_cache["USE_ASAN"] == "ON"
+    # use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
@@ -68,24 +68,24 @@ def run(args, use_gdb, trace, trace_output, **kwargs):
         env["NUCLEAR_TRACE_FILE"] = trace_output
 
     # Make sure default log path exists
-    if use_asan:
-        log_path = os.path.join(os.sep, "home", "nubots", "NUbots", "log")
-        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    # if use_asan:
+    #     log_path = os.path.join(os.sep, "home", "nubots", "NUbots", "log")
+    #     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     # Add necessary ASAN environment variables
-    if use_asan:
-        cprint("WARN: ASan is enabled. Set USE_ASAN to OFF and rebuild to disable.", "red", attrs=["bold"])
+    # if use_asan:
+    #     cprint("WARN: ASan is enabled. Set USE_ASAN to OFF and rebuild to disable.", "red", attrs=["bold"])
 
-        # Append log_path option if other options have been set
-        if "ASAN_OPTIONS" in env:
-            # Only append log_path if it hasn't already been set
-            if "log_path" not in env["ASAN_OPTIONS"]:
-                env["ASAN_OPTIONS"] = f"{env['ASAN_OPTIONS']}:log_path={os.path.join(log_path, 'asan.log')}"
-            # Check for shadow gap flag (needed to let cuda operations run correctly)
-            if "protect_shadow_gap" not in env["ASAN_OPTIONS"]:
-                env["ASAN_OPTIONS"] = f"{env['ASAN_OPTIONS']}:protect_shadow_gap=0"
-        else:
-            env.update({"ASAN_OPTIONS": f"log_path={os.path.join(log_path, 'asan.log')}:protect_shadow_gap=0"})
+    #     # Append log_path option if other options have been set
+    #     if "ASAN_OPTIONS" in env:
+    #         # Only append log_path if it hasn't already been set
+    #         if "log_path" not in env["ASAN_OPTIONS"]:
+    #             env["ASAN_OPTIONS"] = f"{env['ASAN_OPTIONS']}:log_path={os.path.join(log_path, 'asan.log')}"
+    #         # Check for shadow gap flag (needed to let cuda operations run correctly)
+    #         if "protect_shadow_gap" not in env["ASAN_OPTIONS"]:
+    #             env["ASAN_OPTIONS"] = f"{env['ASAN_OPTIONS']}:protect_shadow_gap=0"
+    #     else:
+    #         env.update({"ASAN_OPTIONS": f"log_path={os.path.join(log_path, 'asan.log')}:protect_shadow_gap=0"})
 
         # Find the asan log path and make sure the folder exists
         log_path = re.search("log_path=([^:]+):?", env["ASAN_OPTIONS"]).group(1)

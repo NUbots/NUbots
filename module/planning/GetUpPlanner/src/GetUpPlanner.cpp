@@ -57,7 +57,7 @@ namespace module::planning {
             [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
-                    log<INFO>("Getting up");
+                    log<DEBUG>("Idle");
                     return;
                 }
 
@@ -87,6 +87,7 @@ namespace module::planning {
                         if (std::chrono::system_clock::now() - cfg.fall_time
                             >= std::chrono::duration<double>(cfg.start_delay)) {
                             log<INFO>("Delay elapsed, emitting GetUp task");
+                            log<DEBUG>("Execute getup");
                             emit<Task>(std::make_unique<GetUp>());
                         }
                         // Else if delay not elapsed
@@ -98,7 +99,6 @@ namespace module::planning {
                 }
                 else {
                     // Reset _is_fallen bool if robot has recovered its posture
-                    log<DEBUG>("Robot has recovered its posture");
                     cfg._is_fallen = false;
                 }
             });

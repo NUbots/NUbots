@@ -51,12 +51,12 @@ def _is_wsl1():
         return False
 
     kernel_release = subprocess.check_output(["uname", "-r"]).decode("utf-8").strip()
-    search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
-    major = search.group(1)
-    minor = search.group(2)
+    # search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
+    # major = search.group(1)
+    # minor = search.group(2)
 
-    if major is None or minor is None:
-        return False
+    # if major is None or minor is None:
+        # return False
 
     # WSL 2 has kernel release version >= 4.19 (https://askubuntu.com/a/1177730)
     return int(major) <= 4 and int(minor) < 19
@@ -243,8 +243,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
 
         # If we are running in WSL 1 we need to translate our path to a windows one for docker.
         # Docker with WSL 2 doesn't need this as it supports binding paths directly from WSL into a container.
-        if _is_wsl1():
-            bind_path = subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
+        # if _is_wsl1():
+        #     bind_path = subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
 
         # Mount the pwd in the docker image
         docker_args.extend(
