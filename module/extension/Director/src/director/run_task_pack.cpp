@@ -231,7 +231,7 @@ namespace module::extension {
 
         // Check if a Wait command was emitted and schedule to run the Provider again
         // Other tasks can run with Wait
-        // Wait should be removed after it is run
+        // Wait should be removed and then readded at the end
         TaskList non_wait_tasks;
         TaskList wait_tasks;
         for (const auto& t : requested_tasks) {
