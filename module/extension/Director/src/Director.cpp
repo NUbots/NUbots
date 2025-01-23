@@ -269,9 +269,6 @@ namespace module::extension {
                 // changed any of the tasks that are
                 // queued
                 reevaluate_group(g);
-                // Go check if this state update has changed
-                // any of the tasks that are queued
-                reevaluate_group(g);
             });
 
         on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
