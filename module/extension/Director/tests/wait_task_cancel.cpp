@@ -44,9 +44,8 @@ namespace {
 
     class TestReactor : public TestBase<TestReactor, 5> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
-            // Wait does not want to shut down automatically at the end of the steps, to allow the chrono task to finish
-            auto_shutdown = false;
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
+            : TestBase(std::move(environment), false) {
 
             on<Provide<SimpleTask>>().then([this](const SimpleTask& task, const RunReason& run_reason) {
                 if (run_reason == RunReason::SUBTASK_DONE) {
