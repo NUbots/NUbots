@@ -66,24 +66,14 @@ namespace module::actuation {
                                                        servo.command.position,
                                                        servo.command.state.gain,
                                                        servo.command.state.torque));
-
-                    // If the system doesn't care when the servo is done, then do nothing
-                    if (servo.command.done_type == ServoCommand::DoneType::NONE) {
-                        return;
-                    }
-
-                    // If the time is already up, emit Done
+                }
+                if (servo.command.done_type == ServoCommand::DoneType::TIME) {
                     if (servo.command.time <= NUClear::clock::now()) {
                         emit<Task>(std::make_unique<Done>());
                     }
                     else {
-                        // Rerun the Provider when the servo is done moving
                         emit<Task>(std::make_unique<Wait>(servo.command.time));
                     }
-                }
-                // When the servo is done moving, emit Done
-                else if (run_reason == RunReason::SUBTASK_DONE) {
-                    emit<Task>(std::make_unique<Done>());
                 }
             });
         }
