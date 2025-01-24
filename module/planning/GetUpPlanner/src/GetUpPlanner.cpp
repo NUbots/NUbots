@@ -86,14 +86,13 @@ namespace module::planning {
                         // If delay has passed
                         if (std::chrono::system_clock::now() - cfg.fall_time
                             >= std::chrono::duration<double>(cfg.start_delay)) {
-                            log<INFO>("Delay elapsed, emitting GetUp task");
-                            log<DEBUG>("Execute getup");
+                            log<DEBUG>("Delay elapsed, emitting GetUp task...");
                             emit<Task>(std::make_unique<GetUp>());
                         }
                         // Else if delay not elapsed
                         else if (std::chrono::system_clock::now() - cfg.fall_time
                                  < std::chrono::duration<double>(cfg.start_delay)) {
-                            log<INFO>("Delaying GetUp...");
+                            log<DEBUG>("Delaying GetUp...");
                         }
                     }
                 }

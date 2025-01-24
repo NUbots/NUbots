@@ -3,7 +3,8 @@
 ## Description
 
 The GetUpPlanner module is used to automatically trigger a get up when the robot has fallen over.
-It monitors the robot to see when it is lying down and has been relatively still for the past n frames before triggering a getup action.
+It monitors the angle of the robot to see when it falls past a set threshold angle (the "fallen_angle") before triggering a delay which then triggers a getup action once elapsed.
+The purpose of the delay is to allow the robot to settle to a final fallen position before any sensor readings are taken to more accurately determine which side it has fallen onto.
 
 ## Usage
 
