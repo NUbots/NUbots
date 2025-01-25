@@ -19,6 +19,12 @@ set(nt_out "${CMAKE_CURRENT_BINARY_DIR}/neutron")
 set(py_out "${CMAKE_CURRENT_BINARY_DIR}/python")
 set(dep_out "${CMAKE_CURRENT_BINARY_DIR}/dependencies")
 
+# Ensure the existence of the output directory
+set(npb_out "${CMAKE_CURRENT_BINARY_DIR}/nanopb_options")
+file(MAKE_DIRECTORY "${npb_out}")
+
+set(nanopb_options_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}/nanopb_options")
+
 # We need protobuf and python to generate the neutron messages
 find_package(Protobuf REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
@@ -67,7 +73,34 @@ foreach(proto ${message_protobufs})
   list(APPEND protobuf_src $<TARGET_PROPERTY:${neutron_target},NEUTRON_PROTOBUF_SOURCE>)
   list(APPEND neutron_src $<TARGET_PROPERTY:${neutron_target},NEUTRON_CPP_SOURCE>)
   list(APPEND python_src $<TARGET_PROPERTY:${neutron_target},NEUTRON_PYTHON_SOURCE>)
+
+  # Look through the nanopb options directory. If this message has a corresponding options file, generate the source
+  # code using the nanopb generator
+  if(EXISTS "${nanopb_options_dir}/${file_we}.options")
+
+    # Create the directory for the nanopb output
+    file(MAKE_DIRECTORY "${npb_out}/${output_path}")
+
+    # Get the directory of the proto file
+    get_filename_component(proto_dir ${proto} DIRECTORY)
+
+    add_custom_command(
+      OUTPUT ${npb_out}/${output_path}/${file_we}.pb.c ${npb_out}/${output_path}/${file_we}.pb.h
+      COMMAND nanopb_generator ${file_we}.proto
+      ARGS --proto-path=${proto_dir}
+           --options-path=${nanopb_options_dir}
+           --output-dir=${npb_out}/${output_path}
+      DEPENDS ${proto} ${nanopb_options_dir}/${file_we}.options
+      COMMENT "Generating nanopb headers for ${proto}"
+    )
+
+    # Add the proto file and the option as a dependency
+    list(APPEND npb_sources ${npb_out}/${output_path}/${file_we}.pb.c ${npb_out}/${output_path}/${file_we}.pb.h)
+  endif()
 endforeach(proto ${message_protobufs})
+
+# Create an independent custom target for the nanopb generated files
+add_custom_target(generated_nanopb_sources DEPENDS ${npb_sources})
 
 # Build the reflection header
 add_custom_command(
@@ -94,6 +127,9 @@ target_link_libraries(nuclear_message PUBLIC nuclear_message_protobuf)
 target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(nuclear_message PUBLIC ${nt_out})
+
+# Add the nanopb sources to the target so the generator puts the source files to the correct directory
+add_dependencies(nuclear_message generated_nanopb_sources)
 
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")

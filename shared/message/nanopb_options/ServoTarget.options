@@ -1,0 +1,2 @@
+message.actuation.ServoTargets.targets max_count:20
+message.actuation.SubcontrollerServoTargets.targets max_count:20
