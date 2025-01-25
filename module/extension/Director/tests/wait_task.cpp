@@ -26,6 +26,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <fmt/format.h>
 #include <nuclear>
 
 #include "Director.hpp"
@@ -36,6 +37,12 @@
 namespace {
 
     struct SimpleTask {};
+
+    /// @brief Get the current time since epoch in milliseconds
+    /// @return the current time since epoch in milliseconds
+    int get_time_ms() {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
+    }
 
     std::vector<std::string> events;
 
@@ -48,11 +55,11 @@ namespace {
             on<Provide<SimpleTask>>().then([this](const RunReason& run_reason) {
                 if (run_reason != RunReason::SUBTASK_DONE) {
                     // Rerun the provider after 100ms with Wait
-                    events.push_back("task executed, waiting");
+                    events.push_back(fmt::format("task executed, waiting at time {}", get_time_ms()));
                     emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(100)));
                 }
                 else {
-                    events.push_back("task executed, done waiting");
+                    events.push_back(fmt::format("task executed, done waiting at time {}", get_time_ms()));
                     powerplant.shutdown();
                 }
             });
@@ -62,7 +69,7 @@ namespace {
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 // Freeze time
-                emit(std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
+                emit(std::make_unique<NUClear::message::TimeTravel>(std::chrono::system_clock::time_point{},
                                                                     0.0,
                                                                     NUClear::message::TimeTravel::Action::RELATIVE));
 
@@ -73,7 +80,7 @@ namespace {
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 // Advance time to when Wait should finish
                 emit(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::now() + std::chrono::milliseconds(200),
+                    NUClear::clock::now() + std::chrono::milliseconds(100),
                     0.0,
                     NUClear::message::TimeTravel::Action::ABSOLUTE));
             });
@@ -95,8 +102,8 @@ TEST_CASE("Test that a Wait task will cause a provider to run again", "[director
 
     std::vector<std::string> expected = {
         "emitting task",
-        "task executed, waiting",
-        "task executed, done waiting",
+        "task executed, waiting at time 0",
+        "task executed, done waiting at time 100",
     };
 
     // Make an info print the diff in an easy to read way if we fail

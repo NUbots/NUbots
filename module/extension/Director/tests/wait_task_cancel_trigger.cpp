@@ -26,6 +26,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <fmt/format.h>
 #include <nuclear>
 
 #include "Director.hpp"
@@ -38,6 +39,12 @@ namespace {
     struct SimpleTask {};
     struct SimpleMessage {};
 
+    /// @brief Get the current time since epoch in milliseconds
+    /// @return the current time since epoch in milliseconds
+    int get_time_ms() {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
+    }
+
     std::vector<std::string> events;
 
     class TestReactor : public TestBase<TestReactor, 5> {
@@ -47,16 +54,16 @@ namespace {
 
             on<Provide<SimpleTask>, Optional<Trigger<SimpleMessage>>>().then([this](const RunReason& run_reason) {
                 if (run_reason == RunReason::OTHER_TRIGGER) {
-                    events.push_back("task executed through trigger");
+                    events.push_back(fmt::format("task executed through trigger at time {}", get_time_ms()));
                 }
                 else if (run_reason == RunReason::NEW_TASK) {
-                    events.push_back("new task executed, waiting");
+                    events.push_back(fmt::format("new task executed, waiting at time {}", get_time_ms()));
 
                     // Rerun the provider after 100ms with Wait
                     emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(100)));
                 }
                 else {
-                    events.push_back("task executed, done waiting");
+                    events.push_back(fmt::format("task executed, done waiting at time {}", get_time_ms()));
                     powerplant.shutdown();
                 }
             });
@@ -66,7 +73,7 @@ namespace {
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 // Freeze time
-                emit(std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
+                emit(std::make_unique<NUClear::message::TimeTravel>(std::chrono::system_clock::time_point{},
                                                                     0.0,
                                                                     NUClear::message::TimeTravel::Action::RELATIVE));
 
@@ -108,7 +115,8 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that a Wait task will cause a provider to run again", "[director][wait][trigger]") {
+TEST_CASE("Test that a Wait task will be cancelled when the provider is run because of a Trigger",
+          "[director][wait][trigger]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
@@ -119,12 +127,12 @@ TEST_CASE("Test that a Wait task will cause a provider to run again", "[director
     powerplant.start();
 
     std::vector<std::string> expected = {"emitting simple task",
-                                         "new task executed, waiting",
+                                         "new task executed, waiting at time 0",
                                          "emitting simple message",
-                                         "task executed through trigger",
+                                         "task executed through trigger at time 0",
                                          "emitting simple task",
-                                         "new task executed, waiting",
-                                         "task executed, done waiting"};
+                                         "new task executed, waiting at time 100",
+                                         "task executed, done waiting at time 200"};
 
     // Make an info print the diff in an easy to read way if we fail
     INFO(util::diff_string(expected, events));
