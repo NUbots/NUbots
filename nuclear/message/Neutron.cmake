@@ -86,10 +86,8 @@ foreach(proto ${message_protobufs})
 
     add_custom_command(
       OUTPUT ${npb_out}/${output_path}/${file_we}.pb.c ${npb_out}/${output_path}/${file_we}.pb.h
-      COMMAND nanopb_generator ${file_we}.proto
-      ARGS --proto-path=${proto_dir}
-           --options-path=${nanopb_options_dir}
-           --output-dir=${npb_out}/${output_path}
+      COMMAND nanopb_generator ${file_we}.proto ARGS --proto-path=${proto_dir} --options-path=${nanopb_options_dir}
+              --output-dir=${npb_out}/${output_path}
       DEPENDS ${proto} ${nanopb_options_dir}/${file_we}.options
       COMMENT "Generating nanopb headers for ${proto}"
     )
