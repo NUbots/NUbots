@@ -50,7 +50,7 @@ namespace module::planning {
             this->log_level  = config["log_level"].as<NUClear::LogLevel>();
             cfg.fallen_angle = config["fallen_angle"].as<float>();
             cfg.start_delay  = config["start_delay"].as<double>();
-            cfg._is_fallen   = config["_is_fallen"].as<bool>();
+            cfg.is_fallen   = config["is_fallen"].as<bool>();
         });
 
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
@@ -75,10 +75,10 @@ namespace module::planning {
                 if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
 
                     // If not already fallen
-                    if (!cfg._is_fallen) {
+                    if (!cfg.is_fallen) {
                         // Set fall time
                         cfg.fall_time  = std::chrono::system_clock::now();
-                        cfg._is_fallen = true;
+                        cfg.is_fallen = true;
                     }
 
                     // Else if fallen
@@ -97,8 +97,8 @@ namespace module::planning {
                     }
                 }
                 else {
-                    // Reset _is_fallen bool if robot has recovered its posture
-                    cfg._is_fallen = false;
+                    // Reset is_fallen bool if robot has recovered its posture
+                    cfg.is_fallen = false;
                 }
             });
     }
