@@ -46,7 +46,7 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor, 2> {
+    class TestReactor : public TestBase<TestReactor, 3> {
 
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
@@ -78,9 +78,17 @@ namespace {
             });
 
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+                // Advance time, Wait should not finish yet
+                emit(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::now() + std::chrono::milliseconds(50),
+                    0.0,
+                    NUClear::message::TimeTravel::Action::ABSOLUTE));
+            });
+
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 // Advance time to when Wait should finish
                 emit(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::now() + std::chrono::milliseconds(100),
+                    NUClear::clock::now() + std::chrono::milliseconds(50),
                     0.0,
                     NUClear::message::TimeTravel::Action::ABSOLUTE));
             });
