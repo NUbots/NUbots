@@ -41,7 +41,7 @@
 namespace module::skill {
 
     using extension::Configuration;
-    using message::actuation::BodySequence;is_fallen
+    using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
