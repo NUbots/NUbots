@@ -232,11 +232,11 @@ namespace module::extension {
         // Check if a Wait command was emitted and schedule to run the Provider again
         // Other tasks can run with Wait
         // Wait should be removed and then readded at the end
-        TaskList non_wait_tasks;
-        TaskList wait_tasks;
+        TaskList running_tasks;
+        TaskList non_running_tasks;
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Wait)) {
-                wait_tasks.push_back(t);
+                non_running_tasks.push_back(t);
 
                 // Schedule the Provider to run again
                 // Get the time to wait for
@@ -265,14 +265,14 @@ namespace module::extension {
                     -1));  // Our ID is -1 as we will remove ourselves
             }
             else {
-                non_wait_tasks.push_back(t);
+                running_tasks.push_back(t);
             }
         }
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(non_wait_tasks.size());
-        for (const auto& t : non_wait_tasks) {
+        tasks.reserve(running_tasks.size());
+        for (const auto& t : running_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
@@ -363,7 +363,7 @@ namespace module::extension {
         // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
         auto old_subtasks = group.subtasks;
         // Add back in any waits
-        for (const auto& t : wait_tasks) {
+        for (const auto& t : non_running_tasks) {
             tasks.push_back(t);
         }
         // Update the group's subtasks to the new subtasks
