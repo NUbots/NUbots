@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -25,8 +25,18 @@
  * SOFTWARE.
  */
 
-#include "InformationSource.hpp"
+#ifndef MODULES_EXTENSION_FILEWATCHER_TRANSLATE_HPP
+#define MODULES_EXTENSION_FILEWATCHER_TRANSLATE_HPP
 
-namespace extension::behaviour::information {
-    InformationSource* InformationSource::source = nullptr;
-}
+#include <string>
+
+namespace module::extension {
+
+    /**
+     * @brief Translate a glob pattern into a regex pattern
+     */
+    [[nodiscard]] std::string translate(const std::string& pattern);
+
+}  // namespace module::extension
+
+#endif  // MODULES_EXTENSION_FILEWATCHER_TRANSLATE_HPP

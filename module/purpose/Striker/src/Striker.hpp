@@ -43,6 +43,10 @@ namespace module::purpose {
 
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Ready position to walk to (x, y, theta)
+            Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
+            /// @brief Penalty defence position to walk to when defending against a penalty kick from the opposing team
+            Eigen::Vector3d penalty_defence_position = Eigen::Vector3d::Zero();
             /// @brief Ready position to walk to
             Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
             /// @brief How far (m) the ball can be away from the centre of the field for it to be deemed as

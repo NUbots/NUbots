@@ -67,12 +67,12 @@ namespace module::output {
 
             // clang-format off
             auto lvl = cfg["log_level"].as<std::string>();
-            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            if (lvl == "TRACE") { this->log_level = TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = DEBUG; }
+            else if (lvl == "INFO") { this->log_level = INFO; }
+            else if (lvl == "WARN") { this->log_level = WARN; }
+            else if (lvl == "ERROR") { this->log_level = ERROR; }
+            else if (lvl == "FATAL") { this->log_level = FATAL; }
             // clang-format on
         });
 

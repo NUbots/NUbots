@@ -151,7 +151,7 @@ namespace module::input {
                                                     }))
                              .first;
 
-                    log<NUClear::INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
+                    log<INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
                 }
             }
 
@@ -261,7 +261,7 @@ namespace module::input {
                     std::string message;
                     if (feature == nullptr) {
                         // Doesn't have this feature
-                        NUClear::log<NUClear::ERROR>(
+                        NUClear::log<NUClear::LogLevel::ERROR>(
                             fmt::format("The {} camera does not have a setting named {}", name, key));
                     }
 
@@ -293,16 +293,16 @@ namespace module::input {
                         message       = set_setting(setting, value);
                     }
                     else {
-                        log<NUClear::ERROR>(fmt::format("The type of setting {} is not currently handled", key));
+                        log<ERROR>(fmt::format("The type of setting {} is not currently handled", key));
                     }
 
                     // If we had a message pass it onto the user
                     if (!message.empty()) {
-                        log<NUClear::INFO>(fmt::format("Updated {} on {} camera: {}", key, name, message));
+                        log<INFO>(fmt::format("Updated {} on {} camera: {}", key, name, message));
                     }
                 }
                 catch (const std::runtime_error& e) {
-                    log<NUClear::ERROR>(fmt::format("Error setting {} on {} camera: {}", key, name, e.what()));
+                    log<ERROR>(fmt::format("Error setting {} on {} camera: {}", key, name, e.what()));
                 }
             }
 
@@ -418,7 +418,7 @@ namespace module::input {
 
                         // 100 frames have been over time recently
                         if (timesync.drift.over_time_count > MAX_COUNT_OVER_TIME_FRAMES) {
-                            reactor.log<NUClear::INFO>(fmt::format(
+                            reactor.log<INFO>(fmt::format(
                                 "Clock drift for {} camera exceeded threshold ({:.1f}ms > {:.1f}ms), recalibrating",
                                 context->name,
                                 std::abs(total_cam - total_local) / 1e6,
@@ -506,12 +506,12 @@ namespace module::input {
 
                 // Put the buffer back on the queue and show an error message
                 arv_stream_push_buffer(stream, buffer);
-                NUClear::log<NUClear::WARN>("Failed getting buffer from", context->name, "with error", msg);
+                NUClear::log<NUClear::LogLevel::WARN>("Failed getting buffer from", context->name, "with error", msg);
             }
         }
     }
 
     void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
-        NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
+        NUClear::log<NUClear::LogLevel::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
     }
 }  // namespace module::input

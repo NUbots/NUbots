@@ -42,7 +42,7 @@ namespace module::support::optimisation {
     using utility::support::Expression;
 
     void StandOptimiser::setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
-        NUClear::log<NUClear::INFO>("Stand Optimiser Setting up NSGA2");
+        NUClear::log<NUClear::LogLevel::INFO>("Stand Optimiser Setting up NSGA2");
 
         // Extract the initial values and limits and from config file, for all of the parameters
         script_path = config["task_config_path"].as<std::string>();
@@ -55,7 +55,7 @@ namespace module::support::optimisation {
         }
 
         // Set configuration for real variables
-        NUClear::log<NUClear::INFO>("Real Var Count: ", param_initial_values.size());
+        NUClear::log<NUClear::LogLevel::INFO>("Real Var Count: ", param_initial_values.size());
         nsga2_algorithm.set_real_variable_count(param_initial_values.size());
         nsga2_algorithm.set_real_var_limits(param_limits);
         nsga2_algorithm.set_initial_real_vars(param_initial_values);

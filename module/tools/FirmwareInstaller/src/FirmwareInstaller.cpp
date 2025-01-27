@@ -71,7 +71,7 @@ namespace module::tools {
                     firmwares.insert(std::make_pair(name, fw));
                 }
                 else {
-                    log<NUClear::WARN>("The firmware file", path, "for", name.first, "does not exist");
+                    log<WARN>("The firmware file", path, "for", name.first, "does not exist");
                 }
             }
         });
@@ -181,13 +181,13 @@ namespace module::tools {
             switch (selected_device) {
                 case CM730: name.first = "CM730"; break;
                 case CM740: name.first = "CM740"; break;
-                default: log<NUClear::WARN>("Invalid device selected."); return;
+                default: log<WARN>("Invalid device selected."); return;
             }
 
             switch (selected_battery) {
                 case BATTERY3: name.second = "3CELL"; break;
                 case BATTERY4: name.second = "4CELL"; break;
-                default: log<NUClear::WARN>("Invalid battery selected."); return;
+                default: log<WARN>("Invalid battery selected."); return;
             }
 
             const auto& it = firmwares.find(name);
@@ -196,12 +196,12 @@ namespace module::tools {
             utility::io::uart uart(device, 57600);
 
             if (!uart.connected()) {
-                log<NUClear::WARN>("Unable to connect to CM740 firmware. Check your config file.");
+                log<WARN>("Unable to connect to CM740 firmware. Check your config file.");
                 powerplant.shutdown();
             }
 
             else if (it == firmwares.end()) {
-                log<NUClear::WARN>("Unable to find CM740 firmware. Check your config file.");
+                log<WARN>("Unable to find CM740 firmware. Check your config file.");
                 powerplant.shutdown();
             }
 
@@ -210,7 +210,7 @@ namespace module::tools {
 
                 pollfd pfd{uart.native_handle(), POLLIN, 0};
 
-                log<NUClear::INFO>("Please press the", name.first, "reset button to begin...");
+                log<INFO>("Please press the", name.first, "reset button to begin...");
 
                 // Wait for connection to the CM740 Bootloader
                 char send      = '#';
@@ -231,7 +231,7 @@ namespace module::tools {
                 // Check we are good to go
                 if (std::string(recv, read) == "#") {
 
-                    log<NUClear::INFO>(name.first, "reset complete...");
+                    log<INFO>(name.first, "reset complete...");
 
                     // Enter erase block mode and erase
                     uart.write("\rl\r", 3);
@@ -243,10 +243,10 @@ namespace module::tools {
 
                         // CM740 echos "l\r"
                         // std::string text(recv, read);
-                        // log<NUClear::INFO>(text);
+                        // log<INFO>(text);
                     } while (read != 0);
 
-                    log<NUClear::INFO>("Erase block complete...");
+                    log<INFO>("Erase block complete...");
 
                     // Give the bootloader time to catch its breath
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -276,7 +276,7 @@ namespace module::tools {
                         ;
                     }
 
-                    log<NUClear::INFO>("Downloading Bytesum...");
+                    log<INFO>("Downloading Bytesum...");
 
                     // Wait for the device to finish processing the firmware
                     while (read != 0) {
@@ -284,10 +284,10 @@ namespace module::tools {
                         read = uart.read(recv, sizeof(recv));
 
                         std::string text(recv, read);
-                        log<NUClear::INFO>(text);
+                        log<INFO>(text);
                     }
 
-                    log<NUClear::INFO>("Firmware installation complete...");
+                    log<INFO>("Firmware installation complete...");
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -296,7 +296,7 @@ namespace module::tools {
                     poll(&pfd, 1, 50);
                     if ((read = uart.read(recv, sizeof(recv))) > 0) {
                         std::string text(recv, read);
-                        log<NUClear::INFO>(text);
+                        log<INFO>(text);
                     }
 
                     // Close our uart
@@ -304,7 +304,7 @@ namespace module::tools {
                 }
 
                 else {
-                    log<NUClear::WARN>(name.first, "reset failed.");
+                    log<WARN>(name.first, "reset failed.");
                     uart.close();
                 }
             }

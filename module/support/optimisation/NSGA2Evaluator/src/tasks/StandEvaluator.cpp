@@ -86,9 +86,9 @@ namespace module::support::optimisation {
     }
 
     void StandEvaluator::evaluating_state(NSGA2Evaluator* evaluator) {
-        NUClear::log<NUClear::DEBUG>("Running Script");
+        NUClear::log<NUClear::LogLevel::DEBUG>("Running Script");
         run_script(evaluator);
-        NUClear::log<NUClear::DEBUG>("schedule expire");
+        NUClear::log<NUClear::LogLevel::DEBUG>("schedule expire");
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
 
@@ -102,7 +102,7 @@ namespace module::support::optimisation {
 
         // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
         if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
-            NUClear::log<NUClear::DEBUG>("Fallen!");
+            NUClear::log<NUClear::LogLevel::DEBUG>("Fallen!");
             fallen = true;
             return true;
         }
@@ -128,10 +128,13 @@ namespace module::support::optimisation {
         auto scores      = calculate_scores(trial_duration);
         auto constraints = calculate_constraints(early_termination);
 
-        NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
-        NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
-        NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
-        NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
+        NUClear::log<NUClear::LogLevel::DEBUG>("Trial ran for", trial_duration);
+        NUClear::log<NUClear::LogLevel::DEBUG>("SendFitnessScores for generation",
+                                               generation,
+                                               "individual",
+                                               individual);
+        NUClear::log<NUClear::LogLevel::DEBUG>("    scores:", scores[0], scores[1]);
+        NUClear::log<NUClear::LogLevel::DEBUG>("    constraints:", constraints[0], constraints[1]);
 
         // Create the fitness scores message based on the given results and emit it back to the Optimiser
         std::unique_ptr<NSGA2FitnessScores> fitness_scores = std::make_unique<NSGA2FitnessScores>();
@@ -157,16 +160,16 @@ namespace module::support::optimisation {
 
     void StandEvaluator::load_script(std::string script_path) {
         if (utility::file::exists(script_path)) {
-            NUClear::log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
+            NUClear::log<NUClear::LogLevel::DEBUG>("Loading script: ", script_path, '\n');
             script = script_path;
         }
         else {
-            NUClear::log<NUClear::ERROR>("No script found at: ", script_path, '\n');
+            NUClear::log<NUClear::LogLevel::ERROR>("No script found at: ", script_path, '\n');
         }
     }
 
     void StandEvaluator::save_script(std::string script_path) {
-        NUClear::log<NUClear::DEBUG>("Saving as: ", script_path);
+        NUClear::log<NUClear::LogLevel::DEBUG>("Saving as: ", script_path);
         YAML::Node n(script);
         utility::file::writeToFile(script_path, n);
     }

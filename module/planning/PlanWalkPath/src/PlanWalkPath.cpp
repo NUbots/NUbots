@@ -274,7 +274,7 @@ namespace module::planning {
 
     Eigen::Vector2d PlanWalkPath::adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
                                                                         const std::vector<Eigen::Vector2d>& obstacles) {
-        log<NUClear::DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
 
         // Calculate a perpendicular vector to the direction of the target point
         const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
