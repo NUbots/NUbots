@@ -32,7 +32,7 @@ namespace module::platform::OpenCR {
 
     NUClear::threading::ReactionHandle HardwareIO::create_model_watchdog() {
         return on<Watchdog<ModelWatchdog, 500, std::chrono::milliseconds>, Sync<ModelWatchdog>>().then([this] {
-            log<NUClear::WARN>(fmt::format("OpenCR model information not received, restarting system"));
+            log<WARN>(fmt::format("OpenCR model information not received, restarting system"));
             // Clear all packet queues just in case
             queue_clear_all();
             // Restart the system and exit the watchdog
@@ -47,7 +47,7 @@ namespace module::platform::OpenCR {
             // This may be related to the out of order packets with Sync within NUClear. This should be
             // fixed in a later version of NUClear.
             if (model_watchdog.enabled()) {
-                log<NUClear::WARN>(
+                log<WARN>(
                     "Packet watchdog cannot be enabled while model watchdog is enabled. You may see this "
                     "warning at the start of the program. This is expected as the watchdog reaction may "
                     "still be disabling.");
@@ -68,7 +68,7 @@ namespace module::platform::OpenCR {
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
 
                 // notify with ID and servo name
-                log<NUClear::WARN>(
+                log<WARN>(
                     fmt::format("Dropped packet from ID {} ({})", int(dropout_id), nugus.device_name(dropout_id)));
 
                 // if this is the first packet, set our flag
@@ -82,7 +82,7 @@ namespace module::platform::OpenCR {
 
             // if this is the first packet then send a warning
             if (num_packets_dropped > 1) {
-                log<NUClear::WARN>(
+                log<WARN>(
                     fmt::format("NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
                                 "chain will cause all later packets (of higher ID) to be dropped. Consider "
                                 "checking cables for ID {} ({})",
@@ -94,7 +94,7 @@ namespace module::platform::OpenCR {
             // In case the system stops for some other reason, we don't want the watchdog
             // to make it automatically restart
             if (num_packets_dropped > 0) {
-                log<NUClear::WARN>("Flushing buffer and requesting servo packets to restart system");
+                log<WARN>("Flushing buffer and requesting servo packets to restart system");
                 // We *may* have data that we haven't gotten around to processing by the time the watchdog triggers.
                 // if this is a full packet (somehow) it will throw us out of sync unless we flush the buffer.
                 opencr.flush();

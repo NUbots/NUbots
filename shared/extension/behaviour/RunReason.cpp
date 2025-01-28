@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,16 +24,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "RunReason.hpp"
 
-#include "Director.hpp"
+namespace extension::behaviour::information {
 
-namespace module::extension {
+    thread_local RunReason RunReasonStore::current_reason = RunReason::OTHER_TRIGGER;
 
-    using ::extension::behaviour::RunInfo;
-
-    RunInfo Director::_get_run_info(const uint64_t& /*reaction_id*/) {
-
-        return RunInfo{current_run_reason};
-    }
-
-}  // namespace module::extension
+}  // namespace extension::behaviour::information

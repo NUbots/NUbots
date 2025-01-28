@@ -151,7 +151,7 @@ namespace module::skill {
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                         case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                         case WalkState::State::UNKNOWN:
-                        default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                        default: NUClear::log<NUClear::LogLevel::WARN>("Unknown state."); break;
                     }
                 }
 
@@ -187,7 +187,7 @@ namespace module::skill {
                                                               walk_generator.get_phase());
 
                 // Debugging
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     Eigen::Vector3d thetaTL = mat_to_rpy_intrinsic(Htl.linear());
                     emit(graph("Left foot desired position rLTt (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
                     emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));

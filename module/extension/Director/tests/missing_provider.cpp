@@ -40,10 +40,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask<2>>>().then([this] { events.push_back("simple task 2"); });
 
@@ -65,12 +64,6 @@ namespace {
                 events.push_back("emitting simple task 3");
                 emit<Task>(std::make_unique<SimpleTask<3>>());
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-            });
         }
     };
 
@@ -79,7 +72,7 @@ namespace {
 TEST_CASE("Test that a Task can be emitted when no Provider exists for it", "[director][provider][missing]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

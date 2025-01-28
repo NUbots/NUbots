@@ -34,6 +34,9 @@
 #include <typeindex>
 #include <utility>
 
+#include "GroupInfo.hpp"
+#include "Lock.hpp"
+
 /**
  * This namespace holds all of the communication primitives that are used by the Behaviour header to send messages to
  * the behaviour system. You shouldn't be emitting any of these messages outside of the behaviour header.
@@ -53,8 +56,8 @@ namespace extension::behaviour::commands {
     };
 
     template <typename T>
-    struct RootType {
-        RootType() = delete;
+    struct RootProvider {
+        RootProvider() = delete;
     };
 
     /**
@@ -62,17 +65,27 @@ namespace extension::behaviour::commands {
      */
     struct ProvideReaction {
 
+        /// A function that can be used to set data into the correct caches and return a Lock for when the task is
+        /// executed. This is provided as a function pointer rather than an std::function to ensure that it is stateless
+        /// for the given Provider type (ProviderGroup).
+        using DataSetter = Lock (*)(const NUClear::id_t&,
+                                    const RunReason&,
+                                    const std::shared_ptr<const void>&,
+                                    const std::shared_ptr<const GroupInfo>&);
+
         /**
          * @brief Construct a new Provide Reaction object to send to the behaviour system
          *
          * @param reaction_         the reaction for this provides object
          * @param type_             the type that this Provider provides for
          * @param classification_   what kind of provider this ProvideReaction is for
+         * @param data_setter_      a function that will set the data for this Provider Group
          */
         ProvideReaction(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                         const std::type_index& type_,
-                        const ProviderClassification& classification_)
-            : reaction(std::move(reaction_)), type(type_), classification(classification_) {}
+                        const ProviderClassification& classification_,
+                        const DataSetter& data_setter_)
+            : reaction(std::move(reaction_)), type(type_), classification(classification_), data_setter(data_setter_) {}
 
         /// The reaction for this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -80,6 +93,8 @@ namespace extension::behaviour::commands {
         std::type_index type;
         /// The action type that this Provider is using
         ProviderClassification classification;
+        /// A function that will place data into the correct caches and return a Lock
+        DataSetter data_setter;
     };
 
     /**
@@ -174,13 +189,13 @@ namespace extension::behaviour::commands {
          * @param requester_id_      the reaction_id of the NUClear reaction that finished executing
          * @param requester_task_id_ the reaction_task_id of the NUClear reaction task that finished executing
          */
-        ProviderDone(const uint64_t& requester_id_, const uint64_t& requester_task_id_)
+        ProviderDone(const NUClear::id_t& requester_id_, const NUClear::id_t& requester_task_id_)
             : requester_id(requester_id_), requester_task_id(requester_task_id_) {}
 
         /// The reaction_id of the Provider that finished
-        uint64_t requester_id;
+        NUClear::id_t requester_id;
         /// The specific task_id of the Provider that finished
-        uint64_t requester_task_id;
+        NUClear::id_t requester_task_id;
     };
 
     /**
@@ -192,40 +207,21 @@ namespace extension::behaviour::commands {
          * Construct a new Task object to send to the behaviour system
          *
          * @param type_                 the type that this task is for
-         * @param root_type_            a secondary type to use if this is a root task
-         * @param requester_id_         the id of the reaction that emitted this task
-         * @param requester_task_id_    the task_id of the reaction task that emitted this
          * @param data_                 the task data to be sent to the provider
          * @param name_                 a string name for this task for use in debugging
          * @param priority_             the priority that this task is to run with
          * @param optional_             whether this task is optional or not
          */
         BehaviourTask(const std::type_index& type_,
-                      const std::type_index& root_type_,
-                      const uint64_t& requester_id_,
-                      const uint64_t& requester_task_id_,
                       std::shared_ptr<void> data_,
                       std::string name_,
                       const int& priority_,
                       const bool& optional_)
-            : type(type_)
-            , root_type(root_type_)
-            , requester_id(requester_id_)
-            , requester_task_id(requester_task_id_)
-            , data(std::move(data_))
-            , name(std::move(name_))
-            , priority(priority_)
-            , optional(optional_) {}
+            : type(type_), data(std::move(data_)), name(std::move(name_)), priority(priority_), optional(optional_) {}
 
         /// The Provider type this task is for
         std::type_index type;
-        /// A secondary provider type to use if this is a root task
-        std::type_index root_type;
-        /// The reaction id of the requester (could be the id of a Provider)
-        uint64_t requester_id;
-        /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
-        uint64_t requester_task_id;
-        /// The data for the command, (the data that will be given to the Provider) if null counts as no task
+        /// The data for the command, (the data that will be given to the Provider). If it is null it counts as no task
         std::shared_ptr<void> data;
         /// A name for this task to be shown in debugging systems
         std::string name;
@@ -235,7 +231,48 @@ namespace extension::behaviour::commands {
         bool optional;
     };
 
+    /**
+     * Represents a group of tasks that are emitted by a single provider and should be considered as siblings.
+     */
+    struct BehaviourTasks {
+        /**
+         * Construct a new Behaviour Tasks object to send to the behaviour system
+         *
+         * @param requester_type_    the type of the provider that emitted this task or RootProvider<T> for root tasks
+         * @param requester_id_      the id of the reaction that emitted this task
+         * @param requester_task_id_ the task_id of the reaction task that emitted this
+         * @param root_              if this task pack is a root task
+         * @param tasks_             the tasks that are to be executed
+         */
+        BehaviourTasks(const std::type_index& requester_type_,
+                       const NUClear::id_t& requester_id_,
+                       const NUClear::id_t& requester_task_id_,
+                       const bool& root_,
+                       std::vector<BehaviourTask>&& tasks_)
+            : requester_type(requester_type_)
+            , requester_reaction_id(requester_id_)
+            , requester_task_id(requester_task_id_)
+            , root(root_)
+            , tasks(std::move(tasks_)) {}
+
+        /// The type of the requester, will be either the provider type or RootProvider<type> for root tasks
+        std::type_index requester_type;
+        /// The reaction id of the requester if it is a Provider, otherwise it will be 0 (for root tasks)
+        NUClear::id_t requester_reaction_id;
+        /// The reaction task id of the provider
+        NUClear::id_t requester_task_id;
+        /// If this task pack is a root task
+        bool root;
+        /// The tasks that are to be executed
+        std::vector<BehaviourTask> tasks;
+    };
+
 
 }  // namespace extension::behaviour::commands
+
+namespace NUClear::dsl::operation {
+    template <>
+    struct EmitStats<::extension::behaviour::commands::BehaviourTasks> : std::false_type {};
+}  // namespace NUClear::dsl::operation
 
 #endif  // EXTENSION_BEHAVIOUR_COMMANDS_HPP

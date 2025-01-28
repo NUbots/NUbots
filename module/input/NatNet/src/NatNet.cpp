@@ -61,7 +61,7 @@ namespace module::input {
                 cfg.data_port         = config["data_port"].as<uint16_t>();
                 cfg.command_port      = config["command_port"].as<uint16_t>();
 
-                log<NUClear::INFO>("Connecting to NatNet network", cfg.multicast_address);
+                log<INFO>("Connecting to NatNet network", cfg.multicast_address);
 
                 // Create a listening UDP port for commands
                 std::tie(command_handle, std::ignore, commandFd) =
@@ -90,7 +90,7 @@ namespace module::input {
                                 send_command(Packet::Type::PING);
                             }
                             else if (remote != address) {
-                                log<NUClear::WARN>("There is more than one NatNet server running on this network");
+                                log<WARN>("There is more than one NatNet server running on this network");
                             }
                         });
             }
@@ -119,7 +119,7 @@ namespace module::input {
 
             // Convert IP address from string to binary form
             if (inet_pton(AF_INET, remote.c_str(), &address.sin_addr) <= 0) {
-                log<NUClear::ERROR>("Invalid remote IP address");
+                log<ERROR>("Invalid remote IP address");
                 return;
             }
 
@@ -132,7 +132,7 @@ namespace module::input {
                      sizeof(sockaddr));
         }
         else {
-            log<NUClear::WARN>("NatNet is not yet connected to a remote server");
+            log<WARN>("NatNet is not yet connected to a remote server");
         }
     }
 
@@ -214,7 +214,7 @@ namespace module::input {
         // TODO(HardwareTeam): there is an eod thing here
         uint32_t eod = ReadData<uint32_t>::read(ptr, version);
         if (eod != 0) {
-            log<NUClear::ERROR>("Packet not read correctly, Abandoning.");
+            log<ERROR>("Packet not read correctly, Abandoning.");
             return;
         }
 
@@ -229,7 +229,7 @@ namespace module::input {
             // We need to update our models
             else {
                 // Inform that we are updating our models
-                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                log<INFO>("NatNet models are out of date, updating before resuming data");
 
                 // Request model definitions
                 send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -263,7 +263,7 @@ namespace module::input {
             // We need to update our models
             else {
                 // Inform that we are updating our models
-                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                log<INFO>("NatNet models are out of date, updating before resuming data");
 
                 // Request model definitions
                 send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -309,7 +309,7 @@ namespace module::input {
                     // We need to update our models
                     else {
                         // Inform that we are updating our models
-                        log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                        log<INFO>("NatNet models are out of date, updating before resuming data");
 
                         // Request model definitions
                         send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -322,7 +322,7 @@ namespace module::input {
             // We need to update our models
             else {
                 // Inform that we are updating our models
-                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                log<INFO>("NatNet models are out of date, updating before resuming data");
 
                 // Request model definitions
                 send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -346,7 +346,7 @@ namespace module::input {
 
     void NatNet::process_model(const Packet& packet) {
 
-        log<NUClear::INFO>("Updating model definitions");
+        log<INFO>("Updating model definitions");
 
         // Our pointer as we move through the data
         const char* ptr = &packet.data;
@@ -399,7 +399,7 @@ namespace module::input {
 
                 // Bad packet
                 default: {
-                    log<NUClear::WARN>("NatNet received an unexpected model type", type);
+                    log<WARN>("NatNet received an unexpected model type", type);
                 } break;
             }
         }
@@ -426,7 +426,7 @@ namespace module::input {
                                       + (nat_net_version[2] == 0 ? "" : "." + std::to_string(nat_net_version[2]))
                                       + (nat_net_version[3] == 0 ? "" : "." + std::to_string(nat_net_version[3]));
 
-        log<NUClear::INFO>(
+        log<INFO>(
             fmt::format("Connected to {} ({} {}) over NatNet {}", remote, name, str_app_version, str_nat_version));
 
         // Request model definitions on startup
@@ -472,12 +472,12 @@ namespace module::input {
             case Packet::Type::FRAME_OF_DATA: process_frame(packet); break;
 
             case Packet::Type::UNRECOGNIZED_REQUEST:
-                log<NUClear::ERROR>("An unrecognized request was made to the NatNet server");
+                log<ERROR>("An unrecognized request was made to the NatNet server");
                 break;
 
             case Packet::Type::MESSAGE_STRING: process_string(packet); break;
 
-            default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
+            default: log<ERROR>("The NatNet server sent an unexpected packet type"); break;
         }
     }
 }  // namespace module::input
