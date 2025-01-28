@@ -66,9 +66,7 @@ public:
     explicit TestBase(std::unique_ptr<NUClear::Environment> environment,
                       bool auto_shutdown_                         = true,
                       std::chrono::steady_clock::duration timeout = std::chrono::milliseconds(1000))
-        : BehaviourReactor(std::move(environment)) {
-        // Set whether or not to automatically shutdown the powerplant after the steps are finished
-        auto_shutdown = auto_shutdown_;
+        : BehaviourReactor(std::move(environment)), auto_shutdown(auto_shutdown_) {
         // Advance to the next step when the system is idle
         on<Idle<>>().then([this] { next_step<NSteps>(++step); });
 
