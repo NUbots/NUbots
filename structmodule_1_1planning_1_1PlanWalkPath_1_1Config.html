@@ -183,9 +183,25 @@ Public Attributes</h2></td></tr>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d">acceleration</a> = 0.0</td></tr>
 <tr class="memdesc:a3cadd474fc5462ac44a470a52c14967d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Crude acceleration, the maximum increment/decrease in walk command velocity per update. <br /></td></tr>
 <tr class="separator:a3cadd474fc5462ac44a470a52c14967d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf0ab6e6ed53ce179dac7cb0ebe62bd3"><td class="memItemLeft" align="right" valign="top"><a id="abf0ab6e6ed53ce179dac7cb0ebe62bd3"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#abf0ab6e6ed53ce179dac7cb0ebe62bd3">acceleration_multiplier</a> = 0.0</td></tr>
+<tr class="memdesc:abf0ab6e6ed53ce179dac7cb0ebe62bd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiplier for acceleration/deceleration when walking backwards. <br /></td></tr>
+<tr class="separator:abf0ab6e6ed53ce179dac7cb0ebe62bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afaa24a5cc19b2c5fb81c2826fb9317f7"><td class="memItemLeft" align="right" valign="top"><a id="afaa24a5cc19b2c5fb81c2826fb9317f7"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afaa24a5cc19b2c5fb81c2826fb9317f7">backward_buffer</a> = 0.0</td></tr>
+<tr class="memdesc:afaa24a5cc19b2c5fb81c2826fb9317f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer to prevent oscillation between forwards and backwards movement. <br /></td></tr>
+<tr class="separator:afaa24a5cc19b2c5fb81c2826fb9317f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a896ec56a801cfe629e4f2aecb733712b"><td class="memItemLeft" align="right" valign="top"><a id="a896ec56a801cfe629e4f2aecb733712b"></a>
+Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a896ec56a801cfe629e4f2aecb733712b">backwards_vector</a> = Eigen::Vector2d::Zero()</td></tr>
+<tr class="memdesc:a896ec56a801cfe629e4f2aecb733712b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backwards walk vector. <br /></td></tr>
+<tr class="separator:a896ec56a801cfe629e4f2aecb733712b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d0b4b4523f6c6d095da6fe841102f44"><td class="memItemLeft" align="right" valign="top"><a id="a6d0b4b4523f6c6d095da6fe841102f44"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>max_align_radius</b> = 0.0</td></tr>
 <tr class="separator:a6d0b4b4523f6c6d095da6fe841102f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a197d2688e29ff7ed3b1a6c01b346da57"><td class="memItemLeft" align="right" valign="top"><a id="a197d2688e29ff7ed3b1a6c01b346da57"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a197d2688e29ff7ed3b1a6c01b346da57">max_aligned_angle</a> = 0.0</td></tr>
+<tr class="memdesc:a197d2688e29ff7ed3b1a6c01b346da57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum angle that we are considered to be aligned with the final heading. <br /></td></tr>
+<tr class="separator:a197d2688e29ff7ed3b1a6c01b346da57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c279870073767f89d33b44c619875ff"><td class="memItemLeft" align="right" valign="top"><a id="a3c279870073767f89d33b44c619875ff"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>max_angle_error</b> = 0.0</td></tr>
 <tr class="separator:a3c279870073767f89d33b44c619875ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -193,6 +209,10 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>max_angle_error</b>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a51187d1ec848c03ee92ea0f6c0182cf0">max_angular_velocity</a> = 0.0</td></tr>
 <tr class="memdesc:a51187d1ec848c03ee92ea0f6c0182cf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum angular velocity command for walking. <br /></td></tr>
 <tr class="separator:a51187d1ec848c03ee92ea0f6c0182cf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98b4363fb8b1666f76961a3d622dba8b"><td class="memItemLeft" align="right" valign="top"><a id="a98b4363fb8b1666f76961a3d622dba8b"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a98b4363fb8b1666f76961a3d622dba8b">max_strafe_angle</a> = 0.0</td></tr>
+<tr class="memdesc:a98b4363fb8b1666f76961a3d622dba8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum angle to target for strafing backwards. <br /></td></tr>
+<tr class="separator:a98b4363fb8b1666f76961a3d622dba8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89b16dd288bae949610ffe0ff6c32373"><td class="memItemLeft" align="right" valign="top"><a id="a89b16dd288bae949610ffe0ff6c32373"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a89b16dd288bae949610ffe0ff6c32373">max_translational_velocity_x</a> = 0.0</td></tr>
 <tr class="memdesc:a89b16dd288bae949610ffe0ff6c32373"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum walk command velocity x for walking. <br /></td></tr>
@@ -239,6 +259,10 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a043d3ea874ed212ef1b3bdd1f71ecc0d">rotate_velocity_y</a> = 0.0</td></tr>
 <tr class="memdesc:a043d3ea874ed212ef1b3bdd1f71ecc0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotate on spot walk command side velocity. <br /></td></tr>
 <tr class="separator:a043d3ea874ed212ef1b3bdd1f71ecc0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afee66f6409b419ce90036e8aa7947fe8"><td class="memItemLeft" align="right" valign="top"><a id="afee66f6409b419ce90036e8aa7947fe8"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afee66f6409b419ce90036e8aa7947fe8">starting_velocity</a> = 0.0</td></tr>
+<tr class="memdesc:afee66f6409b419ce90036e8aa7947fe8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starting velocity when walking backwards. <br /></td></tr>
+<tr class="separator:afee66f6409b419ce90036e8aa7947fe8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5610fae322ed4cf15b56dd5821e0e86c"><td class="memItemLeft" align="right" valign="top"><a id="a5610fae322ed4cf15b56dd5821e0e86c"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>strafe_gain</b> = 0.0</td></tr>
 <tr class="separator:a5610fae322ed4cf15b56dd5821e0e86c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -254,7 +278,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>strafe_gain</b> = 0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html">PlanWalkPath</a></li><li class="navelem"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Jan 25 2025 11:01:52 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jan 28 2025 06:14:24 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -213,18 +213,34 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
+<tr class="memitem:ab4904e10b8e5a757b451ce7b6846d666"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#ab4904e10b8e5a757b451ce7b6846d666">accelerate_to_target</a> (double desired_heading)</td></tr>
+<tr class="memdesc:ab4904e10b8e5a757b451ce7b6846d666"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accelerate and rotate the robot towards the target point.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#ab4904e10b8e5a757b451ce7b6846d666">More...</a><br /></td></tr>
+<tr class="separator:ab4904e10b8e5a757b451ce7b6846d666"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfc64be464f37ff6a75ac9ce28406991"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#acfc64be464f37ff6a75ac9ce28406991">adjust_target_direction_for_obstacles</a> (Eigen::Vector2d rDRr, const std::vector&lt; Eigen::Vector2d &gt; &amp;obstacles)</td></tr>
+<tr class="memdesc:acfc64be464f37ff6a75ac9ce28406991"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjust the target direction to avoid obstacles.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#acfc64be464f37ff6a75ac9ce28406991">More...</a><br /></td></tr>
+<tr class="separator:acfc64be464f37ff6a75ac9ce28406991"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b6595e47f523bc2454793cc02d86345"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a9b6595e47f523bc2454793cc02d86345">constrain_velocity</a> (const Eigen::Vector3d &amp;v)</td></tr>
 <tr class="memdesc:a9b6595e47f523bc2454793cc02d86345"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrain a velocity vector to ensure it is within the limits.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#a9b6595e47f523bc2454793cc02d86345">More...</a><br /></td></tr>
 <tr class="separator:a9b6595e47f523bc2454793cc02d86345"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; Eigen::Vector2d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#afc0aa37ffad11d1c6b0820b1012bcf47">get_obstacles</a> (const std::vector&lt; Eigen::Vector2d &gt; &amp;all_obstacles, const Eigen::Vector2d &amp;rDRr)</td></tr>
 <tr class="memdesc:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the closest obstacle in the path to the target, including obstacles close to that obstacle.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#afc0aa37ffad11d1c6b0820b1012bcf47">More...</a><br /></td></tr>
 <tr class="separator:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adafedd46710129ce6f6cc4dc82cca240"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#adafedd46710129ce6f6cc4dc82cca240">strafe_to_target</a> (const double error)</td></tr>
+<tr class="memdesc:adafedd46710129ce6f6cc4dc82cca240"><td class="mdescLeft">&#160;</td><td class="mdescRight">Head towards the target point without rotation.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#adafedd46710129ce6f6cc4dc82cca240">More...</a><br /></td></tr>
+<tr class="separator:adafedd46710129ce6f6cc4dc82cca240"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bcdd0627beac9fc5c2b6ae8d977b25f"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a7bcdd0627beac9fc5c2b6ae8d977b25f">walk_backwards</a> (bool desired_direction)</td></tr>
+<tr class="memdesc:a7bcdd0627beac9fc5c2b6ae8d977b25f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walk straight backwards when the robot is next to the target.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#a7bcdd0627beac9fc5c2b6ae8d977b25f">More...</a><br /></td></tr>
+<tr class="separator:a7bcdd0627beac9fc5c2b6ae8d977b25f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a6e84da1d1dc1c917d65ec5e6fda7aa5c"><td class="memItemLeft" align="right" valign="top"><a id="a6e84da1d1dc1c917d65ec5e6fda7aa5c"></a>
 struct <a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html">module::planning::PlanWalkPath::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a6e84da1d1dc1c917d65ec5e6fda7aa5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaabe9e2c7a91f1ecb8a538116164aa67"><td class="memItemLeft" align="right" valign="top"><a id="aaabe9e2c7a91f1ecb8a538116164aa67"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#aaabe9e2c7a91f1ecb8a538116164aa67">is_walking_backwards</a> = false</td></tr>
+<tr class="memdesc:aaabe9e2c7a91f1ecb8a538116164aa67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boolean value to determine if the robot is walking backwards. <br /></td></tr>
+<tr class="separator:aaabe9e2c7a91f1ecb8a538116164aa67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2642739bb0ad2e7220a8261e4d04009f"><td class="memItemLeft" align="right" valign="top"><a id="a2642739bb0ad2e7220a8261e4d04009f"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a2642739bb0ad2e7220a8261e4d04009f">velocity_magnitude</a> = 0.0</td></tr>
 <tr class="memdesc:a2642739bb0ad2e7220a8261e4d04009f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current magnitude of the translational velocity of the walk command. <br /></td></tr>
@@ -279,6 +295,82 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <tr class="separator:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab4904e10b8e5a757b451ce7b6846d666"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4904e10b8e5a757b451ce7b6846d666">&#9670;&nbsp;</a></span>accelerate_to_target()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double module::planning::PlanWalkPath::accelerate_to_target </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>desired_heading</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Accelerate and rotate the robot towards the target point. </p>
+<dl class="section return"><dt>Returns</dt><dd>desired velocity magnitude </dd></dl>
+
+</div>
+</div>
+<a id="acfc64be464f37ff6a75ac9ce28406991"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfc64be464f37ff6a75ac9ce28406991">&#9670;&nbsp;</a></span>adjust_target_direction_for_obstacles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector2d module::planning::PlanWalkPath::adjust_target_direction_for_obstacles </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::Vector2d&#160;</td>
+          <td class="paramname"><em>rDRr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; Eigen::Vector2d &gt; &amp;&#160;</td>
+          <td class="paramname"><em>obstacles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adjust the target direction to avoid obstacles. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">robots</td><td>vector of all robots in the world </td></tr>
+    <tr><td class="paramname">rDRr</td><td>vector from robot to final target </td></tr>
+    <tr><td class="paramname">obstacles</td><td>vector of obstacles in the path to avoid </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>adjusted target direction </dd></dl>
+
+</div>
+</div>
 <a id="a9b6595e47f523bc2454793cc02d86345"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b6595e47f523bc2454793cc02d86345">&#9670;&nbsp;</a></span>constrain_velocity()</h2>
 
@@ -360,6 +452,70 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 
 </div>
 </div>
+<a id="adafedd46710129ce6f6cc4dc82cca240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adafedd46710129ce6f6cc4dc82cca240">&#9670;&nbsp;</a></span>strafe_to_target()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double module::planning::PlanWalkPath::strafe_to_target </td>
+          <td>(</td>
+          <td class="paramtype">const double&#160;</td>
+          <td class="paramname"><em>error</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Head towards the target point without rotation. </p>
+<dl class="section return"><dt>Returns</dt><dd>desired velocity magnitude </dd></dl>
+
+</div>
+</div>
+<a id="a7bcdd0627beac9fc5c2b6ae8d977b25f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bcdd0627beac9fc5c2b6ae8d977b25f">&#9670;&nbsp;</a></span>walk_backwards()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector2d module::planning::PlanWalkPath::walk_backwards </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>desired_direction</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Walk straight backwards when the robot is next to the target. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">desired_direction</td><td>desired direction to walk- true for backwards, false for forwards </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>adjusted target direction </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/planning/PlanWalkPath/src/<a class="el" href="PlanWalkPath_8hpp_source.html">PlanWalkPath.hpp</a></li>
 <li>module/planning/PlanWalkPath/src/PlanWalkPath.cpp</li>
@@ -370,7 +526,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html">PlanWalkPath</a></li>
-    <li class="footer">Generated on Sat Jan 25 2025 11:01:52 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jan 28 2025 06:14:24 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

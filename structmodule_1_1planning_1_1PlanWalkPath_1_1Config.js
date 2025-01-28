@@ -1,9 +1,14 @@
 var structmodule_1_1planning_1_1PlanWalkPath_1_1Config =
 [
     [ "acceleration", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d", null ],
+    [ "acceleration_multiplier", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#abf0ab6e6ed53ce179dac7cb0ebe62bd3", null ],
+    [ "backward_buffer", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afaa24a5cc19b2c5fb81c2826fb9317f7", null ],
+    [ "backwards_vector", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a896ec56a801cfe629e4f2aecb733712b", null ],
     [ "max_align_radius", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a6d0b4b4523f6c6d095da6fe841102f44", null ],
+    [ "max_aligned_angle", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a197d2688e29ff7ed3b1a6c01b346da57", null ],
     [ "max_angle_error", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3c279870073767f89d33b44c619875ff", null ],
     [ "max_angular_velocity", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a51187d1ec848c03ee92ea0f6c0182cf0", null ],
+    [ "max_strafe_angle", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a98b4363fb8b1666f76961a3d622dba8b", null ],
     [ "max_translational_velocity_x", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a89b16dd288bae949610ffe0ff6c32373", null ],
     [ "max_translational_velocity_y", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab168447d049e6f9464c28907c4aa71ba", null ],
     [ "max_velocity_magnitude", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a35071ba9dd0dec74397c30e78a21a966", null ],
@@ -16,5 +21,6 @@ var structmodule_1_1planning_1_1PlanWalkPath_1_1Config =
     [ "rotate_velocity", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a6c8d63dcf9944707c66dbc827c6b842d", null ],
     [ "rotate_velocity_x", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a525df2d1a19821fff970023de471841d", null ],
     [ "rotate_velocity_y", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a043d3ea874ed212ef1b3bdd1f71ecc0d", null ],
+    [ "starting_velocity", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afee66f6409b419ce90036e8aa7947fe8", null ],
     [ "strafe_gain", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a5610fae322ed4cf15b56dd5821e0e86c", null ]
 ];
