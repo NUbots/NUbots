@@ -157,7 +157,8 @@ namespace module::planning {
                 if (translational_error > cfg.max_align_radius) {
                     // If we are walking backwards, change direction
                     rDRr = is_walking_backwards ? walk_backwards(false) : rDRr;
-                    desired_velocity_magnitude = is_walking_backwards ? velocity_magnitude : accelerate_to_target(desired_heading);
+                    desired_velocity_magnitude =
+                        is_walking_backwards ? velocity_magnitude : accelerate_to_target(desired_heading);
                 }
                 else {
                     // Normalise error between [0, 1] inside align radius
