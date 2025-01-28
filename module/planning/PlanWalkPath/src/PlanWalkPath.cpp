@@ -87,6 +87,7 @@ namespace module::planning {
             cfg.backward_buffer         = config["backward_buffer"].as<Expression>();
             cfg.max_aligned_angle       = config["max_aligned_angle"].as<Expression>();
             cfg.acceleration_multiplier = config["acceleration_multiplier"].as<double>();
+            cfg.backwards_vector        = config["backwards_vector"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -242,7 +243,7 @@ namespace module::planning {
                 std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
 
             // Step backwards while keeping the forward direction
-            return Eigen::Vector2d(-1.0, 0.001);
+            return Eigen::Vector2d(cfg.backwards_vector.x(), cfg.backwards_vector.y());
         }
 
         // Slow down before changing direction
@@ -250,7 +251,7 @@ namespace module::planning {
         is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
 
         // Step backwards while keeping the forward direction
-        return Eigen::Vector2d(-1.0, 0.001);
+        return Eigen::Vector2d(cfg.backwards_vector.x(), cfg.backwards_vector.y());
     }
 
     double PlanWalkPath::accelerate_to_target(double desired_heading) {

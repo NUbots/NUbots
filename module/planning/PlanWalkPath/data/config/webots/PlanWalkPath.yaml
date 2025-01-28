@@ -26,6 +26,7 @@ strafe_gain: 0.4
 max_strafe_angle: 65 * pi / 180 # Maximum angle to strafe at
 max_aligned_angle: 100 * pi / 180 # Maximum angle to be considered aligned
 backward_buffer: 10 * pi / 180 # Buffer angle to keep direction of strafe
+backwards_vector: [-1.0, 0.001] # Vector to walk backwards
 acceleration_multiplier: 0.5
 
 # Radius around obstacles to avoid

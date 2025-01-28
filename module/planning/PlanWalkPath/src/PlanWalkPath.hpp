@@ -70,6 +70,8 @@ namespace module::planning {
             double starting_velocity = 0.0;
             /// @brief Multiplier for acceleration/deceleration when walking backwards
             double acceleration_multiplier = 0.0;
+            /// @brief Backwards walk vector
+            Eigen::Vector2d backwards_vector = Eigen::Vector2d::Zero();
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
