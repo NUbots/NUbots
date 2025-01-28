@@ -244,7 +244,7 @@ namespace module::planning {
                 std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
 
             // Step backwards while keeping the forward direction
-            return Eigen::Vector2d(cfg.backwards_vector.x(), cfg.backwards_vector.y());
+            return cfg.backwards_vector;
         }
 
         // Slow down before changing direction
@@ -252,7 +252,7 @@ namespace module::planning {
         is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
 
         // Step backwards while keeping the forward direction
-        return Eigen::Vector2d(cfg.backwards_vector.x(), cfg.backwards_vector.y());
+        return cfg.backwards_vector;
     }
 
     double PlanWalkPath::accelerate_to_target(double desired_heading) {
