@@ -155,13 +155,8 @@ namespace module::planning {
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
                     // If we are walking backwards, change direction
-                    if (is_walking_backwards) {
-                        rDRr                       = walk_backwards(false);
-                        desired_velocity_magnitude = velocity_magnitude;
-                    }
-                    else {
-                        desired_velocity_magnitude = accelerate_to_target(desired_heading);
-                    }
+                    rDRr = is_walking_backwards ? walk_backwards(false) : rDRr;
+                    desired_velocity_magnitude = is_walking_backwards ? velocity_magnitude : accelerate_to_target(desired_heading);
                 }
                 else {
                     // Normalise error between [0, 1] inside align radius
