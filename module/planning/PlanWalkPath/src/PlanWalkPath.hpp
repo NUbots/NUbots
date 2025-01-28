@@ -78,7 +78,6 @@ namespace module::planning {
             double obstacle_radius = 0.0;
         } cfg;
 
-
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
 

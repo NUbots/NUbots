@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
@@ -48,6 +49,7 @@ namespace module::planning {
     using extension::Configuration;
 
     using message::input::Sensors;
+    using message::localisation::Field;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
@@ -55,7 +57,7 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
-    // using message::support::FieldDescription;
+    using message::support::FieldDescription;
     using message::vision::Goal;
     using message::vision::Goals;
 
@@ -99,11 +101,18 @@ namespace module::planning {
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>, With<Goals>>().then(
-            [this](const WalkTo& walk_to,
-                   const std::shared_ptr<const Robots>& robots,
-                   const Sensors& sensors,
-                   const Goals& goals) {
+        on<Provide<WalkTo>,
+           Optional<With<Robots>>,
+           With<Sensors>,
+           Optional<With<Goals>>,
+           With<Field>,
+           With<FieldDescription>>()
+            .then([this](const WalkTo& walk_to,
+                         const std::shared_ptr<const Robots>& robots,
+                         const Sensors& sensors,
+                         const std::shared_ptr<const Goals>& goals,
+                         const Field& field,
+                         const FieldDescription& fieldDesc) {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
@@ -112,17 +121,16 @@ namespace module::planning {
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
-                // Avoiding goal posts and robots when theyre in the planned path (lean more towards calculating the
-                // path that it will be moving)
-
-                std::vector<Eigen::Vector2d> all_obstacles{};
-                if (!goals.goals.empty() || robots != nullptr) {
+                if ((goals != nullptr && !goals->goals.empty()) || robots != nullptr) {
+                    std::vector<Eigen::Vector2d> all_obstacles{};
                     // If the robot can see goal posts, try to avoid them
-                    if (!goals.goals.empty()) {
+                    if (!goals->goals.empty()) {
                         // Calc the position of the goal posts, add them as obstacles
-                        for (const auto& goal : goals.goals) {
-                            auto goal_post = goal.post.bottom * goal.post.distance;
-                            all_obstacles.emplace_back(goal_post.head(2));
+                        for (const auto& goal : goals->goals) {
+                            auto rGCc = goal.post.bottom * goal.post.distance;  // in camera space
+                            auto rGWw = goal->Hcw.inverse() * rGCc;
+                            auto rGRr = sensors.Hrw * rGWw;
+                            all_obstacles.emplace_back(rGRr.head(2));
                         }
                     }
                     // If there are robots, check if there are obstacles in the way
@@ -147,11 +155,11 @@ namespace module::planning {
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
-                // check the final destination will make the bumping into goal post happen
+                if ()  // vector rDRr is overlap with the goalpost in front )
 
 
-                // Calculate the translational error between the robot and the target point (x, y)
-                const double translational_error = rDRr.norm();
+                    // Calculate the translational error between the robot and the target point (x, y)
+                    const double translational_error = rDRr.norm();
 
                 // Linearly interpolate between angle to the target and desired heading when inside the align radius
                 // region
