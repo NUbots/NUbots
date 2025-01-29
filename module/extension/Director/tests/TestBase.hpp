@@ -64,11 +64,11 @@ public:
      * @param timeout The time to wait for the test to complete before failing
      */
     explicit TestBase(std::unique_ptr<NUClear::Environment> environment,
-                      bool auto_shutdown_                         = true,
+                      bool auto_shutdown                          = true,
                       std::chrono::steady_clock::duration timeout = std::chrono::milliseconds(1000))
-        : BehaviourReactor(std::move(environment)), auto_shutdown(auto_shutdown_) {
+        : BehaviourReactor(std::move(environment)) {
         // Advance to the next step when the system is idle
-        on<Idle<>>().then([this] { next_step<NSteps>(++step); });
+        on<Idle<>>().then([this, auto_shutdown] { next_step<NSteps>(++step, auto_shutdown); });
 
         on<Trigger<Fail>, MainThread>().then([this](const Fail& f) {
             INFO(f.message);
@@ -92,15 +92,16 @@ private:
      * @tparam i The index of the step to run
      *
      * @param v The index of the current step to check against
+     * @param auto_shutdown If true the powerplant will shutdown after the last step
      */
     template <int I>
-    void next_step(const int& v) {
+    void next_step(const int& v, bool auto_shutdown) {
         if (v == I) {
             emit(std::make_unique<Step<I>>());
         }
         else {
             if constexpr (I > 1) {  // Check the next step
-                next_step<I - 1>(v);
+                next_step<I - 1>(v, auto_shutdown);
             }
             else if (auto_shutdown) {  // Shutdown after the last step
                 powerplant.shutdown();
@@ -110,10 +111,6 @@ private:
 
     /// The current step of the test
     int step = 0;
-
-protected:
-    /// Whether to shutdown the powerplant after the test automatically, or to handle it in the test
-    bool auto_shutdown = true;
 };
 
 #endif  // MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
