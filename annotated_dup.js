@@ -50,6 +50,7 @@ var annotated_dup =
         [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
         [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
         [ "Uses", "structextension_1_1behaviour_1_1Uses.html", "structextension_1_1behaviour_1_1Uses" ],
+        [ "Wait", "structextension_1_1behaviour_1_1Wait.html", "structextension_1_1behaviour_1_1Wait" ],
         [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
       ] ],
       [ "Configuration", "structextension_1_1Configuration.html", "structextension_1_1Configuration" ],
@@ -350,6 +351,7 @@ var annotated_dup =
         [ "operation", null, [
           [ "DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4" ],
           [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ],
+          [ "EmitStats< module::extension::Director::WaitFinished >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_01module_1_1extension_1_1Director_1_1WaitFinished_01_4.html", null ],
           [ "EmitStats<::extension::behaviour::commands::BehaviourTasks >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html", null ]
         ] ],
         [ "trait", null, [

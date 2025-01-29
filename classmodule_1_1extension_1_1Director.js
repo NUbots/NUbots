@@ -4,6 +4,7 @@ var classmodule_1_1extension_1_1Director =
     [ "RunResult", "structmodule_1_1extension_1_1Director_1_1RunResult.html", "structmodule_1_1extension_1_1Director_1_1RunResult" ],
     [ "Solution", "structmodule_1_1extension_1_1Director_1_1Solution.html", "structmodule_1_1extension_1_1Director_1_1Solution" ],
     [ "TaskPack", "structmodule_1_1extension_1_1Director_1_1TaskPack.html", "structmodule_1_1extension_1_1Director_1_1TaskPack" ],
+    [ "WaitFinished", "structmodule_1_1extension_1_1Director_1_1WaitFinished.html", "structmodule_1_1extension_1_1Director_1_1WaitFinished" ],
     [ "TaskList", "classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb", null ],
     [ "RunLevel", "classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77", [
       [ "OK", "classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77afae7fc26dfef15f5c935685710e572d9", null ],

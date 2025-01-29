@@ -53,6 +53,7 @@ var hierarchy =
     [ "extension::behaviour::ProviderScope", "structextension_1_1behaviour_1_1ProviderScope.html", null ],
     [ "extension::behaviour::Task< T >", "structextension_1_1behaviour_1_1Task.html", null ],
     [ "extension::behaviour::Uses< T >", "structextension_1_1behaviour_1_1Uses.html", null ],
+    [ "extension::behaviour::Wait", "structextension_1_1behaviour_1_1Wait.html", null ],
     [ "extension::behaviour::When< State, expr, value >", "structextension_1_1behaviour_1_1When.html", null ],
     [ "extension::Configuration", "structextension_1_1Configuration.html", null ],
     [ "extension::FileWatch", "structextension_1_1FileWatch.html", null ],
@@ -80,6 +81,7 @@ var hierarchy =
     [ "module::extension::Director::Solution", "structmodule_1_1extension_1_1Director_1_1Solution.html", null ],
     [ "module::extension::Director::Solution::Option", "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html", null ],
     [ "module::extension::Director::TaskPack", "structmodule_1_1extension_1_1Director_1_1TaskPack.html", null ],
+    [ "module::extension::Director::WaitFinished", "structmodule_1_1extension_1_1Director_1_1WaitFinished.html", null ],
     [ "module::extension::FileWatcher::Watch", "structmodule_1_1extension_1_1FileWatcher_1_1Watch.html", null ],
     [ "module::extension::FileWatcher::WatchMap", "structmodule_1_1extension_1_1FileWatcher_1_1WatchMap.html", null ],
     [ "module::extension::StateUpdate", "structmodule_1_1extension_1_1StateUpdate.html", null ],
@@ -423,6 +425,7 @@ var hierarchy =
       [ "module::output::compressor::vaapi::vaapi_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html", null ]
     ] ],
     [ "std::false_type", null, [
+      [ "NUClear::dsl::operation::EmitStats< module::extension::Director::WaitFinished >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_01module_1_1extension_1_1Director_1_1WaitFinished_01_4.html", null ],
       [ "NUClear::dsl::operation::EmitStats<::extension::behaviour::commands::BehaviourTasks >", "structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html", null ]
     ] ],
     [ "std::runtime_error", null, [

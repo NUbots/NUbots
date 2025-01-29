@@ -11,5 +11,6 @@ var classextension_1_1behaviour_1_1BehaviourReactor =
     [ "Stop", "classextension_1_1behaviour_1_1BehaviourReactor.html#aea1dfde4b3a5d35b48288405bc990caf", null ],
     [ "Task", "classextension_1_1behaviour_1_1BehaviourReactor.html#a4513ce7303cfb0ce526bee9d5cf2470b", null ],
     [ "Uses", "classextension_1_1behaviour_1_1BehaviourReactor.html#a8bbea33283ec03979c745484242719b7", null ],
+    [ "Wait", "classextension_1_1behaviour_1_1BehaviourReactor.html#a3a562529a74d93dfed5d72bea2fbdaca", null ],
     [ "When", "classextension_1_1behaviour_1_1BehaviourReactor.html#a5c9bec81a70b4ff798c6507379bfa7ee", null ]
 ];
