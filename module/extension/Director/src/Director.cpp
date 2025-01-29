@@ -271,6 +271,15 @@ namespace module::extension {
                 reevaluate_group(g);
             });
 
+        on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
+            "Wait Delay",
+            [this](const WaitFinished& w) {
+                // If the provider is still active, then we can run it
+                if (w.provider == w.provider->group.active_provider) {
+                    run_task_on_provider(w.provider->group.active_task, w.provider, RunReason::SUBTASK_DONE);
+                }
+            });
+
         // We have a new task pack to run
         on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
             "Run",
