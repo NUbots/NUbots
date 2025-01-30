@@ -4,4 +4,3 @@ log_level: INFO
 # Threshold angle for executing getup, between torso z axis and world z axis
 fallen_angle: 0.95
 start_delay: 0.5 # seconds
-is_fallen: false

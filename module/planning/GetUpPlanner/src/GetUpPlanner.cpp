@@ -29,6 +29,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/planning/GetUpWhenFallen.hpp"
 #include "message/skill/GetUp.hpp"
@@ -38,6 +39,7 @@
 namespace module::planning {
 
     using extension::Configuration;
+    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::GetUpWhenFallen;
     using message::skill::GetUp;
@@ -50,11 +52,10 @@ namespace module::planning {
             this->log_level  = config["log_level"].as<NUClear::LogLevel>();
             cfg.fallen_angle = config["fallen_angle"].as<float>();
             cfg.start_delay  = config["start_delay"].as<double>();
-            cfg.is_fallen   = config["is_fallen"].as<bool>();
         });
 
-        on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
-            [this](const Uses<GetUp>& getup, const Sensors& sensors) {
+        on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>, With<Stability>>().then(
+            [this](const Uses<GetUp>& getup, const Sensors& sensors, const Stability& stability) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
                     log<DEBUG>("Idle");
@@ -70,15 +71,15 @@ namespace module::planning {
                 double angle = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
                 log<DEBUG>("Angle: ", angle);
 
-                // Check if angle between torso z axis and world z axis is greater than config value, check if already
-                // fallen
+                // Check if angle between torso z axis and world z axis is greater than config value
                 if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
 
                     // If not already fallen
-                    if (!cfg.is_fallen) {
+                    if (stability != Stability::FALLEN) {
                         // Set fall time
-                        cfg.fall_time  = std::chrono::system_clock::now();
-                        cfg.is_fallen = true;
+                        cfg.fall_time = std::chrono::system_clock::now();
+                        // We fell over, change stability state of robot to fallen
+                        emit(std::make_unique<Stability>(Stability::FALLEN));
                     }
 
                     // Else if fallen
@@ -97,8 +98,7 @@ namespace module::planning {
                     }
                 }
                 else {
-                    // Reset is_fallen bool if robot has recovered its posture
-                    cfg.is_fallen = false;
+                    // Do nothing
                 }
             });
     }

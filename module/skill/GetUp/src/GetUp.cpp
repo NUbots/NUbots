@@ -64,9 +64,6 @@ namespace module::skill {
             [this](const RunReason& run_reason, const Sensors& sensors) {
                 switch (run_reason) {
                     case RunReason::NEW_TASK: {
-                        // If we're running getup we fell over
-                        emit(std::make_unique<Stability>(Stability::FALLEN));
-
                         // Transform to torso {t} from world {w} space
                         Eigen::Isometry3d Hwt = sensors.Htw.inverse();
 
@@ -119,6 +116,7 @@ namespace module::skill {
                     case RunReason::SUBTASK_DONE: {
                         // When the subtask is done, we are done
                         log<INFO>("Finished getting up");
+                        // We are standing
                         emit(std::make_unique<Stability>(Stability::STANDING));
                         emit<Task>(std::make_unique<Done>());
                     } break;
