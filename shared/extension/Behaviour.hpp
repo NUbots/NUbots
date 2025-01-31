@@ -38,6 +38,7 @@
 #include "behaviour/RunReason.hpp"
 #include "behaviour/TaskData.hpp"
 #include "behaviour/commands.hpp"
+#include "behaviour/unique_tasks.hpp"
 
 namespace extension::behaviour {
 
@@ -400,45 +401,6 @@ namespace extension::behaviour {
             /// Emit using the provider scope as it will know how to handle the task
             ProviderScope::emit<T>(powerplant, data, priority, optional, name);
         }
-    };
-
-    /**
-     * This is a special task that should be emitted when a Provider finishes the task it was given.
-     * When this is emitted the director will re-execute the Provider which caused this task to run.
-     *
-     * ```
-     * emit<Task>(std::make_unique<Done>());
-     * ```
-     */
-    struct Done {};
-
-    /**
-     * This is a special task that should be emitted when a Provider doesn't want to change what it is doing.
-     * When this is emitted the director will just continue with whatever was previously emitted by this provider.
-     *
-     * ```
-     * emit<Task>(std::make_unique<Continue>());
-     * ```
-     */
-    struct Continue {};
-
-    /**
-     * This is a special task that can be emitted to trigger the Provider to run again at a given time.
-     *
-     * ```
-     * emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(100)));
-     * ```
-     */
-    struct Wait {
-        /// The time at which the Provider should run again
-        NUClear::clock::time_point time;
-
-        /**
-         * Create a new Wait task with the time at which the Provider should run again.
-         *
-         * @param time the time at which the Provider should run again
-         */
-        explicit Wait(const NUClear::clock::time_point& time) : time(time) {}
     };
 
     /**
