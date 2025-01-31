@@ -113,9 +113,7 @@ namespace module::vision {
                         img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
                         cv::cvtColor(img_cv, img_cv, cv::COLOR_RGBA2BGR);
                         break;
-                    default:
-                        log<NUClear::WARN>("Image format not supported: ", utility::vision::fourcc(img.format));
-                        return;
+                    default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
                 }
 
                 // -------- Preprocess the image -------

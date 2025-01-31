@@ -179,13 +179,12 @@ namespace module::vision {
 
             double average_fps = (frame_count > 0) ? (1000.0 * frame_count / cumulative_duration_ms) : 0.0;
 
-            log<NUClear::DEBUG>(
-                fmt::format("Receiving {}/s, Processing {}/s,  Dropping {}/s ({}%), Average FPS: {:.2f}",
-                            processed + dropped,
-                            processed,
-                            dropped,
-                            100 * double(processed) / double(processed + dropped),
-                            average_fps));
+            log<DEBUG>(fmt::format("Receiving {}/s, Processing {}/s,  Dropping {}/s ({}%), Average FPS: {:.2f}",
+                                   processed + dropped,
+                                   processed,
+                                   dropped,
+                                   100 * double(processed) / double(processed + dropped),
+                                   average_fps));
         });
     }
 }  // namespace module::vision
