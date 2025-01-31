@@ -31,6 +31,7 @@
 
 #include "RunReason.hpp"
 #include "commands.hpp"
+#include "unique_tasks.hpp"
 
 namespace extension::behaviour {
     /**
@@ -58,6 +59,21 @@ namespace extension::behaviour {
             std::stable_sort(tasks.begin(), tasks.end(), [](const auto& a, const auto& b) {
                 return a.optional == b.optional ? a.priority > b.priority : b.optional;
             });
+
+            // If there are any Continue tasks, do nothing else
+            // If there are other tasks with Continue, they will be ignored
+            for (const auto& task : tasks) {
+                if (task.type == typeid(::extension::behaviour::Continue)) {
+                    // Tell the user if there is a Continue task with other tasks
+                    if (tasks.size() > 1) {
+                        NUClear::log<NUClear::LogLevel::WARN>(
+                            "Continue task was emitted with other tasks, the other tasks will be ignored");
+                    }
+
+                    // Do nothing else
+                    return;
+                }
+            }
 
             // Emit all the tasks that were accumulated in this scope
             reaction_task.parent->reactor.emit(std::make_unique<commands::BehaviourTasks>(provider_type,
