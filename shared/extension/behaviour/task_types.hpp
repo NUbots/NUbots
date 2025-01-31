@@ -73,5 +73,4 @@ namespace extension::behaviour {
 
 }  // namespace extension::behaviour
 
-
 #endif  // EXTENSION_BEHAVIOUR_TASK_TYPES_HPP
