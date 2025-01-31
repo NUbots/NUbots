@@ -39,6 +39,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
+    using message::actuation::ServoCommand;
     using message::actuation::ServoTarget;
     using message::input::Sensors;
     using utility::input::ServoID;
@@ -51,26 +52,30 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>, Priority::HIGH>().then(
-                [this](const Servo& servo, const RunReason& run_reason) {
-                    if (run_reason == RunReason::NEW_TASK) {
-                        if (log_level <= DEBUG) {
-                            emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
-                                       servo.command.position,
-                                       servo.command.state.gain,
-                                       servo.command.state.torque));
-                        }
-                        emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                           ID,
-                                                           servo.command.position,
-                                                           servo.command.state.gain,
-                                                           servo.command.state.torque));
+            on<Provide<Servo>, Priority::HIGH>().then([this](const Servo& servo, const RunReason& run_reason) {
+                if (run_reason == RunReason::NEW_TASK) {
+                    if (log_level <= DEBUG) {
+                        emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
+                                   servo.command.position,
+                                   servo.command.state.gain,
+                                   servo.command.state.torque));
                     }
-                    // If the time to reach the position is over, then stop requesting the position
-                    else if (NUClear::clock::now() >= servo.command.time) {
+                    // Emit the request to move the servo
+                    emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                       ID,
+                                                       servo.command.position,
+                                                       servo.command.state.gain,
+                                                       servo.command.state.torque));
+                }
+                if (servo.command.done_type == ServoCommand::DoneType::TIME) {
+                    if (servo.command.time <= NUClear::clock::now()) {
                         emit<Task>(std::make_unique<Done>());
                     }
-                });
+                    else {
+                        emit<Task>(std::make_unique<Wait>(servo.command.time));
+                    }
+                }
+            });
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.
