@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef EXTENSION_BEHAVIOUR_UNIQUE_TASKS_HPP
-#define EXTENSION_BEHAVIOUR_UNIQUE_TASKS_HPP
+#ifndef EXTENSION_BEHAVIOUR_TASK_TYPES_HPP
+#define EXTENSION_BEHAVIOUR_TASK_TYPES_HPP
 
 #include <nuclear>
 
@@ -74,4 +74,4 @@ namespace extension::behaviour {
 }  // namespace extension::behaviour
 
 
-#endif
+#endif  // EXTENSION_BEHAVIOUR_TASK_TYPES_HPP

@@ -31,7 +31,7 @@
 
 #include "RunReason.hpp"
 #include "commands.hpp"
-#include "unique_tasks.hpp"
+#include "task_types.hpp"
 
 namespace extension::behaviour {
     /**
