@@ -89,7 +89,7 @@ namespace module::network {
                     std::tie(listen_handle, std::ignore, std::ignore) =
                         on<UDP::Broadcast, Optional<With<GameState>>, Single>(cfg.receive_port)
                             .then([this, &global_config](const UDP::Packet& p,
-                                                         const std::shared_ptr<GameState>& game_state) {
+                                                         const std::shared_ptr<const GameState>& game_state) {
                                 std::string remote_addr = p.remote.address;
 
                                 // Apply filtering of packets if udp_filter_address is set in config
