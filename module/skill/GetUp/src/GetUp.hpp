@@ -39,6 +39,7 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
+            int delay_time; // milliseconds
             /// @brief Script sequence to run when getting from lying on the front to standing
             std::vector<std::string> getup_front;
             /// @brief Script sequence to run when getting from lying on the back to standing

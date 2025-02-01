@@ -52,6 +52,7 @@ namespace module::skill {
         on<Configuration>("GetUp.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
+            cfg.delay_time        = config["delay_time"].as<int>();
             cfg.getup_front       = config["scripts"]["getup_front"].as<std::vector<std::string>>();
             cfg.getup_back        = config["scripts"]["getup_back"].as<std::vector<std::string>>();
             cfg.getup_right       = config["scripts"]["getup_right"].as<std::vector<std::string>>();
@@ -60,65 +61,73 @@ namespace module::skill {
             cfg.getup_upside_down = config["scripts"]["getup_upside_down"].as<std::vector<std::string>>();
         });
 
-        on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then(
-            [this](const RunReason& run_reason, const Sensors& sensors) {
+        on<Provide<GetUpTask>, Uses<BodySequence>, With<Sensors>>().then(
+            [this](const RunReason& run_reason, const Uses<BodySequence>& body, const Sensors& sensors) {
                 switch (run_reason) {
                     case RunReason::NEW_TASK: {
-                        // Transform to torso {t} from world {w} space
-                        Eigen::Isometry3d Hwt = sensors.Htw.inverse();
-
-                        // Decompose our basis axes of the torso {t} into world {w} space
-                        Eigen::Vector3d uXTw = Hwt.rotation().col(0);
-                        Eigen::Vector3d uYTw = Hwt.rotation().col(1);
-                        Eigen::Vector3d uZTw = Hwt.rotation().col(2);
-
-                        // Split into six cases (think faces of a cube) to work out which getup script we should run
-
-                        // torso x is mostly world -z
-                        bool on_front = (uXTw.z() <= uXTw.x() && uXTw.z() <= uXTw.y());
-                        // torso x is mostly world z
-                        bool on_back = (uXTw.z() >= uXTw.x() && uXTw.z() >= uXTw.y());
-                        // torso y is mostly world z
-                        bool on_right = (uYTw.z() >= uYTw.x() && uYTw.z() >= uYTw.y());
-                        // torso y is mostly world -z
-                        bool on_left = (uYTw.z() <= uYTw.x() && uYTw.z() <= uYTw.y());
-                        // torso z is mostly world z
-                        bool upright = (uZTw.z() >= uZTw.x() && uZTw.z() >= uZTw.y());
-                        // torso z is mostly world -z
-                        bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
-
-                        if (on_front) {
-                            log<INFO>("Getting up from front");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_front));
-                        }
-                        else if (on_back) {
-                            log<INFO>("Getting up from back");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_back));
-                        }
-                        else if (on_right) {
-                            log<INFO>("Getting up from right");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_right));
-                        }
-                        else if (on_left) {
-                            log<INFO>("Getting up from left");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_left));
-                        }
-                        else if (upright) {
-                            log<INFO>("Getting up from upright");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_upright));
-                        }
-                        else if (upside_down) {
-                            log<INFO>("Getting up from upside_down");
-                            emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
-                        }
-
+                        // Wait
+                        log<DEBUG>("Delaying getup...");
+                        emit<Task>(std::make_unique<Wait>(NUClear::clock::now()
+                                    + std::chrono::milliseconds(cfg.delay_time)));
                     } break;
-                    case RunReason::SUBTASK_DONE: {
-                        // When the subtask is done, we are done
-                        log<INFO>("Finished getting up");
-                        // We are standing
-                        emit(std::make_unique<Stability>(Stability::STANDING));
-                        emit<Task>(std::make_unique<Done>());
+                    case RunReason::SUBTASK_DONE: { // The wait subtask is done...
+                        // If the robot has not gotten up, get up
+                        if (!body.done) {
+                           // Transform to torso {t} from world {w} space
+                            Eigen::Isometry3d Hwt = sensors.Htw.inverse();
+
+                            // Decompose our basis axes of the torso {t} into world {w} space
+                            Eigen::Vector3d uXTw = Hwt.rotation().col(0);
+                            Eigen::Vector3d uYTw = Hwt.rotation().col(1);
+                            Eigen::Vector3d uZTw = Hwt.rotation().col(2);
+
+                            // Split into six cases (think faces of a cube) to work out which getup script we should run
+
+                            // torso x is mostly world -z
+                            bool on_front = (uXTw.z() <= uXTw.x() && uXTw.z() <= uXTw.y());
+                            // torso x is mostly world z
+                            bool on_back = (uXTw.z() >= uXTw.x() && uXTw.z() >= uXTw.y());
+                            // torso y is mostly world z
+                            bool on_right = (uYTw.z() >= uYTw.x() && uYTw.z() >= uYTw.y());
+                            // torso y is mostly world -z
+                            bool on_left = (uYTw.z() <= uYTw.x() && uYTw.z() <= uYTw.y());
+                            // torso z is mostly world z
+                            bool upright = (uZTw.z() >= uZTw.x() && uZTw.z() >= uZTw.y());
+                            // torso z is mostly world -z
+                            bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
+
+                            if (on_front) {
+                                log<INFO>("Getting up from front");
+                                emit<Task>(load_script<BodySequence>(cfg.getup_front));
+                            }
+                            else if (on_back) {
+                                log<INFO>("Getting up from back");
+                                emit<Task>(load_script<BodySequence>(cfg.getup_back));
+                            }
+                            else if (on_right) {
+                                log<INFO>("Getting up from right");
+                                emit<Task>(load_script<BodySequence>(cfg.getup_right));
+                            }
+                            else if (on_left) {
+                                log<INFO>("Getting up from left");
+                                emit<Task>(load_script<BodySequence>(cfg.getup_left));
+                            }
+                            else if (upright) {
+                                log<INFO>("Getting up from upright");
+                                emit<Task>(load_script<BodySequence>(cfg.getup_upright));
+                            }
+                            else if (upside_down) {
+                                log<INFO>("Getting up from upside_down");
+                                emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
+                            }
+                        }
+                        else {
+                            // When the subtask is done, we are done
+                            log<INFO>("Finished getting up");
+                            // We are standing
+                            emit(std::make_unique<Stability>(Stability::STANDING));
+                            emit<Task>(std::make_unique<Done>());
+                        }
                     } break;
                     // These shouldn't happen but if they do just continue doing the same thing
                     default: emit<Task>(std::make_unique<Continue>()); break;

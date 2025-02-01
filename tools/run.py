@@ -67,12 +67,12 @@ def run(args, use_gdb, trace, trace_output, **kwargs):
     if trace:
         env["NUCLEAR_TRACE_FILE"] = trace_output
 
-    # Make sure default log path exists
+    # # Make sure default log path exists
     # if use_asan:
     #     log_path = os.path.join(os.sep, "home", "nubots", "NUbots", "log")
     #     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
-    # Add necessary ASAN environment variables
+    # # Add necessary ASAN environment variables
     # if use_asan:
     #     cprint("WARN: ASan is enabled. Set USE_ASAN to OFF and rebuild to disable.", "red", attrs=["bold"])
 
@@ -87,9 +87,9 @@ def run(args, use_gdb, trace, trace_output, **kwargs):
     #     else:
     #         env.update({"ASAN_OPTIONS": f"log_path={os.path.join(log_path, 'asan.log')}:protect_shadow_gap=0"})
 
-        # Find the asan log path and make sure the folder exists
-        log_path = re.search("log_path=([^:]+):?", env["ASAN_OPTIONS"]).group(1)
-        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    #     # Find the asan log path and make sure the folder exists
+    #     log_path = re.search("log_path=([^:]+):?", env["ASAN_OPTIONS"]).group(1)
+    #     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     # Start role with GDB
     if use_gdb:

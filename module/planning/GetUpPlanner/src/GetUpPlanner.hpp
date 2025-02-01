@@ -39,8 +39,6 @@ namespace module::planning {
         struct Config {
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
             float fallen_angle = 0.0f;
-            double start_delay = 0.0;  // seconds
-            std::chrono::system_clock::time_point fall_time;
         } cfg;
 
     public:

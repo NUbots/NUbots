@@ -51,11 +51,10 @@ namespace module::planning {
         on<Configuration>("GetUpPlanner.yaml").then([this](const Configuration& config) {
             this->log_level  = config["log_level"].as<NUClear::LogLevel>();
             cfg.fallen_angle = config["fallen_angle"].as<float>();
-            cfg.start_delay  = config["start_delay"].as<double>();
         });
 
-        on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>, With<Stability>>().then(
-            [this](const Uses<GetUp>& getup, const Sensors& sensors, const Stability& stability) {
+        on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
+            [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
                     log<DEBUG>("Idle");
@@ -73,32 +72,12 @@ namespace module::planning {
 
                 // Check if angle between torso z axis and world z axis is greater than config value
                 if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
-
-                    // If not already fallen
-                    if (stability != Stability::FALLEN) {
-                        // Set fall time
-                        cfg.fall_time = std::chrono::system_clock::now();
-                        // We fell over, change stability state of robot to fallen
-                        emit(std::make_unique<Stability>(Stability::FALLEN));
-                    }
-
-                    // Else if fallen
-                    else {
-                        // If delay has passed
-                        if (std::chrono::system_clock::now() - cfg.fall_time
-                            >= std::chrono::duration<double>(cfg.start_delay)) {
-                            log<DEBUG>("Delay elapsed, emitting GetUp task...");
-                            emit<Task>(std::make_unique<GetUp>());
-                        }
-                        // Else if delay not elapsed
-                        else if (std::chrono::system_clock::now() - cfg.fall_time
-                                 < std::chrono::duration<double>(cfg.start_delay)) {
-                            log<DEBUG>("Delaying GetUp...");
-                        }
-                    }
+                    // Emit GetUp task
+                    emit<Task>(std::make_unique<GetUp>());
+                    log<DEBUG>("Execute Getup");
                 }
                 else {
-                    // Do nothing
+                    // Otherwise do not need to get up so emit no tasks
                 }
             });
     }
