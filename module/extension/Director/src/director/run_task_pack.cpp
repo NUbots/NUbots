@@ -169,18 +169,6 @@ namespace module::extension {
             return;
         }
 
-        // See if a Idle command was emitted
-        for (const auto& t : requested_tasks) {
-            if (t->type == typeid(::extension::behaviour::Continue)) {
-                if (requested_tasks.size() > 1) {
-                    log<WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
-                }
-
-                // We don't do anything else on idle
-                return;
-            }
-        }
-
         // See if a done command was emitted
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
