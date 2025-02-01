@@ -1,5 +1,6 @@
 - duration: 25
   targets:
+    # Don't relax...
     - id: R_SHOULDER_PITCH
       position: 0
       gain: .NaN
@@ -64,19 +65,21 @@
       position: 0
       gain: .NaN
       torque: 0
-    - id: HEAD_YAW
-      position: 0
-      gain: .NaN
-      torque: 0
-    - id: HEAD_PITCH
-      position: 0
-      gain: .NaN
-      torque: 0
     - id: R_ANKLE_ROLL
       position: 0
       gain: .NaN
       torque: 0
     - id: L_ANKLE_ROLL
+      position: 0
+      gain: .NaN
+      torque: 0
+
+      # Relax the head only...
+    - id: HEAD_YAW
+      position: 0
+      gain: .NaN
+      torque: 0
+    - id: HEAD_PITCH
       position: 0
       gain: .NaN
       torque: 0
