@@ -1,11 +1,12 @@
 import { NUClearNetPacket } from "nuclearnet.js";
+import { describe, expect, it } from "vitest";
 
 import { message } from "../../../shared/messages";
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { decodePacketId } from "../decode_packet_id";
-import { hashType } from "../hash_type";
 
 const DataPoint = message.eye.DataPoint;
-const Test = message.support.nusight.Test;
+const Test = message.network.Test;
 
 function makePacket(typeName: string, payload: Uint8Array): NUClearNetPacket {
   return {
@@ -32,8 +33,8 @@ describe("decodePacketId()", () => {
   it("returns a default id of 0 for messages without an id field", () => {
     const payload = Test.encode({ message: "This is a test" }).finish();
 
-    const packet = makePacket("message.support.nusight.Test", payload);
+    const packet = makePacket("message.network.Test", payload);
 
-    expect(decodePacketId("message.support.nusight.Test", packet)).toBe(0);
+    expect(decodePacketId("message.network.Test", packet)).toBe(0);
   });
 });

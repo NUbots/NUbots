@@ -173,36 +173,39 @@ export class RpcClient {
       );
 
       // Set a timeout for the request
-      const timeoutTimer = setTimeout(() => {
-        // Remove the listener for the response
-        removeOn();
+      const timeoutTimer = setTimeout(
+        () => {
+          // Remove the listener for the response
+          removeOn();
 
-        // If the request was cancelled, resolve with a cancelled error
-        if (this.tokensCancelled.has(requestToken)) {
-          this.tokensCancelled.delete(requestToken);
-          resolve({
-            ok: false,
-            error: new RpcError("RPC call cancelled", {
-              cause: "CANCELLED",
-              request,
-              RequestType,
-              ResponseType,
-            }),
-          });
-        }
-        // Otherwise, resolve with a timeout error
-        else {
-          resolve({
-            ok: false,
-            error: new RpcError("RPC call timed out", {
-              cause: "TIMEOUT",
-              request,
-              RequestType,
-              ResponseType,
-            }),
-          });
-        }
-      }, options.timeout ?? 10 * 1000);
+          // If the request was cancelled, resolve with a cancelled error
+          if (this.tokensCancelled.has(requestToken)) {
+            this.tokensCancelled.delete(requestToken);
+            resolve({
+              ok: false,
+              error: new RpcError("RPC call cancelled", {
+                cause: "CANCELLED",
+                request,
+                RequestType,
+                ResponseType,
+              }),
+            });
+          }
+          // Otherwise, resolve with a timeout error
+          else {
+            resolve({
+              ok: false,
+              error: new RpcError("RPC call timed out", {
+                cause: "TIMEOUT",
+                request,
+                RequestType,
+                ResponseType,
+              }),
+            });
+          }
+        },
+        options.timeout ?? 10 * 1000,
+      );
 
       // Send the request
       this.network.emit(new RequestType(request), {

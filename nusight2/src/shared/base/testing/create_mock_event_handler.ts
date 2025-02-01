@@ -1,6 +1,6 @@
-import Mock = jest.Mock;
+import { Mock, vi } from "vitest";
 
-export type MockEventHandler<Y extends any[]> = Mock<() => void, [(...args: Y) => void]> & {
+export type MockEventHandler<Y extends any[]> = Mock<(handler: (...args: Y) => void) => () => void> & {
   mockEvent(...args: Y): void;
 };
 
@@ -9,7 +9,7 @@ export type MockEventHandler<Y extends any[]> = Mock<() => void, [(...args: Y) =
 export const createMockEventHandler = <Y extends any[]>(): MockEventHandler<Y> => {
   const listeners: Set<(...args: Y) => void> = new Set();
   return Object.assign(
-    jest.fn((cb: (...args: Y) => void) => {
+    vi.fn((cb: (...args: Y) => void) => {
       listeners.add(cb);
       return () => {
         listeners.delete(cb);

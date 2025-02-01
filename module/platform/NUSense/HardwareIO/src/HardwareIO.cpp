@@ -171,6 +171,8 @@ namespace module::platform::NUSense {
                 // Add the offsets and switch the direction.
                 servo.present_position *= nugus.servo_direction[val.id - 1];
                 servo.present_position += nugus.servo_offset[val.id - 1];
+                servo.goal_position *= nugus.servo_direction[val.id - 1];
+                servo.goal_position += nugus.servo_offset[val.id - 1];
             }
 
             log<NUClear::TRACE>(
