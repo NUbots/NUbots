@@ -118,7 +118,7 @@ namespace module::network {
                                 // If there is game state information, get the colour
                                 message::input::Team team_colour = message::input::Team::UNKNOWN_TEAM;
                                 if (game_state) {
-                                    switch (game_state->data.team.team_colour) {
+                                    switch (int(game_state->team.team_colour)) {
                                         case GameState::TeamColour::BLUE:
                                             team_colour = message::input::Team::BLUE;
                                             break;
@@ -163,7 +163,7 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->data.self.penalty_reason;
+                    int penalty_reason = game_state->self.penalty_reason;
                     switch (penalty_reason) {
                         case 0: msg->state = 0; break;
                         case 1: msg->state = 1; break;
@@ -171,7 +171,11 @@ namespace module::network {
                     }
 
                     // Team colour
-                    msg->current_pose.team = game_state->data.team.team_colour;
+                    switch (int(game_state->team.team_colour)) {
+                        case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
+                        case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
+                        default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
+                    }
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)

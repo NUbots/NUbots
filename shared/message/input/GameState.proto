@@ -31,88 +31,85 @@ import "google/protobuf/timestamp.proto";
 
 message GameState {
 
-    message Data {
+    enum TeamColour {
+        UNKNOWN_TEAM_COLOUR = 0;
+        BLUE                = 1;
+        RED             = 2;
+    };
 
-        enum TeamColour {
-            UNKNOWN_TEAM_COLOUR = 0;
-            BLUE                = 1;
-            RED             = 2;
-        };
-
-        enum Mode {
-            UNKNOWN_MODE      = 0;
-            NORMAL            = 1;
-            PENALTY_SHOOTOUT  = 2;
-            OVERTIME          = 3;
-            TIMEOUT_MODE      = 4;
-            DIRECT_FREEKICK   = 5;
-            INDIRECT_FREEKICK = 6;
-            PENALTYKICK       = 7;
-            CORNER_KICK       = 8;
-            GOAL_KICK         = 9;
-            THROW_IN          = 10;
-        }
-
-        enum Phase {
-            UNKNOWN_PHASE = 0;
-            INITIAL       = 1;
-            READY         = 2;
-            SET           = 3;
-            PLAYING       = 4;
-            TIMEOUT       = 5;
-            FINISHED      = 6;
-        }
-
-        enum PenaltyReason {
-            UNKNOWN_PENALTY_REASON        = 0;
-            UNPENALISED                   = 1;
-            BALL_MANIPULATION             = 2;
-            PHYSICAL_CONTACT              = 3;
-            ILLEGAL_ATTACK                = 4;
-            ILLEGAL_DEFENSE               = 5;
-            REQUEST_FOR_PICKUP            = 6;
-            REQUEST_FOR_SERVICE           = 7;
-            REQUEST_FOR_PICKUP_TO_SERVICE = 8;
-            SUBSTITUTE                    = 9;
-            MANUAL                        = 10;
-            PLAYER_PUSHING                = 11;
-        }
-
-        /// Used to keep track of penalised robots
-        message Robot {
-            uint32        id             = 1;
-            PenaltyReason penalty_reason = 2;
-            /// The timestamp when the robot will be playing again
-            google.protobuf.Timestamp unpenalised = 3;
-        }
-
-        message Team {
-            uint32         team_id       = 1;
-            TeamColour     colour        = 2;
-            uint32         score         = 3;
-            string         coach_message = 4;
-            repeated Robot players       = 5;
-        }
-
-        message SecondaryState {
-            uint32 team_performing = 1;
-            uint32 sub_mode        = 2;
-        }
-
-        Phase                     phase            = 1;
-        Mode                      mode             = 2;
-        bool                      first_half       = 3;
-        bool                      kicked_out_by_us = 4;
-        google.protobuf.Timestamp kicked_out_time  = 5;
-        bool                      our_kick_off     = 6;
-        /// Timestamp when the robot thinks the half is due to end
-        google.protobuf.Timestamp primary_time = 7;
-        /// A timestamp used for other times. E.g. how long in ready, or how long until penalty ends
-        google.protobuf.Timestamp secondary_time  = 8;
-        Team                      team            = 9;
-        Team                      opponent        = 10;
-        Robot                     self            = 11;
-        SecondaryState            secondary_state = 12;
+    enum Mode {
+        UNKNOWN_MODE      = 0;
+        NORMAL            = 1;
+        PENALTY_SHOOTOUT  = 2;
+        OVERTIME          = 3;
+        TIMEOUT_MODE      = 4;
+        DIRECT_FREEKICK   = 5;
+        INDIRECT_FREEKICK = 6;
+        PENALTYKICK       = 7;
+        CORNER_KICK       = 8;
+        GOAL_KICK         = 9;
+        THROW_IN          = 10;
     }
-    Data data = 1;
+
+    enum Phase {
+        UNKNOWN_PHASE = 0;
+        INITIAL       = 1;
+        READY         = 2;
+        SET           = 3;
+        PLAYING       = 4;
+        TIMEOUT       = 5;
+        FINISHED      = 6;
+    }
+
+    enum PenaltyReason {
+        UNKNOWN_PENALTY_REASON        = 0;
+        UNPENALISED                   = 1;
+        BALL_MANIPULATION             = 2;
+        PHYSICAL_CONTACT              = 3;
+        ILLEGAL_ATTACK                = 4;
+        ILLEGAL_DEFENSE               = 5;
+        REQUEST_FOR_PICKUP            = 6;
+        REQUEST_FOR_SERVICE           = 7;
+        REQUEST_FOR_PICKUP_TO_SERVICE = 8;
+        SUBSTITUTE                    = 9;
+        MANUAL                        = 10;
+        PLAYER_PUSHING                = 11;
+    }
+
+    /// Used to keep track of penalised robots
+    message Robot {
+        uint32        id             = 1;
+        PenaltyReason penalty_reason = 2;
+        /// The timestamp when the robot will be playing again
+        google.protobuf.Timestamp unpenalised = 3;
+    }
+
+    message Team {
+        uint32         team_id       = 1;
+        TeamColour     team_colour   = 2;
+        uint32         score         = 3;
+        string         coach_message = 4;
+        repeated Robot players       = 5;
+    }
+
+    message SecondaryState {
+        uint32 team_performing = 1;
+        uint32 sub_mode        = 2;
+    }
+
+    Phase                     phase            = 1;
+    Mode                      mode             = 2;
+    bool                      first_half       = 3;
+    bool                      kicked_out_by_us = 4;
+    google.protobuf.Timestamp kicked_out_time  = 5;
+    bool                      our_kick_off     = 6;
+    /// Timestamp when the robot thinks the half is due to end
+    google.protobuf.Timestamp primary_time = 7;
+    /// A timestamp used for other times. E.g. how long in ready, or how long until penalty ends
+    google.protobuf.Timestamp secondary_time  = 8;
+    Team                      team            = 9;
+    Team                      opponent        = 10;
+    Robot                     self            = 11;
+    SecondaryState            secondary_state = 12;
+
 }

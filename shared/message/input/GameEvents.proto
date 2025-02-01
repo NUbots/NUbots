@@ -56,7 +56,7 @@ message GameEvents {
         uint32  robot_id = 2;
         /// The timestamp when the robot may resume playing
         google.protobuf.Timestamp    ends   = 3;
-        GameState.Data.PenaltyReason reason = 4;
+        GameState.PenaltyReason reason = 4;
     }
 
     /// The context and robot which were unpenalised
@@ -86,7 +86,7 @@ message GameEvents {
     }
 
     message GamePhase {
-        GameState.Data.Phase phase = 1;
+        GameState.Phase phase = 1;
         /// Time when play begins.
         /// Set some time after game-states INITIAL or READY
         google.protobuf.Timestamp ready_time = 2;
@@ -103,6 +103,6 @@ message GameEvents {
     }
 
     message GameMode {
-        GameState.Data.Mode mode = 1;
+        GameState.Mode mode = 1;
     }
 }
