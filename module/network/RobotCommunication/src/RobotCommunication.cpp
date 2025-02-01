@@ -119,12 +119,10 @@ namespace module::network {
                                 message::input::Team team_colour = message::input::Team::UNKNOWN_TEAM;
                                 if (game_state) {
                                     switch (game_state->data.team.team_colour) {
-                                        case GameState::TeamColour::CYAN:
+                                        case GameState::TeamColour::BLUE:
                                             team_colour = message::input::Team::BLUE;
                                             break;
-                                        case GameState::TeamColour::MAGENTA:
-                                            team_colour = message::input::Team::RED;
-                                            break;
+                                        case GameState::TeamColour::RED: team_colour = message::input::Team::RED; break;
                                         default: team_colour = message::input::Team::UNKNOWN_TEAM;
                                     }
                                 }

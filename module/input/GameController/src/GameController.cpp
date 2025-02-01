@@ -223,9 +223,9 @@ namespace module::input {
 
         // Get colours
         state->data.team.team_colour =
-            new_own_team.team_colour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
+            new_own_team.team_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
         state->data.opponent.team_colour =
-            new_opponent_team.team_colour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
+            new_opponent_team.team_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
 
         /*******************************************************************************************
          * Process score updates
@@ -444,7 +444,7 @@ namespace module::input {
          ******************************************************************************************/
         if (old_own_team.team_colour != new_own_team.team_colour) {
             TeamColour colour =
-                new_own_team.team_colour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
+                new_own_team.team_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
             state_changes.emplace_back([this, colour] { emit(std::make_unique<TeamColour>(colour)); });
         }
 

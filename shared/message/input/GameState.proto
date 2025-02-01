@@ -35,8 +35,8 @@ message GameState {
 
         enum TeamColour {
             UNKNOWN_TEAM_COLOUR = 0;
-            CYAN                = 1;
-            MAGENTA             = 2;
+            BLUE                = 1;
+            RED             = 2;
         };
 
         enum Mode {

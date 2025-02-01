@@ -53,7 +53,7 @@ namespace module::input::gamecontroller {
 
     enum class GameType : uint8_t { ROUND_ROBIN = 0, PLAYOFF = 1, DROPIN = 2 };
 
-    enum class TeamColour : uint8_t { CYAN = 0, MAGENTA = 1, DROPBALL = 255 };
+    enum class TeamColour : uint8_t { BLUE = 0, RED = 1, DROPBALL = 255 };
 
     enum class ReplyMessage : uint8_t { PENALISED = 0, UNPENALISED = 1, ALIVE = 2 };
 
