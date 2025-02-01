@@ -29,7 +29,6 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/planning/GetUpWhenFallen.hpp"
 #include "message/skill/GetUp.hpp"
@@ -39,7 +38,6 @@
 namespace module::planning {
 
     using extension::Configuration;
-    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::GetUpWhenFallen;
     using message::skill::GetUp;

@@ -17,7 +17,8 @@
   },
   "files.associations": {
     "*.role": "cmake",
-    ".clang-tidy": "yaml"
+    ".clang-tidy": "yaml",
+    ".Doxyfile": "properties"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
