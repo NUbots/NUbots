@@ -44,19 +44,18 @@ namespace module::input {
     using message::input::GameEvents;
     using message::input::GameState;
     using message::support::GlobalConfig;
-    using TeamColour      = message::input::GameEvents::TeamColour::Value;
-    using Score           = GameEvents::Score;
-    using GoalScored      = GameEvents::GoalScored;
-    using Penalisation    = GameEvents::Penalisation;
-    using Unpenalisation  = GameEvents::Unpenalisation;
-    using Coach_message   = GameEvents::CoachMessage;
-    using HalfTime        = GameEvents::HalfTime;
-    using BallKickedOut   = GameEvents::BallKickedOut;
-    using KickOffTeam     = GameEvents::KickOffTeam;
-    using GamePhase       = GameEvents::GamePhase;
-    using GameMode        = GameEvents::GameMode;
-    using PenaltyReason   = GameState::Data::PenaltyReason;
-    using TeamColourEvent = message::input::GameEvents::TeamColour;
+    using TeamColour     = message::input::GameState::TeamColour::Value;
+    using Score          = GameEvents::Score;
+    using GoalScored     = GameEvents::GoalScored;
+    using Penalisation   = GameEvents::Penalisation;
+    using Unpenalisation = GameEvents::Unpenalisation;
+    using Coach_message  = GameEvents::CoachMessage;
+    using HalfTime       = GameEvents::HalfTime;
+    using BallKickedOut  = GameEvents::BallKickedOut;
+    using KickOffTeam    = GameEvents::KickOffTeam;
+    using GamePhase      = GameEvents::GamePhase;
+    using GameMode       = GameEvents::GameMode;
+    using PenaltyReason  = GameState::Data::PenaltyReason;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), receive_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
@@ -200,6 +199,7 @@ namespace module::input {
         initial_state->data.our_kick_off     = false;
 
         initial_state->data.team.team_id     = TEAM_ID;
+        initial_state->data.team.team_id     = TeamColour::UNKNOWN_TEAM_COLOUR;
         initial_state->data.opponent.team_id = 0;
 
         emit(std::move(initial_state));
@@ -220,6 +220,12 @@ namespace module::input {
 
         const auto& old_opponent_team = get_opponent_team(old_packet);
         const auto& new_opponent_team = get_opponent_team(new_packet);
+
+        // Get colours
+        state->data.team.team_colour =
+            new_own_team.team_colour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
+        state->data.opponent.team_colour =
+            new_opponent_team.team_colour == gamecontroller::TeamColour::CYAN ? TeamColour::CYAN : TeamColour::MAGENTA;
 
         /*******************************************************************************************
          * Process score updates

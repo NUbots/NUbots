@@ -32,6 +32,13 @@ import "google/protobuf/timestamp.proto";
 message GameState {
 
     message Data {
+
+        enum TeamColour {
+            UNKNOWN_TEAM_COLOUR = 0;
+            CYAN                = 1;
+            MAGENTA             = 2;
+        };
+
         enum Mode {
             UNKNOWN_MODE      = 0;
             NORMAL            = 1;
@@ -45,6 +52,7 @@ message GameState {
             GOAL_KICK         = 9;
             THROW_IN          = 10;
         }
+
         enum Phase {
             UNKNOWN_PHASE = 0;
             INITIAL       = 1;
@@ -54,6 +62,7 @@ message GameState {
             TIMEOUT       = 5;
             FINISHED      = 6;
         }
+
         enum PenaltyReason {
             UNKNOWN_PENALTY_REASON        = 0;
             UNPENALISED                   = 1;
@@ -79,9 +88,10 @@ message GameState {
 
         message Team {
             uint32         team_id       = 1;
-            uint32         score         = 2;
-            string         coach_message = 3;
-            repeated Robot players       = 4;
+            TeamColour     colour        = 2;
+            uint32         score         = 3;
+            string         coach_message = 4;
+            repeated Robot players       = 5;
         }
 
         message SecondaryState {

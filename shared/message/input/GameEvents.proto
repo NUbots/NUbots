@@ -40,12 +40,6 @@ message GameEvents {
         UNKNOWN         = 4;
     };
 
-    enum TeamColour {
-        UNKNOWN_TEAM_COLOUR = 0;
-        CYAN                = 1;
-        MAGENTA             = 2;
-    };
-
     message Score {
         uint32 own_score      = 1;
         uint32 opponent_score = 2;
