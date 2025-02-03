@@ -49,5 +49,4 @@ namespace module::planning {
 
 }  // namespace module::planning
 
-
 #endif  // MODULE_PLANNING_GETUPPLANNER_HPP

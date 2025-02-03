@@ -58,7 +58,6 @@ namespace module::planning {
                     log<DEBUG>("Idle");
                     return;
                 }
-
                 // Transform to torso{t} from world{w} space
                 Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
                 // Basis Z vector of torso {t} in world {w} space
@@ -68,15 +67,13 @@ namespace module::planning {
                 double angle = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
                 log<DEBUG>("Angle: ", angle);
 
-                // Check if angle between torso z axis and world z axis is greater than config value
+                // // Check if angle between torso z axis and world z axis is greater than config value
+                // Only emit if we're not already requesting a getup
                 if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
-                    // Emit GetUp task
                     emit<Task>(std::make_unique<GetUp>());
-                    log<DEBUG>("Execute Getup");
+                    log<DEBUG>("Execute getup");
                 }
-                else {
-                    // Otherwise do not need to get up so emit no tasks
-                }
+                // Otherwise do not need to get up so emit no tasks
             });
     }
 
