@@ -55,8 +55,8 @@ message GameEvents {
         Context context  = 1;
         uint32  robot_id = 2;
         /// The timestamp when the robot may resume playing
-        google.protobuf.Timestamp    ends   = 3;
-        GameState.PenaltyReason reason = 4;
+        google.protobuf.Timestamp ends   = 3;
+        GameState.PenaltyReason   reason = 4;
     }
 
     /// The context and robot which were unpenalised

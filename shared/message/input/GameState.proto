@@ -34,7 +34,7 @@ message GameState {
     enum TeamColour {
         UNKNOWN_TEAM_COLOUR = 0;
         BLUE                = 1;
-        RED             = 2;
+        RED                 = 2;
     };
 
     enum Mode {
@@ -111,5 +111,4 @@ message GameState {
     Team                      opponent        = 10;
     Robot                     self            = 11;
     SecondaryState            secondary_state = 12;
-
 }
