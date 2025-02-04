@@ -30,6 +30,9 @@ import datetime
 import multiprocessing
 import os
 import shutil
+
+# Added for formatting
+import subprocess
 import sys
 import tempfile
 from collections import OrderedDict
@@ -48,42 +51,78 @@ repo = pygit2.Repository(b.project_dir)
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
 
+# Get the list of modified files using `git diff`
+def get_modified_files():
+    # `git diff` command to get modified files (excluding renamed files)
+    result = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    if result.returncode == 0:
+        # Split output into lines, each line is a file path
+        modified_files = result.stdout.decode().splitlines()
+        return modified_files
+    else:
+        # If the diff command failed, return an empty list
+        return []
+
+
+# Filter the modified files against the include patterns
+def filter_files(modified_files, include_patterns):
+    included_files = []
+    for file in modified_files:
+        for pattern in include_patterns:
+            if fnmatch(file, pattern):  # Use fnmatch correctly
+                included_files.append(file)
+                break  # No need to check further patterns once it's matched
+    return included_files
+
+
+# Original include patterns
+include_patterns = [
+    "*.cpp",
+    "*.hpp",
+    "*.h",
+    "*.c",
+    "*.py",
+    "*.sh",
+    "*.cmake",
+    "*.proto",
+    "CMakeLists.txt",
+    "**/CMakeLists.txt",
+    "Dockerfile",
+    "**/Dockerfile",
+]
+
+# Get the list of modified files
+modified_files = get_modified_files()
+
+# Filter modified files against the include patterns
+files_to_format = filter_files(modified_files, include_patterns)
+
 # TODO: Fix this
-# formatters["licence"] = {
-#     "format": [
-#         [
-#             "licenseheaders",
-#             "-t",
-#             os.path.join(b.project_dir, ".licence.tmpl"),
-#             "--years={added}",
-#             "--owner=NUbots",
-#             f"--projname=NUbots",
-#             "--projurl=https://github.com/NUbots/NUbots",
-#             "-f",
-#             "{path}",
-#         ]
-#     ],
-#     "include": [
-#         "*.cpp",
-#         "*.hpp",
-#         "*.h",
-#         "*.c",
-#         "*.py",
-#         "*.sh",
-#         "*.cmake",
-#         "*.proto",
-#         "CMakeLists.txt",
-#         "**/CMakeLists.txt",
-#         "Dockerfile",
-#         "**/Dockerfile",
-#     ],
-#     "exclude": [
-#         "shared/utility/motion/splines/*",
-#         "shared/utility/platform/models/nugus/nugus.proto",
-#         "nusight2/src/assets/robot-models/nugus/nugus.proto",
-#         "module/support/optimisation/NSGA2Optimiser/src/nsga2",
-#     ],  # TODO exclude files that are not ours
-# }
+formatters["licence"] = {
+    "format": [
+        [
+            "licenseheaders",
+            "-t",
+            os.path.join(b.project_dir, ".licence.tmpl"),
+            "--years={added}",
+            "--owner=NUbots",
+            f"--projname=NUbots",
+            "--projurl=https://github.com/NUbots/NUbots",
+            "-f",
+            "{path}",
+        ]
+    ],
+    "include": files_to_format,
+    "exclude": [
+        "shared/utility/motion/splines/*",
+        "shared/utility/platform/models/nugus/nugus.proto",
+        "nusight2/src/assets/robot-models/nugus/nugus.proto",
+        "module/support/optimisation/NSGA2Optimiser/src/nsga2",
+    ],  # TODO exclude files that are not ours
+}
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
     "include": ["*.h", "*.c", "*.cc", "*.cxx", "*.cpp", "*.hpp", "*.ipp", "*.frag", "*.glsl", "*.vert", "*.proto"],
