@@ -44,7 +44,6 @@ namespace module::input {
     using message::input::GameEvents;
     using message::input::GameState;
     using message::support::GlobalConfig;
-    using TeamColour     = message::input::GameState::TeamColour::Value;
     using Score          = GameEvents::Score;
     using GoalScored     = GameEvents::GoalScored;
     using Penalisation   = GameEvents::Penalisation;
@@ -56,6 +55,7 @@ namespace module::input {
     using GamePhase      = GameEvents::GamePhase;
     using GameMode       = GameEvents::GameMode;
     using PenaltyReason  = GameState::PenaltyReason;
+    using TeamColour     = GameState::TeamColour::Value;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), receive_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
