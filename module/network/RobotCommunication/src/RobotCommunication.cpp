@@ -130,7 +130,7 @@ namespace module::network {
                                 // Check if the incoming message is from the same team
                                 bool own_team_message = team_colour == incoming_msg.current_pose.team;
 
-                                // Filter out messages from ourself and from other teams
+                                // Filter out messages from ourselves and from other teams
                                 if (!own_player_message && own_team_message) {
                                     emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
                                 }
