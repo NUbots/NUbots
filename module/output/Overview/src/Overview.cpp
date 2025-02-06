@@ -140,10 +140,9 @@ namespace module::output {
                 }
 
                 // Set our game mode properties
-                msg->game_mode  = game_state ? game_state->data.mode : GameState::Data::Mode(0);
-                msg->game_phase = game_state ? game_state->data.phase : GameState::Data::Phase(0);
-                msg->penalty_reason =
-                    game_state ? game_state->data.self.penalty_reason : GameState::Data::PenaltyReason(0);
+                msg->game_mode      = game_state ? game_state->mode : GameState::Mode(0);
+                msg->game_phase     = game_state ? game_state->phase : GameState::Phase(0);
+                msg->penalty_reason = game_state ? game_state->self.penalty_reason : GameState::PenaltyReason(0);
 
                 // Set our last seen times
                 msg->last_camera_image = last_camera_image;
