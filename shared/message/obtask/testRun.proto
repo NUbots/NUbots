@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package message.obtask;
-
-message testRun{
-    int32 num = 1;
-}
