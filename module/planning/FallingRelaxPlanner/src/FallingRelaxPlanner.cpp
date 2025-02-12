@@ -141,6 +141,7 @@ namespace module::planning {
                         emit(std::make_unique<Stability>(Stability::FALLING));
                         if (body.run_state == RunState::NO_TASK) {
                             emit<Task>(load_script<BodySequence>(cfg.fall_script));
+                            log<INFO>("Relaxing because falling...");
                         }
                         else {
                             emit<Task>(std::make_unique<Continue>());

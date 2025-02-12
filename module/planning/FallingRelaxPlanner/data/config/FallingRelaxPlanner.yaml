@@ -33,4 +33,10 @@ accelerometer_angle:
   # The angle of the accelerometer (from upright 0) at which the robot is considered falling
   falling: 45 * pi / 180.0
 
-fall_script: Relax.yaml
+### Comment out ones you don't want...
+# Relax upper body:
+fall_script: RelaxUpperBody.yaml
+## Relax head only:
+# fall_script: RelaxHead.yaml
+## Relax whole body:
+# fall_script:Relax.yaml
