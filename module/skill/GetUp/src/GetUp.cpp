@@ -61,9 +61,9 @@ namespace module::skill {
             cfg.getup_upside_down = config["scripts"]["getup_upside_down"].as<std::vector<std::string>>();
         });
 
-        on<Provide<GetUpTask>, Uses<BodySequence>, With<Sensors>>().then([this](const RunReason& run_reason,
-                                                                                const Uses<BodySequence>& body,
-                                                                                const Sensors& sensors) {
+        on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then([this](const RunReason& run_reason,
+                                                                                 const Uses<BodySequence>& body,
+                                                                                 const Sensors& sensors) {
             if (run_reason == RunReason::NEW_TASK) {
                 // Wait
                 log<DEBUG>("Delaying getup...");
