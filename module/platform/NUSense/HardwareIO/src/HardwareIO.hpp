@@ -58,11 +58,18 @@ namespace module::platform::NUSense {
         /// @brief Contains device information specific to the NUgus robot
         NUgus nugus{};
 
+        /// @brief Empty struct for the watchdog object below
+        struct HandshakeWatchdog {};
+        /// @brief Watchdog handle for the handshake stage
+        ReactionHandle handshake_watchdog;
+        /// @brief Reaction handle for the lambda that catches ServoTargets messages
+        ReactionHandle NUC_packet_catcher;
+
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
         /// NUSense.
         /// @tparam T is the type of the protobuf message to be serialised. In NUSense's case, we expect this to be
-        /// SubcontrollerServoTargets.
+        /// SubcontrollerServoTargets and NUSense handshake messages.
         /// @param packet A const reference to a protobuf message of type T. This gets serialised and turned to a
         /// vector of bytes before sending to NUSense.
         template <typename T>
