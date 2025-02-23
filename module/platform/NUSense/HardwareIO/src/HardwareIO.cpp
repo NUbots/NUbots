@@ -135,9 +135,7 @@ namespace module::platform::NUSense {
                     }
 
                     send_packet(servo_targets);
-                });
-
-            NUC_packet_catcher.disable();
+                }).disable();
         });
 
         on<Startup>().then([this] {
