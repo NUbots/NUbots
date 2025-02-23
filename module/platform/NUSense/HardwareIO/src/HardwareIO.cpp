@@ -138,11 +138,6 @@ namespace module::platform::NUSense {
                 }).disable();
         });
 
-        on<Startup>().then([this] {
-            // Start the handshake watchdog
-            emit<Scope::WATCHDOG>(ServiceWatchdog<HandshakeWatchdog>());
-        });
-
         // If this triggers, then that means that NUSense has acknowledged the NUC's message and the watchdog can be
         // unbound since it should not be needed after this point
         on<Trigger<NUSenseHandshake>>().then([this](const NUSenseHandshake& handshake) {
