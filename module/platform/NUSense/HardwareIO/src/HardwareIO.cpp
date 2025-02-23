@@ -91,6 +91,9 @@ namespace module::platform::NUSense {
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
                 nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
+
+                cfg.servo_configurations[i].direction = config["servos"][i]["direction"].as<int32_t>();
+                cfg.servo_configurations[i].offset = config["servos"][i]["offset"].as<double>();
             }
 
             handshake_watchdog =
@@ -102,15 +105,15 @@ namespace module::platform::NUSense {
 
                         handshake.msg = "";
 
-                        for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                            handshake.servo_configs.emplace_back(config["servos"][i]["direction"].as<int32_t>(),
-                                                                 config["servos"][i]["offset"].as<double>())
+                        for (size_t i = 0; i < cfg.servo_configurations.size(); ++i) {
+                            handshake.servo_configs.emplace_back(cfg.servo_configurations[i].direction,
+                                                                 cfg.servo_configurations[i].offset);
                         }
 
                         // Send to stream reactor
-                        send_packet(servo_configs);
+                        send_packet(handshake);
 
-                        log<NUClear::INFO>("Handshake message sent to NUSense, waiting for response...");
+                        log<INFO>("Handshake message sent to NUSense, waiting for response...");
                     });
 
             // Sync is used because uart write is a shared resource
@@ -150,7 +153,7 @@ namespace module::platform::NUSense {
             handshake_watchdog.unbind();
 
             NUC_packet_catcher.enable();
-            log<NUClear::INFO>("From NUSense: ", handshake.msg);
+            log<INFO>("From NUSense: ", handshake.msg);
         });
 
         // Emit any messages sent by the device to the rest of the system

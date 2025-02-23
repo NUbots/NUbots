@@ -53,6 +53,11 @@ namespace module::platform::NUSense {
                 /// @brief The baud rate to communication with the NUSense device
                 int baud = 0;
             } nusense{};
+            struct ServoConfiguration{
+                int32_t direction = 0;
+                double offset = 0;
+            };
+            std::map<size_t, ServoConfiguration> servo_configurations;
         } cfg{};
 
         /// @brief Contains device information specific to the NUgus robot
@@ -81,7 +86,7 @@ namespace module::platform::NUSense {
 
             // Get the timestamp of the emit if we can, otherwise use now
             const auto* task = NUClear::threading::ReactionTask::get_current_task();
-            auto timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+            auto timestamp = task ? task->statistics ? task->statistics->finished.nuclear_time : NUClear::clock::now() : NUClear::clock::now();
             auto timestamp_us =
                 std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
             uint32_t size = uint32_t(payload.size() + sizeof(hash) + sizeof(timestamp_us));
