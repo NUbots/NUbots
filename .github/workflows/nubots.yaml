@@ -125,9 +125,9 @@ jobs:
         name: Output the created image
         run: echo "image=nubots/nubots:${{ env.DOCKER_TAG }}" >> $GITHUB_OUTPUT
 
-  # Build the codebase as well as run clang-tidy
+  # Build the codebase, first with the OpenCR subcontroller
   build_nubots:
-    name: "Build and test code"
+    name: "Build and test code with OpenCR"
     needs: [check_for_changes, build_docker]
 
     # Run only if the workflow or c++ related code files have changed
@@ -136,19 +136,15 @@ jobs:
       needs.check_for_changes.outputs.has_docker_changes == 'true' ||
       needs.check_for_changes.outputs.has_cpp_changes == 'true'
 
-    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
     env:
       CTEST_OUTPUT_ON_FAILURE: 1
 
-    # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
       options: --user 0:0
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -160,12 +156,13 @@ jobs:
           mkdir -p build
           cd build
           cmake .. -GNinja \
-                   -DCMAKE_BUILD_TYPE=Release \
-                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-                   -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
-                   -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
-                   -DCI_BUILD=ON \
-                   -DBUILD_TESTS=ON
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+                  -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+                  -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
+                  -DCI_BUILD=ON \
+                  -DBUILD_TESTS=ON \
+                  -DSUBCONTROLLER=OpenCR
 
       - name: Build the code
         run: |
@@ -176,6 +173,24 @@ jobs:
         run: |
           cd build
           ninja test
+
+      - name: Reconfigure with NUSense role
+        run: |
+          cd build
+          cmake .. -GNinja \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+                  -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+                  -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
+                  -DCI_BUILD=ON \
+                  -DBUILD_TESTS=ON \
+                  -DSUBCONTROLLER=NUSense
+                  --unset_all_roles --set_roles test-sensor
+
+      - name: Rebuild with NUSense role
+        run: |
+          cd build
+          ninja
 
   # Check the code is formatted correctly
   check-format:
