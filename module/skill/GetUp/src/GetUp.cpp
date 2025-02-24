@@ -65,10 +65,11 @@ namespace module::skill {
                                                                                  const Uses<BodySequence>& body,
                                                                                  const Sensors& sensors) {
             if (run_reason == RunReason::NEW_TASK) {
-                // Wait
+                // Wait so that sensors have time to settle
                 log<DEBUG>("Delaying getup...");
                 emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
             }
+            // The initial Wait has completed
             else if (run_reason == RunReason::SUBTASK_DONE && !body.done) {
                 // Check side and emit getup script
                 // Transform to torso {t} from world {w} space
@@ -127,7 +128,7 @@ namespace module::skill {
                 emit<Task>(std::make_unique<Done>());
             }
             else {
-                // These shouldn't happen but if they do just continue doing the same thing
+                // This shouldn't happen but if it does just continue doing the same thing
                 emit<Task>(std::make_unique<Continue>());
             }
         });
