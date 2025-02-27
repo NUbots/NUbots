@@ -113,7 +113,38 @@ namespace module::network {
                             }
                         });
                 }
+
+                emit(std::unique_ptr<TeamMates>());
             });
+
+        // TODO: include teammates and add a using teammates
+        on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates)) {
+            // Get the id of this robot
+            int id = robocup.current_pose.player_id;
+
+            // Make new TeamMates message using data from the old message
+            TeamMates teammates = std::make_unique<TeamMates>(std::move(old_teammates));
+
+            // TODO: Find if the teammates vector (repeated TeamMate) has ID
+            //...
+            // for (mate in teammates) if mate.id==id then has id
+            //...
+            if (has id) {
+                // Replace the existing entry for this robot with the ID
+            }
+            // Else this robot is not in the list of team mates already, add it in
+            else {
+                // Make the mate
+                TeamMate mate();
+                // Set the variables
+                mate.id = id;
+                mate.id = robocup.current_pose.position;
+                // Add it to the teammates list
+                teammates.teammates.emplace_back(mate);
+            }
+
+            emit(teammates);
+        }
 
         on<Every<2, Per<std::chrono::seconds>>,
            Optional<With<Ball>>,
