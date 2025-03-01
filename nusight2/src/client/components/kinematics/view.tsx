@@ -27,16 +27,17 @@ export class KinematicsView extends React.Component<{
           <div className="h-full flex items-center justify-end">
             <RobotSelectorSingle
               autoSelect={true}
-              robots={robots.map((r) => r.robotModel)}
+              robots={robots}
               selected={selectedRobot?.robotModel}
               onSelect={this.onSelectRobot}
             />
           </div>
         </Menu>
-
-        <div className="flex-1 relative">
-          <CanvasWrapper selectedRobot={selectedRobot} />
-        </div>
+        {selectedRobot && (
+          <div className="flex-1 relative">
+            <CanvasWrapper selectedRobot={selectedRobot} />
+          </div>
+        )}
       </div>
     );
   }

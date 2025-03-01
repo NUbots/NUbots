@@ -4,7 +4,7 @@ import { KinematicsModel } from "./model";
 import { KinematicsRobotModel } from "./robot_model";
 
 export class KinematicsController {
-  static of() {
+  static of(): KinematicsController {
     return new KinematicsController();
   }
 

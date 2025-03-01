@@ -11,6 +11,8 @@ import { Nugus } from "../nugus/view";
 const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
   if (!robot.visible) return null;
 
+  const changingAttribute = robot.Htw; // read a mobx observable property to trigger re-render
+
   return (
     <object3D key={robot.id} rotation={[-Math.PI / 2, 0, -Math.PI / 2]} scale={[5, 5, 5]}>
       <Nugus model={robot} />
@@ -18,16 +20,18 @@ const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ r
   );
 });
 
-export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = ({ selectedRobot }) => (
-  <Canvas camera={{ position: [10, 10, 10], fov: 60 }} className="w-full h-full">
-    <CameraControls />
+export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = observer(({ selectedRobot }) => {
+  return (
+    <Canvas camera={{ position: [10, 10, 10], fov: 60 }} className="w-full h-full">
+      <CameraControls />
 
-    <ambientLight intensity={0.5} />
-    <directionalLight position={[10, 10, 5]} />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} />
 
-    <Grid gridSize={10} divisions={10} />
-    <Axes length={2} />
+      <Grid gridSize={10} divisions={10} />
+      <Axes length={2} />
 
-    {selectedRobot && <RobotComponents robot={selectedRobot} />}
-  </Canvas>
-);
+      <RobotComponents robot={selectedRobot} />
+    </Canvas>
+  );
+});
