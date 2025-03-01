@@ -79,7 +79,7 @@ namespace module::vision {
                     return idx == int(indices.size()) || (cls(LINE_INDEX, idx) >= cfg.confidence_threshold);
                 });
             indices.resize(std::distance(indices.begin(), boundary));
-            log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
+            log<DEBUG>(fmt::format("Partitioned {} points", indices.size()));
 
             // Cluster the field lines
             std::vector<std::vector<int>> clusters;
@@ -88,7 +88,7 @@ namespace module::vision {
                                                         neighbours,
                                                         cfg.cluster_points,
                                                         clusters);
-            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+            log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
             // Partition the clusters such that clusters above the green horizons are removed,
             // and then resize the vector to remove them
@@ -99,7 +99,7 @@ namespace module::vision {
                                                                                         true,
                                                                                         false);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
-            log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+            log<DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
 
             // The FieldLines message contains a FieldLine for every cluster that is a valid field
             // line

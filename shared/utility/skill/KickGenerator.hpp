@@ -116,13 +116,13 @@ namespace utility::skill {
 
             // Check for negative time step
             if (dt <= 0.0f) {
-                NUClear::log<NUClear::WARN>("dt <= 0.0f");
+                NUClear::log<NUClear::LogLevel::WARN>("dt <= 0.0f");
                 return;
             }
 
             // Check for too long dt
             if (dt > kick_duration) {
-                NUClear::log<NUClear::WARN>("dt > kick_duration", dt, kick_duration);
+                NUClear::log<NUClear::LogLevel::WARN>("dt > kick_duration", dt, kick_duration);
                 return;
             }
 

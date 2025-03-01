@@ -32,6 +32,7 @@ extern "C" {
 #undef OK
 }
 
+#include <cmath>
 #include <cstdio>
 #include <fcntl.h>
 #include <sstream>
@@ -75,20 +76,26 @@ namespace module::purpose {
     struct LockServo {};
 
     ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), script_path("Initializing..."), frame(0), selection(0), angle_or_gain(true) {
+        : Reactor(std::move(environment))
+        , script_path("Initializing...")
+        , frame(0)
+        , selection(0)
+        , start_time(std::chrono::system_clock::now()) {
 
         // Add a blank frame to start with
         script.frames.emplace_back();
         script.frames.back().duration = std::chrono::milliseconds(default_duration);
 
         on<Configuration>("ScriptTuner.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file KeyboardWalk.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            this->autosave_dir = config["autosave_dir"].as<std::string>();
         });
 
         on<Startup>().then([this] {
             // Start curses mode
             initscr();
+            // Make input capture non-blocking
+            nodelay(stdscr, true);
             // Capture our characters immediately (but pass through signals)
             cbreak();
             // Capture arrows and function keys
@@ -97,7 +104,11 @@ namespace module::purpose {
             noecho();
             // Hide the cursor
             curs_set(0);
-
+            // Start our colours
+            start_color();
+            // Create our colour pairs
+            setup_colour_pairs();
+            // Refresh the screen
             refresh_view();
         });
 
@@ -106,8 +117,8 @@ namespace module::purpose {
                 script_path = args[1];
 
                 // Check if the script exists and load it if it does.
-                if (utility::file::exists(script_path)) {
-                    NUClear::log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
+                if (std::filesystem::exists(script_path)) {
+                    log<DEBUG>("Loading script: ", script_path, '\n');
                     load_script(script_path);
                     // Build our initial gui with context from loaded script
                     refresh_view();
@@ -115,7 +126,7 @@ namespace module::purpose {
             }
 
             else {
-                NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                log<DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                 powerplant.shutdown();
             }
         });
@@ -130,6 +141,7 @@ namespace module::purpose {
             target.torque   = 100;
 
             script.frames[frame].targets.push_back(target);
+            unsaved_changes = true;
 
             // Emit a waypoint so that the motor will go rigid at this angle
             auto waypoint      = std::make_unique<ServoTarget>();
@@ -141,25 +153,94 @@ namespace module::purpose {
             emit(std::move(waypoint));
         });
 
+        on<Every<AUTOSAVE_INTERVAL, std::chrono::seconds>, Single>().then("Autosave", [this] {
+            log<DEBUG>("Autosaving script if required...");
+
+            // Only autosave if autosaving is enabled and we have unsaved changes
+            if (!autosave_enabled || !unsaved_changes) {
+                return;
+            }
+
+            // Before we start, temp save the old path so we can delete it once we have a new autosave file.
+            auto last_autosave_path = this->autosave_path;
+
+            log<DEBUG>("-> Autosaving to: ", autosave_dir);
+
+            // Check if autosave directory exists
+            if (!std::filesystem::exists(this->autosave_dir)) {
+                log<DEBUG>("-> Creating autosave directory: ", this->autosave_dir);
+                // Create the autosave directory
+                std::filesystem::create_directories(this->autosave_dir);
+            }
+
+            // Get unix epoch time to use as autosave file identifier
+            auto now = NUClear::clock::now().time_since_epoch().count();
+            // Create filename with unix epoch time
+            auto autosave_file = std::to_string(now) + "_" + script_path.filename().string();
+            // Concatenate into a full path
+            this->autosave_path = this->autosave_dir / autosave_file;
+
+            // Save the script to the autosave directory
+            YAML::Node n(script);
+            utility::file::writeToFile(this->autosave_path, n);
+
+            // Log the autosave even though you can't see logs in script tuner
+            log<INFO>("Autosaved script to:", this->autosave_path);
+
+            // Remove the old autosave file to ensure we don't create a massive list of
+            // autosave files during a long session.
+            if (!last_autosave_path.empty()) {
+                std::filesystem::remove(last_autosave_path);
+                log<DEBUG>("Deleted old autosave file: ", last_autosave_path);
+            }
+
+            // This will make sure the alert is displayed on the screen
+            refresh_view();
+        });
 
         on<Always>().then([this] {
             switch (getch()) {
+                case 'k':     // Change selection up
                 case KEY_UP:  // Change selection up
                     selection = selection == 0 ? 19 : selection - 1;
                     break;
+                case 'j':       // Change selection down
                 case KEY_DOWN:  // Change selection down
                     selection = (selection + 1) % 20;
                     break;
+                case '/':  // Change selection to the opposite side
+                    selection = selection % 2 ? selection - 1 : selection + 1;
+                    break;
                 case 9:          // Swap between angle and gain
+                case 'h':        // Swap between angle and gain
                 case KEY_LEFT:   // Swap between angle and gain
+                case 'l':        // Swap between angle and gain
                 case KEY_RIGHT:  // Swap between angle and gain
                     angle_or_gain = !angle_or_gain;
                     break;
+                case 'w':  // Move selection up in NUgus frame
+                    move_nugus_selection(0);
+                    break;
+                case 'a':  // Move selection left in NUgus frame
+                    move_nugus_selection(1);
+                    break;
+                case 's':  // Move selection down in NUgus frame
+                    move_nugus_selection(2);
+                    break;
+                case 'd':  // Move selection right in NUgus frame
+                    move_nugus_selection(3);
+                    break;
                 case ',':  // Move left a frame
-                    activate_frame(frame == 0 ? frame : frame - 1);
+                    if (frame > 0)
+                        activate_frame(frame - 1);
+                    else
+                        beep();
                     break;
                 case '.':  // Move right a frame
-                    activate_frame(frame == script.frames.size() - 1 ? frame : frame + 1);
+                    if (frame < script.frames.size() - 1)
+                        activate_frame(frame + 1);
+                    else
+                        beep();
                     break;
                 case '\n':       // Edit selected field
                 case KEY_ENTER:  // Edit selected field
@@ -196,11 +277,21 @@ namespace module::purpose {
                 case 'G':  // allows multiple gains to be edited at once
                     edit_gain();
                     break;
+                case 'D':  // switch units between degrees and radians
+                    deg_or_rad = !deg_or_rad;
+                    break;
+                case 'V':  // Toggle autosave
+                    autosave_enabled = !autosave_enabled;
+                    break;
                 case ':':  // lists commands
                     help();
                     break;
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
+                    break;
+                case ERR:  // No input
+                    napms(100);
+                    refresh_view();
                     break;
             }
             // Update whatever visual changes we made
@@ -235,7 +326,10 @@ namespace module::purpose {
 
         // Write our title
         attron(A_BOLD);
-        mvprintw(0, (COLS - 14) / 2, " Script Tuner ");
+        mvprintw(0,
+                 (COLS - 14) / 2,
+                 " Script Tuner%s",
+                 unsaved_changes ? "* " : " ");  // Add asterisk for unsaved changes
         attroff(A_BOLD);
 
         // Top sections
@@ -243,7 +337,7 @@ namespace module::purpose {
         mvprintw(3, 2, "Frames:");                          // The frames section is filled out after this
         mvprintw(4,
                  2,
-                 "Duration: %ld",  // Output the selected frames duration
+                 "Duration: %ld ms",  // Output the selected frames duration
                  std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
         mvprintw(5, 2, "_");
 
@@ -251,108 +345,204 @@ namespace module::purpose {
         move(3, 10);
         for (size_t i = 0; i < script.frames.size(); ++i) {
             if (i == frame) {
-                // Turn on highlighting to show this frame is selected
-                attron(A_STANDOUT);
+                // Add some emphasis to show this frame is selected
+                attron(A_BOLD | A_STANDOUT | COLOR_PAIR(1 + (i + 5) % 6));
+            }
+            else {
+                // Dim the other frames
+                attron(A_DIM);
             }
             printw(std::to_string(i + 1).c_str());
             if (i == frame) {
-                // Turn off highlighting
-                attroff(A_STANDOUT);
+                // Turn off emphasis and color
+                attroff(A_BOLD | A_STANDOUT | COLOR_PAIR(1 + (i + 5) % 6));
+            }
+            else {
+                // Turn off dimming
+                attroff(A_DIM);
             }
             printw(" ");
         }
 
 
-        // Heading Commands
-        attron(A_BOLD);
-        mvprintw(LINES - 6, 2, "Commands");
-        attroff(A_BOLD);
-        mvprintw(LINES - 2, 2, "Type :help for a full list of commands");
-
-        // Each Command
-        const char* COMMANDS[] = {",", ".", "N", "I", " ", "T", "J", "G", "P", "S"};
-
-        // Each Meaning
-        const char* MEANINGS[] = {"Left a frame",
-                                  "Right a frame",
-                                  "New Frame",
-                                  "Delete Frame",
-                                  "Lock/Unlock",
-                                  "Edit Duration",
-                                  "Jump to Frame",
-                                  "Change Gains",
-                                  "Play",
-                                  "Save"};
-
-        // Prints commands and their meanings to the screen
-        for (size_t i = 0; i < 10; i = i + 2) {
-            attron(A_BOLD);
-            attron(A_STANDOUT);
-            mvprintw(LINES - 5, 2 + ((2 + 14) * (i / 2)), COMMANDS[i]);
-            attroff(A_BOLD);
-            attroff(A_STANDOUT);
-            mvprintw(LINES - 5, 4 + ((2 + 14) * (i / 2)), MEANINGS[i]);
+        // Log a message if the terminal is too small
+        if (COLS < 74 || LINES < 39) {
+            attron(COLOR_PAIR(3));  // Yellow
+            mvprintw(7, 2, "If possible, resize this terminal to >= 74x39.");
+            attroff(COLOR_PAIR(3));  // Yellow
         }
 
-        for (size_t i = 1; i < 10; i = i + 2) {
+        // Log whether we currently have autosave enabled
+        mvprintw(2, COLS - 2 - 13, "Autosave:    ");
+        attron(A_BOLD | (autosave_enabled ? COLOR_PAIR(2) : COLOR_PAIR(1)));
+        mvprintw(2, COLS - 2 - 3, autosave_enabled ? "ON" : "OFF");
+        attroff(A_BOLD | (autosave_enabled ? COLOR_PAIR(2) : COLOR_PAIR(1)));
+
+
+        mvprintw(LINES - 2, 2, "Type :help for a full list of commands");
+
+        // Only print help commands if the window is big enough to fit them
+        if (LINES >= 36) {
+            // Heading Commands
             attron(A_BOLD);
-            attron(A_STANDOUT);
-            mvprintw(LINES - 4, 2 + ((2 + 14) * ((i - 1) / 2)), COMMANDS[i]);
+            mvprintw(LINES - 6, 2, "Commands");
             attroff(A_BOLD);
-            attroff(A_STANDOUT);
-            mvprintw(LINES - 4, 4 + ((2 + 14) * ((i - 1) / 2)), MEANINGS[i]);
+
+            // Each Command
+            const char* COMMANDS[] = {",", ".", "N", "I", " ", "T", "J", "G", "P", "S"};
+
+            // Each Meaning
+            const char* MEANINGS[] = {"Left a frame",
+                                      "Right a frame",
+                                      "New Frame",
+                                      "Delete Frame",
+                                      "Lock/Unlock",
+                                      "Edit Duration",
+                                      "Jump to Frame",
+                                      "Change Gains",
+                                      "Play",
+                                      "Save"};
+
+            // Prints commands and their meanings to the screen
+            for (size_t i = 0; i < 10; i = i + 2) {
+                attron(A_BOLD);
+                attron(A_STANDOUT);
+                mvprintw(LINES - 5, 2 + ((2 + 14) * (i / 2)), COMMANDS[i]);
+                attroff(A_BOLD);
+                attroff(A_STANDOUT);
+                mvprintw(LINES - 5, 4 + ((2 + 14) * (i / 2)), MEANINGS[i]);
+            }
+
+            for (size_t i = 1; i < 10; i = i + 2) {
+                attron(A_BOLD);
+                attron(A_STANDOUT);
+                mvprintw(LINES - 4, 2 + ((2 + 14) * ((i - 1) / 2)), COMMANDS[i]);
+                attroff(A_BOLD);
+                attroff(A_STANDOUT);
+                mvprintw(LINES - 4, 4 + ((2 + 14) * ((i - 1) / 2)), MEANINGS[i]);
+            }
         }
 
         // Each motor
-        const char* MOTOR_NAMES[] = {"Head Pan",
-                                     "Head Tilt",
-                                     "Right Shoulder Pitch",
-                                     "Left  Shoulder Pitch",
-                                     "Right Shoulder Roll",
-                                     "Left  Shoulder Roll",
-                                     "Right Elbow",
-                                     "Left  Elbow",
-                                     "Right Hip Yaw",
-                                     "Left  Hip Yaw",
-                                     "Right Hip Roll",
-                                     "Left  Hip Roll",
-                                     "Right Hip Pitch",
-                                     "Left  Hip Pitch",
-                                     "Right Knee",
-                                     "Left  Knee",
-                                     "Right Ankle Pitch",
-                                     "Left  Ankle Pitch",
-                                     "Right Ankle Roll",
-                                     "Left  Ankle Roll"};
+        const char* MOTOR_NAMES[] = {
+            "Head Pan (Yaw)",      "Head Tilt (Pitch)",   "Right Shoulder Pitch", "Left  Shoulder Pitch",
+            "Right Shoulder Roll", "Left  Shoulder Roll", "Right Elbow",          "Left  Elbow",
+            "Right Hip Yaw",       "Left  Hip Yaw",       "Right Hip Roll",       "Left  Hip Roll",
+            "Right Hip Pitch",     "Left  Hip Pitch",     "Right Knee",           "Left  Knee",
+            "Right Ankle Pitch",   "Left  Ankle Pitch",   "Right Ankle Roll",     "Left  Ankle Roll"};
 
         // Loop through all our motors
         for (size_t i = 0; i < 20; ++i) {
             // Everything defaults to unlocked, we add locks as we find them
+            attron(COLOR_PAIR(1));  // Red
             mvprintw(i + 9, 2, "U");
+            attroff(COLOR_PAIR(1));  // Red
+
+            // highlight the selection
+            attron(i == selection ? A_BOLD : A_DIM);
 
             // Output the motor name
-            attron(A_BOLD);
             mvprintw(i + 9, 4, MOTOR_NAMES[i]);
-            attroff(A_BOLD);
 
             // Everything defaults to 0 angle and gain (unless we find one)
-            mvprintw(i + 9, 26, "Angle:  -.--- Gain: ---.-");
+            mvprintw(i + 9, 26, deg_or_rad ? "Angle:  ---.- Gain: ---.-" : "Angle:  -.--- Gain: ---.-");
+
+            // Turn off dimming
+            attroff(i == selection ? A_BOLD : A_DIM);
         }
 
         for (auto& target : script.frames[frame].targets) {
             // Output that this frame is locked (we shuffle the head to the top of the list)
+            attron(COLOR_PAIR(2));  // Green
             mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
+            attroff(COLOR_PAIR(2));  // Green
+
+            // Highlight the selection by dimming others
+            if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
+                attron(A_DIM);
+            }
 
             // Output this frames gain and angle
-            mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
-                     26,
-                     "Angle: %+.3f Gain: %5.1f",
-                     target.position,
-                     target.gain);
+            if (deg_or_rad) {
+                // Internally we store angles in radians, so we convert to degrees here
+                // but this means sometimes the degrees amount has funny rounding as we
+                // only display to 1 decimal place, which is slightly lower precision
+                // than 3 decimal places of radians. It had to be done like this to
+                // maintain the same character width to keep things easy.
+                mvprintw(
+                    ((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
+                    26,
+                    "Angle: %4d.%01d Gain: %5.1f",  // Angle with 4 integer places (incl sign) and 1 decimal place
+                    static_cast<int>(target.position * 180 / M_PI),  // Get the integer part of the angle in degrees
+                    static_cast<int>(std::abs(target.position) * 180 / M_PI * 10) % 10,  // And the decimal part
+                    target.gain);
+            }
+            else {
+                mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
+                         26,
+                         "Angle: %+.3f Gain: %5.1f",
+                         target.position,
+                         target.gain);
+            }
+            // Turn off dimming
+            if (((static_cast<uint32_t>(target.id) + 2) % 20) != selection) {
+                attroff(A_DIM);
+            }
         }
 
+        // Add a note about units if we're in degrees
+        if (deg_or_rad) {
+            attron(A_DIM | COLOR_PAIR(6));  // Cyan
+            mvprintw(8, 26 + 6, "degrees");
+            attroff(A_DIM | COLOR_PAIR(6));  // Cyan
+        }
+
+        // Add a note about unsaved changes
+        if (unsaved_changes) {
+            attron(A_BOLD | COLOR_PAIR(3));  // Yellow
+            mvprintw(9 + 20 + 1, 2 + 2, "Your script has unsaved changes!");
+            attroff(A_BOLD | COLOR_PAIR(3));  // Yellow
+        }
+        // And display a message to inform if we've autosaved
+        if (!this->autosave_path.empty()) {
+            // Make sure the path isn't too long for the screen
+            auto path = this->autosave_path.string();
+            if (path.length() > size_t(COLS - 18)) {
+                // Overwrite the end of the path with an ellipsis and null terminator
+                path[COLS - 18 - 3] = '.';
+                path[COLS - 18 - 2] = '.';
+                path[COLS - 18 - 1] = '.';
+                path[COLS - 18]     = '\0';
+            }
+            attron(A_DIM | COLOR_PAIR(6));  // Cyan
+            mvprintw(9 + 20 + 2, 2 + 2, "Autosaved @ %s", path.c_str());
+            attroff(A_DIM | COLOR_PAIR(6));  // Cyan
+        }
+
+        // Log the terminal size in the bottom left, in highlighted red if we're too small, or dim purple normally
+        attron((COLS < 74 || LINES < 39) ? (A_BOLD | A_STANDOUT | COLOR_PAIR(1)) : (A_DIM | COLOR_PAIR(5)));
+        mvprintw(LINES - 3,
+                 COLS - 2 - (1 + (COLS > 9 ? (COLS > 99 ? 3 : 2) : 1) + (LINES > 9 ? (LINES > 99 ? 3 : 2) : 1)),
+                 "%dx%d",
+                 COLS,
+                 LINES);
+        attroff((COLS < 74 || LINES < 39) ? (A_BOLD | A_STANDOUT | COLOR_PAIR(1)) : (A_DIM | COLOR_PAIR(5)));
+
+        // And log the hostname
+        const auto hostname = utility::support::get_hostname();
+        attron(A_DIM | COLOR_PAIR(5));  // Magenta
+        mvprintw(LINES - 2, COLS - hostname.length() - 2, hostname.c_str());
+        attroff(A_DIM | COLOR_PAIR(5));  // Magenta
+
         // Highlight our selected point
+        attron(A_BLINK);
         mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
+        attroff(A_BLINK);
+
+        // Print the ascii art of NUgus showing selection, and location of servos if there's space
+        if (COLS >= 74) {
+            print_nugus(8, COLS >= 87 ? 58 : 51 + (COLS - 51 - 22) / 2);
+        }
 
         // We finished building
         refresh();
@@ -372,11 +562,13 @@ namespace module::purpose {
         // If we don't then save our current motor position as the position
         if (it == std::end(script.frames[frame].targets)) {
 
-            emit<Scope::DIRECT>(std::make_unique<LockServo>());
+            emit<Scope::INLINE>(std::make_unique<LockServo>());
         }
         else {
             // Remove this frame
             script.frames[frame].targets.erase(it);
+            // We've removed a frame so we always have unsaved changes
+            unsaved_changes = true;
 
             // Emit a waypoint so that the motor will turn off gain (go limp)
             auto waypoint      = std::make_unique<ServoTarget>();
@@ -394,6 +586,8 @@ namespace module::purpose {
         auto new_frame = script.frames[frame];
         script.frames.insert(script.frames.begin() + frame, new_frame);
         script.frames[frame].duration = std::chrono::milliseconds(default_duration);
+        // A new frame means we always have unsaved changes
+        unsaved_changes = true;
     }
 
     void ScriptTuner::delete_frame() {
@@ -401,8 +595,19 @@ namespace module::purpose {
         if (script.frames.size() > 1) {
             script.frames.erase(std::begin(script.frames) + frame);
             frame = frame < script.frames.size() ? frame : frame - 1;
+            // We've removed a frame so we always have unsaved changes
+            unsaved_changes = true;
         }
         else {
+            // Check if the last frame is already empty
+            if (script.frames.front().targets.empty()) {
+                beep();
+            }
+            // If it's not empty then we'll have unsaved changes
+            else {
+                unsaved_changes = true;
+            }
+            // Clear the last frame
             script.frames.erase(std::begin(script.frames));
             script.frames.emplace_back();
             frame = 0;
@@ -420,9 +625,26 @@ namespace module::purpose {
                 case 27: return "";
                 case '\n':
                 case KEY_ENTER: return chars.str(); break;
+                case KEY_BACKSPACE:
+                    // If we have characters to delete
+                    if (!chars.str().empty()) {
+                        // Move one character back
+                        chars.seekp(-1, std::ios_base::end);
+                        addch('\b');
+                        // Overwrite the character we want to backspace
+                        chars << '\0';
+                        addch(' ');
+                        // And move the write head back again
+                        chars.seekp(-1, std::ios_base::end);
+                        addch('\b');
+                    }
+                    break;
                 default:
-                    chars << static_cast<char>(ch);
-                    addch(ch);
+                    // Check if we have a printable character before we do anything with it
+                    if (isprint(ch)) {
+                        chars << static_cast<char>(ch);
+                        addch(ch);
+                    }
                     break;
             }
         }
@@ -438,12 +660,27 @@ namespace module::purpose {
         }
 
         // Log a success message
-        NUClear::log<NUClear::DEBUG>("Successfully loaded script from:", path);
+        log<DEBUG>("Successfully loaded script from:", path);
     }
 
     void ScriptTuner::save_script() {
         YAML::Node n(script);
         utility::file::writeToFile(script_path, n);
+        unsaved_changes = false;
+
+        // Delete autosave files now that we've saved
+        if (!autosave_path.empty()) {
+            std::filesystem::remove(autosave_path);
+            log<DEBUG>("Deleted old autosave file: ", autosave_path);
+        }
+        // Remove the autosave directory if it's empty
+        const auto autosave_dir = this->autosave_path.parent_path();
+        if (std::filesystem::is_empty(autosave_dir)) {
+            log<DEBUG>("Deleting empty autosave directory: ", autosave_dir);
+            std::filesystem::remove(autosave_dir);
+        }
+        // Clear the autosave path now that it doesn't exist anymore.
+        autosave_path.clear();
     }
 
     void ScriptTuner::edit_duration() {
@@ -454,14 +691,24 @@ namespace module::purpose {
         }
         move(4, 12);
 
+        // Make the cursor visible
+        curs_set(1);
+
         // Get the users input
         std::string result = user_input();
+
+        // Make the cursor invisible
+        curs_set(0);
 
         // If we have a result
         if (!result.empty()) {
             try {
+                // Temp save old duration
+                auto old_duration             = script.frames[frame].duration;
                 int num                       = stoi(result);
                 script.frames[frame].duration = std::chrono::milliseconds(num);
+                // If the duration has changed then we have unsaved changes
+                unsaved_changes |= old_duration != script.frames[frame].duration;
             }
             // If it's not a number then ignore and beep
             catch (std::invalid_argument&) {
@@ -502,26 +749,42 @@ namespace module::purpose {
                     it->id       = id;
                     it->position = 0;
                     it->gain     = default_gain;
+                    // We've added a new frame so we always have unsaved changes
+                    unsaved_changes = true;
                 }
 
                 // If we are entering an angle
                 if (angle_or_gain) {
+                    // Temp save old position to check for changes
+                    auto old_position = script.frames[frame].targets[selection].position;
+
+                    // If we are in degrees convert to radians
+                    num = deg_or_rad ? num * M_PI / 180 : num;
 
                     // Normalize our angle to be between -pi and pi
                     num = utility::math::angle::normalizeAngle(num);
 
+                    // Set the new position
                     it->position = num;
-                    // Convert our angle to be between -pi and pi
+
+                    // If the position has changed then we have unsaved changes
+                    unsaved_changes |= old_position != script.frames[frame].targets[selection].position;
                 }
                 // If it is a gain
                 else {
+                    // Temp save old gain to check for changes
+                    auto old_gain = script.frames[frame].targets[selection].gain;
+
+                    // Check if the value is < 0 or > 100
                     if (num >= 0 && num <= 100) {
                         it->gain = num;
                     }
                     else {
                         beep();
                     }
-                    // Check if the value is < 0 or > 100
+
+                    // If the gain has changed then we have unsaved changes
+                    unsaved_changes |= old_gain != script.frames[frame].targets[selection].gain;
                 }
             }
             // If it's not a number then ignore and beep
@@ -540,24 +803,32 @@ namespace module::purpose {
         if (tempcommand == "help") {
             curs_set(0);
 
-            const char* ALL_COMMANDS[] =
-                {",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
+            const int NUM_COMMANDS = 20;
 
-            const char* ALL_MEANINGS[] = {"Left a frame",
-                                          "Right a frame",
-                                          "New Frame",
-                                          "Delete Frame",
-                                          "Lock/Unlock",
-                                          "Edit Duration",
-                                          "Jump to Frame",
-                                          "Edit the gains of an entire Script or Frame",
-                                          "Play",
-                                          "Save",
-                                          "Saves Script As)",
-                                          "Manual Refresh View",
-                                          "Mirrors the script",
-                                          "Exit (this works to exit help and edit_gain)",
-                                          "Quit Scripttuner"};
+            const char* ALL_COMMANDS[NUM_COMMANDS] = {"Arrows", "wasd", "/", ",", ".", "N",     "I",
+                                                      "Space",  "T",    "J", "G", "P", "S",     "A",
+                                                      "R",      "M",    "D", "V", "X", "Ctrl-C"};
+
+            const char* ALL_MEANINGS[NUM_COMMANDS] = {"Navigate around the servo list (vim-style hjlk works too)",
+                                                      "Navigate around the NUgus body",
+                                                      "Select the other servo in a pair",
+                                                      "Left a frame",
+                                                      "Right a frame",
+                                                      "New Frame",
+                                                      "Delete Frame",
+                                                      "Lock/Unlock",
+                                                      "Edit Duration",
+                                                      "Jump to Frame",
+                                                      "Edit the gains of an entire Script or Frame",
+                                                      "Play",
+                                                      "Save",
+                                                      "Saves Script As",
+                                                      "Manual Refresh View",
+                                                      "Mirrors the script",
+                                                      "Switch between degree and radian display modes",
+                                                      "Toggle autosave on/off",
+                                                      "Exit (this works to exit help and edit_gain)",
+                                                      "Quit Script Tuner"};
 
             size_t longestCommand = 0;
             for (const auto& command : ALL_COMMANDS) {
@@ -570,7 +841,7 @@ namespace module::purpose {
             mvprintw(0, (COLS - 14) / 2, " Script Tuner ");
             mvprintw(3, 2, "Help Commands:");
             attroff(A_BOLD);
-            for (size_t i = 0; i < 15; i++) {
+            for (size_t i = 0; i < NUM_COMMANDS; i++) {
                 mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                 mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
             }
@@ -583,7 +854,7 @@ namespace module::purpose {
                 mvprintw(3, 2, "Help Commands:");
                 attroff(A_BOLD);
 
-                for (size_t i = 0; i < 15; i++) {
+                for (size_t i = 0; i < NUM_COMMANDS; i++) {
                     mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                     mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                 }
@@ -729,13 +1000,15 @@ namespace module::purpose {
             f = new_frame;
             refresh_view();
         }
+        // Mirroring the script is a change
+        unsaved_changes = true;
     }
 
     void ScriptTuner::save_script_as() {
         move(5, 2);
         curs_set(1);
-        std::string save_script_as = user_input();
-        if (utility::file::exists(save_script_as)) {
+        std::filesystem::path save_script_as = user_input();
+        if (std::filesystem::exists(save_script_as)) {
             bool print = true;
             while (print) {
                 mvprintw(6, 2, "This file already exists.");
@@ -1036,7 +1309,7 @@ namespace module::purpose {
             }
         }
 
-        // edit gains for only specifc frame
+        // edit gains for only specific frame
         if (editFrame) {
             for (auto& target : script.frames[frame].targets) {
                 switch (target.id.value) {
@@ -1073,6 +1346,8 @@ namespace module::purpose {
                 }
             }
         }
+        // Track unsaved changes
+        unsaved_changes |= editScript || editFrame;
         refresh_view();
     }
 
@@ -1121,5 +1396,146 @@ namespace module::purpose {
         }
 
         return std::numeric_limits<float>::quiet_NaN();
+    }
+
+    void ScriptTuner::setup_colour_pairs() {
+        // Coloured text, black background
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+        init_pair(2, COLOR_GREEN, COLOR_BLACK);
+        init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+        init_pair(4, COLOR_BLUE, COLOR_BLACK);
+        init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+        init_pair(6, COLOR_CYAN, COLOR_BLACK);
+    }
+
+    void ScriptTuner::print_nugus(const size_t line, const size_t col) {
+        const char* NUGUS[21] = {"         ____",
+                                 "       .'    '.",
+                                 "       |      |",
+                                 " <- L  |      |  R ->",
+                                 "        \\ 20 /",
+                                 "  .-----' 19 '-----.",
+                                 " /   2          1   \\",
+                                 "| 4  .          .  3 |",
+                                 "|   ||  Viewed  ||   |",
+                                 "|   ||   from   ||   |",
+                                 "| 6 ||  behind  || 5 |",
+                                 "|   ||          ||   |",
+                                 "\\___/|  8 ,,  7 |\\___/",
+                                 "     | 10 ||  9 |",
+                                 "     | 12 || 11 |",
+                                 "     |    ||    |",
+                                 "     | 14 || 13 |",
+                                 "     |    ||    |",
+                                 "     | 18 || 17 |",
+                                 "     | 16 || 15 |",
+                                 "     '----''----'"};
+        // The offsets of each ID within the NUgus ascii art.
+        std::array<std::pair<size_t, size_t>, 20> servo_locs = {{
+            {6, 16},   // ID 1
+            {6, 5},    // ID 2
+            {7, 19},   // ID 3
+            {7, 2},    // ID 4
+            {10, 19},  // ID 5
+            {10, 2},   // ID 6
+            {12, 14},  // ID 7
+            {12, 8},   // ID 8
+            {13, 14},  // ID 9
+            {13, 7},   // ID 10
+            {14, 13},  // ID 11
+            {14, 7},   // ID 12
+            {16, 13},  // ID 13
+            {16, 7},   // ID 14
+            {18, 13},  // ID 15
+            {18, 7},   // ID 16
+            {19, 13},  // ID 17
+            {19, 7},   // ID 18
+            {5, 10},   // ID 19
+            {4, 10}    // ID 20
+        }};
+
+        // Print the NUGUS
+        attron(A_DIM | COLOR_PAIR(4));
+        for (uint8_t i = 0; i < 21; i++) {
+            mvprintw(line + i, col, NUGUS[i]);
+        }
+        attroff(A_DIM | COLOR_PAIR(4));
+
+        // Print the text in grey
+        attron(A_DIM);
+        mvprintw(line + 3, col + 1, "<- L");
+        mvprintw(line + 3, col + 17, "R ->");
+        mvprintw(line + 8, col + 8, "Viewed");
+        mvprintw(line + 9, col + 9, "from");
+        mvprintw(line + 10, col + 8, "behind");
+        attroff(A_DIM);
+
+        // Print the servos showing if they're locked or not
+        // Default to unlocked, redraw the locks once we find them
+        for (uint8_t i = 0; i < 20; i++) {
+            // Verbosity to help off-by-one error hell
+            const uint8_t dxl_id  = i + 1;
+            const size_t list_idx = (i + 2) % 20;
+            attron(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
+            mvprintw(line + servo_locs[i].first, col + servo_locs[i].second, "%d", dxl_id);
+            attroff(COLOR_PAIR(1) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Red
+        }
+        // Loop through each motor in the frame and draw a lock if it's locked
+        for (auto& target : script.frames[frame].targets) {
+            // Even more verbosity to help off-by-one error even-hell-er
+            const uint8_t id      = static_cast<uint32_t>(target.id);
+            const uint8_t dxl_id  = id + 1;
+            const size_t list_idx = (id + 2) % 20;
+
+            attron(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
+            mvprintw(line + servo_locs[id].first, col + servo_locs[id].second, "%d", dxl_id);
+            attroff(COLOR_PAIR(2) | (list_idx == selection ? A_BOLD | A_STANDOUT : A_DIM));  // Green
+        }
+    }
+
+    void ScriptTuner::move_nugus_selection(const uint8_t direction) {
+        // Get the current (dynamixel) id
+        auto id = 1 + (selection < 2 ? 18 + selection : selection - 2);
+        // Move the selection based on the direction
+        // clang-format off
+        switch (direction) {
+            case 0:  // up
+                // for all lower servos, traverse up the same side
+                if (id > 2 && id < 19) id -= 2;
+                // shoulder, go to neck
+                else if (id == 1 || id == 2) id = 19;
+                // lower neck, go up
+                else if (id == 19) id = 20;
+                // upper neck, wrap around to the bottom right
+                else if (id == 20) id = 17;
+                break;
+            case 1:  // left
+                // for all body servos, just switch sides
+                if (id < 19) id = id % 2 ? id + 1 : id - 1;
+                // for the lower neck, move down
+                else if (id == 19) id = 2;
+                // for upper neck, do nothing
+                break;
+            case 2:  // down
+                // for main body, just traverse the sides
+                if (id < 17) id += 2;
+                // for feet, go to upper neck
+                else if (id == 17 || id == 18) id = 20;
+                // for lower neck, go to left shoulder
+                else if (id == 19) id = 2;
+                // for upper neck, go to lower neck
+                else if (id == 20) id = 19;
+                break;
+            case 3:  // right
+                // for all body servos, just switch sides
+                if (id < 19) id = id % 2 ? id + 1 : id - 1;
+                // for the lower neck, move down
+                else if (id == 19) id = 1;
+                // for upper neck, do nothing
+                break;
+        }
+        // clang-format on
+        // Set the selection based on the new id
+        selection = ((id - 1) + 2) % 20;
     }
 }  // namespace module::purpose

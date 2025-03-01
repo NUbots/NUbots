@@ -174,13 +174,13 @@ namespace utility::skill {
                 }
                 break;
             default:
-                NUClear::log<NUClear::WARN>("Something is wrong with the walk engine state.");
+                NUClear::log<NUClear::LogLevel::WARN>("Something is wrong with the walk engine state.");
                 engine_state = WalkEngineState::IDLE;
         }
 
         // Sanity check support foot state
         if ((phase < 0.5f && !foot_step.is_left_support()) || (phase >= 0.5f && foot_step.is_left_support())) {
-            NUClear::log<NUClear::WARN>(
+            NUClear::log<NUClear::LogLevel::WARN>(
                 fmt::format("Invalid state. phase={}, support={}, dt={}", phase, foot_step.is_left_support(), dt));
             return false;
         }
@@ -197,13 +197,13 @@ namespace utility::skill {
                 local_dt = 0.0001f;
             }
             else {
-                NUClear::log<NUClear::WARN>(fmt::format("Negative dt. phase={}, dt={}", phase, dt));
+                NUClear::log<NUClear::LogLevel::WARN>(fmt::format("Negative dt. phase={}, dt={}", phase, dt));
                 return;
             }
         }
         // Check for too long dt
         if (local_dt > 0.25f / params.freq) {
-            NUClear::log<NUClear::WARN>(fmt::format("dt too long. phase={}, dt={}", phase, dt));
+            NUClear::log<NUClear::LogLevel::WARN>(fmt::format("dt too long. phase={}, dt={}", phase, dt));
             return;
         }
 

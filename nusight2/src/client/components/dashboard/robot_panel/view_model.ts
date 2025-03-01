@@ -7,9 +7,9 @@ import { DashboardRobotModel } from "../dashboard_robot/model";
 
 import { LastStatus } from "./view";
 
-const Mode = message.input.GameState.Data.Mode;
-const PenaltyReason = message.input.GameState.Data.PenaltyReason;
-const Phase = message.input.GameState.Data.Phase;
+const Mode = message.input.GameState.Mode;
+const PenaltyReason = message.input.GameState.PenaltyReason;
+const Phase = message.input.GameState.Phase;
 
 export class RobotPanelViewModel {
   constructor(private model: DashboardRobotModel) {}

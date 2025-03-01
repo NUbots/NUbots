@@ -149,15 +149,15 @@ namespace module::skill {
 
             // threshold pitch and roll
             if (std::abs(RPY.x()) > current_cfg.imu_roll_threshold) {
-                log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
-                                               std::abs(RPY.x()),
-                                               current_cfg.imu_roll_threshold));
+                log<WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
+                                      std::abs(RPY.x()),
+                                      current_cfg.imu_roll_threshold));
                 walk_engine.request_pause();
             }
             else if (std::abs(RPY.y()) > current_cfg.imu_pitch_threshold) {
-                log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
-                                               std::abs(RPY.y()),
-                                               current_cfg.imu_pitch_threshold));
+                log<WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
+                                      std::abs(RPY.y()),
+                                      current_cfg.imu_pitch_threshold));
                 walk_engine.request_pause();
             }
         });
@@ -246,7 +246,7 @@ namespace module::skill {
                 // warn user that speed was limited
                 if (command.x() != current_orders.x() || command.y() != current_orders.y()
                     || command.z() != current_orders.z()) {
-                    log<NUClear::WARN>(fmt::format(
+                    log<WARN>(fmt::format(
                         "Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
                         command.x(),
                         command.y(),
@@ -394,7 +394,7 @@ namespace module::skill {
         emit<Task>(right_arm, 0, true, "quintic right arm");
 
         // Plot graphs of desired trajectories
-        if (log_level <= NUClear::DEBUG) {
+        if (log_level <= DEBUG) {
             Eigen::Vector3f thetaTL = mat_to_rpy_intrinsic(Htl.linear());
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
             emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
