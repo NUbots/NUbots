@@ -117,3 +117,13 @@ message NUSense {
     map<uint32, Servo> servo_map = 1;
     IMU                imu       = 2;
 }
+
+message ServoConfiguration {
+    int32 direction = 1;
+    double offset = 2;
+}
+
+message NUSenseHandshake {
+    string msg = 1;
+    repeated ServoConfiguration servo_configs = 2;
+}
