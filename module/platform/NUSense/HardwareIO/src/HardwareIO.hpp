@@ -86,7 +86,7 @@ namespace module::platform::NUSense {
 
             // Get the timestamp of the emit if we can, otherwise use now
             const auto* task = NUClear::threading::ReactionTask::get_current_task();
-            auto timestamp = task ? task->statistics ? task->statistics->finished.nuclear_time : NUClear::clock::now() : NUClear::clock::now();
+            auto timestamp = task ? task->statistics ? task->statistics->created.nuclear_time : NUClear::clock::now() : NUClear::clock::now();
             auto timestamp_us =
                 std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
             uint32_t size = uint32_t(payload.size() + sizeof(hash) + sizeof(timestamp_us));
