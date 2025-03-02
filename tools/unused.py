@@ -39,10 +39,13 @@ from utility.dockerise import run_on_docker
 def register(command):
     # Install help
     command.help = "Creates a list of unused or commented out modules"
+    command.add_argument(
+        "-q", "--quiet", default=False, action="store_true", dest="quiet", help="Silence terminal output."
+    )
 
 
 @run_on_docker
-def run(**kwargs):
+def run(quiet, **kwargs):
 
     source_dir = b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
     roles_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_ROLES_DIR"])
@@ -96,17 +99,18 @@ def run(**kwargs):
     # Find out which modules are unused
     unused_modules = existing_modules.difference(used_modules)
 
-    cprint("Existing Modules", attrs=["bold"])
-    print("\n".join(sorted(existing_modules)))
-    print("\n")
+    if not quiet:
+        cprint("Existing Modules", attrs=["bold"])
+        print("\n".join(sorted(existing_modules)))
+        print("\n")
 
-    cprint("Used Modules", "green", attrs=["bold"])
-    cprint("\n".join(sorted(used_modules)), "green")
-    print("\n")
+        cprint("Used Modules", "green", attrs=["bold"])
+        cprint("\n".join(sorted(used_modules)), "green")
+        print("\n")
 
-    cprint("Unused Modules", "red", attrs=["bold"])
-    cprint("\n".join(sorted(unused_modules)), "red", attrs=["bold"])
-    print("\n")
+        cprint("Unused Modules", "red", attrs=["bold"])
+        cprint("\n".join(sorted(unused_modules)), "red", attrs=["bold"])
+        print("\n")
 
     # Create a role from the unused modules
     unused_role = os.path.join(roles_path, "unused.role")
