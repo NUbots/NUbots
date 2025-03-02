@@ -435,6 +435,8 @@ RUN chmod 440 /etc/sudoers.d/user
 ARG user_uid=1000
 ARG user_gid=$user_uid
 ARG dialout_gid=20
+ARG video_gid=44
+ARG render_gid=110
 
 # useradd -G is not sufficient to add the nubots user to the dialout
 # group as docker manages to lose supplementary groups when changing
@@ -442,8 +444,10 @@ ARG dialout_gid=20
 # Also need to add "--group-add dialout" to the docker run command in run.py
 # Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
 RUN groupadd --gid $dialout_gid dialout \
+    && groupadd --gid $video_gid video_host \
+    && groupadd --gid $render_gid render_host \
     && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp -m nubots
+    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp,video_host,render_host -m nubots
 
 USER nubots
 
