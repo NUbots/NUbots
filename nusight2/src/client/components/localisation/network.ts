@@ -16,7 +16,10 @@ import { FieldIntersection } from "./robot_model";
 import { Line } from "./robot_model";
 
 export class LocalisationNetwork {
-  constructor(private network: Network, private model: LocalisationModel) {
+  constructor(
+    private network: Network,
+    private model: LocalisationModel,
+  ) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.localisation.Ball, this.onBall);
