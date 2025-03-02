@@ -11,7 +11,7 @@ export const AssociationLines: React.FC<AssociationLinesProps> = ({ lines }) => 
   return (
     <>
       <group>
-        {lines.map((line, index) => {
+        {lines?.map((line, index) => {
           const start = new THREE.Vector3(line.start.x, line.start.y, 0.005);
           const end = new THREE.Vector3(line.end.x, line.end.y, 0.005);
 

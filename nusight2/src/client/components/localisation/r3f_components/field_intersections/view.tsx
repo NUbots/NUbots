@@ -68,7 +68,7 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
 export const FieldIntersections: React.FC<FieldIntersectionsProps> = ({ intersections }) => {
   return (
     <>
-      {intersections.map((intersection, index) => (
+      {intersections?.map((intersection, index) => (
         <object3D key={index}>
           <IntersectionShape intersection={intersection} />
         </object3D>
