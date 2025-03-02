@@ -32,8 +32,6 @@
 
 #include "IKKickControllers.hpp"
 
-#include "message/motion/KickCommand.hpp"
-
 #include "utility/input/LimbID.hpp"
 #include "utility/motion/Balance.hpp"
 

@@ -34,11 +34,9 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
 #include "message/actuation/ServoCommand.hpp"
-#include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
-#include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/math/comparison.hpp"
@@ -57,7 +55,6 @@ namespace module::skill {
     using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
-    using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;

@@ -33,7 +33,7 @@
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/KickCommand.hpp"
+#include "message/motion/Kick.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/FieldDescription.hpp"
 
@@ -55,7 +55,7 @@ namespace module::motion {
     using message::behaviour::KickPlan;
     using message::behaviour::ServoCommands;
     using message::motion::IKKickParams;
-    using message::motion::KickCommand;
+    using message::motion::Kick;
     using message::motion::KickFinished;
     using message::motion::StopCommand;
     using KickType = message::behaviour::KickPlan::KickType;
@@ -106,12 +106,7 @@ namespace module::motion {
             emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
         });
 
-        on<Startup>().then("IKKick Startup", [this] {
-            // Default kick plan at enemy goals
-            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
-        });
-
-        on<Trigger<KickCommand>>().then([this] {
+        on<Trigger<Kick>>().then([this] {
             // We want to kick!
 
             emit(std::make_unique<StopCommand>(subsumptionId));  // Stop the walk
@@ -119,8 +114,8 @@ namespace module::motion {
             updatePriority(KICK_PRIORITY);
         });
 
-        on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
-            [this](const KickCommand& command, const Sensors& sensors, const KinematicsModel& kinematicsModel) {
+        on<Trigger<ExecuteKick>, With<Kick, Sensors, KinematicsModel>>().then(
+            [this](const Kick& command, const Sensors& sensors, const KinematicsModel& kinematicsModel) {
                 // Enable our kick pather
                 updater.enable();
                 updatePriority(EXECUTION_PRIORITY);
