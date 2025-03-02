@@ -192,7 +192,7 @@ if __name__ == '__main__':
     study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimization')
 
     # Start the optimization
-    study.optimize(objective, n_trials=250)  # Adjust n_trials as needed
+    study.optimize(objective, n_trials=1000)  # Adjust n_trials as needed
 
     # Print the best parameters and RMSE
     print('Best parameters found:')
@@ -218,3 +218,27 @@ if __name__ == '__main__':
     shutil.copy(sensor_filter_yaml_path, os.path.join(destination_dir, 'BestSensorFilter.yaml'))
 
     print(f'Best YAML files have been saved to {destination_dir}')
+
+    import plotly
+
+    # Plot and save optimization history
+    fig_history = optuna.visualization.plot_optimization_history(study)
+    fig_history.write_html(os.path.join(destination_dir, 'optimization_history.html'))
+
+    # Plot and save parameter importances
+    fig_importances = optuna.visualization.plot_param_importances(study)
+    fig_importances.write_html(os.path.join(destination_dir, 'param_importances.html'))
+
+    # Plot and save parallel coordinate plot
+    fig_parallel = optuna.visualization.plot_parallel_coordinate(study)
+    fig_parallel.write_html(os.path.join(destination_dir, 'parallel_coordinate.html'))
+
+    # Plot and save contour plot
+    fig_contour = optuna.visualization.plot_contour(study)
+    fig_contour.write_html(os.path.join(destination_dir, 'contour_plot.html'))
+
+    # Plot and save slice plot
+    fig_slice = optuna.visualization.plot_slice(study)
+    fig_slice.write_html(os.path.join(destination_dir, 'slice_plot.html'))
+
+    print(f'Visualization plots have been saved to {destination_dir}')
