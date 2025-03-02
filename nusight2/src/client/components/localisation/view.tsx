@@ -27,8 +27,6 @@ import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
 
-import * as THREE from "three";
-
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -126,7 +124,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
           toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
           toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
-          toggleTrajectoryVisibility={this.toggleTrajectoryVisibility}
         ></LocalisationMenuBar>
         <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -221,10 +218,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleBoundedBoxVisibility = () => {
     this.props.controller.toggleBoundedBoxVisibility(this.props.model);
   };
-
-  private toggleTrajectoryVisibility = () => {
-    this.props.controller.toggleTrajectoryVisibility(this.props.model);
-  };
 }
 
 interface LocalisationMenuBarProps {
@@ -245,7 +238,6 @@ interface LocalisationMenuBarProps {
   toggleFieldIntersectionsVisibility(): void;
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
-  toggleTrajectoryVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -294,7 +286,6 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         />
         <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
         <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
-        <MenuItem label="Trajectories" isVisible={model.trajectoryVisible} onClick={props.toggleTrajectoryVisibility} />
       </ul>
     </Menu>
   );
@@ -373,6 +364,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       {model.fieldIntersectionsVisible && robot.fieldIntersections && (
         <FieldIntersections intersections={robot.fieldIntersectionsF} />
       )}
+
       {model.fieldIntersectionsVisible && robot.fieldIntersections && (
         <AssociationLines lines={robot.association_lines} />
       )}
@@ -413,64 +405,6 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           color={robot.color}
         />
       )}
-
-      {model.trajectoryVisible &&
-        model.robots.map((robotModel) => {
-          if (robotModel.visible && robotModel.swingFootTrajectoryHistory.trajectories.length > 0) {
-            return robotModel.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
-              const swingFootTrajectory = traj.trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-              if (swingFootTrajectory.length > 0) {
-                const color = traj.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
-                return (
-                  <Trajectory
-                    trajectory={swingFootTrajectory}
-                    key={`${robotModel.id}-trajectory-${index}`}
-                    lineColor={color}
-                    tubeRadius={0.005}
-                  />
-                );
-              }
-            });
-          }
-        })}
-      {model.trajectoryVisible &&
-        model.robots.map((robotModel) => {
-          if (robotModel.visible && robotModel.torsoTrajectoryHistory.trajectories.length > 0) {
-            return robotModel.torsoTrajectoryHistory.trajectories.map((trajectory, index) => {
-              const torsoTrajectory = trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-              if (torsoTrajectory.length > 0) {
-                return (
-                  <Trajectory
-                    trajectory={torsoTrajectory}
-                    key={`${robotModel.id}-trajectory-${index}`}
-                    lineColor="grey"
-                    tubeRadius={0.005}
-                  />
-                );
-              }
-            });
-          }
-        })}
-
-      {model.trajectoryVisible &&
-        robot.visible &&
-        robot.swingFootTrajectoryHistory &&
-        robot.swingFootTrajectoryHistory.trajectories &&
-        robot.swingFootTrajectoryHistory.trajectories.length > 0 &&
-        robot.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
-          if (traj.trajectory && traj.trajectory.length > 0) {
-            const lastPointData = traj.trajectory[traj.trajectory.length - 1];
-            const lastPoint = new THREE.Vector3(lastPointData.x, lastPointData.y, lastPointData.z);
-            const color = traj.walkPhase === 1 ? "#9A99D7" : "#8AC48E";
-            return (
-              <mesh key={`${robot.id}-trajectory-${index}-footstep`} position={lastPoint.toArray()}>
-                <boxGeometry args={[0.225, 0.12, 0.04]} />
-                <meshStandardMaterial color={color} />
-              </mesh>
-            );
-          }
-          return null;
-        })}
     </object3D>
   );
 });
@@ -494,41 +428,5 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>
 ));
-
-const Trajectory = ({ trajectory, lineColor, tubeRadius }) => {
-  // Create ref
-  const trajectoryRef = React.useRef<THREE.Object3D>(null);
-
-  // React effect
-  React.useEffect(() => {
-    if (!trajectoryRef.current) return;
-
-    // Validate trajectory
-    const validTrajectory = trajectory.filter(
-      (point) => point && !isNaN(point.x) && !isNaN(point.y) && !isNaN(point.z),
-    );
-
-    // Ensure there are enough points to create a curve
-    if (validTrajectory.length < 2) {
-      // Clear any existing trajectory
-      trajectoryRef.current.clear();
-      return;
-    }
-
-    // Generate spline
-    const curve = new THREE.CatmullRomCurve3(validTrajectory);
-
-    // Create the tube geometry along the spline
-    const geometry = new THREE.TubeGeometry(curve, 50, tubeRadius, 8, false);
-    const material = new THREE.MeshStandardMaterial({ color: lineColor });
-    const newTrajectoryMesh = new THREE.Mesh(geometry, material);
-
-    // Clear the old trajectory and add the new one
-    trajectoryRef.current.clear();
-    trajectoryRef.current.add(newTrajectoryMesh);
-  }, [trajectory, tubeRadius, lineColor]);
-
-  return <object3D ref={trajectoryRef} />;
-};
 
 export default LocalisationView;
