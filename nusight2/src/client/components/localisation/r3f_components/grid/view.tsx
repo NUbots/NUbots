@@ -29,22 +29,12 @@ export class GridView extends React.Component<{}> {
 
   private createGrids() {
     const size = 20;
-    const smallGrid = this.buildGrid(size, 0.1, new THREE.Color("#F7F7F7"), 0.0075);
     const largeGrid = this.buildGrid(size, 1, new THREE.Color("#E3E3E3"), 0.01);
-    const whiteBackground = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(size, size),
-      new THREE.MeshBasicMaterial({ color: "#FFFFFF" }),
-    );
     // Prevent z-fighting
-    smallGrid.translateZ(-0.002);
     largeGrid.translateZ(-0.001);
-    whiteBackground.rotateX(-Math.PI / 2); // Rotate by 90 degrees
-    whiteBackground.translateZ(-0.003);
 
     const grid = new THREE.Group();
-    grid.add(smallGrid);
     grid.add(largeGrid);
-    grid.add(whiteBackground);
     grid.rotateX(Math.PI / 2); // Rotate by 90 degrees
 
     return grid;
