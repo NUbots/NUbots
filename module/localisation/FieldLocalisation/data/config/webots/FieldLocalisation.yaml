@@ -1,8 +1,11 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
+
+# Number of particles
+n_particles: 1000
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
 starting_side: EITHER
@@ -10,71 +13,20 @@ starting_side: EITHER
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
 
+# Our confidence in the initial guess of where the robot starts on the field
+initial_covariance: [0.5, 0.5, 0.5]
+
+# Amount of noise added to the particles (how much world can move to adjust for drift) at each time update
+process_noise: [1e-3, 1e-3, 1e-2]
+
 # Bool to save a csv file of the generated occupancy grid map
 save_map: false
 
 # Minimum number of field line points for a measurement update
-min_field_line_points: 75
-
-# Minimum number of field line intersections for an update
-min_field_line_intersections: 3
+min_observations: 0
 
 # Delay before the particle filter starts (allows odometry to settle)
-start_time_delay: 10
+start_time_delay: 1
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
-
-# Weighting associated with field line distance error cost term
-field_line_distance_weight: 0.8347155755999723
-
-# Weighting associated with field intersection landmark error
-field_line_intersection_weight: 0.49597117987743783
-
-# Weighting associated with change between last solution result
-state_change_weight: 0.921829339205462
-
-# Weighting associated with goal post distance error
-goal_post_distance_weight: 6.745911006158417
-
-# Box constraints on change in state (x, y, theta)
-change_limit: [0.8089336479857134, 0.6285285250343745, 0.20832038702389086]
-
-# Minimum distance an associated landmark needs to be for measurement update
-min_association_distance: 1.7415311901858588
-
-# Goal post error tolerance [m]
-goal_post_error_tolerance: 0.5
-
-opt:
-  # Relative tolerance on the optimization parameters
-  xtol_rel: 1e-6
-  # Relative tolerance on the optimization function value
-  ftol_rel: 1e-6
-  # Maximum number of evaluations for the optimization
-  maxeval: 1000
-
-kalman:
-  # Continuous time process model:
-  A:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-  # Continuous time input model: No inputs
-  B: []
-  # Continuous time measurement model:
-  C:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-
-  # Process model noise
-  Q:
-    - [1e-2, 0, 0]
-    - [0, 1e-2, 0]
-    - [0, 0, 3e-2]
-  # Measurement model noise
-  R:
-    - [3.3360958461859638, 0, 0]
-    - [0, 9.634512251900503, 0]
-    - [0, 0, 2.1363860657428577]
