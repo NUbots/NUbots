@@ -133,7 +133,7 @@ namespace module::purpose {
         });
 
         // Trigger when stdin has something to read
-        on<Always>().then([this] {
+        on<IO>(STDIN_FILENO, IO::READ).then([this] {
             switch (tolower(getch())) {
                 case 'w': forward(); break;
                 case 'a': left(); break;
