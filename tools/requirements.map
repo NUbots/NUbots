@@ -13,3 +13,4 @@ si_prefix       si-prefix
 pytimeparse     pytimeparse
 pygit2          pygit2
 plotly          plotly
+ruamel.yaml     ruamel.yaml

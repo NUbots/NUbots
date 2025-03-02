@@ -13,3 +13,4 @@ si-prefix~=1.2.2
 pytimeparse~=1.1.8
 pygit2~=1.13.3
 plotly~=6.0.0
+ruamel.yaml~=0.18.10

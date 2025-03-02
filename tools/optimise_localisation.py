@@ -33,7 +33,7 @@ import subprocess
 import sys
 
 import optuna
-import yaml
+from ruamel.yaml import YAML
 from termcolor import cprint
 
 from utility.dockerise import run_on_docker
@@ -43,15 +43,18 @@ EXECUTABLE_PATH = os.path.join(BUILD_DIR, 'bin/webots/localisation_benchmark')
 NBS_FILE = os.path.join(BUILD_DIR, 'recordings/logging/benchmark.nbs')
 LOCALISATION_YAML_PATH = os.path.join(BUILD_DIR, 'config/webots/FieldLocalisationNLopt.yaml')
 SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, 'config/webots/SensorFilter.yaml')
-DESTINATION_DIR = os.path.join(BUILD_DIR, 'recordings')
+DESTINATION_DIR = os.path.join(BUILD_DIR, 'recordings/optimisation_results')
 
 def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
     """
-    Modifies the YAML configuration files with the provided parameters.
+    Modifies the YAML configuration files with the provided parameters while preserving comments and formatting.
     """
+    yaml_parser = YAML()
+    yaml_parser.indent(mapping=2, sequence=4, offset=2)
+
     # Update FieldLocalisationNLopt.yaml
     with open(localisation_yaml_path, 'r') as file:
-        localisation_config = yaml.safe_load(file)
+        localisation_config = yaml_parser.load(file)
 
     localisation_config['field_line_distance_weight'] = params['field_line_distance_weight']
     localisation_config['field_line_intersection_weight'] = params['field_line_intersection_weight']
@@ -78,17 +81,17 @@ def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
     ]
 
     with open(localisation_yaml_path, 'w') as file:
-        yaml.safe_dump(localisation_config, file)
+        yaml_parser.dump(localisation_config, file)
 
     # Update SensorFilter.yaml
     with open(sensor_filter_yaml_path, 'r') as file:
-        sensor_filter_config = yaml.safe_load(file)
+        sensor_filter_config = yaml_parser.load(file)
 
     sensor_filter_config['mahony']['Kp'] = params['Kp']
     sensor_filter_config['mahony']['Ki'] = params['Ki']
 
     with open(sensor_filter_yaml_path, 'w') as file:
-        yaml.safe_dump(sensor_filter_config, file)
+        yaml_parser.dump(sensor_filter_config, file)
 
 
 def parse_rmse_translation(output):
@@ -210,7 +213,6 @@ def objective(trial):
     if rmse is None:
         return float('inf')
 
-    # Optionally, you can store additional trial attributes here.
     trial.set_user_attr('rmse_translation', parse_rmse_translation)
     trial.set_user_attr('rmse_rotation', parse_rmse_rotation)
 
@@ -232,41 +234,37 @@ def register(parser):
 @run_on_docker
 def run(n_trials, nbs_file, **kwargs):
     """
-    Run the optimization tool.
+    Run the optimisation tool.
     """
-    study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimization')
+    study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimisation')
     NBS_FILE = nbs_file
-    # Set NBS file as user attribute for the study
     study.set_user_attr('nbs_file', NBS_FILE)
-    study.optimize(objective, n_trials=n_trials)
 
-    print('Best parameters found:')
+    # Enable progress bar
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+
+    # Colored output for results
+    cprint('\nBest parameters found:', 'green', attrs=['bold'])
     for key, value in study.best_params.items():
-        print(f'{key}: {value}')
-    print(f'Best RMSE: {study.best_value}')
+        cprint(f'{key}: ', 'cyan', end='')
+        cprint(f'{value}', 'yellow')
 
+    cprint(f'\nBest RMSE: {study.best_value}', 'green', attrs=['bold'])
+
+    # Save configs
     modify_yaml(study.best_params, LOCALISATION_YAML_PATH, SENSOR_FILTER_YAML_PATH)
-
     os.makedirs(DESTINATION_DIR, exist_ok=True)
     shutil.copy(LOCALISATION_YAML_PATH, os.path.join(DESTINATION_DIR, 'BestFieldLocalisationNLopt.yaml'))
     shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, 'BestSensorFilter.yaml'))
-    print(f'Best YAML files have been saved to {DESTINATION_DIR}')
+    cprint(f'\n✅ Best YAML files saved to {DESTINATION_DIR}', 'green')
 
-    # Generate and save visualizations using Optuna's Plotly integration
-    import plotly
+    # Visualisations with British spelling
     fig_history = optuna.visualization.plot_optimization_history(study)
-    fig_history.write_html(os.path.join(DESTINATION_DIR, 'optimization_history.html'))
+    fig_history.write_html(os.path.join(DESTINATION_DIR, 'optimisation_history.html'))
 
-    fig_importances = optuna.visualization.plot_param_importances(study)
-    fig_importances.write_html(os.path.join(DESTINATION_DIR, 'param_importances.html'))
-
-    fig_parallel = optuna.visualization.plot_parallel_coordinate(study)
-    fig_parallel.write_html(os.path.join(DESTINATION_DIR, 'parallel_coordinate.html'))
-
-    fig_contour = optuna.visualization.plot_contour(study)
-    fig_contour.write_html(os.path.join(DESTINATION_DIR, 'contour_plot.html'))
-
-    fig_slice = optuna.visualization.plot_slice(study)
-    fig_slice.write_html(os.path.join(DESTINATION_DIR, 'slice_plot.html'))
-
-    print(f'Visualization plots have been saved to {DESTINATION_DIR}')
+    cprint('\n📈 Visualisation plots saved:', 'blue')
+    cprint(f' - optimisation_history.html', 'cyan')
+    cprint(f' - param_importances.html', 'cyan')
+    cprint(f' - parallel_coordinate.html', 'cyan')
+    cprint(f' - contour_plot.html', 'cyan')
+    cprint(f' - slice_plot.html\n', 'cyan')

@@ -389,7 +389,7 @@ RUN pip install \
     mycroft-mimic3-tts \
     tqdm \
     optuna \
-    PyYAML \
+    ruamel.yaml \
     plotly \
     scikit-learn
 
