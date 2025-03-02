@@ -74,7 +74,7 @@ namespace module::tools {
                 config.mode = REALTIME;
             }
             else {
-                log<NUClear::ERROR>("Playback mode is invalid, stopping playback");
+                log<ERROR>("Playback mode is invalid, stopping playback");
                 powerplant.shutdown();
             }
 
@@ -97,7 +97,7 @@ namespace module::tools {
             // Set playback mode
             auto set_mode_request  = std::make_unique<SetModeRequest>();
             set_mode_request->mode = config.mode;
-            emit<Scope::DIRECT>(set_mode_request);
+            emit<Scope::INLINE>(set_mode_request);
 
             // Delay
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -106,13 +106,13 @@ namespace module::tools {
             auto load_request      = std::make_unique<LoadRequest>();
             load_request->files    = std::vector<std::string>(std::next(args.begin()), args.end());
             load_request->messages = config.messages;
-            emit<Scope::DIRECT>(std::move(load_request));
+            emit<Scope::INLINE>(std::move(load_request));
 
             // Delay
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
             // Start playback
-            emit<Scope::DIRECT>(std::make_unique<PlayRequest>());
+            emit<Scope::INLINE>(std::make_unique<PlayRequest>());
         });
 
 

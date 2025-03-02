@@ -59,7 +59,7 @@ namespace module::nbs {
 
         on<Trigger<LoadRequest>>().then([this](const LoadRequest& load_request) {
             if (playback_state != message::nbs::player::PlaybackState::State::ENDED) {
-                log<NUClear::ERROR>("Cannot load NBS files while playing.");
+                log<ERROR>("Cannot load NBS files while playing.");
                 emit(std::make_unique<LoadRequest::Response>(
                     RpcResponseMeta(load_request.rpc.token, false, "Cannot load NBS files while playing.")));
                 return;
@@ -67,27 +67,27 @@ namespace module::nbs {
 
             if (load_request.files.empty()) {
                 // If no NBS files are provided, don't continue
-                log<NUClear::ERROR>("No NBS files provided.");
+                log<ERROR>("No NBS files provided.");
                 emit(std::make_unique<LoadRequest::Response>(
                     RpcResponseMeta(load_request.rpc.token, false, "No NBS files provided.")));
                 return;
             }
 
-            log<NUClear::INFO>("Loading NBS files:");
+            log<INFO>("Loading NBS files:");
             std::vector<std::filesystem::path> file_paths;
             for (const auto& path : load_request.files) {
                 std::filesystem::path file_path(path);
                 if (std::filesystem::exists(file_path)) {
                     file_paths.push_back(file_path);
-                    log<NUClear::INFO>(" - ", path);
+                    log<INFO>(" - ", path);
                 }
                 else {
-                    log<NUClear::ERROR>("File does not exist: ", path);
+                    log<ERROR>("File does not exist: ", path);
                 }
             }
 
             if (file_paths.empty()) {
-                log<NUClear::ERROR>("No valid NBS files to load.");
+                log<ERROR>("No valid NBS files to load.");
                 emit(std::make_unique<LoadRequest::Response>(
                     RpcResponseMeta(load_request.rpc.token, false, "No valid NBS files to load.")));
                 return;
@@ -114,7 +114,7 @@ namespace module::nbs {
                     log<INFO>(" - ", message_name);
                 }
                 else {
-                    log<NUClear::ERROR>("Message type not found: ", message_name);
+                    log<ERROR>("Message type not found: ", message_name);
                 }
             }
 
@@ -137,7 +137,7 @@ namespace module::nbs {
 
         on<Trigger<SetModeRequest>>().then([this](const SetModeRequest& set_mode_request) {
             mode = set_mode_request.mode;
-            log<NUClear::INFO>("Playback mode set to: ", set_mode_request.mode);
+            log<INFO>("Playback mode set to: ", set_mode_request.mode);
 
             // Emit the playback state
             emit_playback_state();
@@ -183,7 +183,7 @@ namespace module::nbs {
             switch (mode.value) {
                 case FAST:
                     // Set RTF to match the desired playback speed
-                    emit<Scope::DIRECT>(
+                    emit<Scope::INLINE>(
                         std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                        playback_speed,
                                                                        NUClear::message::TimeTravel::Action::RELATIVE));
@@ -193,7 +193,7 @@ namespace module::nbs {
 
                 case REALTIME:
                     // Set RTF to match the desired playback speed
-                    emit<Scope::DIRECT>(
+                    emit<Scope::INLINE>(
                         std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                        playback_speed,
                                                                        NUClear::message::TimeTravel::Action::RELATIVE));
@@ -210,7 +210,7 @@ namespace module::nbs {
                     enable_skip_idle_player();
                     break;
                 default:
-                    log<NUClear::ERROR>("Invalid playback mode selected.");
+                    log<ERROR>("Invalid playback mode selected.");
                     emit(std::make_unique<PlayRequest::Response>(
                         RpcResponseMeta(play_request.rpc.token, false, "Invalid playback mode selected.")));
                     return;
