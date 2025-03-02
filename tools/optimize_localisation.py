@@ -1,43 +1,89 @@
+#!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2025 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
 import os
 import re
-import shutil  # Import shutil for file operations
+import shutil  # For file operations
 import subprocess
 import sys
 
 import optuna
 import yaml
+from termcolor import cprint
 
+from utility.dockerise import run_on_docker
+
+BUILD_DIR = '/home/nubots/build'
+EXECUTABLE_PATH = os.path.join(BUILD_DIR, 'bin/webots/localisation_benchmark')
+DEFAULT_NBS_FILE = os.path.join(BUILD_DIR, 'recordings/logging/benchmark.nbs')
+LOCALISATION_YAML_PATH = os.path.join(BUILD_DIR, 'config/webots/FieldLocalisationNLopt.yaml')
+SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, 'config/webots/SensorFilter.yaml')
+DESTINATION_DIR = os.path.join(BUILD_DIR, 'recordings')
 
 def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
     """
     Modifies the YAML configuration files with the provided parameters.
     """
-    # Modify FieldLocalisationNLopt.yaml
+    # Update FieldLocalisationNLopt.yaml
     with open(localisation_yaml_path, 'r') as file:
         localisation_config = yaml.safe_load(file)
 
-    # Update scalar parameters for FieldLocalisationNLopt.yaml
     localisation_config['field_line_distance_weight'] = params['field_line_distance_weight']
     localisation_config['field_line_intersection_weight'] = params['field_line_intersection_weight']
     localisation_config['state_change_weight'] = params['state_change_weight']
     localisation_config['goal_post_distance_weight'] = params['goal_post_distance_weight']
-    localisation_config['change_limit'] = [params['change_limit_x'], params['change_limit_y'], params['change_limit_theta']]
+    localisation_config['change_limit'] = [
+        params['change_limit_x'],
+        params['change_limit_y'],
+        params['change_limit_theta']
+    ]
     localisation_config['max_association_distance'] = params['max_association_distance']
 
-    # Update matrix parameters for Kalman filter noise covariances
     Q_values = [params['Q_x'], params['Q_y'], params['Q_theta']]
     R_values = [params['R_x'], params['R_y'], params['R_theta']]
-    localisation_config['kalman']['Q'] = [[Q_values[0], 0, 0], [0, Q_values[1], 0], [0, 0, Q_values[2]]]
-    localisation_config['kalman']['R'] = [[R_values[0], 0, 0], [0, R_values[1], 0], [0, 0, R_values[2]]]
+    localisation_config['kalman']['Q'] = [
+        [Q_values[0], 0, 0],
+        [0, Q_values[1], 0],
+        [0, 0, Q_values[2]]
+    ]
+    localisation_config['kalman']['R'] = [
+        [R_values[0], 0, 0],
+        [0, R_values[1], 0],
+        [0, 0, R_values[2]]
+    ]
 
     with open(localisation_yaml_path, 'w') as file:
         yaml.safe_dump(localisation_config, file)
 
-    # Modify SensorFilter.yaml
+    # Update SensorFilter.yaml
     with open(sensor_filter_yaml_path, 'r') as file:
         sensor_filter_config = yaml.safe_load(file)
 
-    # Update Mahony filter parameters
     sensor_filter_config['mahony']['Kp'] = params['Kp']
     sensor_filter_config['mahony']['Ki'] = params['Ki']
 
@@ -71,52 +117,43 @@ def parse_rmse_rotation(output):
         return None
 
 
-def run_benchmark():
+def run_benchmark(nbs_file=DEFAULT_NBS_FILE):
     """
     Runs the LocalisationBenchmark module and captures the RMSE.
     """
-    # Paths to the executable and NBS file
-    executable_path = '/home/nubots/build/bin/webots/localisation_benchmark'
-    nbs_file = '/home/nubots/build/recordings/logging/benchmark.nbs'
-
-    # Ensure the executable and NBS file exist
-    if not os.path.isfile(executable_path):
-        print(f"Executable not found at {executable_path}")
+    if not os.path.isfile(EXECUTABLE_PATH):
+        print(f"Executable not found at {EXECUTABLE_PATH}")
         return None
     if not os.path.isfile(nbs_file):
         print(f"NBS file not found at {nbs_file}")
         return None
 
-    # Command to run
-    command = [executable_path, nbs_file]
+    command = [EXECUTABLE_PATH, nbs_file]
 
     try:
-        # Set the working directory to /home/nubots/build
         result = subprocess.run(
             command,
-            cwd='/home/nubots/build',
+            cwd=BUILD_DIR,
             capture_output=True,
             text=True,
             check=True,
             bufsize=1,
-            timeout=20  # Timeout after 20 seconds (adjust as needed)
+            timeout=20  # Adjust timeout if needed
         )
         output = result.stdout
         rmse_translation = parse_rmse_translation(output)
         rmse_rotation = parse_rmse_rotation(output)
-        print("RMSE Translation: " + str(rmse_translation))
-        print("RMSE Rotation: " + str(rmse_rotation))
+        print("RMSE Translation:", rmse_translation)
+        print("RMSE Rotation:", rmse_rotation)
 
         if rmse_translation is None or rmse_rotation is None:
             return None
 
-        # Combine the RMSE values (adjust weighting as needed)
         total_rmse = rmse_translation + rmse_rotation
         return total_rmse
 
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired:
         print("Benchmark timed out.")
-        # The subprocess is killed automatically when TimeoutExpired is raised
         return None
 
     except subprocess.CalledProcessError as e:
@@ -129,7 +166,6 @@ def objective(trial):
     """
     The objective function for Optuna that defines the optimization problem.
     """
-    # Suggest values for the parameters within the specified ranges
     field_line_distance_weight = trial.suggest_loguniform('field_line_distance_weight', 1e-2, 1e2)
     field_line_intersection_weight = trial.suggest_loguniform('field_line_intersection_weight', 1e-2, 1e2)
     state_change_weight = trial.suggest_loguniform('state_change_weight', 1e-2, 1e2)
@@ -147,7 +183,6 @@ def objective(trial):
     Kp = trial.suggest_uniform('Kp', 1e-2, 1e1)
     Ki = trial.suggest_uniform('Ki', 1e-2, 1e1)
 
-    # Prepare the parameters dictionary
     params = {
         'field_line_distance_weight': field_line_distance_weight,
         'field_line_intersection_weight': field_line_intersection_weight,
@@ -167,78 +202,67 @@ def objective(trial):
         'Ki': Ki,
     }
 
-    # Modify the YAML files with the new parameters
-    localisation_yaml_path = '/home/nubots/build/config/webots/FieldLocalisationNLopt.yaml'
-    sensor_filter_yaml_path = '/home/nubots/build/config/webots/SensorFilter.yaml'
-    modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path)
+    modify_yaml(params, LOCALISATION_YAML_PATH, SENSOR_FILTER_YAML_PATH)
 
-    # Run the benchmark and get the RMSE
     rmse = run_benchmark()
 
     if rmse is None:
-        # Return a high value to penalize the trial if RMSE could not be obtained
         return float('inf')
 
-    # Optionally, report intermediate values
+    # Optionally, you can store additional trial attributes here.
     trial.set_user_attr('rmse_translation', parse_rmse_translation)
     trial.set_user_attr('rmse_rotation', parse_rmse_rotation)
 
-    # Return the RMSE as the objective value to minimize
     return rmse
 
 
-if __name__ == '__main__':
-    # Create an Optuna study object
+@run_on_docker
+def register(parser):
+    """
+    Register command-line arguments for the optimization tool.
+    """
+    parser.description = "Optimizes YAML configuration parameters for the LocalisationBenchmark using Optuna."
+    parser.add_argument("--n_trials", type=int, default=1000,
+                        help="Number of optimization trials to run.")
+    parser.add_argument("--nbs_file", type=str, default=DEFAULT_NBS_FILE,
+                        help="Path to the .nbs file with ground truth data.")
+
+
+@run_on_docker
+def run(n_trials, **kwargs):
+    """
+    Run the optimization tool.
+    """
     study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimization')
+    study.optimize(objective, n_trials=n_trials)
 
-    # Start the optimization
-    study.optimize(objective, n_trials=1000)  # Adjust n_trials as needed
-
-    # Print the best parameters and RMSE
     print('Best parameters found:')
     for key, value in study.best_params.items():
         print(f'{key}: {value}')
     print(f'Best RMSE: {study.best_value}')
 
-    # Paths to the YAML files
-    localisation_yaml_path = '/home/nubots/build/config/webots/FieldLocalisationNLopt.yaml'
-    sensor_filter_yaml_path = '/home/nubots/build/config/webots/SensorFilter.yaml'
+    modify_yaml(study.best_params, LOCALISATION_YAML_PATH, SENSOR_FILTER_YAML_PATH)
 
-    # Modify the YAML files with the best parameters
-    modify_yaml(study.best_params, localisation_yaml_path, sensor_filter_yaml_path)
+    os.makedirs(DESTINATION_DIR, exist_ok=True)
+    shutil.copy(LOCALISATION_YAML_PATH, os.path.join(DESTINATION_DIR, 'BestFieldLocalisationNLopt.yaml'))
+    shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, 'BestSensorFilter.yaml'))
+    print(f'Best YAML files have been saved to {DESTINATION_DIR}')
 
-    # Define the destination directory
-    destination_dir = '/home/nubots/build/recordings/'
-
-    # Ensure the destination directory exists
-    os.makedirs(destination_dir, exist_ok=True)
-
-    # Copy the updated YAML files to the destination directory
-    shutil.copy(localisation_yaml_path, os.path.join(destination_dir, 'BestFieldLocalisationNLopt.yaml'))
-    shutil.copy(sensor_filter_yaml_path, os.path.join(destination_dir, 'BestSensorFilter.yaml'))
-
-    print(f'Best YAML files have been saved to {destination_dir}')
-
+    # Generate and save visualizations using Optuna's Plotly integration
     import plotly
-
-    # Plot and save optimization history
     fig_history = optuna.visualization.plot_optimization_history(study)
-    fig_history.write_html(os.path.join(destination_dir, 'optimization_history.html'))
+    fig_history.write_html(os.path.join(DESTINATION_DIR, 'optimization_history.html'))
 
-    # Plot and save parameter importances
     fig_importances = optuna.visualization.plot_param_importances(study)
-    fig_importances.write_html(os.path.join(destination_dir, 'param_importances.html'))
+    fig_importances.write_html(os.path.join(DESTINATION_DIR, 'param_importances.html'))
 
-    # Plot and save parallel coordinate plot
     fig_parallel = optuna.visualization.plot_parallel_coordinate(study)
-    fig_parallel.write_html(os.path.join(destination_dir, 'parallel_coordinate.html'))
+    fig_parallel.write_html(os.path.join(DESTINATION_DIR, 'parallel_coordinate.html'))
 
-    # Plot and save contour plot
     fig_contour = optuna.visualization.plot_contour(study)
-    fig_contour.write_html(os.path.join(destination_dir, 'contour_plot.html'))
+    fig_contour.write_html(os.path.join(DESTINATION_DIR, 'contour_plot.html'))
 
-    # Plot and save slice plot
     fig_slice = optuna.visualization.plot_slice(study)
-    fig_slice.write_html(os.path.join(destination_dir, 'slice_plot.html'))
+    fig_slice.write_html(os.path.join(DESTINATION_DIR, 'slice_plot.html'))
 
-    print(f'Visualization plots have been saved to {destination_dir}')
+    print(f'Visualization plots have been saved to {DESTINATION_DIR}')
