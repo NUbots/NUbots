@@ -19,10 +19,10 @@ This module benchmarks the performance of the robot's field localisation system 
    message.vision.FieldLines: true # Field line detections
    message.vision.FieldIntersections: true # Field intersection detections
    ```
-3. **Parameter Optimization**:
-   Use the `optimize_localisation` script to tune sensor filter and localisation parameters using a genetic algorithm:
+3. **Parameter Optimisation**:
+   Use the `optimise_localisation` script to tune sensor filter and localisation parameters using a genetic algorithm:
    ```bash
-   ./b optimize_localisation <ground_truth_data.nbs>
+   ./b optimise_localisation <ground_truth_data.nbs>
    ```
 
 ## Dependencies

@@ -222,7 +222,7 @@ def register(parser):
     """
     Register command-line arguments for the optimization tool.
     """
-    parser.description = "Optimizes YAML configuration parameters for the LocalisationBenchmark using Optuna."
+    parser.description = "Optimises YAML configuration parameters for the LocalisationBenchmark using Optuna."
     parser.add_argument("--n_trials", type=int, default=1000,
                         help="Number of optimization trials to run.")
     parser.add_argument("--nbs_file", type=str, default=NBS_FILE,
