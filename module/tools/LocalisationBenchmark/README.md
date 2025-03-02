@@ -1,19 +1,34 @@
-# NBSPlayback
+# LocalisationBenchmark
 
 ## Description
 
+This module benchmarks the performance of the robot's field localisation system by comparing its estimates against ground truth data during NBS file playback. It calculates Root Mean Square Error (RMSE) for translation and rotation errors, as well as individual errors for each degree of freedom (x, y, z, roll, pitch, yaw).
+
 ## Usage
 
-In order to play back the messages, you need to create a role with this module that has the modules you wish to test. You then need to enable the message types that are the input to these modules by setting them to true in the configuration (e.g. `message.input.sensors: true`). Make sure the `.nbs` file contains the messages you are trying to emit (you can check with `./b nbs stats file`).
-
-Provide `.nbs` file paths via the command line. For example `./b run <role> recordings/<nbs-file-a> recordings/<nbs-file-b>`
-
-## Emits
-
-- `message.nbs.PlaybackNBS`: The message containing NBS file paths, message types to play and playback mode.
+1. **Run with NBS File**:
+   Execute the module by providing an NBS file containing ground truth and sensor data as a command-line argument:
+   ```bash
+   ./b run localisation_benchmark <path_to_data.nbs>
+   ```
+2. **Required NBS Messages**:
+   Ensure the NBS file includes the following messages:
+   ```yaml
+   message.platform.RawSensors: true # Ground truth odometry and localisation
+   message.vision.Goals: true # Goal post detections
+   message.vision.FieldLines: true # Field line detections
+   message.vision.FieldIntersections: true # Field intersection detections
+   ```
+3. **Parameter Optimization**:
+   Use the `optimize_localisation` script to tune sensor filter and localisation parameters using a genetic algorithm:
+   ```bash
+   ./b optimize_localisation <ground_truth_data.nbs>
+   ```
 
 ## Dependencies
 
-Modules:
-
-- nbs/Player
+- `message::platform::RawSensors` for ground truth comparison and odometry.
+- `message::vision::Goals`
+- `message::vision::FieldLines`
+- `message::vision::FieldIntersections`
+- NUbots playback system for NBS file handling.
