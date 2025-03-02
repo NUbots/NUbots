@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { Line } from "../../robot_model"; // Adjust this path to the correct tapestry of your type structure
 
 interface AssociationLinesProps {
-  lines: Line[];
+  lines?: Line[];
 }
 
 export const AssociationLines: React.FC<AssociationLinesProps> = ({ lines }) => {

@@ -4,7 +4,7 @@ import { Vector3 } from "../../../../../shared/math/vector3";
 import { FieldIntersection } from "../../robot_model";
 
 interface FieldIntersectionsProps {
-  intersections: FieldIntersection[];
+  intersections?: FieldIntersection[];
 }
 
 const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ intersection }) => {
