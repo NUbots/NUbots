@@ -32,7 +32,7 @@ namespace module::extension {
 
     using component::DirectorTask;
     using component::Provider;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::RunReason;
 
     void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
 
@@ -59,20 +59,21 @@ namespace module::extension {
             // If nothing in the queue updated the active task to a new task we are now idle
             // That also means we need to remove any subtasks this group had recursively
             if (group.active_task == nullptr) {
-
-
                 // Run the Stop reactions for this provider group since it is no longer running
                 // First we restore the original task so we have data for the stop reaction
                 group.active_task = original_task;
                 for (auto& provider : group.providers) {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
-                        auto lock             = hold_run_reason(RunInfo::RunReason::STOPPED);
-                        powerplant.submit(provider->reaction->get_task(), true);
+                        auto lock             = group.update_data(RunReason::STOPPED);
+                        powerplant.submit(provider->reaction->get_task());
                     }
                 }
                 group.active_task     = nullptr;
                 group.active_provider = nullptr;
+
+                // Updatae the group information to reflect that this provider group is no longer running
+                group.update_data();
 
                 // If anyone was pushing this group they can't push anymore since we are not active
                 if (group.pushing_task != nullptr) {
@@ -85,7 +86,6 @@ namespace module::extension {
                 for (const auto& t : group.subtasks) {
                     remove_task(t);
                 }
-
 
                 // We now have no subtasks
                 group.subtasks.clear();

@@ -130,9 +130,6 @@ add_compile_options(-fnon-call-exceptions)
 # We use C++20
 add_compile_options(-std=c++20)
 
-# Make NUClear use the system clock, as we are syncing it with ptp
-add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::steady_clock)
-
 # Make the compiler display colours always (even when we build with ninja)
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
   add_compile_options(-fdiagnostics-color=always)
