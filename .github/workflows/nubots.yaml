@@ -155,6 +155,9 @@ jobs:
       - name: ccache
         uses: TrentHouliston/ccache-action@e3d104e3e9fdc54e91ba1e63bafc172484923084
 
+      - name: Generate Role for Unused Modules
+        run: ./b unused
+
       - name: Configure the code
         run: |
           mkdir -p build
