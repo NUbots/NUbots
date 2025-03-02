@@ -155,12 +155,25 @@ jobs:
       - name: ccache
         uses: TrentHouliston/ccache-action@e3d104e3e9fdc54e91ba1e63bafc172484923084
 
+      - name: Configure the code
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -GNinja \
+                   -DCMAKE_BUILD_TYPE=Release \
+                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+                   -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+                   -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
+                   -DCI_BUILD=ON \
+                   -DBUILD_TESTS=ON
+
+      # The tool requires some cmake variables, but configure needs to be run again after this role is made
+      # Therefore run configure twice, on either side of the unused role
       - name: Generate Role for Unused Modules
         run: ./b unused
 
       - name: Configure the code
         run: |
-          mkdir -p build
           cd build
           cmake .. -GNinja \
                    -DCMAKE_BUILD_TYPE=Release \
