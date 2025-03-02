@@ -40,7 +40,7 @@ from utility.dockerise import run_on_docker
 
 BUILD_DIR = '/home/nubots/build'
 EXECUTABLE_PATH = os.path.join(BUILD_DIR, 'bin/webots/localisation_benchmark')
-DEFAULT_NBS_FILE = os.path.join(BUILD_DIR, 'recordings/logging/benchmark.nbs')
+NBS_FILE = os.path.join(BUILD_DIR, 'recordings/logging/benchmark.nbs')
 LOCALISATION_YAML_PATH = os.path.join(BUILD_DIR, 'config/webots/FieldLocalisationNLopt.yaml')
 SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, 'config/webots/SensorFilter.yaml')
 DESTINATION_DIR = os.path.join(BUILD_DIR, 'recordings')
@@ -117,7 +117,7 @@ def parse_rmse_rotation(output):
         return None
 
 
-def run_benchmark(nbs_file=DEFAULT_NBS_FILE):
+def run_benchmark(nbs_file=NBS_FILE):
     """
     Runs the LocalisationBenchmark module and captures the RMSE.
     """
@@ -166,22 +166,22 @@ def objective(trial):
     """
     The objective function for Optuna that defines the optimization problem.
     """
-    field_line_distance_weight = trial.suggest_loguniform('field_line_distance_weight', 1e-2, 1e2)
-    field_line_intersection_weight = trial.suggest_loguniform('field_line_intersection_weight', 1e-2, 1e2)
-    state_change_weight = trial.suggest_loguniform('state_change_weight', 1e-2, 1e2)
-    goal_post_distance_weight = trial.suggest_loguniform('goal_post_distance_weight', 1e-2, 1e2)
-    change_limit_x = trial.suggest_uniform('change_limit_x', 1e-2, 1.0)
-    change_limit_y = trial.suggest_uniform('change_limit_y', 1e-2, 1.0)
-    change_limit_theta = trial.suggest_uniform('change_limit_theta', 1e-2, 1.0)
-    max_association_distance = trial.suggest_uniform('max_association_distance', 1e-2, 10.0)
-    Q_x = trial.suggest_loguniform('Q_x', 1e-6, 1e-2)
-    Q_y = trial.suggest_loguniform('Q_y', 1e-6, 1e-2)
-    Q_theta = trial.suggest_loguniform('Q_theta', 1e-6, 1e-2)
-    R_x = trial.suggest_uniform('R_x', 1e-2, 1e1)
-    R_y = trial.suggest_uniform('R_y', 1e-2, 1e1)
-    R_theta = trial.suggest_uniform('R_theta', 1e-2, 1e1)
-    Kp = trial.suggest_uniform('Kp', 1e-2, 1e1)
-    Ki = trial.suggest_uniform('Ki', 1e-2, 1e1)
+    field_line_distance_weight = trial.suggest_float('field_line_distance_weight', 1e-2, 1e2, log=True)
+    field_line_intersection_weight = trial.suggest_float('field_line_intersection_weight', 1e-2, 1e2, log=True)
+    state_change_weight = trial.suggest_float('state_change_weight', 1e-2, 1e2, log=True)
+    goal_post_distance_weight = trial.suggest_float('goal_post_distance_weight', 1e-2, 1e2, log=True)
+    change_limit_x = trial.suggest_float('change_limit_x', 1e-2, 1.0)
+    change_limit_y = trial.suggest_float('change_limit_y', 1e-2, 1.0)
+    change_limit_theta = trial.suggest_float('change_limit_theta', 1e-2, 1.0)
+    max_association_distance = trial.suggest_float('max_association_distance', 1e-2, 10.0)
+    Q_x = trial.suggest_float('Q_x', 1e-6, 1e-2, log=True)
+    Q_y = trial.suggest_float('Q_y', 1e-6, 1e-2, log=True)
+    Q_theta = trial.suggest_float('Q_theta', 1e-6, 1e-2, log=True)
+    R_x = trial.suggest_float('R_x', 1e-2, 1e1)
+    R_y = trial.suggest_float('R_y', 1e-2, 1e1)
+    R_theta = trial.suggest_float('R_theta', 1e-2, 1e1)
+    Kp = trial.suggest_float('Kp', 1e-2, 1e1)
+    Ki = trial.suggest_float('Ki', 1e-2, 1e1)
 
     params = {
         'field_line_distance_weight': field_line_distance_weight,
@@ -204,7 +204,8 @@ def objective(trial):
 
     modify_yaml(params, LOCALISATION_YAML_PATH, SENSOR_FILTER_YAML_PATH)
 
-    rmse = run_benchmark()
+    # Run the benchmark with user attribute nbs_file
+    rmse = run_benchmark(trial.study.user_attrs['nbs_file'])
 
     if rmse is None:
         return float('inf')
@@ -224,16 +225,19 @@ def register(parser):
     parser.description = "Optimizes YAML configuration parameters for the LocalisationBenchmark using Optuna."
     parser.add_argument("--n_trials", type=int, default=1000,
                         help="Number of optimization trials to run.")
-    parser.add_argument("--nbs_file", type=str, default=DEFAULT_NBS_FILE,
+    parser.add_argument("--nbs_file", type=str, default=NBS_FILE,
                         help="Path to the .nbs file with ground truth data.")
 
 
 @run_on_docker
-def run(n_trials, **kwargs):
+def run(n_trials, nbs_file, **kwargs):
     """
     Run the optimization tool.
     """
     study = optuna.create_study(direction='minimize', study_name='LocalisationBenchmarkOptimization')
+    NBS_FILE = nbs_file
+    # Set NBS file as user attribute for the study
+    study.set_user_attr('nbs_file', NBS_FILE)
     study.optimize(objective, n_trials=n_trials)
 
     print('Best parameters found:')

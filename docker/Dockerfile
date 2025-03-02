@@ -389,7 +389,9 @@ RUN pip install \
     mycroft-mimic3-tts \
     tqdm \
     optuna \
-    PyYAML
+    PyYAML \
+    plotly \
+    scikit-learn
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
