@@ -15,7 +15,7 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   support::logging::MessageLogHandler # Used to send log messages and reaction statistics to NUsight
-  #network::PlotJuggler
+  network::PlotJuggler
   # Platform
   input::SensorFilter
   platform::Webots
@@ -26,9 +26,9 @@ nuclear_role(
   #vision::BallDetector
   vision::Yolo
   # Localisation
-  #localisation::BallLocalisation
+  localisation::BallLocalisation
   localisation::FieldLocalisationNLopt
-  #localisation::RobotLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos
