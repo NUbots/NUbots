@@ -1,5 +1,6 @@
 import React from "react";
 import * as THREE from "three";
+
 import { Line } from "../../robot_model"; // Adjust this path to the correct tapestry of your type structure
 
 interface AssociationLinesProps {
