@@ -84,7 +84,7 @@ def run(quiet, **kwargs):
     # Find all of the used modules
     for folder, _, files in os.walk(roles_path):
         for role in files:
-            if role.endswith(".role"):
+            if role.endswith(".role") and role != "unused.role":
                 with open(os.path.join(folder, role), "r") as f:
                     for line in f:
                         if "#" in line:
