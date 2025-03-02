@@ -107,3 +107,17 @@ def run(**kwargs):
     cprint("Unused Modules", "red", attrs=["bold"])
     cprint("\n".join(sorted(unused_modules)), "red", attrs=["bold"])
     print("\n")
+
+    # Create a role from the unused modules
+    unused_role = os.path.join(roles_path, "unused.role")
+
+    with open(unused_role, "w") as f:
+        # Header
+        f.write("# This role is automatically generated\n")
+        f.write("# It contains all of the modules that are not used by any existing role\n")
+        f.write("nuclear_role(\n")
+
+        for module in sorted(unused_modules):
+            f.write("    " + module + "\n")
+
+        f.write(")\n")
