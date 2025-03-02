@@ -373,6 +373,9 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 # lame
 RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
+# Nanopb for generating messages for NUSense
+RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################

@@ -169,18 +169,6 @@ namespace module::extension {
             return;
         }
 
-        // See if a Idle command was emitted
-        for (const auto& t : requested_tasks) {
-            if (t->type == typeid(::extension::behaviour::Continue)) {
-                if (requested_tasks.size() > 1) {
-                    log<WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
-                }
-
-                // We don't do anything else on idle
-                return;
-            }
-        }
-
         // See if a done command was emitted
         for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
@@ -229,10 +217,50 @@ namespace module::extension {
         group.done = false;
         group.update_data();
 
+        // Check if a Wait command was emitted and schedule to run the Provider again
+        // Other tasks can run with Wait
+        // Wait should be removed and then readded at the end
+        TaskList running_tasks;
+        TaskList non_running_tasks;
+        for (const auto& t : requested_tasks) {
+            if (t->type == typeid(::extension::behaviour::Wait)) {
+                non_running_tasks.push_back(t);
+
+                // Schedule the Provider to run again
+                // Get the time to wait for
+                auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
+                std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
+
+                // If the delay is over, just run the provider
+                if (delay <= std::chrono::nanoseconds(0)) {
+                    run_task_on_provider(group.active_task, provider, RunReason::SUBTASK_DONE);
+                    continue;
+                }
+
+                // Otherwise, send it to the ChronoController to handle
+                // Make a weak pointer to the task so we can check if it still exists when the task is run
+                std::weak_ptr<component::DirectorTask> weak_task = t;
+                emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
+                    [this, provider, weak_task](const NUClear::clock::time_point&) {
+                        // Check if the task still exists
+                        if (weak_task.lock() != nullptr) {
+                            emit(std::make_unique<WaitFinished>(provider));
+                        }
+                        // Don't do anything else with this task
+                        return false;
+                    },
+                    NUClear::clock::now() + delay,
+                    -1));  // Our ID is -1 as we will remove ourselves
+            }
+            else {
+                running_tasks.push_back(t);
+            }
+        }
+
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(requested_tasks.size());
-        for (const auto& t : requested_tasks) {
+        tasks.reserve(running_tasks.size());
+        for (const auto& t : running_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
@@ -322,6 +350,10 @@ namespace module::extension {
 
         // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
         auto old_subtasks = group.subtasks;
+        // Add back in any waits
+        for (const auto& t : non_running_tasks) {
+            tasks.push_back(t);
+        }
         // Update the group's subtasks to the new subtasks
         group.subtasks = tasks;
 
