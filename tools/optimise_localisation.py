@@ -220,9 +220,9 @@ def register(parser):
     parser.description = "Optimises YAML configuration parameters for the LocalisationBenchmark using Optuna."
     parser.add_argument("--n_trials", type=int, default=1000, help="Number of optimization trials to run.")
     parser.add_argument("--nbs_file", type=str, default=NBS_FILE, help="Path to the .nbs file with ground truth data.")
+    parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")
 
-
-@run_on_docker
+@run_on_docker(hostname="webots")
 def run(n_trials, nbs_file, **kwargs):
     """
     Run the optimisation tool.
