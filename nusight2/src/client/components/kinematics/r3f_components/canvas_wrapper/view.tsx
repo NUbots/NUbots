@@ -20,7 +20,7 @@ const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ r
   );
 });
 
-export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = observer(({ selectedRobot }) => {
+export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = ({ selectedRobot }) => {
   return (
     <Canvas camera={{ position: [10, 10, 10], fov: 60 }} className="w-full h-full">
       <CameraControls />
@@ -31,7 +31,7 @@ export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> =
       <Grid gridSize={10} divisions={10} />
       <Axes length={2} />
 
-      <RobotComponents robot={selectedRobot} />
+      {selectedRobot && <RobotComponents robot={selectedRobot} />}
     </Canvas>
   );
-});
+};

@@ -56,7 +56,7 @@ export const Nugus = ({ model }: { model: KinematicsRobotModel }) => {
 
   // Update the material of the robot
   const material = new THREE.MeshStandardMaterial({
-    color: "#666666",
+    color: "#A2A2A2",
     roughness: 0.5,
     metalness: 0.2,
   });
