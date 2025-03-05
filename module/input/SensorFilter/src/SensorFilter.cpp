@@ -374,16 +374,14 @@ namespace module::input {
         // Convert the rotation matrix from the mahony method into euler angles
         Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
         // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
-        mahony_filter.set_state(rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0)));
+        // mahony_filter.set_state(rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0)));
 
         // If fallen, calculate roll and pitch but keep yaw and position still
         if (stability <= Stability::FALLING) {
-            // Get torso to world
             Eigen::Isometry3d Hwt =
                 previous_sensors == nullptr ? Eigen::Isometry3d::Identity() : previous_sensors->Htw.inverse();
             // Htw rotation is combination of Mahony pitch and roll and existing yaw
-            Hwt.linear() = rpy_intrinsic_to_mat(
-                Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), mat_to_rpy_intrinsic(Hwt.rotation()).z()));
+            Hwt.linear() = Rwt_mahony;
             sensors->Htw = Hwt.inverse();
 
             // Get robot to world
@@ -429,15 +427,14 @@ namespace module::input {
         // Take the translation from the anchor method
         Hwt.translation() = Hwt_anchor.translation();
         // Fuse roll + pitch of mahony filter with yaw of anchor method
-        Hwt.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
+        Hwt.linear() = Rwt_mahony;
         sensors->Htw = Hwt.inverse();
 
         // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
         Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        // Don't update translation if falling/fallen
-        Hwr.translation() = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
-        sensors->Hrw      = Hwr.inverse();
+        Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
+        sensors->Hrw          = Hwr.inverse();
 
         // Low pass filter for torso y velocity
         double y_current     = Hwt.translation().y();
