@@ -41,7 +41,7 @@ goal_post_distance_weight: 6.745911006158417
 change_limit: [0.8089336479857134, 0.6285285250343745, 0.20832038702389086]
 
 # Minimum distance an associated landmark needs to be for measurement update
-max_association_distance: 1.7415311901858588
+max_association_distance: 0.5
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
