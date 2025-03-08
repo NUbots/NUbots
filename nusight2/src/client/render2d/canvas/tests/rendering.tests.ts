@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest";
+
 import { hexToRGB } from "../rendering";
 
 describe("hexToRGB", () => {

@@ -78,10 +78,10 @@ namespace module::strategy {
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     // Increase the threshold to the stopped threshold to prevent oscillations
                     current_threshold = cfg.stopped_threshold;
-                    log<NUClear::DEBUG>("Stopped at field position");
+                    log<DEBUG>("Stopped at field position");
                 }
                 else {
-                    log<NUClear::DEBUG>("Walking to field position");
+                    log<DEBUG>("Walking to field position");
                     emit<Task>(std::make_unique<WalkTo>(Hrd));
                 }
             });

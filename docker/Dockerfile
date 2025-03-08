@@ -321,7 +321,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/964efc8c1771c67c417d8e683bd09b24d8e2871b.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/925dca0f31484a7df64fd335de5a6c9335483c7f.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -373,6 +373,9 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 # lame
 RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
+# Nanopb for generating messages for NUSense
+RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -407,7 +410,7 @@ RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O 
     node-v20.13.1-linux-x64/bin/ node-v20.13.1-linux-x64/include/ node-v20.13.1-linux-x64/lib/
 RUN npm install -g \
     yarn@1.22.19 \
-    prettier@2.7.1 \
+    prettier@3.4.1 \
     eslint@8.57.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container

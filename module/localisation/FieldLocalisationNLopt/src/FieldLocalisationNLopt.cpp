@@ -146,7 +146,7 @@ namespace module::localisation {
                     cfg.initial_hypotheses.emplace_back(right_side);
                     break;
                 case StartingSide::CUSTOM: cfg.initial_hypotheses.emplace_back(cfg.initial_state); break;
-                default: log<NUClear::ERROR>("Invalid starting_side specified"); break;
+                default: log<ERROR>("Invalid starting_side specified"); break;
             }
             state = cfg.initial_hypotheses[0];
             emit<Scope::DELAY>(std::make_unique<ResetFieldLocalisation>(), cfg.start_time_delay);
@@ -154,7 +154,7 @@ namespace module::localisation {
         });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
-            log<NUClear::INFO>("Resetting field localisation");
+            log<INFO>("Resetting field localisation");
             state = cfg.initial_hypotheses[0];
             kf.set_state(state);
             startup = true;
@@ -219,7 +219,7 @@ namespace module::localisation {
                     field->Hfw = compute_Hfw(kf.get_state());
 
                     // Debugging
-                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                    if (log_level <= DEBUG && raw_sensors.localisation_ground_truth.exists) {
                         debug_field_localisation(field->Hfw, raw_sensors);
                     }
                     emit(field);
@@ -344,7 +344,7 @@ namespace module::localisation {
 
             // --- State change cost ---
             cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 emit(graph("Cost", cost));
             }
             return cost;

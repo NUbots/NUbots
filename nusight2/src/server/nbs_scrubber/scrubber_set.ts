@@ -1,9 +1,9 @@
 import { NbsTimestamp } from "nbsdecoder.js";
 
 import { NbsScrubber } from "../../shared/nbs_scrubber";
+import { hashType } from "../../shared/nuclearnet/hash_type";
 import { NUClearNetPacketMaybeEmpty } from "../../shared/nuclearnet/nuclearnet_client";
 import { Clock } from "../../shared/time/clock";
-import { hashType } from "../nuclearnet/hash_type";
 import { parseEventString } from "../nuclearnet/parse_event_string";
 import { NodeSystemClock } from "../time/node_clock";
 

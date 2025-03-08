@@ -51,10 +51,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<MainTask>>().then([this] {
                 // Emit optional tasks with one blocking the other
@@ -103,12 +102,6 @@ namespace {
                 events.push_back("removing main task");
                 emit<Task>(std::unique_ptr<MainTask>(nullptr));
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-            });
         }
     };
 
@@ -118,7 +111,7 @@ TEST_CASE("Test that when a task has self intersection it applies priority corre
           "[director][priority][optional][self_intersection]") {
     // Run the module
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

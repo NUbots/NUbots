@@ -45,10 +45,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
                 events.push_back("simple task from " + t.msg);
@@ -83,12 +82,6 @@ namespace {
                 events.push_back("upping a priority");
                 emit<Task>(std::make_unique<Runner<'a'>>(), 20);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-            });
         }
     };
 }  // namespace
@@ -97,7 +90,7 @@ TEST_CASE("Test when two tasks of equal priority are emitted the one that was em
           "[director][priority][equal]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

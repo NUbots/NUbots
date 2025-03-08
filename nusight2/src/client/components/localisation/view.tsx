@@ -1,8 +1,9 @@
 import React, { ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import { now } from "mobx-utils";
 
+import { compose } from "../../../shared/base/compose";
 import { Button } from "../button/button";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
@@ -75,29 +76,33 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 
 const EnhancedDropdown = dropdownContainer();
 
+const addDocListener = <K extends keyof DocumentEventMap>(
+  ...args: Parameters<typeof document.addEventListener<K>>
+): (() => void) => {
+  document.addEventListener(...args);
+  return () => document.removeEventListener(...args);
+};
+
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
+  private dispose?: () => void;
 
   componentDidMount(): void {
-    document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
-    document.addEventListener("mousemove", this.onMouseMove, false);
-    document.addEventListener("keydown", this.onKeyDown, false);
-    document.addEventListener("keyup", this.onKeyUp, false);
-    document.addEventListener("wheel", this.onWheel, false);
-    disposeOnUnmount(
-      this,
+    this.dispose = compose([
+      addDocListener("pointerlockchange", this.onPointerLockChange, false),
+      addDocListener("mousemove", this.onMouseMove, false),
+      addDocListener("keydown", this.onKeyDown, false),
+      addDocListener("keyup", this.onKeyUp, false),
+      addDocListener("wheel", this.onWheel, false),
       reaction(() => now("frame"), this.onAnimationFrame),
-    );
+      () => this.props.network.destroy(),
+    ]);
   }
 
   componentWillUnmount(): void {
-    document.removeEventListener("pointerlockchange", this.onPointerLockChange, false);
-    document.removeEventListener("mousemove", this.onMouseMove, false);
-    document.removeEventListener("keydown", this.onKeyDown, false);
-    document.removeEventListener("keyup", this.onKeyUp, false);
-    document.removeEventListener("wheel", this.onWheel, false);
-    this.props.network.destroy();
+    this.dispose?.();
+    this.dispose = undefined;
   }
 
   render(): JSX.Element {

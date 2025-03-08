@@ -9,7 +9,10 @@ import { FileDialogModel } from "../file_dialog/model";
 import { NbsScrubbersModel } from "./model";
 
 export class NbsScrubbersController {
-  constructor(private network: RpcNetwork, private model: NbsScrubbersModel) {}
+  constructor(
+    private network: RpcNetwork,
+    private model: NbsScrubbersModel,
+  ) {}
 
   toggleLastActiveScrubberPlayback = () => {
     const scrubber = this.model.lastActiveScrubber;
@@ -42,7 +45,10 @@ export class NbsScrubbersController {
 }
 
 export class NbsScrubberDialogController extends FileDialogController {
-  constructor(private network: RpcNetwork, model: FileDialogModel) {
+  constructor(
+    private network: RpcNetwork,
+    model: FileDialogModel,
+  ) {
     super(model);
   }
 

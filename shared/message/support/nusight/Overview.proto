@@ -59,11 +59,11 @@ message Overview {
     /// The {x, y} location we are kicking to
     fvec2 kick_target = 11;
     /// The type of game being played. From Game Controller
-    input.GameState.Data.Mode game_mode = 12;
+    input.GameState.Mode game_mode = 12;
     /// The current stage of gameplay. For Game Controller
-    input.GameState.Data.Phase game_phase = 13;
+    input.GameState.Phase game_phase = 13;
     /// Why the penalty was given. For Game Controller
-    input.GameState.Data.PenaltyReason penalty_reason = 14;
+    input.GameState.PenaltyReason penalty_reason = 14;
     /// Last time the camera image was seen
     google.protobuf.Timestamp last_camera_image = 15;
     /// Last time vision objects were seen

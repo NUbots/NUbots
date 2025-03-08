@@ -24,7 +24,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "pure_evil.hpp"
 
 #if !defined(NDEBUG) and !defined(__APPLE__)
@@ -35,6 +34,7 @@
     #include <nuclear>
 
 namespace utility::support::evil {
+
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     thread_local std::vector<utility::support::evil::StackFrame> stack =
         std::vector<utility::support::evil::StackFrame>();
@@ -121,6 +121,33 @@ void __cxa_throw(void* ex, void* info, void (*dest)(void*)) {
 
     rethrow(ex, info, dest);
 }
-}  // extern "C"
+}
+
+namespace utility::support::evil {
+
+    std::vector<StackFrame> last_exception_stack_trace() {
+        return stack;
+    }
+
+    std::string last_exception_name() {
+        return exception_name;
+    }
+
+}  // namespace utility::support::evil
+
+#else
+
+// In non debug mode just return an empty stack trace
+namespace utility::support::evil {
+
+    std::vector<StackFrame> last_exception_stack_trace() {
+        return {};
+    }
+
+    std::string last_exception_name() {
+        return "Unknown exception";
+    }
+
+}  // namespace utility::support::evil
 
 #endif  // !defined(NDEBUG) and !defined(__APPLE__)
