@@ -37,6 +37,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/math/comparison.hpp"
@@ -180,28 +181,22 @@ namespace module::skill {
         });
 
         // Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>, With<Behaviour::State>, With<KinematicsModel>>().then(
-            [this](const Behaviour::State& behaviour, const KinematicsModel& model) {
-                kinematicsModel = model;
-                first_run       = true;
-                current_orders.setZero();
-                is_left_support  = true;
-                last_update_time = NUClear::clock::now();
-                walk_engine.reset();
-                if (behaviour == Behaviour::State::GOALIE_WALK) {
-                    current_cfg = goalie_cfg;
-                }
-                else {
-                    current_cfg = normal_cfg;
-                }
-                // Send these parameters to the walk engine
-                walk_engine.set_parameters(current_cfg.params);
+        on<Start<Walk>, With<KinematicsModel>>().then([this](const KinematicsModel& model) {
+            kinematicsModel = model;
+            first_run       = true;
+            current_orders.setZero();
+            is_left_support  = true;
+            last_update_time = NUClear::clock::now();
+            walk_engine.reset();
 
-                imu_reaction.enable(current_cfg.imu_active);
+            // Send these parameters to the walk engine
+            walk_engine.set_parameters(current_cfg.params);
 
-                // Update the walking state
-                emit(std::make_unique<WalkState>(WalkState::State::WALKING, Eigen::Vector3d::Zero()));
-            });
+            imu_reaction.enable(current_cfg.imu_active);
+
+            // Update the walking state
+            emit(std::make_unique<WalkState>(WalkState::State::WALKING, Eigen::Vector3d::Zero()));
+        });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {
@@ -356,8 +351,8 @@ namespace module::skill {
         auto right_leg  = std::make_unique<RightLegIK>();
         left_leg->time  = time;
         right_leg->time = time;
-        left_leg->Htl   = Htl.cast<double>();
-        right_leg->Htr  = Htr.cast<double>();
+        left_leg->Htf   = Htl.cast<double>();
+        right_leg->Htf  = Htr.cast<double>();
         // Arms
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();
