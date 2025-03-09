@@ -58,13 +58,7 @@ def get_modified_files():
         ["git", "diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    if result.returncode == 0:
-        # Split output into lines, each line is a file path
-        modified_files = result.stdout.decode().splitlines()
-        return modified_files
-    else:
-        # If the diff command failed, return an empty list
-        return []
+return result.stdout.decode().splitlines() if not result.returncode else []
 
 
 # Filter the modified files against the include patterns
