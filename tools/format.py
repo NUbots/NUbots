@@ -66,9 +66,11 @@ def filter_files(modified_files, include_patterns):
     included_files = []
     for file in modified_files:
         for pattern in include_patterns:
-            if fnmatch(file, pattern):  # Use fnmatch correctly
+            # Use fnmatch correctly
+            if fnmatch(file, pattern):
                 included_files.append(file)
-                break  # No need to check further patterns once it's matched
+                # No need to check further patterns once it's matched
+                break
     return included_files
 
 
