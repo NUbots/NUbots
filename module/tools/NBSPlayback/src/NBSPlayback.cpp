@@ -32,9 +32,9 @@ namespace module::tools {
 
     using extension::Configuration;
 
-    using message::nbs::player::Finished;
     using message::nbs::player::LoadRequest;
     using message::nbs::player::PauseRequest;
+    using message::nbs::player::PlaybackFinished;
     using message::nbs::player::PlaybackState;
     using message::nbs::player::PlayRequest;
     using message::nbs::player::SetModeRequest;
@@ -98,7 +98,7 @@ namespace module::tools {
             progress_bar.update(playback_state.current_message, playback_state.total_messages, "", "NBS Playback");
         });
 
-        on<Trigger<Finished>>().then([this] {
+        on<Trigger<PlaybackFinished>>().then([this] {
             log<INFO>("Finished playback");
             progress_bar.close();
             powerplant.shutdown();

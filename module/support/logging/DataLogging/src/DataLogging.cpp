@@ -141,10 +141,6 @@ namespace module::support::logging {
                 config.output.directory  = cfg["output"]["directory"].as<std::string>();
                 config.output.split_size = uint64_t(cfg["output"]["split_size"].as<Expression>());
 
-                // If they don't provide a passphrase we assume it's not encrypted
-                config.output.passphrase =
-                    bool(cfg["output"]["passphrase"]) ? cfg["output"]["passphrase"].as<std::string>() : "";
-
                 // Get the name of the currently running binary
                 std::vector<char> data(argv[0].cbegin(), argv[0].cend());
                 data.push_back('\0');
