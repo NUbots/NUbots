@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Location of the NUSense subcontroller
+device: "/dev/nusense"
+
+# Baud rate for communication
+baud: 3000000

@@ -224,7 +224,7 @@ namespace module::tools {
                     poll(&pfd, 1, 20);
                     read       = uart.read(&recv, sizeof(recv));
                     recv[read] = '\0';
-                } while ((std::string(recv, read) != "#") && powerplant.running());
+                } while ((std::string(recv, read) != "#"));
 
                 std::cout << "\rWaiting for " << name.first << " to reset ....." << std::endl;
 

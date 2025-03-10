@@ -56,13 +56,14 @@ namespace module::platform::OpenCR {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
-        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
+        on<Configuration>("OpenCR.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            opencr          = utility::io::uart(config["device"], config["baud"]);
+            byte_wait       = config["byte_wait"];
+            packet_wait     = config["packet_wait"];
+        });
 
-            opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
-            byte_wait   = config["opencr"]["byte_wait"];
-            packet_wait = config["opencr"]["packet_wait"];
-
+        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             // Initialise packet_queue map
             // OpenCR
             packet_queue[NUgus::ID::OPENCR] = std::vector<PacketTypes>();
