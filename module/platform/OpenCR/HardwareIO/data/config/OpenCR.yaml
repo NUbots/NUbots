@@ -1,8 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Location of the NUSense subcontroller
 device: "/dev/ttyUSB0"
-
-# Frequency (Hz) of the physical buzzer on the subcontroller
-buzzer_frequency: 2666
+baud: 3000000
+byte_wait: 1200
+packet_wait: 100000
+bus_reset_wait_time_us: 0

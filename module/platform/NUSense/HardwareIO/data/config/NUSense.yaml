@@ -4,5 +4,5 @@ log_level: INFO
 # Location of the NUSense subcontroller
 device: "/dev/nusense"
 
-# Frequency (Hz) of the physical buzzer on the subcontroller
-buzzer_frequency: 880
+# Baud rate for communication
+baud: 3000000
