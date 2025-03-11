@@ -30,7 +30,9 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/GreenHorizon.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -44,8 +46,10 @@ namespace module::localisation {
 
     using LocalisationRobot  = message::localisation::Robot;
     using LocalisationRobots = message::localisation::Robots;
+    using LocalisationField  = message::localisation::Field;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
+    using FieldDescription   = message::support::FieldDescription;
 
     using message::eye::DataPoint;
     using message::vision::GreenHorizon;
@@ -73,83 +77,97 @@ namespace module::localisation {
         });
 
 
-        on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then([this](const VisionRobots& vision_robots,
-                                                                            const GreenHorizon& horizon) {
-            // Print tracked_robots ids
-            log<DEBUG>("Robots tracked:");
-            for (const auto& tracked_robot : tracked_robots) {
-                log<DEBUG>("\tID: ", tracked_robot.id);
-            }
-
-            // Set all tracked robots to unseen
-            for (auto& tracked_robot : tracked_robots) {
-                tracked_robot.seen = false;
-            }
-
-            // **************** Data association ****************
-            if (!vision_robots.robots.empty()) {
-                Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
-                for (const auto& vision_robot : vision_robots.robots) {
-                    // Position of robot {r} in world {w} space
-                    auto rRWw = Hwc * vision_robot.rRCc;
-
-                    // Data association: find tracked robot which is associated with the vision measurement
-                    data_association(rRWw);
-                }
-            }
-
-            // **************** Robot tracking maintenance ****************
-            for (auto& tracked_robot : tracked_robots) {
-                auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
-
-                // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
-                // A robot is outside of view if it is not within the green horizon
-                // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
-                if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
-                    tracked_robot.seen = true;
+        on<Trigger<VisionRobots>, With<GreenHorizon>, With<FieldDescription>, With<LocalisationField>, Single>().then(
+            [this](const VisionRobots& vision_robots,
+                   const GreenHorizon& horizon,
+                   const FieldDescription& field_description,
+                   const LocalisationField& localisation_field) {
+                // Print tracked_robots ids
+                log<NUClear::DEBUG>("Robots tracked:");
+                for (const auto& tracked_robot : tracked_robots) {
+                    log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
                 }
 
-                // If the tracked robot has not been seen, increment the consecutively missed count
-                tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
-            }
-
-            // Make a vector to store kept robots
-            std::vector<TrackedRobot> new_tracked_robots;
-            // Only keep robots that are not missing or too close to others
-            // TODO: add logic to remove robots if outside of the field
-            for (const auto& tracked_robot : tracked_robots) {
-                if (tracked_robot.missed_count > cfg.max_missed_count) {
-                    log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
-                    continue;
+                // Set all tracked robots to unseen
+                for (auto& tracked_robot : tracked_robots) {
+                    tracked_robot.seen = false;
                 }
 
-                if (std::any_of(tracked_robots.begin(), tracked_robots.end(), [&](const auto& other_robot) {
-                        return &tracked_robot != &other_robot
-                               && (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
-                    })) {
-                    log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
-                    continue;
+                // **************** Data association ****************
+                if (!vision_robots.robots.empty()) {
+                    Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
+                    for (const auto& vision_robot : vision_robots.robots) {
+                        // Position of robot {r} in world {w} space
+                        auto rRWw = Hwc * vision_robot.rRCc;
+
+                        // Data association: find tracked robot which is associated with the vision measurement
+                        data_association(rRWw);
+                    }
                 }
 
-                // If neither case is true, keep the robot
-                new_tracked_robots.push_back(tracked_robot);
-            }
-            tracked_robots = std::move(new_tracked_robots);
+                // **************** Robot tracking maintenance ****************
+                for (auto& tracked_robot : tracked_robots) {
+                    auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
 
-            // Emit the localisation of the robots
-            auto localisation_robots = std::make_unique<LocalisationRobots>();
-            for (const auto& tracked_robot : tracked_robots) {
-                auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
-                LocalisationRobot localisation_robot;
-                localisation_robot.id                  = tracked_robot.id;
-                localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
-                localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
-                localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
-                localisation_robot.time_of_measurement = tracked_robot.last_time_update;
-                localisation_robots->robots.push_back(localisation_robot);
-            }
-            emit(std::move(localisation_robots));
-        });
+                    // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
+                    // A robot is outside of view if it is not within the green horizon
+                    // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
+                    if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+                        tracked_robot.seen = true;
+                    }
+
+                    // If the tracked robot has not been seen, increment the consecutively missed count
+                    tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
+                }
+
+                // Make a vector to store kept robots
+                std::vector<TrackedRobot> new_tracked_robots;
+                // Only keep robots that are not missing or too close to others
+                // TODO: add logic to remove robots if outside of the field
+                for (const auto& tracked_robot : tracked_robots) {
+                    if (tracked_robot.missed_count > cfg.max_missed_count) {
+                        log<NUClear::DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                        continue;
+                    }
+
+                    if (std::any_of(tracked_robots.begin(), tracked_robots.end(), [&](const auto& other_robot) {
+                            return &tracked_robot != &other_robot
+                                   && (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm()
+                                          < cfg.association_distance;
+                        })) {
+                        log<NUClear::DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+                        continue;
+                    }
+
+                    Eigen::Vector3d rRFf = localisation_field.Hfw * tracked_robot.get_rRWw();
+
+                    if (rRFf.x() < field_description.field_length / 2 && rRFf.x() > -field_description.field_length / 2
+                        && rRFf.y() < field_description.field_width / 2
+                        && rRFf.y() > -field_description.field_width / 2) {
+                        log<NUClear::DEBUG>(
+                            fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
+                        continue;
+                    }
+
+                    // If none of the cases are true, keep the robot
+                    new_tracked_robots.push_back(tracked_robot);
+                }
+                tracked_robots = std::move(new_tracked_robots);
+
+                // Emit the localisation of the robots
+                auto localisation_robots = std::make_unique<LocalisationRobots>();
+                for (const auto& tracked_robot : tracked_robots) {
+                    auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+                    LocalisationRobot localisation_robot;
+                    localisation_robot.id                  = tracked_robot.id;
+                    localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+                    localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
+                    localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
+                    localisation_robot.time_of_measurement = tracked_robot.last_time_update;
+                    localisation_robots->robots.push_back(localisation_robot);
+                }
+                emit(std::move(localisation_robots));
+            });
     }
 
     void RobotLocalisation::data_association(const Eigen::Vector3d& rRWw) {
