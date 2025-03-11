@@ -197,7 +197,7 @@ namespace module::localisation {
                 }
                 emit(std::move(localisation_robots));
             });
-    }
+            }
 
     void RobotLocalisation::data_association(const Eigen::Vector3d& rRWw) {
             // If we have no robots yet, this must be a new robot
