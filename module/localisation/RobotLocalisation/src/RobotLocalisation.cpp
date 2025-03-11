@@ -83,9 +83,9 @@ namespace module::localisation {
                    const FieldDescription& field_description,
                    const LocalisationField& localisation_field) {
                 // Print tracked_robots ids
-                log<NUClear::DEBUG>("Robots tracked:");
+                log<DEBUG>("Robots tracked:");
                 for (const auto& tracked_robot : tracked_robots) {
-                    log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
+                    log<DEBUG>("\tID: ", tracked_robot.id);
                 }
 
                 // Set all tracked robots to unseen
@@ -123,10 +123,9 @@ namespace module::localisation {
                 // Make a vector to store kept robots
                 std::vector<TrackedRobot> new_tracked_robots;
                 // Only keep robots that are not missing or too close to others
-                // TODO: add logic to remove robots if outside of the field
                 for (const auto& tracked_robot : tracked_robots) {
                     if (tracked_robot.missed_count > cfg.max_missed_count) {
-                        log<NUClear::DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                        log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
                         continue;
                     }
 
@@ -135,21 +134,21 @@ namespace module::localisation {
                                    && (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm()
                                           < cfg.association_distance;
                         })) {
-                        log<NUClear::DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+                        log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
                         continue;
                     }
 
                     Eigen::Vector3d rRFf = localisation_field.Hfw * tracked_robot.get_rRWw();
 
-                    if (rRFf.x() < field_description.field_length / 2 && rRFf.x() > -field_description.field_length / 2
-                        && rRFf.y() < field_description.field_width / 2
-                        && rRFf.y() > -field_description.field_width / 2) {
-                        log<NUClear::DEBUG>(
-                            fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
+                    if ((rRFf.x() < field_description.dimensions.field_length / 2
+                         || rRFf.x() > -field_description.dimensions.field_length / 2)
+                        && (rRFf.y() < field_description.dimensions.field_width / 2
+                            || rRFf.y() > -field_description.dimensions.field_width / 2)) {
+                        log<DEBUG>(fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
                         continue;
                     }
 
-                    // If none of the cases are true, keep the robot
+                    // If neither case is true, keep the robot
                     new_tracked_robots.push_back(tracked_robot);
                 }
                 tracked_robots = std::move(new_tracked_robots);
