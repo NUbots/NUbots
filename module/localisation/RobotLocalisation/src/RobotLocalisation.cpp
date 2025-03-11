@@ -168,7 +168,9 @@ namespace module::localisation {
                         continue;
                     }
 
-                    Eigen::Vector3d rRFf = localisation_field.Hfw * tracked_robot.get_rRWw();
+                    Eigen::Vector3d rRFf =
+                        localisation_field.Hfw
+                        * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
 
                     if (rRFf.x() < field_description.field_length / 2 && rRFf.x() > -field_description.field_length / 2
                         && rRFf.y() < field_description.field_width / 2
