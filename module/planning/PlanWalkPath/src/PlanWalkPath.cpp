@@ -136,7 +136,7 @@ namespace module::planning {
                         // Calc the position of the goal posts, add them as obstacles
                         for (const auto& goal : goals->goals) {
                             auto rGCc = goal.post.bottom * goal.post.distance;  // in camera space
-                            auto rGWw = goal->Hcw.inverse() * rGCc;
+                            auto rGWw = goals->Hcw.inverse() * rGCc;
                             auto rGRr = sensors.Hrw * rGWw;
                             all_obstacles.emplace_back(rGRr.head(2));
                         }
