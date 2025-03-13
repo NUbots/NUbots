@@ -174,6 +174,11 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "audio",
             "--group-add",
             "dialout",
+            "--group-add",
+            "video_host",
+            "--group-add",
+            "render_host",
+            "--privileged",
         ]
 
         # Work out if we are using an internal image

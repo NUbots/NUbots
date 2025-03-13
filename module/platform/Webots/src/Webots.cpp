@@ -840,7 +840,7 @@ namespace module::platform {
             // Read each field of msg, translate it to our protobuf and emit the data
             auto sensor_data = std::make_unique<RawSensors>();
 
-            sensor_data->timestamp = NUClear::clock::now();
+            sensor_data->timestamp = NUClear::clock::time_point(std::chrono::milliseconds(sensor_measurements.time));
 
             for (const auto& position : sensor_measurements.position_sensors) {
                 auto& servo            = translate_servo_id(position.name, sensor_data->servo);
@@ -921,11 +921,11 @@ namespace module::platform {
             image->name           = camera.name;
             image->dimensions.x() = camera.width;
             image->dimensions.y() = camera.height;
-            image->format         = fourcc("BGR3");  // Change to "JPEG" when webots compression is implemented
+            image->format         = fourcc("RGBA");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::now();
+            image->timestamp = NUClear::clock::time_point(std::chrono::milliseconds(sensor_measurements.time));
 
             Eigen::Isometry3d Hcw;
 
