@@ -2,33 +2,33 @@
   targets:
     - id: R_SHOULDER_PITCH
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: L_SHOULDER_PITCH
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: R_SHOULDER_ROLL
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: L_SHOULDER_ROLL
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: R_ELBOW
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: L_ELBOW
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: HEAD_YAW
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
     - id: HEAD_PITCH
       position: 0
-      gain: .NaN
+      gain: NaN
       torque: 0
