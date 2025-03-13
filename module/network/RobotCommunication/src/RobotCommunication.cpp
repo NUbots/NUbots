@@ -29,6 +29,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "shared/message/strategy/TeamMates.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/WalkState.hpp"
@@ -58,6 +60,7 @@ namespace module::network {
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
+    using shared::message::strategy::TeamMates;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -117,7 +120,7 @@ namespace module::network {
                 emit(std::unique_ptr<TeamMates>());
             });
 
-        // TODO: include teammates and add a using teammates
+        // include teammates and add a using teammates
         on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates)) {
             // Get the id of this robot
             int id = robocup.current_pose.player_id;
@@ -125,12 +128,15 @@ namespace module::network {
             // Make new TeamMates message using data from the old message
             TeamMates teammates = std::make_unique<TeamMates>(std::move(old_teammates));
 
-            // TODO: Find if the teammates vector (repeated TeamMate) has ID
+            // Find if the teammates vector (repeated TeamMate) has ID
             //...
             // for (mate in teammates) if mate.id==id then has id
             //...
-            if (has id) {
-                // Replace the existing entry for this robot with the ID
+            for (auto& mate : teammates.teammates) {  // Loop through each teammate.
+                if (mate.id == id) {  // If the ID of a teammate is found to be the same, update the position.
+                    mate.position = robocup.current_pose.position;  // Update position
+                    break;                                          // Break out of the loop.
+                }
             }
             // Else this robot is not in the list of team mates already, add it in
             else {
