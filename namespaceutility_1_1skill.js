@@ -1,22 +1,23 @@
 var namespaceutility_1_1skill =
 [
+    [ "splines", null, [
+      [ "QuinticSpline", "classutility_1_1skill_1_1splines_1_1QuinticSpline.html", "classutility_1_1skill_1_1splines_1_1QuinticSpline" ],
+      [ "Trajectory", "classutility_1_1skill_1_1splines_1_1Trajectory.html", "classutility_1_1skill_1_1splines_1_1Trajectory" ],
+      [ "Waypoint", "structutility_1_1skill_1_1splines_1_1Waypoint.html", "structutility_1_1skill_1_1splines_1_1Waypoint" ],
+      [ "TrajectoryDimension", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bd", [
+        [ "X", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bdae5a29f64086d2a23888547b4f755ebf9", null ],
+        [ "Y", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bdabd97e20db9a715245dbb2d968737754d", null ],
+        [ "Z", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bda02aec899516de4044f397737c0362791", null ],
+        [ "ROLL", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bdaa0bda8ec4e4777eb719e25a6bda0deec", null ],
+        [ "PITCH", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bdae036f08fe94a33e2d80471b253ec1c4d", null ],
+        [ "YAW", "Trajectory_8hpp.html#a770e092383e50fa86616895cd5c244bdaa98497a694ece2ba012042e7cbc668a4", null ]
+      ] ]
+    ] ],
     [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
     [ "KickGenerator", "classutility_1_1skill_1_1KickGenerator.html", "classutility_1_1skill_1_1KickGenerator" ],
-    [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
     [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
     [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
     [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ],
-    [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ],
-    [ "WalkEngineState", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357a", [
-      [ "IDLE", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aaa5daf7f2ebbba4975d61dab1c40188c7", null ],
-      [ "PAUSED", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aa99b2439e63f73ad515f7ab2447a80673", null ],
-      [ "START_MOVEMENT", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aaba1002977676dba63f0cb10d32e8f685", null ],
-      [ "START_STEP", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aa0154f6e8b7d5a0e0165b46a9391d4528", null ],
-      [ "WALKING", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aa606c114184493a665cf1f6a12fbab9d3", null ],
-      [ "STOP_STEP", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aa42f60be613205afe5e924596e73b1d6f", null ],
-      [ "STOP_MOVEMENT", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aa47e4d06604afec5403611f7fa567e6bb", null ],
-      [ "KICK", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aa959a795d5524bd9054026703a33afb87", null ]
-    ] ],
     [ "get_platform", "namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5", null ],
     [ "load", "namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8", null ],
     [ "load_script", "namespaceutility_1_1skill.html#af969d59d9969565d63f77fc7d1deb588", null ],

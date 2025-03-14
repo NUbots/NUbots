@@ -253,7 +253,6 @@ var annotated_dup =
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
-        [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
         [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
@@ -428,18 +427,6 @@ var annotated_dup =
         ] ]
       ] ],
       [ "motion", null, [
-        [ "splines", null, [
-          [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
-          [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
-          [ "Polynom", "classutility_1_1motion_1_1splines_1_1Polynom.html", "classutility_1_1motion_1_1splines_1_1Polynom" ],
-          [ "QuinticSpline", "classutility_1_1motion_1_1splines_1_1QuinticSpline.html", "classutility_1_1motion_1_1splines_1_1QuinticSpline" ],
-          [ "SmoothSpline", "classutility_1_1motion_1_1splines_1_1SmoothSpline.html", "classutility_1_1motion_1_1splines_1_1SmoothSpline" ],
-          [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
-          [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
-          [ "Trajectory", "classutility_1_1motion_1_1splines_1_1Trajectory.html", "classutility_1_1motion_1_1splines_1_1Trajectory" ],
-          [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
-          [ "Waypoint", "structutility_1_1motion_1_1splines_1_1Waypoint.html", "structutility_1_1motion_1_1splines_1_1Waypoint" ]
-        ] ],
         [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ]
       ] ],
       [ "nbs", null, [
@@ -475,13 +462,16 @@ var annotated_dup =
         [ "unknown_message", "structutility_1_1reflection_1_1unknown__message.html", "structutility_1_1reflection_1_1unknown__message" ]
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", [
+        [ "splines", null, [
+          [ "QuinticSpline", "classutility_1_1skill_1_1splines_1_1QuinticSpline.html", "classutility_1_1skill_1_1splines_1_1QuinticSpline" ],
+          [ "Trajectory", "classutility_1_1skill_1_1splines_1_1Trajectory.html", "classutility_1_1skill_1_1splines_1_1Trajectory" ],
+          [ "Waypoint", "structutility_1_1skill_1_1splines_1_1Waypoint.html", "structutility_1_1skill_1_1splines_1_1Waypoint" ]
+        ] ],
         [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
         [ "KickGenerator", "classutility_1_1skill_1_1KickGenerator.html", "classutility_1_1skill_1_1KickGenerator" ],
-        [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
         [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
         [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
-        [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ],
-        [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ]
+        [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [
         [ "ANSISGR", "structutility_1_1strutil_1_1ANSISGR.html", [

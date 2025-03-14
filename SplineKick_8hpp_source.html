@@ -207,12 +207,12 @@ $(document).ready(function(){initNavTree('SplineKick_8hpp_source.html',''); init
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;message/actuation/ServoCommand.hpp&quot;</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/motion/splines/Trajectory.hpp&quot;</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/skill/KickGenerator.hpp&quot;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/skill/KickGenerator.hpp&quot;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/skill/splines/Trajectory.hpp&quot;</span></div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">namespace </span>module::skill {</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1motion_1_1splines_1_1Waypoint.html">utility::motion::splines::Waypoint</a>;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1skill_1_1splines_1_1Waypoint.html">utility::skill::splines::Waypoint</a>;</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
 <div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classmodule_1_1skill_1_1SplineKick.html">   45</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1skill_1_1SplineKick.html">SplineKick</a> : <span class="keyword">public</span> <a class="code" href="classextension_1_1behaviour_1_1BehaviourReactor.html">::extension::behaviour::BehaviourReactor</a> {</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
@@ -251,14 +251,14 @@ $(document).ready(function(){initNavTree('SplineKick_8hpp_source.html',''); init
 <div class="ttc" id="astructmodule_1_1skill_1_1SplineKick_1_1Config_html"><div class="ttname"><a href="structmodule_1_1skill_1_1SplineKick_1_1Config.html">module::skill::SplineKick::Config</a></div><div class="ttdef"><b>Definition:</b> SplineKick.hpp:50</div></div>
 <div class="ttc" id="astructmodule_1_1skill_1_1SplineKick_1_1Config_html_a694f1827ae796ad5c6a94c3c4dd9d94e"><div class="ttname"><a href="structmodule_1_1skill_1_1SplineKick_1_1Config.html#a694f1827ae796ad5c6a94c3c4dd9d94e">module::skill::SplineKick::Config::servo_states</a></div><div class="ttdeci">std::map&lt; utility::input::ServoID, message::actuation::ServoState &gt; servo_states</div><div class="ttdoc">Stores the gains for each servo.</div><div class="ttdef"><b>Definition:</b> SplineKick.hpp:52</div></div>
 <div class="ttc" id="astructmodule_1_1skill_1_1SplineKick_1_1Config_html_af8010f448df5bdd61e1ed59d846e8289"><div class="ttname"><a href="structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289">module::skill::SplineKick::Config::arm_positions</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; utility::input::ServoID, double &gt; &gt; arm_positions</div><div class="ttdoc">Desired arm positions while walking.</div><div class="ttdef"><b>Definition:</b> SplineKick.hpp:55</div></div>
-<div class="ttc" id="astructutility_1_1motion_1_1splines_1_1Waypoint_html"><div class="ttname"><a href="structutility_1_1motion_1_1splines_1_1Waypoint.html">utility::motion::splines::Waypoint</a></div><div class="ttdef"><b>Definition:</b> Trajectory.hpp:43</div></div>
+<div class="ttc" id="astructutility_1_1skill_1_1splines_1_1Waypoint_html"><div class="ttname"><a href="structutility_1_1skill_1_1splines_1_1Waypoint.html">utility::skill::splines::Waypoint</a></div><div class="ttdef"><b>Definition:</b> Trajectory.hpp:43</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_0f46ec60ca1b85e60b439de4b000e4a6.html">skill</a></li><li class="navelem"><a class="el" href="dir_b1d4fe828065968077b3ba6f65e6c711.html">SplineKick</a></li><li class="navelem"><a class="el" href="dir_371d900c16589c616caae7c1eb19573f.html">src</a></li><li class="navelem"><b>SplineKick.hpp</b></li>
-    <li class="footer">Generated on Sun Mar 9 2025 13:19:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Mar 14 2025 02:40:44 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

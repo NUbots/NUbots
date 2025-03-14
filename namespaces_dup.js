@@ -638,7 +638,6 @@ var namespaces_dup =
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
-        [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
         [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
@@ -988,36 +987,6 @@ var namespaces_dup =
         [ "sgn", "comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d", null ]
       ] ],
       [ "motion", null, [
-        [ "splines", null, [
-          [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
-          [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
-          [ "Polynom", "classutility_1_1motion_1_1splines_1_1Polynom.html", "classutility_1_1motion_1_1splines_1_1Polynom" ],
-          [ "QuinticSpline", "classutility_1_1motion_1_1splines_1_1QuinticSpline.html", "classutility_1_1motion_1_1splines_1_1QuinticSpline" ],
-          [ "SmoothSpline", "classutility_1_1motion_1_1splines_1_1SmoothSpline.html", "classutility_1_1motion_1_1splines_1_1SmoothSpline" ],
-          [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
-          [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
-          [ "Trajectory", "classutility_1_1motion_1_1splines_1_1Trajectory.html", "classutility_1_1motion_1_1splines_1_1Trajectory" ],
-          [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
-          [ "Waypoint", "structutility_1_1motion_1_1splines_1_1Waypoint.html", "structutility_1_1motion_1_1splines_1_1Waypoint" ],
-          [ "Trajectories", "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef", null ],
-          [ "Vector3fQuadruple", "TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34", null ],
-          [ "TrajectoryDimension", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4", [
-            [ "X", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4ac8eee871c3b6b295798dcf25c19d5688", null ],
-            [ "Y", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a0228f0b7b5940bad5f82a74cfc51b337", null ],
-            [ "Z", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a9781203e4d472f01e168fd457baff5aa", null ],
-            [ "ROLL", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4ab9415c4ab48b8633820f79a7883a96e0", null ],
-            [ "PITCH", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a08d80bb50940f7f38a9fd01a22a6fa7e", null ],
-            [ "YAW", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a0b232ad594f4184583daae55fca0feb2", null ]
-          ] ],
-          [ "diffInv", "Footstep_8cpp.html#a5e5892b709f9e29c5777e3afa5297bf6", null ],
-          [ "operator<<", "Polynom_8hpp.html#a6db93f0d85aee6035e22097b31ba1fb1", null ],
-          [ "poseAdd", "Footstep_8cpp.html#a4d9e21dbf59a7fcb43d36b86b2c02ef6", null ],
-          [ "trajectories_init", "TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e", null ],
-          [ "trajectories_support_foot_state", "TrajectoryUtils_8hpp.html#a748c4e4b798d740908e5f87e217a207a", null ],
-          [ "trajectories_trunk_foot_pos", "TrajectoryUtils_8hpp.html#a055aaa07356b7911a25d490bd6c2b096", null ],
-          [ "trajectoriesTrunkFootAcc", "TrajectoryUtils_8hpp.html#a6e949a419d9136bea530f34b334755bc", null ],
-          [ "trajectoriesTrunkFootVel", "TrajectoryUtils_8hpp.html#a4900dbba8900d90675b9c6aeec5ea7d4", null ]
-        ] ],
         [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
         [ "LimbID", "Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6", null ]
       ] ],

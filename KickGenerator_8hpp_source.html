@@ -196,8 +196,8 @@ $(document).ready(function(){initNavTree('KickGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_MOTION_KICKGENERATOR_HPP</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_MOTION_KICKGENERATOR_HPP</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_SKILL_KICKGENERATOR_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_SKILL_KICKGENERATOR_HPP</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;Eigen/Geometry&gt;</span></div>
@@ -206,14 +206,14 @@ $(document).ready(function(){initNavTree('KickGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;utility/math/euler.hpp&quot;</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/motion/splines/Trajectory.hpp&quot;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/skill/splines/Trajectory.hpp&quot;</span></div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
 <div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="namespaceutility_1_1skill.html">   39</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceutility_1_1skill.html">utility::skill</a> {</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a>;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">using</span> utility::math::euler::mat_to_rpy_intrinsic;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="classutility_1_1motion_1_1splines_1_1Trajectory.html">utility::motion::splines::Trajectory</a>;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1motion_1_1splines_1_1Waypoint.html">utility::motion::splines::Waypoint</a>;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="classutility_1_1skill_1_1splines_1_1Trajectory.html">utility::skill::splines::Trajectory</a>;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1skill_1_1splines_1_1Waypoint.html">utility::skill::splines::Waypoint</a>;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
 <div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1KickGenerator.html">   47</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classutility_1_1skill_1_1KickGenerator.html">KickGenerator</a> {</div>
@@ -334,14 +334,14 @@ $(document).ready(function(){initNavTree('KickGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="comment">        /**</span></div>
 <div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="comment">         * @brief Add waypoints to the foot trajectory.</span></div>
 <div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1KickGenerator.html#aa39b74f6d63abccb535877bf41d93d38">  165</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#aa39b74f6d63abccb535877bf41d93d38">add_foot_waypoint</a>(<span class="keyword">const</span> <a class="code" href="structutility_1_1motion_1_1splines_1_1Waypoint.html">Waypoint&lt;Scalar&gt;</a>&amp; waypoint) {</div>
+<div class="line"><a name="l00165"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1KickGenerator.html#aa39b74f6d63abccb535877bf41d93d38">  165</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#aa39b74f6d63abccb535877bf41d93d38">add_foot_waypoint</a>(<span class="keyword">const</span> <a class="code" href="structutility_1_1skill_1_1splines_1_1Waypoint.html">Waypoint&lt;Scalar&gt;</a>&amp; waypoint) {</div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;            <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#af31cbf3fdab6b4de00c2ffa6b39115cf">foot_waypoints</a>.push_back(waypoint);</div>
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        }</div>
 <div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;<span class="comment">        /**</span></div>
 <div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;<span class="comment">         * @brief Add waypoints to the torso trajectory.</span></div>
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1KickGenerator.html#a483ac63efd7c9ad01cdeed89c9738325">  172</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#a483ac63efd7c9ad01cdeed89c9738325">add_torso_waypoint</a>(<span class="keyword">const</span> <a class="code" href="structutility_1_1motion_1_1splines_1_1Waypoint.html">Waypoint&lt;Scalar&gt;</a>&amp; waypoint) {</div>
+<div class="line"><a name="l00172"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1KickGenerator.html#a483ac63efd7c9ad01cdeed89c9738325">  172</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#a483ac63efd7c9ad01cdeed89c9738325">add_torso_waypoint</a>(<span class="keyword">const</span> <a class="code" href="structutility_1_1skill_1_1splines_1_1Waypoint.html">Waypoint&lt;Scalar&gt;</a>&amp; waypoint) {</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#a6c5a751908d37515ada701d18083837e">torso_waypoints</a>.push_back(waypoint);</div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        }</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment"></span> </div>
@@ -374,7 +374,7 @@ $(document).ready(function(){initNavTree('KickGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00202"></a><span class="lineno"><a class="line" href="classutility_1_1skill_1_1KickGenerator.html#a6c5a751908d37515ada701d18083837e">  202</a></span>&#160;<span class="comment"></span>        std::vector&lt;Waypoint&lt;Scalar&gt;&gt; <a class="code" href="classutility_1_1skill_1_1KickGenerator.html#a6c5a751908d37515ada701d18083837e">torso_waypoints</a>{};</div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;        <span class="comment">// 6D piecewise polynomial trajectory for swing foot.</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        <a class="code" href="classutility_1_1motion_1_1splines_1_1Trajectory.html">Trajectory&lt;Scalar&gt;</a> swingfoot_trajectory{};</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        <a class="code" href="classutility_1_1skill_1_1splines_1_1Trajectory.html">Trajectory&lt;Scalar&gt;</a> swingfoot_trajectory{};</div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160; </div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;        <span class="comment">// 6D piecewise polynomial trajectory for torso.</span></div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        Trajectory&lt;Scalar&gt; torso_trajectory{};</div>
@@ -416,8 +416,8 @@ $(document).ready(function(){initNavTree('KickGenerator_8hpp_source.html',''); i
 <div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        }</div>
 <div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    };</div>
 <div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;}  <span class="comment">// namespace utility::skill</span></div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassutility_1_1motion_1_1splines_1_1Trajectory_html"><div class="ttname"><a href="classutility_1_1motion_1_1splines_1_1Trajectory.html">utility::motion::splines::Trajectory</a></div><div class="ttdef"><b>Definition:</b> Trajectory.hpp:67</div></div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160; </div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_SKILL_KICKGENERATOR_HPP</span></div>
 <div class="ttc" id="aclassutility_1_1skill_1_1KickGenerator_html"><div class="ttname"><a href="classutility_1_1skill_1_1KickGenerator.html">utility::skill::KickGenerator</a></div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:47</div></div>
 <div class="ttc" id="aclassutility_1_1skill_1_1KickGenerator_html_a0ba6b4aacd0042eb4815b07721abb494"><div class="ttname"><a href="classutility_1_1skill_1_1KickGenerator.html#a0ba6b4aacd0042eb4815b07721abb494">utility::skill::KickGenerator::get_torso_pose</a></div><div class="ttdeci">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt; get_torso_pose() const</div><div class="ttdoc">Get the torso pose object at the current time.</div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:61</div></div>
 <div class="ttc" id="aclassutility_1_1skill_1_1KickGenerator_html_a207e0b4a5bc0e851d020d5de57bd04f4"><div class="ttname"><a href="classutility_1_1skill_1_1KickGenerator.html#a207e0b4a5bc0e851d020d5de57bd04f4">utility::skill::KickGenerator::generate_trajectories</a></div><div class="ttdeci">void generate_trajectories()</div><div class="ttdoc">Generate swing foot trajectory.</div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:214</div></div>
@@ -436,16 +436,17 @@ $(document).ready(function(){initNavTree('KickGenerator_8hpp_source.html',''); i
 <div class="ttc" id="aclassutility_1_1skill_1_1KickGenerator_html_acd19026ad0f8655722a4b6fdd59cc31a"><div class="ttname"><a href="classutility_1_1skill_1_1KickGenerator.html#acd19026ad0f8655722a4b6fdd59cc31a">utility::skill::KickGenerator::get_foot_pose</a></div><div class="ttdeci">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt; get_foot_pose(const LimbID &amp;limb) const</div><div class="ttdoc">Get the left or right foot pose at the given time in the torso {t} frame.</div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:71</div></div>
 <div class="ttc" id="aclassutility_1_1skill_1_1KickGenerator_html_adf8e4b6c884420db93295e02b49f67e3"><div class="ttname"><a href="classutility_1_1skill_1_1KickGenerator.html#adf8e4b6c884420db93295e02b49f67e3">utility::skill::KickGenerator::update</a></div><div class="ttdeci">void update(const Scalar &amp;dt, const LimbID &amp;limb)</div><div class="ttdoc">Run an update of the walk engine, updating the time and engine state and trajectories.</div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:102</div></div>
 <div class="ttc" id="aclassutility_1_1skill_1_1KickGenerator_html_af31cbf3fdab6b4de00c2ffa6b39115cf"><div class="ttname"><a href="classutility_1_1skill_1_1KickGenerator.html#af31cbf3fdab6b4de00c2ffa6b39115cf">utility::skill::KickGenerator::foot_waypoints</a></div><div class="ttdeci">std::vector&lt; Waypoint&lt; Scalar &gt; &gt; foot_waypoints</div><div class="ttdoc">Foot waypoints.</div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:199</div></div>
+<div class="ttc" id="aclassutility_1_1skill_1_1splines_1_1Trajectory_html"><div class="ttname"><a href="classutility_1_1skill_1_1splines_1_1Trajectory.html">utility::skill::splines::Trajectory</a></div><div class="ttdef"><b>Definition:</b> Trajectory.hpp:67</div></div>
 <div class="ttc" id="anamespaceutility_1_1skill_html"><div class="ttname"><a href="namespaceutility_1_1skill.html">utility::skill</a></div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:39</div></div>
 <div class="ttc" id="astructutility_1_1input_1_1LimbID_html"><div class="ttname"><a href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></div><div class="ttdef"><b>Definition:</b> LimbID.hpp:40</div></div>
-<div class="ttc" id="astructutility_1_1motion_1_1splines_1_1Waypoint_html"><div class="ttname"><a href="structutility_1_1motion_1_1splines_1_1Waypoint.html">utility::motion::splines::Waypoint</a></div><div class="ttdef"><b>Definition:</b> Trajectory.hpp:43</div></div>
+<div class="ttc" id="astructutility_1_1skill_1_1splines_1_1Waypoint_html"><div class="ttname"><a href="structutility_1_1skill_1_1splines_1_1Waypoint.html">utility::skill::splines::Waypoint</a></div><div class="ttdef"><b>Definition:</b> Trajectory.hpp:43</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_e74f07e607724dbb2b9c42172be2da51.html">skill</a></li><li class="navelem"><b>KickGenerator.hpp</b></li>
-    <li class="footer">Generated on Sun Mar 9 2025 13:19:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Mar 14 2025 02:40:45 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
