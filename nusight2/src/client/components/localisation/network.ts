@@ -16,10 +16,7 @@ import { FieldIntersection } from "./robot_model";
 import { Line } from "./robot_model";
 
 export class LocalisationNetwork {
-  constructor(
-    private network: Network,
-    private model: LocalisationModel,
-  ) {
+  constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.localisation.Ball, this.onBall);
@@ -29,7 +26,6 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
-    this.network.on(message.localisation.AssociationLines, this.onAssociationLines);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
   }
@@ -53,11 +49,7 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
-  };
-
-  @action onAssociationLines = (robotModel: RobotModel, associationLines: message.localisation.AssociationLines) => {
-    const robot = LocalisationRobotModel.of(robotModel);
-    robot.association_lines = associationLines.lines.map((line) => {
+    robot.association_lines = field.associationLines.map((line) => {
       return new Line({
         start: Vector3.from(line.start),
         end: Vector3.from(line.end),

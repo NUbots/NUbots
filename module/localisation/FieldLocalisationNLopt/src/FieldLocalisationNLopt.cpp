@@ -41,7 +41,6 @@ namespace module::localisation {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
-    using message::localisation::AssociationLines;
     using message::localisation::Field;
     using message::localisation::Line;
     using message::localisation::ResetFieldLocalisation;
@@ -194,9 +193,6 @@ namespace module::localisation {
                         return;
                     }
 
-                    // Start timer for the optimisation routine
-                    auto start = std::chrono::high_resolution_clock::now();
-
                     // Don't run an update if there are not enough field line points or the robot is unstable
                     bool unstable = stability <= Stability::FALLING;
                     if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
@@ -241,20 +237,11 @@ namespace module::localisation {
                         debug_field_localisation(field->Hfw, raw_sensors);
                     }
                     // Association (run once for debugging in NUsight)
-                    auto associations      = data_association(field_intersections, field->Hfw);
-                    auto association_lines = std::make_unique<AssociationLines>();
+                    auto associations = data_association(field_intersections, field->Hfw);
                     for (const auto& association : associations) {
-                        association_lines->lines.push_back({association.first, association.second});
+                        field->association_lines.push_back({association.first, association.second});
                     }
-                    emit(association_lines);
                     emit(field);
-
-                    // End timer for the optimisation routine
-                    auto end      = std::chrono::high_resolution_clock::now();
-                    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.0;
-                    log<DEBUG>("Field localisation optimisation took ", duration, " ms");
-                    // LOg FPS
-                    log<DEBUG>("FieldLocalisationNLopt FPS", 1000.0 / duration);
                 });
     }
 
