@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package message.nuclear;
+
+/**
+ * Replicates the NUClear::util::GroupDescriptor class from NUClear
+ */
+message GroupDescriptor {
+    /// The name of the group
+    string name = 1;
+    /// The maximum number of reactions that can be run in parallel in this group
+    uint32 concurrency = 2;
+}

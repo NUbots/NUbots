@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "RobotLocalisation.hpp"
 
 #include <fmt/format.h>
@@ -50,9 +76,9 @@ namespace module::localisation {
         on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then([this](const VisionRobots& vision_robots,
                                                                             const GreenHorizon& horizon) {
             // Print tracked_robots ids
-            log<NUClear::DEBUG>("Robots tracked:");
+            log<DEBUG>("Robots tracked:");
             for (const auto& tracked_robot : tracked_robots) {
-                log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
+                log<DEBUG>("\tID: ", tracked_robot.id);
             }
 
             // Set all tracked robots to unseen
@@ -67,11 +93,8 @@ namespace module::localisation {
                     // Position of robot {r} in world {w} space
                     auto rRWw = Hwc * vision_robot.rRCc;
 
-                    // Only consider vision measurements within the green horizon
-                    if (point_in_convex_hull(horizon.horizon, rRWw)) {
-                        // Data association: find tracked robot which is associated with the vision measurement
-                        data_association(rRWw);
-                    }
+                    // Data association: find tracked robot which is associated with the vision measurement
+                    data_association(rRWw);
                 }
             }
 
@@ -95,7 +118,7 @@ namespace module::localisation {
             // Only keep robots that are not missing or too close to others
             for (const auto& tracked_robot : tracked_robots) {
                 if (tracked_robot.missed_count > cfg.max_missed_count) {
-                    log<NUClear::DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                    log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
                     continue;
                 }
 
@@ -103,7 +126,7 @@ namespace module::localisation {
                         return &tracked_robot != &other_robot
                                && (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
                     })) {
-                    log<NUClear::DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+                    log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
                     continue;
                 }
 

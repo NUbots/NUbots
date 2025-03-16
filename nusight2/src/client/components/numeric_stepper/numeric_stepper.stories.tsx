@@ -18,7 +18,7 @@ function LightAndDarkStepper(props: NumericStepperProps) {
       <div className="border border-b-0 p-5 rounded-t-lg">
         <NumericStepper {...props} />
       </div>
-      <div className="dark bg-slate-800 p-5 rounded-b-lg">
+      <div className="dark bg-gray-800 p-5 rounded-b-lg">
         <NumericStepper {...props} />
       </div>
     </div>
@@ -103,7 +103,7 @@ export const Adjustable: Story = {
           value={value}
           onChange={setValue}
           canReset={props.canReset}
-          defaultValue={props.canReset ? props.defaultValue ?? 50 : 50}
+          defaultValue={props.canReset ? (props.defaultValue ?? 50) : 50}
           min={props.min}
           max={props.max}
           step={props.step}

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -146,12 +146,36 @@ namespace module::platform::NUSense {
                 servo.profile_acceleration  = 0;  // not present in NUSense message
                 servo.profile_velocity      = 0;  // not present in NUSense message
 
+                // Log any errors and timeouts from the servo.
+                if (val.packet_counts.packet_errors != 0) {
+                    log<WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
+                                          val.packet_counts.packet_errors,
+                                          val.id,
+                                          nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.packet_counts.crc_errors != 0) {
+                    // For now, the CRC is set to debug until terminating-resistors are gotten since there are many when
+                    // the robot is walking.
+                    log<DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
+                                           val.packet_counts.crc_errors,
+                                           val.id,
+                                           nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+                if (val.packet_counts.timeouts != 0) {
+                    log<WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
+                                          val.packet_counts.timeouts,
+                                          val.id,
+                                          nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                }
+
                 // Add the offsets and switch the direction.
                 servo.present_position *= nugus.servo_direction[val.id - 1];
                 servo.present_position += nugus.servo_offset[val.id - 1];
+                servo.goal_position *= nugus.servo_direction[val.id - 1];
+                servo.goal_position += nugus.servo_offset[val.id - 1];
             }
 
-            log<NUClear::TRACE>(
+            log<TRACE>(
                 fmt::format("\nIMU Data\n"
                             "\tAccel(xyz): {} - {} - {}\n"
                             "\t Gyro(xyz): {} - {} - {}\n ",
@@ -162,24 +186,24 @@ namespace module::platform::NUSense {
                             data.imu.gyro.y,
                             data.imu.gyro.z));
 
-            log<NUClear::TRACE>("Logging servo states...");
+            log<TRACE>("Logging servo states...");
 
             for (const auto& [key, val] : data.servo_map) {
-                log<NUClear::TRACE>(fmt::format("      key: {}", key));
+                log<TRACE>(fmt::format("      key: {}", key));
 
-                log<NUClear::TRACE>(fmt::format("       id: {}", val.id));
-                log<NUClear::TRACE>(fmt::format("   hw_err: {}", val.hardware_error));
-                log<NUClear::TRACE>(fmt::format("torque_en: {}", val.torque_enabled));
-                log<NUClear::TRACE>(fmt::format("     ppwm: {}", val.present_pwm));
-                log<NUClear::TRACE>(fmt::format("    pcurr: {}", val.present_current));
-                log<NUClear::TRACE>(fmt::format("    pvelo: {}", val.present_velocity));
-                log<NUClear::TRACE>(fmt::format("     ppos: {}", val.present_position));
-                log<NUClear::TRACE>(fmt::format("     gpwm: {}", val.goal_pwm));
-                log<NUClear::TRACE>(fmt::format("    gcurr: {}", val.goal_current));
-                log<NUClear::TRACE>(fmt::format("    gvelo: {}", val.goal_velocity));
-                log<NUClear::TRACE>(fmt::format("     gpos: {}", val.goal_position));
-                log<NUClear::TRACE>(fmt::format("  voltage: {}", val.voltage));
-                log<NUClear::TRACE>(fmt::format("     temp: {}", val.temperature));
+                log<TRACE>(fmt::format("       id: {}", val.id));
+                log<TRACE>(fmt::format("   hw_err: {}", val.hardware_error));
+                log<TRACE>(fmt::format("torque_en: {}", val.torque_enabled));
+                log<TRACE>(fmt::format("     ppwm: {}", val.present_pwm));
+                log<TRACE>(fmt::format("    pcurr: {}", val.present_current));
+                log<TRACE>(fmt::format("    pvelo: {}", val.present_velocity));
+                log<TRACE>(fmt::format("     ppos: {}", val.present_position));
+                log<TRACE>(fmt::format("     gpwm: {}", val.goal_pwm));
+                log<TRACE>(fmt::format("    gcurr: {}", val.goal_current));
+                log<TRACE>(fmt::format("    gvelo: {}", val.goal_velocity));
+                log<TRACE>(fmt::format("     gpos: {}", val.goal_position));
+                log<TRACE>(fmt::format("  voltage: {}", val.voltage));
+                log<TRACE>(fmt::format("     temp: {}", val.temperature));
             }
 
             // Emit the raw sensor data
@@ -212,7 +236,7 @@ namespace module::platform::NUSense {
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(command_list));
+            emit<Scope::INLINE>(std::move(command_list));
         });
     }
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -89,7 +89,7 @@ namespace module::vision {
                                                         cfg.cluster_points,
                                                         clusters);
 
-            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+            log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
             // Get only the boundary of each cluster
             for (auto& cluster : clusters) {
@@ -108,7 +108,7 @@ namespace module::vision {
                                                                                         true);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
 
-            log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+            log<DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
 
             // Create the robot message that will hold all observed robots, with general camera details
             auto robots       = std::make_unique<Robots>();
@@ -136,9 +136,9 @@ namespace module::vision {
 
                 // Robots that are too close to us are unlikely to be other robots
                 if (robot.rRCc.norm() < cfg.minimum_robot_distance) {
-                    log<NUClear::DEBUG>(fmt::format("Cluster rejected due to distance: {}. Min allowed distance {}.",
-                                                    robot.rRCc.norm(),
-                                                    cfg.minimum_robot_distance));
+                    log<DEBUG>(fmt::format("Cluster rejected due to distance: {}. Min allowed distance {}.",
+                                           robot.rRCc.norm(),
+                                           cfg.minimum_robot_distance));
                     continue;
                 }
 
@@ -147,7 +147,7 @@ namespace module::vision {
                 robots->robots.push_back(std::move(robot));
             }
 
-            log<NUClear::DEBUG>(fmt::format("Found {} robots", robots->robots.size()));
+            log<DEBUG>(fmt::format("Found {} robots", robots->robots.size()));
 
             emit(robots);
         });

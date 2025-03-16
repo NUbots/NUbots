@@ -31,27 +31,11 @@ export class DirectWebSocketClient implements WebSocketClient {
   }
 
   on(event: string, fn: (...args: any[]) => void) {
-    this.socket.on(event, (...args: any[]) => {
-      const now = Date.now();
-
-      // Go through the args and replace the ack function with a wrapper that adds the time we
-      // received the message here. This is used for performance measurements on the server.
-      const argsWithAckWrapped = args.map((arg) => {
-        // We assume that any function in args is an ack function, since the only function
-        // we will ever get from a Socket.io connection is the ack function.
-        return typeof arg === "function"
-          ? (...ackArgs: any[]) => {
-              arg(...ackArgs, now);
-            }
-          : arg;
-      });
-
-      fn(...argsWithAckWrapped);
-    });
+    this.socket.on(event, fn);
   }
 
-  off(event: string, fn?: Function) {
-    this.socket.off(event, fn);
+  off(event: string, fn?: (...args: any[]) => void) {
+    fn && this.socket.off(event, fn);
   }
 
   send(event: string, ...args: any[]) {

@@ -11,20 +11,22 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
+  network::PlotJuggler
   output::Overview
   output::ImageCompressor
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::BallDetector
   vision::FieldLineDetector
+  vision::BallDetector
+  vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos
@@ -45,9 +47,11 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
+  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   strategy::WalkToFieldPosition
+  strategy::WalkInsideBoundedBox
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
@@ -55,4 +59,6 @@ nuclear_role(
   strategy::AlignBallToGoal
   # Purposes
   purpose::Tester
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

@@ -40,7 +40,7 @@
 #include "utility/file/fileutil.hpp"
 #include "utility/platform/aliases.hpp"
 #include "utility/strutil/strutil.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 #include "utility/support/yaml_log_level.hpp"
 
 namespace fs = ::std::filesystem;
@@ -185,9 +185,9 @@ namespace extension {
                         case YAML::NodeType::Null: [[fallthrough]];
                         case YAML::NodeType::Undefined: [[fallthrough]];
                         default: {
-                            NUClear::log<NUClear::WARN>("Unsetting key",
-                                                        "'" + key + "'",
-                                                        "in YAML file. Is this what you intended?");
+                            NUClear::log<NUClear::LogLevel::WARN>("Unsetting key",
+                                                                  "'" + key + "'",
+                                                                  "in YAML file. Is this what you intended?");
                             ret[key] = item.second;
                             break;
                         }
@@ -320,19 +320,19 @@ namespace NUClear::dsl {
             /// @param reaction The reaction we are binding which will watch the config path(s)
             /// @param file_name The file_name of the desired config file
             template <typename DSL>
-            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& file_name) {
+            static void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& file_name) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                const std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::get_hostname();
                 const std::string platform(::extension::Configuration::get_platform(hostname));
                 const std::string robot_name = utility::platform::get_robot_alias(hostname);
 
                 // Check if there is a default config. If there isn't, try to make one
                 const fs::path default_config = fs::path("config") / file_name;
                 if (!fs::exists(default_config)) {
-                    NUClear::log<NUClear::WARN>("Configuration file '" + default_config.string()
-                                                + "' does not exist. Creating it.");
+                    NUClear::log<NUClear::LogLevel::WARN>("Configuration file '" + default_config.string()
+                                                          + "' does not exist. Creating it.");
 
                     // Check for a directory.
                     if (fs::is_directory(default_config)) {
@@ -391,7 +391,7 @@ namespace NUClear::dsl {
             /// @param t The associated Configuration Reaction
             /// @return False is the reaction is not to be run, otherwise true
             template <typename DSL>
-            [[nodiscard]] static inline bool precondition(threading::Reaction& t) {
+            [[nodiscard]] static inline bool precondition(threading::ReactionTask& t) {
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
                 // Check if the watch is valid and the file is a yaml file
                 if (!watch || fs::path(watch.path).extension() != ".yaml") {
@@ -399,7 +399,7 @@ namespace NUClear::dsl {
                 }
 
                 // Get hostname, platform and binary name to check if this is not a default configuration file
-                const std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::get_hostname();
                 const std::string platform(::extension::Configuration::get_platform(hostname));
                 const auto binary_name       = get_first_command_line_arg();
                 const std::string robot_name = utility::platform::get_robot_alias(hostname);
@@ -444,14 +444,14 @@ namespace NUClear::dsl {
             /// @param t The associated Configuration Reaction
             /// @return A Configuration object is returned.
             template <typename DSL>
-            [[nodiscard]] static inline std::shared_ptr<::extension::Configuration> get(threading::Reaction& t) {
+            [[nodiscard]] static std::shared_ptr<::extension::Configuration> get(threading::ReactionTask& t) {
                 // Get the file watch event
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
 
                 // Return our yaml file
                 try {
                     // Get hostname so we can find the correct per-robot config directory.
-                    const std::string hostname = utility::support::getHostname();
+                    const std::string hostname = utility::support::get_hostname();
                     const std::string platform(::extension::Configuration::get_platform(hostname));
                     const auto binary_name = get_first_command_line_arg();
                     std::string robot_name = utility::platform::get_robot_alias(hostname);
@@ -476,7 +476,7 @@ namespace NUClear::dsl {
                     return std::make_shared<::extension::Configuration>(relative_path, hostname, binary_name, platform);
                 }
                 catch (const YAML::ParserException& e) {
-                    throw std::runtime_error(watch.path + " " + std::string(e.what()));
+                    throw std::runtime_error(watch.path.string() + " " + std::string(e.what()));
                 }
             }
         };

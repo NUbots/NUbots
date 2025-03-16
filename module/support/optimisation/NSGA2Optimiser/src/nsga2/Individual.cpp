@@ -1,8 +1,7 @@
-/* Adapted from https://github.com/dojeda/nsga2-cpp
- *
+/*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -46,7 +45,7 @@ namespace nsga2 {
         gene.resize(config.bin_vars);
 
         if (int(config.bin_bits.size()) != config.bin_vars) {
-            NUClear::log<NUClear::WARN>(
+            NUClear::log<NUClear::LogLevel::WARN>(
                 fmt::format("bin_bits size ({}) != bin_vars ({})", config.bin_bits.size(), config.bin_vars));
         }
 

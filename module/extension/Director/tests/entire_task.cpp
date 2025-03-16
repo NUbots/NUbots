@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask<0>>>().then([this](const SimpleTask<0>& t) { events.push_back(t.msg); });
             on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back(t.msg); });
@@ -85,11 +84,6 @@ namespace {
                 events.push_back("emitting high priority complex task");
                 emit<Task>(std::make_unique<ComplexTask>("high priority"), 100);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-            });
         }
     };
 
@@ -99,7 +93,7 @@ TEST_CASE("Test that if all the non optional tasks can't be executed none of the
           "[director][priority][entire]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

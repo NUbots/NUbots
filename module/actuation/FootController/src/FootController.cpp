@@ -41,16 +41,28 @@ namespace module::actuation {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.mode        = config["mode"].as<std::string>();
 
-            // Read servo gains from the configuration
-            auto servo_gains_config = config["servo_gains"].as<std::map<std::string, double>>();
+            cfg.desired_gains = config["servo_gains"].as<std::map<std::string, double>>();
+            // Set gains of servo to startup phase values
             cfg.servo_states.clear();
-            for (const auto& [key, gain] : servo_gains_config) {
+            cfg.startup_gain = config["startup"]["servo_gain"].as<double>();
+            for (const auto& servo : cfg.desired_gains) {
+                utility::input::ServoID servo_id(servo.first);
+                cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
+            }
+            // Emit request to set desired gains after a delay
+            emit<Scope::DELAY>(std::make_unique<SetGains>(),
+                               std::chrono::seconds(config["startup"]["duration"].as<int>()));
+        });
+
+        on<Trigger<SetGains>>().then([this] {
+            for (const auto& [key, gain] : cfg.desired_gains) {
                 utility::input::ServoID servo_id(key);
                 cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
             }
         });
 
-        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
+
+        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>, Priority::HIGH>().then(
             [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
                 auto left_leg = std::make_unique<LeftLegIK>();
 
@@ -60,7 +72,7 @@ namespace module::actuation {
                 emit<Task>(left_leg, 0, false, "Control left foot");
             });
 
-        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>>().then(
+        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>, Priority::HIGH>().then(
             [this](const ControlRightFoot& right_foot, const Sensors& sensors) {
                 auto right_leg = std::make_unique<RightLegIK>();
 

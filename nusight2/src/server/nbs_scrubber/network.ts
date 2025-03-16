@@ -2,10 +2,6 @@ import { compose } from "../../shared/base/compose";
 import { message } from "../../shared/messages";
 import { NUsightSession } from "../session/session";
 
-import { listNbsFiles } from "./list_nbs_files";
-
-import ScrubberFileEntry = message.eye.ScrubberFileEntry;
-import ScrubberListFilesRequest = message.eye.ScrubberListFilesRequest;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 import ScrubberCloseRequest = message.eye.ScrubberCloseRequest;
 import ScrubberPlayRequest = message.eye.ScrubberPlayRequest;
@@ -23,7 +19,6 @@ export class NbsScrubberNetwork {
   constructor(private session: NUsightSession) {
     const network = session.network;
     this.cleanUp = compose([
-      network.onClientRpc(ScrubberListFilesRequest, this.onListFiles),
       network.onClientRpc(ScrubberLoadRequest, this.onLoad),
       network.onClientRpc(ScrubberCloseRequest, this.onClose),
       network.onClientRpc(ScrubberPlayRequest, this.onPlay),
@@ -42,57 +37,33 @@ export class NbsScrubberNetwork {
     }
   }
 
-  /** Handle a request from the client to list local NBS files for loading a scrubber */
-  private onListFiles = async (request: ScrubberListFilesRequest) => {
-    const { entries, directory } = await listNbsFiles(request.directory);
-
-    return new ScrubberListFilesRequest.Response({
-      ok: true,
-      rpcToken: request.rpcToken,
-      directory,
-      entries: entries.map((entry) => {
-        return {
-          type: entry.type === "directory" ? ScrubberFileEntry.Type.DIRECTORY : ScrubberFileEntry.Type.FILE,
-          name: entry.name,
-          path: entry.path,
-          size: entry.size,
-          dateModified: {
-            seconds: entry.dateModified.getTime() / 1000,
-          },
-        };
-      }),
-    });
-  };
-
   /** Handle a request from the client to load an NBS scrubber */
   private onLoad = (request: ScrubberLoadRequest) => {
     const scrubber = this.session.scrubberSet.load({
       name: request.name ? request.name : undefined,
       files: request.files!,
       onCreate: (scrubber) => {
-        // TODO: Add a flag to the nuclear_join message to indicate that the peer is
-        // a scrubber, so it's possible for the client can handle it differently
         this.session.sendToAll("nuclear_join", scrubber.peer);
       },
     });
 
     console.info(`Scrubber loaded: ${scrubber.data.name} (${scrubber.data.id})`, request.files);
 
-    return new ScrubberLoadRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberLoadRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 
   /** Handle a request from the client to play a scrubber */
   private onPlay = (request: ScrubberPlayRequest) => {
     this.session.scrubberSet.update({ type: "play", id: request.id });
 
-    return new ScrubberPlayRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberPlayRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 
   /** Handle a request from the client to pause a scrubber */
   private onPause = (request: ScrubberPauseRequest) => {
     this.session.scrubberSet.update({ type: "pause", id: request.id });
 
-    return new ScrubberPauseRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberPauseRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 
   /** Handle a request from the client to set the playback speed of a scrubber */
@@ -103,7 +74,7 @@ export class NbsScrubberNetwork {
       playbackSpeed: request.playbackSpeed,
     });
 
-    return new ScrubberSetPlaybackSpeedRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberSetPlaybackSpeedRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 
   /** Handle a request from the client to set the repeat mode of a scrubber */
@@ -114,7 +85,7 @@ export class NbsScrubberNetwork {
       repeat: request.repeat,
     });
 
-    return new ScrubberSetRepeatRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberSetRepeatRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 
   /** Handle a request from the client to seek a scrubber */
@@ -128,7 +99,7 @@ export class NbsScrubberNetwork {
       },
     });
 
-    return new ScrubberSeekRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberSeekRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 
   /** Handle a request from the client to close a scrubber */
@@ -136,8 +107,8 @@ export class NbsScrubberNetwork {
     const scrubber = this.session.scrubberSet.close(request.id);
 
     // Remove the scrubber's fake peer from the network
-    // TODO: add a flag to the nuclear_leave message to indicate that the peer
-    // being removed is a scrubber, to avoid the need for the extra message below
+    // TODO: use the `peer.type` property which indicates that the peer leaving
+    // is a scrubber to avoid the need for the extra message below
     this.session.sendToAll("nuclear_leave", scrubber.peer);
 
     // Remove the scrubber from all browser clients in the session
@@ -147,6 +118,6 @@ export class NbsScrubberNetwork {
 
     console.info(`Scrubber closed: ${scrubber.data.name} (${scrubber.data.id})`);
 
-    return new ScrubberCloseRequest.Response({ ok: true, rpcToken: request.rpcToken });
+    return new ScrubberCloseRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
   };
 }

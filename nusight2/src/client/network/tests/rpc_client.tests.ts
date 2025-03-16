@@ -1,4 +1,5 @@
 import { NUClearNetPacket } from "nuclearnet.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
 import { message } from "../../../shared/messages";
@@ -9,7 +10,7 @@ import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 import { nextRpcToken, RpcClient, RpcError } from "../rpc_client";
 
-import Test = message.support.nusight.Test;
+import Test = message.network.Test;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 
 describe("RpcClient", () => {
@@ -87,16 +88,17 @@ describe("RpcClient", () => {
       id: "robot1",
       name: "Robot 1",
       port: 0,
+      type: "nusight-server",
     });
     const { network, nuclearnetMockEmitter } = createNetwork([robotModel]);
     const client = new RpcClient(network);
 
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: ["a.nbs", "b.nbs"] });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: ["a.nbs", "b.nbs"] });
 
     const promise = client.call(request);
     client.cancelAll();
 
-    const response = ScrubberLoadRequest.Response.encode({ ok: true, rpcToken: nextRpcToken - 1 });
+    const response = ScrubberLoadRequest.Response.encode({ rpc: { ok: true, token: nextRpcToken - 1 } });
     const packet: NUClearNetPacket = {
       hash: undefined as any,
       payload: response.finish() as Buffer,
@@ -128,16 +130,17 @@ describe("RpcClient", () => {
       id: "robot1",
       name: "Robot 1",
       port: 0,
+      type: "nusight-server",
     });
     const { network, nuclearnetMockEmitter } = createNetwork([robotModel]);
     const client = new RpcClient(network);
 
-    const request = new ScrubberLoadRequest({ rpcToken: 1, files: ["a.nbs", "b.nbs"] });
+    const request = new ScrubberLoadRequest({ rpc: { token: 1 }, files: ["a.nbs", "b.nbs"] });
 
     const promise = client.call(request);
 
     // First emit a response for a different RPC call
-    const unrelatedResponse = ScrubberLoadRequest.Response.encode({ ok: true, rpcToken: 99 });
+    const unrelatedResponse = ScrubberLoadRequest.Response.encode({ rpc: { ok: true, token: 99 } });
     const unrelatedResponsePacket: NUClearNetPacket = {
       hash: undefined as any,
       payload: unrelatedResponse.finish() as Buffer,
@@ -151,7 +154,7 @@ describe("RpcClient", () => {
     nuclearnetMockEmitter.emit("message.eye.ScrubberLoadRequest.Response", unrelatedResponsePacket);
 
     // Then emit the response for the RPC call we're interested in
-    const response = ScrubberLoadRequest.Response.encode({ ok: true, rpcToken: nextRpcToken - 1 });
+    const response = ScrubberLoadRequest.Response.encode({ rpc: { ok: true, token: nextRpcToken - 1 } });
     const packet: NUClearNetPacket = {
       hash: undefined as any,
       payload: response.finish() as Buffer,
@@ -169,7 +172,7 @@ describe("RpcClient", () => {
       expect(result.ok).toBe(true);
       expect(result.data).toEqual({
         robotModel,
-        response: { ok: true, rpcToken: nextRpcToken - 1 },
+        response: { rpc: { ok: true, token: nextRpcToken - 1 } },
       });
     } else {
       throw new Error("Expected RPC call to succeed");
@@ -185,11 +188,11 @@ function createNetwork(robots: RobotModel[] = []) {
   const nuclearnetMockEmitter = createMockEventEmitter();
   const nuclearnetClient: NUClearNetClient = {
     on: nuclearnetMockEmitter.on,
-    onJoin: jest.fn(),
-    onLeave: jest.fn(),
-    connect: jest.fn(),
-    onPacket: jest.fn(),
-    send: jest.fn(),
+    onJoin: vi.fn(),
+    onLeave: vi.fn(),
+    connect: vi.fn(),
+    onPacket: vi.fn(),
+    send: vi.fn(),
   };
 
   const nusightNetwork = new NUsightNetwork(nuclearnetClient, AppModel.of({ robots }));

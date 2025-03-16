@@ -5,7 +5,6 @@ import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
 import { message } from "../../../shared/messages";
 import { Clock } from "../../../shared/time/clock";
-import { toSeconds } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -16,6 +15,7 @@ import { TreeData } from "./model";
 
 import Sensors = message.input.Sensors;
 import DataPoint = message.eye.DataPoint;
+import { TimestampObject } from "../../../shared/time/timestamp";
 
 const ServoIds = [
   "Right Shoulder Pitch",
@@ -41,7 +41,11 @@ const ServoIds = [
 ];
 
 export class ChartNetwork {
-  constructor(private clock: Clock, private network: Network, private model: ChartModel) {
+  constructor(
+    private clock: Clock,
+    private network: Network,
+    private model: ChartModel,
+  ) {
     this.network.on(DataPoint, this.onDataPoint);
     this.network.on(Sensors, this.onSensorData);
   }
@@ -66,8 +70,8 @@ export class ChartNetwork {
       data.value.length === 1
         ? [basePath.pop()]
         : data.value.length < 5
-        ? ["x", "y", "z", "w"]
-        : data.value.map((v, i) => `s${i}`);
+          ? ["x", "y", "z", "w"]
+          : data.value.map((v, i) => `s${i}`);
 
     const node = basePath.reduce((accumulator: TreeData, p: string) => {
       if (!accumulator.has(p)) {
@@ -81,7 +85,7 @@ export class ChartNetwork {
 
       if (!node.has(key)) {
         // Create a new series with the start time of this datapoint
-        node.set(key, DataSeries.of(toSeconds(data.timestamp)));
+        node.set(key, DataSeries.of(TimestampObject.toSeconds(data.timestamp)));
       }
 
       const leaf = node.get(key) as DataSeries;
@@ -91,7 +95,7 @@ export class ChartNetwork {
       const chartTime = this.clock.now() - this.model.startTime;
 
       // Now according to the datapoint
-      const pointTime = toSeconds(data.timestamp) - leaf.startTime;
+      const pointTime = TimestampObject.toSeconds(data.timestamp) - leaf.startTime;
 
       // Estimate the drifting distance between the clocks
       leaf.updateDelta(pointTime - chartTime);

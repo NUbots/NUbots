@@ -1,8 +1,7 @@
-/* Adapted from https://github.com/dojeda/nsga2-cpp
- *
+/*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -48,78 +47,78 @@ namespace nsga2 {
     };
 
     bool NSGA2::configuration_is_valid() {
-        NUClear::log<NUClear::INFO>("Checking NSGA-II configuration...");
+        NUClear::log<NUClear::LogLevel::INFO>("Checking NSGA-II configuration...");
 
         if (real_vars < 0) {
-            NUClear::log<NUClear::INFO>("Invalid number of real variables");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of real variables");
             return false;
         }
         else if (bin_vars < 0) {
-            NUClear::log<NUClear::INFO>("Invalid number of binary variables");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of binary variables");
             return false;
         }
         else if (real_vars == 0 && bin_vars == 0) {
-            NUClear::log<NUClear::INFO>("Zero real and binary variables");
+            NUClear::log<NUClear::LogLevel::INFO>("Zero real and binary variables");
             return false;
         }
         else if (objectives < 1) {
-            NUClear::log<NUClear::INFO>("Invalid number of objective functions");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of objective functions");
             return false;
         }
         else if (constraints < 0) {
-            NUClear::log<NUClear::INFO>("Invalid number of constraints");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of constraints");
             return false;
         }
         else if (pop_size < 4 || (pop_size % 4) != 0) {
-            NUClear::log<NUClear::INFO>("Invalid size of population");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid size of population");
             return false;
         }
         else if (real_cross_prob < 0.0 || real_cross_prob > 1.0) {
-            NUClear::log<NUClear::INFO>("Invalid probability of real crossover");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid probability of real crossover");
             return false;
         }
         else if (real_mut_prob < 0.0 || real_mut_prob > 1.0) {
-            NUClear::log<NUClear::INFO>("Invalid probability of real mutation");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid probability of real mutation");
             return false;
         }
         else if (bin_cross_prob < 0.0 || bin_cross_prob > 1.0) {
-            NUClear::log<NUClear::INFO>("Invalid probability of binary crossover");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid probability of binary crossover");
             return false;
         }
         else if (bin_mut_prob < 0.0 || bin_mut_prob > 1.0) {
-            NUClear::log<NUClear::INFO>("Invalid probability of binary mutation");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid probability of binary mutation");
             return false;
         }
         else if (etaC <= 0) {
-            NUClear::log<NUClear::INFO>("Invalid distribution index for crossover");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid distribution index for crossover");
             return false;
         }
         else if (eta_m <= 0) {
-            NUClear::log<NUClear::INFO>("Invalid distribution index for mutation");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid distribution index for mutation");
             return false;
         }
         else if (generations < 1) {
-            NUClear::log<NUClear::INFO>("Invalid number of generations");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of generations");
             return false;
         }
         else if (bin_vars != 0 && bin_bits.size() == 0) {
-            NUClear::log<NUClear::INFO>("Invalid number of bits for binary variables");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of bits for binary variables");
             return false;
         }
         else if (int(real_limits.size()) != real_vars) {
-            NUClear::log<NUClear::INFO>("Invalid number of real variable limits");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of real variable limits");
             return false;
         }
         else if (int(bin_limits.size()) != bin_vars) {
-            NUClear::log<NUClear::INFO>("Invalid number of binary variable limits");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of binary variable limits");
             return false;
         }
         else if ((int(initial_real_vars.size()) != real_vars)) {
-            NUClear::log<NUClear::INFO>("Invalid number of initial real variables");
+            NUClear::log<NUClear::LogLevel::INFO>("Invalid number of initial real variables");
             return false;
         }
         else {
-            NUClear::log<NUClear::INFO>("NSGA-II configuration is valid");
+            NUClear::log<NUClear::LogLevel::INFO>("NSGA-II configuration is valid");
             return true;
         }
     }
@@ -280,7 +279,7 @@ namespace nsga2 {
             if (i == 0) {
                 // If `i` is still 0, that means we only have one front carrying over
                 early_stopping_one_front = true;
-                NUClear::log<NUClear::INFO>("A single front this generation, could stop early");
+                NUClear::log<NUClear::LogLevel::INFO>("A single front this generation, could stop early");
             }
             bool a_child_survives_this_gen = false;
             for (auto& ind : parent_pop->inds) {
@@ -291,7 +290,7 @@ namespace nsga2 {
             }
             if (!a_child_survives_this_gen) {
                 early_stopping_no_improvement = true;
-                NUClear::log<NUClear::INFO>("No improvement this generation, could stop early");
+                NUClear::log<NUClear::LogLevel::INFO>("No improvement this generation, could stop early");
             }
         }
         report_pop(parent_pop, all_pop_file);
@@ -318,7 +317,7 @@ namespace nsga2 {
     void NSGA2::selection(const std::shared_ptr<Population>& _old_pop, std::shared_ptr<Population>& _new_pop) {
         const int old_pop_size = _old_pop->get_size();
         if (_new_pop->get_size() != old_pop_size) {
-            NUClear::log<NUClear::ERROR>("selection error: new and old pops don't have the same size");
+            NUClear::log<NUClear::LogLevel::ERROR>("selection error: new and old pops don't have the same size");
         }
 
         // Set up lists, ready for random scrambling

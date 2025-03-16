@@ -29,6 +29,7 @@
 
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -43,7 +44,22 @@ namespace module::purpose {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
-            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+            Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
+            /// @brief Penalty defence position to walk to when defending against a penalty kick from the opposing team
+            Eigen::Vector3d penalty_defence_position = Eigen::Vector3d::Zero();
+            /// @brief Ready position to walk to
+            Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
+            /// @brief How far (m) the ball can be away from the centre of the field for it to be deemed as
+            /// moved/touched by the other team during kickoff so we can start playing
+            double ball_kickoff_outside_radius = 0.0;
+            /// @brief x minimum bound on field to walk within
+            double bounded_region_x_min = 0.0;
+            /// @brief x maximum bound on field to walk within
+            double bounded_region_x_max = 0.0;
+            /// @brief y minimum bound on field to walk within
+            double bounded_region_y_min = 0.0;
+            /// @brief y maximum bound on field to walk within
+            double bounded_region_y_max = 0.0;
         } cfg;
 
 

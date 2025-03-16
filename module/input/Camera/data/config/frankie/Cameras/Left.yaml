@@ -28,6 +28,6 @@ urdf_path: "models/robot.urdf"
 
 is_left_camera: true
 
-roll_offset: 0.0 * pi / 180
+roll_offset: 1.0 * pi / 180
 
-pitch_offset: 8.0 * pi / 180
+pitch_offset: 10.0 * pi / 180

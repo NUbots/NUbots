@@ -10,8 +10,13 @@ nuclear_role(
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::SoccerConfig # Field description
   support::configuration::GlobalConfig
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  output::Overview
+  output::ImageCompressor
   # Sensors and network (input)
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
   input::GameController
@@ -21,9 +26,11 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
+  vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos
@@ -44,6 +51,7 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
+  strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::StrategiseLook
@@ -54,8 +62,12 @@ nuclear_role(
   strategy::DiveToBall
   strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::Defender
+  purpose::AllRounder
   purpose::Striker
+  purpose::Defender
   purpose::Goalie
   purpose::Soccer
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
+  # Datalogging support::logging::DataLogging
 )

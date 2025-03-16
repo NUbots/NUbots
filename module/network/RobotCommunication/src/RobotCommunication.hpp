@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -42,11 +42,15 @@ namespace module::network {
             uint receive_port = 0;
             /// @brief The IP address used for broadcasting data
             std::string broadcast_ip = "";
+            /// @brief Set this to only receive packets from this IP address
+            std::string udp_filter_address = "";
         } cfg;
+
+        /// @brief ignore packets from these IP addresses
+        std::set<std::string> ignored_ip_addresses{};
 
         /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
         ReactionHandle listen_handle;
-
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotCommunication reactor.

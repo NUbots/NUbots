@@ -1,28 +1,30 @@
-import React from "react";
-import { PropsWithChildren } from "react";
-import { ComponentType } from "react";
+import React, { ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
-import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
-import * as THREE from "three";
-import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { Vector3 } from "../../../shared/math/vector3";
+import { compose } from "../../../shared/base/compose";
+import { Button } from "../button/button";
 import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
-import { PerspectiveCamera } from "../three/three_fiber";
-import { ThreeFiber } from "../three/three_fiber";
+import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
-import { FieldView } from "./field/view";
-import { GridView } from "./grid/view";
-import { LocalisationModel } from "./model";
-import { ViewMode } from "./model";
+import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
+import { Ball } from "./r3f_components/ball/view";
+import { BoundingBox } from "./r3f_components/bounding_box/view";
+import { FieldView } from "./r3f_components/field/view";
+import { FieldIntersections } from "./r3f_components/field_intersections/view";
+import { FieldObjects } from "./r3f_components/field_objects/view";
+import { FieldPoints } from "./r3f_components/field_points/view";
+import { GridView } from "./r3f_components/grid/view";
+import { Nugus } from "./r3f_components/nugus/view";
+import { PurposeLabel } from "./r3f_components/purpose_label/view";
+import { SkyboxView } from "./r3f_components/skybox/view";
+import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
+import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
-import { SkyboxView } from "./skybox/view";
-import style from "./style.module.css";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -30,12 +32,6 @@ type LocalisationViewProps = {
   model: LocalisationModel;
   network: LocalisationNetwork;
 };
-
-const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
-
-// Ball texture obtained from https://katfetisov.wordpress.com/2014/08/08/freebies-football-textures/
-const textureLoader = new THREE.TextureLoader();
-const soccerBallTexture = textureLoader.load("/images/ball_texture.png");
 
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
@@ -50,18 +46,20 @@ interface FieldDimensionSelectorProps {
 
 @observer
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
-  private dropdownToggle = (<button className={style.localisation__menuButton}>Field Type</button>);
+  private dropdownToggle = (<Button>Field Type</Button>);
 
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        <div className="bg-white rounded-lg w-28">
+        <div className="bg-auto-surface-2">
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`${style.fieldOption} ${
-                this.props.model.field.fieldType === option.value ? style.selected : ""
-              } bg-white`}
+              className={`flex p-2 ${
+                this.props.model.field.fieldType === option.value
+                  ? "hover:bg-auto-contrast-1"
+                  : "hover:bg-auto-contrast-1"
+              }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -78,34 +76,38 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 
 const EnhancedDropdown = dropdownContainer();
 
+const addDocListener = <K extends keyof DocumentEventMap>(
+  ...args: Parameters<typeof document.addEventListener<K>>
+): (() => void) => {
+  document.addEventListener(...args);
+  return () => document.removeEventListener(...args);
+};
+
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
+  private dispose?: () => void;
 
   componentDidMount(): void {
-    document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
-    document.addEventListener("mousemove", this.onMouseMove, false);
-    document.addEventListener("keydown", this.onKeyDown, false);
-    document.addEventListener("keyup", this.onKeyUp, false);
-    document.addEventListener("wheel", this.onWheel, false);
-    disposeOnUnmount(
-      this,
+    this.dispose = compose([
+      addDocListener("pointerlockchange", this.onPointerLockChange, false),
+      addDocListener("mousemove", this.onMouseMove, false),
+      addDocListener("keydown", this.onKeyDown, false),
+      addDocListener("keyup", this.onKeyUp, false),
+      addDocListener("wheel", this.onWheel, false),
       reaction(() => now("frame"), this.onAnimationFrame),
-    );
+      () => this.props.network.destroy(),
+    ]);
   }
 
   componentWillUnmount(): void {
-    document.removeEventListener("pointerlockchange", this.onPointerLockChange, false);
-    document.removeEventListener("mousemove", this.onMouseMove, false);
-    document.removeEventListener("keydown", this.onKeyDown, false);
-    document.removeEventListener("keyup", this.onKeyUp, false);
-    document.removeEventListener("wheel", this.onWheel, false);
-    this.props.network.destroy();
+    this.dispose?.();
+    this.dispose = undefined;
   }
 
   render(): JSX.Element {
     return (
-      <div className={style.localisation}>
+      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
         <LocalisationMenuBar
           model={this.props.model}
           Menu={this.props.Menu}
@@ -119,8 +121,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+          toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
         ></LocalisationMenuBar>
-        <div className={style.localisation__canvas}>
+        <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
@@ -205,6 +209,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldIntersectionsVisibility = () => {
     this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
   };
+
+  private toggleWalkToDebugVisibility = () => {
+    this.props.controller.toggleWalkToDebugVisibility(this.props.model);
+  };
+
+  private toggleBoundedBoxVisibility = () => {
+    this.props.controller.toggleBoundedBoxVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -223,12 +235,14 @@ interface LocalisationMenuBarProps {
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
   toggleFieldIntersectionsVisibility(): void;
+  toggleWalkToDebugVisibility(): void;
+  toggleBoundedBoxVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
-    <li className={style.localisation__menuItem}>
-      <button className={style.localisation__menuButton} onClick={props.onClick}>
+    <li className="flex m-0 p-0">
+      <button className="px-4" onClick={props.onClick}>
         <div className="flex items-center justify-center">
           <div className="flex items-center rounded">
             <span className="mx-2">{props.label}</span>
@@ -244,13 +258,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <ul className={style.localisation__menu}>
-        <li className={style.localisation__menuItem}>
-          <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>
+      <ul className="flex h-full items-center">
+        <li className="flex px-4">
+          <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
-          </button>
+          </Button>
         </li>
-        <li className={style.localisation__menuItem}>
+        <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
@@ -258,7 +272,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
         <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
         <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
-        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalsVisible} onClick={props.toggleGoalVisibility} />
         <MenuItem
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
@@ -269,6 +283,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           isVisible={model.fieldIntersectionsVisible}
           onClick={props.toggleFieldIntersectionsVisibility}
         />
+        <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
+        <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
       </ul>
     </Menu>
   );
@@ -282,10 +298,14 @@ const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div className={style.localisation__status}>
-      <span className={style.localisation__info}>&#160;</span>
-      <span className={style.localisation__target}>{target}</span>
-      <span className={style.localisation__viewMode}>{viewModeString(props.model.viewMode)}</span>
+    <div
+      className={
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+      }
+    >
+      <span className="text-left w-1/3">&#160;</span>
+      <span className="w-1/3">{target}</span>
+      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });
@@ -303,7 +323,14 @@ function viewModeString(viewMode: ViewMode) {
   }
 }
 
-export const LocalisationViewModel = observer(({ model }: { model: LocalisationModel }) => {
+interface RobotRenderProps {
+  robot: LocalisationRobotModel;
+  model: LocalisationModel;
+}
+
+const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) => {
+  if (!robot.visible) return null;
+
   return (
     <object3D>
       <PerspectiveCamera
@@ -336,126 +363,25 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
   );
 });
 
-const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
-  <>
-    {model.robots.map(
-      (robot) =>
-        robot.visible && (
-          <object3D key={robot.id}>
-            {robot.rPFf.map((d, i) => {
-              return (
-                <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
-                  <circleBufferGeometry args={[0.02, 20]} />
-                  <meshBasicMaterial color="blue" />
-                </mesh>
-              );
-            })}
-          </object3D>
-        ),
-    )}
-  </>
-);
+const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer(({ model }) => (
+  <object3D>
+    <PerspectiveCamera
+      args={[75, 1, 0.01, 100]}
+      position={model.camera.position.toArray()}
+      rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
+      up={[0, 0, 1]}
+    >
+      <pointLight color="white" />
+    </PerspectiveCamera>
+    <SkyboxView model={model.skybox} />
+    <hemisphereLight args={["#fff", "#fff", 0.6]} />
 
-const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
-  return (
-    <>
-      {model.robots.map(
-        (robot) =>
-          robot.visible && (
-            <object3D key={robot.id}>
-              {robot.fieldIntersectionsF?.map((intersection) => {
-                const createShapeForIntersection = (intersectionType: string, position: Vector3) => {
-                  const basePosition = position.add(new Vector3(0.1, 0.1, 0)).toArray();
-                  switch (intersectionType) {
-                    case "L_INTERSECTION":
-                      return (
-                        <>
-                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
-                            <circleBufferGeometry args={[0.04, 20]} />
-                            <meshBasicMaterial color="red" />
-                          </mesh>
-                          <mesh position={[basePosition[0], basePosition[1] - 0.05, basePosition[2]]}>
-                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
-                            <meshBasicMaterial color="black" />
-                          </mesh>
-                          <mesh position={[basePosition[0] - 0.04, basePosition[1], basePosition[2]]}>
-                            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
-                            <meshBasicMaterial color="black" />
-                          </mesh>
-                        </>
-                      );
-                    case "T_INTERSECTION":
-                      return (
-                        <>
-                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
-                            <circleBufferGeometry args={[0.04, 20]} />
-                            <meshBasicMaterial color="red" />
-                          </mesh>
-                          <mesh position={[basePosition[0], basePosition[1] + 0.05, basePosition[2]]}>
-                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
-                            <meshBasicMaterial color="black" />
-                          </mesh>
-                          <mesh position={[basePosition[0], basePosition[1], basePosition[2]]}>
-                            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
-                            <meshBasicMaterial color="black" />
-                          </mesh>
-                        </>
-                      );
-                    case "X_INTERSECTION":
-                      return (
-                        <>
-                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
-                            <circleBufferGeometry args={[0.04, 20]} />
-                            <meshBasicMaterial color="red" />
-                          </mesh>
-                          <mesh
-                            position={[basePosition[0], basePosition[1], basePosition[2]]}
-                            rotation={[0, 0, Math.PI / 4]}
-                          >
-                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
-                            <meshBasicMaterial color="black" />
-                          </mesh>
-                          <mesh
-                            position={[basePosition[0], basePosition[1], basePosition[2]]}
-                            rotation={[0, 0, -Math.PI / 4]}
-                          >
-                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
-                            <meshBasicMaterial color="black" />
-                          </mesh>
-                        </>
-                      );
-                    default:
-                      return null;
-                  }
-                };
-                return createShapeForIntersection(intersection.type, intersection.position);
-              })}
-            </object3D>
-          ),
-      )}
-    </>
-  );
-};
+    {model.fieldVisible && <FieldView model={model.field} />}
+    {model.gridVisible && <GridView />}
 
-const Particles = ({ model }: { model: LocalisationModel }) => (
-  <>
-    {model.robots.map(
-      (robot) =>
-        robot.visible && (
-          <object3D key={robot.id}>
-            {robot.particles.particle.map((particle, i) => {
-              return (
-                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
-                  <circleBufferGeometry args={[0.02, 20]} />
-                  <meshBasicMaterial color="red" />
-                </mesh>
-              );
-            })}
-          </object3D>
-        ),
-    )}
-  </>
-);
+    {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
+  </object3D>
+));
 
 const Balls = ({ model }: { model: LocalisationModel }) => {
   return (

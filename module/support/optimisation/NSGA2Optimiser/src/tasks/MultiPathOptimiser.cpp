@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -44,13 +44,13 @@ namespace module::support::optimisation {
     using utility::support::Expression;
 
     void MultiPathOptimiser::setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
-        NUClear::log<NUClear::INFO>("Multipath Optimiser Setting up NSGA2");
+        NUClear::log<NUClear::LogLevel::INFO>("Multipath Optimiser Setting up NSGA2");
         std::vector<std::vector<double>> population_data;
 
         std::string input_file_name = config["multipath"]["input_file"].as<std::string>();
 
         population_data = read_in_population_file(input_file_name);
-        NUClear::log<NUClear::INFO>("Data file size is", population_data.size());
+        NUClear::log<NUClear::LogLevel::INFO>("Data file size is", population_data.size());
 
         // Extract the initial values and limits and from config file, for all of the parameters
         auto walk = config["walk"];
@@ -76,7 +76,7 @@ namespace module::support::optimisation {
         trial_duration_limit = config["trial_duration_limit"].as<int>();
 
         // Set configuration for real variables
-        NUClear::log<NUClear::INFO>("Real Var Count: ", param_initial_values.size());
+        NUClear::log<NUClear::LogLevel::INFO>("Real Var Count: ", param_initial_values.size());
         nsga2_algorithm.set_real_variable_count(param_initial_values.size());
         nsga2_algorithm.set_real_var_limits(param_limits);
         nsga2_algorithm.set_initial_real_vars(param_initial_values);
@@ -139,7 +139,7 @@ namespace module::support::optimisation {
                         record.push_back(stof(line));
                     }
                     catch (const std::invalid_argument& e) {
-                        NUClear::log<NUClear::INFO>("NaN found in file ");
+                        NUClear::log<NUClear::LogLevel::INFO>("NaN found in file ");
                         e.what();
                     }
                 }

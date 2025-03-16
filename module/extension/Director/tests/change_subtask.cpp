@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<ParentTask>>().then([this](const ParentTask& task) {
                 if (task.subtask == 1) {
@@ -85,11 +84,6 @@ namespace {
                 events.push_back("emitting parent task with subtask 2");
                 emit<Task>(std::make_unique<ParentTask>(2));
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-            });
         }
 
     private:
@@ -100,7 +94,7 @@ namespace {
 TEST_CASE("Test that subtasks can be changed when one subtask calls the other", "[director][subtasks][change]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

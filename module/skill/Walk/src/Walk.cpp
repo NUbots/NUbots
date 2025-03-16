@@ -105,13 +105,16 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+
+            // Since walk needs a Stability message to run, emit one at the beginning
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
         // Start - Runs every time the Walk provider starts (wasn't running)
         on<Start<WalkTask>>().then([this]() {
-            // Reset the last update time and walk engine
+            // Reset the last update time
             last_update_time = NUClear::clock::now();
-            walk_generator.reset();
+
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
@@ -125,11 +128,13 @@ namespace module::skill {
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
            With<Sensors>,
+           With<Stability>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
-           Single>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
+           Single,
+           Priority::HIGH>()
+            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -137,14 +142,17 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
 
-                // Update the walk engine and emit the stability state
-                switch (
-                    walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase).value) {
-                    case WalkState::State::WALKING:
-                    case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
-                    case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkState::State::UNKNOWN:
-                    default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                // Update the walk engine and emit the stability state, only if not falling/fallen
+                if (stability >= Stability::DYNAMIC) {
+                    switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
+                                .value) {
+                        case WalkState::State::STARTING:
+                        case WalkState::State::WALKING:
+                        case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
+                        case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                        case WalkState::State::UNKNOWN:
+                        default: NUClear::log<NUClear::LogLevel::WARN>("Unknown state."); break;
+                    }
                 }
 
                 // Compute the goal position time
@@ -179,7 +187,7 @@ namespace module::skill {
                                                               walk_generator.get_phase());
 
                 // Debugging
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     Eigen::Vector3d thetaTL = mat_to_rpy_intrinsic(Htl.linear());
                     emit(graph("Left foot desired position rLTt (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
                     emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));

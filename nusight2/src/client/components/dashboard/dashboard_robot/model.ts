@@ -10,9 +10,9 @@ import { memoize } from "../../../base/memoize";
 import { BrowserSystemClock } from "../../../time/browser_clock";
 import { RobotModel } from "../../robot/model";
 
-import Mode = message.input.GameState.Data.Mode;
-import PenaltyReason = message.input.GameState.Data.PenaltyReason;
-import Phase = message.input.GameState.Data.Phase;
+import Mode = message.input.GameState.Mode;
+import PenaltyReason = message.input.GameState.PenaltyReason;
+import Phase = message.input.GameState.Phase;
 
 export class DashboardRobotModel {
   // Parameters that influence the display
@@ -124,19 +124,19 @@ export class DashboardRobotModel {
       ballColor: "#ff9800",
       ballCovariance: Matrix2.of(),
       ballPosition: Vector2.of(),
-      ballSightColor: "#4DB6AC",
+      ballSightColor: "#4db659",
       battery: -1,
       camera: Transform.of(),
       gameMode: Mode.UNKNOWN_MODE,
       gamePhase: Phase.UNKNOWN_PHASE,
       playerId: -1,
       kickTarget: Vector2.of(),
-      kickTargetColor: "#00796B",
+      kickTargetColor: "#115e2c",
       lastCameraImage: 0,
       lastSeenBall: 0,
       lastSeenGoal: 0,
       penaltyReason: PenaltyReason.UNKNOWN_PENALTY_REASON,
-      robotColor: "#015457",
+      robotColor: "#015726",
       robotPosition: Vector3.of(),
       robotPositionCovariance: Matrix3.of(),
       roleName: "",

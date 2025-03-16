@@ -12,7 +12,8 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensor input
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

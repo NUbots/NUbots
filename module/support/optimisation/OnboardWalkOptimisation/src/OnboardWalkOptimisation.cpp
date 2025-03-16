@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -52,7 +52,7 @@ namespace module::support::optimisation {
 
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
             if (msg.command == OptimisationCommand::CommandType::RESET_ROBOT) {
-                NUClear::log<NUClear::DEBUG>("Onboard Resetting!");
+                NUClear::log<NUClear::LogLevel::DEBUG>("Onboard Resetting!");
                 is_upright = false;
                 resetting  = true;
             }
@@ -66,7 +66,7 @@ namespace module::support::optimisation {
                         .count();
                 // Trigger the next individual after standing for the config value cfg.wait_time
                 if (is_upright && (time_waited > cfg.wait_time)) {
-                    NUClear::log<NUClear::DEBUG>(
+                    NUClear::log<NUClear::LogLevel::DEBUG>(
                         fmt::format("Stood upright for {:.1f} seconds. Reset done.", time_waited));
                     resetting  = false;
                     is_upright = false;
@@ -83,11 +83,11 @@ namespace module::support::optimisation {
                     is_upright = true;
                     // Start timer
                     start_time = NUClear::clock::now();
-                    NUClear::log<NUClear::DEBUG>(fmt::format("Standing for {} seconds.", cfg.wait_time));
+                    NUClear::log<NUClear::LogLevel::DEBUG>(fmt::format("Standing for {} seconds.", cfg.wait_time));
                 }
                 else if (is_upright && !(std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) < cfg.standing_angle)) {
                     is_upright = false;
-                    NUClear::log<NUClear::DEBUG>("No longer standing.");
+                    NUClear::log<NUClear::LogLevel::DEBUG>("No longer standing.");
                 }
             }
             else {

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef UTILITY_REACTOR_STREAMREACTOR_HPP
 #define UTILITY_REACTOR_STREAMREACTOR_HPP
 
@@ -61,7 +87,7 @@ namespace utility::reactor {
                 // Log the reason we are reconnecting if it's not an empty string.
                 // empty string means we are just starting up
                 if (!rc.reason.empty()) {
-                    log<NUClear::WARN>(rc.reason);
+                    log<WARN>(rc.reason);
                 }
 
                 if (connection_valid()) {
@@ -95,13 +121,13 @@ namespace utility::reactor {
                     }
                     bytes_written += written;
                 }
-                if (log_level <= NUClear::TRACE) {
+                if (log_level <= TRACE) {
                     std::stringstream debug_string{};
                     for (const auto& byte : t.data) {
                         debug_string << std::isprint(byte) ? std::string(1, char(byte))
                                                            : fmt::format("\\{:#04x} ", byte);
                     }
-                    log<NUClear::TRACE>("Wrote:", debug_string.str());
+                    log<TRACE>("Wrote:", debug_string.str());
                 }
             });
 
@@ -164,7 +190,7 @@ namespace utility::reactor {
                             emit(std::make_unique<Reconnect>("The device hung up"));
                         }
                         if ((event.events & ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {
-                            log<NUClear::ERROR>(
+                            log<ERROR>(
                                 utility::strutil::dedent(fmt::format("Unknown IO event on {}valid connection: {}",
                                                                      connection_valid() ? "" : "in",
                                                                      event.events)));
@@ -174,12 +200,12 @@ namespace utility::reactor {
                     // Allow post-connection settings to be applied
                     emit(std::make_unique<PostConnect>(connection_attempt));
 
-                    log<NUClear::INFO>(fmt::format("Successfully connected to the device at {}", device_description()));
+                    log<INFO>(fmt::format("Successfully connected to the device at {}", device_description()));
                 }
                 catch (const std::runtime_error& ex) {
-                    log<NUClear::WARN>(fmt::format("Failed to connect to the device at {}\nError: {}",
-                                                   device_description(),
-                                                   ex.what()));
+                    log<WARN>(fmt::format("Failed to connect to the device at {}\nError: {}",
+                                          device_description(),
+                                          ex.what()));
                 }
             });
 
@@ -441,7 +467,7 @@ namespace utility::reactor {
             uint8_t byte = 0;
             while (::read(fd, &byte, 1) == 1) {
 
-                if (log_level <= NUClear::TRACE) {
+                if (log_level <= TRACE) {
                     debug_string << std::isprint(byte) ? std::string(1, char(byte)) : fmt::format("\\{:#04x} ", byte);
                 }
 
@@ -455,11 +481,11 @@ namespace utility::reactor {
                     }
                 }
                 catch (const std::exception& ex) {
-                    log<NUClear::WARN>(ex.what());
+                    log<WARN>(ex.what());
                 }
             }
-            if (log_level <= NUClear::TRACE) {
-                log<NUClear::TRACE>("Read:", debug_string.str());
+            if (log_level <= TRACE) {
+                log<TRACE>("Read:", debug_string.str());
             }
         }
 

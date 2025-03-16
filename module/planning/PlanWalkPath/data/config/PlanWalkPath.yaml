@@ -1,20 +1,33 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# General playing tuning values for approaching ball
-max_translational_velocity_magnitude: 0.15
-min_translational_velocity_magnitude: 0.05
-max_angular_velocity: 0.25
-min_angular_velocity: -0.25
-acceleration: 0.004 # maximum increment in walk command velocity
-approach_radius: 0.75 # region around ball to begin decelerating
+# General playing tuning values for walking
+max_translational_velocity_x: 0.175
+max_translational_velocity_y: 0.1
+max_angular_velocity: 0.4
+starting_velocity: 0.0005
+acceleration: 0.005 # maximum increment in walk command velocity
 
 # Rotate on the spot tuning values
-rotate_velocity: 0.2
+rotate_velocity: 0.4
 rotate_velocity_x: 0.0
 rotate_velocity_y: 0.0
 
 # Rotate around ball tuning values
-pivot_ball_velocity: 0.2
+pivot_ball_velocity: 0.5
 pivot_ball_velocity_x: 0.0
 pivot_ball_velocity_y: -0.2
+
+max_align_radius: 0.75 # Radius [m] to begin aligning with target heading
+min_align_radius: 0.4 # Radius [m] to stay aligning with the target heading
+max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
+min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
+strafe_gain: 1
+max_strafe_angle: 65 * pi / 180 # Maximum angle to strafe at
+max_aligned_angle: 100 * pi / 180 # Maximum angle to be considered aligned
+backward_buffer: 10 * pi / 180 # Buffer angle to keep direction of strafe
+backwards_vector: [-1.0, 0.001] # Vector to walk backwards
+acceleration_multiplier: 0.3
+
+# Radius around obstacles to avoid
+obstacle_radius: 0.6

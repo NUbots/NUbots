@@ -116,7 +116,7 @@ TEST_CASE("Given a file, when the file contents are modified, then change events
     INFO("\n === FileWatcherTestFile Start ===\n");
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant plant(config);
     plant.install<module::extension::FileWatcher>();
     plant.install<TestReactor>();

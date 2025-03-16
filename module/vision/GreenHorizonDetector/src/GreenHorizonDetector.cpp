@@ -54,6 +54,7 @@ namespace module::vision {
 
             cfg.confidence_threshold = config["confidence_threshold"].as<double>();
             cfg.cluster_points       = config["cluster_points"].as<uint>();
+            cfg.max_distance         = config["max_distance"].as<double>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -86,17 +87,16 @@ namespace module::vision {
                                                         cfg.cluster_points,
                                                         clusters);
 
-            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+            log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
             // Prevent issues if there are no clusters
             if (clusters.size() == 0) {
-                log<NUClear::DEBUG>("No clusters found, cannot form a green horizon");
+                log<DEBUG>("No clusters found, cannot form a green horizon");
                 return;
             }
 
             // Get points from the camera since we want to measure the distance from the robot
             Eigen::Matrix<double, 3, Eigen::Dynamic> rPCc = Hcw * rPWw;
-
             // Get the closest distance to the robot from all points in the cluster
             auto get_closest_distance = [&](const std::vector<int>& cluster) {
                 int closest_index = *std::min_element(cluster.begin(), cluster.end(), [&](int a, int b) {
@@ -105,23 +105,15 @@ namespace module::vision {
                 return rPCc.col(closest_index).norm();
             };
 
-            // Find the cluster closest to the robot
-            auto closest_cluster_it = std::min_element(clusters.begin(),
-                                                       clusters.end(),
-                                                       [&](const std::vector<int>& a, const std::vector<int>& b) {
-                                                           return get_closest_distance(a) < get_closest_distance(b);
-                                                       });
-
+            // Go through clusters, remove unacceptable and merge acceptable
+            std::vector<int> field_cluster;
             for (const auto& cluster : clusters) {
-                log<NUClear::DEBUG>(fmt::format("Cluster with {} points and distance {}",
-                                                cluster.size(),
-                                                get_closest_distance(cluster)));
+                // Skip if too far away
+                if (get_closest_distance(cluster) < cfg.max_distance) {
+                    // Merge acceptable clusters into field_cluster
+                    field_cluster.insert(field_cluster.end(), cluster.begin(), cluster.end());
+                }
             }
-
-            log<NUClear::DEBUG>(fmt::format("Closest cluster has {} points", closest_cluster_it->size()));
-
-            // The closest cluster to the robot is the field cluster
-            auto field_cluster = *closest_cluster_it;
 
             // Partition the cluster such that we only have the boundary points of the cluster
             auto boundary = utility::vision::visualmesh::boundary_points(field_cluster.begin(),
@@ -133,7 +125,7 @@ namespace module::vision {
             field_cluster.resize(std::distance(field_cluster.begin(), boundary));
 
             // Graph the field cluster points if debugging
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 for (int idx : field_cluster) {
                     emit(graph("Field cluster point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
@@ -141,13 +133,12 @@ namespace module::vision {
 
             // The remaining points are on the boundary of the field
             // They may also appear around other objects such as the ball
-            log<NUClear::DEBUG>(
-                fmt::format("Found {} points on the boundary of the cluster to create a convex hull with",
-                            field_cluster.size()));
+            log<DEBUG>(fmt::format("Found {} points on the boundary of the cluster to create a convex hull with",
+                                   field_cluster.size()));
 
             // Convex hull algorithms require at least three points
             if (field_cluster.size() < 3) {
-                log<NUClear::DEBUG>("Not enough points to make a convex hull");
+                log<DEBUG>("Not enough points to make a convex hull");
                 return;
             }
 
@@ -155,7 +146,7 @@ namespace module::vision {
             auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
 
             // Graph the convex hull if debugging
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 for (int idx : hull_indices) {
                     emit(graph("Convex hull point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
@@ -182,9 +173,9 @@ namespace module::vision {
                 msg->horizon.emplace_back(rPWw.col(idx));
             }
 
-            log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
-                                            hull_indices.size(),
-                                            field_cluster.size()));
+            log<DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
+                                   hull_indices.size(),
+                                   field_cluster.size()));
 
             emit(std::move(msg));
         });

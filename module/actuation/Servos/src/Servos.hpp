@@ -39,6 +39,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
+    using message::actuation::ServoCommand;
     using message::actuation::ServoTarget;
     using message::input::Sensors;
     using utility::input::ServoID;
@@ -58,27 +59,30 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>>().then(
-                [this](const Servo& servo, const RunInfo& info) {
-                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-                        if (log_level <= NUClear::DEBUG) {
-                            emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
-                                       servo.command.position,
-                                       servo.command.state.gain,
-                                       servo.command.state.torque));
-                        }
-                        emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                           ID,
-                                                           id_to_joint_name[ID],
-                                                           servo.command.position,
-                                                           servo.command.state.gain,
-                                                           servo.command.state.torque));
+            on<Provide<Servo>, Priority::HIGH>().then([this](const Servo& servo, const RunReason& run_reason) {
+                if (run_reason == RunReason::NEW_TASK) {
+                    if (log_level <= DEBUG) {
+                        emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
+                                   servo.command.position,
+                                   servo.command.state.gain,
+                                   servo.command.state.torque));
                     }
-                    // If the time to reach the position is over, then stop requesting the position
-                    else if (NUClear::clock::now() >= servo.command.time) {
+                    // Emit the request to move the servo
+                    emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                       ID,
+                                                       servo.command.position,
+                                                       servo.command.state.gain,
+                                                       servo.command.state.torque));
+                }
+                if (servo.command.done_type == ServoCommand::DoneType::TIME) {
+                    if (servo.command.time <= NUClear::clock::now()) {
                         emit<Task>(std::make_unique<Done>());
                     }
-                });
+                    else {
+                        emit<Task>(std::make_unique<Wait>(servo.command.time));
+                    }
+                }
+            });
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.
@@ -88,10 +92,10 @@ namespace module::actuation {
         /// @tparam Elements is a template pack of Servos that Group uses
         template <typename Group, typename... Elements>
         void add_group_provider() {
-            on<Provide<Group>, Needs<Elements>...>().then(
-                [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
+            on<Provide<Group>, Needs<Elements>..., Priority::HIGH>().then(
+                [this](const Group& group, const RunReason& run_reason, const Uses<Elements>... elements) {
                     // Check if any subtask is Done
-                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    if (run_reason == RunReason::SUBTASK_DONE) {
                         // If every servo task is done then emit Done (ignore servos that weren't included in the Task
                         // message)
                         if (((!group.servos.contains(utility::actuation::ServoMap<Elements>::value) || elements.done)
@@ -99,8 +103,8 @@ namespace module::actuation {
                             emit<Task>(std::make_unique<Done>());
                             return;
                         }
-                        // Emit Idle if all the servos are not Done yet
-                        emit<Task>(std::make_unique<Idle>());
+                        // Emit Continue if all the servos are not Done yet
+                        emit<Task>(std::make_unique<Continue>());
                         return;
                     }
 
@@ -114,8 +118,8 @@ namespace module::actuation {
                                     group.servos.at(utility::actuation::ServoMap<Elements>::value)));
                             }
                             else {  // if a servo was not filled in the map for this group, log it
-                                log<NUClear::TRACE>("Requested a Servo Group Task but did not provide values for Servo",
-                                                    ServoID(utility::actuation::ServoMap<Elements>::value));
+                                log<TRACE>("Requested a Servo Group Task but did not provide values for Servo",
+                                           ServoID(utility::actuation::ServoMap<Elements>::value));
                             }
                         }(),
                         ...);
@@ -138,25 +142,25 @@ namespace module::actuation {
         void add_sequence_provider() {
             // Message to keep track of which position in the vector is to be emitted
             // Make an initial count message
-            emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(0));
+            emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(0));
 
-            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>>().then(
-                [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
+            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Priority::HIGH>().then(
+                [this](const Sequence& sequence, const RunReason& run_reason, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {
                         emit<Task>(std::make_unique<Done>());
                     }
                     // If this is a new task, run the first pack of servos and increment the counter
-                    else if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                    else if (run_reason == RunReason::NEW_TASK) {
                         emit<Task>(std::make_unique<Group>(sequence.frames[0]));
-                        emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(1));
+                        emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(1));
                     }
                     // If the subtask is done, we are done if it is the last servo frames, otherwise use the count to
                     // determine the current frame to emit
-                    else if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    else if (run_reason == RunReason::SUBTASK_DONE) {
                         if (count.count < sequence.frames.size()) {
                             emit<Task>(std::make_unique<Group>(sequence.frames[count.count]));
-                            emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(count.count + 1));
+                            emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(count.count + 1));
                         }
                         else {
                             emit<Task>(std::make_unique<Done>());
@@ -164,7 +168,7 @@ namespace module::actuation {
                     }
                     // Any other run reason shouldn't happen
                     else {
-                        emit<Task>(std::make_unique<Idle>());
+                        emit<Task>(std::make_unique<Continue>());
                     }
                 });
         }

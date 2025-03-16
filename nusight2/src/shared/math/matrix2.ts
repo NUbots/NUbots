@@ -1,7 +1,10 @@
 import { Vector2 } from "./vector2";
 
 export class Matrix2 {
-  constructor(readonly x: Vector2, readonly y: Vector2) {}
+  constructor(
+    readonly x: Vector2,
+    readonly y: Vector2,
+  ) {}
 
   static of() {
     return new Matrix2(new Vector2(1, 0), new Vector2(0, 1));
@@ -25,6 +28,10 @@ export class Matrix2 {
 
   toString() {
     return [`${format(this.x.x)} ${format(this.y.x)}`, `${format(this.x.y)} ${format(this.y.y)}`].join("\n");
+  }
+
+  get determinant(): number {
+    return this.x.x * this.y.y - this.y.x * this.x.y;
   }
 }
 
