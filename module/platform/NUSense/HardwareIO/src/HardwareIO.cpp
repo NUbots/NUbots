@@ -76,15 +76,14 @@ namespace module::platform::NUSense {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : utility::reactor::StreamReactor<HardwareIO, NUSenseParser, 5>(std::move(environment)) {
 
-        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file HardwareIO.yaml
+        on<Configuration>("NUSense.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            auto device     = config["nusense"]["device"].as<std::string>();
-            auto baud       = config["nusense"]["baud"].as<int>();
 
             // Tell the stream reactor to connect to the device
-            emit(std::make_unique<ConnectSerial>(device, baud));
+            emit(std::make_unique<ConnectSerial>(config["device"], config["baud"]));
+        });
 
+        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             // Apply servo offsets
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
