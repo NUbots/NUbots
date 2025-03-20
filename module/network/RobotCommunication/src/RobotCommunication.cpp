@@ -124,7 +124,7 @@ namespace module::network {
         // include teammates and add a using teammates
         on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates) {
             // Get the id of this robot
-            int id = robocup.current_pose.player_id;
+            u_int32_t id = robocup.current_pose.player_id;
 
             // Make new TeamMates message using data from the old message
             TeamMates teammates = old_teammates;
@@ -137,7 +137,7 @@ namespace module::network {
 
             for (auto& mate : teammates.teammates) {  // Loop through each teammate.
                 if (mate.id == id) {  // If the ID of a teammate is found to be the same, update the position.
-                    mate.rRFf = robocup.current_pose.position;  // Update position
+                    mate.rRFf = robocup.current_pose.position.cast<double>();  // Update position
                     found     = true;
                     break;  // Break out of the loop.
                 }
@@ -148,7 +148,7 @@ namespace module::network {
                 TeamMate mate;
                 // Set the variables
                 mate.id   = id;
-                mate.rRFf = robocup.current_pose.position;
+                mate.rRFf = robocup.current_pose.position.cast<double>();
                 // Add it to the teammates list
                 teammates.teammates.emplace_back(mate);
             }
