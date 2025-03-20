@@ -29,8 +29,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "shared/message/strategy/TeamMates.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/WalkState.hpp"
@@ -41,9 +39,11 @@
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
+#include "message/strategy/TeamMates.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
+#include "utility/strategy/soccer_strategy.hpp"
 
 
 namespace module::network {
@@ -59,8 +59,9 @@ namespace module::network {
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
+    using message::strategy::TeamMate;
+    using message::strategy::TeamMates;
     using message::support::GlobalConfig;
-    using shared::message::strategy::TeamMates;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -121,36 +122,39 @@ namespace module::network {
             });
 
         // include teammates and add a using teammates
-        on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates)) {
+        on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates) {
             // Get the id of this robot
             int id = robocup.current_pose.player_id;
 
             // Make new TeamMates message using data from the old message
-            TeamMates teammates = std::make_unique<TeamMates>(std::move(old_teammates));
+            TeamMates teammates = old_teammates;
 
             // Find if the teammates vector (repeated TeamMate) has ID
             //...
             // for (mate in teammates) if mate.id==id then has id
             //...
+            bool found = false;
+
             for (auto& mate : teammates.teammates) {  // Loop through each teammate.
                 if (mate.id == id) {  // If the ID of a teammate is found to be the same, update the position.
-                    mate.position = robocup.current_pose.position;  // Update position
-                    break;                                          // Break out of the loop.
+                    mate.rRFf = robocup.current_pose.position;  // Update position
+                    found     = true;
+                    break;  // Break out of the loop.
                 }
             }
             // Else this robot is not in the list of team mates already, add it in
-            else {
+            if (!found) {
                 // Make the mate
-                TeamMate mate();
+                TeamMate mate;
                 // Set the variables
-                mate.id = id;
-                mate.id = robocup.current_pose.position;
+                mate.id   = id;
+                mate.rRFf = robocup.current_pose.position;
                 // Add it to the teammates list
                 teammates.teammates.emplace_back(mate);
             }
 
-            emit(teammates);
-        }
+            emit(std::make_unique<TeamMates>(std::move(teammates)));
+        });
 
         on<Every<2, Per<std::chrono::seconds>>,
            Optional<With<Ball>>,

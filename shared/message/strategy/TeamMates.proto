@@ -34,7 +34,7 @@ message TeamMate {
         uint32 id = 1;
 
         /// Vector from field to the position of this robot
-        vec3 rRFf = 2;
+        fvec3 rRFf = 2;
 }
 
 message TeamMates {

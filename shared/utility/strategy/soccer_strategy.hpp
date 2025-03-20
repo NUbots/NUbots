@@ -28,47 +28,50 @@
 #ifndef UTILITY_STRATEGY_SOCCER_STRATEGY_HPP
 #define UTILITY_STRATEGY_SOCCER_STRATEGY_HPP
 
+#include <Eigen/Core>
 #include <Eigen/Geometry>
 
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/strategy/TeamMates.hpp"
+
 
 namespace utility::strategy {
 
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::strategy::TeamMates;
 
-    enum Possession {
-        SELF,
-        TEAMMATE,
-        OPPONENT,
-        NONE
-    }
+    struct Possession {
+        enum Value { SELF, TEAMMATE, OPPONENT, NONE };
+        Value value = Value::SELF;
+    };
 
-    Possession
-        get_possession(const LocalisationBall& ball, const TeamMates& teammates, const Field& field, double threshold) {
+    Possession get_possession(const Ball& ball, const TeamMates& teammates, const Field& field, double threshold) {
         // Do we have the ball?
-        Eigen::Vector3d rBCc = Hcw * ball.rBWw;  // cam 2 ball equals the world 2 cam transform times the world 2 ball
+        Eigen::Vector3d rBCc =
+            ball.Hcw * ball.rBWw;  // cam 2 ball equals the world 2 cam transform times the world 2 ball
         rBCc.norm();
         if (rBCc.norm() < threshold) {  // if the cam 2 ball norm is less than the threshold than return the possession
                                         // of the current robot.
-            return Possession::SELF;
+            return Possession{Possession::SELF};
         }
 
         // Do our teammates have the ball?
-        Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;     // Get the ball relative to the field
-        for (const auto& teammate : teammates.teammates)  // Loop through the team mates
+        Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;  // Get the ball relative to the field
+        for (const auto& teammate : teammates.teammates)
+        // Loop through the team mates
         {                                                 // for teammate in teammates.teammates
             Eigen::Vector3d rRBf = teammate.rRFf - rBFf;  // Eigen::Vector3d rRBf = mate.rRFf - rBFf;
             if (rRBf.norm()
                 < threshold) {  // if rRBf.norm() < threshold then teammate has ball return Possession::TEAMMATE
-                return Possession::TEAMMATES;
+                return Possession{Possession::TEAMMATE};
             }
         }
 
         // other?
-        return Possession::NONE;
+        return Possession{Possession::NONE};
     }
 
 }  // namespace utility::strategy
