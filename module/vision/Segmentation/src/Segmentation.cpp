@@ -216,7 +216,7 @@ namespace module::vision {
             for (int y = 0; y < IMAGE_SIZE; y++) {
                 for (int x = 0; x < IMAGE_SIZE; x++) {
                     int class_id = segmentation_result.at<uchar>(y, x);
-                    if (class_id < classes.size()) {
+                    if (static_cast<size_t>(class_id) < classes.size()) {
                         visualization.at<cv::Vec3b>(y, x) = classes[class_id].colour;
                     }
                 }
@@ -345,7 +345,7 @@ namespace module::vision {
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
                         int class_id = segmentation_result.at<uchar>(y, x);
-                        if (class_id < classes.size()) {
+                        if (static_cast<size_t>(class_id) < classes.size()) {
                             colored_segmentation_map.at<cv::Vec3b>(y, x) = classes[class_id].colour;
                         }
                         else {
