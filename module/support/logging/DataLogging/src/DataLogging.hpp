@@ -68,7 +68,7 @@ namespace module::support::logging {
                 /// The threshold of bytes where after this we split the file
                 uint64_t split_size{};
                 /// The encryption passphrase to use or empty if not encrypting
-                std::string passphrase;
+                std::string passphrase = "";
             } output;
         } config;
 
