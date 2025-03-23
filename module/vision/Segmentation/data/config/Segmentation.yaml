@@ -1,2 +1,11 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
+
+# Number of segmentation classes
+num_classes: 3
+
+# Path to the model weights
+model_path: "segmentation_model.onnx"
+
+# OpenVino device (CPU, GPU)
+device: CPU
