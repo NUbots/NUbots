@@ -101,15 +101,8 @@ namespace module::vision {
                         // Extract the camera position now that we need it
                         Eigen::Isometry3d Hcw(image.Hcw);
 
-                        auto start  = std::chrono::high_resolution_clock::now();
+                        // Run the inference
                         auto result = runner(image, Hcw.cast<float>());
-                        auto end    = std::chrono::high_resolution_clock::now();
-
-                        auto duration =
-                            std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.0;
-                        cumulative_duration_ms += duration;
-                        ++frame_count;
-
 
                         if (result.indices.empty()) {
                             // The ground is not visible, hence the mesh cannot be drawn
@@ -176,15 +169,6 @@ namespace module::vision {
                                    100 * double(processed) / double(processed + dropped)));
             processed = 0;
             dropped   = 0;
-
-            double average_fps = (frame_count > 0) ? (1000.0 * frame_count / cumulative_duration_ms) : 0.0;
-
-            log<DEBUG>(fmt::format("Receiving {}/s, Processing {}/s,  Dropping {}/s ({}%), Average FPS: {:.2f}",
-                                   processed + dropped,
-                                   processed,
-                                   dropped,
-                                   100 * double(processed) / double(processed + dropped),
-                                   average_fps));
         });
     }
 }  // namespace module::vision

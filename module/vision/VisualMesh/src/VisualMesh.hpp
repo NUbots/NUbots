@@ -64,11 +64,6 @@ namespace module::vision {
         int processed = 0;
         /// Number of images that have been dropped since this was last reset
         int dropped = 0;
-
-        /// Cumulative duration of processed frames in milliseconds
-        double cumulative_duration_ms = 0.0;
-        /// Number of processed frames for average FPS calculation
-        int frame_count = 0;
     };
 
 }  // namespace module::vision
