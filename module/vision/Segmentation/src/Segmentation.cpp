@@ -33,18 +33,21 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/vision/FieldLines.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
 namespace module::vision {
 
     using extension::Configuration;
 
     using message::input::Image;
+    using message::vision::FieldLines;
     using message::vision::GreenHorizon;
 
     Segmentation::Segmentation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -171,7 +174,6 @@ namespace module::vision {
                           "x",
                           IMAGE_SIZE,
                           ")");
-                // We'll continue anyway and resize if needed
             }
 
             // Find the class with highest probability for each pixel
@@ -220,6 +222,68 @@ namespace module::vision {
             cv::resize(visualization, visualization, cv::Size(width, height));
             cv::resize(segmentation_result, segmentation_result, cv::Size(width, height));
 
+            // -------- Create field lines from segmentation result --------
+            // Field lines are class index 1 in our segmentation
+            const int FIELD_LINE_CLASS = 1;
+
+            // Helper function to simplify unprojection calls
+            auto pix_to_ray = [&](double x, double y) {
+                // Normalize the pixel coordinates to the image width normalized dimensions
+                Eigen::Vector2d norm_dim = Eigen::Vector2d(img.dimensions.x(), img.dimensions.y()) / img.dimensions.x();
+                return utility::vision::unproject(
+                    Eigen::Matrix<double, 2, 1>(x / img.dimensions.x(), y / img.dimensions.x()),
+                    img.lens,
+                    norm_dim);
+            };
+
+            // Helper function to simplify projecting rays onto the field plane then transforming into world space
+            auto ray_to_world_space = [&](const Eigen::Matrix<double, 3, 1>& uFCc) {
+                const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
+                Eigen::Vector3d uFCw         = Hwc.rotation() * uFCc;
+                Eigen::Vector3d rFCw         = uFCw * std::abs(Hwc.translation().z() / uFCw.z()) + Hwc.translation();
+                return rFCw;
+            };
+
+            // Find field line pixels and convert them to rays
+            std::vector<Eigen::Vector3d> line_rays;
+            std::vector<Eigen::Vector3d> line_world_points;
+
+            // Create a field lines message
+            auto field_lines       = std::make_unique<FieldLines>();
+            field_lines->id        = img.id;
+            field_lines->timestamp = img.timestamp;
+            field_lines->Hcw       = img.Hcw;
+
+            // Extract field line points from the segmentation result
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int class_id = segmentation_result.at<uchar>(y, x);
+                    if (class_id == FIELD_LINE_CLASS) {
+                        // Convert pixel to ray in camera space
+                        Eigen::Vector3d uFCc = pix_to_ray(x, y);
+
+                        // Project ray onto field plane in world space
+                        Eigen::Vector3d rFWw = ray_to_world_space(uFCc);
+
+                        // Only add the ray if it's on the field plane
+                        if (rFWw.z() == 0) {
+                            field_lines->points.push_back(uFCc);
+                            field_lines->rPWw.push_back(rFWw);
+                        }
+                    }
+                }
+            }
+
+            // Only emit field lines if we found any
+            if (!field_lines->points.empty()) {
+                log<DEBUG>("Found ", field_lines->points.size(), " field line points");
+                //  Print first world point rPWw
+                log<DEBUG>("First world point rPWw: ", field_lines->rPWw[0]);
+                emit(field_lines);
+            }
+            else {
+                log<DEBUG>("No field lines found in segmentation");
+            }
 
             // -------- Create and emit visualization image --------
             auto visualization_image            = std::make_unique<message::input::Image>();
