@@ -4,7 +4,7 @@ import { Vector3 } from "../../../../../shared/math/vector3";
 import { FieldIntersection } from "../../robot_model";
 
 interface FieldIntersectionsProps {
-  intersections: FieldIntersection[];
+  intersections?: FieldIntersection[];
 }
 
 const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ intersection }) => {
@@ -68,7 +68,7 @@ const IntersectionShape: React.FC<{ intersection: FieldIntersection }> = ({ inte
 export const FieldIntersections: React.FC<FieldIntersectionsProps> = ({ intersections }) => {
   return (
     <>
-      {intersections.map((intersection, index) => (
+      {intersections?.map((intersection, index) => (
         <object3D key={index}>
           <IntersectionShape intersection={intersection} />
         </object3D>

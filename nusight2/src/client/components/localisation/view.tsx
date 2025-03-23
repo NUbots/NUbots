@@ -16,6 +16,7 @@ import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections/view";
+import { AssociationLines } from "./r3f_components/association_lines/view";
 import { FieldObjects } from "./r3f_components/field_objects/view";
 import { FieldPoints } from "./r3f_components/field_points/view";
 import { GridView } from "./r3f_components/grid/view";
@@ -360,9 +361,11 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         defaultColor="orange"
       />
 
-      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
-        <FieldIntersections intersections={robot.fieldIntersections} />
+      {model.fieldIntersectionsVisible && robot.fieldIntersectionsF && (
+        <FieldIntersections intersections={robot.fieldIntersectionsF} />
       )}
+
+      {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
 
       {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
         <WalkPathVisualiser

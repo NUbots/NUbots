@@ -15,10 +15,7 @@ import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
 
 export class LocalisationNetwork {
-  constructor(
-    private network: Network,
-    private model: LocalisationModel,
-  ) {
+  constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.localisation.Ball, this.onBall);
@@ -51,6 +48,10 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
 
   @action
