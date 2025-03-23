@@ -31,6 +31,11 @@ import "Matrix.proto";
 import "Vector.proto";
 import "Transform.proto";
 
+message Line {
+    vec3 start = 1;
+    vec3 end   = 2;
+}
+
 message Field {
     /// Homogeneous transformation matrix from world to field space
     iso3 Hfw = 1;
@@ -40,6 +45,8 @@ message Field {
     double uncertainty = 3;
     /// Vector of particles representing the robots pose hypothesis (x, y, theta)
     repeated vec3 particles = 4;
+    /// Association lines between observations and landmarks
+    repeated Line association_lines = 5;
 }
 
 message ResetFieldLocalisation {}
