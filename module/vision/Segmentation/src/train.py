@@ -1,14 +1,15 @@
 import os
+import random
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
 from PIL import Image
-import numpy as np
-from tqdm import tqdm
-import random
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+from tqdm import tqdm
 
 
 # Define the SE (Squeeze-and-Excitation) block for channel attention
@@ -94,25 +95,19 @@ class EfficientSegmentationModel(nn.Module):
 
         # Decoder blocks with skip connections
         self.dec1 = nn.Sequential(
-            nn.ConvTranspose2d(
-                64, 32, kernel_size=3, stride=2, padding=1, output_padding=1
-            ),
+            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU6(inplace=True),
         )
 
         self.dec2 = nn.Sequential(
-            nn.ConvTranspose2d(
-                64, 24, kernel_size=3, stride=2, padding=1, output_padding=1
-            ),
+            nn.ConvTranspose2d(64, 24, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(24),
             nn.ReLU6(inplace=True),
         )
 
         self.dec3 = nn.Sequential(
-            nn.ConvTranspose2d(
-                48, 16, kernel_size=3, stride=2, padding=1, output_padding=1
-            ),
+            nn.ConvTranspose2d(48, 16, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU6(inplace=True),
         )
@@ -138,9 +133,7 @@ class EfficientSegmentationModel(nn.Module):
         d3 = torch.cat([d3, x0], dim=1)  # [B, 32, H/2, W/2]
 
         out = self.final(d3)  # [B, num_classes, H/2, W/2]
-        return nn.functional.interpolate(
-            out, scale_factor=2, mode="bilinear", align_corners=False
-        )
+        return nn.functional.interpolate(out, scale_factor=2, mode="bilinear", align_corners=False)
 
 
 # Custom dataset for segmentation (with augmentation)
@@ -236,24 +229,18 @@ class SegmentationDataset(Dataset):
 
 
 # Improved training function with learning rate scheduling
-def train_model(
-    model, train_loader, val_loader, criterion, optimizer, device, num_epochs=20
-):
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=20):
     best_loss = float("inf")
 
     # Add learning rate scheduler for better convergence
-    scheduler = ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.5, patience=3, verbose=True
-    )
+    scheduler = ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3, verbose=True)
 
     for epoch in range(num_epochs):
         # Training
         model.train()
         train_loss = 0.0
 
-        for images, masks in tqdm(
-            train_loader, desc=f"Epoch {epoch + 1}/{num_epochs} - Training"
-        ):
+        for images, masks in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{num_epochs} - Training"):
             images = images.to(device)
             masks = masks.to(device)
 
@@ -274,9 +261,7 @@ def train_model(
         total_pixels = 0
 
         with torch.no_grad():
-            for images, masks in tqdm(
-                val_loader, desc=f"Epoch {epoch + 1}/{num_epochs} - Validation"
-            ):
+            for images, masks in tqdm(val_loader, desc=f"Epoch {epoch + 1}/{num_epochs} - Validation"):
                 images = images.to(device)
                 masks = masks.to(device)
 
@@ -349,12 +334,8 @@ def main():
 
     # Create dataloaders
     batch_size = 8
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, num_workers=2
-    )
-    test_loader = DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False, num_workers=2
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
     # Initialize model
     model = EfficientSegmentationModel(in_channels=3, num_classes=3)
@@ -366,9 +347,7 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
 
     # Train model
-    train_model(
-        model, train_loader, test_loader, criterion, optimizer, device, num_epochs=30
-    )
+    train_model(model, train_loader, test_loader, criterion, optimizer, device, num_epochs=30)
 
     # Export to ONNX
     dummy_input = torch.randn(1, 3, img_size, img_size).to(device)

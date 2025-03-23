@@ -1,6 +1,7 @@
-import os
-import torch
 import argparse
+import os
+
+import torch
 from train import EfficientSegmentationModel
 
 
@@ -60,9 +61,7 @@ def main():
         default="results/segmentation_model.onnx",
         help="Path where the ONNX model will be saved",
     )
-    parser.add_argument(
-        "--img_size", type=int, default=512, help="Input image size for the model"
-    )
+    parser.add_argument("--img_size", type=int, default=512, help="Input image size for the model")
 
     args = parser.parse_args()
 

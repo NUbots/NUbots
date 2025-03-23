@@ -1,9 +1,10 @@
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-import matplotlib.pyplot as plt
-import numpy as np
-import os
 
 # Import the model definition
 from train import EfficientSegmentationModel
@@ -12,9 +13,7 @@ from train import EfficientSegmentationModel
 def visualize_segmentation():
     # Parameters
     model_path = "results/best_segmentation_model.pth"  # Updated path
-    test_image_path = (
-        "test/images/81-test_nagoya_game_a_00278.png"  # Change this to your test image
-    )
+    test_image_path = "test/images/81-test_nagoya_game_a_00278.png"  # Change this to your test image
     # Try to find corresponding ground truth mask
     test_mask_path = test_image_path.replace("images", "segmentations")
     img_size = 512
