@@ -39,6 +39,12 @@ namespace module::vision {
         struct Config {
             /// @brief Number of segmentation classes (field, lines, background)
             int num_classes = 3;
+
+            /// @brief Maximum distance (in meters) from camera to consider field line points valid
+            float max_field_line_distance = 5.0f;
+
+            /// @brief Enable distance filtering for field line points
+            bool filter_by_distance = true;
         } cfg;
 
         /// @brief OpenVINO compiled model, used to create inference request object

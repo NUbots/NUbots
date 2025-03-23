@@ -9,3 +9,7 @@ model_path: "segmentation_model.onnx"
 
 # OpenVino device (CPU, GPU)
 device: CPU
+
+# Field line distance filtering
+filter_by_distance: true
+max_field_line_distance: 5.0 # Maximum distance in meters to consider field line points valid

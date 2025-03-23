@@ -57,6 +57,10 @@ namespace module::vision {
             log_level       = config["log_level"].as<NUClear::LogLevel>();
             cfg.num_classes = config["num_classes"].as<int>();
 
+            // New parameters
+            cfg.filter_by_distance      = config["filter_by_distance"].as<bool>();
+            cfg.max_field_line_distance = config["max_field_line_distance"].as<float>();
+
             // Compile the model and create inference request object
             compiled_model =
                 ov::Core().compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
@@ -265,8 +269,20 @@ namespace module::vision {
                         // Project ray onto field plane in world space
                         Eigen::Vector3d rFWw = ray_to_world_space(uFCc);
 
-                        // Only add the ray if it's on the field plane
-                        if (rFWw.z() == 0) {
+                        // Check if the point is within the maximum distance
+                        bool is_valid = true;
+                        if (cfg.filter_by_distance) {
+                            // Calculate distance from camera origin to the field point
+                            const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
+                            double distance              = (rFWw - Hwc.translation()).norm();
+
+                            if (distance > cfg.max_field_line_distance || rFWw.z() != 0) {
+                                is_valid = false;
+                            }
+                        }
+
+                        // Only add the ray if it's on the field plane and within distance limit
+                        if (is_valid) {
                             field_lines->points.push_back(uFCc);
                             field_lines->rPWw.push_back(rFWw);
                         }
