@@ -47,8 +47,10 @@ namespace module::localisation {
     using LocalisationRobot  = message::localisation::Robot;
     using LocalisationRobots = message::localisation::Robots;
     using LocalisationField  = message::localisation::Field;
+    using LocalisationField  = message::localisation::Field;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
+    using FieldDescription   = message::support::FieldDescription;
     using FieldDescription   = message::support::FieldDescription;
 
     using message::eye::DataPoint;
@@ -137,14 +139,28 @@ namespace module::localisation {
                 // **************** Robot tracking maintenance ****************
                 for (auto& tracked_robot : tracked_robots) {
                     auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+                    // **************** Robot tracking maintenance ****************
+                    for (auto& tracked_robot : tracked_robots) {
+                        auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
 
-                    // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
-                    // A robot is outside of view if it is not within the green horizon
-                    // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
-                    if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
-                        tracked_robot.seen = true;
+                        // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
+                        // A robot is outside of view if it is not within the green horizon
+                        // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
+                        if (!point_in_convex_hull(horizon.horizon,
+                                                  Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+                            tracked_robot.seen = true;
+                        }
+                        // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
+                        // A robot is outside of view if it is not within the green horizon
+                        // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
+                        if (!point_in_convex_hull(horizon.horizon,
+                                                  Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+                            tracked_robot.seen = true;
+                        }
+
+                        // If the tracked robot has not been seen, increment the consecutively missed count
+                        tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
                     }
-
                     // If the tracked robot has not been seen, increment the consecutively missed count
                     tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
                 }
