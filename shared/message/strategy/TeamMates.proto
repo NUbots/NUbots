@@ -30,11 +30,11 @@ package message.strategy;
 import "Vector.proto";
 
 message TeamMate {
-        /// ID of the robot
-        uint32 id = 1;
+    /// ID of the robot
+    uint32 id = 1;
 
-        /// Vector from field to the position of this robot
-        vec3 rRFf = 2;
+    /// Vector from field to the position of this robot
+    vec3 rRFf = 2;
 }
 
 message TeamMates {
