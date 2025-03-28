@@ -125,6 +125,10 @@ namespace module::purpose {
                 }
             }
 
+            else if (args.size() == 1) {
+                log<WARN>("No script path provided. Did you forget to run with a script?");
+            }
+
             else {
                 log<DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                 powerplant.shutdown();
@@ -198,7 +202,8 @@ namespace module::purpose {
             refresh_view();
         });
 
-        on<Always>().then([this] {
+        // on<Always>().then([this] {
+        on<IO>(STDIN_FILENO, IO::READ).then([this] {
             switch (getch()) {
                 case 'k':     // Change selection up
                 case KEY_UP:  // Change selection up
@@ -289,17 +294,22 @@ namespace module::purpose {
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
                     break;
-                case ERR:  // No input
-                    napms(100);
-                    refresh_view();
-                    break;
+                    // case ERR:  // No input
+                    //     napms(100);
+                    //     refresh_view();
+                    //     break;
             }
             // Update whatever visual changes we made
             refresh_view();
         });
 
         // When we shutdown end ncurses
-        on<Shutdown>().then(endwin);
+        on<Shutdown>().then([this] {
+            // End curses mode
+            endwin();
+            // Restore terminal state
+            refresh();
+        });
     }
 
     void ScriptTuner::activate_frame(int frame) {
