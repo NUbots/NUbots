@@ -2,7 +2,7 @@
 
 ## Description
 
-A Behaviour module that will run the appropriate getup script for the
+A Behaviour module that will run the appropriate getup script for the robot. It is first delayed so that the robot can settle into it's final position to improve side detection accuracy.
 
 ## Usage
 
