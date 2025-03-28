@@ -51,7 +51,7 @@ def _is_wsl1():
         return False
 
     kernel_release = subprocess.check_output(["uname", "-r"]).decode("utf-8").strip()
-    search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
+    search = re.search(r"^(\d+)\.(\d+)\.\d+", kernel_release)
     major = search.group(1)
     minor = search.group(2)
 
