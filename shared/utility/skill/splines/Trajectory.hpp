@@ -24,8 +24,8 @@
  * https://github.com/Rhoban/model/
  */
 
-#ifndef UTILITY_MOTION_SPLINES_TRAJECTORY_HPP
-#define UTILITY_MOTION_SPLINES_TRAJECTORY_HPP
+#ifndef UTILITY_SKILL_SPLINES_TRAJECTORY_HPP
+#define UTILITY_SKILL_SPLINES_TRAJECTORY_HPP
 
 #include <array>
 #include <iostream>
@@ -33,9 +33,9 @@
 
 #include "QuinticSpline.hpp"
 
-using utility::motion::splines::QuinticSpline;
+using utility::skill::splines::QuinticSpline;
 
-namespace utility::motion::splines {
+namespace utility::skill::splines {
 
     enum TrajectoryDimension { X, Y, Z, ROLL, PITCH, YAW };
 
@@ -180,6 +180,6 @@ namespace utility::motion::splines {
         std::array<std::vector<Scalar>, 6> timepoints;
     };
 
-}  // namespace utility::motion::splines
+}  // namespace utility::skill::splines
 
-#endif  // MOTION_TRAJECTORY_HPP
+#endif  // SKILL_TRAJECTORY_HPP
