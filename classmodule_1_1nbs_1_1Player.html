@@ -210,14 +210,18 @@ Public Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#aad111f41bdb83fb6b194b3ea4f680d1b">emit_next_message</a> ()</td></tr>
 <tr class="memdesc:aad111f41bdb83fb6b194b3ea4f680d1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to emit the next message from the decoder if it is time. <br /></td></tr>
 <tr class="separator:aad111f41bdb83fb6b194b3ea4f680d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f180de87766dc8785fcd5a8d51ab48f"><td class="memItemLeft" align="right" valign="top"><a id="a3f180de87766dc8785fcd5a8d51ab48f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a3f180de87766dc8785fcd5a8d51ab48f">enable_idle_handle</a> ()</td></tr>
-<tr class="memdesc:a3f180de87766dc8785fcd5a8d51ab48f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds and enables idle handle, which will run when the system is idle and try to emit the next message. <br /></td></tr>
-<tr class="separator:a3f180de87766dc8785fcd5a8d51ab48f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5819b1cc4b9de9bb79038dfacf222c75"><td class="memItemLeft" align="right" valign="top"><a id="a5819b1cc4b9de9bb79038dfacf222c75"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a5819b1cc4b9de9bb79038dfacf222c75">enable_main_loop_handle</a> ()</td></tr>
-<tr class="memdesc:a5819b1cc4b9de9bb79038dfacf222c75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds and enable main loop handle, which will always run trying to emit the next message. <br /></td></tr>
-<tr class="separator:a5819b1cc4b9de9bb79038dfacf222c75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ffc5ee17bae0a83e582cfbbce6d124e"><td class="memItemLeft" align="right" valign="top"><a id="a0ffc5ee17bae0a83e582cfbbce6d124e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0ffc5ee17bae0a83e582cfbbce6d124e">emit_playback_state</a> ()</td></tr>
+<tr class="memdesc:a0ffc5ee17bae0a83e582cfbbce6d124e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits the playback state. <br /></td></tr>
+<tr class="separator:a0ffc5ee17bae0a83e582cfbbce6d124e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d505e75d3d68ad93fe8f15bbe7455d0"><td class="memItemLeft" align="right" valign="top"><a id="a9d505e75d3d68ad93fe8f15bbe7455d0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a9d505e75d3d68ad93fe8f15bbe7455d0">enable_realtime_player</a> ()</td></tr>
+<tr class="memdesc:a9d505e75d3d68ad93fe8f15bbe7455d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds and enable realtime player, which will always run trying to emit the next message. <br /></td></tr>
+<tr class="separator:a9d505e75d3d68ad93fe8f15bbe7455d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c36b4660214b6d4af7db23d949f7bdd"><td class="memItemLeft" align="right" valign="top"><a id="a9c36b4660214b6d4af7db23d949f7bdd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a9c36b4660214b6d4af7db23d949f7bdd">enable_skip_idle_player</a> ()</td></tr>
+<tr class="memdesc:a9c36b4660214b6d4af7db23d949f7bdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds and enables skip idle player, which will run when the system is idle and try to emit the next message. <br /></td></tr>
+<tr class="separator:a9c36b4660214b6d4af7db23d949f7bdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a795356048fc939b9f673dc243eb61896"><td class="memItemLeft" align="right" valign="top"><a id="a795356048fc939b9f673dc243eb61896"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a795356048fc939b9f673dc243eb61896">register_emitters</a> ()</td></tr>
 <tr class="memdesc:a795356048fc939b9f673dc243eb61896"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the functions that will decode and emit the message types. <br /></td></tr>
@@ -248,22 +252,26 @@ std::map&lt; uint64_t, std::function&lt; void(<a class="el" href="classutility_1
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0bf0f51d78fa67a2efdab7eb5d69ecdc">end_time</a> = NUClear::clock::time_point::min()</td></tr>
 <tr class="memdesc:a0bf0f51d78fa67a2efdab7eb5d69ecdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The latest timestamp across all files in the player. <br /></td></tr>
 <tr class="separator:a0bf0f51d78fa67a2efdab7eb5d69ecdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22d7bd96ee73564b3f2d5ceb7858eea6"><td class="memItemLeft" align="right" valign="top"><a id="a22d7bd96ee73564b3f2d5ceb7858eea6"></a>
-NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a22d7bd96ee73564b3f2d5ceb7858eea6">idle_handle</a></td></tr>
-<tr class="memdesc:a22d7bd96ee73564b3f2d5ceb7858eea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Idle handle. <br /></td></tr>
-<tr class="separator:a22d7bd96ee73564b3f2d5ceb7858eea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb6ffd1f6677ccdb40b935550846940b"><td class="memItemLeft" align="right" valign="top"><a id="abb6ffd1f6677ccdb40b935550846940b"></a>
-NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#abb6ffd1f6677ccdb40b935550846940b">main_loop_handle</a></td></tr>
-<tr class="memdesc:abb6ffd1f6677ccdb40b935550846940b"><td class="mdescLeft">&#160;</td><td class="mdescRight">On always main loop handle. <br /></td></tr>
-<tr class="separator:abb6ffd1f6677ccdb40b935550846940b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a460c0ea9156b7465aa0fb46f91117ec8"><td class="memItemLeft" align="right" valign="top"><a id="a460c0ea9156b7465aa0fb46f91117ec8"></a>
-message::nbs::player::PlaybackMode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a460c0ea9156b7465aa0fb46f91117ec8">mode</a> = message::nbs::player::PlaybackMode::REALTIME</td></tr>
-<tr class="memdesc:a460c0ea9156b7465aa0fb46f91117ec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playback mode. <br /></td></tr>
+message::nbs::player::PlaybackMode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a460c0ea9156b7465aa0fb46f91117ec8">mode</a> = message::nbs::player::PlaybackMode::UNKNOWN</td></tr>
+<tr class="memdesc:a460c0ea9156b7465aa0fb46f91117ec8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmodule_1_1nbs_1_1Player.html">Player</a> mode. <br /></td></tr>
 <tr class="separator:a460c0ea9156b7465aa0fb46f91117ec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eb48dc9ca1ff604527deff214e1c64f"><td class="memItemLeft" align="right" valign="top"><a id="a0eb48dc9ca1ff604527deff214e1c64f"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0eb48dc9ca1ff604527deff214e1c64f">playback_speed</a> = 1</td></tr>
-<tr class="memdesc:a0eb48dc9ca1ff604527deff214e1c64f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playback speed (clock rtf) <br /></td></tr>
+<tr class="memdesc:a0eb48dc9ca1ff604527deff214e1c64f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmodule_1_1nbs_1_1Player.html">Player</a> playback speed (clock rtf) <br /></td></tr>
 <tr class="separator:a0eb48dc9ca1ff604527deff214e1c64f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d121349e38a96b8332f44377f026827"><td class="memItemLeft" align="right" valign="top"><a id="a3d121349e38a96b8332f44377f026827"></a>
+message::nbs::player::PlaybackState::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a3d121349e38a96b8332f44377f026827">playback_state</a> = message::nbs::player::PlaybackState::State::ENDED</td></tr>
+<tr class="memdesc:a3d121349e38a96b8332f44377f026827"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playback state. <br /></td></tr>
+<tr class="separator:a3d121349e38a96b8332f44377f026827"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39630a4fc511af19fdac0853e774480c"><td class="memItemLeft" align="right" valign="top"><a id="a39630a4fc511af19fdac0853e774480c"></a>
+NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a39630a4fc511af19fdac0853e774480c">realtime_player_handle</a></td></tr>
+<tr class="memdesc:a39630a4fc511af19fdac0853e774480c"><td class="mdescLeft">&#160;</td><td class="mdescRight">On always main loop handle. <br /></td></tr>
+<tr class="separator:a39630a4fc511af19fdac0853e774480c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dd2d60c500619b72d20083a083282e0"><td class="memItemLeft" align="right" valign="top"><a id="a7dd2d60c500619b72d20083a083282e0"></a>
+NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a7dd2d60c500619b72d20083a083282e0">skip_idle_player_handle</a></td></tr>
+<tr class="memdesc:a7dd2d60c500619b72d20083a083282e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Idle handle. <br /></td></tr>
+<tr class="separator:a7dd2d60c500619b72d20083a083282e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ea741f91c18048deb19b6503402d2f1"><td class="memItemLeft" align="right" valign="top"><a id="a0ea741f91c18048deb19b6503402d2f1"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0ea741f91c18048deb19b6503402d2f1">start_time</a> = NUClear::clock::time_point::max()</td></tr>
 <tr class="memdesc:a0ea741f91c18048deb19b6503402d2f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The earliest timestamp across all files in the player. <br /></td></tr>
@@ -331,7 +339,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>nbs</b></li><li class="navelem"><a class="el" href="classmodule_1_1nbs_1_1Player.html">Player</a></li>
-    <li class="footer">Generated on Sun Mar 16 2025 22:01:43 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Mar 28 2025 11:13:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
