@@ -273,18 +273,8 @@ RUN mkdir build && cd build && \
     -Wno-dev && \
     make -j$(nproc) && make install
 
-# protobuf v21 lots of errors
-# protobuf v22 produces error error: ‘uint32_t’ was not declared in this scope
-# protobuf v23 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
-# protobuf v24 produces error error: ‘SetGlobalVLogLevel’ is not a member of ‘absl’
-# v25 has CMake error with protobuf "/protobuf/java/core/src/main/java/com/google/java_features.proto": No such file or directory.\
-# v26 has OpenVINO error relocation R_X86_64_TPOFF32 against hidden symbol `_ZN6google8protobuf8internal22allocate_at_least_hookE' can not be used when making a shared object
-# v27 has fatal error: google/protobuf/stubs/logging.h: No such file or directory
-# v28 fatal error: google/protobuf/stubs/logging.h: No such file or directory
-# v29 fatal error: google/protobuf/stubs/logging.h: No such file or directory
-
 # Move OpenVino libraries to our library path
-# RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
