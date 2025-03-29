@@ -49,7 +49,7 @@ function(NUCLEAR_MODULE)
     # Python Code
   elseif(MODULE_LANGUAGE STREQUAL "PYTHON")
 
-    find_package(PythonInterp 3 REQUIRED)
+    find_package(Python3 REQUIRED)
     find_package(pybind11 REQUIRED)
     find_package(PythonLibsNew 3 REQUIRED)
 

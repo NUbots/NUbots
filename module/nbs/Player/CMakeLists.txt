@@ -26,7 +26,7 @@ SOFTWARE.
 ]]
 
 # Generate our data logging module to handle all the message types
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 REQUIRED)
 
 set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/register_players.cpp")
 

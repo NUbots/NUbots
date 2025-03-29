@@ -1,5 +1,5 @@
 # We need python!
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 REQUIRED)
 find_package(NUClear REQUIRED)
 
 # We use threading

@@ -40,9 +40,9 @@ if(POLICY CMP0079)
 endif()
 
 # This allows the use of the FindPythonInterp and FindPythonLibs modules
-if(POLICY CMP0148)
-  cmake_policy(SET CMP0148 NEW)
-endif()
+# if(POLICY CMP0148)
+#   cmake_policy(SET CMP0148 NEW)
+# endif()
 
 # Enable testing if we are building tests
 if(BUILD_TESTS)
@@ -89,7 +89,7 @@ endif()
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY) # Turn back on for CI_BUILD once we have fixed all the warnings
-  find_package(PythonInterp 3 REQUIRED)
+  find_package(Python3 REQUIRED)
   set(CMAKE_CXX_CLANG_TIDY "${PYTHON_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
                            "${PROJECT_BINARY_DIR}/clang-tidy-fixes" clang-tidy
   )
@@ -160,7 +160,7 @@ if(BUILD_TESTS)
 endif()
 
 # Generate VSCode launch configurations
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 REQUIRED)
 list(JOIN NUCLEAR_ROLES " " launch_roles)
 add_custom_command(
   OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"

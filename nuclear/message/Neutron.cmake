@@ -21,7 +21,7 @@ set(dep_out "${CMAKE_CURRENT_BINARY_DIR}/dependencies")
 
 # We need protobuf and python to generate the neutron messages
 find_package(Protobuf REQUIRED)
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 REQUIRED)
 
 # We need eigen for neutron messages
 find_package(Eigen3 REQUIRED)

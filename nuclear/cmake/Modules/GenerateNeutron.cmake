@@ -21,7 +21,7 @@ include(CMakeParseArguments)
 function(GenerateNeutron)
   # We need protobuf and python to generate the neutron messages
   find_package(Protobuf REQUIRED)
-  find_package(PythonInterp 3 REQUIRED)
+  find_package(Python3 REQUIRED)
 
   # Set the path to our generating scripts
   set(SCRIPT_SOURCE "${PROJECT_SOURCE_DIR}/nuclear/cmake/Scripts")
