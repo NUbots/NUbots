@@ -289,7 +289,13 @@ namespace utility::support {
         for (auto& data : config.as<std::vector<Expression>>()) {
             result[i++] = U(data);
         }
-        assert((fmt::format("We expected {} elements in the YAML file but {} were found", N, i), i == N));
+
+        // Create the error message
+        const auto error_message = fmt::format("We expected {} elements in the YAML file but {} were found", N, i);
+
+        // Use the error message in the assert
+        assert((error_message, i == N));
+
         return result;
     }
 
