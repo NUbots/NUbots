@@ -335,6 +335,9 @@ RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
     --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
 RUN install-package glib2-devel
+RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
+    -Ddefault_library=both && \
+    cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
 RUN  ls ${prefix}/include && \
     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
     -Ddefault_library=both \
