@@ -26,8 +26,8 @@
 # SOFTWARE.
 #
 import argparse
+import importlib.util
 import os
-import pkgutil
 import re
 import subprocess
 import sys
@@ -141,10 +141,11 @@ if __name__ == "__main__":
 
     for components in useable:
         if sys.argv[1 : len(components) + 1] == components:
-            loader = pkgutil.find_loader(".".join(components))
-            if loader:
+            spec = importlib.util.find_spec(".".join(components))
+            if spec:
                 try:
-                    module = loader.load_module()
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
                     if hasattr(module, "register") and hasattr(module, "run"):
 
                         # Build up the base subcommands to this point
@@ -182,9 +183,10 @@ if __name__ == "__main__":
     tools = {}
     for components in candidates:
         try:
-            loader = pkgutil.find_loader(".".join(components))
-            if loader:
-                module = loader.load_module()
+            spec = importlib.util.find_spec(".".join(components))
+            if spec:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
                 if hasattr(module, "register") and hasattr(module, "run"):
 
                     subcommand = subcommands
