@@ -39,6 +39,11 @@ if(POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW)
 endif()
 
+# This allows the use of the FindPythonInterp and FindPythonLibs modules
+if(POLICY CMP0148)
+  cmake_policy(SET CMP0148 NEW)
+endif()
+
 # Enable testing if we are building tests
 if(BUILD_TESTS)
   enable_testing()
