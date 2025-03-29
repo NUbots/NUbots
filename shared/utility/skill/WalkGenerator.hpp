@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_MOTION_WALKGENERATOR_HPP
-#define MODULE_MOTION_WALKGENERATOR_HPP
+#ifndef MODULE_SKILL_WALKGENERATOR_HPP
+#define MODULE_SKILL_WALKGENERATOR_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -35,14 +35,14 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/splines/Trajectory.hpp"
+#include "utility/skill/splines/Trajectory.hpp"
 
 namespace utility::skill {
 
     using utility::input::LimbID;
     using utility::math::euler::mat_to_rpy_intrinsic;
-    using utility::motion::splines::Trajectory;
-    using utility::motion::splines::Waypoint;
+    using utility::skill::splines::Trajectory;
+    using utility::skill::splines::Waypoint;
 
     using message::behaviour::state::WalkState;
     using message::behaviour::state::WalkState::Phase::LEFT;
@@ -249,7 +249,7 @@ namespace utility::skill {
                     // We do not update the time here because we want to remain in the stopped state
                     reset();
                     break;
-                default: NUClear::log<NUClear::WARN>("Unknown state", engine_state.value);
+                default: NUClear::log<NUClear::LogLevel::WARN>("Unknown state", engine_state.value);
             }
 
 
@@ -490,13 +490,13 @@ namespace utility::skill {
         void update_time(const Scalar& dt) {
             // Check for negative time step
             if (dt <= 0.0f) {
-                NUClear::log<NUClear::WARN>("dt <= 0.0f");
+                NUClear::log<NUClear::LogLevel::WARN>("dt <= 0.0f");
                 return;
             }
 
             // Check for too long dt
             if (dt > p.step_period) {
-                NUClear::log<NUClear::WARN>("dt > params.p.step_period");
+                NUClear::log<NUClear::LogLevel::WARN>("dt > params.p.step_period");
                 return;
             }
 

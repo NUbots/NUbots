@@ -117,7 +117,7 @@ namespace module::input {
                 update_odometry(sensors, previous_sensors, raw_sensors, stability);
 
                 // Graph debug information
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     debug_sensor_filter(sensors, raw_sensors);
                 }
 
@@ -188,7 +188,7 @@ namespace module::input {
             sensors->feet[BodySide::RIGHT].down = is_foot_down(raw_sensors.fsr.right, cfg.foot_down.threshold);
         }
         else {
-            log<NUClear::WARN>("Unknown foot down method");
+            log<WARN>("Unknown foot down method");
         }
 
         // **************** Planted Foot Information ****************
@@ -213,7 +213,8 @@ namespace module::input {
 
         // Check for errors on the platform and FSRs
         if (subcontroller_packet_error) {
-            NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
+            NUClear::log<NUClear::LogLevel::WARN>(
+                make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
 
 
@@ -224,7 +225,7 @@ namespace module::input {
 
             // Check for an error on the servo and report it
             if (hardware_status != RawSensors::HardwareError::HARDWARE_OK) {
-                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(raw_servo, id));
+                NUClear::log<NUClear::LogLevel::WARN>(make_servo_hardware_error_string(raw_servo, id));
             }
 
             // Determine the current position with potential fallback to the last known good position
@@ -233,9 +234,9 @@ namespace module::input {
                 && (fabs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change
                     || hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
                 current_position = previous_sensors->servo[id].present_position;
-                NUClear::log<NUClear::DEBUG>("Suspected encoder error on servo ",
-                                             id,
-                                             ": Using last known good position.");
+                NUClear::log<NUClear::LogLevel::DEBUG>("Suspected encoder error on servo ",
+                                                       id,
+                                                       ": Using last known good position.");
             }
 
             sensors->servo.emplace_back(
@@ -270,7 +271,7 @@ namespace module::input {
         // throw massive numbers without an error flag and if our hardware is working as intended, it should never
         // read that we're spinning at 2 revs/s
         if (raw_sensors.gyroscope.norm() > 4.0 * M_PI) {
-            NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
+            NUClear::log<NUClear::LogLevel::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
             if (previous_sensors) {
                 sensors->gyroscope = previous_sensors->gyroscope;
             }
@@ -322,22 +323,22 @@ namespace module::input {
         // If we have a state change, emit the appropriate event
         if (left_state_change) {
             if (left_down) {
-                log<NUClear::INFO>("Left Button Down");
-                emit<Scope::DIRECT>(std::make_unique<ButtonLeftDown>());
+                log<INFO>("Left Button Down");
+                emit<Scope::INLINE>(std::make_unique<ButtonLeftDown>());
             }
             else {
-                log<NUClear::INFO>("Left Button Up");
-                emit<Scope::DIRECT>(std::make_unique<ButtonLeftUp>());
+                log<INFO>("Left Button Up");
+                emit<Scope::INLINE>(std::make_unique<ButtonLeftUp>());
             }
         }
         if (mid_state_change) {
             if (middle_down) {
-                log<NUClear::INFO>("Middle Button Down");
-                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleDown>());
+                log<INFO>("Middle Button Down");
+                emit<Scope::INLINE>(std::make_unique<ButtonMiddleDown>());
             }
             else {
-                log<NUClear::INFO>("Middle Button Up");
-                emit<Scope::DIRECT>(std::make_unique<ButtonMiddleUp>());
+                log<INFO>("Middle Button Up");
+                emit<Scope::INLINE>(std::make_unique<ButtonMiddleUp>());
             }
         }
     }
@@ -405,7 +406,7 @@ namespace module::input {
                 case WalkState::Phase::LEFT:
                     Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
                     break;
-                default: log<NUClear::WARN>("Anchor frame should not be updated in double support phase"); break;
+                default: log<WARN>("Anchor frame should not be updated in double support phase"); break;
             }
             // Update our current anchor foot indicator to new foot
             planted_anchor_foot = sensors->planted_foot_phase;

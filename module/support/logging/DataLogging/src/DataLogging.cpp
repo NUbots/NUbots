@@ -33,6 +33,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/nbs/Index.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::logging {
@@ -71,6 +72,8 @@ namespace module::support::logging {
             uint32_t size = data.data.size() + sizeof(data.hash) + sizeof(timestamp_us);
 
             // If the file isn't open, or writing this message will exceed our max size, make a new file
+            // If we are encrypting the encoder can actually add a few extra bytes over this so it is possible we end up
+            // with more bytes of data than our maximum.
             if (!encoder || !encoder->is_open()
                 || (encoder->get_bytes_written() + size + 3 + sizeof(timestamp_us) + sizeof(data.hash))
                        >= config.output.split_size) {
@@ -78,86 +81,80 @@ namespace module::support::logging {
                     encoder->close();
                 }
 
-                std::filesystem::path temp;
-
-                if (!output_file_path.empty()) {
-                    temp = output_file_path;
-                    // Remove the first character of the filename
-                    temp.replace_filename(
-                        output_file_path.filename().string().substr(1,
-                                                                    output_file_path.filename().string().size() - 1));
-                    std::filesystem::rename(output_file_path, temp);
-                }
-
-                if (!index_file_path.empty()) {
-                    temp = index_file_path;
-                    // Remove the first character of the filename
-                    temp.replace_filename(
-                        index_file_path.filename().string().substr(1, index_file_path.filename().string().size() - 1));
-                    std::filesystem::rename(index_file_path, temp);
-                }
-
                 // Creates directory for output
                 std::filesystem::create_directories(config.output.directory / config.output.binary);
 
                 // Creates the output ".nbs" file path.
-                std::string ftime = formatted_time();
-                output_file_path  = config.output.directory / config.output.binary / ("_" + ftime + ".nbs");
+                output_file_path = std::filesystem::path();
+
+                // If we are encrypting it's an "nbe" file otherwise it's "nbs"
+                std::string ext = config.output.passphrase.empty() ? ".nbs" : ".nbe";
+                output_file_path +=
+                    config.output.directory / config.output.binary / fmt::format("{}{}", formatted_time(), ext);
 
                 // Creates the output ".idx" file path.
                 index_file_path = output_file_path;
                 index_file_path += ".idx";
 
-                encoder = std::make_unique<utility::nbs::Encoder>(output_file_path, index_file_path);
+                // Make a new encoder
+                if (config.output.passphrase.empty()) {
+                    encoder = std::make_unique<utility::nbs::Encoder>(output_file_path);
+                }
+                else {
+                    encoder = std::make_unique<utility::nbs::Encoder>(output_file_path, config.output.passphrase);
+                }
             }
 
-            encoder->write(data.timestamp, data.message_timestamp, data.hash, data.id, data.data);
+            encoder->write(data.timestamp, data.message_timestamp, data.hash, data.subtype, data.data);
+        });
+
+        on<Startup>().then([this] {
+            // Make a pass through the output directory and ensure there are no stale lock files
+            std::error_code ec;
+            for (const auto& dir_entry :
+                 std::filesystem::directory_iterator{config.output.directory / config.output.binary, ec}) {
+                if (dir_entry.path().extension() == ".lock") {
+                    log<WARN>(fmt::format("Removing old lock file: {}", dir_entry.path().string()));
+                    std::filesystem::remove(dir_entry.path());
+                }
+            }
+
+            // Check for any errors that occurred and report them
+            if (ec) {
+                log<ERROR>(fmt::format("Error iterating through '{}': {}",
+                                       (config.output.directory / config.output.binary).string(),
+                                       ec.message()));
+            }
         });
 
         on<Shutdown>().then([this] {
+            if (encoder == nullptr) {
+                return;
+            }
+
             encoder->close();
-
-            std::filesystem::path temp;
-
-            if (!output_file_path.empty()) {
-                temp = output_file_path;
-                // Remove the first character of the filename
-                temp.replace_filename(
-                    output_file_path.filename().string().substr(1, output_file_path.filename().string().size() - 1));
-                std::filesystem::rename(output_file_path, temp);
-            }
-
-            if (!index_file_path.empty()) {
-                temp = index_file_path;
-                // Remove the first character of the filename
-                temp.replace_filename(
-                    index_file_path.filename().string().substr(1, index_file_path.filename().string().size() - 1));
-                std::filesystem::rename(index_file_path, temp);
-            }
         });
 
         on<Configuration, Trigger<CommandLineArguments>, Sync<DataLog>>("DataLogging.yaml")
             .then([this](const Configuration& cfg, const CommandLineArguments& argv) {
-                log_level = cfg["log_level"].as<NUClear::LogLevel>();
-
                 // Get the details we need to generate a log file name
                 config.output.directory  = cfg["output"]["directory"].as<std::string>();
-                config.output.split_size = cfg["output"]["split_size"].as<Expression>();
+                config.output.split_size = uint64_t(cfg["output"]["split_size"].as<Expression>());
 
                 // Get the name of the currently running binary
-                std::vector<uint8_t> data(argv[0].cbegin(), argv[0].cend());
+                std::vector<char> data(argv[0].cbegin(), argv[0].cend());
                 data.push_back('\0');
-                const auto* base     = basename(reinterpret_cast<const char*>(data.data()));
+                const auto* base     = basename(data.data());
                 config.output.binary = std::string(base);
 
                 // Rescue any existing recorders that we want to keep
                 std::map<std::string, ReactionHandle> new_handles;
-                for (const auto& setting : cfg["messages"].config) {
+                for (const auto& setting : cfg["messages"]) {
                     auto name    = setting.first.as<std::string>();
                     bool enabled = setting.second.as<bool>();
 
                     // If it was enabled and we are keeping it enabled, keep it and remove it from the old list
-                    if (handles.count(name) > 0 && enabled) {
+                    if (handles.contains(name) && enabled) {
                         new_handles.insert(std::make_pair(name, handles[name]));
                         handles.erase(handles.find(name));
                     }
@@ -165,18 +162,18 @@ namespace module::support::logging {
 
                 // Unbind any recorders we didn't save
                 for (auto& handle : handles) {
-                    log<NUClear::INFO>("Data logging for type", handle.first, "disabled");
+                    log<INFO>("Data logging for type", handle.first, "disabled");
                     handle.second.unbind();
                 }
 
                 // Add any new recorders that we don't have yet
-                for (const auto& setting : cfg["messages"].config) {
+                for (const auto& setting : cfg["messages"]) {
                     auto name    = setting.first.as<std::string>();
                     bool enabled = setting.second.as<bool>();
 
                     // If we are enabling this, and it wasn't already enabled, enable it
-                    if (new_handles.count(name) == 0 && enabled) {
-                        log<NUClear::INFO>("Data logging for type", name, "enabled");
+                    if (!new_handles.contains(name) && enabled) {
+                        log<INFO>("Data logging for type", name, "enabled");
                         new_handles.insert(std::make_pair(name, activate_recorder(name)));
                     }
                 }
