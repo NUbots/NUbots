@@ -28,6 +28,7 @@
 #ifndef UTILITY_INPUT_LIMBID_HPP
 #define UTILITY_INPUT_LIMBID_HPP
 
+#include <cstdint>
 #include <set>
 
 #include "utility/input/ServoID.hpp"
