@@ -42,7 +42,7 @@ interface WalkTrajectoryProps {
 export const WalkTrajectory: React.FC<WalkTrajectoryProps> = ({
   torso_trajectory,
   swing_foot_trajectory,
-  color = "#ff0000",
+  color = "#ffa500",
   lineWidth = 5,
 }) => {
   return (

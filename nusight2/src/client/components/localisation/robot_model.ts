@@ -400,7 +400,7 @@ export class LocalisationRobotModel {
     this.trajectory_history.push({
       torso: torso.map((m) => Matrix4.from(m)),
       swing_foot: swing_foot.map((m) => Matrix4.from(m)),
-      color: "#ff0000",
+      color: "#ffa500",
       timestamp: Date.now(),
       phase: this.walk_phase,
     });

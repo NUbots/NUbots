@@ -397,7 +397,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <WalkTrajectory
           torso_trajectory={robot.torso_trajectoryF}
           swing_foot_trajectory={robot.swing_foot_trajectoryF}
-          color={"#ff0000"}
+          color={"#ffa500"}
         />
       )}
 
