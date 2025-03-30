@@ -30,12 +30,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
 
 #include "utility/math/comparison.hpp"
@@ -49,7 +47,6 @@ namespace module::planning {
     using extension::Configuration;
 
     using message::input::Sensors;
-    using message::localisation::Field;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
@@ -57,7 +54,6 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
-    using message::support::FieldDescription;
     using message::vision::Goal;
     using message::vision::Goals;
 
@@ -112,15 +108,11 @@ namespace module::planning {
         on<Provide<WalkTo>,
            Optional<With<Robots>>,
            With<Sensors>,
-           Optional<With<Goals>>,
-           With<Field>,
-           With<FieldDescription>>()
+           Optional<With<Goals>>>()
             .then([this](const WalkTo& walk_to,
                          const std::shared_ptr<const Robots>& robots,
                          const Sensors& sensors,
-                         const std::shared_ptr<const Goals>& goals,
-                         const Field& field,
-                         const FieldDescription& fieldDesc) {
+                         const std::shared_ptr<const Goals>& goals) {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
@@ -129,16 +121,17 @@ namespace module::planning {
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
+                // If there are goals in sight, or other robots
                 if ((goals != nullptr && !goals->goals.empty()) || robots != nullptr) {
                     std::vector<Eigen::Vector2d> all_obstacles{};
                     // If the robot can see goal posts, try to avoid them
                     if (!goals->goals.empty()) {
                         // Calc the position of the goal posts, add them as obstacles
                         for (const auto& goal : goals->goals) {
-                            auto rGCc = goal.post.bottom * goal.post.distance;  // in camera space
-                            auto rGWw = goals->Hcw.inverse() * rGCc;
+                            auto rGCc = goal.post.bottom * goal.post.distance;  // In camera space
+                            auto rGWw = goals-> Hcw.inverse() * rGCc;
                             auto rGRr = sensors.Hrw * rGWw;
-                            all_obstacles.emplace_back(rGRr.head(2));
+                            all_obstacles.emplace_back(rGRr.head(2)); // Add them as obstacles
                         }
                     }
                     // If there are robots, check if there are obstacles in the way
