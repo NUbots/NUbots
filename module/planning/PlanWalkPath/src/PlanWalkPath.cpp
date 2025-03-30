@@ -156,11 +156,9 @@ namespace module::planning {
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
-                if ()  // vector rDRr is overlap with the goalpost in front )
 
-
-                    // Calculate the translational error between the robot and the target point (x, y)
-                    const double translational_error = rDRr.norm();
+                // Calculate the translational error between the robot and the target point (x, y)
+                const double translational_error = rDRr.norm();
 
                 // Linearly interpolate between angle to the target and desired heading when inside the align radius
                 // region
