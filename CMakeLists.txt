@@ -107,6 +107,8 @@ if(CI_BUILD)
   # -warnings-as-errors=*) * set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
 endif()
 
+add_compile_options(-Wno-stringop-overflow)
+
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)
 if(USE_ASAN)
