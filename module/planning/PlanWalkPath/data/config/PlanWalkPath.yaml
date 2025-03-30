@@ -30,4 +30,4 @@ backwards_vector: [-1.0, 0.001] # Vector to walk backwards
 acceleration_multiplier: 0.3
 
 # Radius around obstacles to avoid
-obstacle_radius: 0.6
+obstacle_radius: 1

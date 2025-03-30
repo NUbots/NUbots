@@ -120,14 +120,15 @@ namespace module::planning {
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
+                std::vector<Eigen::Vector2d> all_obstacles{};
                 // Avoiding goal posts and robots when theyre in the planned path
                 if (!goals.goals.empty() || robots != nullptr) {
-                    std::vector<Eigen::Vector2d> all_obstacles{};
-                    // if goal posts are in the planned path, avoid them
+
+                    // If the robot can see goal posts, try to avoid them
                     if (!goals.goals.empty()) {
-                        // the position of the goal post
+                        // The position of the goal post
                         Eigen::Vector3d goal_post = goals.goals[0].post.bottom * goals.goals[0].post.distance;
-                        // put this as an obstacle
+                        // Put this as an obstacle
                         all_obstacles.emplace_back(goal_post.head(2));
                     }
                     // If there are robots, check if there are obstacles in the way
