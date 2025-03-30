@@ -192,9 +192,17 @@ export class LocalisationNetwork {
   @action.bound
   private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);
+
+    // If phase changed, add current trajectories to history before updating
+    if (robot.walk_phase !== walk_state.phase && robot.torso_trajectory.length > 0) {
+      robot.addToTrajectoryHistory(robot.torso_trajectoryF, robot.swing_foot_trajectoryF);
+    }
+
+    // Update current state
     robot.torso_trajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
     robot.swing_foot_trajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
     robot.Hwp = Matrix4.from(walk_state.Hwp);
+    robot.walk_phase = walk_state.phase;
   }
 }
 

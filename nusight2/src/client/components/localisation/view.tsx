@@ -26,6 +26,7 @@ import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory/view";
+import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history/view";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -396,9 +397,12 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         <WalkTrajectory
           torso_trajectory={robot.torso_trajectoryF}
           swing_foot_trajectory={robot.swing_foot_trajectoryF}
-          color={robot.color}
+          color={"#ff0000"}
         />
       )}
+
+      {robot.trajectory_history.length > 0 && <WalkTrajectoryHistory trajectories={robot.trajectory_history} />}
+
       {model.boundedBoxVisible && robot.boundingBox && (
         <BoundingBox
           minX={robot.boundingBox.minX}

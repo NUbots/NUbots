@@ -1,11 +1,13 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
+import { action } from "mobx";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
+import { message } from "../../../shared/messages";
 
 class ServoMotor {
   @observable angle: number;
@@ -165,6 +167,14 @@ export class LocalisationRobotModel {
   @observable player_id: number;
   @observable torso_trajectory: Matrix4[];
   @observable swing_foot_trajectory: Matrix4[];
+  @observable walk_phase: message.behaviour.state.WalkState.Phase;
+  @observable trajectory_history: {
+    torso: Matrix4[];
+    swing_foot: Matrix4[];
+    color: string;
+    timestamp: number;
+    phase: message.behaviour.state.WalkState.Phase;
+  }[] = [];
 
   constructor({
     model,
@@ -196,6 +206,8 @@ export class LocalisationRobotModel {
     player_id,
     torso_trajectory,
     swing_foot_trajectory,
+    walk_phase,
+    trajectory_history,
   }: {
     model: RobotModel;
     name: string;
@@ -226,6 +238,14 @@ export class LocalisationRobotModel {
     player_id: number;
     torso_trajectory: Matrix4[];
     swing_foot_trajectory: Matrix4[];
+    walk_phase: message.behaviour.state.WalkState.Phase;
+    trajectory_history: {
+      torso: Matrix4[];
+      swing_foot: Matrix4[];
+      color: string;
+      timestamp: number;
+      phase: message.behaviour.state.WalkState.Phase;
+    }[];
   }) {
     this.model = model;
     this.name = name;
@@ -256,6 +276,8 @@ export class LocalisationRobotModel {
     this.player_id = player_id;
     this.torso_trajectory = torso_trajectory;
     this.swing_foot_trajectory = swing_foot_trajectory;
+    this.walk_phase = walk_phase;
+    this.trajectory_history = trajectory_history;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -285,6 +307,8 @@ export class LocalisationRobotModel {
       player_id: -1,
       torso_trajectory: [],
       swing_foot_trajectory: [],
+      walk_phase: message.behaviour.state.WalkState.Phase.DOUBLE,
+      trajectory_history: [],
     });
   });
 
@@ -365,5 +389,29 @@ export class LocalisationRobotModel {
   @computed
   get swing_foot_trajectoryF(): Matrix4[] {
     return this.swing_foot_trajectory.map((Hps) => this.Hfw.multiply(this.Hwp).multiply(Hps));
+  }
+
+  @action
+  addToTrajectoryHistory(torso: Matrix4[], swing_foot: Matrix4[]) {
+    if (torso.length === 0 || swing_foot.length === 0) {
+      return;
+    }
+
+    this.trajectory_history.push({
+      torso: torso.map((m) => Matrix4.from(m)),
+      swing_foot: swing_foot.map((m) => Matrix4.from(m)),
+      color: "#ff0000",
+      timestamp: Date.now(),
+      phase: this.walk_phase,
+    });
+
+    const MAX_HISTORY = 10;
+    if (this.trajectory_history.length > MAX_HISTORY) {
+      this.trajectory_history.shift();
+    }
+
+    const MAX_AGE_MS = 10000;
+    const now = Date.now();
+    this.trajectory_history = this.trajectory_history.filter((t) => now - t.timestamp < MAX_AGE_MS);
   }
 }
