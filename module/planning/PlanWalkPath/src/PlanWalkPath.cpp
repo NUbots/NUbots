@@ -34,6 +34,8 @@
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
 
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
@@ -53,6 +55,9 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
+    // using message::support::FieldDescription;
+    using message::vision::Goal;
+    using message::vision::Goals;
 
     using message::strategy::StandStill;
 
@@ -102,22 +107,35 @@ namespace module::planning {
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>, With<Goals>>().then(
+            [this](const WalkTo& walk_to,
+                   const std::shared_ptr<const Robots>& robots,
+                   const Sensors& sensors,
+                   const Goals& goals) {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
                 const double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
-                // Calculate the angle between the robot and the final desired heading
+                // Calculate the angle between the robot (where it is facing) and the final desired heading
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
-                // If there are robots, check if there are obstacles in the way
-                if (robots != nullptr) {
-                    // Get the positions of all robots in the world
+                // Avoiding goal posts and robots when theyre in the planned path
+                if (!goals.goals.empty() || robots != nullptr) {
                     std::vector<Eigen::Vector2d> all_obstacles{};
-                    for (const auto& robot : robots->robots) {
-                        all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
+                    // if goal posts are in the planned path, avoid them
+                    if (!goals.goals.empty()) {
+                        // the position of the goal post
+                        Eigen::Vector3d goal_post = goals.goals[0].post.bottom * goals.goals[0].post.distance;
+                        // put this as an obstacle
+                        all_obstacles.emplace_back(goal_post.head(2));
+                    }
+                    // If there are robots, check if there are obstacles in the way
+                    if (robots != nullptr) {
+                        // Get the positions of all robots in the world
+                        for (const auto& robot : robots->robots) {
+                            all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
+                        }
                     }
                     // Sort obstacles based on distance from the robot
                     std::sort(all_obstacles.begin(),
@@ -126,16 +144,21 @@ namespace module::planning {
 
                     // Get the obstacles in the way of the current path
                     const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
-
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
                         // Adjust the target direction to avoid obstacles
                         rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
 
                         // Override the heading when walking around obstacles
+                        // Find the suitable vector in order to walk around the obstacles
+                        rDRr = walk_around_obstacle(obstacles, rDRr);
+                        // log<NUClear::INFO>("Walking around obstacle");
+                        log<NUClear::INFO>("Goalpost at index 0 is ", goals.goals[0].side);
+                        //  Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
+
 
                 // Calculate the translational error between the robot and the target point (x, y)
                 const double translational_error = rDRr.norm();
@@ -294,6 +317,34 @@ namespace module::planning {
 
         // Scale the perpendicular vector by obstacle_radius to ensure clearance
         return left_distance < right_distance ? leftmost : rightmost;
+    }
+
+    Eigen::Vector2d PlanWalkPath::walk_around_obstacle(std::vector<Eigen::Vector2d> obstacles, Eigen::Vector2d rDRr) {
+        log<NUClear::DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+
+        // Calculate a perpendicular vector to the direction of the target point
+        const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
+
+        // Find leftmost and rightmost and see which is a better path
+        Eigen::Vector2d leftmost  = obstacles[0];
+        Eigen::Vector2d rightmost = obstacles[0];
+        for (const auto& pos : obstacles) {
+            leftmost  = pos.dot(perp_direction) < leftmost.dot(perp_direction) ? pos : leftmost;
+            rightmost = pos.dot(perp_direction) > rightmost.dot(perp_direction) ? pos : rightmost;
+        }
+
+        // Add on the obstacle radius
+        leftmost  = leftmost - perp_direction * cfg.obstacle_radius;
+        rightmost = rightmost + perp_direction * cfg.obstacle_radius;
+
+        // Determine if leftmost or rightmost position has a quicker path
+        const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
+        const double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
+
+        // Scale the perpendicular vector by obstacle_radius to ensure clearance
+        Eigen::Vector2d vector = left_distance < right_distance ? leftmost : rightmost;
+
+        return vector;
     }
 
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {

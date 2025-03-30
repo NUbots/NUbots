@@ -91,11 +91,15 @@ namespace module::planning {
             double obstacle_radius = 0.0;
         } cfg;
 
+
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
 
         /// @brief Boolean value to determine if the robot is walking backwards
         bool is_walking_backwards = false;
+
+        /// @brief Just testing
+        Eigen::Vector2d walk_around_obstacle(std::vector<Eigen::Vector2d> obstacles, Eigen::Vector2d rDRr);
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain
