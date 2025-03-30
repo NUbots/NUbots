@@ -149,11 +149,6 @@ namespace module::planning {
                         // Adjust the target direction to avoid obstacles
                         rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
 
-                        // Override the heading when walking around obstacles
-                        // Find the suitable vector in order to walk around the obstacles
-                        rDRr = walk_around_obstacle(obstacles, rDRr);
-                        // log<NUClear::INFO>("Walking around obstacle");
-                        log<NUClear::INFO>("Goalpost at index 0 is ", goals.goals[0].side);
                         //  Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
@@ -317,34 +312,6 @@ namespace module::planning {
 
         // Scale the perpendicular vector by obstacle_radius to ensure clearance
         return left_distance < right_distance ? leftmost : rightmost;
-    }
-
-    Eigen::Vector2d PlanWalkPath::walk_around_obstacle(std::vector<Eigen::Vector2d> obstacles, Eigen::Vector2d rDRr) {
-        log<NUClear::DEBUG>("Path planning around", obstacles.size(), "obstacles.");
-
-        // Calculate a perpendicular vector to the direction of the target point
-        const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
-
-        // Find leftmost and rightmost and see which is a better path
-        Eigen::Vector2d leftmost  = obstacles[0];
-        Eigen::Vector2d rightmost = obstacles[0];
-        for (const auto& pos : obstacles) {
-            leftmost  = pos.dot(perp_direction) < leftmost.dot(perp_direction) ? pos : leftmost;
-            rightmost = pos.dot(perp_direction) > rightmost.dot(perp_direction) ? pos : rightmost;
-        }
-
-        // Add on the obstacle radius
-        leftmost  = leftmost - perp_direction * cfg.obstacle_radius;
-        rightmost = rightmost + perp_direction * cfg.obstacle_radius;
-
-        // Determine if leftmost or rightmost position has a quicker path
-        const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
-        const double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
-
-        // Scale the perpendicular vector by obstacle_radius to ensure clearance
-        Eigen::Vector2d vector = left_distance < right_distance ? leftmost : rightmost;
-
-        return vector;
     }
 
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
