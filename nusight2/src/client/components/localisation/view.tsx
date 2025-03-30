@@ -25,6 +25,7 @@ import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
 import { LocalisationRobotModel } from "./robot_model";
+import { WalkTrajectory } from "./r3f_components/walk_trajectory/view";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -391,6 +392,13 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
       {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
 
+      {robot.torso_trajectory && robot.swing_foot_trajectory && (
+        <WalkTrajectory
+          torso_trajectory={robot.torso_trajectoryF}
+          swing_foot_trajectory={robot.swing_foot_trajectoryF}
+          color={robot.color}
+        />
+      )}
       {model.boundedBoxVisible && robot.boundingBox && (
         <BoundingBox
           minX={robot.boundingBox.minX}

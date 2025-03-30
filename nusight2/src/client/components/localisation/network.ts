@@ -15,10 +15,7 @@ import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
 
 export class LocalisationNetwork {
-  constructor(
-    private network: Network,
-    private model: LocalisationModel,
-  ) {
+  constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.localisation.Ball, this.onBall);
@@ -30,6 +27,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -190,6 +188,14 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
+
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.torso_trajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
+    robot.swing_foot_trajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
+    robot.Hwp = Matrix4.from(walk_state.Hwp);
+  }
 }
 
 function decompose(m: THREE.Matrix4): {
