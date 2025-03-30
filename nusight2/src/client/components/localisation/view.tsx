@@ -24,9 +24,9 @@ import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
-import { LocalisationRobotModel } from "./robot_model";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory/view";
 import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history/view";
+import { LocalisationRobotModel } from "./robot_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;

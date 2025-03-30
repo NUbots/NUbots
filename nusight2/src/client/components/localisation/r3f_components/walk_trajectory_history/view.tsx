@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Matrix4 } from "../../../../../shared/math/matrix4";
 import { TrajectoryLine } from "../walk_trajectory/view";
 
