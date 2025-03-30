@@ -43,7 +43,11 @@ from . import defaults, platform
 
 def _is_docker():
     path = "/proc/self/cgroup"
-    return os.path.exists("/.dockerenv") or os.path.isfile(path) and any("docker" in line for line in open(path))
+    return (
+        os.path.exists("/.dockerenv")
+        or os.path.isfile(path)
+        and any("docker" in line for line in open(path))
+    )
 
 
 def _is_wsl1():
@@ -71,7 +75,10 @@ def _is_linux():
 def _setup_volume(volume_name, clean_volume):
     volume = (
         volume_name
-        if subprocess.call(["docker", "volume", "inspect", volume_name], stderr=DEVNULL, stdout=DEVNULL) == 0
+        if subprocess.call(
+            ["docker", "volume", "inspect", volume_name], stderr=DEVNULL, stdout=DEVNULL
+        )
+        == 0
         else None
     )
 
@@ -83,7 +90,14 @@ def _setup_volume(volume_name, clean_volume):
 
     # If we don't have a volume, make one
     if volume is None:
-        if subprocess.call(["docker", "volume", "create", volume_name], stderr=DEVNULL, stdout=DEVNULL) == 0:
+        if (
+            subprocess.call(
+                ["docker", "volume", "create", volume_name],
+                stderr=DEVNULL,
+                stdout=DEVNULL,
+            )
+            == 0
+        ):
             volume = volume_name
         else:
             raise RuntimeError("Docker volume create returned a non-zero exit code")
@@ -101,7 +115,11 @@ def _setup_internal_image(image, rebuild, clean_volume):
         platform.build(repository, target)
 
     # Find the current target for this platform
-    target = target if target != "selected" else platform.selected(repository, defaults.local_user)
+    target = (
+        target
+        if target != "selected"
+        else platform.selected(repository, defaults.local_user)
+    )
 
     # Ensure the build volume exists and clean it if necessary
     build_volume_name = f"{repository}_{target}_{defaults.local_user}_build"
@@ -179,6 +197,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "--group-add",
             "render_host",
             "--privileged",
+            "--gpus",
+            "all",
         ]
 
         # Work out if we are using an internal image
@@ -200,7 +220,12 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
 
         # Check if we can find the image, and if not try to either build it or pull it
         rebuild = kwargs["rebuild"]
-        image_found = subprocess.call(["docker", "image", "inspect", image], stderr=DEVNULL, stdout=DEVNULL) == 0
+        image_found = (
+            subprocess.call(
+                ["docker", "image", "inspect", image], stderr=DEVNULL, stdout=DEVNULL
+            )
+            == 0
+        )
 
         # Perform the tasks that we only perform on the internal image and add on any extra arguments needed
         if internal_image:
@@ -223,11 +248,17 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
                 # Make it a relpath so it's easier to read
                 context = os.path.relpath(docker_context, os.getcwd())
                 if rebuild:
-                    print(f"User requested rebuild of image {image}, rebuilding from {context}")
+                    print(
+                        f"User requested rebuild of image {image}, rebuilding from {context}"
+                    )
                 elif not image_found:
-                    print(f"Could not find the image {image}, rebuilding from {context}")
+                    print(
+                        f"Could not find the image {image}, rebuilding from {context}"
+                    )
                 if pty.spawn(["docker", "build", "-t", image, "."], cwd=context) != 0:
-                    cprint(f"Failed to build {image} from {context}", "red", attrs=["bold"])
+                    cprint(
+                        f"Failed to build {image} from {context}", "red", attrs=["bold"]
+                    )
                     exit(1)
 
             # We are using a public image
@@ -238,7 +269,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
                     print(f"Could not find the image {image}, attempting to pull")
 
                 if pty.spawn(["docker", "pull", image]) != 0:
-                    cprint(f"The tag {image} failed to be pulled", "red", attrs=["bold"])
+                    cprint(
+                        f"The tag {image} failed to be pulled", "red", attrs=["bold"]
+                    )
                     exit(1)
 
         # Work out what cwd we need to have on docker to mirror the cwd we have here
@@ -249,7 +282,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # If we are running in WSL 1 we need to translate our path to a windows one for docker.
         # Docker with WSL 2 doesn't need this as it supports binding paths directly from WSL into a container.
         if _is_wsl1():
-            bind_path = subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
+            bind_path = subprocess.check_output(["wslpath", "-m", b.project_dir])[
+                :-1
+            ].decode("utf-8")
 
         # Mount the pwd in the docker image
         docker_args.extend(
@@ -274,7 +309,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # Environment variables
         # This should be specified as VAR1=VALUE1,VAR2=VALUE2
         if kwargs["environment"] is not None:
-            key_pairs = [["--env", key_pair] for key_pair in kwargs["environment"].split(",")]
+            key_pairs = [
+                ["--env", key_pair] for key_pair in kwargs["environment"].split(",")
+            ]
             for key_pair in key_pairs:
                 docker_args.extend(key_pair)
 
