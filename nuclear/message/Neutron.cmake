@@ -72,7 +72,7 @@ endforeach(proto ${message_protobufs})
 # Build the reflection header
 add_custom_command(
   OUTPUT ${nt_out}/message/reflection.hpp
-  COMMAND ${PYTHON_EXECUTABLE} ARGS ${script_source}/build_message_reflection.py ${py_out}
+  COMMAND ${Python3_EXECUTABLE} ARGS ${script_source}/build_message_reflection.py ${py_out}
           ${nt_out}/message/reflection.hpp
   WORKING_DIRECTORY ${nt_out}
   DEPENDS ${python_src} ${script_source}/build_message_reflection.py

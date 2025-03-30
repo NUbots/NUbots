@@ -39,11 +39,6 @@ if(POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW)
 endif()
 
-# This allows the use of the FindPythonInterp and FindPythonLibs modules
-# if(POLICY CMP0148)
-#   cmake_policy(SET CMP0148 NEW)
-# endif()
-
 # Enable testing if we are building tests
 if(BUILD_TESTS)
   enable_testing()
@@ -90,7 +85,7 @@ endif()
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY) # Turn back on for CI_BUILD once we have fixed all the warnings
   find_package(Python3 REQUIRED)
-  set(CMAKE_CXX_CLANG_TIDY "${PYTHON_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
+  set(CMAKE_CXX_CLANG_TIDY "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
                            "${PROJECT_BINARY_DIR}/clang-tidy-fixes" clang-tidy
   )
   set(CMAKE_C_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY})
@@ -165,7 +160,7 @@ list(JOIN NUCLEAR_ROLES " " launch_roles)
 add_custom_command(
   OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
   COMMAND
-    ${PYTHON_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
+    ${Python3_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
     "${PROJECT_SOURCE_DIR}" "-b" "${PROJECT_BINARY_DIR}" "-l" "${PROJECT_SOURCE_DIR}/.vscode/launch.json" "-a"
     "${USE_ASAN}" "${launch_roles}"
   DEPENDS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py"

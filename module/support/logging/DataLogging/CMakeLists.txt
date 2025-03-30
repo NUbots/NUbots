@@ -33,7 +33,7 @@ set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/message_handles.cpp")
 # Generate the encoders for different message types
 add_custom_command(
   OUTPUT "${source_file}"
-  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
+  COMMAND ${Python3_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
           "${PROJECT_BINARY_DIR}/nuclear/message/python" "${source_file}"
   DEPENDS nuclear::message "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
   COMMENT "Generating DataLogging system for current messages"
