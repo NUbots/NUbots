@@ -49,9 +49,9 @@ namespace module::localisation {
     using VisionBalls = message::vision::Balls;
     using VisionBall  = message::vision::Ball;
     using message::input::RoboCup;
+    using message::localisation::Field;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
-    using message::localisation::Field;
 
     using message::eye::DataPoint;
 
@@ -103,36 +103,51 @@ namespace module::localisation {
 
             cfg.max_robots = config["max_robots"].as<int>();
 
-            cfg.ignore_guess_delay = config["ignore_guess_delay"].as<double>();
+            cfg.team_ball_recency = config["team_ball_recency"].as<double>();
+
+            cfg.team_guess_error = config["team_guess_error"].as<double>();
 
             team_guesses.resize(cfg.max_robots);
 
             last_time_update = NUClear::clock::now();
         });
 
-        on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
-            log<NUClear::INFO>("ID: ", robocup.current_pose.player_id);
-            log<NUClear::INFO>("Ball: ", robocup.ball.position.x(), robocup.ball.position.y(), robocup.ball.position.z());
-
-            Eigen::Isometry3d Hfw = field.Hfw;
-
+        on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
             Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
 
-            Eigen::Vector3d rBWw = Hfw.inverse() * rBFf;
-
             team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
-            team_guesses[robocup.current_pose.player_id - 1].rBWw = rBWw;
+            team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
         });
 
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-
-            if (!balls.balls.empty()) {
-
-                for (auto ball : balls.balls) {
-                    log<NUClear::INFO>("Ball: ", ball.uBCc.x(), ball.uBCc.y(), ball.uBCc.z());
+        on<Every<1, Per<std::chrono::seconds>>, Optional<With<VisionBalls>>>().then(
+            [this](const std::shared_ptr<const VisionBalls>& balls) {
+                if (!balls->balls.empty()) {
+                    last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
                 }
-            }
-        });
+
+                const auto dt =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
+                        .count();
+
+                if (dt > 2.0) {
+
+                    Eigen::Vector3d average = Eigen::Vector3d::Zero();
+
+                    bool accept_team_guess = get_team_guess(average, false);
+
+                    log<NUClear::DEBUG>("Side: ", accept_team_guess, average.x(), average.y(), average.z());
+
+                    last_time_update = NUClear::clock::now();
+
+                    auto ball = std::make_unique<Ball>();
+
+                    ball->rBWw                = last_Hcw * average;
+                    ball->vBw                 = Eigen::Vector3d::Zero();
+                    ball->time_of_measurement = last_time_update;
+                    ball->Hcw                 = last_Hcw;
+                    emit(ball);
+                }
+            });
 
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<FieldDescription>>().then(
@@ -167,48 +182,24 @@ namespace module::localisation {
                     log<NUClear::DEBUG>("Accept ball: ", accept_ball);
 
                     // Data association: if we have rejected too many balls, accept the closest one
+                    bool low_confidence = false;
                     if (rejection_count > cfg.max_rejections) {
                         accept_ball     = true;
                         rejection_count = 0;
+                        low_confidence  = true;
                     }
 
-                    std::vector<Eigen::Vector3d> to_check;
+                    Eigen::Vector3d team_guess_average = Eigen::Vector3d::Zero();
 
-                    for (auto guess: team_guesses) {
+                    const bool accept_team_guess = get_team_guess(team_guess_average, true);
 
-                        if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - guess.last_heard).count()
-                        < cfg.ignore_guess_delay) {
-                            to_check.emplace_back(guess.rBWw);
-                        }
-                    }
+                    log<NUClear::DEBUG>("Main: ",
+                                        accept_team_guess,
+                                        team_guess_average.x(),
+                                        team_guess_average.y(),
+                                        team_guess_average.z());
 
-                    if (to_check.size() > 0) {
-
-                        Eigen::Vector3d error = Eigen::Vector3d::Zero();
-
-                        if (to_check.size() > 1) {
-                            for (auto i = to_check.begin() + 1; i!=to_check.end(); ++i) {
-                                error -= (*to_check.begin() - *i).cwiseAbs();
-                            }
-                        }
-
-                        if (error.norm() < 1.0) {
-
-                            Eigen::Vector3d average = Eigen::Vector3d::Zero();
-
-                            for (auto guess: to_check) {
-                                average += guess;
-                            }
-
-                            average /= to_check.size();
-
-                            log<NUClear::INFO>("Best Guess: ", average.x(), average.y(), average.z());
-                        }
-
-                    }
-
-
-                    if (accept_ball) {
+                    if (accept_ball || accept_team_guess) {
                         // Compute the time since the last update (in seconds)
                         const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
                                                                                                   - last_time_update)
@@ -227,9 +218,17 @@ namespace module::localisation {
                         state = BallModel<double>::StateVec(ukf.get_state());
 
                         // Generate and emit message
-                        auto ball                 = std::make_unique<Ball>();
-                        ball->rBWw                = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
-                        ball->vBw                 = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+                        auto ball = std::make_unique<Ball>();
+
+                        if (low_confidence && accept_team_guess) {
+                            ball->rBWw = balls.Hcw * team_guess_average;
+                            ball->vBw  = Eigen::Vector3d::Zero();
+                        }
+                        else {
+                            ball->rBWw = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
+                            ball->vBw  = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+                        }
+
                         ball->time_of_measurement = last_time_update;
                         ball->Hcw                 = balls.Hcw;
                         if (log_level <= NUClear::DEBUG) {
@@ -243,6 +242,40 @@ namespace module::localisation {
                     }
                 }
             });
+    }
+
+    bool BallLocalisation::get_team_guess(Eigen::Vector3d& average, const bool use_error) {
+
+        std::vector<Eigen::Vector3d> to_check;
+
+        for (auto guess : team_guesses) {
+
+            if (std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - guess.last_heard)
+                    .count()
+                < cfg.team_ball_recency) {
+                to_check.emplace_back(guess.rBFf);
+            }
+        }
+
+        if (to_check.size() > 0) {
+
+            Eigen::Vector3d error = Eigen::Vector3d::Zero();
+
+            if (use_error && to_check.size() > 1) {
+
+                for (auto i = to_check.begin() + 1; i != to_check.end(); ++i) {
+                    error -= (*to_check.begin() - *i).cwiseAbs();
+                }
+            }
+            if (!use_error || error.norm() < 1.0) {
+                for (auto guess : to_check) {
+                    average += guess;
+                }
+                average /= to_check.size();
+                return true;
+            }
+        }
+        return false;
     }
 
 }  // namespace module::localisation

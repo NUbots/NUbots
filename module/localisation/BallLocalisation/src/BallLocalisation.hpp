@@ -84,7 +84,9 @@ namespace module::localisation {
 
             int max_robots = 0;
 
-            double ignore_guess_delay = 0.0;
+            double team_ball_recency = 0.0;
+
+            double team_guess_error = 0.0;
 
         } cfg;
 
@@ -100,13 +102,17 @@ namespace module::localisation {
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};
 
+        bool get_team_guess(Eigen::Vector3d& average, const bool use_error);
+
         struct TeamGuess {
             NUClear::clock::time_point last_heard = NUClear::clock::now();
 
-            Eigen::Vector3d rBWw;
+            Eigen::Vector3d rBFf;
         };
 
-        std::vector<TeamGuess> team_guesses {};
+        std::vector<TeamGuess> team_guesses{};
+
+        Eigen::Isometry3d last_Hcw;
 
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.

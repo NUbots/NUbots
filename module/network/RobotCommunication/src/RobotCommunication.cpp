@@ -110,13 +110,12 @@ namespace module::network {
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
-                                log<NUClear::INFO>("Robocup Emitted");
                             }
                         });
                 }
             });
 
-        on<Every<250, Per<std::chrono::milliseconds>>,
+        on<Every<1, Per<std::chrono::seconds>>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
@@ -134,8 +133,6 @@ namespace module::network {
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const GlobalConfig>& config) {
                 auto msg = std::make_unique<RoboCup>();
-
-                //log<NUClear::INFO>("MSG Time ", NUClear::clock::now().time_since_epoch().count());
 
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();

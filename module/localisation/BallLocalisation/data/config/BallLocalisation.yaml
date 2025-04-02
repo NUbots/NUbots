@@ -24,6 +24,8 @@ acceptance_radius: 2
 # Maximum number of ball rejections before acceptance
 max_rejections: 25
 
-max_robots: 5
+max_robots: 3
 
-ignore_guess_delay: 5.0
+team_ball_recency: 5.0
+
+team_guess_error: 1.0
