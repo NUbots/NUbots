@@ -101,53 +101,16 @@ namespace module::localisation {
             // Set our rejection count
             cfg.max_rejections = config["max_rejections"].as<int>();
 
-            cfg.max_robots = config["max_robots"].as<int>();
-
-            cfg.team_ball_recency = config["team_ball_recency"].as<double>();
-
-            cfg.team_guess_error = config["team_guess_error"].as<double>();
+            // Set configuration for robot to robot communication balls
+            cfg.max_robots               = config["max_robots"].as<int>();
+            cfg.team_ball_recency        = config["team_ball_recency"].as<double>();
+            cfg.team_guess_error         = config["team_guess_error"].as<double>();
+            cfg.team_guess_default_timer = config["team_guess_default_timer"].as<double>();
 
             team_guesses.resize(cfg.max_robots);
 
             last_time_update = NUClear::clock::now();
         });
-
-        on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
-            Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
-
-            team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
-            team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
-        });
-
-        on<Every<1, Per<std::chrono::seconds>>, Optional<With<VisionBalls>>>().then(
-            [this](const std::shared_ptr<const VisionBalls>& balls) {
-                if (!balls->balls.empty()) {
-                    last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
-                }
-
-                const auto dt =
-                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
-                        .count();
-
-                if (dt > 2.0) {
-
-                    Eigen::Vector3d average = Eigen::Vector3d::Zero();
-
-                    bool accept_team_guess = get_team_guess(average, false);
-
-                    log<NUClear::DEBUG>("Side: ", accept_team_guess, average.x(), average.y(), average.z());
-
-                    last_time_update = NUClear::clock::now();
-
-                    auto ball = std::make_unique<Ball>();
-
-                    ball->rBWw                = last_Hcw * average;
-                    ball->vBw                 = Eigen::Vector3d::Zero();
-                    ball->time_of_measurement = last_time_update;
-                    ball->Hcw                 = last_Hcw;
-                    emit(ball);
-                }
-            });
 
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<FieldDescription>>().then(
@@ -193,12 +156,6 @@ namespace module::localisation {
 
                     const bool accept_team_guess = get_team_guess(team_guess_average, true);
 
-                    log<NUClear::DEBUG>("Main: ",
-                                        accept_team_guess,
-                                        team_guess_average.x(),
-                                        team_guess_average.y(),
-                                        team_guess_average.z());
-
                     if (accept_ball || accept_team_guess) {
                         // Compute the time since the last update (in seconds)
                         const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
@@ -242,14 +199,55 @@ namespace module::localisation {
                     }
                 }
             });
+
+        // Stores ball positions received from teammates
+        on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
+            Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
+
+            team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
+            team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
+        });
+
+        // Called once a second to default to teammates balls if we haven't seen one recently
+        on<Every<1, Per<std::chrono::seconds>>, Optional<With<VisionBalls>>>().then(
+            [this](const std::shared_ptr<const VisionBalls>& balls) {
+                if (!balls->balls.empty()) {
+                    last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
+                }
+
+                const auto dt =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
+                        .count();
+
+                if (dt > cfg.team_guess_default_timer) {
+
+                    Eigen::Vector3d average = Eigen::Vector3d::Zero();
+
+                    get_team_guess(average, false);
+
+                    last_time_update = NUClear::clock::now();
+
+                    auto ball = std::make_unique<Ball>();
+
+                    ball->rBWw                = last_Hcw * average;
+                    ball->vBw                 = Eigen::Vector3d::Zero();
+                    ball->time_of_measurement = last_time_update;
+                    ball->Hcw                 = last_Hcw;
+                    emit(ball);
+                }
+            });
     }
 
+    // Run to calculate balls using robot to robot communication
+    // Returns whether we have a valid guess from teammates balls
+    // Error calculation is optional
     bool BallLocalisation::get_team_guess(Eigen::Vector3d& average, const bool use_error) {
 
         std::vector<Eigen::Vector3d> to_check;
 
         for (auto guess : team_guesses) {
 
+            // Check if our teammates ball message meets our recency threshold
             if (std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - guess.last_heard)
                     .count()
                 < cfg.team_ball_recency) {
@@ -257,6 +255,7 @@ namespace module::localisation {
             }
         }
 
+        // Check if we have enough guesses from teammates
         if (to_check.size() > 0) {
 
             Eigen::Vector3d error = Eigen::Vector3d::Zero();

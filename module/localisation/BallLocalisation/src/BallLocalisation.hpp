@@ -88,6 +88,8 @@ namespace module::localisation {
 
             double team_guess_error = 0.0;
 
+            double team_guess_default_timer = 0.0;
+
         } cfg;
 
         /// @brief Rejection count
