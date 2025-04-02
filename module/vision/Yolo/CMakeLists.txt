@@ -26,9 +26,7 @@ SOFTWARE.
 ]]
 find_package(OpenCV REQUIRED)
 set(OpenVINO_DIR /usr/local/lib/cmake)
-# set(InferenceEngine_DIR /usr/local/lib/cmake)
 find_package(OpenVINO REQUIRED)
-# find_package(InferenceEngine REQUIRED)
 find_package(TBB REQUIRED)
 
 # Build our NUClear module
