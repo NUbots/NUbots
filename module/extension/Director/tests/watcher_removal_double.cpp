@@ -51,10 +51,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<PrimaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("primary task")); });
 
@@ -95,13 +94,6 @@ namespace {
                 events.push_back("removing primary task");
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr), 2);
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-            });
         }
     };
 
@@ -111,7 +103,7 @@ TEST_CASE("Test that a watcher can take over from another provider while there i
           "[director][remove][watcher][double]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

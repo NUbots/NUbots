@@ -150,8 +150,8 @@ export class VisionNetwork {
         goal.side === message.vision.Goal.Side.LEFT
           ? "left"
           : goal.side === message.vision.Goal.Side.RIGHT
-          ? "right"
-          : "unknown",
+            ? "right"
+            : "unknown",
       post: {
         top: Vector3.from(goal.post?.top),
         bottom: Vector3.from(goal.post?.bottom),
@@ -194,7 +194,7 @@ export class VisionNetwork {
   }
 }
 
-async function jpegBufferToBitmap(buffer: ArrayBuffer): Promise<ImageBitmap> {
+async function jpegBufferToBitmap(buffer: Uint8Array): Promise<ImageBitmap> {
   const blob = new Blob([buffer], { type: "image/jpeg" });
   return createImageBitmap(blob, {
     colorSpaceConversion: "none",

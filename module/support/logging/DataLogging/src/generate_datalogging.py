@@ -26,6 +26,8 @@
 # SOFTWARE.
 #
 
+#!/usr/bin/env python3
+
 import os
 import pkgutil
 import sys
@@ -44,6 +46,7 @@ if __name__ == "__main__":
         modules = pkgutil.iter_modules(path=[dir_name])
         for loader, module_name, ispkg in modules:
             if module_name.endswith("pb2"):
+
                 # Work out what header file this came from
                 include = os.path.join(os.path.relpath(dir_name, shared_folder), "{}.hpp".format(module_name[:-4]))
 
@@ -61,6 +64,7 @@ if __name__ == "__main__":
     # Now that we've imported them all get all the subclasses of protobuf message
     messages = set()
     for message in google.protobuf.message.Message.__subclasses__():
+
         # Work out our original protobuf type
         pb_type = ".".join(message.DESCRIPTOR.full_name.split(".")[1:])
 
@@ -90,14 +94,14 @@ if __name__ == "__main__":
 
                 auto log = std::make_unique<DataLogging::DataLog>();
 
-                // We get the timestamp here from the time the message was emitted
+                // We get the timestamp here from the time the message was created
                 // (or now if we can't access the current reaction)
                 const auto* task = NUClear::threading::ReactionTask::get_current_task();
-                log->timestamp   = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+                log->timestamp = task ? task->statistics ? task->statistics->created.nuclear_time : NUClear::clock::now() : NUClear::clock::now();
 
                 // Get the data from the message to be used in the index
                 log->message_timestamp = utility::nbs::get_timestamp(log->timestamp, data);
-                log->id                = utility::nbs::get_id(data);
+                log->subtype = utility::nbs::get_subtype(data);
 
                 // Serialise the data and get the hash for it
                 log->data = NUClear::util::serialise::Serialise<T>::serialise(data);

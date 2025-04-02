@@ -11,9 +11,9 @@ import { Message, Simulator } from "../simulator";
 
 import { periodic } from "./periodic";
 
-import Mode = message.input.GameState.Data.Mode;
-import PenaltyReason = message.input.GameState.Data.PenaltyReason;
-import Phase = message.input.GameState.Data.Phase;
+import Mode = message.input.GameState.Mode;
+import PenaltyReason = message.input.GameState.PenaltyReason;
+import Phase = message.input.GameState.Phase;
 import Overview = message.support.nusight.Overview;
 
 export class OverviewSimulator extends Simulator {

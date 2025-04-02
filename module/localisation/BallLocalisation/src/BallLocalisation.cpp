@@ -178,8 +178,8 @@ namespace module::localisation {
                         first_ball_seen = true;
                         rejection_count = 0;
                     }
-                    log<NUClear::DEBUG>("Rejection count: ", rejection_count);
-                    log<NUClear::DEBUG>("Accept ball: ", accept_ball);
+                    log<DEBUG>("Rejection count: ", rejection_count);
+                    log<DEBUG>("Accept ball: ", accept_ball);
 
                     // Data association: if we have rejected too many balls, accept the closest one
                     bool low_confidence = false;
@@ -231,9 +231,9 @@ namespace module::localisation {
 
                         ball->time_of_measurement = last_time_update;
                         ball->Hcw                 = balls.Hcw;
-                        if (log_level <= NUClear::DEBUG) {
-                            log<NUClear::DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
-                            log<NUClear::DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
+                        if (log_level <= DEBUG) {
+                            log<DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
+                            log<DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
                             emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
                             emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
                         }

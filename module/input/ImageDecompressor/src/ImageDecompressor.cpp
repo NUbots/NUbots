@@ -69,7 +69,7 @@ namespace module::input {
                 auto it = decompressors.find(image.id);
                 if (it == decompressors.end() || it->second->width != image.dimensions[0]
                     || it->second->height != image.dimensions[1] || it->second->format != image.format) {
-                    log<NUClear::INFO>("Rebuilding decompressors for", image.name, "camera");
+                    log<INFO>("Rebuilding decompressors for", image.name, "camera");
 
                     // Replace the existing one with a new one
                     it = decompressors.insert(std::make_pair(image.id, std::make_shared<DecompressorContext>())).first;
@@ -127,11 +127,11 @@ namespace module::input {
         });
 
         on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
-            log<NUClear::DEBUG>(fmt::format("Receiving {}/s, Decompressing {}/s,  Dropping {}/s ({}%)",
-                                            decompressed + dropped,
-                                            decompressed,
-                                            dropped,
-                                            100 * double(decompressed) / double(decompressed + dropped)));
+            log<DEBUG>(fmt::format("Receiving {}/s, Decompressing {}/s,  Dropping {}/s ({}%)",
+                                   decompressed + dropped,
+                                   decompressed,
+                                   dropped,
+                                   100 * double(decompressed) / double(decompressed + dropped)));
             decompressed = 0;
             dropped      = 0;
         });

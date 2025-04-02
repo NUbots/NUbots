@@ -102,7 +102,7 @@ namespace module::vision {
                     });
                 indices.resize(std::distance(indices.begin(), boundary));
 
-                log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
+                log<DEBUG>(fmt::format("Partitioned {} points", indices.size()));
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
@@ -121,7 +121,7 @@ namespace module::vision {
                                                             cfg.cluster_points,
                                                             clusters);
 
-                log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+                log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
                 // Partition the clusters such that clusters above the green horizons are removed,
                 // and then resize the vector to remove them
@@ -133,7 +133,7 @@ namespace module::vision {
                                                                                             true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
-                log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                log<DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
 
                 // Create the Balls message, which will contain a Ball for every cluster that is a valid ball
                 auto balls = std::make_unique<Balls>();
@@ -141,7 +141,7 @@ namespace module::vision {
                 // Balls is still emitted even if there are no balls, to indicate to other modules that no balls are
                 // currently visible
                 if (clusters.empty()) {
-                    log<NUClear::DEBUG>("Found no balls.");
+                    log<DEBUG>("Found no balls.");
                     emit(std::move(balls));
                     return;
                 }
@@ -236,9 +236,9 @@ namespace module::vision {
 
                     // For this particular ball, see if it should be thrown out
                     // For debugging purposes, go through each check
-                    log<NUClear::DEBUG>("**************************************************");
-                    log<NUClear::DEBUG>("*                    THROWOUTS                   *");
-                    log<NUClear::DEBUG>("**************************************************");
+                    log<DEBUG>("**************************************************");
+                    log<DEBUG>("*                    THROWOUTS                   *");
+                    log<DEBUG>("**************************************************");
                     bool keep = true;
                     b.colour.fill(1.0);  // a valid ball has a white colour in NUsight
 
@@ -266,10 +266,10 @@ namespace module::vision {
                     // Check if standard deviation is low enough
                     if (deviation > cfg.maximum_deviation) {
 
-                        log<NUClear::DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
-                                                        deviation,
-                                                        cfg.maximum_deviation));
-                        log<NUClear::DEBUG>("--------------------------------------------------");
+                        log<DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
+                                               deviation,
+                                               cfg.maximum_deviation));
+                        log<DEBUG>("--------------------------------------------------");
                         // Balls that violate degree of fit will show as green in NUsight
                         b.colour = keep ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
                         keep     = false;
@@ -280,12 +280,12 @@ namespace module::vision {
 
                     if ((std::abs(projection_distance - angular_distance) / max_distance) > cfg.distance_disagreement) {
 
-                        log<NUClear::DEBUG>(
+                        log<DEBUG>(
                             fmt::format("Ball discarded: Width and proj distance disagree too much: width = "
                                         "{}, proj = {}",
                                         angular_distance,
                                         projection_distance));
-                        log<NUClear::DEBUG>("--------------------------------------------------");
+                        log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as blue in NUsight
                         b.colour = keep ? message::conversion::math::vec4(0.0, 0.0, 1.0, 1.0) : b.colour;
                         keep     = false;
@@ -295,10 +295,10 @@ namespace module::vision {
                     // Prevents the robot itself being classed as a ball, ie its arms/hands
                     if (angular_distance < cfg.minimum_ball_distance) {
 
-                        log<NUClear::DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
-                                                        angular_distance,
-                                                        cfg.minimum_ball_distance));
-                        log<NUClear::DEBUG>("--------------------------------------------------");
+                        log<DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
+                                               angular_distance,
+                                               cfg.minimum_ball_distance));
+                        log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as red in NUsight
                         b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 0.0, 1.0) : b.colour;
                         keep     = false;
@@ -307,35 +307,35 @@ namespace module::vision {
                     // DISCARD IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
                     if (angular_distance > field.dimensions.field_length) {
 
-                        log<NUClear::DEBUG>(
+                        log<DEBUG>(
                             fmt::format("Ball discarded: Distance to ball greater than field length: distance = "
                                         "{}, field length = {}",
                                         angular_distance,
                                         field.dimensions.field_length));
-                        log<NUClear::DEBUG>("--------------------------------------------------");
+                        log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as yellow in NUsight
                         b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 1.0, 1.0) : b.colour;
                         keep     = false;
                     }
 
-                    log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
-                    log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
-                    log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
-                    log<NUClear::DEBUG>(
+                    log<DEBUG>(fmt::format("Camera {}", balls->id));
+                    log<DEBUG>(fmt::format("radius {}", b.radius));
+                    log<DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
+                    log<DEBUG>(
                         fmt::format("Distance {} - rBCc {}", angular_distance, b.measurements[0].rBCc.transpose()));
-                    log<NUClear::DEBUG>(fmt::format("Projection Distance {} - rBCc",
-                                                    projection_distance,
-                                                    b.measurements[1].rBCc.transpose()));
-                    log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
-                                                    std::abs(projection_distance - angular_distance) / max_distance));
-                    log<NUClear::DEBUG>("**************************************************");
+                    log<DEBUG>(fmt::format("Projection Distance {} - rBCc",
+                                           projection_distance,
+                                           b.measurements[1].rBCc.transpose()));
+                    log<DEBUG>(fmt::format("Distance Throwout {}",
+                                           std::abs(projection_distance - angular_distance) / max_distance));
+                    log<DEBUG>("**************************************************");
 
                     if (!keep) {
                         b.measurements.clear();
                     }
                     // If the ball passed the checks, add it to the Balls message to be emitted
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
-                    if (keep || log_level <= NUClear::DEBUG) {
+                    if (keep || log_level <= DEBUG) {
                         balls->balls.push_back(std::move(b));
                     }
 
