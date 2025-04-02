@@ -44,14 +44,11 @@ export const CameraControls = () => {
     };
 
     const handleWheel = (event: WheelEvent) => {
-      if (event.ctrlKey) {
-        event.preventDefault();
-        setZoom((prevZoom: number) => {
-          const newZoom = Math.min(Math.max(prevZoom + event.deltaY * 0.05, 20), 100);
-          return newZoom;
-        });
-        event.preventDefault();
-      }
+      event.preventDefault();
+      setZoom((prevZoom: number) => {
+        const newZoom = Math.min(Math.max(prevZoom + event.deltaY * 0.05, 20), 100);
+        return newZoom;
+      });
     };
 
     gl.domElement.addEventListener("mousedown", handleMouseDown);
