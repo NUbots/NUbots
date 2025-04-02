@@ -9,17 +9,29 @@ export const CoordinateLabel = ({ text, position }: { text: string; position: [n
   const { camera } = useThree() as { camera: THREE.PerspectiveCamera; gl: THREE.WebGLRenderer };
   const [color, setColor] = useState<THREE.Color>(new THREE.Color(0xffffff));
 
-  // Observe theme changes using MutationObserver and update the label color
-  useEffect(() => {
-    const updateColor = () => {
-      const computedColor = window.getComputedStyle(document.documentElement).getPropertyValue("color");
-      setColor(new THREE.Color(computedColor));
-    };
+  // Function to determine the theme and set color (dark mode or light mode)
+  const updateColor = () => {
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    setColor(new THREE.Color(isDarkMode ? 0xffffff : 0x000000));
+  };
 
+  // Observe theme changes
+  useEffect(() => {
+    // Create a MutationObserver to watch for changes in this tab (mode toggle)
     const observer = new MutationObserver(updateColor);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-    return () => observer.disconnect();
+    // Add event listener for focus to update color when the window is focused (tab switched)
+    const handleFocus = () => updateColor();
+    window.addEventListener("focus", handleFocus);
+
+    // Initialise on mount
+    updateColor();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   // Load the font and create the text geometry

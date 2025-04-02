@@ -4,11 +4,10 @@ import { observer } from "mobx-react";
 
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
-
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper/view";
-
+import { JointDataDisplay } from "./r3f_components/joint_data_display/view";
 @observer
 export class KinematicsView extends React.Component<{
   controller: KinematicsController;
@@ -22,7 +21,7 @@ export class KinematicsView extends React.Component<{
     } = this.props;
 
     return (
-      <div className="w-full h-full flex flex-col">
+      <div className="w-full h-screen flex flex-col">
         <Menu>
           <div className="h-full flex items-center justify-end">
             <RobotSelectorSingle
@@ -33,9 +32,18 @@ export class KinematicsView extends React.Component<{
             />
           </div>
         </Menu>
+
         {selectedRobot && (
-          <div className="flex-1 relative">
-            <CanvasWrapper selectedRobot={selectedRobot} />
+          <div className="flex flex-1 overflow-hidden">
+            {/* Left Side: 3D Canvas */}
+            <div className="flex-1 relative">
+              <CanvasWrapper selectedRobot={selectedRobot} />
+            </div>
+
+            {/* Right Side: Joint Data Pane */}
+            <div className="w-1/4 h-full overflow-y-auto">
+              <JointDataDisplay robot={selectedRobot} />
+            </div>
           </div>
         )}
       </div>

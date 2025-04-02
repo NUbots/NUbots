@@ -12,7 +12,7 @@ export const CameraControls = () => {
   // Synchronise the camera position with the spherical coordinates
   useEffect(() => {
     camera.position.setFromSpherical(spherical);
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(0, -2, 0);
     camera.updateProjectionMatrix();
   }, [camera, spherical]);
 
@@ -40,7 +40,7 @@ export const CameraControls = () => {
       spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
 
       camera.position.setFromSpherical(spherical);
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(0, -2, 0);
     };
 
     const handleWheel = (event: WheelEvent) => {

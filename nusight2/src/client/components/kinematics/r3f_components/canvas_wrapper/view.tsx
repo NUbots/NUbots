@@ -22,7 +22,7 @@ const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ r
 
 export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = ({ selectedRobot }) => {
   return (
-    <Canvas camera={{ position: [10, 10, 10], fov: 60 }} className="w-full h-full">
+    <Canvas camera={{ position: [10, 10, 10], fov: 60 }}>
       <CameraControls />
 
       <ambientLight intensity={0.5} />
