@@ -24,12 +24,12 @@
  * https://github.com/Rhoban/model/
  */
 
-#ifndef UTILITY_MOTION_SPLINES_QUINTICSPLINE_HPP
-#define UTILITY_MOTION_SPLINES_QUINTICSPLINE_HPP
+#ifndef UTILITY_SKILL_SPLINES_QUINTICSPLINE_HPP
+#define UTILITY_SKILL_SPLINES_QUINTICSPLINE_HPP
 
 #include <Eigen/Core>
 
-namespace utility::motion::splines {
+namespace utility::skill::splines {
 
     template <typename Scalar>
     class QuinticSpline {
@@ -116,6 +116,6 @@ namespace utility::motion::splines {
         Eigen::Matrix<Scalar, 6, 1> coefficients = Eigen::Matrix<Scalar, 6, 1>::Zero();
     };
 
-}  // namespace utility::motion::splines
+}  // namespace utility::skill::splines
 
-#endif  // MOTION_QUINTICSPLINE_HPP
+#endif  // SKILL_QUINTICSPLINE_HPP
