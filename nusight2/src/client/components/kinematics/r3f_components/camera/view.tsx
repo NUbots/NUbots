@@ -5,48 +5,67 @@ import * as THREE from "three";
 export const CameraControls = () => {
   const { camera, gl } = useThree() as { camera: THREE.PerspectiveCamera; gl: THREE.WebGLRenderer };
   const [isDragging, setIsDragging] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(camera.fov);
-  const spherical = useRef(new THREE.Spherical(20, Math.PI / 2.5, Math.PI / 4)).current;
 
-  // Synchronise the camera position with the spherical coordinates
+  const spherical = useRef(new THREE.Spherical(20, Math.PI / 2.5, Math.PI / 4)).current;
+  const lookAtOffset = useRef(new THREE.Vector3(0, -2, 0));
+
+  // Update camera position and lookAt
   useEffect(() => {
-    camera.position.setFromSpherical(spherical);
-    camera.lookAt(0, -2, 0);
+    camera.position.setFromSpherical(spherical).add(lookAtOffset.current);
+    camera.lookAt(lookAtOffset.current);
     camera.updateProjectionMatrix();
   }, [camera, spherical]);
 
-  // Handle camera controls on mouse events
+  // Handle mouse interactions
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
-      setIsDragging(true);
+      if (event.ctrlKey) {
+        setIsPanning(true); // Ctrl + Drag -> Panning
+      } else {
+        setIsDragging(true); // Left-click -> Rotation
+      }
       dragStart.current = { x: event.clientX, y: event.clientY };
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setIsPanning(false);
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-      if (!isDragging) return;
+      if (!isDragging && !isPanning) return;
 
       const deltaX = event.clientX - dragStart.current.x;
       const deltaY = event.clientY - dragStart.current.y;
       dragStart.current = { x: event.clientX, y: event.clientY };
 
-      spherical.theta -= deltaX * 0.005;
-      spherical.phi -= deltaY * 0.005;
+      // Handle panning and rotation
+      if (isPanning) {
+        // Calculate panning movement based on camera direction
+        const panSpeed = 0.02;
+        const right = new THREE.Vector3();
+        camera.getWorldDirection(right);
+        right.cross(camera.up).normalize().multiplyScalar(-deltaX * panSpeed);
 
-      spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+        const up = new THREE.Vector3(0, 1, 0).multiplyScalar(deltaY * panSpeed);
+        lookAtOffset.current.add(right).add(up);
+      } else {
+        // Rotate the camera
+        spherical.theta -= deltaX * 0.005;
+        spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - deltaY * 0.005));
+      }
 
-      camera.position.setFromSpherical(spherical);
-      camera.lookAt(0, -2, 0);
+      camera.position.setFromSpherical(spherical).add(lookAtOffset.current);
+      camera.lookAt(lookAtOffset.current);
     };
 
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
       setZoom((prevZoom: number) => {
-        const newZoom = Math.min(Math.max(prevZoom + event.deltaY * 0.05, 20), 100);
+        const newZoom = Math.min(Math.max(prevZoom + event.deltaY * 0.05, 10), 80);
         return newZoom;
       });
     };
@@ -62,9 +81,9 @@ export const CameraControls = () => {
       gl.domElement.removeEventListener("mouseup", handleMouseUp);
       gl.domElement.removeEventListener("wheel", handleWheel);
     };
-  }, [camera, gl, isDragging, spherical]);
+  }, [camera, gl, isDragging, isPanning, spherical]);
 
-  // Update the camera when the zoom state changes
+  // Update zoom
   useEffect(() => {
     camera.fov = zoom;
     camera.updateProjectionMatrix();
