@@ -1,6 +1,5 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
-import { observer } from "mobx-react";
 
 import { KinematicsRobotModel } from "../../robot_model";
 import { Axes } from "../axes/view";
@@ -8,17 +7,15 @@ import { CameraControls } from "../camera/view";
 import { Grid } from "../grid/view";
 import { Nugus } from "../nugus/view";
 
-const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
+const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = ({ robot }) => {
   if (!robot.visible) return null;
-
-  const changingAttribute = robot.Htw; // read a mobx observable property to trigger re-render
 
   return (
     <object3D key={robot.id} rotation={[-Math.PI / 2, 0, -Math.PI / 2]} scale={[5, 5, 5]}>
       <Nugus model={robot} />
     </object3D>
   );
-});
+};
 
 export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = ({ selectedRobot }) => {
   return (
