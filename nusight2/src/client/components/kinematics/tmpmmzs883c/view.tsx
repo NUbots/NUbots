@@ -4,7 +4,6 @@ import { observer } from "mobx-react";
 
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
-
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper/view";

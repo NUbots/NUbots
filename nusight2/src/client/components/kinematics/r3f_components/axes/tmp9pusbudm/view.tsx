@@ -45,12 +45,12 @@ const Arrow = ({
 export const Axes = ({ length }: { length: number }) => (
   <>
     <CoordinateLabel text="X" position={[length + 1, 0, -0.25]} />
-    <Arrow dir={[1, 0, 0]} color={0x4caf50} length={length + 1} thickness={0.04} />
+    <Arrow dir={[1, 0, 0]} color={0x4CAF50} length={length + 1} thickness={0.04} />
 
     <CoordinateLabel text="Y" position={[0.25, length + 1, 0]} />
-    <Arrow dir={[0, 1, 0]} color={0x1e88e5} length={length + 1} thickness={0.04} />
+    <Arrow dir={[0, 1, 0]} color={0x1E88E5} length={length + 1} thickness={0.04} />
 
     <CoordinateLabel text="Z" position={[-0.25, 0, length + 1]} />
-    <Arrow dir={[0, 0, 1]} color={0xe53935} length={length + 1} thickness={0.04} />
+    <Arrow dir={[0, 0, 1]} color={0xE53935} length={length + 1} thickness={0.04} />
   </>
 );

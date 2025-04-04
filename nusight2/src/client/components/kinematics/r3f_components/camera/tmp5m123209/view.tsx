@@ -48,10 +48,7 @@ export const CameraControls = () => {
         const panSpeed = 0.02;
         const right = new THREE.Vector3();
         camera.getWorldDirection(right);
-        right
-          .cross(camera.up)
-          .normalize()
-          .multiplyScalar(-deltaX * panSpeed);
+        right.cross(camera.up).normalize().multiplyScalar(-deltaX * panSpeed);
 
         const up = new THREE.Vector3(0, 1, 0).multiplyScalar(deltaY * panSpeed);
         lookAtOffset.current.add(right).add(up);

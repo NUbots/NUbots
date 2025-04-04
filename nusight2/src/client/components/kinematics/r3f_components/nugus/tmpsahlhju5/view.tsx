@@ -1,6 +1,6 @@
 import React from "react";
-import { observer } from "mobx-react";
 import * as THREE from "three";
+import { observer } from "mobx-react";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { KinematicsRobotModel } from "../../robot_model";

@@ -138,7 +138,7 @@ export class KinematicsRobotModel {
     this.Htw = Htw;
     this.Hfw = Hfw;
     this.Rwt = Rwt;
-    this.motors = motors;
+    this.motors = motors;;
   }
 
   static of = memoize((model: RobotModel): KinematicsRobotModel => {
