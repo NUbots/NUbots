@@ -32,7 +32,6 @@
 #endif
 
 #include <array>
-#include <cstdint>
 #include <type_traits>
 
 namespace dynamixel::v2 {
@@ -66,20 +65,15 @@ namespace dynamixel::v2 {
     template <typename T, size_t N>
     struct SyncWriteCommand {
 
-        constexpr SyncWriteCommand(uint16_t address, const SyncWriteData<T> (&data_arr)[N])
+        SyncWriteCommand(uint16_t address, const SyncWriteData<T> (&data)[N])
             : magic(0x00FDFFFF)
             , id(0xFE)
-            , length(3 + sizeof(address) + sizeof(size) + N * sizeof(data_arr[0]))
+            , length(3 + sizeof(address) + sizeof(size) + N * sizeof(data[0]))
             , instruction(Instruction::SYNC_WRITE)
             , address(address)
             , size(sizeof(T))
-            , data{}
-            , checksum(0) {
-            for (size_t i = 0; i < N; ++i) {
-                const_cast<SyncWriteData<T>&>(data[i]) = data_arr[i];
-            }
-            const_cast<uint16_t&>(checksum) = calculate_checksum(this);
-        }
+            , data(data)
+            , checksum(calculate_checksum(this)) {}
 
         /// Magic number that heads up every packet
         const uint32_t magic;
