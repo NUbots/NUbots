@@ -290,11 +290,7 @@ namespace utility::support {
             result[i++] = U(data);
         }
 
-        // Create the error message
-        const auto error_message = fmt::format("We expected {} elements in the YAML file but {} were found", N, i);
-
-        // Use the error message in the assert
-        assert((error_message, i == N));
+        assert((fmt::format("We expected {} elements in the YAML file but {} were found", N, i), i == N));
 
         return result;
     }
