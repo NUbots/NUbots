@@ -27,6 +27,10 @@ SOFTWARE.
 cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
+# Set the compiler version of the project
+set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
+set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
+
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)
 
@@ -106,8 +110,6 @@ if(CI_BUILD)
   # Turn these back on once we have fixed all the clang-tidy warnings * set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY}
   # -warnings-as-errors=*) * set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
 endif()
-
-add_compile_options(-Wno-stringop-overflow)
 
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)
