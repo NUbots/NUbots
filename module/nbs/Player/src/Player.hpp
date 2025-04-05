@@ -40,6 +40,10 @@ namespace module::nbs {
 
     class Player : public NUClear::Reactor {
     private:
+        /// The configuration variables for this reactor
+        struct {
+        } config{};
+
         /**
          * @brief Registers an emitter for a specific message type `T`.
          *

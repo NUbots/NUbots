@@ -122,9 +122,13 @@ namespace module::localisation {
                     return;
                 }
 
+                const double dt =
+                    duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
+                last_time_update_time = NUClear::clock::now();
+
                 // Not a valid time to run localisation
                 if (fallen || field_lines.rPWw.size() < cfg.min_observations
-                    || time_since_startup < cfg.start_time_delay) {
+                    || time_since_startup < cfg.start_time_delay || dt <= 0.0) {
                     return;
                 }
 
@@ -135,9 +139,6 @@ namespace module::localisation {
                 }
 
                 // Time update (includes resampling)
-                const double dt =
-                    duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
-                last_time_update_time = NUClear::clock::now();
                 filter.time(dt);
 
                 auto field(std::make_unique<Field>());
