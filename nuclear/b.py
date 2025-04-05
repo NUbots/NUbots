@@ -114,7 +114,7 @@ if __name__ == "__main__":
     )
     subcommands.required = True
 
-    # Look thorough our tools directories and find all the files and folders that could be a command
+    # Look through our tools directories and find all the files and folders that could be a command
     candidates = []
     for path in [user_tools_path, nuclear_tools_path]:
         for dirpath, dnames, fnames in os.walk(path):
@@ -141,11 +141,17 @@ if __name__ == "__main__":
 
     for components in useable:
         if sys.argv[1 : len(components) + 1] == components:
-            spec = importlib.util.find_spec(".".join(components))
-            if spec:
-                try:
+            module_name = ".".join(components)
+            module_path = os.path.join(user_tools_path, *components) + ".py"
+
+            # Dynamically load the module
+            try:
+                spec = importlib.util.spec_from_file_location(module_name, module_path)
+                if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
+                    sys.modules[module_name] = module
                     spec.loader.exec_module(module)
+
                     if hasattr(module, "register") and hasattr(module, "run"):
 
                         # Build up the base subcommands to this point
@@ -183,10 +189,14 @@ if __name__ == "__main__":
     tools = {}
     for components in candidates:
         try:
-            spec = importlib.util.find_spec(".".join(components))
-            if spec:
+            module_name = ".".join(components)
+            module_path = os.path.join(user_tools_path, *components) + ".py"
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            if spec and spec.loader:
                 module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
                 spec.loader.exec_module(module)
+
                 if hasattr(module, "register") and hasattr(module, "run"):
 
                     subcommand = subcommands
