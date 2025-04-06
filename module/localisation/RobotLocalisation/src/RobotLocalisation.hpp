@@ -32,6 +32,9 @@
 
 #include "RobotModel.hpp"
 
+#include "message/vision/GreenHorizon.hpp"
+#include "message/vision/Robot.hpp"
+
 #include "utility/math/filter/UKF.hpp"
 
 namespace module::localisation {
@@ -101,13 +104,13 @@ namespace module::localisation {
         /// As it is unbounded, an unsigned long is used to store it
         unsigned long next_id = 0;
 
+        void prediction();
+        void data_association(const message::vision::Robots& vision_robots);
+        void maintenance(const message::vision::GreenHorizon& horizon);
+
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
-
-        /// @brief Tests if this robot measurement is associated with a tracked robot or if it is a new robot
-        /// @param vision_robot The robot detection from the vision system
-        void data_association(const Eigen::Vector3d& rRWw);
     };
 
 }  // namespace module::localisation
