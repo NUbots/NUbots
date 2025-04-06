@@ -120,6 +120,7 @@ export class LocalisationNetwork {
     robot.robots = localisation_robots.robots.map((localisation_robot) => ({
       id: localisation_robot.id!,
       rRWw: Vector3.from(localisation_robot.rRWw),
+      color: localisation_robot.isBlue ? "blue" : "red",
     }));
   }
 

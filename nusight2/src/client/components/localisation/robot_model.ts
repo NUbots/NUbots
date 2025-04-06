@@ -150,7 +150,7 @@ export class LocalisationRobotModel {
   @observable fieldIntersections?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
-  @observable robots: { id: number; rRWw: Vector3 }[];
+  @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
   @observable max_align_radius: number;
   @observable min_align_radius: number;
@@ -205,7 +205,7 @@ export class LocalisationRobotModel {
     ball?: { rBWw: Vector3 };
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
-    robots: { id: number; rRWw: Vector3 }[];
+    robots: { id: number; rRWw: Vector3; color: string; }[];
     purpose: string;
     max_align_radius: number;
     min_align_radius: number;

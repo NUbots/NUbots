@@ -109,7 +109,7 @@ namespace module::localisation {
         unsigned long next_id = 0;
 
         void prediction();
-        void data_association(const message::vision::Robots& vision_robots);
+        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw);
         void maintenance(const message::vision::GreenHorizon& horizon);
 
     public:

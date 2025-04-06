@@ -50,6 +50,12 @@ message Robot {
 
     /// Homogeneous transformation matrix from world to camera space
     iso3 Hcw = 6;
+
+    /// Team colour for NUsight
+    bool is_blue = 7;
+
+    /// Team mate ID for NUsight if known
+    uint32 teammate_id = 8;
 }
 
 message Robots {

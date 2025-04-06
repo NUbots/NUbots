@@ -357,7 +357,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         }))}
         defaultHeight={0.8}
         defaultRadius={0.1}
-        defaultColor="orange"
+        defaultColor={robot.color || "orange"}
       />
 
       {model.fieldIntersectionsVisible && robot.fieldIntersections && (

@@ -30,6 +30,9 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/input/GameState.hpp"
+#include "message/input/RoboCup.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/GreenHorizon.hpp"
 #include "message/vision/Robot.hpp"
@@ -48,6 +51,9 @@ namespace module::localisation {
     using VisionRobots       = message::vision::Robots;
 
     using message::eye::DataPoint;
+    using message::input::GameState;
+    using message::input::RoboCup;
+    using message::localisation::Field;
     using message::vision::GreenHorizon;
 
     using utility::math::geometry::point_in_convex_hull;
@@ -73,8 +79,48 @@ namespace module::localisation {
         });
 
 
-        on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then(
-            [this](const VisionRobots& vision_robots, const GreenHorizon& horizon) {
+        on<Trigger<RoboCup>, With<GreenHorizon>, With<Field>, Optional<With<GameState>>, Single>().then(
+            [this](const RoboCup& robocup,
+                   const GreenHorizon& horizon,
+                   const Field& field,
+                   const std::shared_ptr<const GameState>& game_state) {
+                // **Run maintenance step**
+                maintenance(horizon);
+
+                // **Data association**
+                // RoboCup messages come from teammates. Their position is in field space, so convert to world.
+                std::vector<Eigen::Vector3d> robots_rRWw{field.Hfw.inverse() * robocup.current_pose.position};
+                // Run data association step
+                data_association(robots_rRWw, true);
+
+
+                // **Emit the localisation of the robots**
+                auto localisation_robots = std::make_unique<LocalisationRobots>();
+                for (const auto& tracked_robot : tracked_robots) {
+                    auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+                    LocalisationRobot localisation_robot;
+                    localisation_robot.id                  = tracked_robot.id;
+                    localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+                    localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
+                    localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
+                    localisation_robot.time_of_measurement = tracked_robot.last_time_update;
+
+                    // Determine our team colour
+                    bool self_blue =
+                        game_state && game_state->team.team_colour == GameState::TeamColour::BLUE ? true : false;
+                    // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
+                    localisation_robot.is_blue     = tracked_robot.is_teammate ? self_blue : !self_blue;
+                    localisation_robot.teammate_id = tracked_robot.teammate_id : 0;
+
+                    localisation_robots->robots.push_back(localisation_robot);
+                }
+                emit(std::move(localisation_robots));
+            });
+
+        on<Trigger<VisionRobots>, With<GreenHorizon>, Optional<With<GameState>>, Single>().then(
+            [this](const VisionRobots& vision_robots,
+                   const GreenHorizon& horizon,
+                   const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -110,6 +156,14 @@ namespace module::localisation {
                     localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
                     localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
                     localisation_robot.time_of_measurement = tracked_robot.last_time_update;
+
+                    // Determine our team colour
+                    bool self_blue =
+                        game_state && game_state->team.team_colour == GameState::TeamColour::BLUE ? true : false;
+                    // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
+                    localisation_robot.is_blue     = tracked_robot.is_teammate ? self_blue : !self_blue;
+                    localisation_robot.teammate_id = tracked_robot.teammate_id : 0;
+
                     localisation_robots->robots.push_back(localisation_robot);
                 }
                 emit(std::move(localisation_robots));
@@ -128,16 +182,14 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw) {
-        Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
-
-        for (const auto& robot : robots) {
+    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw, uint teammate_id) {
+        for (const auto& rRWw : robots_rRWw) {
             TrackedRobot* best_match = nullptr;
             double best_distance     = std::numeric_limits<double>::max();
 
             // Find closest existing robot
             for (auto& tracked_robot : tracked_robots) {
-                double distance = (robot.rRWw.head<2>() - tracked_robot.get_rRWw()).norm();
+                double distance = (rRWw.head<2>() - tracked_robot.get_rRWw()).norm();
                 if (distance < cfg.association_distance && distance < best_distance) {
                     best_distance = distance;
                     best_match    = &tracked_robot;  // Use reference to the existing tracked robot
@@ -146,15 +198,36 @@ namespace module::localisation {
 
             if (best_match) {
                 // Update matched robot with the vision measurement
-                best_match->ukf.measure(Eigen::Vector2d(robot.rRWw.head<2>()),
+                best_match->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                         cfg.ukf.noise.measurement.position,
                                         MeasurementType::ROBOT_POSITION());
                 best_match->seen = true;
+
+                // If the robot is identified as a teammate via Wi-Fi, mark it as a teammate
+                if (teammate_id != 0) {
+                    best_match->is_teammate = true;         // Mark as teammate
+                    best_match->teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
+                }
+
+                // Check if teammate ID is already assigned
+                for (auto& tracked_robot : tracked_robots) {
+                    if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != best_match->id) {
+                        // If a teammate ID is already assigned to another robot, clear it
+                        tracked_robot.teammate_id = 0;
+                        tracked_robot.is_teammate = false;  // Mark as not a teammate
+                    }
+                }
             }
             else {
                 // No close robot: start tracking a new one
-                tracked_robots.emplace_back(TrackedRobot(robot.rRWw, cfg.ukf, next_id++));
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
                 tracked_robots.back().seen = true;
+
+                // Mark this new robot as a teammate if it is identified as such
+                if (teammate_id != 0) {
+                    tracked_robots.back().is_teammate = true;         // Mark as teammate
+                    tracked_robots.back().teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
+                }
             }
         }
     }
