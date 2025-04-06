@@ -56,7 +56,7 @@ namespace module::platform::OpenCR {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
-        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
+        on<Configuration>("OpenCR.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
