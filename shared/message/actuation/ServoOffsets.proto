@@ -29,9 +29,9 @@ package message.actuation;
 
 message ServoOffsets {
     message ServoOffset {
-        float offset = 2;
+        float offset    = 2;
         int32 direction = 3;
-        bool simulated = 4;
+        bool  simulated = 4;
     }
 
     repeated ServoOffset offsets = 1;
