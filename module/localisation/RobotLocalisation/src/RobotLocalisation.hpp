@@ -77,6 +77,10 @@ namespace module::localisation {
             long missed_count = 0;
             /// @brief A unique identifier for the robot
             const unsigned long id;
+            /// @brief Whether or not this robot is a teammate
+            bool is_teammate = false;
+            /// @brief The unique identifier of the robot if it is a teammate
+            unsigned long teammate_id = 0;
 
             /// @brief Constructor that sets the state for the UKF
             TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
