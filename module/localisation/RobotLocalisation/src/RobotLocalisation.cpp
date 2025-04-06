@@ -75,23 +75,32 @@ namespace module::localisation {
 
         on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then(
             [this](const VisionRobots& vision_robots, const GreenHorizon& horizon) {
-                // Run prediction step
+                // **Run prediction step**
                 prediction();
 
+                // **Data association**
+                // Transform the robot positions from camera coordinates to world coordinates
+                Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
+                // Make a vector with the transformed position
+                std::vector<Eigen::Vector3d> robots_rRWw{};
+                for (const auto& vision_robot : vision_robots.robots) {
+                    Eigen::Vector3d rRWw = Hwc * vision_robot.rRCc;
+                    robots_rRWw.push_back(rRWw);
+                }
                 // Run data association step
-                data_association(vision_robots);
+                data_association(robots_rRWw);
 
-                // Run maintenance step
+                // **Run maintenance step**
                 maintenance(horizon);
 
-                // Debugging output
+                // **Debugging output**
                 // Print tracked_robots ids
                 log<DEBUG>("Robots tracked:");
                 for (const auto& tracked_robot : tracked_robots) {
                     log<DEBUG>("\tID: ", tracked_robot.id);
                 }
 
-                // Emit the localisation of the robots
+                // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
                 for (const auto& tracked_robot : tracked_robots) {
                     auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
@@ -119,19 +128,16 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::data_association(const VisionRobots& vision_robots) {
+    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw) {
         Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
 
-        for (const auto& vision_robot : vision_robots.robots) {
-            // Robot position in world frame
-            Eigen::Vector3d rRWw = Hwc * vision_robot.rRCc;
-
+        for (const auto& robot : robots) {
             TrackedRobot* best_match = nullptr;
             double best_distance     = std::numeric_limits<double>::max();
 
             // Find closest existing robot
             for (auto& tracked_robot : tracked_robots) {
-                double distance = (rRWw.head<2>() - tracked_robot.get_rRWw()).norm();
+                double distance = (robot.rRWw.head<2>() - tracked_robot.get_rRWw()).norm();
                 if (distance < cfg.association_distance && distance < best_distance) {
                     best_distance = distance;
                     best_match    = &tracked_robot;  // Use reference to the existing tracked robot
@@ -140,14 +146,14 @@ namespace module::localisation {
 
             if (best_match) {
                 // Update matched robot with the vision measurement
-                best_match->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
+                best_match->ukf.measure(Eigen::Vector2d(robot.rRWw.head<2>()),
                                         cfg.ukf.noise.measurement.position,
                                         MeasurementType::ROBOT_POSITION());
                 best_match->seen = true;
             }
             else {
                 // No close robot: start tracking a new one
-                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
+                tracked_robots.emplace_back(TrackedRobot(robot.rRWw, cfg.ukf, next_id++));
                 tracked_robots.back().seen = true;
             }
         }
