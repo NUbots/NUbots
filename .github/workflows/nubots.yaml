@@ -25,7 +25,7 @@ jobs:
   # Detects changes to NUbots related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     # Output the detected changes for conditionally running other jobs
     outputs:
@@ -57,7 +57,7 @@ jobs:
     name: "Build docker image"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     # We output the image tag that we create so the other jobs can use it
     outputs:
@@ -137,7 +137,7 @@ jobs:
       needs.check_for_changes.outputs.has_cpp_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     env:
       CTEST_OUTPUT_ON_FAILURE: 1
 
@@ -183,7 +183,7 @@ jobs:
     needs: [check_for_changes, build_docker]
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     # Run on the container we just built
     container:
