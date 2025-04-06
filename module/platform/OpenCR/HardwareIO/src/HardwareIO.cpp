@@ -87,7 +87,7 @@ namespace module::platform::OpenCR {
         });
 
         on<Trigger<ServoOffsets>>().then([this](const ServoOffsets& offsets) {
-            // Update the servo offsets
+            // Update the servo offsets if the config changes
             for (size_t i = 0; i < offsets.offsets.size(); ++i) {
                 nugus.servo_offset[i]     = offsets.offsets[i].offset;
                 nugus.servo_direction[i]  = offsets.offsets[i].direction;
@@ -95,7 +95,7 @@ namespace module::platform::OpenCR {
             }
         });
 
-        on<Startup>().then("HardwareIO Startup", [this] {
+        on<Startup, With<ServoOffsets>>().then("HardwareIO Startup", [this](const ServoOffsets& offsets) {
             // The first thing to do is get the model information
             // The model watchdog is started, which has a longer time than the packet watchdog
             // The packet watchdog is disabled until we start the main loop
@@ -103,6 +103,13 @@ namespace module::platform::OpenCR {
 
             // The startup function sets up the subcontroller state
             startup();
+
+            // Set the servo offsets
+            for (size_t i = 0; i < offsets.offsets.size(); ++i) {
+                nugus.servo_offset[i]     = offsets.offsets[i].offset;
+                nugus.servo_direction[i]  = offsets.offsets[i].direction;
+                servo_states[i].simulated = offsets.offsets[i].simulated;
+            }
         });
 
         // When we receive data back from the OpenCR it will arrive here

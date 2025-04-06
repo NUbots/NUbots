@@ -32,6 +32,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoOffsets.hpp"
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -44,6 +45,7 @@
 namespace module::platform::NUSense {
 
     using extension::Configuration;
+    using message::actuation::ServoOffsets;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::actuation::SubcontrollerServoTarget;
@@ -162,10 +164,10 @@ namespace module::platform::NUSense {
                 }
 
                 // Add the offsets and switch the direction.
-                servo.present_position *= nugus.servo_direction[val.id - 1];
-                servo.present_position += offsets[val.id - 1].offset;
-                servo.goal_position *= nugus.servo_direction[val.id - 1];
-                servo.goal_position += offsets[val.id - 1].offset;
+                servo.present_position *= offsets.offsets[val.id - 1].direction;
+                servo.present_position += offsets.offsets[val.id - 1].offset;
+                servo.goal_position *= offsets.offsets[val.id - 1].direction;
+                servo.goal_position += offsets.offsets[val.id - 1].offset;
             }
 
             log<TRACE>(
@@ -217,7 +219,7 @@ namespace module::platform::NUSense {
                     servo_targets.targets.emplace_back(
                         target.time - NUClear::clock::now(),
                         target.id,
-                        (target.position - offsets[target.id].offset * offsets[target.id].direction,
+                        (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
                         target.gain,
                         target.torque);
                 }
