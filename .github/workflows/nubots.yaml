@@ -52,7 +52,7 @@ jobs:
 
   # Build the docker image. This job is not conditional since we don't want it skipped
   # because other jobs depend on it. The actual building of the image is cached, so it
-  # wont't be doing unnecessary work if there are no relevant Dockerfile changes.
+  # won't be doing unnecessary work if there are no relevant Dockerfile changes.
   build_docker:
     name: "Build docker image"
 
