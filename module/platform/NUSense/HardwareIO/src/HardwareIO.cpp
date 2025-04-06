@@ -84,12 +84,6 @@ namespace module::platform::NUSense {
 
             // Tell the stream reactor to connect to the device
             emit(std::make_unique<ConnectSerial>(device, baud));
-
-            // Apply servo offsets
-            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
-                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
-            }
         });
 
         // Emit any messages sent by the device to the rest of the system
@@ -98,7 +92,7 @@ namespace module::platform::NUSense {
         });
 
         // Handle successfully decoded NUSense data
-        on<Trigger<NUSense>>().then([this](const NUSense& data) {
+        on<Trigger<NUSense>, With<ServoOffsets>>().then([this](const NUSense& data, const ServoOffsets& offsets) {
             // Will contain data from the NUSense to emit to the rest of the system
             auto sensors = std::make_unique<RawSensors>();
 
@@ -170,9 +164,9 @@ namespace module::platform::NUSense {
 
                 // Add the offsets and switch the direction.
                 servo.present_position *= nugus.servo_direction[val.id - 1];
-                servo.present_position += nugus.servo_offset[val.id - 1];
+                servo.present_position += offsets[val.id - 1].offset;
                 servo.goal_position *= nugus.servo_direction[val.id - 1];
-                servo.goal_position += nugus.servo_offset[val.id - 1];
+                servo.goal_position += offsets[val.id - 1].offset;
             }
 
             log<TRACE>(
@@ -212,24 +206,25 @@ namespace module::platform::NUSense {
 
 
         // Sync is used because uart write is a shared resource
-        on<Trigger<ServoTargets>, Sync<HardwareIO>>().then([this](const ServoTargets& commands) {
-            // Copy the data into a new message so we can use a duration instead of a timepoint
-            // and take the offsets and switch the direction.
-            auto servo_targets = SubcontrollerServoTargets();
+        on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then(
+            [this](const ServoTargets& commands, const ServoOffsets& offsets) {
+                // Copy the data into a new message so we can use a duration instead of a timepoint
+                // and take the offsets and switch the direction.
+                auto servo_targets = SubcontrollerServoTargets();
 
-            // Change the timestamp in servo targets to the difference between the timestamp and now
-            // Take away the offset and switch the direction if needed
-            for (auto& target : commands.targets) {
-                servo_targets.targets.emplace_back(
-                    target.time - NUClear::clock::now(),
-                    target.id,
-                    (target.position - nugus.servo_offset[target.id]) * nugus.servo_direction[target.id],
-                    target.gain,
-                    target.torque);
-            }
+                // Change the timestamp in servo targets to the difference between the timestamp and now
+                // Take away the offset and switch the direction if needed
+                for (auto& target : commands.targets) {
+                    servo_targets.targets.emplace_back(
+                        target.time - NUClear::clock::now(),
+                        target.id,
+                        (target.position - offsets[target.id].offset * offsets[target.id].direction,
+                        target.gain,
+                        target.torque);
+                }
 
-            send_packet(servo_targets);
-        });
+                send_packet(servo_targets);
+            });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto command_list = std::make_unique<ServoTargets>();
