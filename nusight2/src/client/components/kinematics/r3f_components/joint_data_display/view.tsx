@@ -9,6 +9,7 @@ export const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = obser
       <h3 className="text-xl font-semibold mb-4 pb-2">Joint Angles</h3>
       <ul className="space-y-2">
         {Object.entries(robot.motors).map(([jointName, motor]) => {
+          // Format joint name from camelCase to "Camel Case"
           const formattedLabel = jointName
             .replace(/([a-z])([A-Z])/g, "$1 $2")
             .replace(/^./, (match) => match.toUpperCase());

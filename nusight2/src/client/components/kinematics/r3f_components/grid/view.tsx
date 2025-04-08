@@ -7,22 +7,15 @@ export const Grid = ({ gridSize, divisions }: { gridSize: number; divisions: num
 
   for (let i = 0; i <= divisions; i++) {
     const value = (i - gridSize / 2) / 10;
+    const label = value.toFixed(1);
 
     labels.push(
-      // X-axis labels
-      <React.Fragment key={`x-${i}`}>
-        <CoordinateLabel text={value.toFixed(1)} position={[value * 10, -gridSize / 2, gridSize / 2 + 1]} />
-      </React.Fragment>,
-
-      // Y-axis labels
-      <React.Fragment key={`y-${i}`}>
-        <CoordinateLabel text={value.toFixed(1)} position={[-gridSize / 2 - 0.5, value * 10, gridSize / 2 + 0.5]} />
-      </React.Fragment>,
-
-      // Z-axis labels
-      <React.Fragment key={`z-${i}`}>
-        <CoordinateLabel text={value.toFixed(1)} position={[gridSize / 2 + 0.5, -gridSize / 2, value * 10]} />
-      </React.Fragment>,
+      // X-axis label
+      <CoordinateLabel key={`x-${i}`} text={label} position={[value * 10, -gridSize / 2, gridSize / 2 + 1]} />,
+      // Y-axis label
+      <CoordinateLabel key={`y-${i}`} text={label} position={[-gridSize / 2 - 0.5, value * 10, gridSize / 2 + 0.5]} />,
+      // Z-axis label
+      <CoordinateLabel key={`z-${i}`} text={label} position={[gridSize / 2 + 0.5, -gridSize / 2, value * 10]} />,
     );
   }
 
@@ -45,7 +38,7 @@ export const Grid = ({ gridSize, divisions }: { gridSize: number; divisions: num
         rotation={[0, 0, Math.PI / 2]}
       />
 
-      {/* Labels */}
+      {/* Labels for X, Y, and Z axes */}
       {labels}
     </>
   );

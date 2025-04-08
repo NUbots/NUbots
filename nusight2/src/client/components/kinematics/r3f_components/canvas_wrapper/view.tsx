@@ -22,12 +22,15 @@ export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> =
     <Canvas camera={{ position: [10, 10, 10], fov: 60 }}>
       <CameraControls />
 
+      {/* Basic lighting setup */}
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} />
 
+      {/* Render the grid and axes */}
       <Grid gridSize={10} divisions={10} />
       <Axes length={2} />
 
+      {/* Render the selected robot */}
       {selectedRobot && <RobotComponents robot={selectedRobot} />}
     </Canvas>
   );

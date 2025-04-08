@@ -12,7 +12,7 @@ export const CameraControls = () => {
   const spherical = useRef(new THREE.Spherical(20, Math.PI / 2.5, Math.PI / 4)).current;
   const lookAtOffset = useRef(new THREE.Vector3(0, -2, 0));
 
-  // Update camera position and lookAt
+  // Update camera position and view
   useEffect(() => {
     camera.position.setFromSpherical(spherical).add(lookAtOffset.current);
     camera.lookAt(lookAtOffset.current);
@@ -21,20 +21,23 @@ export const CameraControls = () => {
 
   // Handle mouse interactions
   useEffect(() => {
+    // Determine if the mouse is panning or rotating
     const handleMouseDown = (event: MouseEvent) => {
       if (event.ctrlKey) {
-        setIsPanning(true); // Ctrl + Drag -> Panning
+        setIsPanning(true); // Ctrl + left drag -> Panning
       } else {
-        setIsDragging(true); // Left-click -> Rotation
+        setIsDragging(true); // Left drag -> Rotation
       }
       dragStart.current = { x: event.clientX, y: event.clientY };
     };
 
+    // Release mouse button
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsPanning(false);
     };
 
+    // Handle mouse movement for panning or rotating
     const handleMouseMove = (event: MouseEvent) => {
       if (!isDragging && !isPanning) return;
 
@@ -42,7 +45,6 @@ export const CameraControls = () => {
       const deltaY = event.clientY - dragStart.current.y;
       dragStart.current = { x: event.clientX, y: event.clientY };
 
-      // Handle panning and rotation
       if (isPanning) {
         // Calculate panning movement based on camera direction
         const panSpeed = 0.02;
@@ -61,10 +63,12 @@ export const CameraControls = () => {
         spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - deltaY * 0.005));
       }
 
+      // Update camera position and view
       camera.position.setFromSpherical(spherical).add(lookAtOffset.current);
       camera.lookAt(lookAtOffset.current);
     };
 
+    // Handle mouse wheel for zooming
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
       setZoom((prevZoom: number) => {
