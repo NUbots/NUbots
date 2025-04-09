@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/ServoOffsets.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -37,6 +38,7 @@ namespace module::actuation {
 
     using extension::Configuration;
     using message::actuation::KinematicsModel;
+    using message::actuation::ServoOffsets;
     using utility::support::Expression;
 
 
@@ -47,6 +49,16 @@ namespace module::actuation {
             KinematicsModel model;
             configure(model, config);
             emit(std::make_unique<KinematicsModel>(model));
+        });
+
+        on<Configuration>("Offsets.yaml").then([this](const Configuration& config) {
+            auto offsets = std::make_unique<ServoOffsets>();
+            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+                offsets->offsets.emplace_back(config["servos"][i]["offset"].as<Expression>(),
+                                              config["servos"][i]["direction"].as<Expression>(),
+                                              config["servos"][i]["simulated"].as<bool>());
+            }
+            emit(offsets);
         });
     }
 

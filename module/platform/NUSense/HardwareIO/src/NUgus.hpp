@@ -34,12 +34,6 @@ namespace module::platform::NUSense {
 
     class NUgus {
     public:
-        /// @brief The direction (clockwise or anticlockwise) to measure each motor in
-        std::array<int8_t, 20> servo_direction{};
-
-        /// @brief Offsets the radian angles of motors to change their 0 position
-        std::array<double, 20> servo_offset{};
-
         enum class ID : uint8_t {
             NO_ID            = 0,
             R_SHOULDER_PITCH = 1,
