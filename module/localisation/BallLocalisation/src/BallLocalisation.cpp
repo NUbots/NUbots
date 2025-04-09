@@ -211,7 +211,7 @@ namespace module::localisation {
         // Called once a second to default to teammates balls if we haven't seen one recently
         on<Every<1, Per<std::chrono::seconds>>, Optional<With<VisionBalls>>>().then(
             [this](const std::shared_ptr<const VisionBalls>& balls) {
-                if (!balls->balls.empty()) {
+                if (balls && !balls->balls.empty()) {
                     last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
                 }
 
@@ -240,7 +240,6 @@ namespace module::localisation {
 
     // Run to calculate balls using robot to robot communication
     // Returns whether we have a valid guess from teammates balls
-    // Error calculation is optional
     bool BallLocalisation::get_team_guess(Eigen::Vector3d& average) {
 
         std::vector<Eigen::Vector3d> to_check;

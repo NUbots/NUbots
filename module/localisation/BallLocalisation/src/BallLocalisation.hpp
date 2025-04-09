@@ -109,12 +109,12 @@ namespace module::localisation {
         struct TeamGuess {
             NUClear::clock::time_point last_heard = NUClear::clock::now();
 
-            Eigen::Vector3d rBFf;
+            Eigen::Vector3d rBFf = Eigen::Vector3d::Zero();
         };
 
         std::vector<TeamGuess> team_guesses{};
 
-        Eigen::Isometry3d last_Hcw;
+        Eigen::Isometry3d last_Hcw = Eigen::Isometry3d::Identity();
 
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.
