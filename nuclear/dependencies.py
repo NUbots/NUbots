@@ -29,7 +29,7 @@ import re
 import subprocess
 import sys
 
-whitespace = re.compile("\s+")
+whitespace = re.compile(r"\s+")
 
 
 def parse_requirements_map(user_tools_path):

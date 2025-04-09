@@ -27,6 +27,8 @@
 #ifndef MODULE_PLATFORM_OPENCR_OPENCR_HPP
 #define MODULE_PLATFORM_OPENCR_OPENCR_HPP
 
+#include <cstdint>
+
 #include "dynamixel/v2/DynamixelDevice.hpp"
 
 namespace module::platform::OpenCR {

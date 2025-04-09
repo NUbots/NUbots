@@ -289,7 +289,9 @@ namespace utility::support {
         for (auto& data : config.as<std::vector<Expression>>()) {
             result[i++] = U(data);
         }
+
         assert((fmt::format("We expected {} elements in the YAML file but {} were found", N, i), i == N));
+
         return result;
     }
 
