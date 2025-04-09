@@ -154,7 +154,7 @@ namespace module::localisation {
 
                     Eigen::Vector3d team_guess_average = Eigen::Vector3d::Zero();
 
-                    const bool accept_team_guess = get_team_guess(team_guess_average, true);
+                    const bool accept_team_guess = get_team_guess(team_guess_average);
 
                     if (accept_ball || accept_team_guess) {
                         // Compute the time since the last update (in seconds)
@@ -223,7 +223,7 @@ namespace module::localisation {
 
                     Eigen::Vector3d average = Eigen::Vector3d::Zero();
 
-                    get_team_guess(average, false);
+                    get_team_guess(average);
 
                     last_time_update = NUClear::clock::now();
 
@@ -241,7 +241,7 @@ namespace module::localisation {
     // Run to calculate balls using robot to robot communication
     // Returns whether we have a valid guess from teammates balls
     // Error calculation is optional
-    bool BallLocalisation::get_team_guess(Eigen::Vector3d& average, const bool use_error) {
+    bool BallLocalisation::get_team_guess(Eigen::Vector3d& average) {
 
         std::vector<Eigen::Vector3d> to_check;
 
@@ -260,17 +260,20 @@ namespace module::localisation {
 
             Eigen::Vector3d error = Eigen::Vector3d::Zero();
 
-            if (use_error && to_check.size() > 1) {
+            if (to_check.size() > 1) {
 
                 for (auto i = to_check.begin() + 1; i != to_check.end(); ++i) {
                     error -= (*to_check.begin() - *i).cwiseAbs();
                 }
             }
-            if (!use_error || error.norm() < 1.0) {
-                for (auto guess : to_check) {
-                    average += guess;
-                }
-                average /= to_check.size();
+
+            for (auto guess : to_check) {
+                average += guess;
+            }
+            average /= to_check.size();
+
+            if (error.norm() < 1.0) {
+
                 return true;
             }
         }
