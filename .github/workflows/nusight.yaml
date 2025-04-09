@@ -34,6 +34,7 @@ jobs:
     # Output the detected changes for conditionally running other jobs
     outputs:
       has_workflow_changes: ${{ steps.filter.outputs.workflow_changes }}
+      has_docker_changes: ${{ steps.filter.outputs.docker_changes }}
       has_nusight_changes: ${{ steps.filter.outputs.nusight_changes }}
 
     steps:
@@ -47,27 +48,105 @@ jobs:
           filters: |
             workflow_changes:
               - '.github/workflows/nusight.yaml'
+            docker_changes:
+              - 'docker/**'
             nusight_changes:
               - 'nusight2/**'
               - 'shared/message/**/*.proto'
               - 'nuclear/message/proto/**/*.proto'
 
-  # Build the NUsight code
-  build-nusight:
-    name: Build NUsight
-    needs: check_for_changes
-
-    # Run only if the workflow or NUsight related files have changed
-    if: >
-      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
-      needs.check_for_changes.outputs.has_nusight_changes == 'true'
+  # Build the docker image. This job is not conditional since we don't want it skipped
+  # because other jobs depend on it. The actual building of the image is cached, so it
+  # won't be doing unnecessary work if there are no relevant Dockerfile changes.
+  build_docker:
+    name: "Build docker image"
 
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
 
-    # Run on the Node container
+    # We output the image tag that we create so the other jobs can use it
+    outputs:
+      image: ${{ steps.image_output.outputs.image }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Figure out the tag to use for the Docker image
+      - name: Set Docker tag
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]
+          then
+            branch="${{ github.ref_name }}"
+            # Replace forward slashes with dashes to avoid special characters
+            echo "DOCKER_TAG=${branch////-}" >> "${GITHUB_ENV}";
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]
+          then
+            echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
+          elif [[ "${{ github.event_name }}" == "merge_group" ]]
+          then
+            pr=$(echo "${{ github.ref_name }}" | grep -iEo 'pr-[[:digit:]]+' | head -1)
+            echo DOCKER_TAG=PR-${pr:3} >> "${GITHUB_ENV}";
+          fi
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Setup docker buildx
+      - name: 🐳 Set up docker buildx 🐳
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
+            env.BUILDKIT_STEP_LOG_MAX_SPEED=-1
+
+      # Login to the docker repository
+      - name: Login to the docker repository
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Ensure write permissions for group and other are NOT set
+      # This is done to ensure consistency with the b script across all systems
+      - name: Enforce file permissions
+        run: chmod -Rv g-w,o-w docker/
+
+      # Build and push the docker image
+      - name: 🐳 Build the docker image 🐳
+        uses: docker/build-push-action@v4
+        with:
+          pull: true
+          tags: "nubots/nubots:${{ env.DOCKER_TAG }}"
+          file: docker/Dockerfile
+          context: docker
+          cache-from: |
+            type=registry,ref=nubots/nubots:${{ env.DOCKER_TAG }}
+            type=registry,ref=nubots/nubots:generic
+          cache-to: type=inline
+          build-args: platform=generic
+          push: true
+
+      - id: image_output
+        name: Output the created image
+        run: echo "image=nubots/nubots:${{ env.DOCKER_TAG }}" >> $GITHUB_OUTPUT
+
+  # Build the NUsight code
+  build-nusight:
+    name: Build NUsight
+    needs: [check_for_changes, build_docker]
+
+    # Run only if the workflow or NUsight related files have changed
+    if: >
+      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_docker_changes == 'true' ||
+      needs.check_for_changes.outputs.has_nusight_changes == 'true'
+
+    runs-on: ubuntu-22.04
+
+    # Run on the container we just built
     container:
-      image: node:20
+      image: "${{ needs.build_docker.outputs.image }}"
+      options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -79,7 +158,7 @@ jobs:
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       # Check if the yarn cache directory is valid
       - uses: actions/cache@v3
@@ -92,33 +171,33 @@ jobs:
 
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
-        working-directory: nusight2
-        run: yarn global add node-gyp && yarn --prefer-offline
+        run: ./b yarn install --prefer-offline
 
+      # Typescript type checking
       - name: Type Check NUsight
-        working-directory: nusight2
-        run: yarn tscheck
+        run: ./b yarn tscheck
 
+      # Build the NUsight code
       - name: Build NUsight
-        working-directory: nusight2
-        run: yarn build:ci
+        run: ./b yarn build:ci
 
   # Build the NUsight Storybook code
   build-nusight-storybook:
     name: Build NUsight Storybook
-    needs: check_for_changes
+    needs: [check_for_changes, build_docker]
 
     # Run only if the workflow or NUsight related files have changed
     if: >
       needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_docker_changes == 'true' ||
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
-    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
 
-    # Run on the Node container
+    # Run on the container we just built
     container:
-      image: node:20
+      image: "${{ needs.build_docker.outputs.image }}"
+      options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -130,7 +209,7 @@ jobs:
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       # Check if the yarn cache directory is valid
       - uses: actions/cache@v3
@@ -143,29 +222,29 @@ jobs:
 
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
-        working-directory: nusight2
-        run: yarn global add node-gyp && yarn --prefer-offline
+        run: ./b yarn install --prefer-offline
 
-      - name: Build NUsight
-        working-directory: nusight2
-        run: yarn storybook:build
+      # Build the NUsight Storybook code
+      - name: Build NUsight Storybook
+        run: ./b yarn storybook:build
 
   # Test the NUsight code
   test-nusight:
     name: Test NUsight
-    needs: check_for_changes
+    needs: [check_for_changes, build_docker]
 
     # Run only if the workflow or NUsight related files have changed
     if: >
       needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_docker_changes == 'true' ||
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
-    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
 
-    # Run on the Node container
+    # Run on the container we just built
     container:
-      image: node:20
+      image: "${{ needs.build_docker.outputs.image }}"
+      options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -177,7 +256,7 @@ jobs:
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       # Check if the yarn cache directory is valid
       - uses: actions/cache@v3
@@ -190,9 +269,7 @@ jobs:
 
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
-        working-directory: nusight2
-        run: yarn global add node-gyp && yarn --prefer-offline
+        run: ./b yarn install --prefer-offline
 
-      - name: Build NUsight
-        working-directory: nusight2
-        run: yarn test:ci
+      - name: Test NUsight
+        run: ./b yarn test:ci
