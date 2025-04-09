@@ -111,12 +111,10 @@ namespace module::planning {
                                             : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
                                                                                 : State::FALLING;
 
-                    // Falling if at least two of the three checks are unstable or if any one of them is falling
-                    bool falling = (gyro_mag_state == State::FALLING || acc_mag_state == State::FALLING
-                                    || acc_angle_state == State::FALLING)
-                                   || (gyro_mag_state == State::UNSTABLE && acc_mag_state == State::UNSTABLE)
-                                   || (gyro_mag_state == State::UNSTABLE && acc_angle_state == State::UNSTABLE)
-                                   || (acc_mag_state == State::UNSTABLE && acc_angle_state == State::UNSTABLE);
+                    // Falling if at least two of the three checks are falling
+                    bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING)
+                                   || (gyro_mag_state == State::FALLING && acc_angle_state == State::FALLING)
+                                   || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING);
 
                     // We are falling
                     if (falling) {
