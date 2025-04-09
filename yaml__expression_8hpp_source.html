@@ -461,88 +461,90 @@ $(document).ready(function(){initNavTree('yaml__expression_8hpp_source.html','')
 <div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; data : config.as&lt;std::vector&lt;Expression&gt;&gt;()) {</div>
 <div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;            result[i++] = U(data);</div>
 <div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;        }</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;        assert((fmt::format(<span class="stringliteral">&quot;We expected {} elements in the YAML file but {} were found&quot;</span>, N, i), i == N));</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    }</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160; </div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U = T&gt;</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    <span class="keyword">inline</span> std::vector&lt;T&gt; resolve_expression(<span class="keyword">const</span> YAML::Node&amp; config) {</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;        std::vector&lt;T&gt; result;</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; data : config.as&lt;std::vector&lt;Expression&gt;&gt;()) {</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            result.emplace_back(U(data));</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;        }</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;        <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    }</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;}  <span class="comment">// namespace utility::support</span></div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160; </div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;<span class="keyword">namespace </span>YAML {</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160; </div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        assert((fmt::format(<span class="stringliteral">&quot;We expected {} elements in the YAML file but {} were found&quot;</span>, N, i), i == N));</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160; </div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;        <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;    }</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160; </div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U = T&gt;</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    <span class="keyword">inline</span> std::vector&lt;T&gt; resolve_expression(<span class="keyword">const</span> YAML::Node&amp; config) {</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;        std::vector&lt;T&gt; result;</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; data : config.as&lt;std::vector&lt;Expression&gt;&gt;()) {</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;            result.emplace_back(U(data));</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;        }</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;        <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    }</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;}  <span class="comment">// namespace utility::support</span></div>
 <div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160; </div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00309"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html">  309</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html">convert&lt;utility::support::Expression&gt;</a> {</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;        <span class="keyword">static</span> Node encode(<span class="keyword">const</span> <a class="code" href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a>&amp; rhs) {</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;            Node node;</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160; </div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;            <span class="comment">// Treat as a double</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;            node = rhs;</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160; </div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;        }</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160; </div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, <a class="code" href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a>&amp; rhs) {</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;            rhs = <a class="code" href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a>(node);</div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;        }</div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;    };</div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160; </div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;    <span class="keyword">template</span> &lt;<span class="keywordtype">int</span> Rows, <span class="keywordtype">int</span> Cols&gt;</div>
-<div class="line"><a name="l00326"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4.html">  326</a></span>&#160;    <span class="keyword">struct </span>convert&lt;Eigen::Matrix&lt;double, Rows, Cols&gt;&gt; {</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;        <span class="keyword">static</span> Node encode(<span class="keyword">const</span> Eigen::Matrix&lt;double, Rows, Cols&gt;&amp; rhs) {</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            Node node;</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            <span class="keywordflow">if</span> (Cols == 1) {</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;                    node.push_back(rhs(i, 0));</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                }</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;            }</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                    Node row;</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Cols; ++j) {</div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;                        row.push_back(rhs(i, j));</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;                    }</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;                    node.push_back(row);</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;                }</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;            }</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;        }</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160; </div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, Eigen::Matrix&lt;double, Rows, Cols&gt;&amp; rhs) {</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;            <span class="keywordflow">if</span> (!node.IsSequence() || node.size() != Rows) {</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            }</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            <span class="keywordflow">if</span> (Cols == 1) {</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;                    rhs(i, 0) = node[i].as&lt;<span class="keywordtype">double</span>&gt;();</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                }</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;            }</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;                    <span class="keywordflow">if</span> (!node[i].IsSequence() || node[i].size() != Cols) {</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;                        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;                    }</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Cols; ++j) {</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;                        rhs(i, j) = node[i][j].as&lt;<span class="keywordtype">double</span>&gt;();</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;                    }</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;                }</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;            }</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        }</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;    };</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160; </div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;<span class="keyword">namespace </span>YAML {</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160; </div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00311"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html">  311</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html">convert&lt;utility::support::Expression&gt;</a> {</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;        <span class="keyword">static</span> Node encode(<span class="keyword">const</span> <a class="code" href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a>&amp; rhs) {</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;            Node node;</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160; </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;            <span class="comment">// Treat as a double</span></div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;            node = rhs;</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160; </div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;        }</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160; </div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, <a class="code" href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a>&amp; rhs) {</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;            rhs = <a class="code" href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a>(node);</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;        }</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;    };</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;    <span class="keyword">template</span> &lt;<span class="keywordtype">int</span> Rows, <span class="keywordtype">int</span> Cols&gt;</div>
+<div class="line"><a name="l00328"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4.html">  328</a></span>&#160;    <span class="keyword">struct </span>convert&lt;Eigen::Matrix&lt;double, Rows, Cols&gt;&gt; {</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;        <span class="keyword">static</span> Node encode(<span class="keyword">const</span> Eigen::Matrix&lt;double, Rows, Cols&gt;&amp; rhs) {</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            Node node;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            <span class="keywordflow">if</span> (Cols == 1) {</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                    node.push_back(rhs(i, 0));</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;                }</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;            }</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;            <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;                    Node row;</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Cols; ++j) {</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;                        row.push_back(rhs(i, j));</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;                    }</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;                    node.push_back(row);</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;                }</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;            }</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        }</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160; </div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, Eigen::Matrix&lt;double, Rows, Cols&gt;&amp; rhs) {</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            <span class="keywordflow">if</span> (!node.IsSequence() || node.size() != Rows) {</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            }</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160; </div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;            <span class="keywordflow">if</span> (Cols == 1) {</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;                    rhs(i, 0) = node[i].as&lt;<span class="keywordtype">double</span>&gt;();</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;                }</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;            }</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;            <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Rows; ++i) {</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;                    <span class="keywordflow">if</span> (!node[i].IsSequence() || node[i].size() != Cols) {</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;                        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;                    }</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Cols; ++j) {</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;                        rhs(i, j) = node[i][j].as&lt;<span class="keywordtype">double</span>&gt;();</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;                    }</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;                }</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;            }</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;        }</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;    };</div>
 <div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160; </div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="astructYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4_html"><div class="ttname"><a href="structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html">YAML::convert&lt; utility::support::Expression &gt;</a></div><div class="ttdef"><b>Definition:</b> yaml_expression.hpp:309</div></div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160; </div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="astructYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4_html"><div class="ttname"><a href="structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html">YAML::convert&lt; utility::support::Expression &gt;</a></div><div class="ttdef"><b>Definition:</b> yaml_expression.hpp:311</div></div>
 <div class="ttc" id="astructutility_1_1support_1_1Expression_html"><div class="ttname"><a href="structutility_1_1support_1_1Expression.html">utility::support::Expression</a></div><div class="ttdoc">Represents a mathematical expression This could either be represented as a double or as a vector/matr...</div><div class="ttdef"><b>Definition:</b> yaml_expression.hpp:44</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -550,7 +552,7 @@ $(document).ready(function(){initNavTree('yaml__expression_8hpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_7a14655160e996e834c58137480ad3d2.html">support</a></li><li class="navelem"><b>yaml_expression.hpp</b></li>
-    <li class="footer">Generated on Wed Apr 9 2025 01:54:07 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Apr 9 2025 02:22:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
