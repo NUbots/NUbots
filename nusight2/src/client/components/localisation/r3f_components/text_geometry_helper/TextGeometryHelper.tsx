@@ -9,7 +9,7 @@ export const TextGeometryHelper = (text: string): TextGeometry => {
     const loader = new FontLoader();
 
     // Load font asynchronously
-    loader.load("/fonts/roboto/Roboto Medium_Regular.json", (font: any) => {
+    loader.load("/fonts/roboto/Roboto_Medium_Regular.json", (font: any) => {
       const newGeometry = new TextGeometry(text, {
         font: font,
         size: 0.1,

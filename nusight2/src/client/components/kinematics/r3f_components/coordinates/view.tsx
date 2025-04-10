@@ -37,7 +37,7 @@ export const CoordinateLabel = ({ text, position }: { text: string; position: [n
   // Load the font and create the text geometry
   useEffect(() => {
     const loader = new FontLoader();
-    loader.load("/fonts/roboto/Roboto Medium_Regular.json", (font: any) => {
+    loader.load("/fonts/roboto/Roboto_Medium_Regular.json", (font: any) => {
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: 0.2,
