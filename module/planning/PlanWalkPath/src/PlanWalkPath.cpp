@@ -34,6 +34,7 @@
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/vision/Goal.hpp"
 
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
@@ -53,6 +54,8 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
+    using message::vision::Goal;
+    using message::vision::Goals;
 
     using message::strategy::StandStill;
 
@@ -102,37 +105,54 @@ namespace module::planning {
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        on<Provide<WalkTo>,
+           Optional<With<Robots>>,
+           With<Sensors>,
+           Optional<With<Goals>>>()
+            .then([this](const WalkTo& walk_to,
+                         const std::shared_ptr<const Robots>& robots,
+                         const Sensors& sensors,
+                         const std::shared_ptr<const Goals>& goals) {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
                 const double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
-                // Calculate the angle between the robot and the final desired heading
+                // Calculate the angle between the robot (where it is facing) and the final desired heading
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
-                // If there are robots, check if there are obstacles in the way
-                if (robots != nullptr) {
-                    // Get the positions of all robots in the world
+                // If there are goals in sight, or other robots
+                if ((goals != nullptr && !goals->goals.empty()) || robots != nullptr) {
                     std::vector<Eigen::Vector2d> all_obstacles{};
-                    for (const auto& robot : robots->robots) {
-                        all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
+                    // If the robot can see goal posts, try to avoid them
+                    if (!goals->goals.empty()) {
+                        // Calc the position of the goal posts, add them as obstacles
+                        for (const auto& goal : goals->goals) {
+                            auto rGCc = goal.post.bottom * goal.post.distance;  // In camera space
+                            auto rGWw = goals-> Hcw.inverse() * rGCc;
+                            auto rGRr = sensors.Hrw * rGWw;
+                            all_obstacles.emplace_back(rGRr.head(2)); // Add them as obstacles
+                        }
+                    }
+                    // If there are robots, check if there are obstacles in the way
+                    if (robots != nullptr) {
+                        // Get the positions of all robots in the world
+                        for (const auto& robot : robots->robots) {
+                            all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
+                        }
                     }
                     // Sort obstacles based on distance from the robot
                     std::sort(all_obstacles.begin(),
                               all_obstacles.end(),
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
-
                     // Get the obstacles in the way of the current path
                     const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
-
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
                         // Adjust the target direction to avoid obstacles
                         rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
 
-                        // Override the heading when walking around obstacles
+                        //  Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
