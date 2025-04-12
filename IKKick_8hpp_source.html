@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: module/motion/IKKick/src/IKKick.hpp Source File</title>
+    <title>NUbots: module/skill/IKKick/src/IKKick.hpp Source File</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -204,72 +204,71 @@ $(document).ready(function(){initNavTree('IKKick_8hpp_source.html',''); initResi
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &quot;IKKickControllers.hpp&quot;</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;message/motion/KickCommand.hpp&quot;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;extension/Behaviour.hpp&quot;</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/motion/Balance.hpp&quot;</span></div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">namespace </span>module::motion {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">namespace </span>module::skill {</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classmodule_1_1motion_1_1IKKick.html">   42</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1motion_1_1IKKick.html">IKKick</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classmodule_1_1skill_1_1IKKick.html">   42</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1skill_1_1IKKick.html">IKKick</a> : <span class="keyword">public</span> <a class="code" href="classextension_1_1behaviour_1_1BehaviourReactor.html">::extension::behaviour::BehaviourReactor</a> {</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="comment">// ID of support foot</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <a class="code" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a> supportFoot;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="comment">// NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="comment">// foot which is rightFootFront KickPlanner has to add the radius of the all to get the location of the</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="comment">// centre of the ball point position of ball</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        Eigen::Vector3d ballPosition;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="comment">// direction we want to kick the ball</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        Eigen::Vector3d goalPosition;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">        /// Subsumption ID key to access motors</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="classmodule_1_1motion_1_1IKKick.html#aaa24295cd3a6ffd4766c73c0e112fedd">   55</a></span>&#160;<span class="comment"></span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code" href="classmodule_1_1motion_1_1IKKick.html#aaa24295cd3a6ffd4766c73c0e112fedd">subsumptionId</a>;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keywordtype">bool</span> leftFootIsSupport;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordtype">float</span> foot_separation;</div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="structmodule_1_1skill_1_1IKKick_1_1Config.html">   45</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1skill_1_1IKKick_1_1Config.html">Config</a> {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            <span class="keywordtype">int</span> gain_legs = 0;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            <span class="keywordtype">int</span> torque    = 0;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        } cfg;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">        /// @brief ID of support foot</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="classmodule_1_1skill_1_1IKKick.html#a2f5b1cb2658bc4ca8fae4a051fbcb66a">   51</a></span>&#160;<span class="comment"></span>        <a class="code" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a> <a class="code" href="classmodule_1_1skill_1_1IKKick.html#a2f5b1cb2658bc4ca8fae4a051fbcb66a">support_foot</a> = utility::input::LimbID::LEFT_LEG;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="comment">// NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="comment">// foot which is rightFootFront KickPlanner has to add the radius of the all to get the location of the</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="comment">// centre of the ball point position of ball</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        Eigen::Vector3d ball_position = Eigen::Vector3d::Zero();</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">        /// @brief Direction we want to kick the ball</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classmodule_1_1skill_1_1IKKick.html#a2bb670a35ce1614d36281c3eef7cdec0">   59</a></span>&#160;<span class="comment"></span>        Eigen::Vector3d <a class="code" href="classmodule_1_1skill_1_1IKKick.html#a2bb670a35ce1614d36281c3eef7cdec0">goal_position</a> = Eigen::Vector3d::Zero();</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordtype">float</span> KICK_PRIORITY;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keywordtype">float</span> EXECUTION_PRIORITY;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordtype">float</span> gain_legs = 50;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordtype">float</span> torque    = 100;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keywordtype">bool</span> feedback_active;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <a class="code" href="classutility_1_1motion_1_1Balancer.html">utility::motion::Balancer</a> feedbackBalancer;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <a class="code" href="classmodule_1_1motion_1_1KickBalancer.html">KickBalancer</a> balancer;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <a class="code" href="classmodule_1_1motion_1_1Kicker.html">Kicker</a> kicker;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keywordtype">void</span> updatePriority(<span class="keyword">const</span> <span class="keywordtype">float</span>&amp; priority);</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keyword">static</span> constexpr <span class="keywordtype">size_t</span> UPDATE_FREQUENCY = 90;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        ReactionHandle updater;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the IKKick reactor.</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1motion_1_1IKKick.html#a2a2d7bd4ca60a4d45954f545558201a7">IKKick</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    };</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}  <span class="comment">// namespace module::motion</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassmodule_1_1motion_1_1IKKick_html"><div class="ttname"><a href="classmodule_1_1motion_1_1IKKick.html">module::motion::IKKick</a></div><div class="ttdef"><b>Definition:</b> IKKick.hpp:42</div></div>
-<div class="ttc" id="aclassmodule_1_1motion_1_1IKKick_html_a2a2d7bd4ca60a4d45954f545558201a7"><div class="ttname"><a href="classmodule_1_1motion_1_1IKKick.html#a2a2d7bd4ca60a4d45954f545558201a7">module::motion::IKKick::IKKick</a></div><div class="ttdeci">IKKick(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the IKKick reactor.</div><div class="ttdef"><b>Definition:</b> IKKick.cpp:73</div></div>
-<div class="ttc" id="aclassmodule_1_1motion_1_1IKKick_html_aaa24295cd3a6ffd4766c73c0e112fedd"><div class="ttname"><a href="classmodule_1_1motion_1_1IKKick.html#aaa24295cd3a6ffd4766c73c0e112fedd">module::motion::IKKick::subsumptionId</a></div><div class="ttdeci">const size_t subsumptionId</div><div class="ttdoc">Subsumption ID key to access motors.</div><div class="ttdef"><b>Definition:</b> IKKick.hpp:55</div></div>
-<div class="ttc" id="aclassmodule_1_1motion_1_1KickBalancer_html"><div class="ttname"><a href="classmodule_1_1motion_1_1KickBalancer.html">module::motion::KickBalancer</a></div><div class="ttdef"><b>Definition:</b> IKKickControllers.hpp:239</div></div>
-<div class="ttc" id="aclassmodule_1_1motion_1_1Kicker_html"><div class="ttname"><a href="classmodule_1_1motion_1_1Kicker.html">module::motion::Kicker</a></div><div class="ttdef"><b>Definition:</b> IKKickControllers.hpp:254</div></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordtype">bool</span> left_foot_is_support = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keywordtype">float</span> foot_separation = 0.0;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keywordtype">bool</span> feedback_active;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <a class="code" href="classutility_1_1motion_1_1Balancer.html">utility::motion::Balancer</a> feedback_balancer;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <a class="code" href="classmodule_1_1skill_1_1KickBalancer.html">KickBalancer</a> balancer{};</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <a class="code" href="classmodule_1_1skill_1_1Kicker.html">Kicker</a> kicker{};</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keyword">static</span> constexpr <span class="keywordtype">size_t</span> UPDATE_FREQUENCY = 90;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        ReactionHandle updater;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the IKKick reactor.</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1skill_1_1IKKick.html#a54f677a3c536f51eb4bbd7fbf85c2337">IKKick</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    };</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}  <span class="comment">// namespace module::skill</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassextension_1_1behaviour_1_1BehaviourReactor_html"><div class="ttname"><a href="classextension_1_1behaviour_1_1BehaviourReactor.html">extension::behaviour::BehaviourReactor</a></div><div class="ttdoc">A reactor subtype that can be used when making a behaviour reactor.</div><div class="ttdef"><b>Definition:</b> Behaviour.hpp:412</div></div>
+<div class="ttc" id="aclassmodule_1_1skill_1_1IKKick_html"><div class="ttname"><a href="classmodule_1_1skill_1_1IKKick.html">module::skill::IKKick</a></div><div class="ttdef"><b>Definition:</b> IKKick.hpp:42</div></div>
+<div class="ttc" id="aclassmodule_1_1skill_1_1IKKick_html_a2bb670a35ce1614d36281c3eef7cdec0"><div class="ttname"><a href="classmodule_1_1skill_1_1IKKick.html#a2bb670a35ce1614d36281c3eef7cdec0">module::skill::IKKick::goal_position</a></div><div class="ttdeci">Eigen::Vector3d goal_position</div><div class="ttdoc">Direction we want to kick the ball.</div><div class="ttdef"><b>Definition:</b> IKKick.hpp:59</div></div>
+<div class="ttc" id="aclassmodule_1_1skill_1_1IKKick_html_a2f5b1cb2658bc4ca8fae4a051fbcb66a"><div class="ttname"><a href="classmodule_1_1skill_1_1IKKick.html#a2f5b1cb2658bc4ca8fae4a051fbcb66a">module::skill::IKKick::support_foot</a></div><div class="ttdeci">utility::input::LimbID support_foot</div><div class="ttdoc">ID of support foot.</div><div class="ttdef"><b>Definition:</b> IKKick.hpp:51</div></div>
+<div class="ttc" id="aclassmodule_1_1skill_1_1IKKick_html_a54f677a3c536f51eb4bbd7fbf85c2337"><div class="ttname"><a href="classmodule_1_1skill_1_1IKKick.html#a54f677a3c536f51eb4bbd7fbf85c2337">module::skill::IKKick::IKKick</a></div><div class="ttdeci">IKKick(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the IKKick reactor.</div><div class="ttdef"><b>Definition:</b> IKKick.cpp:61</div></div>
+<div class="ttc" id="aclassmodule_1_1skill_1_1KickBalancer_html"><div class="ttname"><a href="classmodule_1_1skill_1_1KickBalancer.html">module::skill::KickBalancer</a></div><div class="ttdef"><b>Definition:</b> IKKickControllers.hpp:236</div></div>
+<div class="ttc" id="aclassmodule_1_1skill_1_1Kicker_html"><div class="ttname"><a href="classmodule_1_1skill_1_1Kicker.html">module::skill::Kicker</a></div><div class="ttdef"><b>Definition:</b> IKKickControllers.hpp:253</div></div>
 <div class="ttc" id="aclassutility_1_1motion_1_1Balancer_html"><div class="ttname"><a href="classutility_1_1motion_1_1Balancer.html">utility::motion::Balancer</a></div><div class="ttdef"><b>Definition:</b> Balance.hpp:44</div></div>
+<div class="ttc" id="astructmodule_1_1skill_1_1IKKick_1_1Config_html"><div class="ttname"><a href="structmodule_1_1skill_1_1IKKick_1_1Config.html">module::skill::IKKick::Config</a></div><div class="ttdef"><b>Definition:</b> IKKick.hpp:45</div></div>
 <div class="ttc" id="astructutility_1_1input_1_1LimbID_html"><div class="ttname"><a href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></div><div class="ttdef"><b>Definition:</b> LimbID.hpp:41</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_e6610ba406ce43768f763e29ef940f72.html">motion</a></li><li class="navelem"><a class="el" href="dir_f877959cb10c2d46889dac0147cfeea2.html">IKKick</a></li><li class="navelem"><a class="el" href="dir_da8c9b5e1dcb1f29a4a1e7c550dc86c3.html">src</a></li><li class="navelem"><b>IKKick.hpp</b></li>
-    <li class="footer">Generated on Wed Apr 9 2025 02:22:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_0f46ec60ca1b85e60b439de4b000e4a6.html">skill</a></li><li class="navelem"><a class="el" href="dir_b9a29a01c37475d5af9f6a9912cb0b71.html">IKKick</a></li><li class="navelem"><a class="el" href="dir_8c18299fb2a76d29979f51a470adcc21.html">src</a></li><li class="navelem"><b>IKKick.hpp</b></li>
+    <li class="footer">Generated on Sat Apr 12 2025 07:40:57 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

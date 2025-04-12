@@ -51,7 +51,7 @@ var searchData=
   ['angledistance_48',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]],
   ['angular_5facceleration_49',['angular_acceleration',['../structutility_1_1skill_1_1splines_1_1Waypoint.html#ac8e7460f5b56a6c076cba9875d6b9bf2',1,'utility::skill::splines::Waypoint']]],
   ['angular_5fvelocity_50',['angular_velocity',['../structutility_1_1skill_1_1splines_1_1Waypoint.html#a1bf094d8a3848c453d41f4fc91da576b',1,'utility::skill::splines::Waypoint']]],
-  ['animator_51',['Animator',['../classmodule_1_1motion_1_1Animator.html',1,'module::motion']]],
+  ['animator_51',['Animator',['../classmodule_1_1skill_1_1Animator.html',1,'module::skill']]],
   ['ansisgr_52',['ANSISGR',['../structutility_1_1strutil_1_1ANSISGR.html',1,'utility::strutil']]],
   ['ansisgr_3c_20ansicode_3a_3ablack_20_3e_53',['ANSISGR&lt; ANSICode::BLACK &gt;',['../structutility_1_1strutil_1_1ANSISGR.html',1,'utility::strutil']]],
   ['ansisgr_3c_20ansicode_3a_3ablue_20_3e_54',['ANSISGR&lt; ANSICode::BLUE &gt;',['../structutility_1_1strutil_1_1ANSISGR.html',1,'utility::strutil']]],

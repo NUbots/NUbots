@@ -1,0 +1,9 @@
+<map id="module::skill::Kicker" name="module::skill::Kicker">
+<area shape="rect" id="node1" title=" " alt="" coords="659,121,813,148"/>
+<area shape="rect" id="node2" href="$classmodule_1_1skill_1_1SixDOFFootController.html" title=" " alt="" coords="343,49,534,90"/>
+<area shape="rect" id="node3" href="$classmodule_1_1skill_1_1Animator.html" title=" " alt="" coords="13,5,188,32"/>
+<area shape="rect" id="node4" href="$structutility_1_1input_1_1LimbID.html" title=" " alt="" coords="23,56,178,83"/>
+<area shape="rect" id="node5" href="$structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html" title=" " alt="" coords="5,107,196,149"/>
+<area shape="rect" id="node6" href="$structmodule_1_1skill_1_1Kicker_1_1Config.html" title=" " alt="" coords="361,114,516,155"/>
+<area shape="rect" id="node7" href="$classmodule_1_1skill_1_1SixDOFFrame.html" title=" " alt="" coords="337,196,540,223"/>
+</map>

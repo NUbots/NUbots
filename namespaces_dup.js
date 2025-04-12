@@ -298,26 +298,6 @@ var namespaces_dup =
         [ "eigen_to_nlopt", "FieldLocalisationNLopt_8hpp.html#a8afa1eb801f638e4c890f687a71f0c32", null ],
         [ "nlopt_to_eigen", "FieldLocalisationNLopt_8hpp.html#ad86283b67507ebac4528671874b068eb", null ]
       ] ],
-      [ "motion", null, [
-        [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],
-        [ "ExecuteKick", "structmodule_1_1motion_1_1ExecuteKick.html", null ],
-        [ "FinishKick", "structmodule_1_1motion_1_1FinishKick.html", null ],
-        [ "IKKick", "classmodule_1_1motion_1_1IKKick.html", "classmodule_1_1motion_1_1IKKick" ],
-        [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
-        [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
-        [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
-        [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ],
-        [ "FrameID", "IKKick_8cpp.html#ac46958dcb5cce9c8dbdb3ddd0539232a", null ],
-        [ "KickType", "IKKick_8cpp.html#ab3ad9a0901a7cc87c7cccec9aab52bf3", null ],
-        [ "LimbID", "IKKick_8cpp.html#a61a4760eed3f929d1ae7176e5dd793dc", null ],
-        [ "ServoID", "IKKick_8cpp.html#ab2b0df2c19654efc0988e3603f0aa227", null ],
-        [ "MotionStage", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216", [
-          [ "READY", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a1593adc78b7217602beca561b59cd68c", null ],
-          [ "RUNNING", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a8df1ef7d10b5c28ebb2fb0ed83973980", null ],
-          [ "STOPPING", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216ac4404e0674320ec745e5d05faf4a47d8", null ],
-          [ "FINISHED", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a0b634e34da4c66e3c16075ca4689acc0", null ]
-        ] ]
-      ] ],
       [ "nbs", null, [
         [ "Player", "classmodule_1_1nbs_1_1Player.html", "classmodule_1_1nbs_1_1Player" ]
       ] ],
@@ -634,20 +614,35 @@ var namespaces_dup =
         ] ]
       ] ],
       [ "skill", null, [
+        [ "Animator", "classmodule_1_1skill_1_1Animator.html", "classmodule_1_1skill_1_1Animator" ],
         [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
+        [ "IKKick", "classmodule_1_1skill_1_1IKKick.html", "classmodule_1_1skill_1_1IKKick" ],
+        [ "KickBalancer", "classmodule_1_1skill_1_1KickBalancer.html", "classmodule_1_1skill_1_1KickBalancer" ],
+        [ "Kicker", "classmodule_1_1skill_1_1Kicker.html", "classmodule_1_1skill_1_1Kicker" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "SixDOFFootController", "classmodule_1_1skill_1_1SixDOFFootController.html", "classmodule_1_1skill_1_1SixDOFFootController" ],
+        [ "SixDOFFrame", "classmodule_1_1skill_1_1SixDOFFrame.html", "classmodule_1_1skill_1_1SixDOFFrame" ],
         [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ],
         [ "DiveTask", "Dive_8cpp.html#aab4cff4ad6c87765b3bf727736fd547f", null ],
+        [ "FrameID", "IKKick_8cpp.html#acd73c12a8ca34742c8d746f1be769bbb", null ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
+        [ "LimbID", "IKKick_8cpp.html#a305fa4d07c67fb64eb585549d41a240a", null ],
         [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ],
         [ "SayTask", "Say_8cpp.html#a52cce32b085db46104fee4406a26e9ac", null ],
+        [ "ServoID", "IKKick_8cpp.html#a247a3e44a191995ffbdd04cfd2538f08", null ],
         [ "WalkState", "Walk_8cpp.html#afebde5e5778924a828c4aa8da384d27d", null ],
-        [ "WalkTask", "Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020", null ]
+        [ "WalkTask", "Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020", null ],
+        [ "MotionStage", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8", [
+          [ "READY", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8ae1e93a358007501ba2e1c2d03fa1d488", null ],
+          [ "RUNNING", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8a106ced5325e746ee63d26368b7e5ffde", null ],
+          [ "STOPPING", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8a8802aa8def92b5af65fe221af9107a69", null ],
+          [ "FINISHED", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8aa9a161fb6bcb743944967bf4d5885ace", null ]
+        ] ]
       ] ],
       [ "strategy", null, [
         [ "AlignBallToGoal", "classmodule_1_1strategy_1_1AlignBallToGoal.html", "classmodule_1_1strategy_1_1AlignBallToGoal" ],

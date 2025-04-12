@@ -143,16 +143,6 @@ var annotated_dup =
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ]
       ] ],
-      [ "motion", null, [
-        [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],
-        [ "ExecuteKick", "structmodule_1_1motion_1_1ExecuteKick.html", null ],
-        [ "FinishKick", "structmodule_1_1motion_1_1FinishKick.html", null ],
-        [ "IKKick", "classmodule_1_1motion_1_1IKKick.html", "classmodule_1_1motion_1_1IKKick" ],
-        [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
-        [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
-        [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
-        [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ]
-      ] ],
       [ "nbs", null, [
         [ "Player", "classmodule_1_1nbs_1_1Player.html", "classmodule_1_1nbs_1_1Player" ]
       ] ],
@@ -249,12 +239,18 @@ var annotated_dup =
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ]
       ] ],
       [ "skill", null, [
+        [ "Animator", "classmodule_1_1skill_1_1Animator.html", "classmodule_1_1skill_1_1Animator" ],
         [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
+        [ "IKKick", "classmodule_1_1skill_1_1IKKick.html", "classmodule_1_1skill_1_1IKKick" ],
+        [ "KickBalancer", "classmodule_1_1skill_1_1KickBalancer.html", "classmodule_1_1skill_1_1KickBalancer" ],
+        [ "Kicker", "classmodule_1_1skill_1_1Kicker.html", "classmodule_1_1skill_1_1Kicker" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "SixDOFFootController", "classmodule_1_1skill_1_1SixDOFFootController.html", "classmodule_1_1skill_1_1SixDOFFootController" ],
+        [ "SixDOFFrame", "classmodule_1_1skill_1_1SixDOFFrame.html", "classmodule_1_1skill_1_1SixDOFFrame" ],
         [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ]
       ] ],
