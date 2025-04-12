@@ -32,45 +32,42 @@
 
 #include "IKKickControllers.hpp"
 
-#include "message/motion/KickCommand.hpp"
+#include "extension/Behaviour.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/motion/Balance.hpp"
 
-namespace module::motion {
+namespace module::skill {
 
-    class IKKick : public NUClear::Reactor {
+    class IKKick : public ::extension::behaviour::BehaviourReactor {
 
     private:
-        // ID of support foot
-        utility::input::LimbID supportFoot;
+        struct Config {
+            int gain_legs = 0;
+            int torque    = 0;
+        } cfg;
+
+        /// @brief ID of support foot
+        utility::input::LimbID support_foot = utility::input::LimbID::LEFT_LEG;
+
         // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick
         // foot which is rightFootFront KickPlanner has to add the radius of the all to get the location of the
         // centre of the ball point position of ball
-        Eigen::Vector3d ballPosition;
-        // direction we want to kick the ball
-        Eigen::Vector3d goalPosition;
+        Eigen::Vector3d ball_position = Eigen::Vector3d::Zero();
 
-        /// Subsumption ID key to access motors
-        const size_t subsumptionId;
+        /// @brief Direction we want to kick the ball
+        Eigen::Vector3d goal_position = Eigen::Vector3d::Zero();
 
-        bool leftFootIsSupport;
+        bool left_foot_is_support = false;
 
-        float foot_separation;
+        float foot_separation = 0.0;
 
-        float KICK_PRIORITY;
-        float EXECUTION_PRIORITY;
-
-        float gain_legs = 50;
-        float torque    = 100;
 
         bool feedback_active;
-        utility::motion::Balancer feedbackBalancer;
+        utility::motion::Balancer feedback_balancer;
 
-        KickBalancer balancer;
-        Kicker kicker;
-
-        void updatePriority(const float& priority);
+        KickBalancer balancer{};
+        Kicker kicker{};
 
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
@@ -80,7 +77,6 @@ namespace module::motion {
         /// @brief Called by the powerplant to build and setup the IKKick reactor.
         explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace module::motion
-
+}  // namespace module::skill
 
 #endif
