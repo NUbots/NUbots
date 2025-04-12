@@ -418,160 +418,163 @@ $(document).ready(function(){initNavTree('Script_8hpp_source.html',''); initResi
 <div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;            <span class="comment">// Add the servos in the frame to a map</span></div>
 <div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;            std::map&lt;uint32_t, ServoCommand&gt; servos{};</div>
 <div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;            <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; target : frame.targets) {</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;            }</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160; </div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;            <span class="comment">// Add the map to the pack. This represents one sequence of servos.</span></div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;            msg-&gt;frames.emplace_back(servos);</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;        }</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160; </div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;        <span class="comment">// Return the message which can then be emitted as a Task</span></div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        <span class="keywordflow">return</span> msg;</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;    }</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160; </div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160; </div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;}  <span class="comment">// namespace utility::skill</span></div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;                servos[target.id] = ServoCommand(time,</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;                                                 target.position,</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                                                 ServoState(target.gain, target.torque),</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                                                 ServoCommand::DoneType::TIME);</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;            }</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160; </div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;            <span class="comment">// Add the map to the pack. This represents one sequence of servos.</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;            msg-&gt;frames.emplace_back(servos);</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        }</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;        <span class="comment">// Return the message which can then be emitted as a Task</span></div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;        <span class="keywordflow">return</span> msg;</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    }</div>
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160; </div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;<span class="comment">// Functionality for reading in scripts</span></div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;<span class="keyword">namespace </span>YAML {</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00266"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html">  266</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structutility_1_1skill_1_1Frame_1_1Target.html">utility::skill::Frame::Target</a>&gt; {<span class="comment"></span></div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="comment">        /// @brief Encodes a Target as a YAML Node</span></div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="comment">        /// @param rhs The Target to convert to a YAML Node</span></div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;<span class="comment">        /// @return A YAML Node of the Target</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#abeb301265d72eaf6fdd0395a4567cdc6">  270</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> Node <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#abeb301265d72eaf6fdd0395a4567cdc6">encode</a>(const ::utility::skill::Frame::Target&amp; rhs) {</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;            Node node;</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160; </div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;            node[<span class="stringliteral">&quot;id&quot;</span>]       = <span class="keyword">static_cast&lt;</span>std::string<span class="keyword">&gt;</span>(rhs.id);</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;            node[<span class="stringliteral">&quot;position&quot;</span>] = rhs.position;</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;            node[<span class="stringliteral">&quot;gain&quot;</span>]     = rhs.gain;</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;            node[<span class="stringliteral">&quot;torque&quot;</span>]   = rhs.torque;</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160; </div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;        }<span class="comment"></span></div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;<span class="comment">        /// @brief Decodes a YAML Node as a Target</span></div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="comment">        /// @param node The YAML Node to decode</span></div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="comment">        /// @param rhs A Target where the YAML Node information will be placed</span></div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;<span class="comment">        /// @return True if decoding was successful, false otherwise</span></div>
-<div class="line"><a name="l00284"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#afd36d299b870d78c49f92e9b28968716">  284</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#afd36d299b870d78c49f92e9b28968716">decode</a>(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structutility_1_1skill_1_1Frame_1_1Target.html">utility::skill::Frame::Target</a>&amp; rhs) {</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;            <span class="comment">// Try to read and save the target information</span></div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;            <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;                rhs = <a class="code" href="structutility_1_1skill_1_1Frame_1_1Target.html">::utility::skill::Frame::Target</a>{node[<span class="stringliteral">&quot;id&quot;</span>].as&lt;std::string&gt;(),</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;                                                      node[<span class="stringliteral">&quot;position&quot;</span>].as&lt;float&gt;(),</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;                                                      node[<span class="stringliteral">&quot;gain&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;(),</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;                                                      node[<span class="stringliteral">&quot;torque&quot;</span>].IsDefined() ? node[<span class="stringliteral">&quot;torque&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;() : 100.0f};</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;            }</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;                NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;                                                       <span class="stringliteral">&quot;Line:&quot;</span>,</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;                                                       e.mark.line,</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;                                                       <span class="stringliteral">&quot;Column:&quot;</span>,</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;                                                       e.mark.column,</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;                                                       <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;                                                       e.mark.pos,</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;                                                       <span class="stringliteral">&quot;Message:&quot;</span>,</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;                                                       e.msg);</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            }</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160; </div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;        }</div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;    };</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160; </div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00310"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html">  310</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structutility_1_1skill_1_1Frame.html">utility::skill::Frame</a>&gt; {<span class="comment"></span></div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;<span class="comment">        /// @brief Encodes a Frame as a YAML Node</span></div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;<span class="comment">        /// @param rhs The Frame to convert to a YAML Node</span></div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;<span class="comment">        /// @return A YAML Node of the Frame</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a89a00f1a63b9ea1c5d563e6651059a62">  314</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> Node <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a89a00f1a63b9ea1c5d563e6651059a62">encode</a>(const ::utility::skill::Frame&amp; rhs) {</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;            Node node;</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160; </div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;            node[<span class="stringliteral">&quot;duration&quot;</span>] = std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(rhs.duration).count();</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;            node[<span class="stringliteral">&quot;targets&quot;</span>]  = rhs.targets;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160; </div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;}  <span class="comment">// namespace utility::skill</span></div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160; </div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;<span class="comment">// Functionality for reading in scripts</span></div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="keyword">namespace </span>YAML {</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00269"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html">  269</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structutility_1_1skill_1_1Frame_1_1Target.html">utility::skill::Frame::Target</a>&gt; {<span class="comment"></span></div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<span class="comment">        /// @brief Encodes a Target as a YAML Node</span></div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;<span class="comment">        /// @param rhs The Target to convert to a YAML Node</span></div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<span class="comment">        /// @return A YAML Node of the Target</span></div>
+<div class="line"><a name="l00273"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#abeb301265d72eaf6fdd0395a4567cdc6">  273</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> Node <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#abeb301265d72eaf6fdd0395a4567cdc6">encode</a>(const ::utility::skill::Frame::Target&amp; rhs) {</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;            Node node;</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160; </div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;            node[<span class="stringliteral">&quot;id&quot;</span>]       = <span class="keyword">static_cast&lt;</span>std::string<span class="keyword">&gt;</span>(rhs.id);</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;            node[<span class="stringliteral">&quot;position&quot;</span>] = rhs.position;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;            node[<span class="stringliteral">&quot;gain&quot;</span>]     = rhs.gain;</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;            node[<span class="stringliteral">&quot;torque&quot;</span>]   = rhs.torque;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160; </div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;        }<span class="comment"></span></div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;<span class="comment">        /// @brief Decodes a YAML Node as a Target</span></div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;<span class="comment">        /// @param node The YAML Node to decode</span></div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;<span class="comment">        /// @param rhs A Target where the YAML Node information will be placed</span></div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="comment">        /// @return True if decoding was successful, false otherwise</span></div>
+<div class="line"><a name="l00287"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#afd36d299b870d78c49f92e9b28968716">  287</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#afd36d299b870d78c49f92e9b28968716">decode</a>(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structutility_1_1skill_1_1Frame_1_1Target.html">utility::skill::Frame::Target</a>&amp; rhs) {</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;            <span class="comment">// Try to read and save the target information</span></div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;            <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;                rhs = <a class="code" href="structutility_1_1skill_1_1Frame_1_1Target.html">::utility::skill::Frame::Target</a>{node[<span class="stringliteral">&quot;id&quot;</span>].as&lt;std::string&gt;(),</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;                                                      node[<span class="stringliteral">&quot;position&quot;</span>].as&lt;float&gt;(),</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;                                                      node[<span class="stringliteral">&quot;gain&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;(),</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;                                                      node[<span class="stringliteral">&quot;torque&quot;</span>].IsDefined() ? node[<span class="stringliteral">&quot;torque&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;() : 100.0f};</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;            }</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;                NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;                                                       <span class="stringliteral">&quot;Line:&quot;</span>,</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;                                                       e.mark.line,</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;                                                       <span class="stringliteral">&quot;Column:&quot;</span>,</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;                                                       e.mark.column,</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;                                                       <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;                                                       e.mark.pos,</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;                                                       <span class="stringliteral">&quot;Message:&quot;</span>,</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;                                                       e.msg);</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            }</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160; </div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;        }</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    };</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160; </div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00313"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html">  313</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structutility_1_1skill_1_1Frame.html">utility::skill::Frame</a>&gt; {<span class="comment"></span></div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;<span class="comment">        /// @brief Encodes a Frame as a YAML Node</span></div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;<span class="comment">        /// @param rhs The Frame to convert to a YAML Node</span></div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;<span class="comment">        /// @return A YAML Node of the Frame</span></div>
+<div class="line"><a name="l00317"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a89a00f1a63b9ea1c5d563e6651059a62">  317</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> Node <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a89a00f1a63b9ea1c5d563e6651059a62">encode</a>(const ::utility::skill::Frame&amp; rhs) {</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;            Node node;</div>
 <div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160; </div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;        }</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;<span class="comment">        /// @brief Decodes a YAML Node as a Frame</span></div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;<span class="comment">        /// @param node The YAML Node to decode</span></div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;<span class="comment">        /// @param rhs A Frame where the YAML Node information will be placed</span></div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;<span class="comment">        /// @return True if decoding was successful, false otherwise</span></div>
-<div class="line"><a name="l00327"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a6887db0817410a595838d9149773efd6">  327</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a6887db0817410a595838d9149773efd6">decode</a>(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structutility_1_1skill_1_1Frame.html">utility::skill::Frame</a>&amp; rhs) {</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;                <span class="keywordtype">int</span> millis = node[<span class="stringliteral">&quot;duration&quot;</span>].as&lt;<span class="keywordtype">int</span>&gt;();</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;                std::chrono::milliseconds duration(millis);</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160; </div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                <span class="keyword">auto</span> targets = node[<span class="stringliteral">&quot;targets&quot;</span>].as&lt;std::vector&lt;::utility::skill::Frame::Target&gt;&gt;();</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                rhs          = {duration, targets};</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            }</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;                                                       <span class="stringliteral">&quot;Line:&quot;</span>,</div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;                                                       e.mark.line,</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;                                                       <span class="stringliteral">&quot;Column:&quot;</span>,</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;                                                       e.mark.column,</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;                                                       <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;                                                       e.mark.pos,</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;                                                       <span class="stringliteral">&quot;Message:&quot;</span>,</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;                                                       e.msg);</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;            }</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160; </div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;        }</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;    };</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160; </div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Sequence&gt;</div>
-<div class="line"><a name="l00353"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html">  353</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structutility_1_1skill_1_1Script.html">utility::skill::Script</a>&lt;Sequence&gt;&gt; {<span class="comment"></span></div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;<span class="comment">        /// @brief Encodes a Script as a YAML Node</span></div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;<span class="comment">        /// @param rhs The Script to convert to a YAML Node</span></div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;<span class="comment">        /// @return A YAML Node of the Script</span></div>
-<div class="line"><a name="l00357"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a1a3a88b0339ce7c052920fb8433344d9">  357</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> Node <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a1a3a88b0339ce7c052920fb8433344d9">encode</a>(const ::utility::skill::Script&lt;Sequence&gt;&amp; rhs) {</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;            Node node;</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160; </div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;            node = rhs.frames;</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160; </div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;        }</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;<span class="comment">        /// @brief Decodes a YAML Node as a Script</span></div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;<span class="comment">        /// @param node The YAML Node to decode</span></div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="comment">        /// @param rhs A Script where the YAML Node information will be placed</span></div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="comment">        /// @return True if decoding was successful, false otherwise</span></div>
-<div class="line"><a name="l00369"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a7e9ea19cd7fb6d02b035a5d89261207a">  369</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a7e9ea19cd7fb6d02b035a5d89261207a">decode</a>(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structutility_1_1skill_1_1Script.html">utility::skill::Script&lt;Sequence&gt;</a>&amp; rhs) {</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;            <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;                <span class="keyword">auto</span> frames = node.as&lt;std::vector&lt;::utility::skill::Frame&gt;&gt;();</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;                rhs         = {frames};</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;            }</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;                                                       <span class="stringliteral">&quot;Line:&quot;</span>,</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;                                                       e.mark.line,</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                                                       <span class="stringliteral">&quot;Column:&quot;</span>,</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                                                       e.mark.column,</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;                                                       <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                                                       e.mark.pos,</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                                                       <span class="stringliteral">&quot;Message:&quot;</span>,</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                                                       e.msg);</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;            }</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160; </div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        }</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    };</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;}  <span class="comment">// namespace YAML</span></div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160; </div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_SKILL_SCRIPT_HPP</span></div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;            node[<span class="stringliteral">&quot;duration&quot;</span>] = std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(rhs.duration).count();</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;            node[<span class="stringliteral">&quot;targets&quot;</span>]  = rhs.targets;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160; </div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;        }</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;<span class="comment">        /// @brief Decodes a YAML Node as a Frame</span></div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;<span class="comment">        /// @param node The YAML Node to decode</span></div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;<span class="comment">        /// @param rhs A Frame where the YAML Node information will be placed</span></div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;<span class="comment">        /// @return True if decoding was successful, false otherwise</span></div>
+<div class="line"><a name="l00330"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a6887db0817410a595838d9149773efd6">  330</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a6887db0817410a595838d9149773efd6">decode</a>(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structutility_1_1skill_1_1Frame.html">utility::skill::Frame</a>&amp; rhs) {</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                <span class="keywordtype">int</span> millis = node[<span class="stringliteral">&quot;duration&quot;</span>].as&lt;<span class="keywordtype">int</span>&gt;();</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                std::chrono::milliseconds duration(millis);</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160; </div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                <span class="keyword">auto</span> targets = node[<span class="stringliteral">&quot;targets&quot;</span>].as&lt;std::vector&lt;::utility::skill::Frame::Target&gt;&gt;();</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                rhs          = {duration, targets};</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;            }</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;                NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;                                                       <span class="stringliteral">&quot;Line:&quot;</span>,</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;                                                       e.mark.line,</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;                                                       <span class="stringliteral">&quot;Column:&quot;</span>,</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;                                                       e.mark.column,</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;                                                       <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;                                                       e.mark.pos,</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;                                                       <span class="stringliteral">&quot;Message:&quot;</span>,</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;                                                       e.msg);</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            }</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;        }</div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;    };</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160; </div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Sequence&gt;</div>
+<div class="line"><a name="l00356"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html">  356</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structutility_1_1skill_1_1Script.html">utility::skill::Script</a>&lt;Sequence&gt;&gt; {<span class="comment"></span></div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;<span class="comment">        /// @brief Encodes a Script as a YAML Node</span></div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;<span class="comment">        /// @param rhs The Script to convert to a YAML Node</span></div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;<span class="comment">        /// @return A YAML Node of the Script</span></div>
+<div class="line"><a name="l00360"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a1a3a88b0339ce7c052920fb8433344d9">  360</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> Node <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a1a3a88b0339ce7c052920fb8433344d9">encode</a>(const ::utility::skill::Script&lt;Sequence&gt;&amp; rhs) {</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;            Node node;</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160; </div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;            node = rhs.frames;</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160; </div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;        }</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="comment">        /// @brief Decodes a YAML Node as a Script</span></div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;<span class="comment">        /// @param node The YAML Node to decode</span></div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;<span class="comment">        /// @param rhs A Script where the YAML Node information will be placed</span></div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="comment">        /// @return True if decoding was successful, false otherwise</span></div>
+<div class="line"><a name="l00372"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a7e9ea19cd7fb6d02b035a5d89261207a">  372</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a7e9ea19cd7fb6d02b035a5d89261207a">decode</a>(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structutility_1_1skill_1_1Script.html">utility::skill::Script&lt;Sequence&gt;</a>&amp; rhs) {</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;            <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;                <span class="keyword">auto</span> frames = node.as&lt;std::vector&lt;::utility::skill::Frame&gt;&gt;();</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                rhs         = {frames};</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;            }</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                                                       <span class="stringliteral">&quot;Line:&quot;</span>,</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;                                                       e.mark.line,</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                                                       <span class="stringliteral">&quot;Column:&quot;</span>,</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                                                       e.mark.column,</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                                                       <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                                                       e.mark.pos,</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                                                       <span class="stringliteral">&quot;Message:&quot;</span>,</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;                                                       e.msg);</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;            }</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160; </div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        }</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    };</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160; </div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_SKILL_SCRIPT_HPP</span></div>
 <div class="ttc" id="anamespaceutility_1_1skill_html"><div class="ttname"><a href="namespaceutility_1_1skill.html">utility::skill</a></div><div class="ttdef"><b>Definition:</b> KickGenerator.hpp:39</div></div>
 <div class="ttc" id="anamespaceutility_1_1skill_html_a165293156a62b9e4bb7899e5364d7cd8"><div class="ttname"><a href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">utility::skill::load</a></div><div class="ttdeci">static YAML::Node load(const std::string &amp;script)</div><div class="ttdoc">If a robot-specific script exists, load the YAML file as a script. If not, loads the platform-specifi...</div><div class="ttdef"><b>Definition:</b> Script.hpp:114</div></div>
 <div class="ttc" id="anamespaceutility_1_1skill_html_a917b6229cb1233389f832c2abf62378b"><div class="ttname"><a href="namespaceutility_1_1skill.html#a917b6229cb1233389f832c2abf62378b">utility::skill::load_script</a></div><div class="ttdeci">static std::unique_ptr&lt; Sequence &gt; load_script(const std::vector&lt; ScriptRequest &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</div><div class="ttdoc">Creates sequences of servos from the script requests given.</div><div class="ttdef"><b>Definition:</b> Script.hpp:149</div></div>
 <div class="ttc" id="anamespaceutility_1_1skill_html_aca73f6cdfa73f7e519dd35b0e8acf3a5"><div class="ttname"><a href="namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5">utility::skill::get_platform</a></div><div class="ttdeci">static std::string get_platform(const std::string &amp;hostname)</div><div class="ttdoc">Assumes the hostname is of the form &lt;platform_name&gt;&lt;robot_number&gt; and returns &lt;platform_name&gt;.</div><div class="ttdef"><b>Definition:</b> Script.hpp:89</div></div>
-<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4_html_a6887db0817410a595838d9149773efd6"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a6887db0817410a595838d9149773efd6">YAML::convert&lt;::utility::skill::Frame &gt;::decode</a></div><div class="ttdeci">static bool decode(const Node &amp;node, ::utility::skill::Frame &amp;rhs)</div><div class="ttdoc">Decodes a YAML Node as a Frame.</div><div class="ttdef"><b>Definition:</b> Script.hpp:327</div></div>
-<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4_html_a89a00f1a63b9ea1c5d563e6651059a62"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a89a00f1a63b9ea1c5d563e6651059a62">YAML::convert&lt;::utility::skill::Frame &gt;::encode</a></div><div class="ttdeci">static Node encode(const ::utility::skill::Frame &amp;rhs)</div><div class="ttdoc">Encodes a Frame as a YAML Node.</div><div class="ttdef"><b>Definition:</b> Script.hpp:314</div></div>
-<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4_html_abeb301265d72eaf6fdd0395a4567cdc6"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#abeb301265d72eaf6fdd0395a4567cdc6">YAML::convert&lt;::utility::skill::Frame::Target &gt;::encode</a></div><div class="ttdeci">static Node encode(const ::utility::skill::Frame::Target &amp;rhs)</div><div class="ttdoc">Encodes a Target as a YAML Node.</div><div class="ttdef"><b>Definition:</b> Script.hpp:270</div></div>
-<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4_html_afd36d299b870d78c49f92e9b28968716"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#afd36d299b870d78c49f92e9b28968716">YAML::convert&lt;::utility::skill::Frame::Target &gt;::decode</a></div><div class="ttdeci">static bool decode(const Node &amp;node, ::utility::skill::Frame::Target &amp;rhs)</div><div class="ttdoc">Decodes a YAML Node as a Target.</div><div class="ttdef"><b>Definition:</b> Script.hpp:284</div></div>
-<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4_html_a1a3a88b0339ce7c052920fb8433344d9"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a1a3a88b0339ce7c052920fb8433344d9">YAML::convert&lt;::utility::skill::Script&lt; Sequence &gt; &gt;::encode</a></div><div class="ttdeci">static Node encode(const ::utility::skill::Script&lt; Sequence &gt; &amp;rhs)</div><div class="ttdoc">Encodes a Script as a YAML Node.</div><div class="ttdef"><b>Definition:</b> Script.hpp:357</div></div>
-<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4_html_a7e9ea19cd7fb6d02b035a5d89261207a"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a7e9ea19cd7fb6d02b035a5d89261207a">YAML::convert&lt;::utility::skill::Script&lt; Sequence &gt; &gt;::decode</a></div><div class="ttdeci">static bool decode(const Node &amp;node, ::utility::skill::Script&lt; Sequence &gt; &amp;rhs)</div><div class="ttdoc">Decodes a YAML Node as a Script.</div><div class="ttdef"><b>Definition:</b> Script.hpp:369</div></div>
+<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4_html_a6887db0817410a595838d9149773efd6"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a6887db0817410a595838d9149773efd6">YAML::convert&lt;::utility::skill::Frame &gt;::decode</a></div><div class="ttdeci">static bool decode(const Node &amp;node, ::utility::skill::Frame &amp;rhs)</div><div class="ttdoc">Decodes a YAML Node as a Frame.</div><div class="ttdef"><b>Definition:</b> Script.hpp:330</div></div>
+<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4_html_a89a00f1a63b9ea1c5d563e6651059a62"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html#a89a00f1a63b9ea1c5d563e6651059a62">YAML::convert&lt;::utility::skill::Frame &gt;::encode</a></div><div class="ttdeci">static Node encode(const ::utility::skill::Frame &amp;rhs)</div><div class="ttdoc">Encodes a Frame as a YAML Node.</div><div class="ttdef"><b>Definition:</b> Script.hpp:317</div></div>
+<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4_html_abeb301265d72eaf6fdd0395a4567cdc6"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#abeb301265d72eaf6fdd0395a4567cdc6">YAML::convert&lt;::utility::skill::Frame::Target &gt;::encode</a></div><div class="ttdeci">static Node encode(const ::utility::skill::Frame::Target &amp;rhs)</div><div class="ttdoc">Encodes a Target as a YAML Node.</div><div class="ttdef"><b>Definition:</b> Script.hpp:273</div></div>
+<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4_html_afd36d299b870d78c49f92e9b28968716"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html#afd36d299b870d78c49f92e9b28968716">YAML::convert&lt;::utility::skill::Frame::Target &gt;::decode</a></div><div class="ttdeci">static bool decode(const Node &amp;node, ::utility::skill::Frame::Target &amp;rhs)</div><div class="ttdoc">Decodes a YAML Node as a Target.</div><div class="ttdef"><b>Definition:</b> Script.hpp:287</div></div>
+<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4_html_a1a3a88b0339ce7c052920fb8433344d9"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a1a3a88b0339ce7c052920fb8433344d9">YAML::convert&lt;::utility::skill::Script&lt; Sequence &gt; &gt;::encode</a></div><div class="ttdeci">static Node encode(const ::utility::skill::Script&lt; Sequence &gt; &amp;rhs)</div><div class="ttdoc">Encodes a Script as a YAML Node.</div><div class="ttdef"><b>Definition:</b> Script.hpp:360</div></div>
+<div class="ttc" id="astructYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4_html_a7e9ea19cd7fb6d02b035a5d89261207a"><div class="ttname"><a href="structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html#a7e9ea19cd7fb6d02b035a5d89261207a">YAML::convert&lt;::utility::skill::Script&lt; Sequence &gt; &gt;::decode</a></div><div class="ttdeci">static bool decode(const Node &amp;node, ::utility::skill::Script&lt; Sequence &gt; &amp;rhs)</div><div class="ttdoc">Decodes a YAML Node as a Script.</div><div class="ttdef"><b>Definition:</b> Script.hpp:372</div></div>
 <div class="ttc" id="astructutility_1_1input_1_1ServoID_html"><div class="ttname"><a href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a></div><div class="ttdef"><b>Definition:</b> ServoID.hpp:37</div></div>
 <div class="ttc" id="astructutility_1_1skill_1_1Frame_1_1Target_html"><div class="ttname"><a href="structutility_1_1skill_1_1Frame_1_1Target.html">utility::skill::Frame::Target</a></div><div class="ttdoc">Servo targets for each active servo in the frame.</div><div class="ttdef"><b>Definition:</b> Script.hpp:63</div></div>
 <div class="ttc" id="astructutility_1_1skill_1_1Frame_1_1Target_html_a4f54751162f3e522ba160ce022f94845"><div class="ttname"><a href="structutility_1_1skill_1_1Frame_1_1Target.html#a4f54751162f3e522ba160ce022f94845">utility::skill::Frame::Target::position</a></div><div class="ttdeci">float position</div><div class="ttdoc">Target position for this servo in this frame.</div><div class="ttdef"><b>Definition:</b> Script.hpp:67</div></div>
@@ -589,7 +592,7 @@ $(document).ready(function(){initNavTree('Script_8hpp_source.html',''); initResi
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_e74f07e607724dbb2b9c42172be2da51.html">skill</a></li><li class="navelem"><b>Script.hpp</b></li>
-    <li class="footer">Generated on Sat Apr 12 2025 07:40:57 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Apr 12 2025 08:33:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
