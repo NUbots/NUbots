@@ -33,6 +33,7 @@
 #include <catch2/generators/catch_generators_adapters.hpp>
 #include <catch2/generators/catch_generators_random.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <random>
 
 namespace utility::math::test {
     using Catch::Matchers::WithinAbs;
