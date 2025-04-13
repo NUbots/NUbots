@@ -137,13 +137,13 @@ namespace module::support::logging {
 
             // Output the level
             switch (message.level) {
-                case NUClear::LogLevel::TRACE: log_file << source << "TRACE: "; break;
-                case NUClear::LogLevel::DEBUG: log_file << source << Colour::green << "DEBUG: "; break;
-                case NUClear::LogLevel::INFO: log_file << source << Colour::brightblue << "INFO: "; break;
-                case NUClear::LogLevel::WARN: log_file << source << Colour::yellow << "WARN: "; break;
-                case NUClear::LogLevel::ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
-                case NUClear::LogLevel::UNKNOWN:;
-                case NUClear::LogLevel::FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
+                case TRACE: log_file << source << "TRACE: "; break;
+                case DEBUG: log_file << source << Colour::green << "DEBUG: "; break;
+                case INFO: log_file << source << Colour::brightblue << "INFO: "; break;
+                case WARN: log_file << source << Colour::yellow << "WARN: "; break;
+                case ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
+                case UNKNOWN:;
+                case FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
             }
 
             // Output the message
