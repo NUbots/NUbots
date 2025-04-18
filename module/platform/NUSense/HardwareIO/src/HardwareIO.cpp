@@ -80,6 +80,8 @@ namespace module::platform::NUSense {
 
         on<Configuration>("NUSense.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            auto device     = config["nusense"]["device"].as<std::string>();
+            auto baud       = config["nusense"]["baud"].as<int>();
 
             // Tell the stream reactor to connect to the device
             emit(std::make_unique<ConnectSerial>(device, baud));
