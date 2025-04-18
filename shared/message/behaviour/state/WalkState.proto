@@ -28,6 +28,8 @@ syntax = "proto3";
 package message.behaviour.state;
 
 import "Vector.proto";
+import "Matrix.proto";
+import "Transform.proto";
 
 message WalkState {
     enum State {
@@ -52,4 +54,13 @@ message WalkState {
 
     /// Walk phase
     Phase phase = 3;
+
+    /// Torso trajectory Hpt
+    repeated mat4 torso_trajectory = 4;
+
+    /// Swing foot trajectory Hps
+    repeated mat4 swing_foot_trajectory = 5;
+
+    /// Hwp transform from planted foot to world
+    iso3 Hwp = 6;
 }

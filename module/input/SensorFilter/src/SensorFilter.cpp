@@ -414,6 +414,7 @@ namespace module::input {
             Hwp.translation().z() = 0;
             Hwp.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
         }
+        sensors->Hwp = Hwp;
 
         // Compute torso pose using kinematics from anchor frame (current planted foot)
         Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT
