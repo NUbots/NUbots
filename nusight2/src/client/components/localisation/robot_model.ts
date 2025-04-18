@@ -325,9 +325,11 @@ export class LocalisationRobotModel {
 
   /** Robot positions in field space */
   @computed
-  get rRFf(): Vector3[] {
-    return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
-  }
+  get rRFf(): { position: Vector3; color: string }[] {
+    return this.robots?.map((robot) => ({
+      position: robot.rRWw.applyMatrix4(this.Hfw),
+      color: robot.color,
+    }));}
 
   /** Field intersections in field space */
   @computed
