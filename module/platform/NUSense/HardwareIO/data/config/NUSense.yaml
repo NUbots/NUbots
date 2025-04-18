@@ -1,8 +1,19 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Location of the NUSense subcontroller
-device: "/dev/nusense"
+battery:
+  charged_voltage: 16.8
+  nominal_voltage: 14.8
+  flat_voltage: 14.0
 
-# Baud rate for communication
-baud: 3000000
+nusense:
+  device: "/dev/nusense"
+  baud: 3000000
+  byte_wait: 1200
+  packet_wait: 100000
+  bus_reset_wait_time_us: 0
+
+alarms:
+  temperature:
+    level: 60
+    buzzer_frequency: 880 # Hz
