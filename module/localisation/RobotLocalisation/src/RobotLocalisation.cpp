@@ -84,15 +84,18 @@ namespace module::localisation {
                    const GreenHorizon& horizon,
                    const Field& field,
                    const std::shared_ptr<const GameState>& game_state) {
-                // **Run maintenance step**
-                maintenance(horizon);
+                // **Run prediction step**
+                prediction();
 
                 // **Data association**
                 // RoboCup messages come from teammates. Their position is in field space, so convert to world.
-                std::vector<Eigen::Vector3d> robots_rRWw{field.Hfw.inverse() * robocup.current_pose.position};
+                std::vector<Eigen::Vector3d> robots_rRWw{
+                    (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
                 // Run data association step
-                data_association(robots_rRWw, true);
+                data_association(robots_rRWw, robocup.current_pose.player_id);
 
+                // **Run maintenance step**
+                maintenance(horizon);
 
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
@@ -109,8 +112,8 @@ namespace module::localisation {
                     bool self_blue =
                         game_state && game_state->team.team_colour == GameState::TeamColour::BLUE ? true : false;
                     // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
-                    localisation_robot.is_blue     = tracked_robot.is_teammate ? self_blue : !self_blue;
-                    localisation_robot.teammate_id = tracked_robot.teammate_id : 0;
+                    localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
+                    localisation_robot.teammate_id = tracked_robot.teammate_id;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
@@ -134,7 +137,7 @@ namespace module::localisation {
                     robots_rRWw.push_back(rRWw);
                 }
                 // Run data association step
-                data_association(robots_rRWw);
+                data_association(robots_rRWw, 0);
 
                 // **Run maintenance step**
                 maintenance(horizon);
@@ -161,8 +164,8 @@ namespace module::localisation {
                     bool self_blue =
                         game_state && game_state->team.team_colour == GameState::TeamColour::BLUE ? true : false;
                     // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
-                    localisation_robot.is_blue     = tracked_robot.is_teammate ? self_blue : !self_blue;
-                    localisation_robot.teammate_id = tracked_robot.teammate_id : 0;
+                    localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
+                    localisation_robot.teammate_id = tracked_robot.teammate_id;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
@@ -205,7 +208,6 @@ namespace module::localisation {
 
                 // If the robot is identified as a teammate via Wi-Fi, mark it as a teammate
                 if (teammate_id != 0) {
-                    best_match->is_teammate = true;         // Mark as teammate
                     best_match->teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
                 }
 
@@ -214,7 +216,6 @@ namespace module::localisation {
                     if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != best_match->id) {
                         // If a teammate ID is already assigned to another robot, clear it
                         tracked_robot.teammate_id = 0;
-                        tracked_robot.is_teammate = false;  // Mark as not a teammate
                     }
                 }
             }
@@ -225,7 +226,6 @@ namespace module::localisation {
 
                 // Mark this new robot as a teammate if it is identified as such
                 if (teammate_id != 0) {
-                    tracked_robots.back().is_teammate = true;         // Mark as teammate
                     tracked_robots.back().teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
                 }
             }

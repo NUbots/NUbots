@@ -77,9 +77,8 @@ namespace module::localisation {
             long missed_count = 0;
             /// @brief A unique identifier for the robot
             const unsigned long id;
-            /// @brief Whether or not this robot is a teammate
-            bool is_teammate = false;
             /// @brief The unique identifier of the robot if it is a teammate
+            /// If it is not a teammate, this will be 0
             unsigned long teammate_id = 0;
 
             /// @brief Constructor that sets the state for the UKF
@@ -109,7 +108,7 @@ namespace module::localisation {
         unsigned long next_id = 0;
 
         void prediction();
-        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw);
+        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw, uint teammate_id);
         void maintenance(const message::vision::GreenHorizon& horizon);
 
     public:
