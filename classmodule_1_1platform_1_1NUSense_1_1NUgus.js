@@ -27,7 +27,5 @@ var classmodule_1_1platform_1_1NUSense_1_1NUgus =
       [ "NUSENSE", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a064b35ad9a703010b19fd15e46e93d6ca030f0c84845f487bc2ea21969e450d58", null ],
       [ "BROADCAST", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a064b35ad9a703010b19fd15e46e93d6ca81d741a35dc8a42c885b7cc031afd17f", null ]
     ] ],
-    [ "device_name", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a27202e45542c015df225ee97238ed26b", null ],
-    [ "servo_direction", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a4dcbcc22ca81ee7ac6b298f115e83afc", null ],
-    [ "servo_offset", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#ac31d3f0239922bf6814056009a8f23e2", null ]
+    [ "device_name", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a27202e45542c015df225ee97238ed26b", null ]
 ];

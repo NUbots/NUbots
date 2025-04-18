@@ -1,7 +1,5 @@
 var NAVTREEINDEX11 =
 {
-"structdynamixel_1_1v2_1_1RegWriteCommand.html#a72e3d54d84e6eee085d6ddcfed3ad450":[2,0,0,0,9,0],
-"structdynamixel_1_1v2_1_1RegWriteCommand.html#a8f4b3e2b197a244ca3befd01b6b2fa2f":[2,0,0,0,9,4],
 "structdynamixel_1_1v2_1_1RegWriteCommand.html#aa7c8566fc1e203bc2bf8531a1531b029":[2,0,0,0,9,1],
 "structdynamixel_1_1v2_1_1RegWriteCommand.html#aaae15582fe019f4f8fddc141b74755b8":[2,0,0,0,9,7],
 "structdynamixel_1_1v2_1_1RegWriteCommand.html#ad0e52c4fc56bdccfae25caefd41a4f79":[2,0,0,0,9,6],
@@ -249,5 +247,7 @@ var NAVTREEINDEX11 =
 "structmodule_1_1extension_1_1FileWatcher_1_1WatchMap.html#a3edbe913e0b3a403e39034e913367dcd":[2,0,3,1,2,1,1],
 "structmodule_1_1extension_1_1FileWatcher_1_1WatchMap.html#a4cd915854d03121a9ee6c1e83548f318":[2,0,3,1,2,1,0],
 "structmodule_1_1extension_1_1FileWatcher_1_1WatchMap.html#a8a266b545f092d5afeffecff2bb54b42":[2,0,3,1,2,1,2],
-"structmodule_1_1extension_1_1StateUpdate.html":[2,0,3,1,3]
+"structmodule_1_1extension_1_1StateUpdate.html":[2,0,3,1,3],
+"structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84":[2,0,3,1,3,2],
+"structmodule_1_1extension_1_1StateUpdate.html#a38813296cd3d83f72b1bc1175c33fe0a":[2,0,3,1,3,0]
 };

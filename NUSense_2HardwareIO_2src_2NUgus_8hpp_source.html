@@ -205,86 +205,78 @@ $(document).ready(function(){initNavTree('NUSense_2HardwareIO_2src_2NUgus_8hpp_s
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>module::platform::NUSense {</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
 <div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">   35</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">NUgus</a> {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">        /// @brief The direction (clockwise or anticlockwise) to measure each motor in</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a4dcbcc22ca81ee7ac6b298f115e83afc">   38</a></span>&#160;<span class="comment"></span>        std::array&lt;int8_t, 20&gt; <a class="code" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a4dcbcc22ca81ee7ac6b298f115e83afc">servo_direction</a>{};</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">        /// @brief Offsets the radian angles of motors to change their 0 position</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#ac31d3f0239922bf6814056009a8f23e2">   41</a></span>&#160;<span class="comment"></span>        std::array&lt;double, 20&gt; <a class="code" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#ac31d3f0239922bf6814056009a8f23e2">servo_offset</a>{};</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keyword">enum class</span> ID : uint8_t {</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            NO_ID            = 0,</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            R_SHOULDER_PITCH = 1,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            L_SHOULDER_PITCH = 2,</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            R_SHOULDER_ROLL  = 3,</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            L_SHOULDER_ROLL  = 4,</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            R_ELBOW          = 5,</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            L_ELBOW          = 6,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            R_HIP_YAW        = 7,</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            L_HIP_YAW        = 8,</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            R_HIP_ROLL       = 9,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            L_HIP_ROLL       = 10,</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            R_HIP_PITCH      = 11,</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            L_HIP_PITCH      = 12,</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            R_KNEE           = 13,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;            L_KNEE           = 14,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            R_ANKLE_PITCH    = 15,</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            L_ANKLE_PITCH    = 16,</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            R_ANKLE_ROLL     = 17,</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            L_ANKLE_ROLL     = 18,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;            HEAD_YAW         = 19,</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;            HEAD_PITCH       = 20,</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;            R_FSR            = 111,  <span class="comment">// Not yet implemented</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;            L_FSR            = 112,  <span class="comment">// Not yet implemented</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;            NUSENSE          = 200,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;            BROADCAST        = 254</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        };</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        constexpr std::string device_name(ID <span class="keywordtype">id</span>)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;            <span class="keywordflow">switch</span> (<span class="keywordtype">id</span>) {</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                <span class="keywordflow">case</span> ID::NO_ID: <span class="keywordflow">return</span> <span class="stringliteral">&quot;NO_ID&quot;</span>;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                <span class="keywordflow">case</span> ID::R_SHOULDER_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_SHOULDER_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                <span class="keywordflow">case</span> ID::L_SHOULDER_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_SHOULDER_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                <span class="keywordflow">case</span> ID::R_SHOULDER_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_SHOULDER_ROLL&quot;</span>;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                <span class="keywordflow">case</span> ID::L_SHOULDER_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_SHOULDER_ROLL&quot;</span>;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                <span class="keywordflow">case</span> ID::R_ELBOW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_ELBOW&quot;</span>;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="keywordflow">case</span> ID::L_ELBOW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_ELBOW&quot;</span>;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                <span class="keywordflow">case</span> ID::R_HIP_YAW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_HIP_YAW&quot;</span>;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                <span class="keywordflow">case</span> ID::L_HIP_YAW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_HIP_YAW&quot;</span>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                <span class="keywordflow">case</span> ID::R_HIP_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_HIP_ROLL&quot;</span>;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                <span class="keywordflow">case</span> ID::L_HIP_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_HIP_ROLL&quot;</span>;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                <span class="keywordflow">case</span> ID::R_HIP_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_HIP_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="keywordflow">case</span> ID::L_HIP_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_HIP_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                <span class="keywordflow">case</span> ID::R_KNEE: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_KNEE&quot;</span>;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                <span class="keywordflow">case</span> ID::L_KNEE: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_KNEE&quot;</span>;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                <span class="keywordflow">case</span> ID::R_ANKLE_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_ANKLE_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                <span class="keywordflow">case</span> ID::L_ANKLE_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_ANKLE_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                <span class="keywordflow">case</span> ID::R_ANKLE_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_ANKLE_ROLL&quot;</span>;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                <span class="keywordflow">case</span> ID::L_ANKLE_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_ANKLE_ROLL&quot;</span>;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                <span class="keywordflow">case</span> ID::HEAD_YAW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;HEAD_YAW&quot;</span>;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                <span class="keywordflow">case</span> ID::HEAD_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;HEAD_PITCH&quot;</span>;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                <span class="keywordflow">case</span> ID::R_FSR: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_FSR&quot;</span>;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                <span class="keywordflow">case</span> ID::L_FSR: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_FSR&quot;</span>;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                <span class="keywordflow">case</span> ID::NUSENSE: <span class="keywordflow">return</span> <span class="stringliteral">&quot;NUSENSE&quot;</span>;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                <span class="keywordflow">case</span> ID::BROADCAST: <span class="keywordflow">return</span> <span class="stringliteral">&quot;BROADCAST&quot;</span>;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                <span class="keywordflow">default</span>: <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;enum NUgus::ID&#39;s value is corrupt, unknown value stored&quot;</span>);</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            }</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        }</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    };</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;}  <span class="comment">// namespace module::platform::NUSense</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_PLATFORM_NUSENSE_NUGUS_HPP</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <span class="keyword">enum class</span> ID : uint8_t {</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;            NO_ID            = 0,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            R_SHOULDER_PITCH = 1,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;            L_SHOULDER_PITCH = 2,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            R_SHOULDER_ROLL  = 3,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;            L_SHOULDER_ROLL  = 4,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;            R_ELBOW          = 5,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            L_ELBOW          = 6,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            R_HIP_YAW        = 7,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            L_HIP_YAW        = 8,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            R_HIP_ROLL       = 9,</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            L_HIP_ROLL       = 10,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            R_HIP_PITCH      = 11,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            L_HIP_PITCH      = 12,</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            R_KNEE           = 13,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            L_KNEE           = 14,</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            R_ANKLE_PITCH    = 15,</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            L_ANKLE_PITCH    = 16,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            R_ANKLE_ROLL     = 17,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            L_ANKLE_ROLL     = 18,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            HEAD_YAW         = 19,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;            HEAD_PITCH       = 20,</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            R_FSR            = 111,  <span class="comment">// Not yet implemented</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            L_FSR            = 112,  <span class="comment">// Not yet implemented</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            NUSENSE          = 200,</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            BROADCAST        = 254</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        };</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        constexpr std::string device_name(ID <span class="keywordtype">id</span>)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;            <span class="keywordflow">switch</span> (<span class="keywordtype">id</span>) {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                <span class="keywordflow">case</span> ID::NO_ID: <span class="keywordflow">return</span> <span class="stringliteral">&quot;NO_ID&quot;</span>;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                <span class="keywordflow">case</span> ID::R_SHOULDER_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_SHOULDER_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                <span class="keywordflow">case</span> ID::L_SHOULDER_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_SHOULDER_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                <span class="keywordflow">case</span> ID::R_SHOULDER_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_SHOULDER_ROLL&quot;</span>;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                <span class="keywordflow">case</span> ID::L_SHOULDER_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_SHOULDER_ROLL&quot;</span>;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                <span class="keywordflow">case</span> ID::R_ELBOW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_ELBOW&quot;</span>;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                <span class="keywordflow">case</span> ID::L_ELBOW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_ELBOW&quot;</span>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                <span class="keywordflow">case</span> ID::R_HIP_YAW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_HIP_YAW&quot;</span>;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                <span class="keywordflow">case</span> ID::L_HIP_YAW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_HIP_YAW&quot;</span>;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                <span class="keywordflow">case</span> ID::R_HIP_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_HIP_ROLL&quot;</span>;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                <span class="keywordflow">case</span> ID::L_HIP_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_HIP_ROLL&quot;</span>;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                <span class="keywordflow">case</span> ID::R_HIP_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_HIP_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="keywordflow">case</span> ID::L_HIP_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_HIP_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                <span class="keywordflow">case</span> ID::R_KNEE: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_KNEE&quot;</span>;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                <span class="keywordflow">case</span> ID::L_KNEE: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_KNEE&quot;</span>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                <span class="keywordflow">case</span> ID::R_ANKLE_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_ANKLE_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                <span class="keywordflow">case</span> ID::L_ANKLE_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_ANKLE_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                <span class="keywordflow">case</span> ID::R_ANKLE_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_ANKLE_ROLL&quot;</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="keywordflow">case</span> ID::L_ANKLE_ROLL: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_ANKLE_ROLL&quot;</span>;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                <span class="keywordflow">case</span> ID::HEAD_YAW: <span class="keywordflow">return</span> <span class="stringliteral">&quot;HEAD_YAW&quot;</span>;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                <span class="keywordflow">case</span> ID::HEAD_PITCH: <span class="keywordflow">return</span> <span class="stringliteral">&quot;HEAD_PITCH&quot;</span>;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                <span class="keywordflow">case</span> ID::R_FSR: <span class="keywordflow">return</span> <span class="stringliteral">&quot;R_FSR&quot;</span>;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                <span class="keywordflow">case</span> ID::L_FSR: <span class="keywordflow">return</span> <span class="stringliteral">&quot;L_FSR&quot;</span>;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                <span class="keywordflow">case</span> ID::NUSENSE: <span class="keywordflow">return</span> <span class="stringliteral">&quot;NUSENSE&quot;</span>;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                <span class="keywordflow">case</span> ID::BROADCAST: <span class="keywordflow">return</span> <span class="stringliteral">&quot;BROADCAST&quot;</span>;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                <span class="keywordflow">default</span>: <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;enum NUgus::ID&#39;s value is corrupt, unknown value stored&quot;</span>);</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        }</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    };</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;}  <span class="comment">// namespace module::platform::NUSense</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_PLATFORM_NUSENSE_NUGUS_HPP</span></div>
 <div class="ttc" id="aclassmodule_1_1platform_1_1NUSense_1_1NUgus_html"><div class="ttname"><a href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">module::platform::NUSense::NUgus</a></div><div class="ttdef"><b>Definition:</b> NUgus.hpp:35</div></div>
-<div class="ttc" id="aclassmodule_1_1platform_1_1NUSense_1_1NUgus_html_a4dcbcc22ca81ee7ac6b298f115e83afc"><div class="ttname"><a href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a4dcbcc22ca81ee7ac6b298f115e83afc">module::platform::NUSense::NUgus::servo_direction</a></div><div class="ttdeci">std::array&lt; int8_t, 20 &gt; servo_direction</div><div class="ttdoc">The direction (clockwise or anticlockwise) to measure each motor in.</div><div class="ttdef"><b>Definition:</b> NUgus.hpp:38</div></div>
-<div class="ttc" id="aclassmodule_1_1platform_1_1NUSense_1_1NUgus_html_ac31d3f0239922bf6814056009a8f23e2"><div class="ttname"><a href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html#ac31d3f0239922bf6814056009a8f23e2">module::platform::NUSense::NUgus::servo_offset</a></div><div class="ttdeci">std::array&lt; double, 20 &gt; servo_offset</div><div class="ttdoc">Offsets the radian angles of motors to change their 0 position.</div><div class="ttdef"><b>Definition:</b> NUgus.hpp:41</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_ed63217b7bb49170c8e57a244b73c2e6.html">platform</a></li><li class="navelem"><a class="el" href="dir_57c29e6146db581b67384a2c854ae5ac.html">NUSense</a></li><li class="navelem"><a class="el" href="dir_b5f3ca3dc5d39a8e08e85d0be91428a9.html">HardwareIO</a></li><li class="navelem"><a class="el" href="dir_3d0b2795d839bfee598f5156bd6d0f20.html">src</a></li><li class="navelem"><b>NUgus.hpp</b></li>
-    <li class="footer">Generated on Sat Apr 12 2025 08:33:03 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 04:08:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
