@@ -288,7 +288,7 @@ namespace module::localisation {
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
-        // Field intersection measurement associated with a landmark
+        // Field intersection measurement associated with a landmark (known landmark, intersection detection)
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
 
         // Occupied landmarks
@@ -300,7 +300,7 @@ namespace module::localisation {
             Eigen::Vector3d closest_landmark;
             bool found_association = false;
 
-            // Transform the observed intersection from world to field coordinates
+            // Transform the detected intersection from world to field coordinates
             Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
 
             for (const auto& landmark : landmarks) {
@@ -308,7 +308,7 @@ namespace module::localisation {
                 if (landmark.type == intersection.type
                     && std::find(occupied_landmarks.begin(), occupied_landmarks.end(), landmark.rLFf)
                            == occupied_landmarks.end()) {
-                    // Calculate Euclidean distance between the observed intersection and the landmark
+                    // Calculate Euclidean distance between the detected intersection and the landmark
                     double distance = (landmark.rLFf - rIFf).norm();
 
                     // If this landmark is closer and within the maximum association distance, update the association

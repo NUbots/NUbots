@@ -333,6 +333,9 @@ namespace module::localisation {
 
         /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return Pairs of landmarks and corresponding field intersections (known landmark, intersection
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
