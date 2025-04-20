@@ -1,9 +1,11 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
+import { action } from "mobx";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
+import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
@@ -142,6 +144,7 @@ export class LocalisationRobotModel {
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
+  @observable Hwp: Matrix4; // Planted foot to world
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
@@ -162,6 +165,16 @@ export class LocalisationRobotModel {
   @observable velocity_target: Vector3;
   @observable boundingBox?: BoundingBox;
   @observable player_id: number;
+  @observable torso_trajectory: Matrix4[];
+  @observable swing_foot_trajectory: Matrix4[];
+  @observable walk_phase: message.behaviour.state.WalkState.Phase;
+  @observable trajectory_history: {
+    torso: Matrix4[];
+    swing_foot: Matrix4[];
+    color: string;
+    timestamp: number;
+    phase: message.behaviour.state.WalkState.Phase;
+  }[] = [];
 
   constructor({
     model,
@@ -171,6 +184,7 @@ export class LocalisationRobotModel {
     Hrw,
     Hfw,
     Hrd,
+    Hwp,
     Rwt,
     motors,
     fieldLinePoints,
@@ -190,6 +204,10 @@ export class LocalisationRobotModel {
     velocity_target,
     boundingBox,
     player_id,
+    torso_trajectory,
+    swing_foot_trajectory,
+    walk_phase,
+    trajectory_history,
   }: {
     model: RobotModel;
     name: string;
@@ -198,6 +216,7 @@ export class LocalisationRobotModel {
     Hrw: Matrix4;
     Hfw: Matrix4;
     Hrd?: Matrix4;
+    Hwp: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
@@ -217,6 +236,16 @@ export class LocalisationRobotModel {
     velocity_target: Vector3;
     boundingBox?: BoundingBox;
     player_id: number;
+    torso_trajectory: Matrix4[];
+    swing_foot_trajectory: Matrix4[];
+    walk_phase: message.behaviour.state.WalkState.Phase;
+    trajectory_history: {
+      torso: Matrix4[];
+      swing_foot: Matrix4[];
+      color: string;
+      timestamp: number;
+      phase: message.behaviour.state.WalkState.Phase;
+    }[];
   }) {
     this.model = model;
     this.name = name;
@@ -225,6 +254,7 @@ export class LocalisationRobotModel {
     this.Hrw = Hrw;
     this.Hfw = Hfw;
     this.Hrd = Hrd;
+    this.Hwp = Hwp;
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
@@ -244,6 +274,10 @@ export class LocalisationRobotModel {
     this.velocity_target = velocity_target;
     this.boundingBox = boundingBox;
     this.player_id = player_id;
+    this.torso_trajectory = torso_trajectory;
+    this.swing_foot_trajectory = swing_foot_trajectory;
+    this.walk_phase = walk_phase;
+    this.trajectory_history = trajectory_history;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -254,6 +288,7 @@ export class LocalisationRobotModel {
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
@@ -270,6 +305,10 @@ export class LocalisationRobotModel {
       max_angle_error: 0,
       velocity_target: Vector3.of(),
       player_id: -1,
+      torso_trajectory: [],
+      swing_foot_trajectory: [],
+      walk_phase: message.behaviour.state.WalkState.Phase.DOUBLE,
+      trajectory_history: [],
     });
   });
 
@@ -338,5 +377,41 @@ export class LocalisationRobotModel {
         position: intersection.position.applyMatrix4(this.Hfw),
       });
     });
+  }
+
+  /** Torso trajectory (Hpt) in field space */
+  @computed
+  get torso_trajectoryF(): Matrix4[] {
+    return this.torso_trajectory.map((Hpt) => this.Hfw.multiply(this.Hwp).multiply(Hpt));
+  }
+
+  /** Swing foot trajectory (Hps) in field space */
+  @computed
+  get swing_foot_trajectoryF(): Matrix4[] {
+    return this.swing_foot_trajectory.map((Hps) => this.Hfw.multiply(this.Hwp).multiply(Hps));
+  }
+
+  @action
+  addToTrajectoryHistory(torso: Matrix4[], swing_foot: Matrix4[]) {
+    if (torso.length === 0 || swing_foot.length === 0) {
+      return;
+    }
+
+    this.trajectory_history.push({
+      torso: torso.map((m) => Matrix4.from(m)),
+      swing_foot: swing_foot.map((m) => Matrix4.from(m)),
+      color: "#ffa500",
+      timestamp: Date.now(),
+      phase: this.walk_phase,
+    });
+
+    const MAX_HISTORY = 10;
+    if (this.trajectory_history.length > MAX_HISTORY) {
+      this.trajectory_history.shift();
+    }
+
+    const MAX_AGE_MS = 10000;
+    const now = Date.now();
+    this.trajectory_history = this.trajectory_history.filter((t) => now - t.timestamp < MAX_AGE_MS);
   }
 }
