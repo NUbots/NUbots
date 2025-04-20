@@ -70,7 +70,7 @@ namespace module::support::logging {
                 std::lock_guard<std::mutex> lock(mutex);
 
                 // Get our reactor name
-                std::string reactor = stats.identifiers.reactor;
+                std::string reactor = stats.identifiers->reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t last_c = reactor.find_last_of(':');
@@ -80,7 +80,7 @@ namespace module::support::logging {
 
                 // Print our exception detals
                 log_file << reactor << " "
-                         << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
+                         << (stats.identifiers->name.empty() ? "" : "- " + stats.identifiers->name + " ")
                          << Colour::brightred << "Exception:"
                          << " " << Colour::brightred << utility::support::evil::exception_name << std::endl;
 
@@ -98,7 +98,7 @@ namespace module::support::logging {
                     std::string exception_name = NUClear::util::demangle(typeid(ex).name());
 
                     log_file << reactor << " "
-                             << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
+                             << (stats.identifiers->name.empty() ? "" : "- " + stats.identifiers->name + " ")
                              << Colour::brightred << "Exception:"
                              << " " << Colour::brightred << exception_name << " " << ex.what() << std::endl;
                 }
@@ -106,7 +106,7 @@ namespace module::support::logging {
                 catch (...) {
 
                     log_file << reactor << " "
-                             << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
+                             << (stats.identifiers->name.empty() ? "" : "- " + stats.identifiers->name + " ")
                              << Colour::brightred << "Exception of unkown type" << std::endl;
                 }
 #endif
@@ -120,9 +120,9 @@ namespace module::support::logging {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task != nullptr) {
+            if (message.statistics != nullptr) {
                 // Get our reactor name
-                std::string reactor = message.task->identifiers.reactor;
+                std::string reactor = message.statistics->identifiers->reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t last_c = reactor.find_last_of(':');
@@ -130,18 +130,20 @@ namespace module::support::logging {
 
                 // This is our source
                 source = reactor + " "
-                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
+                         + (message.statistics->identifiers->name.empty()
+                                ? ""
+                                : "- " + message.statistics->identifiers->name + " ");
             }
 
             // Output the level
             switch (message.level) {
-                case TRACE: log_file << source << "TRACE: "; break;
-                case DEBUG: log_file << source << Colour::green << "DEBUG: "; break;
-                case INFO: log_file << source << Colour::brightblue << "INFO: "; break;
-                case WARN: log_file << source << Colour::yellow << "WARN: "; break;
-                case ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
-                case UNKNOWN:;
-                case FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
+                case NUClear::LogLevel::TRACE: log_file << source << "TRACE: "; break;
+                case NUClear::LogLevel::DEBUG: log_file << source << Colour::green << "DEBUG: "; break;
+                case NUClear::LogLevel::INFO: log_file << source << Colour::brightblue << "INFO: "; break;
+                case NUClear::LogLevel::WARN: log_file << source << Colour::yellow << "WARN: "; break;
+                case NUClear::LogLevel::ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
+                case NUClear::LogLevel::UNKNOWN:;
+                case NUClear::LogLevel::FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
             }
 
             // Output the message
