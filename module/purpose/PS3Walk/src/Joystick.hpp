@@ -28,6 +28,7 @@
 #ifndef MODULE_PURPOSE_PS3WALK_JOYSTICK_HPP
 #define MODULE_PURPOSE_PS3WALK_JOYSTICK_HPP
 
+#include <cstdint>
 #include <string>
 
 /**
