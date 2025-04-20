@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html":[2,0,3,8,1,6,0],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a1a5338bb611e321f9439e3ec5b5ddb0f":[2,0,3,8,1,6,0,1],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a29f64b7d3c182adeda218d7af177e9d7":[2,0,3,8,1,6,0,0],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a390dea89a85bca3458ef50afee650327":[2,0,3,8,1,6,0,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a163c7d0607ecc204ce2265d308e0f16c":[2,0,3,11,8,0,1],
 "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3":[2,0,3,11,8,0,0],
 "structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html":[2,0,3,11,9,0],
-"structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html#a05086f09e8be428add85118299961aa7":[2,0,3,11,9,0,2],
-"structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html#a238055220400e22b5ab4e07c692505f0":[2,0,3,11,9,0,4]
+"structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html#a05086f09e8be428add85118299961aa7":[2,0,3,11,9,0,2]
 };

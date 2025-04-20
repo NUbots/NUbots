@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html":[2,0,3,8,1,10],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7":[2,0,3,8,1,10,0],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a021321e8c168ba3ae39ce3a2e7b3ec87":[2,0,3,8,1,10,0,2],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a0d1d8243de9b526bf4aefb49181aa45c":[2,0,3,8,1,10,0,9],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1KickBalancer.html#a89e4d2efba739f33a5d9915e432e6e6a":[2,0,3,10,5,3],
 "classmodule_1_1skill_1_1KickBalancer.html#aa3ed3037fb4bd07fdf4d484e235cb955":[2,0,3,10,5,1],
 "classmodule_1_1skill_1_1KickBalancer.html#af4a4c13dfd319fc3d8d4d59cfd75f691":[2,0,3,10,5,4],
-"classmodule_1_1skill_1_1Kicker.html":[2,0,3,10,6],
-"classmodule_1_1skill_1_1Kicker.html#a2b5579d45c7be10de2c7ba9783fe6ea9":[2,0,3,10,6,5]
+"classmodule_1_1skill_1_1Kicker.html":[2,0,3,10,6]
 };
