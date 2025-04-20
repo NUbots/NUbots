@@ -122,6 +122,15 @@ export class FieldIntersection {
   }
 }
 
+export class Line {
+  @observable start: Vector3;
+  @observable end: Vector3;
+  constructor({ start, end }: { start: Vector3; end: Vector3 }) {
+    this.start = start;
+    this.end = end;
+  }
+}
+
 export class BoundingBox {
   @observable minX: number;
   @observable minY: number;
@@ -150,11 +159,12 @@ export class LocalisationRobotModel {
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable particles: Vector3[]; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
-  @observable fieldIntersections?: FieldIntersection[];
+  @observable rIWw?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
   @observable purpose: string;
+  @observable associationLines?: Line[];
   @observable max_align_radius: number;
   @observable min_align_radius: number;
   @observable angle_to_final_heading: number;
@@ -190,10 +200,11 @@ export class LocalisationRobotModel {
     fieldLinePoints,
     particles,
     ball,
-    fieldIntersections,
+    rIWw,
     goals,
     robots,
     purpose,
+    associationLines,
     max_align_radius,
     min_align_radius,
     angle_to_final_heading,
@@ -222,10 +233,11 @@ export class LocalisationRobotModel {
     fieldLinePoints: { rPWw: Vector3[] };
     particles: Vector3[];
     ball?: { rBWw: Vector3 };
-    fieldIntersections?: FieldIntersection[];
+    rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
     purpose: string;
+    associationLines?: Line[];
     max_align_radius: number;
     min_align_radius: number;
     angle_to_final_heading: number;
@@ -260,10 +272,11 @@ export class LocalisationRobotModel {
     this.fieldLinePoints = fieldLinePoints;
     this.particles = particles;
     this.ball = ball;
-    this.fieldIntersections = fieldIntersections;
+    this.rIWw = rIWw;
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.associationLines = associationLines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
     this.angle_to_final_heading = angle_to_final_heading;
@@ -296,6 +309,7 @@ export class LocalisationRobotModel {
       goals: { points: [] },
       robots: [],
       purpose: "",
+      associationLines: [],
       max_align_radius: 0,
       min_align_radius: 0,
       angle_to_final_heading: 0,
@@ -370,8 +384,8 @@ export class LocalisationRobotModel {
 
   /** Field intersections in field space */
   @computed
-  get fieldIntersectionsF(): FieldIntersection[] | undefined {
-    return this.fieldIntersections?.map((intersection) => {
+  get rIFf(): FieldIntersection[] | undefined {
+    return this.rIWw?.map((intersection) => {
       return new FieldIntersection({
         type: intersection.type,
         position: intersection.position.applyMatrix4(this.Hfw),

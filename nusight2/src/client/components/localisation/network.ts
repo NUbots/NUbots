@@ -52,6 +52,10 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
 
   @action
@@ -128,7 +132,7 @@ export class LocalisationNetwork {
   private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+    robot.rIWw = fieldIntersections.intersections.map((intersection) => {
       let intersection_type = "";
       if (intersection.type === 0) {
         intersection_type = "UNKNOWN";
