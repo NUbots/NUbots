@@ -141,7 +141,7 @@ namespace module::localisation {
                 Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
             auto left_top_side =
                 Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
-            auto right__middle_side =
+            auto right_middle_side =
                 Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
             auto right_bottom_side =
                 Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
@@ -149,12 +149,12 @@ namespace module::localisation {
                 Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
             switch (cfg.starting_side) {
                 case StartingSide::LEFT: cfg.initial_hypotheses.emplace_back(left_middle_side); break;
-                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right__middle_side); break;
+                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right_middle_side); break;
                 case StartingSide::EITHER:
                     cfg.initial_hypotheses.emplace_back(left_middle_side);
                     cfg.initial_hypotheses.emplace_back(left_bottom_side);
                     cfg.initial_hypotheses.emplace_back(left_top_side);
-                    cfg.initial_hypotheses.emplace_back(right__middle_side);
+                    cfg.initial_hypotheses.emplace_back(right_middle_side);
                     cfg.initial_hypotheses.emplace_back(right_bottom_side);
                     cfg.initial_hypotheses.emplace_back(right_top_side);
                     break;
