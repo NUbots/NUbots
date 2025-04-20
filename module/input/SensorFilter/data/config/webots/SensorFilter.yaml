@@ -12,9 +12,9 @@ foot_down:
 # Mahony filter for roll + pitch
 mahony:
   # Proportional gain
-  Kp: 0.2325313657343745
+  Kp: 0.23
   # Integral gain
-  Ki: 0.1942891618305163
+  Ki: 0.19
   # Initial bias
   initial_bias: [0, 0, 0]
   # Initial orientation (roll, pitch, yaw)
