@@ -29,6 +29,7 @@
 #ifndef UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 #define UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
