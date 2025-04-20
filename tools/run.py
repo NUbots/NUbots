@@ -29,6 +29,7 @@
 import os
 import re
 
+import yaml
 from termcolor import cprint
 
 import b
@@ -47,11 +48,13 @@ def register(command):
     )
     command.add_argument("--trace", action="store_true", default=False, help="Generate a trace file for the program")
     command.add_argument("--trace-output", default="recordings/trace.pftrace", help="The output file for the trace")
+    command.add_argument("--webots_port", type=int, default=None, help="The port to use for webots")
+    command.add_argument("--player_id", type=int, default=None, help="The player id to use for the player")
+    command.add_argument("--team_id", type=int, default=None, help="The team id to use for the player")
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 
-
 @run_on_docker
-def run(args, use_gdb, trace, trace_output, **kwargs):
+def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **kwargs):
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
@@ -115,6 +118,46 @@ def run(args, use_gdb, trace, trace_output, **kwargs):
     else:
         cmd = []
 
+    # Update the config files if requested to support running multiple robots
+    update_configs(webots_port, player_id, team_id)
+
     # Run the command
     pty = WrapPty()
     exit(pty.spawn(cmd + args, env))
+
+# Update config
+def update_config(yaml_file, key, value):
+    # Try to open the file, if it fails don't do anything
+    try:
+        with open(yaml_file, "r") as file:
+            config = yaml.load(file, Loader=yaml.FullLoader)
+    except FileNotFoundError:
+        print(f"config file not found: {yaml_file}, module not built.")
+        return
+
+    # Update the config
+    config[key] = value
+
+    # Write the updated config back to the file
+    with open(yaml_file, "w") as file:
+        yaml.dump(config, file)
+
+def update_configs(webots_port, player_id, team_id):
+    # Change into the config directory
+    os.chdir("./config")
+
+    # If the webots port is given, set it in Webots.yaml
+    if webots_port is not None:
+        update_config("Webots.yaml", "port", webots_port)
+
+    # If the player id is given, set it in GlobalConfig and GameController
+    if player_id is not None:
+        update_config("webots/GlobalConfig.yaml", "player_id", player_id)
+        update_config("GameController.yaml", "player_id", player_id)
+
+    # Set `team_id` if it is provided
+    if team_id is not None:
+        update_config("webots/GlobalConfig.yaml", "team_id", team_id)
+
+    # Change back to the build directory
+    os.chdir("./..")
