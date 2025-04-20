@@ -36,13 +36,13 @@ namespace module::support {
     ReactionTimer::ReactionTimer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("ReactionTimer.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file ReactionTimer.yaml
+            log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
         on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-            log(stats.identifiers.name,
+            log(stats.identifiers->name,
                 1000.0
-                    * (double((stats.finished - stats.started).count())
+                    * (double((stats.finished.nuclear_time - stats.started.nuclear_time).count())
                        / double(NUClear::clock::duration::period::den)),
                 "ms");
         });

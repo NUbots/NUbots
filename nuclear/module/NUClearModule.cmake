@@ -17,7 +17,7 @@ function(NUCLEAR_MODULE)
   # Keep our modules path for grouping later
   set(module_path "module/${module_target_name}")
 
-  # Stip out slashes to make it a valid target name
+  # Strip out slashes to make it a valid target name
   string(REPLACE "/" "" module_target_name "${module_target_name}")
 
   # Parse our input arguments

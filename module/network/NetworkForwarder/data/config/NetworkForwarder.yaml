@@ -46,3 +46,4 @@ targets:
     message.purpose.Purpose: true
     message.planning.WalkToDebug: true
     message.strategy.WalkInsideBoundedBox: true
+    message.behaviour.state.WalkState: true
