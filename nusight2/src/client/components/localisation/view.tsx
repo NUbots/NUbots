@@ -353,11 +353,11 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
       <FieldObjects
         objects={robot.rRFf.map((r) => ({
-          position: r,
+          position: r.position,
+          color: r.color,
         }))}
         defaultHeight={0.8}
         defaultRadius={0.1}
-        defaultColor={robot.color || "orange"}
       />
 
       {model.fieldIntersectionsVisible && robot.fieldIntersections && (
