@@ -361,9 +361,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         defaultColor="orange"
       />
 
-      {model.fieldIntersectionsVisible && robot.rIFf && (
-        <FieldIntersections intersections={robot.rIFf} />
-      )}
+      {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
 
       {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
 
