@@ -49,12 +49,10 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
-    robot.association_lines = field.associationLines.map((line) => {
-      return new Line({
-        start: Vector3.from(line.start),
-        end: Vector3.from(line.end),
-      });
-    });
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
 
   @action

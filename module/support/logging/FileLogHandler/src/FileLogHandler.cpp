@@ -140,7 +140,7 @@ namespace module::support::logging {
                 case INFO: log_file << source << Colour::brightblue << "INFO: "; break;
                 case WARN: log_file << source << Colour::yellow << "WARN: "; break;
                 case ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
-                case NUClear::UNKNOWN:;
+                case UNKNOWN:;
                 case FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
             }
 

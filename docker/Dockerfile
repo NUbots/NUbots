@@ -41,7 +41,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
+FROM --platform=linux/amd64 archlinux:base-devel-20241117.0.280007
 
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -131,20 +131,20 @@ RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v14.0.0.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
-RUN install-from-source https://github.com/intel/opencl-clang/archive/v14.0.0.tar.gz \
-    --patch https://gist.githubusercontent.com/TrentHouliston/4281ecb27d1990f77cc43659ac888aaf/raw/4ddad7c87feb38e5c53917cc06036d0fead97791/resource_linker_skip_cross.patch
+RUN install-from-source https://github.com/intel/opencl-clang/archive/470cf0018e1ef6fc92eda1356f5f31f7da452abc.tar.gz \
+    --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
 
 # Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.5.0.tar.gz \
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/sdk-1.3.216.0.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2022.2.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
     -DSPIRV_WERROR=Off \
     -DBUILD_SHARED_LIBS=ON \
     -DSPIRV_TOOLS_BUILD_STATIC=OFF \
@@ -154,22 +154,15 @@ RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package ncurses
 
-# intel graphics compiler
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.11485.tar.gz \
-    --patch https://raw.githubusercontent.com/archlinux/svntogit-community/f557b1f70d15c5f991ca6b20c06113069ac5c30b/trunk/fix-zlib-linking.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/12c99343388eba6e6275856b25e0fa8978585dfb.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/1d5ceafdbc005f3adc58be5af1dc92f068908e16.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/d9535cc5c3e54b21d56c492d4e21cb13c80b9b7a.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/49f4d4e3e904179bf3a0b880732b92f8bfb2c64a.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/12332c1ee8e92238c919ad7c2aa36119259cb622.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/6a13fa903f380e17378286a7cd43995b0ae162ad.patch \
-    --patch https://raw.githubusercontent.com/archlinux/svntogit-community/49c729c11b765c19bc8cc5d3f38022efd5078204/trunk/fix-AlignmentAnalysis-test-failures-on-LLVM-14.patch \
-    --patch https://github.com/intel/intel-graphics-compiler/commit/8b49f42e8148284815b4c31bf1c280e7ae2b03be.patch \
-    --patch https://gist.githubusercontent.com/TrentHouliston/acc374481f58800a4d409725f49b5247/raw/687fa40cf693b6f38daeded623ec89ad77311bf3/built_tools_target.patch \
+RUN pip install pyyaml mako
+
+# Intel graphics compiler
+RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
+    --patch https://gist.githubusercontent.com/ysims/3775531601b210507c478bca083b768d/raw/fa435e70c2870f2539c0da973a161ad7968d4696/built_tools_target.patch \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.6' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.5' \
     -DIGC_OPTION__LLVM_MODE=Prebuilds \
     -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
     -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
@@ -179,7 +172,7 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DINSTALL_GENX_IR=ON
 
 # gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.1.7.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
     --build-system cmake \
     -DRUN_TEST_SUITE=OFF
 
@@ -191,9 +184,8 @@ RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz
     -Dvalgrind=false
 
 # Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.15.0.tar.gz
-
-RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-22.4.4.tar.gz \
+RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
+RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
@@ -204,8 +196,7 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
     -DENABLE_NONFREE_KERNELS=ON
 
 # Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/22.29.23750.tar.gz \
-    --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
+RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
@@ -216,14 +207,8 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/r
 RUN install-package ruby
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
 
-# Eigen3
-RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-
-# tcmalloc
-RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
-    --build-system autotools \
-    --with-tcmalloc-pagesize=64 \
-    --enable-minimal
+# OpenCV
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
 # Protobuf
 RUN install-package protobuf && \
@@ -234,38 +219,71 @@ RUN install-package protobuf && \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
     -DBUILD_SHARED_LIBS=OFF
 
-# OpenCV
-RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
-
 # OpenVino - Dependencies
-RUN install-package opencl-clhpp && \
-    install-package opencl-headers && \
-    install-package ocl-icd
+RUN install-package opencl-clhpp \
+    shellcheck \
+    scons \
+    pkgconf \
+    patchelf \
+    fdupes \
+    ca-certificates \
+    file \
+    rapidjson \
+    snappy
 
-# OpenVino
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 && \
-    cd openvino &&  \
-    git submodule update --init --recursive && \
-    mkdir build && \
-    cd build && \
+# Clone OpenVINO repository
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
+    cd openvino && \
+    git submodule update --init --recursive
+
+# Download AUR patches
+WORKDIR /openvino
+RUN curl -L -o 010-openvino-change-install-paths.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/010-openvino-change-install-paths.patch?h=openvino && \
+    curl -L -o 020-openvino-disable-werror.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/020-openvino-disable-werror.patch?h=openvino && \
+    curl -L -o 030-openvino-level-zero-disable-werror.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/030-openvino-level-zero-disable-werror.patch?h=openvino && \
+    curl -L -o 040-openvino-protobuf23-fix.patch \
+    https://aur.archlinux.org/cgit/aur.git/plain/040-openvino-protobuf23-fix.patch?h=openvino
+
+# Apply patches
+RUN cd /openvino && \
+    patch -d . -p1 < 010-openvino-change-install-paths.patch && \
+    patch -d . -p1 < 020-openvino-disable-werror.patch && \
+    patch -d thirdparty/level_zero/level-zero -p1 < 030-openvino-level-zero-disable-werror.patch && \
+    patch -d . -p1 < 040-openvino-protobuf23-fix.patch
+
+# Build OpenVINO
+RUN mkdir build && cd build && \
     cmake .. -DBUILD_TESTING:BOOL='OFF' \
-            -DCMAKE_BUILD_TYPE:STRING='Release' \
-            -DENABLE_AVX512F:BOOL='OFF' \
-            -DENABLE_PYTHON:BOOL='OFF' \
-            -DENABLE_CLANG_FORMAT:BOOL='OFF' \
-            -DENABLE_NCC_STYLE:BOOL='OFF' \
-            -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
-            -DENABLE_SYSTEM_TBB:BOOL='ON' \
-            -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
-            -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
-            -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
-            -Wno-dev && \
-    make -j$(nproc) && \
-    make install && \
-    /usr/local/setupvars.sh
+    -DCMAKE_BUILD_TYPE:STRING='Release' \
+    -DENABLE_AVX512F:BOOL='OFF' \
+    -DENABLE_PYTHON:BOOL='OFF' \
+    -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+    -DENABLE_NCC_STYLE:BOOL='OFF' \
+    -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+    -DENABLE_INTEL_NPU:BOOL='OFF' \
+    -DENABLE_SYSTEM_TBB:BOOL='ON' \
+    -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+    -DENABLE_SYSTEM_PROTOBUF:BOOL='OFF' \
+    -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+    -DENABLE_CPPLINT:BOOL='OFF' \
+    -DCMAKE_CXX_STANDARD='17' \
+    -Wno-dev && \
+    make -j$(nproc) && make install
 
 # Move OpenVino libraries to our library path
-RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+
+# Eigen3
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+
+# tcmalloc
+RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
+    --build-system autotools \
+    --with-tcmalloc-pagesize=64 \
+    --enable-minimal
 
 # Libjpeg
 RUN install-package yasm
@@ -306,10 +324,12 @@ RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
     --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.72.3/glib-2.72.3.tar.bz2 \
+RUN install-package glib2-devel
+RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
     -Ddefault_library=both && \
     cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
-RUN install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
+RUN  ls ${prefix}/include && \
+    install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
     -Ddefault_library=both \
     -Dusb=enabled \
     -Ddocumentation=disabled \
@@ -400,7 +420,8 @@ RUN pip install \
 RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
-    doxygen
+    doxygen \
+    gcc13
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \

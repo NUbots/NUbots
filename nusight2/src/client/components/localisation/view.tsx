@@ -361,13 +361,11 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         defaultColor="orange"
       />
 
-      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
+      {model.fieldIntersectionsVisible && robot.fieldIntersectionsF && (
         <FieldIntersections intersections={robot.fieldIntersectionsF} />
       )}
 
-      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
-        <AssociationLines lines={robot.association_lines} />
-      )}
+      {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
 
       {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
         <WalkPathVisualiser

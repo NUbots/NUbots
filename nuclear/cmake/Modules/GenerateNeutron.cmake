@@ -21,7 +21,7 @@ include(CMakeParseArguments)
 function(GenerateNeutron)
   # We need protobuf and python to generate the neutron messages
   find_package(Protobuf REQUIRED)
-  find_package(PythonInterp 3 REQUIRED)
+  find_package(Python3 REQUIRED)
 
   # Set the path to our generating scripts
   set(SCRIPT_SOURCE "${PROJECT_SOURCE_DIR}/nuclear/cmake/Scripts")
@@ -120,7 +120,7 @@ function(GenerateNeutron)
   # by adding protobuf to the package
   add_custom_command(
     OUTPUT "${pb}.proto"
-    COMMAND ${PYTHON_EXECUTABLE} ARGS "${SCRIPT_SOURCE}/repackage_message.py" "${NEUTRON_PROTO}" "${pb}.proto"
+    COMMAND ${Python3_EXECUTABLE} ARGS "${SCRIPT_SOURCE}/repackage_message.py" "${NEUTRON_PROTO}" "${pb}.proto"
     WORKING_DIRECTORY "${SCRIPT_SOURCE}"
     DEPENDS "${SCRIPT_SOURCE}/repackage_message.py" ${NEUTRON_PROTO}
     COMMENT "Repackaging protobuf ${NEUTRON_PROTO}"
@@ -150,7 +150,7 @@ function(GenerateNeutron)
   # Build our c++ class from the extracted information
   add_custom_command(
     OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.hpp"
-    COMMAND ${CMAKE_COMMAND} -E env NEUTRON_BUILTIN_DIR=${NEUTRON_BUILTIN_OUTPUT_DIR} ${PYTHON_EXECUTABLE} ARGS
+    COMMAND ${CMAKE_COMMAND} -E env NEUTRON_BUILTIN_DIR=${NEUTRON_BUILTIN_OUTPUT_DIR} ${Python3_EXECUTABLE} ARGS
             "${SCRIPT_SOURCE}/build_message_class.py" "${nt}"
     WORKING_DIRECTORY "${nt_out}"
     DEPENDS "${SCRIPT_SOURCE}/build_message_class.py" ${message_class_generator_files} "${nt}.pb"
