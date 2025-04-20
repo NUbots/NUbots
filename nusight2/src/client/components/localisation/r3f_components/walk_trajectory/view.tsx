@@ -28,8 +28,8 @@ export const TrajectoryLine: React.FC<TrajectoryLineProps> = ({ poses, color, li
     transparent: opacity < 1.0,
     opacity: opacity,
   });
-
-  return <line geometry={geometry} material={material} />;
+  // @ts-ignore
+  return <line geometry={geometry} material={material} />
 };
 
 interface WalkTrajectoryProps {
