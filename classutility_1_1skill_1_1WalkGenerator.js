@@ -13,6 +13,7 @@ var classutility_1_1skill_1_1WalkGenerator =
     [ "get_parameters", "classutility_1_1skill_1_1WalkGenerator.html#acd7f26d8f7eada562239f7f92f5b70ab", null ],
     [ "get_phase", "classutility_1_1skill_1_1WalkGenerator.html#ae05a0d003cb492731fb7dfacc691c7d9", null ],
     [ "get_state", "classutility_1_1skill_1_1WalkGenerator.html#a0a9662552bcfec8fc609503bd86f2942", null ],
+    [ "get_step_period", "classutility_1_1skill_1_1WalkGenerator.html#aea30c58f294dec9157af6a747ca30b9f", null ],
     [ "get_swing_foot_pose", "classutility_1_1skill_1_1WalkGenerator.html#a5090024ceeb8df8ad9f23b3f2e53a5f9", null ],
     [ "get_swing_foot_pose", "classutility_1_1skill_1_1WalkGenerator.html#a619111a6b275259e3a66873f72771a6c", null ],
     [ "get_time", "classutility_1_1skill_1_1WalkGenerator.html#a3ba83536e86d09d391a832db6d6ab5e2", null ],
