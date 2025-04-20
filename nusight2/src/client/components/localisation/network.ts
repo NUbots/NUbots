@@ -131,7 +131,7 @@ export class LocalisationNetwork {
   private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+    robot.rIWw = fieldIntersections.intersections.map((intersection) => {
       let intersection_type = "";
       if (intersection.type === 0) {
         intersection_type = "UNKNOWN";

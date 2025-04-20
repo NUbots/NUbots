@@ -156,7 +156,7 @@ export class LocalisationRobotModel {
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable particles: Vector3[]; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
-  @observable fieldIntersections?: FieldIntersection[];
+  @observable rIWw?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3 }[];
@@ -186,7 +186,7 @@ export class LocalisationRobotModel {
     fieldLinePoints,
     particles,
     ball,
-    fieldIntersections,
+    rIWw,
     goals,
     robots,
     purpose,
@@ -214,7 +214,7 @@ export class LocalisationRobotModel {
     fieldLinePoints: { rPWw: Vector3[] };
     particles: Vector3[];
     ball?: { rBWw: Vector3 };
-    fieldIntersections?: FieldIntersection[];
+    rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3 }[];
     purpose: string;
@@ -242,7 +242,7 @@ export class LocalisationRobotModel {
     this.fieldLinePoints = fieldLinePoints;
     this.particles = particles;
     this.ball = ball;
-    this.fieldIntersections = fieldIntersections;
+    this.rIWw = rIWw;
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
@@ -345,8 +345,8 @@ export class LocalisationRobotModel {
 
   /** Field intersections in field space */
   @computed
-  get fieldIntersectionsF(): FieldIntersection[] | undefined {
-    return this.fieldIntersections?.map((intersection) => {
+  get rIFf(): FieldIntersection[] | undefined {
+    return this.rIWw?.map((intersection) => {
       return new FieldIntersection({
         type: intersection.type,
         position: intersection.position.applyMatrix4(this.Hfw),
