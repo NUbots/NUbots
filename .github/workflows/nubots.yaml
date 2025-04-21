@@ -50,26 +50,11 @@ jobs:
             cpp_changes:
               - '!{nusight2,.vscode,tools}/**'
 
-  # Free space for the Docker image
-  free_disk_space:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: false
-          android: false
-          dotnet: false
-          haskell: false
-
   # Build the docker image. This job is not conditional since we don't want it skipped
   # because other jobs depend on it. The actual building of the image is cached, so it
   # won't be doing unnecessary work if there are no relevant Dockerfile changes.
   build_docker:
     name: "Build docker image"
-    needs: [free_disk_space]
 
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
@@ -80,6 +65,17 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Free up space on the runner
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+          android: false
+          dotnet: false
+          haskell: false
+
       # Figure out the tag to use for the Docker image
       - name: Set Docker tag
         run: |
