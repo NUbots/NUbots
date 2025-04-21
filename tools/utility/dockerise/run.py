@@ -151,6 +151,32 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
 
+        # If the user requests a multi-run session, then spin up multiple containers
+        if kwargs["command"] == "multi":
+            num_instances = kwargs.get("instances", 1)  # Default to 1 instance if not specified
+            for i in range(int(kwargs["num_robots"])):
+                print(f"Starting instance {i + 1} of {num_instances} for team 1.")
+                instance_kwargs = kwargs.copy()
+                instance_kwargs["command"] = "run"  # Change the command to `run` for each instance
+                instance_kwargs["hostname"] = f"{docker_hostname}-{i + 1}"  # Unique hostname for each instance
+                instance_kwargs["webots_port"] = 1001 + i  # Unique webots port for each instance
+                instance_kwargs["player_id"] = i + 1  # Set the player ID for each instance
+                _run(**instance_kwargs)  # Recursively call _run for each instance
+
+            # Skip running second team if not requested
+            if kwargs["single_team"]:
+                return
+
+            for i in range(int(kwargs["num_robots"])):
+                print(f"Starting instance {i + 1} of {num_instances} for team 2.")
+                instance_kwargs = kwargs.copy()
+                instance_kwargs["command"] = "run"  # Change the command to `run` for each instance
+                instance_kwargs["hostname"] = f"{docker_hostname}-{i + 1}"  # Unique hostname for each instance
+                instance_kwargs["webots_port"] = 1021 + i  # Unique webots port for each instance
+                instance_kwargs["player_id"] = i + 1 # Set the player ID for each instance
+                instance_kwargs["team_id"] = 13  # While team 1 can use the default, team 2 needs to be set to a different ID
+                _run(**instance_kwargs)  # Recursively call _run for each instance
+
         # Docker arguments
         docker_args = [
             "docker",
