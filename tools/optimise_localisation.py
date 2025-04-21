@@ -222,6 +222,7 @@ def register(parser):
     parser.add_argument("--nbs_file", type=str, default=NBS_FILE, help="Path to the .nbs file with ground truth data.")
     parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")
 
+
 @run_on_docker(hostname="webots")
 def run(n_trials, nbs_file, **kwargs):
     """
