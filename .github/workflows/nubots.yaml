@@ -51,11 +51,11 @@ jobs:
               - '!{nusight2,.vscode,tools}/**'
 
   # Free space for the Docker image
-  free-disk-space:
+  free_disk_space:
     runs-on: ubuntu-22.04
     steps:
       - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@v1.3.1
         with:
           # this might remove tools that are actually needed,
           # if set to "true" but frees about 6 GB
@@ -69,6 +69,7 @@ jobs:
   # won't be doing unnecessary work if there are no relevant Dockerfile changes.
   build_docker:
     name: "Build docker image"
+    needs: [free_disk_space]
 
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
