@@ -37,6 +37,7 @@
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -59,6 +60,7 @@ namespace module::skill {
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
+    using utility::input::FrameID;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -208,6 +210,18 @@ namespace module::skill {
                                walk_task.velocity_target.z()));
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
+
+                    // Sample trajectory points
+                    const int num_samples = 10;
+                    for (double t = 0; t <= walk_generator.get_step_period();
+                         t += walk_generator.get_step_period() / num_samples) {
+                        walk_state->torso_trajectory.push_back(walk_generator.get_torso_pose(t).matrix());
+                        walk_state->swing_foot_trajectory.push_back(walk_generator.get_swing_foot_pose(t).matrix());
+                    }
+                    auto Htp        = walk_generator.get_phase() == WalkState::Phase::RIGHT
+                                          ? sensors.Htx[FrameID::R_FOOT_BASE]
+                                          : sensors.Htx[FrameID::L_FOOT_BASE];
+                    walk_state->Hwp = sensors.Htw.inverse() * Htp;
                 }
                 emit(walk_state);
             });

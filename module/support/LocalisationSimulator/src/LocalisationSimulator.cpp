@@ -44,7 +44,7 @@ namespace module::support {
         });
 
         on<Every<3, Per<std::chrono::seconds>>, With<Field>>().then("Heart Beat",
-                                                                    [this](const Field& f) { log(f.Hfw); });
+                                                                    [this](const Field& f) { log(f.Hfw.matrix()); });
     }
 
 }  // namespace module::support

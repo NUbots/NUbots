@@ -12,6 +12,7 @@ import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
+import { AssociationLines } from "./r3f_components/association_lines/view";
 import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
@@ -24,6 +25,8 @@ import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
+import { WalkTrajectory } from "./r3f_components/walk_trajectory/view";
+import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history/view";
 import { LocalisationRobotModel } from "./robot_model";
 
 type LocalisationViewProps = {
@@ -360,9 +363,9 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         defaultColor="orange"
       />
 
-      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
-        <FieldIntersections intersections={robot.fieldIntersections} />
-      )}
+      {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
+
+      {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
 
       {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
         <WalkPathVisualiser
@@ -390,6 +393,16 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       )}
 
       {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
+
+      {robot.torso_trajectory && robot.swing_foot_trajectory && (
+        <WalkTrajectory
+          torso_trajectory={robot.torso_trajectoryF}
+          swing_foot_trajectory={robot.swing_foot_trajectoryF}
+          color={"#ffa500"}
+        />
+      )}
+
+      {robot.trajectory_history.length > 0 && <WalkTrajectoryHistory trajectories={robot.trajectory_history} />}
 
       {model.boundedBoxVisible && robot.boundingBox && (
         <BoundingBox

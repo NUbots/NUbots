@@ -39,10 +39,13 @@ from utility.dockerise import run_on_docker
 def register(command):
     # Install help
     command.help = "Creates a list of unused or commented out modules"
+    command.add_argument(
+        "-q", "--quiet", default=False, action="store_true", dest="quiet", help="Silence terminal output."
+    )
 
 
 @run_on_docker
-def run(**kwargs):
+def run(quiet, **kwargs):
 
     source_dir = b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
     roles_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_ROLES_DIR"])
@@ -79,30 +82,46 @@ def run(**kwargs):
                                 break
 
     # Find all of the used modules
-    for role in os.listdir(roles_path):
-        if role.endswith(".role"):
-            with open(os.path.join(roles_path, role), "r") as f:
-                for line in f:
-                    if "#" in line:
-                        line = line[: line.find("#")]
-                    line = line.strip()
-                    reg = re.findall(r"(\w+::(?:\w+(::)?)*)", line)
-                    for modules in reg:
-                        for module in modules:
-                            if module != "" and module != "::":
-                                used_modules.add(module)
+    for folder, _, files in os.walk(roles_path):
+        for role in files:
+            if role.endswith(".role") and role != "unused.role":
+                with open(os.path.join(folder, role), "r") as f:
+                    for line in f:
+                        if "#" in line:
+                            line = line[: line.find("#")]
+                        line = line.strip()
+                        reg = re.findall(r"(\w+::(?:\w+(::)?)*)", line)
+                        for modules in reg:
+                            for module in modules:
+                                if module != "" and module != "::":
+                                    used_modules.add(module)
 
     # Find out which modules are unused
     unused_modules = existing_modules.difference(used_modules)
 
-    cprint("Existing Modules", attrs=["bold"])
-    print("\n".join(existing_modules))
-    print("\n")
+    if not quiet:
+        cprint("Existing Modules", attrs=["bold"])
+        print("\n".join(sorted(existing_modules)))
+        print("\n")
 
-    cprint("Used Modules", "green", attrs=["bold"])
-    cprint("\n".join(used_modules), "green")
-    print("\n")
+        cprint("Used Modules", "green", attrs=["bold"])
+        cprint("\n".join(sorted(used_modules)), "green")
+        print("\n")
 
-    cprint("Unused Modules", "red", attrs=["bold"])
-    cprint("\n".join(unused_modules), "red", attrs=["bold"])
-    print("\n")
+        cprint("Unused Modules", "red", attrs=["bold"])
+        cprint("\n".join(sorted(unused_modules)), "red", attrs=["bold"])
+        print("\n")
+
+    # Create a role from the unused modules
+    unused_role = os.path.join(roles_path, "unused.role")
+
+    with open(unused_role, "w") as f:
+        # Header
+        f.write("# This role is automatically generated\n")
+        f.write("# It contains all of the modules that are not used by any existing role\n")
+        f.write("nuclear_role(\n")
+
+        for module in sorted(unused_modules):
+            f.write("    " + module + "\n")
+
+        f.write(")\n")

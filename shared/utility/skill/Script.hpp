@@ -246,7 +246,10 @@ namespace utility::skill {
             // Add the servos in the frame to a map
             std::map<uint32_t, ServoCommand> servos{};
             for (const auto& target : frame.targets) {
-                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                servos[target.id] = ServoCommand(time,
+                                                 target.position,
+                                                 ServoState(target.gain, target.torque),
+                                                 ServoCommand::DoneType::TIME);
             }
 
             // Add the map to the pack. This represents one sequence of servos.
