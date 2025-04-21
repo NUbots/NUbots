@@ -22,7 +22,7 @@ This module benchmarks the performance of the robot's field localisation system 
 3. **Parameter Optimisation**:
    Use the `optimise_localisation` script to tune sensor filter and localisation parameters using a genetic algorithm:
    ```bash
-   ./b optimise_localisation <ground_truth_data.nbs>
+   ./b optimise_localisation --nbs_file <ground_truth_data.nbs> --n_trials 500 --hostname webots
    ```
 
 ## Dependencies
