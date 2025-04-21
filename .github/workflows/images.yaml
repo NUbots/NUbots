@@ -17,6 +17,20 @@ concurrency:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+ # Free space for the Docker image
+ free-disk-space:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
+        tool-cache: false
+        android: false
+        dotnet: false
+        haskell: false
+
   # Build the docker images
   build_and_push:
     name: "Build and push image"
