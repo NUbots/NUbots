@@ -119,7 +119,7 @@ def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **k
         cmd = []
 
     # Update the config files if requested to support running multiple robots
-    update_configs(webots_port, player_id, team_id)
+    update_webots_configs(webots_port, player_id, team_id)
 
     # Run the command
     pty = WrapPty()
@@ -142,22 +142,16 @@ def update_config(yaml_file, key, value):
     with open(yaml_file, "w") as file:
         yaml.dump(config, file)
 
-def update_configs(webots_port, player_id, team_id):
-    # Change into the config directory
-    os.chdir("./config")
-
+def update_webots_configs(webots_port, player_id, team_id):
     # If the webots port is given, set it in Webots.yaml
     if webots_port is not None:
-        update_config("Webots.yaml", "port", webots_port)
+        update_config("config/Webots.yaml", "port", webots_port)
 
     # If the player id is given, set it in GlobalConfig and GameController
     if player_id is not None:
-        update_config("webots/GlobalConfig.yaml", "player_id", player_id)
-        update_config("GameController.yaml", "player_id", player_id)
+        update_config("config/webots/GlobalConfig.yaml", "player_id", player_id)
+        update_config("config/GameController.yaml", "player_id", player_id)
 
     # Set `team_id` if it is provided
     if team_id is not None:
-        update_config("webots/GlobalConfig.yaml", "team_id", team_id)
-
-    # Change back to the build directory
-    os.chdir("./..")
+        update_config("config/webots/GlobalConfig.yaml", "team_id", team_id)
