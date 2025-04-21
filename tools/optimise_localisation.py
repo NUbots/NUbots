@@ -42,11 +42,10 @@ BUILD_DIR = "/home/nubots/build"
 EXECUTABLE_PATH = os.path.join(BUILD_DIR, "bin/webots/localisation_benchmark")
 NBS_FILE = os.path.join(BUILD_DIR, "recordings/logging/benchmark.nbs")
 LOCALISATION_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/FieldLocalisationNLopt.yaml")
-SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/SensorFilter.yaml")
 DESTINATION_DIR = os.path.join(BUILD_DIR, "recordings/optimisation_results")
 
 
-def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
+def modify_yaml(params, localisation_yaml_path):
     """
     Modifies the YAML configuration files with the provided parameters while preserving comments and formatting.
     """
@@ -75,16 +74,6 @@ def modify_yaml(params, localisation_yaml_path, sensor_filter_yaml_path):
 
     with open(localisation_yaml_path, "w") as file:
         yaml_parser.dump(localisation_config, file)
-
-    # Update SensorFilter.yaml
-    with open(sensor_filter_yaml_path, "r") as file:
-        sensor_filter_config = yaml_parser.load(file)
-
-    sensor_filter_config["mahony"]["Kp"] = params["Kp"]
-    sensor_filter_config["mahony"]["Ki"] = params["Ki"]
-
-    with open(sensor_filter_yaml_path, "w") as file:
-        yaml_parser.dump(sensor_filter_config, file)
 
 
 def parse_rmse_translation(output):
@@ -176,8 +165,6 @@ def objective(trial):
     R_x = trial.suggest_float("R_x", 1e-2, 1e1)
     R_y = trial.suggest_float("R_y", 1e-2, 1e1)
     R_theta = trial.suggest_float("R_theta", 1e-2, 1e1)
-    Kp = trial.suggest_float("Kp", 1e-2, 1e1)
-    Ki = trial.suggest_float("Ki", 1e-2, 1e1)
 
     params = {
         "field_line_distance_weight": field_line_distance_weight,
@@ -194,11 +181,9 @@ def objective(trial):
         "R_x": R_x,
         "R_y": R_y,
         "R_theta": R_theta,
-        "Kp": Kp,
-        "Ki": Ki,
     }
 
-    modify_yaml(params, LOCALISATION_YAML_PATH, SENSOR_FILTER_YAML_PATH)
+    modify_yaml(params, LOCALISATION_YAML_PATH)
 
     # Run the benchmark with user attribute nbs_file
     rmse = run_benchmark(trial.study.user_attrs["nbs_file"])
@@ -244,13 +229,12 @@ def run(n_trials, nbs_file, **kwargs):
     cprint(f"\nBest RMSE: {study.best_value}", "green", attrs=["bold"])
 
     # Save configs
-    modify_yaml(study.best_params, LOCALISATION_YAML_PATH, SENSOR_FILTER_YAML_PATH)
+    modify_yaml(study.best_params, LOCALISATION_YAML_PATH)
     os.makedirs(DESTINATION_DIR, exist_ok=True)
     shutil.copy(LOCALISATION_YAML_PATH, os.path.join(DESTINATION_DIR, "BestFieldLocalisationNLopt.yaml"))
-    shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, "BestSensorFilter.yaml"))
     cprint(f"\n✅ Best YAML files saved to {DESTINATION_DIR}", "green")
 
-    # Visualisations with British spelling
+    # Visualisations
     fig_history = optuna.visualization.plot_optimization_history(study)
     fig_history.write_html(os.path.join(DESTINATION_DIR, "optimisation_history.html"))
 
