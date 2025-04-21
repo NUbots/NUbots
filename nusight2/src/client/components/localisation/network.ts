@@ -28,6 +28,7 @@ export class LocalisationNetwork {
     this.network.on(message.output.Mujoco, this.onMujoco);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -49,6 +50,10 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
 
   @action
@@ -125,7 +130,7 @@ export class LocalisationNetwork {
   private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+    robot.rIWw = fieldIntersections.intersections.map((intersection) => {
       let intersection_type = "";
       if (intersection.type === 0) {
         intersection_type = "UNKNOWN";
@@ -189,42 +194,21 @@ export class LocalisationNetwork {
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
 
-  @action
-  private onMujoco = (robotModel: RobotModel, mujoco: message.output.Mujoco) => {
-    // Ignore empty Sensors packets which may be emitted by the nbs scrubber
-    // when there's no Sensors data at a requested timestamp).
-    if (!mujoco.Htw) {
-      return;
-    }
-
-    console.log("onMujoco", mujoco);
-
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(mujoco.Htw!)).invert());
-    robot.Htw_mujoco = Matrix4.from(mujoco.Htw);
-    // robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
-    robot.motors_mujoco.rightShoulderPitch.angle = mujoco.servoMap["right_shoulder_pitch"]!;
-    robot.motors_mujoco.leftShoulderPitch.angle = mujoco.servoMap["left_shoulder_pitch"]!;
-    robot.motors_mujoco.rightShoulderRoll.angle = mujoco.servoMap["right_shoulder_roll"]!;
-    robot.motors_mujoco.leftShoulderRoll.angle = mujoco.servoMap["left_shoulder_roll"]!;
-    robot.motors_mujoco.rightElbow.angle = mujoco.servoMap["right_elbow"]!;
-    robot.motors_mujoco.leftElbow.angle = mujoco.servoMap["left_elbow"]!;
-    robot.motors_mujoco.rightHipYaw.angle = mujoco.servoMap["right_hip_yaw"]!;
-    robot.motors_mujoco.leftHipYaw.angle = mujoco.servoMap["left_hip_yaw"]!;
-    robot.motors_mujoco.rightHipRoll.angle = mujoco.servoMap["right_hip_roll"]!;
-    robot.motors_mujoco.leftHipRoll.angle = mujoco.servoMap["left_hip_roll"]!;
-    robot.motors_mujoco.rightHipPitch.angle = mujoco.servoMap["right_hip_pitch"]!;
-    robot.motors_mujoco.leftHipPitch.angle = mujoco.servoMap["left_hip_pitch"]!;
-    robot.motors_mujoco.rightKnee.angle = mujoco.servoMap["right_knee"]!;
-    robot.motors_mujoco.leftKnee.angle = mujoco.servoMap["left_knee"]!;
-    robot.motors_mujoco.rightAnklePitch.angle = mujoco.servoMap["right_ankle_pitch"]!;
-    robot.motors_mujoco.leftAnklePitch.angle = mujoco.servoMap["left_ankle_pitch"]!;
-    robot.motors_mujoco.rightAnkleRoll.angle = mujoco.servoMap["right_ankle_roll"]!;
-    robot.motors_mujoco.leftAnkleRoll.angle = mujoco.servoMap["left_ankle_roll"]!;
-    robot.motors_mujoco.headPan.angle = mujoco.servoMap["neck_yaw"]!;
-    robot.motors_mujoco.headTilt.angle = mujoco.servoMap["head_pitch"]!;
-  };
+    // If phase changed, add current trajectories to history before updating
+    if (robot.walk_phase !== walk_state.phase && robot.torso_trajectory.length > 0) {
+      robot.addToTrajectoryHistory(robot.torso_trajectoryF, robot.swing_foot_trajectoryF);
+    }
+
+    // Update current state
+    robot.torso_trajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
+    robot.swing_foot_trajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
+    robot.Hwp = Matrix4.from(walk_state.Hwp);
+    robot.walk_phase = walk_state.phase;
+  }
 }
 
 function decompose(m: THREE.Matrix4): {

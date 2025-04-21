@@ -26,6 +26,7 @@
 # SOFTWARE.
 #
 
+import importlib
 import os
 import pkgutil
 import sys
@@ -57,7 +58,7 @@ if __name__ == "__main__":
                     os.sep, "."
                 )
                 if fqdn not in sys.modules:
-                    loader.find_module(fqdn).load_module(fqdn)
+                    importlib.import_module(fqdn)
 
     # Now that we've imported them all get all the subclasses of protobuf message
     messages = set()

@@ -12,6 +12,7 @@ import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
+import { AssociationLines } from "./r3f_components/association_lines/view";
 import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
@@ -24,6 +25,8 @@ import { PurposeLabel } from "./r3f_components/purpose_label/view";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
+import { WalkTrajectory } from "./r3f_components/walk_trajectory/view";
+import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history/view";
 import { LocalisationRobotModel } from "./robot_model";
 
 type LocalisationViewProps = {
@@ -332,33 +335,84 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
   if (!robot.visible) return null;
 
   return (
-    <object3D>
-      <PerspectiveCamera
-        args={[75, 1, 0.01, 100]}
-        position={model.camera.position.toArray()}
-        rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
-        up={[0, 0, 1]}
-      >
-        <pointLight color="white" />
-      </PerspectiveCamera>
-      <SkyboxView model={model.skybox} />
-      <hemisphereLight args={["#fff", "#fff", 0.6]} />
-      {model.fieldVisible && <FieldView model={model.field} />}
-      {model.gridVisible && <GridView />}
-      {model.robotVisible &&
-        model.robots.map((robotModel) => {
-          return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
-        })}
-      {model.robotVisible &&
-        model.robots.map((robotModel) => {
-          return robotModel.visible && <MujocoRobot key={robotModel.id} model={robotModel} />;
-        })}
-      {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
-      {model.ballVisible && <Balls model={model} />}
-      {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
-      {model.particlesVisible && <Particles model={model} />}
-      {model.goalVisible && <Goals model={model} />}
-      <Robots model={model} />
+    <object3D key={robot.id}>
+      <Nugus model={robot} />
+
+      {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
+      {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
+
+      {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
+
+      {model.goalsVisible && (
+        <FieldObjects
+          objects={robot.rGFf.map((goal) => ({
+            position: goal.bottom,
+            height: goal.top.z,
+          }))}
+          defaultRadius={0.05}
+          defaultColor="magenta"
+        />
+      )}
+
+      <FieldObjects
+        objects={robot.rRFf.map((r) => ({
+          position: r,
+        }))}
+        defaultHeight={0.8}
+        defaultRadius={0.1}
+        defaultColor="orange"
+      />
+
+      {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
+
+      {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
+
+      {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
+        <WalkPathVisualiser
+          Hfd={robot.Hfd}
+          Hfr={robot.Hfr}
+          Hft={robot.Hft}
+          min_align_radius={robot.min_align_radius}
+          max_align_radius={robot.max_align_radius}
+          min_angle_error={robot.min_angle_error}
+          max_angle_error={robot.max_angle_error}
+          angle_to_final_heading={robot.angle_to_final_heading}
+          velocity_target={robot.velocity_target}
+        />
+      )}
+
+      {robot.Hft && robot.purpose && (
+        <PurposeLabel
+          Hft={robot.Hft}
+          player_id={robot.player_id}
+          backgroundColor={robot.color}
+          purpose={robot.purpose}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
+        />
+      )}
+
+      {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
+
+      {robot.torso_trajectory && robot.swing_foot_trajectory && (
+        <WalkTrajectory
+          torso_trajectory={robot.torso_trajectoryF}
+          swing_foot_trajectory={robot.swing_foot_trajectoryF}
+          color={"#ffa500"}
+        />
+      )}
+
+      {robot.trajectory_history.length > 0 && <WalkTrajectoryHistory trajectories={robot.trajectory_history} />}
+
+      {model.boundedBoxVisible && robot.boundingBox && (
+        <BoundingBox
+          minX={robot.boundingBox.minX}
+          maxX={robot.boundingBox.maxX}
+          minY={robot.boundingBox.minY}
+          maxY={robot.boundingBox.maxY}
+          color={robot.color}
+        />
+      )}
     </object3D>
   );
 });
