@@ -12,6 +12,7 @@ import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
+import { AssociationLines } from "./r3f_components/association_lines/view";
 import { Ball } from "./r3f_components/ball/view";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
@@ -362,9 +363,9 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         defaultColor="orange"
       />
 
-      {model.fieldIntersectionsVisible && robot.fieldIntersections && (
-        <FieldIntersections intersections={robot.fieldIntersections} />
-      )}
+      {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
+
+      {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
 
       {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
         <WalkPathVisualiser
