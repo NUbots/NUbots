@@ -27,7 +27,6 @@ export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
   React.useEffect(() => {
     // Update robot's pose
     if (robotRef.current) {
-      robotRef.current.quaternion.copy(new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
       const joints = (robotRef.current?.children[0] as any)?.joints;
       // Update robot's joints
       if (joints) {
