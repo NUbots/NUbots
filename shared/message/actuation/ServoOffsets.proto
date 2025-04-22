@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2025 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -25,42 +25,14 @@
 
 syntax = "proto3";
 
-package message.behaviour.state;
+package message.actuation;
 
-import "Vector.proto";
-import "Matrix.proto";
-import "Transform.proto";
-
-message WalkState {
-    enum State {
-        UNKNOWN  = 0;
-        STARTING = 1;
-        WALKING  = 2;
-        STOPPING = 3;
-        STOPPED  = 4;
+message ServoOffsets {
+    message ServoOffset {
+        float offset    = 2;
+        int32 direction = 3;
+        bool  simulated = 4;
     }
 
-    enum Phase {
-        DOUBLE = 0;
-        LEFT   = 1;
-        RIGHT  = 2;
-    }
-
-    /// Walking state
-    State state = 1;
-
-    /// Current requested velocity target (dx, dy, dtheta)
-    vec3 velocity_target = 2;
-
-    /// Walk phase
-    Phase phase = 3;
-
-    /// Torso trajectory Hpt
-    repeated mat4 torso_trajectory = 4;
-
-    /// Swing foot trajectory Hps
-    repeated mat4 swing_foot_trajectory = 5;
-
-    /// Hwp transform from planted foot to world
-    iso3 Hwp = 6;
+    repeated ServoOffset offsets = 1;
 }

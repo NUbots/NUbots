@@ -280,6 +280,14 @@ namespace utility::skill {
             return t;
         }
 
+        /**
+         * @brief Get the period of the step.
+         * @return Period of the step.
+         */
+        Scalar get_step_period() const {
+            return p.step_period;
+        }
+
     private:
         /// @brief Walk engine parameters.
         WalkParameters p;
