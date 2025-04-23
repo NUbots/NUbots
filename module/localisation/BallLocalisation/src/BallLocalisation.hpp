@@ -82,6 +82,8 @@ namespace module::localisation {
 
             uint player_id = 0;
 
+            bool use_r2r_balls = false;
+
             int max_robots = 0;
 
             double team_ball_recency = 0.0;

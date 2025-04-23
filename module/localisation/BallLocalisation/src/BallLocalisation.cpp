@@ -102,6 +102,7 @@ namespace module::localisation {
             cfg.max_rejections = config["max_rejections"].as<int>();
 
             // Set configuration for robot to robot communication balls
+            cfg.use_r2r_balls            = config["use_r2r_balls"].as<bool>();
             cfg.max_robots               = config["max_robots"].as<int>();
             cfg.team_ball_recency        = config["team_ball_recency"].as<double>();
             cfg.team_guess_error         = config["team_guess_error"].as<double>();
@@ -152,9 +153,15 @@ namespace module::localisation {
                         low_confidence  = true;
                     }
 
+                    bool accept_team_guess;
                     Eigen::Vector3d team_guess_average = Eigen::Vector3d::Zero();
 
-                    const bool accept_team_guess = get_team_guess(team_guess_average);
+                    if (cfg.use_r2r_balls) {
+                        accept_team_guess = get_team_guess(team_guess_average);
+                    }
+                    else {
+                        accept_team_guess = false;
+                    }
 
                     if (accept_ball || accept_team_guess) {
                         // Compute the time since the last update (in seconds)
@@ -202,38 +209,42 @@ namespace module::localisation {
 
         // Stores ball positions received from teammates
         on<Trigger<RoboCup>>().then([this](const RoboCup& robocup) {
-            Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
+            if (cfg.use_r2r_balls) {
+                Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
 
-            team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
-            team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
+                team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
+                team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
+            }
         });
 
         // Called once a second to default to teammates balls if we haven't seen one recently
         on<Every<1, Per<std::chrono::seconds>>, Optional<With<VisionBalls>>>().then(
             [this](const std::shared_ptr<const VisionBalls>& balls) {
-                if (balls && !balls->balls.empty()) {
-                    last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
-                }
+                if (cfg.use_r2r_balls) {
+                    if (balls && !balls->balls.empty()) {
+                        last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
+                    }
 
-                const auto dt =
-                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
-                        .count();
+                    const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
+                                                                                              - last_time_update)
+                                        .count();
 
-                if (dt > cfg.team_guess_default_timer) {
+                    if (dt > cfg.team_guess_default_timer) {
 
-                    Eigen::Vector3d average = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d average = Eigen::Vector3d::Zero();
 
-                    get_team_guess(average);
+                        get_team_guess(average);
 
-                    last_time_update = NUClear::clock::now();
+                        last_time_update = NUClear::clock::now();
 
-                    auto ball = std::make_unique<Ball>();
+                        auto ball = std::make_unique<Ball>();
 
-                    ball->rBWw                = last_Hcw * average;
-                    ball->vBw                 = Eigen::Vector3d::Zero();
-                    ball->time_of_measurement = last_time_update;
-                    ball->Hcw                 = last_Hcw;
-                    emit(ball);
+                        ball->rBWw                = last_Hcw * average;
+                        ball->vBw                 = Eigen::Vector3d::Zero();
+                        ball->time_of_measurement = last_time_update;
+                        ball->Hcw                 = last_Hcw;
+                        emit(ball);
+                    }
                 }
             });
     }
