@@ -395,6 +395,7 @@ var hierarchy =
       [ "module::support::optimisation::NSGA2Optimiser", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html", null ],
       [ "module::support::optimisation::OnboardWalkOptimisation", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html", null ],
       [ "module::tools::FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", null ],
+      [ "module::tools::LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", null ],
       [ "module::tools::NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", null ],
       [ "module::tools::RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html", null ],
       [ "module::tools::SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", null ],

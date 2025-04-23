@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,2497,140,2523"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,2526,140,2553"/>
 <area shape="rect" id="node2" href="$classutility_1_1reactor_1_1StreamReactor.html" title=" " alt="" coords="213,477,444,533"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="249,1035,408,1076"/>
 <area shape="rect" id="node43" href="$classmodule_1_1actuation_1_1KinematicsConfiguration.html" title=" " alt="" coords="237,1100,420,1141"/>
@@ -42,18 +42,19 @@
 <area shape="rect" id="node80" href="$classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html" title=" " alt="" coords="219,3276,438,3317"/>
 <area shape="rect" id="node81" href="$classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html" title=" " alt="" coords="219,3341,438,3383"/>
 <area shape="rect" id="node82" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="212,3407,445,3434"/>
-<area shape="rect" id="node83" href="$classmodule_1_1tools_1_1NBSPlayback.html" title=" " alt="" coords="226,3458,431,3485"/>
-<area shape="rect" id="node84" href="$classmodule_1_1tools_1_1RoboCupConfiguration.html" title=" " alt="" coords="197,3509,461,3535"/>
-<area shape="rect" id="node85" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="201,3559,456,3586"/>
-<area shape="rect" id="node86" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="225,3610,432,3637"/>
-<area shape="rect" id="node87" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="237,3661,421,3703"/>
-<area shape="rect" id="node88" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="223,3727,435,3754"/>
-<area shape="rect" id="node89" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="221,3779,436,3820"/>
-<area shape="rect" id="node90" href="$classmodule_1_1vision_1_1RobotDetector.html" title=" " alt="" coords="219,3845,439,3871"/>
-<area shape="rect" id="node91" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="228,3895,429,3922"/>
-<area shape="rect" id="node92" href="$classmodule_1_1vision_1_1Yolo.html" title=" " alt="" coords="253,3946,405,3973"/>
-<area shape="rect" id="node93" href="$classmodule_1_1vision_1_1YoloCoco.html" title=" " alt="" coords="237,3997,421,4023"/>
-<area shape="rect" id="node94" href="$classutility_1_1reactor_1_1StreamReactor.html" title="This reactor implements the common pattern of connecting to a stream device such as a serial port or ..." alt="" coords="207,4047,450,4103"/>
+<area shape="rect" id="node83" href="$classmodule_1_1tools_1_1LocalisationBenchmark.html" title=" " alt="" coords="230,3459,427,3500"/>
+<area shape="rect" id="node84" href="$classmodule_1_1tools_1_1NBSPlayback.html" title=" " alt="" coords="226,3525,431,3551"/>
+<area shape="rect" id="node85" href="$classmodule_1_1tools_1_1RoboCupConfiguration.html" title=" " alt="" coords="197,3575,461,3602"/>
+<area shape="rect" id="node86" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="201,3626,456,3653"/>
+<area shape="rect" id="node87" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="225,3677,432,3703"/>
+<area shape="rect" id="node88" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="237,3728,421,3769"/>
+<area shape="rect" id="node89" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="223,3794,435,3821"/>
+<area shape="rect" id="node90" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="221,3845,436,3887"/>
+<area shape="rect" id="node91" href="$classmodule_1_1vision_1_1RobotDetector.html" title=" " alt="" coords="219,3911,439,3938"/>
+<area shape="rect" id="node92" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="228,3962,429,3989"/>
+<area shape="rect" id="node93" href="$classmodule_1_1vision_1_1Yolo.html" title=" " alt="" coords="253,4013,405,4039"/>
+<area shape="rect" id="node94" href="$classmodule_1_1vision_1_1YoloCoco.html" title=" " alt="" coords="237,4063,421,4090"/>
+<area shape="rect" id="node95" href="$classutility_1_1reactor_1_1StreamReactor.html" title="This reactor implements the common pattern of connecting to a stream device such as a serial port or ..." alt="" coords="207,4114,450,4170"/>
 <area shape="rect" id="node3" href="$classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html" title=" " alt="" coords="535,5,737,47"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="562,71,710,112"/>
 <area shape="rect" id="node6" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="562,136,710,177"/>

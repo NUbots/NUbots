@@ -736,6 +736,7 @@ var namespaces_dup =
         [ "FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", "classmodule_1_1tools_1_1FirmwareInstaller" ],
         [ "FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
         [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
+        [ "LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", "classmodule_1_1tools_1_1LocalisationBenchmark" ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
         [ "RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html", "classmodule_1_1tools_1_1RoboCupConfiguration" ],
         [ "SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", "classmodule_1_1tools_1_1SystemConfiguration" ],
