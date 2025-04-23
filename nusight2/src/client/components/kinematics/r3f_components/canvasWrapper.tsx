@@ -2,6 +2,7 @@ import React from "react";
 import { Canvas } from "@react-three/fiber";
 
 import { KinematicsRobotModel } from "../robot_model";
+
 import { Axes } from "./axes";
 import { CameraControls } from "./camera";
 import { Grid } from "./grid";
