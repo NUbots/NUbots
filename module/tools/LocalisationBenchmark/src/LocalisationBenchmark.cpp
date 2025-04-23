@@ -126,8 +126,8 @@ namespace module::tools {
                                            * Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
 
                 // Compute localisation error
-                auto localisation_error               = tinyrobotics::homogeneous_error(Hft_gt, Hft_est);
-                double localisation_translation_error = localisation_error.head<3>().norm();
+                Eigen::Matrix<double, 6, 1> localisation_error = tinyrobotics::homogeneous_error(Hft_gt, Hft_est);
+                double localisation_translation_error          = localisation_error.head<3>().norm();
                 total_localisation_translation_error += localisation_translation_error * localisation_translation_error;
 
                 // Compute localisation rotation error
