@@ -1,11 +1,11 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
 
-import { KinematicsRobotModel } from "../../robot_model";
-import { Axes } from "../axes/view";
-import { CameraControls } from "../camera/view";
-import { Grid } from "../grid/view";
-import { Nugus } from "../nugus/view";
+import { KinematicsRobotModel } from "../robot_model";
+import { Axes } from "./axes";
+import { CameraControls } from "./camera";
+import { Grid } from "./grid";
+import { Nugus } from "./nugus";
 
 const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = ({ robot }) => {
   if (!robot.visible) return null;

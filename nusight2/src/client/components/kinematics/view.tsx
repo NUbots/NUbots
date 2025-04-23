@@ -7,8 +7,9 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
-import { CanvasWrapper } from "./r3f_components/canvas_wrapper/view";
-import { JointDataDisplay } from "./r3f_components/joint_data_display/view";
+import { CanvasWrapper } from "./r3f_components/canvasWrapper";
+import { JointDataDisplay } from "./r3f_components/jointDataDisplay";
+
 @observer
 export class KinematicsView extends React.Component<{
   controller: KinematicsController;

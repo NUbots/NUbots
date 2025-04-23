@@ -1,7 +1,7 @@
 import React from "react";
 import { Euler } from "three";
 
-import { CoordinateLabel } from "../coordinates/view";
+import { CoordinateLabel } from "./coordinates";
 
 const Arrow = ({
   dir,

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { CoordinateLabel } from "../coordinates/view";
+import { CoordinateLabel } from "./coordinates";
 
 export const Grid = ({ gridSize, divisions }: { gridSize: number; divisions: number }) => {
   const labels = [];

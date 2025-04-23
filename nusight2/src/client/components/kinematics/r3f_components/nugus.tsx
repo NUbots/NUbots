@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { KinematicsRobotModel } from "../../robot_model";
+import { KinematicsRobotModel } from "../robot_model";
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 

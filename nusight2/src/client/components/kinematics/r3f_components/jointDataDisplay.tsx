@@ -1,7 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
 
-import { KinematicsRobotModel } from "../../robot_model";
+import { KinematicsRobotModel } from "../robot_model";
 
 export const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
   return (
