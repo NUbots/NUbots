@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2025 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -42,7 +42,7 @@ namespace module::tools {
             /// @brief Playback mode
             message::nbs::player::PlaybackMode mode;
             /// @brief Messages to play
-            std::vector<std::string> messages;
+            std::vector<std::string> messages{};
         } config;
 
         /// @brief The total error in the localisation translation

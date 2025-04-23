@@ -149,7 +149,7 @@ def run_benchmark(nbs_file=NBS_FILE):
 
 def objective(trial):
     """
-    The objective function for Optuna that defines the optimization problem.
+    The objective function for Optuna that defines the optimisation problem.
     """
     field_line_distance_weight = trial.suggest_float("field_line_distance_weight", 1e-2, 1e2, log=True)
     field_line_intersection_weight = trial.suggest_float("field_line_intersection_weight", 1e-2, 1e2, log=True)
@@ -203,7 +203,7 @@ def register(parser):
     Register command-line arguments for the optimization tool.
     """
     parser.description = "Optimises YAML configuration parameters for the LocalisationBenchmark using Optuna."
-    parser.add_argument("--n_trials", type=int, default=1000, help="Number of optimization trials to run.")
+    parser.add_argument("--n_trials", type=int, default=1000, help="Number of optimisation trials to run.")
     parser.add_argument("--nbs_file", type=str, default=NBS_FILE, help="Path to the .nbs file with ground truth data.")
     parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")
 
