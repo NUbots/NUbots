@@ -40,7 +40,6 @@ from utility.dockerise import run_on_docker
 
 BUILD_DIR = "/home/nubots/build"
 EXECUTABLE_PATH = os.path.join(BUILD_DIR, "bin/webots/localisation_benchmark")
-NBS_FILE = os.path.join(BUILD_DIR, "recordings/logging/benchmark.nbs")
 LOCALISATION_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/FieldLocalisationNLopt.yaml")
 DESTINATION_DIR = os.path.join(BUILD_DIR, "recordings/optimisation_results")
 
@@ -102,7 +101,7 @@ def parse_rmse_rotation(output):
         return None
 
 
-def run_benchmark(nbs_file=NBS_FILE):
+def run_benchmark(nbs_file):
     """
     Runs the LocalisationBenchmark module and captures the RMSE.
     """
@@ -203,8 +202,8 @@ def register(parser):
     Register command-line arguments for the optimization tool.
     """
     parser.description = "Optimises YAML configuration parameters for the LocalisationBenchmark using Optuna."
+    parser.add_argument("--nbs_file", type=str, required=True, help="Path to the .nbs file with ground truth data.")
     parser.add_argument("--n_trials", type=int, default=1000, help="Number of optimisation trials to run.")
-    parser.add_argument("--nbs_file", type=str, default=NBS_FILE, help="Path to the .nbs file with ground truth data.")
     parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")
 
 
@@ -214,8 +213,7 @@ def run(n_trials, nbs_file, **kwargs):
     Run the optimisation tool.
     """
     study = optuna.create_study(direction="minimize", study_name="LocalisationBenchmarkOptimisation")
-    NBS_FILE = nbs_file
-    study.set_user_attr("nbs_file", NBS_FILE)
+    study.set_user_attr("nbs_file", nbs_file)
 
     # Enable progress bar
     study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
