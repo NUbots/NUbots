@@ -3,6 +3,7 @@ import * as THREE from "three";
 
 import { Matrix4 } from "../../../../shared/math/matrix4";
 import { Vector3 } from "../../../../shared/math/vector3";
+
 import { ArrowGeometry } from "./arrow_geometry";
 
 interface WalkPathVisualiserProps {
