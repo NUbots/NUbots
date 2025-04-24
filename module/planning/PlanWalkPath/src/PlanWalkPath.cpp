@@ -109,7 +109,7 @@ namespace module::planning {
            Optional<With<Robots>>,
            With<Sensors>,
            With<Field>,
-           With<FieldDescription>>>()
+           With<FieldDescription>>()
             .then([this](const WalkTo& walk_to,
                          const std::shared_ptr<const Robots>& robots,
                          const Sensors& sensors,
@@ -247,10 +247,10 @@ namespace module::planning {
         // New list to store goalpost positions
         std::vector<Eigen::Vector2d> list_goalposts {};
 
-        list_goalposts.emplace_back(fieldDesc->goalpost_own_l);
-        list_goalposts.emplace_back(fieldDesc->goalpost_own_r);
-        list_goalposts.emplace_back(fieldDesc->goalpost_opp_l);
-        list_goalposts.emplace_back(fieldDesc->goalpost_opp_r);
+        list_goalposts.emplace_back(fieldDesc.goalpost_own_l);
+        list_goalposts.emplace_back(fieldDesc.goalpost_own_r);
+        list_goalposts.emplace_back(fieldDesc.goalpost_opp_l);
+        list_goalposts.emplace_back(fieldDesc.goalpost_opp_r);
 
         // Loop through this list, converting all of the goalpost position from field space to robot space, then add them back in all_obstacles list
         for(Eigen::Vector2d goalpost_pos : list_goalposts){
