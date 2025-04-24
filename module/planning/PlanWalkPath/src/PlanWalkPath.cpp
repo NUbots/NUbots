@@ -125,7 +125,9 @@ namespace module::planning {
 
                 std::vector<Eigen::Vector2d> all_obstacles{};
 
-                all_obstacles = add_goalpost_as_obstacles(all_obstacles, field, fieldDesc, sensors);
+                Eigen::Isometry3d Hwf = field.Hfw.inverse();
+                Eigen::Isometry3d Hrw = sensors.Hrw;
+                all_obstacles = add_goalpost_as_obstacles(all_obstacles, fieldDesc, Hwf, Hrw);
 
                 // If there are goals in sight, or other robots
                 if (robots != nullptr) {
@@ -242,7 +244,7 @@ namespace module::planning {
         });
     }
 
-    std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, Field field , FieldDescription fieldDesc, Sensors sensors){
+    std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, const FieldDescription& fieldDesc, Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw){
         // New list to store goalpost positions
         std::vector<Eigen::Vector3d> list_goalposts {};
 
@@ -253,8 +255,8 @@ namespace module::planning {
 
         // Loop through this list, converting all of the goalpost position from field space to robot space, then add them back in all_obstacles list
         for(const auto& goalpost_pos : list_goalposts){
-            auto rFWw = field.Hfw.inverse() * goalpost_pos;        // Convert goalpost position from field space to world space
-            auto rWRr = sensors.Hrw * rFWw;                        // Convert that to robot space
+            auto rFWw = Hwf * goalpost_pos;        // Convert goalpost position from field space to world space
+            auto rWRr = Hrw * rFWw;                        // Convert that to robot space
 
             all_obstacles.emplace_back(rWRr.head(2));
         }

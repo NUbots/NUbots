@@ -102,11 +102,11 @@ namespace module::planning {
 
         /// @brief Add all the goalpost positions on the field to the obstacles list.
         /// @param all_obstacles The obstacles list to which goalpost positions will be added.
-        /// @param field A reference to the Field class to access the transformation from world to field coordinates (Hfw).
         /// @param fieldDesc A reference to the FieldDescription class to access the goalpost coordinates in field space.
-        /// @param sensors A reference to the Sensors class to access the transformation from robot to world coordinates (Hrw).
+        /// @param Hwf Homogenous transformation matrix from field space to world space
+        /// @param Hwf Homogenous transformation matrix from world space to robot space
         /// @return A modified obstacle list containing the original obstacles plus the goalpost positions in robot space.
-        std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, message::localisation::Field field , message::support::FieldDescription fieldDesc, message::input::Sensors sensors);
+        std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, const message::support::FieldDescription& fieldDesc, Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw );
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain
