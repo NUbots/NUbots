@@ -429,6 +429,10 @@ namespace module::extension {
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
         NUClear::id_t unique_id_source = 0;
+
+        /// @brief Count to track when we should next emit a Director message for NUsight visualisation
+        int debug_emit_count = 0;
+
     };
 
 }  // namespace module::extension
