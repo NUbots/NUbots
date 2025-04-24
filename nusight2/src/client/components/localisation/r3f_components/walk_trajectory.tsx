@@ -1,8 +1,8 @@
 import React from "react";
 import * as THREE from "three";
 
-import { Matrix4 } from "../../../../../shared/math/matrix4";
-import { Vector3 } from "../../../../../shared/math/vector3";
+import { Matrix4 } from "../../../../shared/math/matrix4";
+import { Vector3 } from "../../../../shared/math/vector3";
 
 interface TrajectoryLineProps {
   poses: Matrix4[];
