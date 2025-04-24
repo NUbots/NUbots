@@ -106,7 +106,7 @@ namespace module::planning {
         /// @param Hwf Homogenous transformation matrix from field space to world space
         /// @param Hwf Homogenous transformation matrix from world space to robot space
         /// @return A modified obstacle list containing the original obstacles plus the goalpost positions in robot space.
-        std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, const message::support::FieldDescription& fieldDesc, Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw );
+        std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, std::vector<Eigen::Vector3d> list_goalposts, Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw );
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain

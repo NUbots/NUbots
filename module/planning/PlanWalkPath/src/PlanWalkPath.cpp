@@ -125,9 +125,16 @@ namespace module::planning {
 
                 std::vector<Eigen::Vector2d> all_obstacles{};
 
+                std::vector<Eigen::Vector3d> list_goalposts {};
+
+                list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_own_l.x(),fieldDesc.goalpost_own_l.y() , 0));
+                list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_own_r.x(),fieldDesc.goalpost_own_r.y() , 0));
+                list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_opp_l.x(),fieldDesc.goalpost_opp_l.y() , 0));
+                list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_opp_r.x(),fieldDesc.goalpost_opp_r.y() , 0));
+
                 Eigen::Isometry3d Hwf = field.Hfw.inverse();
                 Eigen::Isometry3d Hrw = sensors.Hrw;
-                all_obstacles = add_goalpost_as_obstacles(all_obstacles, fieldDesc, Hwf, Hrw);
+                all_obstacles = add_goalpost_as_obstacles(all_obstacles, list_goalposts, Hwf, Hrw);
 
                 // If there are goals in sight, or other robots
                 if (robots != nullptr) {
@@ -244,14 +251,8 @@ namespace module::planning {
         });
     }
 
-    std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, const FieldDescription& fieldDesc, Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw){
+    std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, std::vector<Eigen::Vector3d> list_goalposts ,Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw){
         // New list to store goalpost positions
-        std::vector<Eigen::Vector3d> list_goalposts {};
-
-        list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_own_l.x(),fieldDesc.goalpost_own_l.y() , 0));
-        list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_own_r.x(),fieldDesc.goalpost_own_r.y() , 0));
-        list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_opp_l.x(),fieldDesc.goalpost_opp_l.y() , 0));
-        list_goalposts.emplace_back(Eigen::Vector3d(fieldDesc.goalpost_opp_r.x(),fieldDesc.goalpost_opp_r.y() , 0));
 
         // Loop through this list, converting all of the goalpost position from field space to robot space, then add them back in all_obstacles list
         for(const auto& goalpost_pos : list_goalposts){
