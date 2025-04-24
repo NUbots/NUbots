@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 
-import { Vector3 } from "../../../../../shared/math/vector3";
+import { Vector3 } from "../../../../shared/math/vector3";
 
 interface FieldObjectProps {
   objects: Array<{

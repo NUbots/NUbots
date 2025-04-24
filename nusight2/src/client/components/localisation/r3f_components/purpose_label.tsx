@@ -1,7 +1,8 @@
 import React from "react";
 
-import { Matrix4 } from "../../../../../shared/math/matrix4";
-import { TextBillboard } from "../text_billboard/view";
+import { Matrix4 } from "../../../../shared/math/matrix4";
+
+import { TextBillboard } from "./text_billboard";
 
 interface PurposeLabelProps {
   Hft: Matrix4;
