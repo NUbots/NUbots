@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
-import { Vector3 } from "../../../../../shared/math/vector3";
+import { Vector3 } from "../../../../shared/math/vector3";
 
 interface FieldPoints {
   points: Vector3[];

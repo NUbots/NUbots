@@ -2,11 +2,18 @@ import React from "react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { LocalisationRobotModel } from "../../robot_model";
+import { Matrix4 } from "../../../../shared/math/matrix4";
+import { ServoMotorSet } from "../robot_model";
+
+interface WalkPathGoalProps {
+  Hfd: Matrix4;
+  Hft: Matrix4;
+  motors: ServoMotorSet;
+}
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
-export const Nugus = ({ model }: { model: LocalisationRobotModel }) => {
+export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once
@@ -17,16 +24,34 @@ export const Nugus = ({ model }: { model: LocalisationRobotModel }) => {
         robotRef.current.add(robot);
       }
     });
-  }, [nugusUrdfPath]);
+  }, []);
 
-  const position = model.Hft.decompose().translation;
-  const rotation = model.Hft.decompose().rotation;
-  const motors = model.motors;
+  const rDFf = Hfd.decompose().translation;
+  const rTFf = Hft.decompose().translation;
+  const Rfd_quat = new THREE.Quaternion(
+    Hfd.decompose().rotation.x,
+    Hfd.decompose().rotation.y,
+    Hfd.decompose().rotation.z,
+    Hfd.decompose().rotation.w,
+  );
+  const Rft_quat = new THREE.Quaternion(
+    Hft.decompose().rotation.x,
+    Hft.decompose().rotation.y,
+    Hft.decompose().rotation.z,
+    Hft.decompose().rotation.w,
+  );
 
+  // Get euler angles from quaternion
+  const Rfz_euler = new THREE.Euler().setFromQuaternion(Rfd_quat, "ZYX");
+  const Rft_euler = new THREE.Euler().setFromQuaternion(Rft_quat, "ZYX");
+  // Fuse the euler angles into a single quaternion
+  const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(Rft_euler.x, Rft_euler.y, Rfz_euler.z, "ZYX"));
+  const position = new THREE.Vector3(rDFf?.x, rDFf?.y, rTFf.z);
+
+  // Update the position of the robot to match the walk path goal
   React.useEffect(() => {
-    // Update robot's pose
     if (robotRef.current) {
-      robotRef.current.position.copy(new THREE.Vector3(position.x, position.y, position.z));
+      robotRef.current.position.set(position.x, position.y, position.z);
       robotRef.current.quaternion.copy(new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
       const joints = (robotRef.current?.children[0] as any)?.joints;
       // Update robot's joints
@@ -52,23 +77,16 @@ export const Nugus = ({ model }: { model: LocalisationRobotModel }) => {
         joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
         joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
       }
+      robotRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          // Set opacity for all mesh children
+          child.material.transparent = true;
+          child.material.color.setStyle("rgb(0, 100, 100)");
+          child.material.opacity = 0.2;
+        }
+      });
     }
-  }, [position, rotation, motors]);
-
-  // Update the material of the robot
-  const material = new THREE.MeshStandardMaterial({
-    color: "#666666",
-    roughness: 0.5,
-    metalness: 0.2,
   });
-  if (robotRef.current) {
-    robotRef.current.traverse((child) => {
-      if (child.type === "URDFVisual" && child.children.length > 0) {
-        const mesh = child.children[0] as THREE.Mesh;
-        mesh.material = material;
-      }
-    });
-  }
 
   return <object3D ref={robotRef} />;
 };
