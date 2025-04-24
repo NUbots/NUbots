@@ -310,7 +310,7 @@ RUN install-from-source https://github.com/fmtlib/fmt/archive/refs/tags/9.0.0.ta
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz \
+RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.8.0.tar.gz \
     -DCATCH_CONFIG_CONSOLE_WIDTH=120 \
     -DCATCH_CONFIG_CPP11_TO_STRING=ON \
     -DCATCH_CONFIG_CPP17_UNCAUGHT_EXCEPTIONS=ON \
@@ -410,7 +410,11 @@ RUN pip install \
     Pillow \
     protobuf==4.21.2 \
     mycroft-mimic3-tts \
-    tqdm
+    tqdm \
+    optuna \
+    ruamel.yaml \
+    plotly \
+    scikit-learn
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
