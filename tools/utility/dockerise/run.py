@@ -51,7 +51,7 @@ def _is_wsl1():
         return False
 
     kernel_release = subprocess.check_output(["uname", "-r"]).decode("utf-8").strip()
-    search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
+    search = re.search(r"^(\d+)\.(\d+)\.\d+", kernel_release)
     major = search.group(1)
     minor = search.group(2)
 
@@ -174,6 +174,11 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "audio",
             "--group-add",
             "dialout",
+            "--group-add",
+            "video_host",
+            "--group-add",
+            "render_host",
+            "--privileged",
         ]
 
         # Work out if we are using an internal image
