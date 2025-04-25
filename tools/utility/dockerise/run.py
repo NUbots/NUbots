@@ -131,7 +131,7 @@ def _setup_internal_image(image, rebuild, clean_volume):
     return mounts
 
 
-def run(func, image, hostname="docker", ports=[], docker_context=None):
+def run(func, image, hostname=None, ports=[], docker_context=None, name=None):
     requested_image = image
 
     def _run(**kwargs):
@@ -142,40 +142,16 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             func(**kwargs)
             exit(0)
 
-        # If this is the run command, then use the binary name to determine if
-        # the hostname should be docker or webots
-        # Binaries containing 'webots' (ie in the webots folder) should be given the hostname 'webots'
-        # to ensure the config files are chosen correctly
-        docker_hostname = hostname
-        if kwargs["command"] == "run":
+        # Use the hostname if it is set
+        if not hostname is None:
+            docker_hostname = hostname
+        # If this is the run command and no hostname is set, then use 'webots' if included in the role name
+        elif kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
-
-        # If the user requests a multi-run session, then spin up multiple containers
-        if kwargs["command"] == "multi":
-            num_instances = kwargs.get("instances", 1)  # Default to 1 instance if not specified
-            for i in range(int(kwargs["num_robots"])):
-                print(f"Starting instance {i + 1} of {num_instances} for team 1.")
-                instance_kwargs = kwargs.copy()
-                instance_kwargs["command"] = "run"  # Change the command to `run` for each instance
-                instance_kwargs["hostname"] = f"{docker_hostname}-{i + 1}"  # Unique hostname for each instance
-                instance_kwargs["webots_port"] = 1001 + i  # Unique webots port for each instance
-                instance_kwargs["player_id"] = i + 1  # Set the player ID for each instance
-                _run(**instance_kwargs)  # Recursively call _run for each instance
-
-            # Skip running second team if not requested
-            if kwargs["single_team"]:
-                return
-
-            for i in range(int(kwargs["num_robots"])):
-                print(f"Starting instance {i + 1} of {num_instances} for team 2.")
-                instance_kwargs = kwargs.copy()
-                instance_kwargs["command"] = "run"  # Change the command to `run` for each instance
-                instance_kwargs["hostname"] = f"{docker_hostname}-{i + 1}"  # Unique hostname for each instance
-                instance_kwargs["webots_port"] = 1021 + i  # Unique webots port for each instance
-                instance_kwargs["player_id"] = i + 1 # Set the player ID for each instance
-                instance_kwargs["team_id"] = 13  # While team 1 can use the default, team 2 needs to be set to a different ID
-                _run(**instance_kwargs)  # Recursively call _run for each instance
+        # Otherwise just set to 'docker'
+        else:
+            docker_hostname = "docker"
 
         # Docker arguments
         docker_args = [
@@ -206,6 +182,10 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "render_host",
             "--privileged",
         ]
+
+        # If we have a name, then use it
+        if name is not None:
+            docker_args.extend(["--name", name])
 
         # Work out if we are using an internal image
         internal_image, image = defaults.internalise_image(requested_image)
