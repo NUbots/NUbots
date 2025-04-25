@@ -34,6 +34,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/planning/RelaxWhenFalling.hpp"
 
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/skill/Script.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -44,6 +45,7 @@ namespace module::planning {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::RelaxWhenFalling;
+    using utility::nusight::graph;
     using utility::skill::load_script;
     using utility::support::Expression;
 
@@ -100,6 +102,7 @@ namespace module::planning {
                                        std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
                                        cfg.acc_angle.smoothing);
 
+
                     // Check if we are stable according to each sensor
                     State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
                                             : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
@@ -115,6 +118,14 @@ namespace module::planning {
                     bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING)
                                    || (gyro_mag_state == State::FALLING && acc_angle_state == State::FALLING)
                                    || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING);
+
+                    //////    Plots    //////
+                    emit(graph("Falling sensor: x:gyro, y:acc, z:angle",
+                               gyro_mag,
+                               acc_mag,
+                               acc_angle * 180 / 3.14159265358979));
+                    emit(graph("Falling", falling));
+                    //////    End plots    //////
 
                     // We are falling
                     if (falling) {
