@@ -150,9 +150,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
-            # If "webots_port" exists in kwargs, set the hostname to "webots" + webots_port
-            if kwargs["webots_port"] is not None:
-                docker_hostname = f"webots{kwargs['webots_port']}"
+            # If "player_id" exists in kwargs, set the hostname to "webots" + player_id
+            if kwargs["player_id"] is not None:
+                docker_hostname = f"webots{kwargs['player_id']}"
 
         # Docker arguments
         docker_args = [
