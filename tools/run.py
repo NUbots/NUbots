@@ -118,40 +118,14 @@ def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **k
     else:
         cmd = []
 
-    # Update the config files if requested to support running multiple robots
-    update_webots_configs(webots_port, player_id, team_id)
+    # Add webots settings to the args if they are set
+    if webots_port is not None:
+        args.extend(["--webots_port", str(webots_port)])
+    if player_id is not None:
+        args.extend(["--player_id", str(player_id)])
+    if team_id is not None:
+        args.extend(["--team_id", str(team_id)])
 
     # Run the command
     pty = WrapPty()
     exit(pty.spawn(cmd + args, env))
-
-# Update config
-def update_config(yaml_file, key, value):
-    # Try to open the file, if it fails don't do anything
-    try:
-        with open(yaml_file, "r") as file:
-            config = yaml.load(file, Loader=yaml.FullLoader)
-    except FileNotFoundError:
-        print(f"config file not found: {yaml_file}, module not built.")
-        return
-
-    # Update the config
-    config[key] = value
-
-    # Write the updated config back to the file
-    with open(yaml_file, "w") as file:
-        yaml.dump(config, file)
-
-def update_webots_configs(webots_port, player_id, team_id):
-    # If the webots port is given, set it in Webots.yaml
-    if webots_port is not None:
-        update_config("config/Webots.yaml", "port", webots_port)
-
-    # If the player id is given, set it in GlobalConfig and GameController
-    if player_id is not None:
-        update_config("config/webots/GlobalConfig.yaml", "player_id", player_id)
-        update_config("config/GameController.yaml", "player_id", player_id)
-
-    # Set `team_id` if it is provided
-    if team_id is not None:
-        update_config("config/webots/GlobalConfig.yaml", "team_id", team_id)
