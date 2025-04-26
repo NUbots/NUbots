@@ -49,7 +49,13 @@ namespace module::support::configuration {
                     // Get the index of the player_id
                     auto it = std::find(args.begin(), args.end(), "--player_id");
                     if (it + 1 != args.end()) {
-                        msg->player_id = *(it + 1);
+                        try {
+                            msg->player_id = static_cast<uint32_t>(std::stoul(*(it + 1)));
+                        }
+                        catch (const std::exception& e) {
+                            // Handle invalid conversion
+                            log<ERROR>("Invalid value for --player_id:", *(it + 1));
+                        }
                     }
                 }
 
@@ -58,7 +64,13 @@ namespace module::support::configuration {
                     // Get the index of the team_id
                     auto it = std::find(args.begin(), args.end(), "--team_id");
                     if (it + 1 != args.end()) {
-                        msg->team_id = *(it + 1);
+                        try {
+                            msg->team_id = static_cast<uint32_t>(std::stoul(*(it + 1)));
+                        }
+                        catch (const std::exception& e) {
+                            // Handle invalid conversion
+                            log<ERROR>("Invalid value for --team_id:", *(it + 1));
+                        }
                     }
                 }
 
