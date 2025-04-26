@@ -24,44 +24,77 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-#
 
+import asyncio
+import os
 import re
+import signal
 import subprocess
 import sys
+import termios
 from subprocess import DEVNULL
 
-from honcho.manager import Manager
+from colorama import Back, Fore, Style, init
 from termcolor import cprint
-
-from utility.dockerise import defaults
 
 # NUbots RoboCup team ID
 NUBOTS_TEAM_ID = 12
 
+# Lock for printing
+print_lock = asyncio.Lock()
+
+# Initialize colorama for Windows support
+init(autoreset=True)
+# Robot colours based on the team and player id (up to 10 players per team)
+ROBOT_COLOURS = [
+    Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.WHITE,
+    Fore.LIGHTBLACK_EX, Fore.LIGHTWHITE_EX, Fore.LIGHTYELLOW_EX
+]
+
+original_termios_settings = None
 
 def register(command):
     command.help = "Build and run images for use with Webots"
-    # subparsers = command.add_subparsers(help="sub-command help", dest="sub_command")
-
-    # run_subcommand = subparsers.add_parser("run", help="Run the simulation docker image for use with Webots")
     command.add_argument("role", help="The role to run")
     command.add_argument("num_robots", type=int, help="The number of robots to run")
     command.add_argument("--single_team", action="store_true", default=False, help="Run all robots on the same team")
     command.add_argument("args", nargs="*", help="the command and any arguments that should be used for the execution")
+async def safe_print(line):
+    async with print_lock:
+        print(line)
 
+async def run_process(name, command, colour):
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
 
-def run(role, num_robots=1, single_team=False, ports=[], **kwargs):
-    # Honcho is used to run the docker containers in parallel
-    process_manager = Manager()
+    await safe_print(f"{colour}[{name}] started with PID {process.pid}{Style.RESET_ALL}")
 
-    # Override honcho.manager.terminate() method, this is called by its signal handler on CTRL+C
-    process_manager._killall = exec_stop
+    async def read_stream(stream, stream_name):
+        while True:
+            line = await stream.readline()
+            if not line:
+                break
+            line = line.decode().rstrip()
+            # Build the entire line *before* printing
+            log_line = f"{colour}[{name} {stream_name}] {line}{Style.RESET_ALL}"
+            await safe_print(log_line)
 
-    # Add all robot run commands to process_manager
+    await asyncio.gather(
+        read_stream(process.stdout, "stdout"),
+        read_stream(process.stderr, "stderr")
+    )
+
+    return_code = await process.wait()
+    await safe_print(f"{colour}[{name}] exited with return code {return_code}{Style.RESET_ALL}")
+async def async_run(role, num_robots=1, single_team=False, ports=[], **kwargs):
+    commands = []
+
     for i in range(1, num_robots + 1):
+        robot_colour = ROBOT_COLOURS[i % len(ROBOT_COLOURS)]  # Assign color based on robot number
 
-        # Command for first team player i
         command = [
             "./b",
             "run",
@@ -74,13 +107,11 @@ def run(role, num_robots=1, single_team=False, ports=[], **kwargs):
             "--team_id",
             str(NUBOTS_TEAM_ID),
         ]
-        process_manager.add_process(f"Robot_{i}", " ".join(command))
+        commands.append((f"Robot_{NUBOTS_TEAM_ID}_{i}", command, robot_colour))
 
-        # Skip second team if single_team is True
         if single_team:
             continue
 
-        # Build a command to run the `run` command
         command = [
             "./b",
             "run",
@@ -93,61 +124,91 @@ def run(role, num_robots=1, single_team=False, ports=[], **kwargs):
             "--team_id",
             str(NUBOTS_TEAM_ID + 1),
         ]
+        commands.append((f"Robot_{NUBOTS_TEAM_ID+1}_{i}", command, robot_colour))
 
-        process_manager.add_process(f"Robot_{i+num_robots}", " ".join(command))
+    await asyncio.gather(*(run_process(name, cmd, colour) for name, cmd, colour in commands))
 
-    # Start the containers
-    process_manager.loop()
+def run(**kwargs):
+    global original_termios_settings
+    try:
+        fd = sys.stdin.fileno()
+        if os.isatty(fd):
+            original_termios_settings = termios.tcgetattr(fd)
+    except Exception:
+        original_termios_settings = None
 
-    sys.exit(process_manager.returncode)
+    try:
+        asyncio.run(async_run(**kwargs))
+    except KeyboardInterrupt:
+        exec_stop()
+    finally:
+        # Make sure we ALWAYS reset terminal no matter how we exit
+        force_terminal_reset()
 
+def force_terminal_reset():
+    try:
+        if original_termios_settings is not None:
+            fd = sys.stdin.fileno()
+            if os.isatty(fd):
+                termios.tcsetattr(fd, termios.TCSADRAIN, original_termios_settings)
+    except Exception:
+        pass
 
-# Signal handler function to kill containers on CTRL+C
 def exec_stop():
-    # Get all container IDs for containers with "webots" in their hostname
-    container_ids = (
-        subprocess.check_output(
-            [
-                "docker",
-                "ps",
-                "-a",
-                "-q",
-                "--filter",
-                "name=webots",  # Match containers with "webots" in their name
-                "--format={{.ID}}",
-            ]
-        )
-        .strip()
-        .decode("ascii")
-        .split()
-    )
-
-    # Filter containers with hostnames matching "webots<number>"
-    matching_containers = []
-    for container_id in container_ids:
-        hostname = (
+    try:
+        container_ids = (
             subprocess.check_output(
                 [
                     "docker",
-                    "inspect",
-                    "-f",
-                    "{{.Config.Hostname}}",
-                    container_id,
+                    "ps",
+                    "-a",
+                    "-q",
+                    "--filter",
+                    "name=webots",
+                    "--format={{.ID}}",
                 ]
             )
             .strip()
             .decode("ascii")
+            .split()
         )
-        if re.match(r"webots\d+", hostname):  # Match "webots" followed by a number
-            matching_containers.append(container_id)
 
-    cprint(
-        f"Stopping ALL containers...",
-        color="red",
-        attrs=["bold"],
-    )
-    exit_code = subprocess.run(
-        ["docker", "container", "rm", "-f"] + matching_containers, stderr=DEVNULL, stdout=DEVNULL
-    ).returncode
+        matching_containers = []
+        for container_id in container_ids:
+            hostname = (
+                subprocess.check_output(
+                    [
+                        "docker",
+                        "inspect",
+                        "-f",
+                        "{{.Config.Hostname}}",
+                        container_id,
+                    ]
+                )
+                .strip()
+                .decode("ascii")
+            )
+            if re.match(r"webots\d+_\d+", hostname):
+                matching_containers.append(container_id)
 
-    sys.exit(exit_code)
+        if matching_containers:
+            cprint(f"Stopping ALL containers...", color="red", attrs=["bold"])
+            subprocess.run(
+                ["docker", "container", "rm", "-f"] + matching_containers,
+                stderr=DEVNULL,
+                stdout=DEVNULL
+            )
+    except subprocess.CalledProcessError:
+        pass
+
+    # Try to flush all output
+    try:
+        sys.stdout.flush()
+        sys.stderr.flush()
+    except Exception:
+        pass
+
+    # **Force reset terminal properly**
+    force_terminal_reset()
+
+    sys.exit(0)
