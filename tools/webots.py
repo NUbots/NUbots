@@ -188,7 +188,7 @@ def exec_stop():
                 .strip()
                 .decode("ascii")
             )
-            if re.match(r"webots\d+_\d+", hostname):
+            if re.match(r"webots\d+", hostname):
                 matching_containers.append(container_id)
 
         if matching_containers:

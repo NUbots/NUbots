@@ -186,7 +186,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
 
         # Set name from hostname to search for the container in the multi tool
         # Add random number so they are unique
-        docker_args.extend(["--name", f"{docker_hostname}_{os.getpid()}"])
+        docker_args.extend(["--name", f"{docker_hostname}{os.getpid()}"])
 
         # Work out if we are using an internal image
         internal_image, image = defaults.internalise_image(requested_image)
