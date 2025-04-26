@@ -418,7 +418,8 @@ RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
     doxygen \
-    gcc13
+    gcc13 \
+    overmind
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \

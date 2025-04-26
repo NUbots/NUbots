@@ -131,7 +131,7 @@ def _setup_internal_image(image, rebuild, clean_volume):
     return mounts
 
 
-def run(func, image, hostname=None, ports=[], docker_context=None, name=None):
+def run(func, image, hostname="docker", ports=[], docker_context=None, name=None):
     requested_image = image
 
     def _run(**kwargs):
@@ -142,16 +142,13 @@ def run(func, image, hostname=None, ports=[], docker_context=None, name=None):
             func(**kwargs)
             exit(0)
 
-        # Use the hostname if it is set
-        if not hostname is None:
-            docker_hostname = hostname
         # If this is the run command and no hostname is set, then use 'webots' if included in the role name
         elif kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
-        # Otherwise just set to 'docker'
-        else:
-            docker_hostname = "docker"
+            # If "webots_port" exists in kwargs, set the hostname to "webots" + webots_port
+            if kwargs["webots_port"] is not None:
+                docker_hostname = f"webots{kwargs['webots_port']}"
 
         # Docker arguments
         docker_args = [
@@ -183,9 +180,9 @@ def run(func, image, hostname=None, ports=[], docker_context=None, name=None):
             "--privileged",
         ]
 
-        # If we have a name, then use it
-        if name is not None:
-            docker_args.extend(["--name", name])
+        # Set name from hostname to search for the container in the multi tool
+        print(docker_hostname)
+        docker_args.extend(["--name", docker_hostname])
 
         # Work out if we are using an internal image
         internal_image, image = defaults.internalise_image(requested_image)

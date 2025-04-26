@@ -29,12 +29,14 @@
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import textwrap
+from pathlib import Path
 from subprocess import DEVNULL
 
-from honcho.manager import Manager
+from honcho.manager import Manager, Printer
 from termcolor import cprint
 
 import b
@@ -55,55 +57,59 @@ def register(command):
     command.add_argument("args", nargs="*", help="the command and any arguments that should be used for the execution")
 
 def run(role, num_robots=1, single_team=False, ports=[], **kwargs):
-    # Get the current selected image
-    image = defaults.image_name("selected")
-
-    # Honcho is used to run the docker containers in parallel
-    process_manager = Manager()
-
-    # Override honcho.manager.terminate() method, this is called by its signal handler on CTRL+C
-    process_manager._killall = exec_stop
+    procfile_lines = []
 
     # Add all robot run commands to process_manager
     for i in range(1, num_robots + 1):
 
-        # Set team_id, robot_color and port_num based on the number of instances being started
-        # If only a single team, or in the first half of the robots, configure for team 1
-        if single_team or i <= num_robots // 2:
-            team_id = NUBOTS_TEAM_ID
-            webots_port = 10000 + i
-            player_id = i
-            hostname = f"webots1{player_id}"
-        else:
-            team_id = NUBOTS_TEAM_ID + 1
-            webots_port = 10020 + i - num_robots // 2
-            player_id = i - num_robots // 2
-            hostname = f"webots2{player_id}"
-
-        # Build a command to run the `run` command
+        # Command for first team player i
         command = [
             "./b",
             "run",
             role,
             *kwargs["args"],
-            f"--webots_port={webots_port}",
-            f"--player_id={player_id}",
-            f"--team_id={team_id}",
-            f"--hostname={hostname}",
-            f"--name=robot{i}",
+            "--webots_port", str(10000 + i),
+            "--player_id", str(i),
+            "--team_id", str(NUBOTS_TEAM_ID),
         ]
+        procfile_lines.append(f"Robot_{i}: {' '.join(command)}")
 
-        process_manager.add_process(f"Robot_{i}", " ".join(command))
+        # # Skip second team if single_team is True
+        # if single_team:
+        #     continue
 
-    # Start the containers
-    process_manager.loop()
+        # # Build a command to run the `run` command
+        # command = [
+        #     "./b",
+        #     "run",
+        #     role,
+        #     *kwargs["args"],
+        #     "--webots_port", str(10020 + i),
+        #     "--player_id", str(i),
+        #     "--team_id", str(NUBOTS_TEAM_ID + 1),
+        # ]
 
-    sys.exit(process_manager.returncode)
+        # process_manager.add_process(f"Robot_{i*2}", " ".join(command))
+
+    # Write to temporary Procfile
+    procfile_path = Path(".overmind_procfile")
+    procfile_path.write_text("\n".join(procfile_lines))
+
+    def handle_sigint(signum, frame):
+        print("\n[Python] Received Ctrl+C, stopping containers...")
+        exec_stop()
+
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    try:
+        subprocess.run(["overmind", "start", "-f", str(procfile_path)], check=True)
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.returncode)
 
 
 # Signal handler function to kill containers on CTRL+C
 def exec_stop():
-    # Get all container ID's for containers running this game
+    # Get all container IDs for containers with "webots" in their hostname
     container_ids = (
         subprocess.check_output(
             [
@@ -112,7 +118,7 @@ def exec_stop():
                 "-a",
                 "-q",
                 "--filter",
-                f"name=robot",
+                "name=webots",  # Match containers with "webots" in their name
                 "--format={{.ID}}",
             ]
         )
@@ -121,13 +127,28 @@ def exec_stop():
         .split()
     )
 
+    # Filter containers with hostnames matching "webots<number>"
+    matching_containers = []
+    for container_id in container_ids:
+        hostname = subprocess.check_output(
+            [
+                "docker",
+                "inspect",
+                "-f",
+                "{{.Config.Hostname}}",
+                container_id,
+            ]
+        ).strip().decode("ascii")
+        if re.match(r"webots\d+", hostname):  # Match "webots" followed by a number
+            matching_containers.append(container_id)
+
     cprint(
         f"Stopping ALL containers...",
         color="red",
         attrs=["bold"],
     )
     exit_code = subprocess.run(
-        ["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL
+        ["docker", "container", "rm", "-f"] + matching_containers, stderr=DEVNULL, stdout=DEVNULL
     ).returncode
 
     sys.exit(exit_code)
