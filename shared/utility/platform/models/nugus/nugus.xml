@@ -1,6 +1,6 @@
 <mujoco model="nugus">
 <compiler angle="radian" meshdir=""/>
-  
+
   <option iterations="3" ls_iterations="5" timestep=".002">
     <flag eulerdamp="disable"/>
   </option>

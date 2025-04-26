@@ -50,9 +50,24 @@ namespace module::platform {
             // create invisible window, single-buffered
             glfwWindowHint(GLFW_VISIBLE, 0);
             glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+            // Try to create the window, if it fails, try with a different display
             window = glfwCreateWindow(W, H, "Invisible window", NULL, NULL);
             if (!window) {
-                mju_error("Could not create GLFW window");
+                // Try with a different display
+                const char* display = getenv("DISPLAY");
+                if (display) {
+                    log<WARN>("Failed to create window with default display, trying with DISPLAY=:0");
+                    setenv("DISPLAY", ":0", 1);
+                    window = glfwCreateWindow(W, H, "Invisible window", NULL, NULL);
+                }
+                if (!window) {
+                    mju_error("Could not create GLFW window");
+                }
             }
 
             // make context current
@@ -93,17 +108,17 @@ namespace module::platform {
             // set initial joint positions in qpos and servo state
             for (auto& joint : initial_positions) {
                 int id = mj_name2id(m, mjOBJ_JOINT, joint.first.c_str());
-                log<NUClear::INFO>("Joint name:", joint.first, "ID:", id);
+                log<INFO>("Joint name:", joint.first, "ID:", id);
                 if (id != -1) {
                     d->qpos[m->jnt_qposadr[id]]            = joint.second;
                     servo_state[joint.first].id            = id;
-                    servo_state[joint.first].name          = joint.first;
+                    servo_state[joint.first].servo_name    = joint.first;
                     servo_state[joint.first].goal_position = joint.second;
                     servo_state[joint.first].p_gain        = 5;
                     servo_state[joint.first].d_gain        = 0;
                 }
                 else {
-                    log<NUClear::WARN>("Joint name not found in model:", joint.first);
+                    log<WARN>("Joint name not found in model:", joint.first);
                 }
             }
 
@@ -123,7 +138,7 @@ namespace module::platform {
             // set rendering to offscreen buffer
             mjr_setBuffer(mjFB_OFFSCREEN, &con);
             if (con.currentBuffer != mjFB_OFFSCREEN) {
-                log<NUClear::WARN>("Offscreen rendering not supported, using default/window framebuffer");
+                log<WARN>("Offscreen rendering not supported, using default/window framebuffer");
             }
 
             // get size of active renderbuffer
@@ -135,7 +150,7 @@ namespace module::platform {
             rgb   = (unsigned char*) std::malloc(3 * W * H);
             depth = (float*) std::malloc(sizeof(float) * W * H);
             if (!rgb) {
-                log<NUClear::ERROR>("Could not allocate buffers");
+                log<ERROR>("Could not allocate buffers");
             }
 
             // render
@@ -144,14 +159,14 @@ namespace module::platform {
             current_real_time = NUClear::clock::now();
 
             // Pause RTF
-            // emit<Scope::DIRECT>(
+            // emit<Scope::INLINE>(
             //     std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
             //                                                    0,
             //                                                    NUClear::message::TimeTravel::Action::RELATIVE));
         });
 
         on<Startup>().then("Mujoco Startup", [this] {
-            // emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
+            // emit<Scope::INLINE>(std::make_unique<NUClear::message::TimeTravel>(
             //     NUClear::clock::now() + std::chrono::milliseconds(1000 / UPDATE_FREQUENCY + 10),
             //     0,
             //     NUClear::message::TimeTravel::Action::ABSOLUTE));
@@ -168,27 +183,27 @@ namespace module::platform {
 
                 double next_sim_step = d->time + real_delta;
 
-                log<NUClear::DEBUG>("Real Delta:", real_delta);
-                log<NUClear::DEBUG>("d->time:", d->time);
+                log<DEBUG>("Real Delta:", real_delta);
+                log<DEBUG>("d->time:", d->time);
 
                 auto mujoco = std::make_unique<message::output::Mujoco>();
                 while (d->time < next_sim_step) {
                     // ctrl
 
                     for (auto servo : servo_state) {
-                        int joint_id = mj_name2id(m, mjOBJ_JOINT, servo.second.name.c_str());
+                        int joint_id = mj_name2id(m, mjOBJ_JOINT, servo.second.servo_name.c_str());
                         if (joint_id == -1) {
-                            log<NUClear::WARN>("Joint name not found:", servo.second.name);
+                            log<WARN>("Joint name not found:", servo.second.servo_name);
                             continue;
                         }
-                        int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR, servo.second.name.c_str());
+                        int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR, servo.second.servo_name.c_str());
                         if (actuator_id == -1) {
-                            log<NUClear::WARN>("Actuator not found for joint:", servo.second.name);
+                            log<WARN>("Actuator not found for joint:", servo.second.servo_name);
                             continue;
                         }
                         // P control
-                        d->ctrl[actuator_id]                 = servo.second.goal_position;
-                        mujoco->servo_map[servo.second.name] = d->qpos[m->jnt_qposadr[joint_id]];
+                        d->ctrl[actuator_id]                       = servo.second.goal_position;
+                        mujoco->servo_map[servo.second.servo_name] = d->qpos[m->jnt_qposadr[joint_id]];
                     }
 
                     // advance simulation
@@ -218,7 +233,7 @@ namespace module::platform {
                 raw_sensors->servo.r_shoulder_pitch.goal_position = servo_state["right_shoulder_pitch"].goal_position;
                 raw_sensors->servo.r_shoulder_pitch.present_position =
                     d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_shoulder_pitch")]];
-                log<NUClear::DEBUG>("Right Shoulder Pitch:", raw_sensors->servo.r_shoulder_pitch.present_position);
+                log<DEBUG>("Right Shoulder Pitch:", raw_sensors->servo.r_shoulder_pitch.present_position);
                 raw_sensors->servo.l_shoulder_pitch.goal_position = servo_state["left_shoulder_pitch"].goal_position;
                 raw_sensors->servo.l_shoulder_pitch.present_position =
                     d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_shoulder_pitch")]];
@@ -311,8 +326,8 @@ namespace module::platform {
 
                 // // Exponential filter to do the smoothing
                 // rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
-                // log<NUClear::DEBUG>("RTF:", rtf);
-                // log<NUClear::DEBUG>("Sim Delta:", sim_delta, "Real Delta:", real_delta);
+                // log<DEBUG>("RTF:", rtf);
+                // log<DEBUG>("Sim Delta:", sim_delta, "Real Delta:", real_delta);
                 // NUClear::clock::set_clock(NUClear::clock::now(), rtf);
 
                 // // Update our current times
@@ -320,7 +335,7 @@ namespace module::platform {
                 // current_real_time = NUClear::clock::now();
 
 
-                // emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
+                // emit<Scope::INLINE>(std::make_unique<NUClear::message::TimeTravel>(
                 //     NUClear::clock::now() + std::chrono::milliseconds(1000 / UPDATE_FREQUENCY + 10),
                 //     0,
                 //     NUClear::message::TimeTravel::Action::ABSOLUTE));
@@ -332,7 +347,7 @@ namespace module::platform {
                 // Loop through each of our commands
                 for (const auto& target : targets.targets) {
                     servo_state[target.name].id            = target.id;
-                    servo_state[target.name].name          = target.name;
+                    servo_state[target.name].servo_name    = target.name;
                     servo_state[target.name].p_gain        = target.gain;
                     servo_state[target.name].goal_position = target.position;
                 }
@@ -341,7 +356,7 @@ namespace module::platform {
         on<Trigger<ServoTarget>, Priority::HIGH>().then([this](const ServoTarget& target) {
             auto targets = std::make_unique<ServoTargets>();
             targets->targets.emplace_back(target);
-            emit<Scope::DIRECT>(targets);
+            emit<Scope::INLINE>(targets);
         });
 
         on<Trigger<Render>, Single>().then("Render Mujoco", [this] { render(); });
