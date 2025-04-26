@@ -131,7 +131,7 @@ def _setup_internal_image(image, rebuild, clean_volume):
     return mounts
 
 
-def run(func, image, hostname="docker", ports=[], docker_context=None, name=None):
+def run(func, image, hostname="docker", ports=[], docker_context=None):
     requested_image = image
 
     def _run(**kwargs):
@@ -142,8 +142,11 @@ def run(func, image, hostname="docker", ports=[], docker_context=None, name=None
             func(**kwargs)
             exit(0)
 
+        # If this is the run command, then use the binary name to determine if
+        # the hostname should be docker or webots
+        # Binaries containing 'webots' (ie in the webots folder) should be given the hostname 'webots'
+        # to ensure the config files are chosen correctly
         docker_hostname = hostname
-        # If this is the run command and no hostname is set, then use 'webots' if included in the role name
         if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
