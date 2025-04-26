@@ -71,6 +71,7 @@ namespace module::platform {
     using message::input::Sensors;
     using message::platform::RawSensors;
     using message::platform::ResetWebotsServos;
+    using NUClear::message::CommandLineArguments;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -260,31 +261,44 @@ namespace module::platform {
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Configuration>("Webots.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file Webots.yaml
-            time_step            = config["time_step"].as<int>();
-            min_camera_time_step = config["min_camera_time_step"].as<int>();
-            min_sensor_time_step = config["min_sensor_time_step"].as<int>();
-            max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
-            max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
-            max_fsr_value        = config["max_fsr_value"].as<float>();
+        on<Configuration, Trigger<CommandLineArguments>>("Webots.yaml")
+            .then([this](const Configuration& config, const CommandLineArguments& args) {
+                // Use configuration here from file Webots.yaml
+                time_step            = config["time_step"].as<int>();
+                min_camera_time_step = config["min_camera_time_step"].as<int>();
+                min_sensor_time_step = config["min_sensor_time_step"].as<int>();
+                max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
+                max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
+                max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            log_level = config["log_level"].as<NUClear::LogLevel>();
+                log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            clock_smoothing = config["clock_smoothing"].as<double>();
+                clock_smoothing = config["clock_smoothing"].as<double>();
 
-            server_address = config["server_address"].as<std::string>();
-            server_port    = config["port"].as<std::string>();
+                server_address = config["server_address"].as<std::string>();
+                server_port    = config["port"].as<std::string>();
 
-            on<Watchdog<Webots, 30, std::chrono::seconds>, Sync<Webots>>().then([this, config] {
-                // We haven't received any messages lately
-                log<WARN>("Connection timed out. Attempting reconnect");
+                // Check if port is set in the command line arguments
+                // Find "--webots_port" and get the value after
+                if (std::find(args.begin(), args.end(), "--webots_port") != args.end()) {
+                    // Get the index of the port
+                    auto it = std::find(args.begin(), args.end(), "--webots_port");
+                    if (it + 1 != args.end()) {
+                        server_port = *(it + 1);
+                    }
+                }
+
+                log<INFO>(fmt::format("Connecting to {}:{}", server_address, server_port));
+
+                on<Watchdog<Webots, 30, std::chrono::seconds>, Sync<Webots>>().then([this, config] {
+                    // We haven't received any messages lately
+                    log<WARN>("Connection timed out. Attempting reconnect");
+                    setup_connection();
+                });
+
+                // Connect to the server
                 setup_connection();
             });
-
-            // Connect to the server
-            setup_connection();
-        });
 
 
         on<Configuration>("WebotsCameras").then([this](const Configuration& config) {

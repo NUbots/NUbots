@@ -33,14 +33,36 @@
 
 namespace module::support::configuration {
     using extension::Configuration;
+    using NUClear::message::CommandLineArguments;
 
     GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("GlobalConfig.yaml").then([this](const Configuration& config) {
-            auto msg       = std::make_unique<message::support::GlobalConfig>();
-            msg->player_id = config["player_id"].as<uint32_t>();
-            msg->team_id   = config["team_id"].as<uint32_t>();
-            emit(msg);
-        });
+        on<Configuration, Trigger<CommandLineArguments>>("GlobalConfig.yaml")
+            .then([this](const Configuration& config, const CommandLineArguments& args) {
+                auto msg       = std::make_unique<message::support::GlobalConfig>();
+                msg->player_id = config["player_id"].as<uint32_t>();
+                msg->team_id   = config["team_id"].as<uint32_t>();
+
+                // Check if command line arguments contain "--player_id" and "--team_id"
+                // Find "--player_id" and get the value after
+                if (std::find(args.begin(), args.end(), "--player_id") != args.end()) {
+                    // Get the index of the player_id
+                    auto it = std::find(args.begin(), args.end(), "--player_id");
+                    if (it + 1 != args.end()) {
+                        msg->player_id = *(it + 1);
+                    }
+                }
+
+                // Find "--team_id" and get the value after
+                if (std::find(args.begin(), args.end(), "--team_id") != args.end()) {
+                    // Get the index of the team_id
+                    auto it = std::find(args.begin(), args.end(), "--team_id");
+                    if (it + 1 != args.end()) {
+                        msg->team_id = *(it + 1);
+                    }
+                }
+
+                emit(msg);
+            });
     }
 }  // namespace module::support::configuration
