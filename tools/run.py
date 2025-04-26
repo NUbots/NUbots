@@ -29,7 +29,6 @@
 import os
 import re
 
-import yaml
 from termcolor import cprint
 
 import b
