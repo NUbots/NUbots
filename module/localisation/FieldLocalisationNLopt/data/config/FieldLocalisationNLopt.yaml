@@ -36,6 +36,9 @@ field_line_intersection_weight: 20.0
 # Weighting associated with change between last solution result
 state_change_weight: 1.5
 
+# Minimum distance an associated landmark needs to be for measurement update
+max_association_distance: 0.5
+
 # Weighting associated with goal post distance error
 goal_post_distance_weight: 0.5
 
