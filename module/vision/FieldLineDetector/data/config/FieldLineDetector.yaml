@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-confidence_threshold: 0.7 # How confident do we need to be that this is a field line
+confidence_threshold: 0.6 # How confident do we need to be that this is a field line
 cluster_points: 1 # How many points do we need to claim this cluster is a field line
