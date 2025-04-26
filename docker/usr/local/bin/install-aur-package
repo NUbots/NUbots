@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# -lt 1 ]]; then
+    echo "Usage: install-aur-package <pkgname…>" >&2; exit 1
+fi
+sudo -u builder yay -S --noconfirm --needed "$@"

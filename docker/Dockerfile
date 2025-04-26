@@ -57,6 +57,13 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
 
+RUN useradd --create-home --shell /bin/bash builder \
+    && echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/builder
+
+# Add a script that installs AUR packages
+COPY usr/local/bin/install-aur-package /usr/local/bin/install-aur-package
+RUN chmod +x /usr/local/bin/install-aur-package
+
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
 RUN install-package \
@@ -79,7 +86,15 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano
+    nano \
+    go
+
+# Install yay
+USER builder
+RUN git clone https://aur.archlinux.org/yay.git ~/yay \
+    && cd ~/yay \
+    && makepkg -si --noconfirm --needed
+USER root
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
