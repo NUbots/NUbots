@@ -26,21 +26,15 @@
 # SOFTWARE.
 #
 
-import os
 import re
-import shutil
-import signal
 import subprocess
 import sys
-import textwrap
-from pathlib import Path
 from subprocess import DEVNULL
 
-from honcho.manager import Manager, Printer
+from honcho.manager import Manager
 from termcolor import cprint
 
-import b
-from utility.dockerise import defaults, platform
+from utility.dockerise import defaults
 
 # NUbots RoboCup team ID
 NUBOTS_TEAM_ID = 12
@@ -56,8 +50,13 @@ def register(command):
     command.add_argument("--single_team", action="store_true", default=False, help="Run all robots on the same team")
     command.add_argument("args", nargs="*", help="the command and any arguments that should be used for the execution")
 
+
 def run(role, num_robots=1, single_team=False, ports=[], **kwargs):
-    procfile_lines = []
+    # Honcho is used to run the docker containers in parallel
+    process_manager = Manager()
+
+    # Override honcho.manager.terminate() method, this is called by its signal handler on CTRL+C
+    process_manager._killall = exec_stop
 
     # Add all robot run commands to process_manager
     for i in range(1, num_robots + 1):
@@ -68,43 +67,39 @@ def run(role, num_robots=1, single_team=False, ports=[], **kwargs):
             "run",
             role,
             *kwargs["args"],
-            "--webots_port", str(10000 + i),
-            "--player_id", str(i),
-            "--team_id", str(NUBOTS_TEAM_ID),
+            "--webots_port",
+            str(10000 + i),
+            "--player_id",
+            str(i),
+            "--team_id",
+            str(NUBOTS_TEAM_ID),
         ]
-        procfile_lines.append(f"Robot_{i}: {' '.join(command)}")
+        process_manager.add_process(f"Robot_{i}", " ".join(command))
 
-        # # Skip second team if single_team is True
-        # if single_team:
-        #     continue
+        # Skip second team if single_team is True
+        if single_team:
+            continue
 
-        # # Build a command to run the `run` command
-        # command = [
-        #     "./b",
-        #     "run",
-        #     role,
-        #     *kwargs["args"],
-        #     "--webots_port", str(10020 + i),
-        #     "--player_id", str(i),
-        #     "--team_id", str(NUBOTS_TEAM_ID + 1),
-        # ]
+        # Build a command to run the `run` command
+        command = [
+            "./b",
+            "run",
+            role,
+            *kwargs["args"],
+            "--webots_port",
+            str(10020 + i),
+            "--player_id",
+            str(i),
+            "--team_id",
+            str(NUBOTS_TEAM_ID + 1),
+        ]
 
-        # process_manager.add_process(f"Robot_{i*2}", " ".join(command))
+        process_manager.add_process(f"Robot_{i+num_robots}", " ".join(command))
 
-    # Write to temporary Procfile
-    procfile_path = Path(".overmind_procfile")
-    procfile_path.write_text("\n".join(procfile_lines))
+    # Start the containers
+    process_manager.loop()
 
-    def handle_sigint(signum, frame):
-        print("\n[Python] Received Ctrl+C, stopping containers...")
-        exec_stop()
-
-    signal.signal(signal.SIGINT, handle_sigint)
-
-    try:
-        subprocess.run(["overmind", "start", "-f", str(procfile_path)], check=True)
-    except subprocess.CalledProcessError as e:
-        sys.exit(e.returncode)
+    sys.exit(process_manager.returncode)
 
 
 # Signal handler function to kill containers on CTRL+C
@@ -130,15 +125,19 @@ def exec_stop():
     # Filter containers with hostnames matching "webots<number>"
     matching_containers = []
     for container_id in container_ids:
-        hostname = subprocess.check_output(
-            [
-                "docker",
-                "inspect",
-                "-f",
-                "{{.Config.Hostname}}",
-                container_id,
-            ]
-        ).strip().decode("ascii")
+        hostname = (
+            subprocess.check_output(
+                [
+                    "docker",
+                    "inspect",
+                    "-f",
+                    "{{.Config.Hostname}}",
+                    container_id,
+                ]
+            )
+            .strip()
+            .decode("ascii")
+        )
         if re.match(r"webots\d+", hostname):  # Match "webots" followed by a number
             matching_containers.append(container_id)
 

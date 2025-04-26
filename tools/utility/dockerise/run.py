@@ -142,8 +142,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None, name=None
             func(**kwargs)
             exit(0)
 
+        docker_hostname = hostname
         # If this is the run command and no hostname is set, then use 'webots' if included in the role name
-        elif kwargs["command"] == "run":
+        if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
             # If "webots_port" exists in kwargs, set the hostname to "webots" + webots_port
@@ -181,7 +182,6 @@ def run(func, image, hostname="docker", ports=[], docker_context=None, name=None
         ]
 
         # Set name from hostname to search for the container in the multi tool
-        print(docker_hostname)
         docker_args.extend(["--name", docker_hostname])
 
         # Work out if we are using an internal image
