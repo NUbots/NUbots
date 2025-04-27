@@ -81,7 +81,8 @@ def terminal_reset():
 # This function is used to print messages in a thread-safe manner
 async def safe_print(line):
     async with print_lock:
-        print(line)
+        sys.stdout.write("\r" + line + "\n")
+        sys.stdout.flush()
 
 
 # This function runs a process and captures its output
