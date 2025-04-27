@@ -57,13 +57,8 @@ def modify_yaml(params, sensor_filter_yaml_path):
         sensor_filter_config = yaml_parser.load(file)
 
     # Modify Kp and Ki under mahony
-    if "mahony" in sensor_filter_config:
-        sensor_filter_config["mahony"]["Kp"] = params["Kp"]
-        sensor_filter_config["mahony"]["Ki"] = params["Ki"]
-    else:
-        print("Warning: 'mahony' section not found in SensorFilter.yaml")
-        # Optionally create the section if it's missing, or handle the error
-        # sensor_filter_config['mahony'] = {'Kp': params['Kp'], 'Ki': params['Ki']}
+    sensor_filter_config["mahony"]["Kp"] = params["Kp"]
+    sensor_filter_config["mahony"]["Ki"] = params["Ki"]
 
     with open(sensor_filter_yaml_path, "w") as file:
         yaml_parser.dump(sensor_filter_config, file)
