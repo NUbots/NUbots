@@ -68,7 +68,6 @@ def parse_rmse_translation(output):
     """
     Parses the Odometry RMSE translation error from the module's output.
     """
-    # Updated regex for odometry benchmark output
     match = re.search(r"Odometry translation RMSE error:\s+([0-9.]+)", output)
     if match:
         return float(match.group(1))
@@ -155,7 +154,7 @@ def objective(trial):
     rmse = run_benchmark(trial.study.user_attrs["nbs_file"])
 
     if rmse is None:
-        return float("inf") # Indicate failure
+        return float("inf")  # Indicate failure
     return rmse
 
 
@@ -164,9 +163,11 @@ def register(parser):
     """
     Register command-line arguments for the optimization tool.
     """
-    parser.description = "Optimises Mahony filter gains (Kp, Ki) in SensorFilter.yaml using Optuna and OdometryBenchmark." # Updated description
+    parser.description = (
+        "Optimises Mahony filter gains (Kp, Ki) in SensorFilter.yaml using Optuna and OdometryBenchmark."
+    )
     parser.add_argument("--nbs_file", type=str, required=True, help="Path to the .nbs file with ground truth data.")
-    parser.add_argument("--n_trials", type=int, default=100, help="Number of optimisation trials to run.") # Reduced default trials maybe
+    parser.add_argument("--n_trials", type=int, default=100, help="Number of optimisation trials to run.")
     parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")
 
 
@@ -190,7 +191,6 @@ def run(n_trials, nbs_file, **kwargs):
     # Save best config
     modify_yaml(study.best_params, SENSOR_FILTER_YAML_PATH)
     os.makedirs(DESTINATION_DIR, exist_ok=True)
-    # Updated destination filename
     shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, "BestSensorFilter.yaml"))
     cprint(f"\n✅ Best SensorFilter YAML saved to {DESTINATION_DIR}/BestSensorFilter.yaml", "green")
 

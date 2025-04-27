@@ -24,6 +24,6 @@ This module benchmarks the performance of the robot's odometry system (specifica
 
 ## Dependencies
 
--   `message::platform::RawSensors` for ground truth odometry comparison.
--   `message::input::Sensors` for the estimated odometry.
--   NUbots playback system for NBS file handling.
+- `message::platform::RawSensors` for ground truth odometry comparison.
+- `message::input::Sensors` for the estimated odometry.
+- NUbots playback system for NBS file handling.
