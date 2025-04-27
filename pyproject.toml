@@ -54,3 +54,6 @@ opencv-contrib-python-headless = "4.11.0.86"
 
 # Machine Learning
 tensorflow = "2.18.0"
+
+# Optimisation
+optuna  = "0.12.0"
