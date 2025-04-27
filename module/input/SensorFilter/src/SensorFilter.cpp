@@ -89,7 +89,6 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
-            cfg.max_servo_change = config["max_servo_change"].as<double>();
         });
 
         on<Startup>().then([this] {
@@ -230,9 +229,7 @@ namespace module::input {
 
             // Determine the current position with potential fallback to the last known good position
             double current_position = raw_servo.present_position;
-            if (previous_sensors
-                && (fabs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change
-                    || hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
+            if (previous_sensors && (hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
                 current_position = previous_sensors->servo[id].present_position;
                 NUClear::log<NUClear::LogLevel::DEBUG>("Suspected encoder error on servo ",
                                                        id,
