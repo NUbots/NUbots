@@ -125,8 +125,9 @@ namespace module::tools {
             double odometry_translation_error          = odometry_error.head<3>().norm();
             total_odometry_translation_error += odometry_translation_error * odometry_translation_error;
 
-            // Compute odometry rotation error
-            double odometry_rotation_error = odometry_error.tail<3>().norm();
+            // Compute odometry rotation error, ignore yaw for now
+            // TODO: Add yaw error
+            double odometry_rotation_error = odometry_error.tail<3>().head<2>().norm();
             total_odometry_rotation_error += odometry_rotation_error * odometry_rotation_error;
 
             // Accumulate squared errors for each individual DoF
