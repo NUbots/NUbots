@@ -26,8 +26,8 @@
 # SOFTWARE.
 #
 import argparse
+import importlib.util
 import os
-import pkgutil
 import re
 import subprocess
 import sys
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     )
     subcommands.required = True
 
-    # Look thorough our tools directories and find all the files and folders that could be a command
+    # Look through our tools directories and find all the files and folders that could be a command
     candidates = []
     for path in [user_tools_path, nuclear_tools_path]:
         for dirpath, dnames, fnames in os.walk(path):
@@ -141,10 +141,17 @@ if __name__ == "__main__":
 
     for components in useable:
         if sys.argv[1 : len(components) + 1] == components:
-            loader = pkgutil.find_loader(".".join(components))
-            if loader:
-                try:
-                    module = loader.load_module()
+            module_name = ".".join(components)
+            module_path = os.path.join(user_tools_path, *components) + ".py"
+
+            # Dynamically load the module
+            try:
+                spec = importlib.util.spec_from_file_location(module_name, module_path)
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[module_name] = module
+                    spec.loader.exec_module(module)
+
                     if hasattr(module, "register") and hasattr(module, "run"):
 
                         # Build up the base subcommands to this point
@@ -162,19 +169,19 @@ if __name__ == "__main__":
                         # We're done, exit
                         exit(0)
 
-                except ModuleNotFoundError as e:
-                    print(f'missing command dependency "{e.name}"')
+            except ModuleNotFoundError as e:
+                print(f'missing command dependency "{e.name}"')
 
-                    dependency = find_dependency(e.name, user_tools_path)
-                    package = dependency["version"]
+                dependency = find_dependency(e.name, user_tools_path)
+                package = dependency["version"]
 
-                    print(f'installing missing dependency "{package}"...')
-                    print()
+                print(f'installing missing dependency "{package}"...')
+                print()
 
-                    install_dependency(package)
+                install_dependency(package)
 
-                    # Try re-running the current command now that the library exists
-                    sys.exit(subprocess.call([sys.executable, *sys.argv]))
+                # Try re-running the current command now that the library exists
+                sys.exit(subprocess.call([sys.executable, *sys.argv]))
 
     # If we reach this point, we couldn't find a tool to use.
     # In this case we need to look through all the tools so we can register them all.
@@ -182,9 +189,14 @@ if __name__ == "__main__":
     tools = {}
     for components in candidates:
         try:
-            loader = pkgutil.find_loader(".".join(components))
-            if loader:
-                module = loader.load_module()
+            module_name = ".".join(components)
+            module_path = os.path.join(user_tools_path, *components) + ".py"
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
+                spec.loader.exec_module(module)
+
                 if hasattr(module, "register") and hasattr(module, "run"):
 
                     subcommand = subcommands
