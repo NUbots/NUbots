@@ -1,3 +1,32 @@
+#!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2025 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+import argparse
 import os
 
 import matplotlib.pyplot as plt
@@ -5,18 +34,22 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-
 # Import the model definition
 from train import EfficientSegmentationModel
 
+# Assuming run_on_docker is available in your project structure
+# If not, you might need to adjust the import or remove the decorator
+from utility.dockerise import run_on_docker
 
-def visualize_segmentation():
-    # Parameters
-    model_path = "results/best_segmentation_model.pth"  # Updated path
-    test_image_path = "test/images/81-test_nagoya_game_a_00278.png"  # Change this to your test image
-    # Try to find corresponding ground truth mask
-    test_mask_path = test_image_path.replace("images", "segmentations")
-    img_size = 512
+
+def visualize_segmentation(model_path, test_image_path, img_size=512):
+    """
+    Loads a model, performs segmentation on a test image, and visualizes the result.
+    """
+    # Parameters are now passed as arguments
+    # model_path = "results/best_segmentation_model.pth"
+    # test_image_path = "test/images/81-test_nagoya_game_a_00278.png"
+    # img_size = 512
 
     # Define the class colors for visualization
     class_colors = [
@@ -57,6 +90,7 @@ def visualize_segmentation():
     original_image = np.array(image)
 
     # Load ground truth mask if it exists
+    test_mask_path = test_image_path.replace("images", "segmentations")
     ground_truth_exists = os.path.exists(test_mask_path)
     if ground_truth_exists:
         mask = Image.open(test_mask_path).convert("RGB")
@@ -113,5 +147,37 @@ def visualize_segmentation():
     print("Visualization saved as 'results/segmentation_result.png'")
 
 
-if __name__ == "__main__":
-    visualize_segmentation()
+@run_on_docker
+def register(parser):
+    """
+    Register command-line arguments for the segmentation visualization script.
+    """
+    parser.description = "Visualize the output of a segmentation model on a test image."
+    parser.add_argument(
+        "--model_path",
+        type=str,
+        default="results/best_segmentation_model.pth",
+        help="Path to the saved PyTorch model (.pth file)",
+    )
+    parser.add_argument(
+        "--test_image_path",
+        type=str,
+        required=True,  # Make image path required
+        help="Path to the test image file",
+    )
+    parser.add_argument("--img_size", type=int, default=512, help="Input image size the model expects")
+    # Add hostname if necessary for your docker setup
+    # parser.add_argument("--hostname", type=str, default="some_default_host", help="Specify the Docker hostname")
+
+
+@run_on_docker  # Add relevant hostname if needed
+def run(model_path, test_image_path, img_size, **kwargs):
+    """
+    Run the segmentation visualization.
+    """
+    visualize_segmentation(model_path, test_image_path, img_size)
+
+
+# Remove the old if __name__ == "__main__": block
+# if __name__ == "__main__":
+#    visualize_segmentation()
