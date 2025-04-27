@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['object_766',['Object',['../structmodule_1_1vision_1_1Yolo_1_1Object.html',1,'module::vision::Yolo::Object'],['../structmodule_1_1vision_1_1YoloCoco_1_1Object.html',1,'module::vision::YoloCoco::Object']]],
-  ['objects_767',['objects',['../classmodule_1_1vision_1_1YoloCoco.html#afe9611c3f59724a47f5c2cdcfbae88b3',1,'module::vision::YoloCoco::objects()'],['../classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79',1,'module::vision::Yolo::objects()']]],
-  ['obstacle_5fradius_768',['obstacle_radius',['../structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a9e0454b6afafd3a4e27fdd78c6800cb3',1,'module::planning::PlanWalkPath::Config']]],
-  ['occupancymap_769',['OccupancyMap',['../classutility_1_1localisation_1_1OccupancyMap.html',1,'utility::localisation']]],
-  ['occupancymap_3c_20double_20_3e_770',['OccupancyMap&lt; double &gt;',['../classutility_1_1localisation_1_1OccupancyMap.html',1,'utility::localisation']]],
+  ['object_765',['Object',['../structmodule_1_1vision_1_1Yolo_1_1Object.html',1,'module::vision::Yolo::Object'],['../structmodule_1_1vision_1_1YoloCoco_1_1Object.html',1,'module::vision::YoloCoco::Object']]],
+  ['objects_766',['objects',['../classmodule_1_1vision_1_1YoloCoco.html#afe9611c3f59724a47f5c2cdcfbae88b3',1,'module::vision::YoloCoco::objects()'],['../classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79',1,'module::vision::Yolo::objects()']]],
+  ['obstacle_5fradius_767',['obstacle_radius',['../structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a9e0454b6afafd3a4e27fdd78c6800cb3',1,'module::planning::PlanWalkPath::Config']]],
+  ['occupancymap_768',['OccupancyMap',['../classutility_1_1localisation_1_1OccupancyMap.html',1,'utility::localisation']]],
+  ['occupancymap_3c_20double_20_3e_769',['OccupancyMap&lt; double &gt;',['../classutility_1_1localisation_1_1OccupancyMap.html',1,'utility::localisation']]],
+  ['odometrybenchmark_770',['OdometryBenchmark',['../classmodule_1_1tools_1_1OdometryBenchmark.html',1,'module::tools::OdometryBenchmark'],['../classmodule_1_1tools_1_1OdometryBenchmark.html#ad099dfeecf38ad7bdbaafd62d4245085',1,'module::tools::OdometryBenchmark::OdometryBenchmark()']]],
   ['offset_771',['offset',['../structutility_1_1nbs_1_1IndexItem.html#a24ad36421839d2e30b63b6a25af74f26',1,'utility::nbs::IndexItem']]],
   ['ok_772',['OK',['../classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77afae7fc26dfef15f5c935685710e572d9',1,'module::extension::Director::OK()'],['../structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca8279e608bb823bcbcf51d08467b42ed2',1,'module::extension::Director::Solution::Option::OK()']]],
   ['oksolution_773',['OkSolution',['../structmodule_1_1extension_1_1Director_1_1OkSolution.html',1,'module::extension::Director']]],

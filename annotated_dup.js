@@ -309,6 +309,7 @@ var annotated_dup =
         [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
         [ "LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", "classmodule_1_1tools_1_1LocalisationBenchmark" ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
+        [ "OdometryBenchmark", "classmodule_1_1tools_1_1OdometryBenchmark.html", "classmodule_1_1tools_1_1OdometryBenchmark" ],
         [ "RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html", "classmodule_1_1tools_1_1RoboCupConfiguration" ],
         [ "SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", "classmodule_1_1tools_1_1SystemConfiguration" ]
       ] ],
