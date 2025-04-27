@@ -19,7 +19,7 @@ mahony:
     - 0
     - 0
     - 0
-# Initial orientation (roll, pitch, yaw)
+  # Initial orientation (roll, pitch, yaw)
   initial_rpy:
     - 0
     - 0.21
