@@ -60,10 +60,11 @@ def run(**kwargs):
             exec_stop()
 
 
-# Return the terminal to its original state on exit
+# Global to store the original terminal settings
 original_termios_settings = None
 
 
+# Context manager is used to reset the terminal settings on exit
 @contextmanager
 def terminal_reset():
     global original_termios_settings
