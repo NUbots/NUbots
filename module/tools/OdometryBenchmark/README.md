@@ -15,7 +15,6 @@ This module benchmarks the performance of the robot's odometry system (specifica
     Ensure the NBS file includes the following messages:
     ```yaml
     message.platform.RawSensors: true # Contains odometry ground truth (Htw)
-    message.input.Sensors: true # Contains estimated odometry (Htw)
     ```
 3.  **Parameter Optimisation**:
     Use the `optimise_odometry` script (to be created) to tune sensor filter parameters:
