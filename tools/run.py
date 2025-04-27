@@ -52,6 +52,7 @@ def register(command):
     command.add_argument("--team_id", type=int, default=None, help="The team id to use for the player")
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 
+
 @run_on_docker
 def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **kwargs):
     # Check to see if ASan was enabled

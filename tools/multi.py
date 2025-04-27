@@ -43,12 +43,14 @@ NUBOTS_TEAM_ID = 12
 # Lock for printing
 print_lock = asyncio.Lock()
 
+
 def register(command):
     command.help = "Build and run images for use with Webots"
     command.add_argument("role", help="The role to run")
     command.add_argument("num_robots", type=int, help="The number of robots to run")
     command.add_argument("--single_team", action="store_true", default=False, help="Run all robots on the same team")
     command.add_argument("args", nargs="*", help="the command and any arguments that should be used for the execution")
+
 
 def run(**kwargs):
     with terminal_reset():
@@ -57,8 +59,11 @@ def run(**kwargs):
         except KeyboardInterrupt:
             exec_stop()
 
+
 # Return the terminal to its original state on exit
 original_termios_settings = None
+
+
 @contextmanager
 def terminal_reset():
     global original_termios_settings
@@ -71,17 +76,17 @@ def terminal_reset():
         if original_termios_settings is not None:
             termios.tcsetattr(fd, termios.TCSADRAIN, original_termios_settings)
 
+
 # This function is used to print messages in a thread-safe manner
 async def safe_print(line):
     async with print_lock:
         print(line)
 
+
 # This function runs a process and captures its output
 async def run_process(name, command, colour):
     process = await asyncio.create_subprocess_exec(
-        *command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
 
     await safe_print(f"{colour}[{name}] started with PID {process.pid}{Style.RESET_ALL}")
@@ -96,13 +101,11 @@ async def run_process(name, command, colour):
             log_line = f"{colour}[{name} {stream_name}] {line}{Style.RESET_ALL}"
             await safe_print(log_line)
 
-    await asyncio.gather(
-        read_stream(process.stdout, "stdout"),
-        read_stream(process.stderr, "stderr")
-    )
+    await asyncio.gather(read_stream(process.stdout, "stdout"), read_stream(process.stderr, "stderr"))
 
     return_code = await process.wait()
     await safe_print(f"{colour}[{name}] exited with return code {return_code}{Style.RESET_ALL}")
+
 
 # Runs the requested number of robots with the `./b run` command
 async def async_run(role, num_robots=1, single_team=False, **kwargs):
@@ -111,8 +114,16 @@ async def async_run(role, num_robots=1, single_team=False, **kwargs):
     init(autoreset=True)
     # Robot colours based on the team and player id (up to 10 players per team)
     ROBOT_COLOURS = [
-        Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.WHITE,
-        Fore.LIGHTBLACK_EX, Fore.LIGHTWHITE_EX, Fore.LIGHTYELLOW_EX
+        Fore.RED,
+        Fore.GREEN,
+        Fore.YELLOW,
+        Fore.BLUE,
+        Fore.MAGENTA,
+        Fore.CYAN,
+        Fore.WHITE,
+        Fore.LIGHTBLACK_EX,
+        Fore.LIGHTWHITE_EX,
+        Fore.LIGHTYELLOW_EX,
     ]
 
     def build_command(role, args, webots_port, player_id, team_id):
@@ -137,45 +148,53 @@ async def async_run(role, num_robots=1, single_team=False, **kwargs):
         robot_colour = ROBOT_COLOURS[i % len(ROBOT_COLOURS)]
 
         # Add command for the first team
-        commands.append((
-            f"Robot_{NUBOTS_TEAM_ID}_{i}",
-            build_command(role, kwargs["args"], 10000 + i, i, NUBOTS_TEAM_ID),
-            robot_colour
-        ))
+        commands.append(
+            (
+                f"Robot_{NUBOTS_TEAM_ID}_{i}",
+                build_command(role, kwargs["args"], 10000 + i, i, NUBOTS_TEAM_ID),
+                robot_colour,
+            )
+        )
 
         # Add command for the second team if not single_team
         if not single_team:
-            commands.append((
-                f"Robot_{NUBOTS_TEAM_ID + 1}_{i}",
-                build_command(role, kwargs["args"], 10020 + i, i, NUBOTS_TEAM_ID + 1),
-                robot_colour
-            ))
+            commands.append(
+                (
+                    f"Robot_{NUBOTS_TEAM_ID + 1}_{i}",
+                    build_command(role, kwargs["args"], 10020 + i, i, NUBOTS_TEAM_ID + 1),
+                    robot_colour,
+                )
+            )
 
     # Run the processes concurrently
     await asyncio.gather(*(run_process(name, cmd, colour) for name, cmd, colour in commands))
+
 
 # Clean up on exit
 def exec_stop():
     # Stop the containers, otherwise they will continue to run
     try:
-        container_ids = subprocess.check_output(
-            ["docker", "ps", "-a", "-q", "--filter", "name=webots", "--format={{.ID}}"]
-        ).decode("ascii").strip().split()
+        container_ids = (
+            subprocess.check_output(["docker", "ps", "-a", "-q", "--filter", "name=webots", "--format={{.ID}}"])
+            .decode("ascii")
+            .strip()
+            .split()
+        )
         # This regex matches the container name set in the dockerise/run script
         matching_containers = [
-            container_id for container_id in container_ids
-            if re.match(r"webots\d+", subprocess.check_output(
-                ["docker", "inspect", "-f", "{{.Config.Hostname}}", container_id]
-            ).decode("ascii").strip())
+            container_id
+            for container_id in container_ids
+            if re.match(
+                r"webots\d+",
+                subprocess.check_output(["docker", "inspect", "-f", "{{.Config.Hostname}}", container_id])
+                .decode("ascii")
+                .strip(),
+            )
         ]
 
         if matching_containers:
             cprint("Stopping ALL containers...", color="red", attrs=["bold"])
-            subprocess.run(
-                ["docker", "container", "rm", "-f"] + matching_containers,
-                stderr=DEVNULL,
-                stdout=DEVNULL
-            )
+            subprocess.run(["docker", "container", "rm", "-f"] + matching_containers, stderr=DEVNULL, stdout=DEVNULL)
     except subprocess.CalledProcessError:
         pass
     finally:
