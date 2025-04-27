@@ -111,6 +111,8 @@ namespace module::tools {
         on<Trigger<Sensors>, With<RawSensors>>().then([this](const Sensors& sensors, const RawSensors& raw_sensors) {
             // Check if ground truth odometry data exists
             if (!raw_sensors.odometry_ground_truth.exists) {
+                log<ERROR>("No ground truth odometry data found");
+                powerplant.shutdown();
                 return;
             }
 
