@@ -28,7 +28,7 @@
 
 import os
 import re
-import shutil  # For file operations
+import shutil
 import subprocess
 import sys
 
@@ -39,8 +39,8 @@ from termcolor import cprint
 from utility.dockerise import run_on_docker
 
 BUILD_DIR = "/home/nubots/build"
-EXECUTABLE_PATH = os.path.join(BUILD_DIR, "bin/webots/odometry_benchmark")  # Updated executable
-SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/SensorFilter.yaml")  # Updated config path
+EXECUTABLE_PATH = os.path.join(BUILD_DIR, "bin/webots/odometry_benchmark")
+SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/SensorFilter.yaml")
 DESTINATION_DIR = os.path.join(BUILD_DIR, "recordings/optimisation_results")
 
 
@@ -82,14 +82,9 @@ def parse_rmse_rotation(output):
     """
     Parses the Odometry RMSE rotation error from the module's output.
     """
-    # Updated regex for odometry benchmark output (note: output is in degrees, but we might want radians for comparison)
-    # The benchmark currently outputs degrees, let's parse that first.
     match = re.search(r"Odometry rotation RMSE error:\s+([0-9.]+)", output)
     if match:
-        # Convert degrees back to radians if needed for the objective function, or keep as degrees
-        # For combining with translation error (meters), using radians might be more conventional
-        # return math.radians(float(match.group(1))) # Requires import math
-        return float(match.group(1))  # Keep as degrees for now, simpler
+        return float(match.group(1))
     else:
         print("Could not parse Odometry RMSE rotation error.")
         print(output)
@@ -117,7 +112,7 @@ def run_benchmark(nbs_file):
             text=True,
             check=True,
             bufsize=1,
-            timeout=30,  # Adjust timeout if needed (odometry might be faster/slower)
+            timeout=20,
         )
         output = result.stdout
         rmse_translation = parse_rmse_translation(output)
@@ -146,8 +141,8 @@ def objective(trial):
     The objective function for Optuna that defines the optimisation problem for odometry.
     """
     # Define search space for Kp and Ki based on SensorFilter.yaml defaults/expectations
-    kp = trial.suggest_float("Kp", 1e-2, 1e1, log=True)  # Adjust range as needed
-    ki = trial.suggest_float("Ki", 1e-2, 1e1, log=True)  # Adjust range as needed
+    kp = trial.suggest_float("Kp", 1e-2, 1e1, log=True)
+    ki = trial.suggest_float("Ki", 1e-2, 1e1, log=True)
 
     params = {
         "Kp": kp,
@@ -161,11 +156,6 @@ def objective(trial):
 
     if rmse is None:
         return float("inf") # Indicate failure
-
-    # Optionally store individual components if needed for analysis later
-    # trial.set_user_attr("rmse_translation", parse_rmse_translation(last_output)) # Need to capture output if parsing again
-    # trial.set_user_attr("rmse_rotation", parse_rmse_rotation(last_output))
-
     return rmse
 
 
@@ -185,19 +175,17 @@ def run(n_trials, nbs_file, **kwargs):
     """
     Run the optimisation tool.
     """
-    study = optuna.create_study(direction="minimize", study_name="OdometryBenchmarkOptimisation") # Updated study name
+    study = optuna.create_study(direction="minimize", study_name="OdometryBenchmarkOptimisation")
     study.set_user_attr("nbs_file", nbs_file)
 
     # Enable progress bar
     study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
-
-    # Colored output for results
     cprint("\nBest parameters found:", "green", attrs=["bold"])
     for key, value in study.best_params.items():
         cprint(f"{key}: ", "cyan", end="")
         cprint(f"{value}", "yellow")
 
-    cprint(f"\nBest combined RMSE (Translation_m + Rotation_deg): {study.best_value}", "green", attrs=["bold"]) # Updated metric description
+    cprint(f"\nBest combined RMSE (Translation_m + Rotation_deg): {study.best_value}", "green", attrs=["bold"])
 
     # Save best config
     modify_yaml(study.best_params, SENSOR_FILTER_YAML_PATH)
@@ -206,27 +194,17 @@ def run(n_trials, nbs_file, **kwargs):
     shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, "BestSensorFilter.yaml"))
     cprint(f"\n✅ Best SensorFilter YAML saved to {DESTINATION_DIR}/BestSensorFilter.yaml", "green")
 
-    # Visualisations (optional, similar plots can be generated)
+    # Visualisations
     try:
         fig_history = optuna.visualization.plot_optimization_history(study)
         fig_history.write_html(os.path.join(DESTINATION_DIR, "odometry_optimisation_history.html"))
-
-        # Other plots might be less meaningful with only 2 parameters, but can still be generated
         fig_importance = optuna.visualization.plot_param_importances(study)
         fig_importance.write_html(os.path.join(DESTINATION_DIR, "odometry_param_importances.html"))
-
-        # Add other relevant plots if desired
-        # fig_parallel = optuna.visualization.plot_parallel_coordinate(study)
-        # fig_parallel.write_html(os.path.join(DESTINATION_DIR, "odometry_parallel_coordinate.html"))
-        # fig_slice = optuna.visualization.plot_slice(study)
-        # fig_slice.write_html(os.path.join(DESTINATION_DIR, "odometry_slice_plot.html"))
-
-
         cprint("\n📈 Visualisation plots saved:", "blue")
         cprint(f" - odometry_optimisation_history.html", "cyan")
         cprint(f" - odometry_param_importances.html", "cyan")
-        # cprint(f" - odometry_parallel_coordinate.html", "cyan")
-        # cprint(f" - odometry_slice_plot.html\n", "cyan")
+        cprint(f" - odometry_parallel_coordinate.html", "cyan")
+        cprint(f" - odometry_slice_plot.html\n", "cyan")
 
     except Exception as e:
         cprint(f"\nCould not generate visualisation plots: {e}", "yellow")
