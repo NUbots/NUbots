@@ -36,6 +36,96 @@
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
+// -------------------------------------------------------------------------
+// Embedded HungarianAlgorithm directly so no extra files are needed
+// -------------------------------------------------------------------------
+namespace {
+    class HungarianAlgorithm {
+    public:
+        HungarianAlgorithm()  = default;
+        ~HungarianAlgorithm() = default;
+
+        // Solve the rectangular assignment problem.
+        //   costMatrix: M×L matrix (rows = detections, cols = landmarks)
+        //   Assignment: output vector of length M, where Assignment[i] = j or -1 if no match
+        // Returns the total minimal cost.
+        double Solve(const std::vector<std::vector<double>>& costMatrix, std::vector<int>& Assignment) {
+
+            const int M = costMatrix.size();
+            const int L = costMatrix[0].size();
+            const int N = std::max(M, L);
+
+            // Build an N×N matrix, padding with a large constant
+            const double INF = std::numeric_limits<double>::max() / 2;
+            std::vector<std::vector<double>> m(N, std::vector<double>(N, INF));
+            for (int i = 0; i < M; ++i) {
+                for (int j = 0; j < L; ++j) {
+                    m[i][j] = costMatrix[i][j];
+                }
+            }
+
+            // Dual variables
+            std::vector<double> u(N + 1, 0), v(N + 1, 0);
+            // p[j] = which row is assigned to column j
+            std::vector<int> p(N + 1, 0), way(N + 1, 0);
+
+            // Hungarian algorithm in O(N^3)
+            for (int i = 1; i <= N; ++i) {
+                p[0]   = i;
+                int j0 = 0;
+                std::vector<double> minv(N + 1, INF);
+                std::vector<char> used(N + 1, false);
+                do {
+                    used[j0] = true;
+                    int i0 = p[j0], j1 = 0;
+                    double delta = INF;
+                    for (int j = 1; j <= N; ++j) {
+                        if (!used[j]) {
+                            double cur = m[i0 - 1][j - 1] - u[i0] - v[j];
+                            if (cur < minv[j]) {
+                                minv[j] = cur;
+                                way[j]  = j0;
+                            }
+                            if (minv[j] < delta) {
+                                delta = minv[j];
+                                j1    = j;
+                            }
+                        }
+                    }
+                    for (int j = 0; j <= N; ++j) {
+                        if (used[j]) {
+                            u[p[j]] += delta;
+                            v[j] -= delta;
+                        }
+                        else {
+                            minv[j] -= delta;
+                        }
+                    }
+                    j0 = j1;
+                } while (p[j0] != 0);
+
+                // Augmenting path
+                do {
+                    int j1 = way[j0];
+                    p[j0]  = p[j1];
+                    j0     = j1;
+                } while (j0);
+            }
+
+            // Build the assignment vector for the first M rows
+            Assignment.assign(M, -1);
+            for (int j = 1; j <= N; ++j) {
+                if (p[j] >= 1 && p[j] <= M && j <= L) {
+                    Assignment[p[j] - 1] = j - 1;
+                }
+            }
+
+            // Total minimal cost is -v[0]
+            return -v[0];
+        }
+    };
+}  // namespace
+
 namespace module::localisation {
 
     using extension::Configuration;
@@ -288,47 +378,44 @@ namespace module::localisation {
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
-        // Field intersection measurement associated with a landmark (known landmark, intersection detection)
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
 
-        // Occupied landmarks
-        std::vector<Eigen::Vector3d> occupied_landmarks{};
+        const auto& dets = field_intersections->intersections;
+        size_t M         = dets.size();
+        size_t L         = landmarks.size();
+        size_t N         = std::max(M, L);
 
-        // Check each field intersection measurement and find the closest landmark
-        for (const auto& intersection : field_intersections->intersections) {
-            double min_distance = std::numeric_limits<double>::max();
-            Eigen::Vector3d closest_landmark;
-            bool found_association = false;
-
-            // Transform the detected intersection from world to field coordinates
-            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
-
-            for (const auto& landmark : landmarks) {
-                // If the landmark is the same type as our measurement and we haven't already assigned it
-                if (landmark.type == intersection.type
-                    && std::find(occupied_landmarks.begin(), occupied_landmarks.end(), landmark.rLFf)
-                           == occupied_landmarks.end()) {
-                    // Calculate Euclidean distance between the detected intersection and the landmark
-                    double distance = (landmark.rLFf - rIFf).norm();
-
-                    // If this landmark is closer and within the maximum association distance, update the association
-                    if (distance < min_distance && distance <= cfg.max_association_distance) {
-                        min_distance      = distance;
-                        closest_landmark  = landmark.rLFf;
-                        found_association = true;
+        // 1) Build and pad cost matrix
+        const double INF = cfg.max_association_distance + 1.0;
+        std::vector<std::vector<double>> cost(N, std::vector<double>(N, INF));
+        for (size_t i = 0; i < M; ++i) {
+            Eigen::Vector3d rIFf = Hfw * dets[i].rIWw;
+            for (size_t j = 0; j < L; ++j) {
+                if (landmarks[j].type == dets[i].type) {
+                    double d = (landmarks[j].rLFf - rIFf).norm();
+                    if (d <= cfg.max_association_distance) {
+                        cost[i][j] = d;
                     }
                 }
             }
-
-            // Mark the closest landmark as occupied if within the distance threshold
-            if (found_association) {
-                occupied_landmarks.push_back(closest_landmark);
-                associations.emplace_back(closest_landmark, rIFf);
-            }
         }
 
+        // 2) Solve with Hungarian
+        HungarianAlgorithm hung;
+        std::vector<int> assignment;
+        hung.Solve(cost, assignment);
+
+        // 3) Collect valid matches
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+        for (size_t i = 0; i < M; ++i) {
+            int j = (i < assignment.size() ? assignment[i] : -1);
+            if (j >= 0 && j < (int) L && cost[i][j] < INF) {
+                Eigen::Vector3d rIFf = Hfw * dets[i].rIWw;
+                associations.emplace_back(landmarks[j].rLFf, rIFf);
+            }
+        }
         return associations;
     }
+
 
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
         const Eigen::Vector3d& initial_guess,
