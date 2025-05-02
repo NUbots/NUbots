@@ -78,7 +78,7 @@ namespace module::platform {
             int id;
 
             /// @brief Name of the servo
-            std::string name;
+            std::string servo_name;
 
             double p_gain = 32.0 / 255.0;
             // `i` and `d` gains are always 0
@@ -137,7 +137,7 @@ namespace module::platform {
             emit(std::move(image));
             auto end      = NUClear::clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
-            log<NUClear::DEBUG>("Rendering took", duration, "ms");
+            log<DEBUG>("Rendering took", duration, "ms");
         }
     };
 

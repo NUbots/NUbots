@@ -70,6 +70,7 @@ namespace module::actuation {
                     // Emit the request to move the servo
                     emit(std::make_unique<ServoTarget>(servo.command.time,
                                                        ID,
+                                                       id_to_joint_name[ID],
                                                        servo.command.position,
                                                        servo.command.state.gain,
                                                        servo.command.state.torque));

@@ -1,5 +1,7 @@
 #include "Mujoco.hpp"
 
+#include <X11/Xlib.h>
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
@@ -43,20 +45,33 @@ namespace module::platform {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.world_path  = config["world_path"].as<std::string>();
             // init GLFW
+            XInitThreads();  // Add this at the top after including <X11/Xlib.h>
             if (!glfwInit()) {
                 mju_error("Could not initialize GLFW");
             }
 
-            // create invisible window, single-buffered
+            // After glfwInit(), modify the window hints:
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // Changed from CORE_PROFILE
             glfwWindowHint(GLFW_VISIBLE, 0);
             glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+            glfwWindowHint(GLFW_X11_XCB_VULKAN_SURFACE, 0);
+
+            // Create window with explicit sharing context
             window = glfwCreateWindow(W, H, "Invisible window", NULL, NULL);
             if (!window) {
-                mju_error("Could not create GLFW window");
+                const char* description;
+                int code = glfwGetError(&description);
+                log<ERROR>("Could not create GLFW window: ", description, " (error code: ", code, ")");
+                glfwTerminate();
+                return;
             }
 
-            // make context current
+            // Make context current
             glfwMakeContextCurrent(window);
+
+            // Initialize GLAD or similar OpenGL loader here if you're using one
 
             // load and compile
             char error[1000] = "Could not load binary model";
@@ -80,30 +95,27 @@ namespace module::platform {
 
             // get initial joint positions from configuration
             auto initial_positions = config["initial_joint_positions"].as<std::map<std::string, double>>();
-
-            Eigen::Vector3d pos  = Eigen::Vector3d(config["initial_floating_base"]["pos"].as<Expression>());
-            Eigen::VectorXd quat = Eigen::VectorXd(config["initial_floating_base"]["quat"].as<Expression>());
-            d->qpos[0]           = pos.x();
-            d->qpos[1]           = pos.y();
-            d->qpos[2]           = pos.z();
-            d->qpos[3]           = quat(0);
-            d->qpos[4]           = quat(1);
-            d->qpos[5]           = quat(2);
-            d->qpos[6]           = quat(3);
             // set initial joint positions in qpos and servo state
+            d->qpos[0] = config["floating_base"]["x_pos"].as<double>();
+            d->qpos[1] = config["floating_base"]["y_pos"].as<double>();
+            d->qpos[2] = config["floating_base"]["z_pos"].as<double>();
+            d->qpos[3] = config["floating_base"]["x_quat"].as<double>();
+            d->qpos[4] = config["floating_base"]["y_quat"].as<double>();
+            d->qpos[5] = config["floating_base"]["z_quat"].as<double>();
+            d->qpos[6] = config["floating_base"]["w_quat"].as<double>();
             for (auto& joint : initial_positions) {
                 int id = mj_name2id(m, mjOBJ_JOINT, joint.first.c_str());
-                log<NUClear::INFO>("Joint name:", joint.first, "ID:", id);
+                log<INFO>("Joint name:", joint.first, "ID:", id);
                 if (id != -1) {
                     d->qpos[m->jnt_qposadr[id]]            = joint.second;
                     servo_state[joint.first].id            = id;
-                    servo_state[joint.first].name          = joint.first;
+                    servo_state[joint.first].servo_name    = joint.first;
                     servo_state[joint.first].goal_position = joint.second;
                     servo_state[joint.first].p_gain        = 5;
                     servo_state[joint.first].d_gain        = 0;
                 }
                 else {
-                    log<NUClear::WARN>("Joint name not found in model:", joint.first);
+                    log<WARN>("Joint name not found in model:", joint.first);
                 }
             }
 
@@ -123,7 +135,7 @@ namespace module::platform {
             // set rendering to offscreen buffer
             mjr_setBuffer(mjFB_OFFSCREEN, &con);
             if (con.currentBuffer != mjFB_OFFSCREEN) {
-                log<NUClear::WARN>("Offscreen rendering not supported, using default/window framebuffer");
+                log<WARN>("Offscreen rendering not supported, using default/window framebuffer");
             }
 
             // get size of active renderbuffer
@@ -135,65 +147,67 @@ namespace module::platform {
             rgb   = (unsigned char*) std::malloc(3 * W * H);
             depth = (float*) std::malloc(sizeof(float) * W * H);
             if (!rgb) {
-                log<NUClear::ERROR>("Could not allocate buffers");
+                log<ERROR>("Could not allocate buffers");
             }
 
-            // render
-            emit(std::make_unique<Render>());
-
-            current_real_time = NUClear::clock::now();
-
-            // Pause RTF
-            // emit<Scope::DIRECT>(
+            // freeze NUClear clock
+            // emit<Scope::INLINE>(
             //     std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-            //                                                    0,
-            //                                                    NUClear::message::TimeTravel::Action::RELATIVE));
+            //                                                    0.0,
+            //                                                    NUClear::message::TimeTravel::Action::ABSOLUTE));
+
+
+            // render
+            render();
+            // emit(std::make_unique<Render>());
         });
 
-        on<Startup>().then("Mujoco Startup", [this] {
-            // emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
-            //     NUClear::clock::now() + std::chrono::milliseconds(1000 / UPDATE_FREQUENCY + 10),
-            //     0,
-            //     NUClear::message::TimeTravel::Action::ABSOLUTE));
-        });
-
-        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH, Sync<ServoState>>().then(
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
             "Simulator Update Loop",
             [this] {
-                real_delta =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(NUClear::clock::now() - current_real_time)
-                        .count()
-                    / 1e9;
-                current_real_time = NUClear::clock::now();
-
-                double next_sim_step = d->time + real_delta;
-
-                log<NUClear::DEBUG>("Real Delta:", real_delta);
-                log<NUClear::DEBUG>("d->time:", d->time);
-
-                auto mujoco = std::make_unique<message::output::Mujoco>();
+                double sim_delta     = 1.0 / UPDATE_FREQUENCY;
+                double next_sim_step = d->time + sim_delta;
                 while (d->time < next_sim_step) {
                     // ctrl
-
                     for (auto servo : servo_state) {
-                        int joint_id = mj_name2id(m, mjOBJ_JOINT, servo.second.name.c_str());
+                        int joint_id = mj_name2id(m, mjOBJ_JOINT, servo.second.servo_name.c_str());
                         if (joint_id == -1) {
-                            log<NUClear::WARN>("Joint name not found:", servo.second.name);
+                            log<WARN>("Joint name not found:", servo.second.servo_name);
                             continue;
                         }
-                        int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR, servo.second.name.c_str());
+                        int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR, servo.second.servo_name.c_str());
                         if (actuator_id == -1) {
-                            log<NUClear::WARN>("Actuator not found for joint:", servo.second.name);
+                            log<WARN>("Actuator not found for joint:", servo.second.servo_name);
                             continue;
                         }
-                        // P control
-                        d->ctrl[actuator_id]                 = servo.second.goal_position;
-                        mujoco->servo_map[servo.second.name] = d->qpos[m->jnt_qposadr[joint_id]];
+                        // PD control
+                        d->ctrl[actuator_id] =
+                            servo.second.p_gain * (servo.second.goal_position - d->qpos[m->jnt_qposadr[joint_id]]);
+                        // + servo.second.d_gain * (0.0 - d->qvel[m->jnt_dofadr[joint_id]]);
+                        log<DEBUG>("Joint:",
+                                   servo.second.servo_name,
+                                   "Goal:",
+                                   servo.second.goal_position,
+                                   "Current:",
+                                   d->qpos[m->jnt_qposadr[joint_id]],
+                                   "Control:",
+                                   d->ctrl[actuator_id],
+                                   "P Gain:",
+                                   servo.second.p_gain);
+                        emit(graph(servo.second.servo_name + " goal position", servo.second.goal_position));
+                        emit(graph(servo.second.servo_name + " current position", d->qpos[m->jnt_qposadr[joint_id]]));
+                        emit(graph(servo.second.servo_name + " control", d->ctrl[actuator_id]));
                     }
 
                     // advance simulation
                     mj_step(m, d);
                 }
+
+                // advance NUClear clock
+                emit<Scope::INLINE>(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::now() + std::chrono::nanoseconds(static_cast<int64_t>(sim_delta * 1e9) + 10),
+                    0.0,
+                    NUClear::message::TimeTravel::Action::ABSOLUTE));
 
                 // sensors
                 auto raw_sensors = std::make_unique<RawSensors>();
@@ -215,115 +229,43 @@ namespace module::platform {
                 }
 
                 // joint encoders
-                raw_sensors->servo.r_shoulder_pitch.goal_position = servo_state["right_shoulder_pitch"].goal_position;
                 raw_sensors->servo.r_shoulder_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_shoulder_pitch")]];
-                log<NUClear::DEBUG>("Right Shoulder Pitch:", raw_sensors->servo.r_shoulder_pitch.present_position);
-                raw_sensors->servo.l_shoulder_pitch.goal_position = servo_state["left_shoulder_pitch"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_shoulder_pitch")];
                 raw_sensors->servo.l_shoulder_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_shoulder_pitch")]];
-                raw_sensors->servo.r_shoulder_roll.goal_position = servo_state["right_shoulder_roll"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_shoulder_pitch")];
                 raw_sensors->servo.r_shoulder_roll.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_shoulder_roll")]];
-                raw_sensors->servo.l_shoulder_roll.goal_position = servo_state["left_shoulder_roll"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_shoulder_roll")];
                 raw_sensors->servo.l_shoulder_roll.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_shoulder_roll")]];
-                raw_sensors->servo.r_elbow.goal_position = servo_state["right_elbow_pitch"].goal_position;
-                raw_sensors->servo.r_elbow.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_elbow_pitch")]];
-                raw_sensors->servo.l_elbow.goal_position = servo_state["left_elbow_pitch"].goal_position;
-                raw_sensors->servo.l_elbow.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_elbow_pitch")]];
-                raw_sensors->servo.r_hip_yaw.goal_position = servo_state["right_hip_yaw"].goal_position;
-                raw_sensors->servo.r_hip_yaw.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_hip_yaw")]];
-                raw_sensors->servo.l_hip_yaw.goal_position = servo_state["left_hip_yaw"].goal_position;
-                raw_sensors->servo.l_hip_yaw.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_hip_yaw")]];
-                raw_sensors->servo.r_hip_roll.goal_position = servo_state["right_hip_roll"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_shoulder_roll")];
+                raw_sensors->servo.r_elbow.present_position   = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_elbow")];
+                raw_sensors->servo.l_elbow.present_position   = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_elbow")];
+                raw_sensors->servo.r_hip_yaw.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_hip_yaw")];
+                raw_sensors->servo.l_hip_yaw.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_hip_yaw")];
                 raw_sensors->servo.r_hip_roll.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_hip_roll [hip]")]];
-                raw_sensors->servo.l_hip_roll.goal_position = servo_state["left_hip_roll"].goal_position;
-                raw_sensors->servo.l_hip_roll.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_hip_roll [hip]")]];
-                raw_sensors->servo.r_hip_pitch.goal_position = servo_state["right_hip_pitch"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_hip_roll")];
+                raw_sensors->servo.l_hip_roll.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_hip_roll")];
                 raw_sensors->servo.r_hip_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_hip_pitch")]];
-                raw_sensors->servo.l_hip_pitch.goal_position = servo_state["left_hip_pitch"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_hip_pitch")];
                 raw_sensors->servo.l_hip_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_hip_pitch")]];
-                raw_sensors->servo.r_knee.goal_position = servo_state["right_knee_pitch"].goal_position;
-                raw_sensors->servo.r_knee.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_knee_pitch")]];
-                raw_sensors->servo.l_knee.goal_position = servo_state["left_knee_pitch"].goal_position;
-                raw_sensors->servo.l_knee.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_knee_pitch")]];
-                raw_sensors->servo.r_ankle_pitch.goal_position = servo_state["right_ankle_pitch"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_hip_pitch")];
+                raw_sensors->servo.r_knee.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_knee")];
+                raw_sensors->servo.l_knee.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_knee")];
                 raw_sensors->servo.r_ankle_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_ankle_pitch")]];
-                raw_sensors->servo.l_ankle_pitch.goal_position = servo_state["left_ankle_pitch"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_ankle_pitch")];
                 raw_sensors->servo.l_ankle_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_ankle_pitch")]];
-                raw_sensors->servo.r_ankle_roll.goal_position = servo_state["right_ankle_roll"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_ankle_pitch")];
                 raw_sensors->servo.r_ankle_roll.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "right_ankle_roll")]];
-                raw_sensors->servo.l_ankle_roll.goal_position = servo_state["left_ankle_roll"].goal_position;
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_ankle_roll")];
                 raw_sensors->servo.l_ankle_roll.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "left_ankle_roll")]];
-                raw_sensors->servo.neck_yaw.goal_position = servo_state["neck_yaw"].goal_position;
-                raw_sensors->servo.neck_yaw.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "neck_yaw")]];
-                raw_sensors->servo.neck_pitch.goal_position = servo_state["head_pitch"].goal_position;
-                raw_sensors->servo.neck_pitch.present_position =
-                    d->qpos[m->jnt_qposadr[mj_name2id(m, mjOBJ_JOINT, "head_pitch")]];
+                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_ankle_roll")];
+                raw_sensors->servo.neck_yaw.present_position   = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "neck_yaw")];
+                raw_sensors->servo.neck_pitch.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "neck_pitch")];
 
-
-                emit(raw_sensors);
+                emit(std::move(raw_sensors));
 
                 // render
                 // render();
-
-
                 emit(std::make_unique<Render>());
-
-                Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
-                Hwt.translation()     = Eigen::Vector3d(d->qpos[0], d->qpos[1], d->qpos[2]);
-                Hwt.linear() = Eigen::Quaterniond(d->qpos[3], d->qpos[4], d->qpos[5], d->qpos[6]).toRotationMatrix();
-                mujoco->Htw  = Hwt.inverse();
-                emit(mujoco);
-
-                // // Save our previous deltas
-                // const uint32_t prev_sim_delta  = sim_delta;
-                // const uint64_t prev_real_delta = real_delta;
-
-                // // Update our current deltas
-                // real_delta =
-                //     std::chrono::duration_cast<std::chrono::nanoseconds>(NUClear::clock::now() - current_real_time)
-                //         .count()
-                //     / 1e9;
-                // sim_delta = d->time - current_sim_time;
-
-                // // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas,
-                // // smoothed
-                // const double ratio =
-                //     static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta +
-                //     prev_real_delta);
-
-                // // Exponential filter to do the smoothing
-                // rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
-                // log<NUClear::DEBUG>("RTF:", rtf);
-                // log<NUClear::DEBUG>("Sim Delta:", sim_delta, "Real Delta:", real_delta);
-                // NUClear::clock::set_clock(NUClear::clock::now(), rtf);
-
-                // // Update our current times
-                // current_sim_time  = d->time;
-                // current_real_time = NUClear::clock::now();
-
-
-                // emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
-                //     NUClear::clock::now() + std::chrono::milliseconds(1000 / UPDATE_FREQUENCY + 10),
-                //     0,
-                //     NUClear::message::TimeTravel::Action::ABSOLUTE));
             });
 
         // This trigger updates our current servo state
@@ -332,7 +274,7 @@ namespace module::platform {
                 // Loop through each of our commands
                 for (const auto& target : targets.targets) {
                     servo_state[target.name].id            = target.id;
-                    servo_state[target.name].name          = target.name;
+                    servo_state[target.name].servo_name    = target.name;
                     servo_state[target.name].p_gain        = target.gain;
                     servo_state[target.name].goal_position = target.position;
                 }
@@ -341,7 +283,7 @@ namespace module::platform {
         on<Trigger<ServoTarget>, Priority::HIGH>().then([this](const ServoTarget& target) {
             auto targets = std::make_unique<ServoTargets>();
             targets->targets.emplace_back(target);
-            emit<Scope::DIRECT>(targets);
+            emit<Scope::INLINE>(targets);
         });
 
         on<Trigger<Render>, Single>().then("Render Mujoco", [this] { render(); });
