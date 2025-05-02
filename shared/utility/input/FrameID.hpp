@@ -28,6 +28,7 @@
 #ifndef UTILITY_INPUT_FRAMEID_HPP
 #define UTILITY_INPUT_FRAMEID_HPP
 
+#include <cstdint>
 #include <set>
 #include <string>
 

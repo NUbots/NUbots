@@ -38,6 +38,7 @@
 #include "behaviour/RunReason.hpp"
 #include "behaviour/TaskData.hpp"
 #include "behaviour/commands.hpp"
+#include "behaviour/task_types.hpp"
 
 namespace extension::behaviour {
 
@@ -403,26 +404,6 @@ namespace extension::behaviour {
     };
 
     /**
-     * This is a special task that should be emitted when a Provider finishes the task it was given.
-     * When this is emitted the director will re-execute the Provider which caused this task to run.
-     *
-     * ```
-     * emit<Task>(std::make_unique<Done>());
-     * ```
-     */
-    struct Done {};
-
-    /**
-     * This is a special task that should be emitted when a Provider doesn't want to change what it is doing.
-     * When this is emitted the director will just continue with whatever was previously emitted by this provider.
-     *
-     * ```
-     * emit<Task>(std::make_unique<Continue>());
-     * ```
-     */
-    struct Continue {};
-
-    /**
      * A reactor subtype that can be used when making a behaviour reactor.
      *
      * It exposes the additional DSL words that are added by the Behaviour DSL so they can be used without the need for
@@ -453,6 +434,7 @@ namespace extension::behaviour {
         using RunState  = ::extension::behaviour::RunState;
         using Done      = ::extension::behaviour::Done;
         using Continue  = ::extension::behaviour::Continue;
+        using Wait      = ::extension::behaviour::Wait;
     };
 
 }  // namespace extension::behaviour

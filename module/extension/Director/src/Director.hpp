@@ -57,6 +57,12 @@ namespace module::extension {
         static constexpr int concurrency = 1;
 
     private:
+        /// A request to run the specified provider, after a `Wait` task's time has elapsed
+        struct WaitFinished {
+            /// The provider to run after the `Wait` task's time has elapsed
+            std::shared_ptr<component::Provider> provider;
+        };
+
         /**
          * Adds a Provider for a type
          *
@@ -426,5 +432,12 @@ namespace module::extension {
     };
 
 }  // namespace module::extension
+
+// Director stats (eg trace) are turned off on normal BehaviourTasks, we do this to WaitFinished as well
+// This is due to computational issues when stats are on in the Director
+namespace NUClear::dsl::operation {
+    template <>
+    struct EmitStats<module::extension::Director::WaitFinished> : std::false_type {};
+}  // namespace NUClear::dsl::operation
 
 #endif  // MODULE_EXTENSION_DIRECTOR_HPP

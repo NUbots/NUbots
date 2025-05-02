@@ -3,10 +3,9 @@ log_level: INFO
 
 # General playing tuning values for walking
 max_translational_velocity_x: 0.175
-min_translational_velocity_x: -0.1
 max_translational_velocity_y: 0.1
-min_translational_velocity_y: -0.1
 max_angular_velocity: 0.4
+starting_velocity: 0.005
 acceleration: 0.01 # maximum increment in walk command velocity
 
 # Rotate on the spot tuning values
@@ -24,6 +23,11 @@ min_align_radius: 0.4 # Radius [m] to stay aligning with the target heading
 max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
 min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
 strafe_gain: 0.4
+max_strafe_angle: 65 * pi / 180 # Maximum angle to strafe at
+max_aligned_angle: 100 * pi / 180 # Maximum angle to be considered aligned
+backward_buffer: 10 * pi / 180 # Buffer angle to keep direction of strafe
+backwards_vector: [-1.0, 0.001] # Vector to walk backwards
+acceleration_multiplier: 0.5
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.5

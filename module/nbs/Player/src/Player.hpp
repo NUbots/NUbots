@@ -63,53 +63,49 @@ namespace module::nbs {
         // Our deserialisation functions that convert the messages and emit them
         std::map<uint64_t, std::function<void(utility::nbs::Decoder&)>> emitters;
 
-        /// Register the functions that will decode and emit the message types
-        void register_emitters();
-
         /// NBS file decoder
         utility::nbs::Decoder decoder;
-
-        /// Playback mode
-        message::nbs::player::PlaybackMode mode = message::nbs::player::PlaybackMode::REALTIME;
-
-        /// Playback speed (clock rtf)
-        double playback_speed = 1;
-
         /// NBS file iterator
         utility::nbs::Decoder::Iterator decoder_iterator = decoder.begin();
 
         /// Mutex for the decoder and idle mutex logic
         std::mutex decoder_mutex;
-
-        /// Idle handle
-        NUClear::threading::ReactionHandle idle_handle;
-
-        /// On always main loop handle
-        NUClear::threading::ReactionHandle main_loop_handle;
-
-        /// Target time for the next message emit
-        NUClear::clock::time_point target_emit_time;
-
         /// Condition variable to signal when the decoder loop should continue
         std::condition_variable cv;
+        /// Idle handle
+        NUClear::threading::ReactionHandle skip_idle_player_handle;
+        /// On always main loop handle
+        NUClear::threading::ReactionHandle realtime_player_handle;
 
+        /// Player mode
+        message::nbs::player::PlaybackMode mode = message::nbs::player::PlaybackMode::UNKNOWN;
+        /// Player playback speed (clock rtf)
+        double playback_speed = 1;
         /// The total number of messages in the NBS file being played
         uint64_t total_messages = 0;
-
         /// The earliest timestamp across all files in the player
         NUClear::clock::time_point start_time = NUClear::clock::time_point::max();
-
         /// The latest timestamp across all files in the player
         NUClear::clock::time_point end_time = NUClear::clock::time_point::min();
+        /// Target time for the next message emit
+        NUClear::clock::time_point target_emit_time;
+        /// Playback state
+        message::nbs::player::PlaybackState::State playback_state = message::nbs::player::PlaybackState::State::ENDED;
+
+        /// Register the functions that will decode and emit the message types
+        void register_emitters();
 
         /// Tries to emit the next message from the decoder if it is time
         void emit_next_message();
 
-        /// Adds and enables idle handle, which will run when the system is idle and try to emit the next message
-        void enable_idle_handle();
+        /// Emits the playback state
+        void emit_playback_state();
 
-        /// Adds and enable main loop handle, which will always run trying to emit the next message
-        void enable_main_loop_handle();
+        /// Adds and enables skip idle player, which will run when the system is idle and try to emit the next message
+        void enable_skip_idle_player();
+
+        /// Adds and enable realtime player, which will always run trying to emit the next message
+        void enable_realtime_player();
     };
 
 }  // namespace module::nbs
