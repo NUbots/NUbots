@@ -47,8 +47,8 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase    = message::input::GameState::Data::Phase;
-    using GameMode = message::input::GameState::Data::Mode;
+    using Phase    = message::input::GameState::Phase;
+    using GameMode = message::input::GameState::Mode;
     using message::input::GameState;
     using message::planning::KickTo;
     using message::purpose::CornerKickAllRounder;
@@ -95,7 +95,7 @@ namespace module::purpose {
 
                 // Check if there is GameState information, and if so act based on the current mode
                 if (game_state) {
-                    switch (game_state->data.mode.value) {
+                    switch (game_state->mode.value) {
                         case GameMode::PENALTY_SHOOTOUT:
                             emit<Task>(std::make_unique<PenaltyShootoutAllRounder>());
                             break;
