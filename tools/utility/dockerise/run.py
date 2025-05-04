@@ -197,6 +197,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         for v in kwargs["volume"]:
             docker_args.extend(["--volume", v])
 
+        if kwargs["shm_size"] is not None:
+            docker_args.extend(["--shm-size", kwargs["shm_size"]])
+
         # Pass through GPUs if requested
         if kwargs["gpus"] is not None:
             docker_args.extend(["--gpus", kwargs["gpus"]])

@@ -49,6 +49,7 @@ def register(func, image, **kwargs):
         command.add_argument("--volume", default=[], action="append", help="--volume commands to pass to docker run")
         command.add_argument("--gpus", help="--gpus commands to pass to docker run")
         command.add_argument("--device", default=[], action="append", help="--device commands to pass to docker run")
+        command.add_argument("--shm_size", help="--shm_size commands to pass to docker run")
 
         func(command)
 
