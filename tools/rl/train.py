@@ -8,9 +8,11 @@ from datetime import datetime
 
 import jax
 import mujoco
+import numpy as np
 from brax.training.agents.ppo import networks as ppo_networks
 from brax.training.agents.ppo import train as ppo
 from jax import numpy as jp
+from ml_collections import config_dict
 from mujoco_playground import registry, wrapper
 from mujoco_playground._src.gait import draw_joystick_command
 from mujoco_playground.config import locomotion_params
@@ -51,7 +53,29 @@ def train_bipedal_joystick_policy():
     env_name = 'NugusJoystick'
     env = Joystick()
     env_cfg = default_config()
-    ppo_params = locomotion_params.brax_ppo_config(env_name)
+    ppo_params = config_dict.create(
+        num_timesteps=100_000_000,
+        num_evals=1,
+        reward_scaling=1.0,
+        episode_length=env_cfg.episode_length,
+        normalize_observations=True,
+        action_repeat=1,
+        unroll_length=20,
+        num_minibatches=32,
+        num_updates_per_batch=4,
+        discounting=0.97,
+        learning_rate=3e-4,
+        entropy_cost=1e-2,
+        num_envs=8192,
+        batch_size=256,
+        max_grad_norm=1.0,
+        network_factory=config_dict.create(
+            policy_hidden_layer_sizes=(128, 128, 128, 128),
+            value_hidden_layer_sizes=(256, 256, 256, 256, 256),
+            policy_obs_key="state",
+            value_obs_key="state",
+        ),
+    )
 
     # Get domain randomizer if available
     randomizer = registry.get_domain_randomizer(env_name)
