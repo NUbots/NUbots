@@ -167,14 +167,7 @@ jobs:
       - name: Configure the code
         run: |
           mkdir -p build
-          cd build
-          cmake .. -GNinja \
-                   -DCMAKE_BUILD_TYPE=Release \
-                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-                   -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
-                   -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
-                   -DCI_BUILD=ON \
-                   -DBUILD_TESTS=ON
+          ./b configure
 
       # The tool requires some cmake variables, but configure needs to be run again after this role is made
       # Therefore run configure twice, on either side of the unused role
@@ -182,20 +175,10 @@ jobs:
         run: ./b unused
 
       - name: Configure the code
-        run: |
-          cd build
-          cmake .. -GNinja \
-                   -DCMAKE_BUILD_TYPE=Release \
-                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-                   -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
-                   -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
-                   -DCI_BUILD=ON \
-                   -DBUILD_TESTS=ON
+        run: ./b configure
 
       - name: Build the code
-        run: |
-          cd build
-          ninja
+        run: ./b build --build-dir build
 
       - name: Test the code
         run: |
