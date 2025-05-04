@@ -28,6 +28,8 @@ import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
 import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history";
 import { LocalisationRobotModel } from "./robot_model";
+import { CovarianceEllipsoid } from "./r3f_components/covariance_ellipsoid";
+
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -58,11 +60,10 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                this.props.model.field.fieldType === option.value
-                  ? "hover:bg-auto-contrast-1"
-                  : "hover:bg-auto-contrast-1"
-              }`}
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -358,10 +359,21 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         objects={robot.rRFf.map((r) => ({
           position: r,
         }))}
-        defaultHeight={0.8}
-        defaultRadius={0.1}
+        defaultHeight={0.05}
+        defaultRadius={0.05}
         defaultColor="orange"
       />
+
+      {robot.robots.map(other => (
+        <CovarianceEllipsoid
+          key={`cov-${other.id}`}
+          // centre in **field** coordinates – same transform you use for rRFf
+          position={other.rRWw.applyMatrix4(robot.Hfw)}
+          covariance={other.covariance}
+          scaleFactor={2}     // 2 σ by default; tweak if you like
+          color="yellow"
+        />
+      ))}
 
       {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
 

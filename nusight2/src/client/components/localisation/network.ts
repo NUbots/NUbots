@@ -2,6 +2,7 @@ import { action } from "mobx";
 import * as THREE from "three";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
+import { Matrix2 } from "../../../shared/math/matrix2";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
@@ -125,6 +126,7 @@ export class LocalisationNetwork {
     robot.robots = localisation_robots.robots.map((localisation_robot) => ({
       id: localisation_robot.id!,
       rRWw: Vector3.from(localisation_robot.rRWw),
+      covariance: Matrix4.from(localisation_robot.covariance),
     }));
   }
 
