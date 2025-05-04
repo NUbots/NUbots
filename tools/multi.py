@@ -51,15 +51,6 @@ def register(command):
     command.add_argument("--single_team", action="store_true", default=False, help="Run all robots on the same team")
     command.add_argument("args", nargs="*", help="the command and any arguments that should be used for the execution")
 
-
-def run(**kwargs):
-    with terminal_reset():
-        try:
-            asyncio.run(async_run(**kwargs))
-        except KeyboardInterrupt:
-            exec_stop()
-
-
 # Global to store the original terminal settings
 original_termios_settings = None
 
@@ -110,67 +101,70 @@ async def run_process(name, command, colour):
 
 
 # Runs the requested number of robots with the `./b run` command
-async def async_run(role, num_robots=1, single_team=False, **kwargs):
+async def run(role, num_robots=1, single_team=False, **kwargs):
+    with terminal_reset():
+        try:
+            # Initialise colorama for Windows support
+            init(autoreset=True)
+            # Robot colours based on the team and player id (up to 10 players per team)
+            ROBOT_COLOURS = [
+                Fore.RED,
+                Fore.GREEN,
+                Fore.YELLOW,
+                Fore.BLUE,
+                Fore.MAGENTA,
+                Fore.CYAN,
+                Fore.WHITE,
+                Fore.LIGHTBLACK_EX,
+                Fore.LIGHTWHITE_EX,
+                Fore.LIGHTYELLOW_EX,
+            ]
 
-    # Initialise colorama for Windows support
-    init(autoreset=True)
-    # Robot colours based on the team and player id (up to 10 players per team)
-    ROBOT_COLOURS = [
-        Fore.RED,
-        Fore.GREEN,
-        Fore.YELLOW,
-        Fore.BLUE,
-        Fore.MAGENTA,
-        Fore.CYAN,
-        Fore.WHITE,
-        Fore.LIGHTBLACK_EX,
-        Fore.LIGHTWHITE_EX,
-        Fore.LIGHTYELLOW_EX,
-    ]
+            def build_command(role, args, webots_port, player_id, team_id):
+                return [
+                    "./b",
+                    "run",
+                    role,
+                    *args,
+                    "--webots_port",
+                    str(webots_port),
+                    "--player_id",
+                    str(player_id),
+                    "--team_id",
+                    str(team_id),
+                ]
 
-    def build_command(role, args, webots_port, player_id, team_id):
-        return [
-            "./b",
-            "run",
-            role,
-            *args,
-            "--webots_port",
-            str(webots_port),
-            "--player_id",
-            str(player_id),
-            "--team_id",
-            str(team_id),
-        ]
+            commands = []
 
-    commands = []
+            # Loop over each robot
+            for i in range(1, num_robots + 1):
+                # Assign color based on robot number
+                robot_colour = ROBOT_COLOURS[i % len(ROBOT_COLOURS)]
 
-    # Loop over each robot
-    for i in range(1, num_robots + 1):
-        # Assign color based on robot number
-        robot_colour = ROBOT_COLOURS[i % len(ROBOT_COLOURS)]
-
-        # Add command for the first team
-        commands.append(
-            (
-                f"Robot_{NUBOTS_TEAM_ID}_{i}",
-                build_command(role, kwargs["args"], 10000 + i, i, NUBOTS_TEAM_ID),
-                robot_colour,
-            )
-        )
-
-        # Add command for the second team if not single_team
-        if not single_team:
-            commands.append(
-                (
-                    f"Robot_{NUBOTS_TEAM_ID + 1}_{i}",
-                    build_command(role, kwargs["args"], 10020 + i, i, NUBOTS_TEAM_ID + 1),
-                    robot_colour,
+                # Add command for the first team
+                commands.append(
+                    (
+                        f"Robot_{NUBOTS_TEAM_ID}_{i}",
+                        build_command(role, kwargs["args"], 10000 + i, i, NUBOTS_TEAM_ID),
+                        robot_colour,
+                    )
                 )
-            )
 
-    # Run the processes concurrently
-    await asyncio.gather(*(run_process(name, cmd, colour) for name, cmd, colour in commands))
+                # Add command for the second team if not single_team
+                if not single_team:
+                    commands.append(
+                        (
+                            f"Robot_{NUBOTS_TEAM_ID + 1}_{i}",
+                            build_command(role, kwargs["args"], 10020 + i, i, NUBOTS_TEAM_ID + 1),
+                            robot_colour,
+                        )
+                    )
 
+            # Run the processes concurrently
+            await asyncio.gather(*(run_process(name, cmd, colour) for name, cmd, colour in commands))
+
+        except KeyboardInterrupt:
+            exec_stop()
 
 # Clean up on exit
 def exec_stop():
