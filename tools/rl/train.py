@@ -132,7 +132,7 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
 
     def progress(num_steps, metrics):
         times.append(time.monotonic())
-        print(f"Step: {num_steps}, Eval Reward: {metrics.get('eval/episode_reward', 'N/A')}")
+        print(f"Step: {num_steps}, Eval #{metrics.get('eval/episode', 'N/A')}, Eval Reward: {metrics.get('eval/episode_reward', 'N/A')}")
 
     # Handle checkpoint loading
     restore_checkpoint_path = None
@@ -175,8 +175,8 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
     )
 
     if len(times) > 1:
-        print("Time to jit", times[1] - times[0])
-        print("Time to train", times[-1] - times[1])
+        print(f"Time to JIT:   {times[1] - times[0]:.2f} seconds")
+        print(f"Time to train: {times[-1] - times[1]:.2f} seconds")
 
     if play_only:
         print("Skipped training, loaded model from checkpoint")
