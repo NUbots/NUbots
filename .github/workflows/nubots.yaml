@@ -166,8 +166,16 @@ jobs:
 
       - name: Configure the code
         run: |
-          mkdir -p build
-          ./b configure
+          ./b configure --build-dir build \
+          -- \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build-type }} \
+          -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCI_BUILD=ON \
+          -DBUILD_TESTS=ON \
+          -DENABLE_COVERAGE=${{ inputs.coverage }} \
+          -DENABLE_CLANG_TIDY=${{ inputs.clang-tidy }}
 
       # The tool requires some cmake variables, but configure needs to be run again after this role is made
       # Therefore run configure twice, on either side of the unused role
@@ -175,7 +183,17 @@ jobs:
         run: ./b unused
 
       - name: Configure the code
-        run: ./b configure
+        run: |
+          ./b configure --build-dir build \
+          -- \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build-type }} \
+          -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCI_BUILD=ON \
+          -DBUILD_TESTS=ON \
+          -DENABLE_COVERAGE=${{ inputs.coverage }} \
+          -DENABLE_CLANG_TIDY=${{ inputs.clang-tidy }}
 
       - name: Build the code
         run: ./b build --build-dir build
