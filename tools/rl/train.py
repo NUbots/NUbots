@@ -23,10 +23,6 @@ from mujoco_playground._src.gait import draw_joystick_command
 from mujoco_playground.config import locomotion_params
 from orbax import checkpoint as ocp
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from nugus.joystick import Joystick, default_config
-from nugus.ppo_config import get_default_ppo_config
-
 from utility.dockerise import run_on_docker
 
 # Configure MuJoCo to use the EGL rendering backend (requires GPU)
@@ -63,20 +59,24 @@ def run(**kwargs):
 
     print(f"{'Playing' if play_only else 'Training'} a joystick policy for NUgus on device: {jax.default_backend()}")
 
-    # Setup experiment name and logging directories
-    now = datetime.now()
-    timestamp = now.strftime("%Y%m%d-%H%M%S")
-    exp_name = f"NugusJoystick-{timestamp}"
+    if not load_checkpoint_path:
+        # Setup experiment name and logging directories
+        now = datetime.now()
+        timestamp = now.strftime("%Y%m%d-%H%M%S")
+        exp_name = f"NugusJoystick-{timestamp}"
 
-    # Set up logging directory
-    logdir = epath.Path("/home/nubots/build/recordings/rl").resolve() / exp_name
-    logdir.mkdir(parents=True, exist_ok=True)
-    print(f"Logs are being stored in: {logdir}")
+        # Set up logging directory
+        logdir = epath.Path("/home/nubots/build/recordings/rl").resolve() / exp_name
+        logdir.mkdir(parents=True, exist_ok=True)
+        print(f"Logs are being stored in: {logdir}")
 
-    # Set up checkpoint directory
-    ckpt_path = logdir / "checkpoints"
-    ckpt_path.mkdir(parents=True, exist_ok=True)
-    print(f"Checkpoint path: {ckpt_path}")
+        # Set up checkpoint directory
+        ckpt_path = logdir / "checkpoints"
+        ckpt_path.mkdir(parents=True, exist_ok=True)
+        print(f"Checkpoint path: {ckpt_path}")
+    else:
+        ckpt_path = epath.Path(load_checkpoint_path)
+        print(f"Loading checkpoint from: {ckpt_path}")
 
     train_bipedal_joystick_policy(ckpt_path, play_only=play_only, load_checkpoint_path=load_checkpoint_path)
 
@@ -91,8 +91,8 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
     """
     # Choose the bipedal environment
     env_name = 'NugusJoystick'
-    env = Joystick()
-    env_cfg = default_config()
+    env = registry.load(env_name)
+    env_cfg = registry.get_default_config(env_name)
 
     # Save environment configuration if checkpoint path is provided
     if ckpt_path is not None:
@@ -100,7 +100,7 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
             json.dump(env_cfg.to_dict(), fp, indent=4)
 
     # Get PPO config and set episode length from env_cfg
-    ppo_params = get_default_ppo_config()
+    ppo_params = locomotion_params.brax_ppo_config(env_name)
     ppo_params.episode_length = env_cfg.episode_length
 
     # If in play_only mode, set num_timesteps to 0 to skip training
@@ -193,8 +193,7 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
         print(f"Saved final checkpoint to {path}")
 
     # Rollout and render
-    env = registry.load(env_name)
-    eval_env = registry.load(env_name)
+    eval_env = registry.load(env_name, config=env_cfg)
     jit_reset = jax.jit(eval_env.reset)
     jit_step = jax.jit(eval_env.step)
     jit_inference_fn = jax.jit(make_inference_fn(params, deterministic=True))
