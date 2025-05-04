@@ -49,6 +49,7 @@ def register(command):
         "--build-dir", help="The directory to build the code in", default=os.path.join(b.project_dir, "..", "build")
     )
 
+
 @run_on_docker
 def run(j, args, purge_messages, build_dir, **kwargs):
     # Change into the build directory
