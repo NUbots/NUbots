@@ -16,12 +16,11 @@
 
 from typing import Any, Dict, Optional, Union
 
-from etils import epath
 import jax
-from ml_collections import config_dict
 import mujoco
+from etils import epath
+from ml_collections import config_dict
 from mujoco import mjx
-
 from mujoco_playground._src import mjx_env
 from mujoco_playground._src.locomotion.nugus import nugus_constants as consts
 
@@ -48,11 +47,6 @@ class NugusEnv(mjx_env.MjxEnv):
             epath.Path(xml_path).read_text(), assets=get_assets()
         )
         self._mj_model.opt.timestep = config.sim_dt
-
-        # Modify PD gains.
-        self._mj_model.dof_damping[6:] = config.Kd
-        self._mj_model.actuator_gainprm[:, 0] = config.Kp
-        self._mj_model.actuator_biasprm[:, 1] = -config.Kp
 
         # Increase offscreen framebuffer size to render at higher resolutions.
         # TODO(kevin): Consider moving this somewhere else.
