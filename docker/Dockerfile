@@ -405,6 +405,7 @@ RUN install-package mesa-utils
 RUN install-package mesa-libgl
 RUN install-package libglvnd
 RUN install-package glfw-x11
+RUN install-package ffmpeg
 RUN install-from-source https://github.com/Tom0Brien/mujoco/archive/e1b4a73e845b2096cfc026afc1566233c9844b85.tar.gz
 
 # lame
