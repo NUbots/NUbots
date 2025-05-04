@@ -50,16 +50,17 @@ namespace module::platform {
                 mju_error("Could not initialize GLFW");
             }
 
-            // After glfwInit(), modify the window hints:
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // Changed from CORE_PROFILE
-            glfwWindowHint(GLFW_VISIBLE, 0);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+            glfwWindowHint(GLFW_VISIBLE, 0);  // Make window invisible
             glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
             glfwWindowHint(GLFW_X11_XCB_VULKAN_SURFACE, 0);
 
+            log<INFO>("Creating window");
+
             // Create window with explicit sharing context
-            window = glfwCreateWindow(W, H, "Invisible window", NULL, NULL);
+            window = glfwCreateWindow(W, H, "Mujoco Window", NULL, NULL);
             if (!window) {
                 const char* description;
                 int code = glfwGetError(&description);
@@ -68,10 +69,8 @@ namespace module::platform {
                 return;
             }
 
-            // Make context current
+            // Make context current in the main thread
             glfwMakeContextCurrent(window);
-
-            // Initialize GLAD or similar OpenGL loader here if you're using one
 
             // load and compile
             char error[1000] = "Could not load binary model";
@@ -90,19 +89,16 @@ namespace module::platform {
             d = mj_makeData(m);
             mj_forward(m, d);
 
-            // Update timestep
-            // m->opt.timestep = 1.0 / UPDATE_FREQUENCY;
-
             // get initial joint positions from configuration
             auto initial_positions = config["initial_joint_positions"].as<std::map<std::string, double>>();
             // set initial joint positions in qpos and servo state
-            d->qpos[0] = config["floating_base"]["x_pos"].as<double>();
-            d->qpos[1] = config["floating_base"]["y_pos"].as<double>();
-            d->qpos[2] = config["floating_base"]["z_pos"].as<double>();
-            d->qpos[3] = config["floating_base"]["x_quat"].as<double>();
-            d->qpos[4] = config["floating_base"]["y_quat"].as<double>();
-            d->qpos[5] = config["floating_base"]["z_quat"].as<double>();
-            d->qpos[6] = config["floating_base"]["w_quat"].as<double>();
+            d->qpos[0] = config["initial_floating_base"]["pos_x"].as<double>();
+            d->qpos[1] = config["initial_floating_base"]["pos_y"].as<double>();
+            d->qpos[2] = config["initial_floating_base"]["pos_z"].as<double>();
+            d->qpos[3] = config["initial_floating_base"]["quat_w"].as<double>();
+            d->qpos[4] = config["initial_floating_base"]["quat_x"].as<double>();
+            d->qpos[5] = config["initial_floating_base"]["quat_y"].as<double>();
+            d->qpos[6] = config["initial_floating_base"]["quat_z"].as<double>();
             for (auto& joint : initial_positions) {
                 int id = mj_name2id(m, mjOBJ_JOINT, joint.first.c_str());
                 log<INFO>("Joint name:", joint.first, "ID:", id);
@@ -150,12 +146,6 @@ namespace module::platform {
                 log<ERROR>("Could not allocate buffers");
             }
 
-            // freeze NUClear clock
-            // emit<Scope::INLINE>(
-            //     std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-            //                                                    0.0,
-            //                                                    NUClear::message::TimeTravel::Action::ABSOLUTE));
-
 
             // render
             render();
@@ -202,12 +192,6 @@ namespace module::platform {
                     // advance simulation
                     mj_step(m, d);
                 }
-
-                // advance NUClear clock
-                emit<Scope::INLINE>(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::now() + std::chrono::nanoseconds(static_cast<int64_t>(sim_delta * 1e9) + 10),
-                    0.0,
-                    NUClear::message::TimeTravel::Action::ABSOLUTE));
 
                 // sensors
                 auto raw_sensors = std::make_unique<RawSensors>();

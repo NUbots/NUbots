@@ -4,8 +4,13 @@ log_level: DEBUG
 world_path: "models/nugus/scene.xml"
 
 initial_floating_base:
-  pos: [0, 0, 0.473774]
-  quat: [0.994428, 0.00107808, 0.104931, -0.0100319]
+  pos_x: 0.0
+  pos_y: 0.0
+  pos_z: 0.473774
+  quat_x: -0.0100319
+  quat_y: 0.00107808
+  quat_z: 0.104931
+  quat_w: 0.994428
 
 initial_joint_positions:
   right_shoulder_pitch: 1.714

@@ -100,7 +100,11 @@ namespace module::platform {
         void render(void) {
             auto now = NUClear::clock::now();
             // std::unique_lock<std::mutex> lock(render_mutex);
-            glfwMakeContextCurrent(window);
+
+            // Ensure we're on the correct thread and context TODO: FIX THIS
+            // if (!glfwGetCurrentContext()) {
+            //     glfwMakeContextCurrent(window);
+            // }
 
             // update abstract scene
             mjv_updateScene(m, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
@@ -116,11 +120,6 @@ namespace module::platform {
             // read rgb and depth buffers
             mjr_readPixels(rgb, depth, viewport, &con);
 
-            auto image            = std::make_unique<message::input::Image>();
-            image->timestamp      = NUClear::clock::now();
-            image->dimensions.x() = W;
-            image->dimensions.y() = H;
-
             // flip the image
             for (int row = 0; row < H / 2; ++row) {
                 for (int col = 0; col < W; ++col) {
@@ -130,11 +129,20 @@ namespace module::platform {
                 }
             }
 
+            auto image            = std::make_unique<message::input::Image>();
+            image->timestamp      = NUClear::clock::now();
+            image->dimensions.x() = W;
+            image->dimensions.y() = H;
+
             std::vector<uint8_t> image_data(rgb, rgb + 3 * W * H);
             image->data.assign(image_data.begin(), image_data.end());
             image->format = utility::vision::fourcc("RGB3");
             image->name   = "Mujoco";
             emit(std::move(image));
+
+            // Swap buffers to ensure frame updates
+            glfwSwapBuffers(window);
+
             auto end      = NUClear::clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
             log<DEBUG>("Rendering took", duration, "ms");
