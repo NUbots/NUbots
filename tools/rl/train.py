@@ -11,6 +11,10 @@ import jax
 import mediapy as media
 import mujoco
 import numpy as np
+import onnxruntime as rt
+import tensorflow as tf
+import tf2onnx
+from brax.training.acme import running_statistics
 from brax.training.agents.ppo import networks as ppo_networks
 from brax.training.agents.ppo import train as ppo
 from etils import epath
@@ -21,6 +25,7 @@ from mujoco_playground import registry, wrapper
 from mujoco_playground._src.gait import draw_joystick_command
 from mujoco_playground.config import locomotion_params
 from orbax import checkpoint as ocp
+from tensorflow.keras import layers
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from nugus.joystick import Joystick, default_config
@@ -217,3 +222,160 @@ def train_bipedal_joystick_policy(ckpt_path=None):
     print(f"Rollout video saved to {video_path}")
 
     # Export final policy to onnx
+    export_policy_to_onnx(params, env, make_inference_fn, ckpt_path)
+
+def export_policy_to_onnx(params, env, make_inference_fn, ckpt_path=None):
+    """
+    Export the trained policy model to ONNX format.
+
+    Args:
+        params: The trained model parameters
+        env: The environment instance
+        make_inference_fn: Function to create the inference function
+        ckpt_path: Path to save the ONNX model
+    """
+    print("Exporting policy to ONNX format...")
+
+    # Define output path
+    output_path = ckpt_path.parent / "nugus_policy.onnx" if ckpt_path else "nugus_policy.onnx"
+
+    # Get observation and action sizes
+    obs_size = env.observation_size
+    act_size = env.action_size
+    print(f"Observation size: {obs_size}, Action size: {act_size}")
+
+    # Extract normalization parameters
+    normalizer_params = params[0] if isinstance(params, tuple) else {}
+    policy_params = params[1] if isinstance(params, tuple) else params
+
+    # Create TensorFlow model equivalent
+    mean = normalizer_params.mean["state"] if hasattr(normalizer_params, 'mean') else None
+    std = normalizer_params.std["state"] if hasattr(normalizer_params, 'std') else None
+
+    # Create TensorFlow MLP model
+    tf_policy_network = create_tf_policy_network(
+        param_size=act_size * 2,
+        mean_std=(tf.convert_to_tensor(mean), tf.convert_to_tensor(std)) if mean is not None and std is not None else None,
+        hidden_layer_sizes=ppo_params.network_factory.policy_hidden_layer_sizes if hasattr(ppo_params, 'network_factory') else [128, 128, 128, 128],
+        activation=tf.nn.swish
+    )
+
+    # Transfer weights from JAX model to TensorFlow model
+    transfer_weights(policy_params['params'], tf_policy_network)
+
+    # Define the TensorFlow input signature
+    spec = [tf.TensorSpec(shape=(1, obs_size["state"][0]), dtype=tf.float32, name="obs")]
+
+    # Set output names
+    tf_policy_network.output_names = ['continuous_actions']
+
+    # Convert to ONNX
+    model_proto, _ = tf2onnx.convert.from_keras(tf_policy_network, input_signature=spec, opset=11, output_path=str(output_path))
+
+    # Verify the ONNX model
+    providers = ['CPUExecutionProvider']
+    try:
+        m = rt.InferenceSession(str(output_path), providers=providers)
+        onnx_input = {'obs': np.ones((1, obs_size["state"][0]), dtype=np.float32)}
+        onnx_pred = m.run(['continuous_actions'], onnx_input)[0]
+        print(f"ONNX model verification: Output shape {onnx_pred.shape}")
+        print(f"ONNX model saved to {output_path}")
+    except Exception as e:
+        print(f"Error verifying ONNX model: {e}")
+
+def create_tf_policy_network(param_size, mean_std=None, hidden_layer_sizes=[128, 128, 128, 128], activation=tf.nn.relu):
+    """
+    Create a TensorFlow MLP policy network.
+
+    Args:
+        param_size: Size of the output parameters
+        mean_std: Tuple of (mean, std) for observation normalization
+        hidden_layer_sizes: List of hidden layer sizes
+        activation: Activation function
+
+    Returns:
+        TensorFlow MLP model
+    """
+    class MLP(tf.keras.Model):
+        def __init__(
+            self,
+            layer_sizes,
+            activation=tf.nn.relu,
+            kernel_init="lecun_uniform",
+            activate_final=False,
+            bias=True,
+            layer_norm=False,
+            mean_std=None,
+        ):
+            super().__init__()
+
+            self.layer_sizes = layer_sizes
+            self.activation = activation
+            self.kernel_init = kernel_init
+            self.activate_final = activate_final
+            self.bias = bias
+            self.layer_norm = layer_norm
+
+            if mean_std is not None:
+                self.mean = tf.Variable(mean_std[0], trainable=False, dtype=tf.float32)
+                self.std = tf.Variable(mean_std[1], trainable=False, dtype=tf.float32)
+            else:
+                self.mean = None
+                self.std = None
+
+            self.mlp_block = tf.keras.Sequential(name="MLP_0")
+            for i, size in enumerate(self.layer_sizes):
+                dense_layer = layers.Dense(
+                    size,
+                    activation=self.activation if i < len(self.layer_sizes) - 1 or activate_final else None,
+                    kernel_initializer=self.kernel_init,
+                    name=f"hidden_{i}",
+                    use_bias=self.bias,
+                )
+                self.mlp_block.add(dense_layer)
+                if self.layer_norm:
+                    self.mlp_block.add(layers.LayerNormalization(name=f"layer_norm_{i}"))
+
+            self.submodules = [self.mlp_block]
+
+        def call(self, inputs):
+            if isinstance(inputs, list):
+                inputs = inputs[0]
+            if self.mean is not None and self.std is not None:
+                inputs = (inputs - self.mean) / self.std
+            logits = self.mlp_block(inputs)
+            loc, _ = tf.split(logits, 2, axis=-1)
+            return tf.tanh(loc)
+
+    policy_network = MLP(
+        layer_sizes=list(hidden_layer_sizes) + [param_size],
+        activation=activation,
+        kernel_init="lecun_uniform",
+        layer_norm=False,
+        mean_std=mean_std,
+    )
+    return policy_network
+
+def transfer_weights(jax_params, tf_model):
+    """
+    Transfer weights from a JAX parameter dictionary to the TensorFlow model.
+
+    Args:
+        jax_params: JAX parameter dictionary
+        tf_model: TensorFlow model
+    """
+    for layer_name, layer_params in jax_params.items():
+        try:
+            tf_layer = tf_model.get_layer("MLP_0").get_layer(name=layer_name)
+        except ValueError:
+            print(f"Layer {layer_name} not found in TensorFlow model.")
+            continue
+        if isinstance(tf_layer, tf.keras.layers.Dense):
+            kernel = np.array(layer_params['kernel'])
+            bias = np.array(layer_params['bias'])
+            print(f"Transferring Dense layer {layer_name}, kernel shape {kernel.shape}, bias shape {bias.shape}")
+            tf_layer.set_weights([kernel, bias])
+        else:
+            print(f"Unhandled layer type in {layer_name}: {type(tf_layer)}")
+
+    print("Weights transferred successfully.")

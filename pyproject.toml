@@ -59,4 +59,6 @@ dependencies = [
     "matplotlib>=3.10.1",
     "playground",
     "jax[cuda12]>=0.5.3",
+    "tf2onnx>=1.8.4",
+    "onnxruntime>=1.21.1",
 ]
