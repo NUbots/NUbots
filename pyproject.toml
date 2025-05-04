@@ -18,6 +18,7 @@ dependencies = [
     "tqdm==4.67.1",
     "ruamel.yaml==0.18.10",
     "pytimeparse==1.1.8",
+    "colorama" = "0.4.5",
     # Formatting
     "pyproj==3.7.0",
     "black==24.10.0",
