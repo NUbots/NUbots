@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime
 
 import jax
@@ -40,15 +41,27 @@ os.environ['XLA_FLAGS'] = xla_flags
 @run_on_docker
 def register(command):
     command.description = "Train a RL joystick policy for NUgus"
+    command.add_argument("--play_only", action="store_true", help="Only run inference with a trained model without training")
+    command.add_argument("--load_checkpoint_path", type=str, help="Path to checkpoint to load for inference or continued training")
 
 @run_on_docker
 def run(**kwargs):
     """
     Trains a joystick policy for a bipedal robot using MuJoCo Playground and Brax PPO.
     """
+    play_only = kwargs.get("play_only", False)
+    load_checkpoint_path = kwargs.get("load_checkpoint_path", None)
+
     for device in jax.devices():
         print(f"Device: {device}, Type: {device.device_kind}, Platform: {device.platform}")
-    print("Started training a joystick policy for NUgus on device:", jax.default_backend())
+
+    if play_only:
+        print("Running in play-only mode - no training will be performed")
+        if not load_checkpoint_path:
+            print("Error: In play_only mode, you must specify a checkpoint to load with --load_checkpoint_path")
+            return
+
+    print(f"{'Playing' if play_only else 'Training'} a joystick policy for NUgus on device: {jax.default_backend()}")
 
     # Setup experiment name and logging directories
     now = datetime.now()
@@ -65,14 +78,16 @@ def run(**kwargs):
     ckpt_path.mkdir(parents=True, exist_ok=True)
     print(f"Checkpoint path: {ckpt_path}")
 
-    train_bipedal_joystick_policy(ckpt_path)
+    train_bipedal_joystick_policy(ckpt_path, play_only=play_only, load_checkpoint_path=load_checkpoint_path)
 
-def train_bipedal_joystick_policy(ckpt_path=None):
+def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoint_path=None):
     """
     Trains a joystick policy for a bipedal robot using MuJoCo Playground and Brax PPO.
 
     Args:
         ckpt_path: Path to save checkpoints to.
+        play_only: If True, only run inference without training.
+        load_checkpoint_path: Path to load checkpoint from.
     """
     # Choose the bipedal environment
     env_name = 'NugusJoystick'
@@ -87,6 +102,10 @@ def train_bipedal_joystick_policy(ckpt_path=None):
     # Get PPO config and set episode length from env_cfg
     ppo_params = get_default_ppo_config()
     ppo_params.episode_length = env_cfg.episode_length
+
+    # If in play_only mode, set num_timesteps to 0 to skip training
+    if play_only:
+        ppo_params.num_timesteps = 0
 
     # Get domain randomizer if available
     randomizer = registry.get_domain_randomizer(env_name)
@@ -108,18 +127,44 @@ def train_bipedal_joystick_policy(ckpt_path=None):
             orbax_checkpointer.save(path, params, force=True, save_args=save_args)
             print(f"Saved checkpoint at step {current_step} to {path}")
 
+    # Use monotonic time for more accurate timing
+    times = [time.monotonic()]
+
     def progress(num_steps, metrics):
-        times.append(datetime.now())
+        times.append(time.monotonic())
         print(f"Step: {num_steps}, Eval Reward: {metrics.get('eval/episode_reward', 'N/A')}")
 
-    times = [datetime.now()]
+    # Handle checkpoint loading
+    restore_checkpoint_path = None
+    if load_checkpoint_path is not None:
+        ckpt_path_obj = epath.Path(load_checkpoint_path)
+        if ckpt_path_obj.is_dir():
+            # Try to find latest checkpoint in directory
+            latest_ckpts = list(ckpt_path_obj.glob("*"))
+            latest_ckpts = [ckpt for ckpt in latest_ckpts if ckpt.is_dir()]
+            if latest_ckpts:
+                try:
+                    # Sort by numeric value if possible
+                    latest_ckpts.sort(key=lambda x: int(x.name))
+                except ValueError:
+                    # Otherwise sort by name
+                    latest_ckpts.sort()
+                restore_checkpoint_path = latest_ckpts[-1]
+                print(f"Restoring from latest checkpoint: {restore_checkpoint_path}")
+            else:
+                print(f"No checkpoints found in {load_checkpoint_path}")
+        else:
+            restore_checkpoint_path = ckpt_path_obj
+            print(f"Restoring from checkpoint: {restore_checkpoint_path}")
+
     # Set up the training function
     train_fn = functools.partial(
         ppo.train, **dict(ppo_training_params),
         network_factory=network_factory,
         randomization_fn=randomizer,
         progress_fn=progress,
-        policy_params_fn=policy_params_fn
+        policy_params_fn=policy_params_fn,
+        restore_checkpoint_path=restore_checkpoint_path
     )
 
     # Run training
@@ -128,13 +173,19 @@ def train_bipedal_joystick_policy(ckpt_path=None):
         eval_env=registry.load(env_name, config=env_cfg),
         wrap_env_fn=wrapper.wrap_for_brax_training,
     )
-    print("Time to jit", times[1] - times[0])
-    print("Time to train", times[-1] - times[1])
-    print("Training complete!")
-    print("Final metrics:", metrics)
+
+    if len(times) > 1:
+        print("Time to jit", times[1] - times[0])
+        print("Time to train", times[-1] - times[1])
+
+    if play_only:
+        print("Skipped training, loaded model from checkpoint")
+    else:
+        print("Training complete!")
+        print("Final metrics:", metrics)
 
     # Save final checkpoint
-    if ckpt_path is not None:
+    if ckpt_path is not None and not play_only:
         orbax_checkpointer = ocp.PyTreeCheckpointer()
         save_args = orbax_utils.save_args_from_target(params)
         path = ckpt_path / "final"
