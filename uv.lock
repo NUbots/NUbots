@@ -857,7 +857,7 @@ requires-dist = [
     { name = "opencv-contrib-python-headless", specifier = "==4.11.0.86" },
     { name = "optuna", specifier = "==4.3.0" },
     { name = "pillow", specifier = "==11.1.0" },
-    { name = "playground", git = "https://github.com/Tom0Brien/mujoco_playground" },
+    { name = "playground", git = "https://github.com/Tom0Brien/mujoco_playground?branch=obrien%2Fnugus" },
     { name = "protobuf", specifier = "==5.27.5" },
     { name = "protoc-exe", specifier = "==22.0rc1" },
     { name = "protoc-wheel-0", specifier = "==27.0" },
@@ -2012,7 +2012,7 @@ wheels = [
 [[package]]
 name = "playground"
 version = "0.0.4"
-source = { git = "https://github.com/Tom0Brien/mujoco_playground#9bcbe736177472ba35d60773e3030a36e37962b7" }
+source = { git = "https://github.com/Tom0Brien/mujoco_playground?branch=obrien%2Fnugus#f0446c32d180f414c407bfcbe1bf74fb3f45f3f7" }
 dependencies = [
     { name = "brax" },
     { name = "etils" },

@@ -7,7 +7,7 @@ line_length = 120
 known_first_party = ['b', 'utility']
 
 [tool.uv.sources]
-playground = { git = "https://github.com/Tom0Brien/mujoco_playground" }
+playground = { git = "https://github.com/Tom0Brien/mujoco_playground", branch = "obrien/nugus" }
 
 [project]
 name = "Horus"
