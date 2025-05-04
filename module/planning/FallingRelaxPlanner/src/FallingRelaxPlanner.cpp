@@ -96,7 +96,7 @@ namespace module::planning {
                                       std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
                                       cfg.gyro_mag.smoothing);
                     acc_mag   = smooth(acc_mag,  //
-                                     std::abs(a.norm() - cfg.acc_mag.mean),
+                                     std::abs(a.norm()),
                                      cfg.acc_mag.smoothing);
                     acc_angle = smooth(acc_angle,
                                        std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
@@ -107,17 +107,16 @@ namespace module::planning {
                     State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
                                             : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
                                                                               : State::FALLING;
-                    State acc_mag_state   = acc_mag < cfg.acc_mag.unstable  ? State::STABLE
-                                            : acc_mag < cfg.acc_mag.falling ? State::UNSTABLE
+                    State acc_mag_state   = acc_mag > cfg.acc_mag.unstable  ? State::STABLE
+                                            : acc_mag > cfg.acc_mag.falling ? State::UNSTABLE
                                                                             : State::FALLING;
                     State acc_angle_state = acc_angle < cfg.acc_angle.unstable  ? State::STABLE
                                             : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
                                                                                 : State::FALLING;
 
-                    // Falling if at least two of the three checks are falling
-                    bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING)
-                                   || (gyro_mag_state == State::FALLING && acc_angle_state == State::FALLING)
-                                   || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING);
+                    // Falling if both gyro and acc_mag agree
+                    bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING);
+
 
                     //////    Plots    //////
                     emit(graph("Falling sensor: x:gyro, y:acc, z:angle",
