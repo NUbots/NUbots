@@ -140,11 +140,13 @@ namespace module::localisation {
             for (const auto& tracked_robot : tracked_robots) {
                 auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
                 LocalisationRobot localisation_robot;
-                localisation_robot.id                  = tracked_robot.id;
-                localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
-                localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
-                localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
-                localisation_robot.time_of_measurement = tracked_robot.last_time_update;
+                localisation_robot.id                     = tracked_robot.id;
+                localisation_robot.rRWw                   = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+                localisation_robot.vRw                    = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
+                localisation_robot.covariance             = tracked_robot.ukf.get_covariance();
+                localisation_robot.time_of_measurement    = tracked_robot.last_time_update;
+                localisation_robot.latest_associated_rRWw = tracked_robot.latest_associated_rRWw;
+
                 localisation_robots->robots.push_back(localisation_robot);
             }
             emit(std::move(localisation_robots));
@@ -187,7 +189,8 @@ namespace module::localisation {
         closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                        cfg.ukf.noise.measurement.position,
                                        MeasurementType::ROBOT_POSITION());
-        closest_robot_itr->seen = true;
+        closest_robot_itr->seen                   = true;
+        closest_robot_itr->latest_associated_rRWw = rRWw;
     }
 
 

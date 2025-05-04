@@ -162,7 +162,7 @@ export class LocalisationRobotModel {
   @observable rIWw?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
-  @observable robots: { id: number; rRWw: Vector3, covariance: Matrix4 }[];
+  @observable robots: { id: number; rRWw: Vector3, covariance: Matrix4, latest_rRWw_measurements: Vector3 }[];
   @observable purpose: string;
   @observable associationLines?: Line[];
   @observable max_align_radius: number;
@@ -235,7 +235,7 @@ export class LocalisationRobotModel {
     ball?: { rBWw: Vector3 };
     rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
-    robots: { id: number; rRWw: Vector3,  covariance: Matrix4}[];
+    robots: { id: number; rRWw: Vector3,  covariance: Matrix4, latest_rRWw_measurements: Vector3}[];
     purpose: string;
     associationLines?: Line[];
     max_align_radius: number;
@@ -380,6 +380,12 @@ export class LocalisationRobotModel {
   @computed
   get rRFf(): Vector3[] {
     return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
+  }
+
+  /** Robot latest position measurments in field space */
+  @computed
+  get latest_rRFf_measurements(): Vector3[] {
+    return this.robots?.map((robot) => robot.latest_rRWw_measurements.applyMatrix4(this.Hfw));
   }
 
   /** Field intersections in field space */

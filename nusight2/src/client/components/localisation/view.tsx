@@ -359,9 +359,18 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         objects={robot.rRFf.map((r) => ({
           position: r,
         }))}
-        defaultHeight={0.05}
+        defaultHeight={0.051}
         defaultRadius={0.05}
         defaultColor="orange"
+      />
+
+      <FieldObjects
+        objects={robot.latest_rRFf_measurements.map((r) => ({
+          position: r,
+        }))}
+        defaultHeight={0.05}
+        defaultRadius={0.05}
+        defaultColor="blue"
       />
 
       {robot.robots.map(other => (

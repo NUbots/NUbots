@@ -127,6 +127,7 @@ export class LocalisationNetwork {
       id: localisation_robot.id!,
       rRWw: Vector3.from(localisation_robot.rRWw),
       covariance: Matrix4.from(localisation_robot.covariance),
+      latest_rRWw_measurements: Vector3.from(localisation_robot.latestAssociatedRRWw),
     }));
   }
 

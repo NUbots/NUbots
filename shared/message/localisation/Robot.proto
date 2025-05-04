@@ -50,6 +50,9 @@ message Robot {
 
     /// Homogeneous transformation matrix from world to camera space
     iso3 Hcw = 6;
+
+    /// Latest robot position observation associated with this robot
+    vec3 latest_associated_rRWw = 7;
 }
 
 message Robots {

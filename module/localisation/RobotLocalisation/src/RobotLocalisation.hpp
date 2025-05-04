@@ -74,6 +74,9 @@ namespace module::localisation {
             long missed_count = 0;
             /// @brief A unique identifier for the robot
             const unsigned long id;
+            /// Latest robot position observation associated with this robot
+            Eigen::Vector3d latest_associated_rRWw = Eigen::Vector3d::Zero();
+
 
             /// @brief Constructor that sets the state for the UKF
             TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
