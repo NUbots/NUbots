@@ -360,15 +360,14 @@ yaml = ["pyyaml (>=5.3)"]
 
 [[package]]
 name = "colorama"
-version = "0.4.6"
+version = "0.4.5"
 description = "Cross-platform colored terminal text."
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 groups = ["main"]
-markers = "platform_system == \"Windows\" or sys_platform == \"win32\""
 files = [
-    {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
-    {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+    {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
+    {file = "colorama-0.4.5.tar.gz", hash = "sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4"},
 ]
 
 [[package]]
@@ -2893,4 +2892,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "df9076d16503d14ef3b89f0485281c74be3c63567499c1888280bec6f3c1f911"
+content-hash = "03eb0cce49ac38cc253eabbe9c32d7cfcbe30b24348cf7f85050b1d6ab74bde5"
