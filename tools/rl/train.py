@@ -1,5 +1,6 @@
 import distutils.util
 import functools
+import json
 import os
 import re
 import subprocess
@@ -7,18 +8,23 @@ import sys
 from datetime import datetime
 
 import jax
+import mediapy as media
 import mujoco
 import numpy as np
 from brax.training.agents.ppo import networks as ppo_networks
 from brax.training.agents.ppo import train as ppo
+from etils import epath
+from flax.training import orbax_utils
 from jax import numpy as jp
 from ml_collections import config_dict
 from mujoco_playground import registry, wrapper
 from mujoco_playground._src.gait import draw_joystick_command
 from mujoco_playground.config import locomotion_params
+from orbax import checkpoint as ocp
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from nugus.joystick import Joystick, default_config
+from nugus.ppo_config import get_default_ppo_config
 
 from utility.dockerise import run_on_docker
 
@@ -43,39 +49,44 @@ def run(**kwargs):
     for device in jax.devices():
         print(f"Device: {device}, Type: {device.device_kind}, Platform: {device.platform}")
     print("Started training a joystick policy for NUgus on device:", jax.default_backend())
-    train_bipedal_joystick_policy()
 
-def train_bipedal_joystick_policy():
+    # Setup experiment name and logging directories
+    now = datetime.now()
+    timestamp = now.strftime("%Y%m%d-%H%M%S")
+    exp_name = f"NugusJoystick-{timestamp}"
+
+    # Set up logging directory
+    logdir = epath.Path("/home/nubots/build/recordings/rl").resolve() / exp_name
+    logdir.mkdir(parents=True, exist_ok=True)
+    print(f"Logs are being stored in: {logdir}")
+
+    # Set up checkpoint directory
+    ckpt_path = logdir / "checkpoints"
+    ckpt_path.mkdir(parents=True, exist_ok=True)
+    print(f"Checkpoint path: {ckpt_path}")
+
+    train_bipedal_joystick_policy(ckpt_path)
+
+def train_bipedal_joystick_policy(ckpt_path=None):
     """
     Trains a joystick policy for a bipedal robot using MuJoCo Playground and Brax PPO.
+
+    Args:
+        ckpt_path: Path to save checkpoints to.
     """
     # Choose the bipedal environment
     env_name = 'NugusJoystick'
     env = Joystick()
     env_cfg = default_config()
-    ppo_params = config_dict.create(
-        num_timesteps=100_000_000,
-        num_evals=1,
-        reward_scaling=1.0,
-        episode_length=env_cfg.episode_length,
-        normalize_observations=True,
-        action_repeat=1,
-        unroll_length=20,
-        num_minibatches=32,
-        num_updates_per_batch=4,
-        discounting=0.97,
-        learning_rate=3e-4,
-        entropy_cost=1e-2,
-        num_envs=8192,
-        batch_size=256,
-        max_grad_norm=1.0,
-        network_factory=config_dict.create(
-            policy_hidden_layer_sizes=(128, 128, 128, 128),
-            value_hidden_layer_sizes=(256, 256, 256, 256, 256),
-            policy_obs_key="state",
-            value_obs_key="state",
-        ),
-    )
+
+    # Save environment configuration if checkpoint path is provided
+    if ckpt_path is not None:
+        with open(ckpt_path / "config.json", "w", encoding="utf-8") as fp:
+            json.dump(env_cfg.to_dict(), fp, indent=4)
+
+    # Get PPO config and set episode length from env_cfg
+    ppo_params = get_default_ppo_config()
+    ppo_params.episode_length = env_cfg.episode_length
 
     # Get domain randomizer if available
     randomizer = registry.get_domain_randomizer(env_name)
@@ -88,6 +99,15 @@ def train_bipedal_joystick_policy():
             **ppo_params.network_factory
         )
 
+    # Define policy parameters function for saving checkpoints
+    def policy_params_fn(current_step, make_policy, params):
+        if ckpt_path is not None:
+            orbax_checkpointer = ocp.PyTreeCheckpointer()
+            save_args = orbax_utils.save_args_from_target(params)
+            path = ckpt_path / f"{current_step}"
+            orbax_checkpointer.save(path, params, force=True, save_args=save_args)
+            print(f"Saved checkpoint at step {current_step} to {path}")
+
     def progress(num_steps, metrics):
         times.append(datetime.now())
         print(f"Step: {num_steps}, Eval Reward: {metrics.get('eval/episode_reward', 'N/A')}")
@@ -98,7 +118,8 @@ def train_bipedal_joystick_policy():
         ppo.train, **dict(ppo_training_params),
         network_factory=network_factory,
         randomization_fn=randomizer,
-        progress_fn=progress
+        progress_fn=progress,
+        policy_params_fn=policy_params_fn
     )
 
     # Run training
@@ -111,6 +132,14 @@ def train_bipedal_joystick_policy():
     print("Time to train", times[-1] - times[1])
     print("Training complete!")
     print("Final metrics:", metrics)
+
+    # Save final checkpoint
+    if ckpt_path is not None:
+        orbax_checkpointer = ocp.PyTreeCheckpointer()
+        save_args = orbax_utils.save_args_from_target(params)
+        path = ckpt_path / "final"
+        orbax_checkpointer.save(path, params, force=True, save_args=save_args)
+        print(f"Saved final checkpoint to {path}")
 
     # Rollout and render
     env = registry.load(env_name)
@@ -181,6 +210,10 @@ def train_bipedal_joystick_policy():
         height=480,
         modify_scene_fns=mod_fns,
     )
-    media.show_video(frames, fps=fps, loop=False)
 
-    # Export policy to onnx
+    # Save video to file rather than displaying it
+    video_path = ckpt_path.parent / "rollout.mp4" if ckpt_path else "rollout.mp4"
+    media.write_video(video_path, frames, fps=fps)
+    print(f"Rollout video saved to {video_path}")
+
+    # Export final policy to onnx
