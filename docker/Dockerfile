@@ -477,9 +477,6 @@ RUN install -d -m 0755 /home/nubots/NUbots \
     && install -d -m 0777 /home/nubots/build \
     && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
 
-# Configure poetry to use the build directory for storage for the current user
-RUN poetry config cache-dir /home/nubots/build/poetry-cache
-
 # Configure the cache directories
 ENV CCACHE_DIR=/home/nubots/build/ccache
 
