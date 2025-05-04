@@ -51,6 +51,7 @@ def register(command):
     command.add_argument("--single_team", action="store_true", default=False, help="Run all robots on the same team")
     command.add_argument("args", nargs="*", help="the command and any arguments that should be used for the execution")
 
+
 # Global to store the original terminal settings
 original_termios_settings = None
 
@@ -165,6 +166,7 @@ async def run(role, num_robots=1, single_team=False, **kwargs):
 
         except KeyboardInterrupt:
             exec_stop()
+
 
 # Clean up on exit
 def exec_stop():
