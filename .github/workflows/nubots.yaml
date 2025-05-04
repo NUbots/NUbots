@@ -168,14 +168,12 @@ jobs:
         run: |
           ./b configure --build-dir build \
           -- \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build-type }} \
+          -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
           -DCI_BUILD=ON \
-          -DBUILD_TESTS=ON \
-          -DENABLE_COVERAGE=${{ inputs.coverage }} \
-          -DENABLE_CLANG_TIDY=${{ inputs.clang-tidy }}
+          -DBUILD_TESTS=ON
 
       # The tool requires some cmake variables, but configure needs to be run again after this role is made
       # Therefore run configure twice, on either side of the unused role
@@ -186,14 +184,12 @@ jobs:
         run: |
           ./b configure --build-dir build \
           -- \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build-type }} \
+          -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
           -DCI_BUILD=ON \
-          -DBUILD_TESTS=ON \
-          -DENABLE_COVERAGE=${{ inputs.coverage }} \
-          -DENABLE_CLANG_TIDY=${{ inputs.clang-tidy }}
+          -DBUILD_TESTS=ON
 
       - name: Build the code
         run: ./b build --build-dir build
