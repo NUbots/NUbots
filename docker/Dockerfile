@@ -447,6 +447,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES=all
 RUN install-package clinfo
 
 # Add OpenGL and GPU-related environment variables
+ENV MUJOCO_GL=egl
 ENV LIBGL_ALWAYS_INDIRECT=0
 ENV LIBGL_ALWAYS_SOFTWARE=0
 ENV DISPLAY=:0
