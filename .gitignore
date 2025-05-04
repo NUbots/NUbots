@@ -106,6 +106,4 @@ tags
 \.vscode/ipch
 .ccls-cache
 .vscode/launch.json
-
-# Datasets folder
 /datasets/
