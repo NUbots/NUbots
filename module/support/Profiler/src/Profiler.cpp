@@ -46,27 +46,28 @@ namespace module::support {
 
         on<Trigger<ReactionStatistics>>().then("Profiler", [this](const ReactionStatistics& stats) {
             // Compute the time this reaction took
-            double time =
-                1000.0
-                * (double((stats.finished - stats.started).count()) / double(NUClear::clock::duration::period::den));
+            double time = 1000.0
+                          * (double((stats.finished.nuclear_time - stats.started.nuclear_time).count())
+                             / double(NUClear::clock::duration::period::den));
 
             // Add new profile if it doesn't exist
-            if (reaction_profiles.find(stats.reaction_id) == reaction_profiles.end()) {
-                reaction_profiles[stats.reaction_id]             = ReactionProfile();
-                reaction_profiles[stats.reaction_id].reaction_id = stats.reaction_id;
-                reaction_profiles[stats.reaction_id].name        = stats.identifiers.name;
-                reaction_profiles[stats.reaction_id].reactor     = stats.identifiers.reactor;
+            if (reaction_profiles.find(stats.target.reaction_id) == reaction_profiles.end()) {
+                reaction_profiles[stats.target.reaction_id]             = ReactionProfile();
+                reaction_profiles[stats.target.reaction_id].reaction_id = stats.target.reaction_id;
+                reaction_profiles[stats.target.reaction_id].name        = stats.identifiers->name;
+                reaction_profiles[stats.target.reaction_id].reactor     = stats.identifiers->reactor;
             }
 
             // Update the profile stats for this reaction
-            reaction_profiles[stats.reaction_id].total_time += time;
-            reaction_profiles[stats.reaction_id].count++;
-            reaction_profiles[stats.reaction_id].max_time =
-                std::max(reaction_profiles[stats.reaction_id].max_time, time);
-            reaction_profiles[stats.reaction_id].min_time =
-                std::min(reaction_profiles[stats.reaction_id].min_time, time);
-            reaction_profiles[stats.reaction_id].avg_time =
-                reaction_profiles[stats.reaction_id].total_time / reaction_profiles[stats.reaction_id].count;
+            reaction_profiles[stats.target.reaction_id].total_time += time;
+            reaction_profiles[stats.target.reaction_id].count++;
+            reaction_profiles[stats.target.reaction_id].max_time =
+                std::max(reaction_profiles[stats.target.reaction_id].max_time, time);
+            reaction_profiles[stats.target.reaction_id].min_time =
+                std::min(reaction_profiles[stats.target.reaction_id].min_time, time);
+            reaction_profiles[stats.target.reaction_id].avg_time =
+                reaction_profiles[stats.target.reaction_id].total_time
+                / reaction_profiles[stats.target.reaction_id].count;
 
             // Update the total time and count for all reactions
             total_time_all += time;

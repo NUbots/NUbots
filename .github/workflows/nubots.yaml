@@ -65,6 +65,15 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Free up space on the runner
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          # Remove unneeded tools to free up more space
+          android: true
+          dotnet: true
+          haskell: true
+
       # Figure out the tag to use for the Docker image
       - name: Set Docker tag
         run: |
@@ -158,6 +167,22 @@ jobs:
       - name: Configure the code
         run: |
           mkdir -p build
+          cd build
+          cmake .. -GNinja \
+                   -DCMAKE_BUILD_TYPE=Release \
+                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+                   -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+                   -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
+                   -DCI_BUILD=ON \
+                   -DBUILD_TESTS=ON
+
+      # The tool requires some cmake variables, but configure needs to be run again after this role is made
+      # Therefore run configure twice, on either side of the unused role
+      - name: Generate Role for Unused Modules
+        run: ./b unused
+
+      - name: Configure the code
+        run: |
           cd build
           cmake .. -GNinja \
                    -DCMAKE_BUILD_TYPE=Release \

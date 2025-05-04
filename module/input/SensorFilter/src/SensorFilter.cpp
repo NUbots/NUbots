@@ -89,7 +89,6 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
-            cfg.max_servo_change = config["max_servo_change"].as<double>();
         });
 
         on<Startup>().then([this] {
@@ -230,9 +229,7 @@ namespace module::input {
 
             // Determine the current position with potential fallback to the last known good position
             double current_position = raw_servo.present_position;
-            if (previous_sensors
-                && (fabs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change
-                    || hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
+            if (previous_sensors && (hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
                 current_position = previous_sensors->servo[id].present_position;
                 NUClear::log<NUClear::LogLevel::DEBUG>("Suspected encoder error on servo ",
                                                        id,
@@ -414,6 +411,7 @@ namespace module::input {
             Hwp.translation().z() = 0;
             Hwp.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
         }
+        sensors->Hwp = Hwp;
 
         // Compute torso pose using kinematics from anchor frame (current planted foot)
         Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT

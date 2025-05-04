@@ -67,6 +67,7 @@ RUN install-package \
     python-tqdm \
     python-requests \
     base-devel \
+    clang \
     ccache \
     ninja \
     cmake \
@@ -80,11 +81,6 @@ RUN install-package \
     parallel \
     vim \
     nano
-
-# Get python to look in /usr/local for packages
-RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
-    > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-COPY etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -101,11 +97,9 @@ RUN ln -s /usr/local/bin/install-from-source.py /usr/local/bin/install-from-sour
 RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_generic_toolchain.py --prefix /usr
 
-#############################################
-### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
-#############################################
-
-RUN pip install python-magic==0.4.27
+##############################################
+### ADD NEW SYSTEM PROGRAMS/LIBRARIES HERE ###
+##############################################
 
 ################################################
 #  _____           _      _           _        #
@@ -116,6 +110,16 @@ RUN pip install python-magic==0.4.27
 ################################################
 ARG platform=generic
 ARG prefix=/usr/local
+
+# Create a python virtual environment at ${PREFIX} to decouple python packages from the system
+RUN python -m venv ${prefix}
+
+# Install python dependencies for the install-from-source script
+RUN pip install \
+    python-magic==0.4.27 \
+    requests==2.32.3 \
+    termcolor==2.5.0 \
+    tqdm==4.62.3
 
 # Generate toolchain files for the current platform
 RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
@@ -310,7 +314,7 @@ RUN install-from-source https://github.com/fmtlib/fmt/archive/refs/tags/9.0.0.ta
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz \
+RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.8.0.tar.gz \
     -DCATCH_CONFIG_CONSOLE_WIDTH=120 \
     -DCATCH_CONFIG_CPP11_TO_STRING=ON \
     -DCATCH_CONFIG_CPP17_UNCAUGHT_EXCEPTIONS=ON \
@@ -400,18 +404,6 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
-# Install python libraries
-RUN pip install \
-    pygit2==1.13.3 \
-    xxhash \
-    pylint \
-    termcolor \
-    stringcase \
-    Pillow \
-    protobuf==4.21.2 \
-    mycroft-mimic3-tts \
-    tqdm
-
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
     arm-none-eabi-gcc \
@@ -419,13 +411,8 @@ RUN install-package \
     doxygen \
     gcc13
 
-# Install formatters as last step so if they change the image is easy to update
-RUN pip install --upgrade \
-    cmake-format==0.6.13 \
-    isort==5.10.1 \
-    black==22.6.0 \
-    licenseheaders==0.8.8
 
+# Node tools
 RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O - \
     | tar --extract --xz --strip-components=1 --directory /usr --file - \
     node-v20.13.1-linux-x64/bin/ node-v20.13.1-linux-x64/include/ node-v20.13.1-linux-x64/lib/
@@ -433,6 +420,9 @@ RUN npm install -g \
     yarn@1.22.19 \
     prettier@3.4.1 \
     eslint@8.57.0
+
+# Install poetry for python package management and set it to use the build directory for storage
+RUN pip install poetry==2.1.2
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -452,7 +442,7 @@ RUN ldconfig
 COPY etc/sudoers.d/user /etc/sudoers.d/user
 RUN chmod 440 /etc/sudoers.d/user
 
-# Create the user, and setup sudo so no password is required
+# Create the user and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
 ARG dialout_gid=20
@@ -482,6 +472,9 @@ COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 RUN install -d -m 0755 /home/nubots/NUbots \
     && install -d -m 0777 /home/nubots/build \
     && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
+
+# Configure poetry to use the build directory for storage for the current user
+RUN poetry config cache-dir /home/nubots/build/poetry-cache
 
 # Configure the cache directories
 ENV CCACHE_DIR /home/nubots/build/ccache
