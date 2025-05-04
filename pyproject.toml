@@ -6,6 +6,9 @@ profile = "black"
 line_length = 120
 known_first_party = ['b', 'utility']
 
+[tool.uv.sources]
+playground = { git = "https://github.com/Tom0Brien/mujoco_playground" }
+
 [project]
 name = "Horus"
 version = "0.0.1"
@@ -47,5 +50,13 @@ dependencies = [
     # Machine Learning
     "tensorflow==2.18.0",
     # Optimisation
-    "optuna==4.3.0"
+    "optuna==4.3.0",
+    # Reinforcement Learning
+    "mujoco",
+    "mujoco-mjx",
+    "brax",
+    "mediapy>=1.2.4",
+    "matplotlib>=3.10.1",
+    "playground",
+    "jax[cuda12]>=0.5.3",
 ]
