@@ -1,3 +1,0 @@
-# Exclude all *.pyc files from the build context
-*.pyc
-
