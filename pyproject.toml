@@ -6,55 +6,47 @@ profile = "black"
 line_length = 120
 known_first_party = ['b', 'utility']
 
-[tool.poetry]
-package-mode = false
-requires-poetry = ">=2.0"
+[project]
+name = "Horus"
+version = "0.0.1"
+requires-python = ">=3.10,<3.13"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-
-# Basically required standard libraries
-numpy = "2.0.0"
-termcolor = "2.5.0"
-tqdm = "4.67.1"
-"ruamel.yaml" = "0.18.10"
-pytimeparse = "1.1.8"
-colorama = "0.4.5"
-
-# Formatting
-pyproj = "3.7.0"
-black = "24.10.0"
-isort = "5.13.2"
-pygit2 = "1.17.0"
-cmakelang = "0.6.13"
-
-# Testing/Linting
-pytest = "8.3.4"
-pytest-cov = "6.0.0"
-pylint = "3.3.3"
-
-# C++ Coverage
-gcovr = "7.2"
-
-# Python NUClear Modules
-pybind11 = "2.13.6"
-
-# Protobuf/Neutron/NBS
-protoc-exe = "22.0rc1"
-xxhash = "3.5.0"
-stringcase = "1.2.0"
-protoc-wheel-0 = "27.0"
-protobuf = "5.27.5"
-pycryptodomex = "3.21.0"
-natsort = "8.4.0"
-jsonschema = "4.23.0"
-
-# Image Processing
-Pillow = "11.1.0"
-opencv-contrib-python-headless = "4.11.0.86"
-
-# Machine Learning
-tensorflow = "2.18.0"
-
-# Optimisation
-optuna  = "4.3.0"
+dependencies = [
+    # Basically required standard libraries
+    "numpy==2.0.0",
+    "termcolor==2.5.0",
+    "tqdm==4.67.1",
+    "ruamel.yaml==0.18.10",
+    "pytimeparse==1.1.8",
+    "colorama==0.4.5",
+    # Formatting
+    "pyproj==3.7.0",
+    "black==24.10.0",
+    "isort==5.13.2",
+    "pygit2==1.17.0",
+    "cmakelang==0.6.13",
+    # Testing/Linting
+    "pytest==8.3.4",
+    "pytest-cov==6.0.0",
+    "pylint==3.3.3",
+    # C++ Coverage
+    "gcovr==7.2",
+    # Python NUClear Modules
+    "pybind11==2.13.6",
+    # Protobuf/Neutron/NBS
+    "protoc-exe==22.0rc1",
+    "xxhash==3.5.0",
+    "stringcase==1.2.0",
+    "protoc-wheel-0==27.0",
+    "protobuf==5.27.5",
+    "pycryptodomex==3.21.0",
+    "natsort==8.4.0",
+    "jsonschema==4.23.0",
+    # Image Processing
+    "Pillow==11.1.0",
+    "opencv-contrib-python-headless==4.11.0.86",
+    # Machine Learning
+    "tensorflow==2.18.0",
+    # Optimisation
+    "optuna==4.3.0"
+]
