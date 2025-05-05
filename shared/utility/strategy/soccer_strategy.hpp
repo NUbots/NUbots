@@ -32,6 +32,7 @@
 #include <Eigen/Geometry>
 
 #include "message/input/RoboCup.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/strategy/TeamMates.hpp"
@@ -39,6 +40,7 @@
 
 namespace utility::strategy {
 
+    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::strategy::TeamMates;
@@ -48,38 +50,39 @@ namespace utility::strategy {
         Value value = Value::SELF;
     };
 
-    struct Robots {
-        // Robot's distance to ball
-        double distance_to_ball = 0.0;
-        // Id of the robot
-        uint id = 0;
-        // Instance of Possession struct, indicating if the robot has the ball, is close, etc.
-        Possession possession;
-    };
 
-    std::vector<Robots> get_sorted_bots(const Ball& ball, const TeamMates& teammates, const Field& field) {
-        std::vector<Robots> robots;
+    std::vector<std::pair<Possession, double>> get_sorted_bots(const Ball& ball,
+                                                               const TeamMates& teammates,
+                                                               const Field& field,
+                                                               const Sensors& sensors) {
+        // Create empty list.
+        std::vector<std::pair<Possession, double>> robots{};
 
-        // Transforms the ball's position from world coordinates to field coordinates using field.Hfw.
-        // rBWw is the ball's position in world coordinates.
+        // Transform ball position to field coordinates.
+        // 'ball.rBWw' is ball position in world coordinates.
+        // 'field.Hfw' transforms from world to field coordinates.
+        // Multiplying these gives 'rBFf', which is the ball's position in field coordinates.
         Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
 
-        // Looping through teammmates, for each teammate, a 'Robots' object is created.
-        // Robot's position (mate.rRFf) is retrieved, and distance from robot to ball is calculated using norm.
-        // Then is stored in 'distance_to_ball'
-        // Each 'Robots' object is added to the robots vector.
+        // Find self distance to ball.
+        // 'sensors.Hrw' transforms world to robot.
+        Eigen::Vector3d rBRr         = sensors.Hrw * ball.rBWw;
+        double self_distance_to_ball = rBRr.norm();
+        robots.push_back({Possession{Possession::SELF}, self_distance_to_ball});
+
+        // Loop through each teammate,
+        // subtract ball position (rBFf) from teammates position (rRFf) to get vector between both.
         for (const auto& mate : teammates.teammates) {
-            Robots robot;
-            robot.id               = mate.id;
-            Eigen::Vector3d rRFf   = mate.rRFf;
-            robot.distance_to_ball = (rRFf - rBFf).norm();
-            robots.push_back(robot);
+            Eigen::Vector3d rRFf    = mate.rRFf;
+            double distance_to_ball = (rRFf - rBFf).norm();
+            robots.push_back({Possession{Possession::TEAMMATE}, distance_to_ball});
         }
 
-        // Robot's are sorted by distance to the ball, if there is a tie, they are sorted by robot id.
-        std::sort(robots.begin(), robots.end(), [](const Robots& a, const Robots& b) {
-            return (a.distance_to_ball < b.distance_to_ball)
-                   || (a.distance_to_ball == b.distance_to_ball && a.id < b.id);
+        // Robots are sorted by distance to the ball.
+        // Compare distance smallest to largest.
+        std::sort(robots.begin(), robots.end(), [](const auto& a, const auto& b) {
+            //
+            return a.second < b.second;
         });
 
         // Sorted list of robots is returned.
@@ -87,37 +90,37 @@ namespace utility::strategy {
     }
 
 
-    Possession get_possession(const Ball& ball, const TeamMates& teammates, const Field& field, double threshold) {
+    Possession get_possession(const Ball& ball,
+                              const TeamMates& teammates,
+                              const Field& field,
+                              const Sensors& sensors,
+                              double threshold) {
 
         // Function determines who has possession based on proximity and a threshold distance.
-        // First calls 'get_sorted_bots()' to get the list of robots sotered by distance to ball.
-        // If no robot's are found, it returns 'Possession::NONE'
-        std::vector<Robots> sortedRobots = get_sorted_bots(ball, teammates, field);
-        if (sortedRobots.empty()) {
+        // First calls 'get_sorted_bots()' to get the list of robots sorted by distance to ball.
+        // If no robot close, return NONE.
+        // If closest robot too far, return NONE.
+        // Otherwise check if SELF, TEAMMATE, or OPPONENT.
+        auto sorted_robots = get_sorted_bots(ball, teammates, field, sensors);
+
+        if (sorted_robots.empty()) {
             return Possession{Possession::NONE};
         }
 
-        // rBCc transforms the ball's position from world coordinates to camera coordinates using ball.Hcw.
-        // If the distance between the ball and robot is less than the threshold, it will assume the robot has possesion
-        // 'Possession::SELF' is returned
-        Eigen::Vector3d rBCc = ball.Hcw * ball.rBWw;
+        auto& closest_bot = sorted_robots[0];
 
-        if (rBCc.norm() < threshold) {
+        if (closest_bot.second > threshold) {
+            return Possession{Possession::NONE};
+        }
+        else if (closest_bot.first.value == Possession::SELF) {
             return Possession{Possession::SELF};
         }
-
-        // Function checks each teammate, calculates the distance from each teammate to the ball's position.
-        // If there is a teammate within the threshold, 'Possession::TEAMMATE' is returned.
-        Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
-        for (const auto& teammate : teammates.teammates) {
-            Eigen::Vector3d rRBf = teammate.rRFf - rBFf;
-            if (rRBf.norm() < threshold) {
-                return Possession{Possession::TEAMMATE};
-            }
+        else if (closest_bot.first.value == Possession::TEAMMATE) {
+            return Possession{Possession::TEAMMATE};
         }
-
-        // If no robot or teammate id within the threshold, 'Possession::NONE' is returned.
-        return Possession{Possession::NONE};
+        else {
+            return Possession{Possession::OPPONENT};
+        }
     }
 }  // namespace utility::strategy
 
