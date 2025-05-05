@@ -108,7 +108,7 @@ namespace utility::strategy {
         if (closest_bot.second > threshold) {
             return Possession{Possession::NONE};
         }
-        return closest_bot.first.value;
+        return closest_bot.first;
     }
 }  // namespace utility::strategy
 

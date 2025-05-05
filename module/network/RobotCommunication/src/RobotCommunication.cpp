@@ -183,7 +183,7 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->data.self.penalty_reason;
+                    int penalty_reason = game_state->self.penalty_reason;
                     switch (penalty_reason) {
                         case 0: msg->state = 0; break;
                         case 1: msg->state = 1; break;
