@@ -130,6 +130,7 @@ namespace module::network {
                                         default: team_colour = message::input::Team::UNKNOWN_TEAM;
                                     }
                                 }
+
                                 // Check if the incoming message is from the same team
                                 bool own_team_message = team_colour == incoming_msg.current_pose.team;
 
@@ -164,6 +165,7 @@ namespace module::network {
                     break;  // Break out of the loop.
                 }
             }
+
             // Else this robot is not in the list of team mates already, add it in
             if (!found) {
                 // Make the mate
@@ -211,6 +213,7 @@ namespace module::network {
                         case 1: msg->state = 1; break;
                         default: msg->state = 2; break;
                     }
+
                     // Team colour
                     switch (int(game_state->team.team_colour)) {
                         case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
