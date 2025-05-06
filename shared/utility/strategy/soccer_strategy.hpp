@@ -30,43 +30,59 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
-#include "message/input/RoboCup.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/localisation/Ball.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/strategy/TeamMates.hpp"
 
 
 namespace utility::strategy {
 
-    using message::input::Sensors;
-    using message::localisation::Ball;
-    using message::localisation::Field;
     using message::strategy::TeamMates;
 
+    /**
+     *   @brief Enum to represent the ball possession status.
+     */
     struct Possession {
         enum Value { SELF, TEAMMATE, OPPONENT, NONE };
         Value value = Value::SELF;
     };
 
 
-    std::vector<std::pair<Possession, double>> get_sorted_bots(const Ball& ball,
+    /**
+     *   @brief Return a list of robots that are sorted by distance to the ball.
+     *
+     *   @details
+     *  This will calculate the distance from the ball to the:
+     *      Robot (SELF)
+     *      Teammate (TEAMMATE)
+     *
+     *  The list will be sorted by ascending order of the distance.
+     *
+     *  @param rBWw ball position in world coordinates.
+     *  @param teammates information about teammate positions.
+     *  @param Hfw transformation of world to field coordinates.
+     *  @param Hrw transformation of world to robot coordinates.
+     *
+     *  @return A vector of pairs, these contain a Possession type and distance to the ball.
+     */
+    std::vector<std::pair<Possession, double>> get_sorted_bots(const Eigen::Vector3d& rBWw,
                                                                const TeamMates& teammates,
-                                                               const Field& field,
-                                                               const Sensors& sensors) {
+                                                               const Eigen::Isometry3d& Hfw,
+                                                               const Eigen::Isometry3d& Hrw) {
         // Create empty list.
         std::vector<std::pair<Possession, double>> robots{};
 
         // Transform ball position to field coordinates.
-        // 'ball.rBWw' is ball position in world coordinates.
-        // 'field.Hfw' transforms from world to field coordinates.
+        // 'rBWw' is ball position in world coordinates.
+        // 'Hfw' transforms from world to field coordinates.
         // Multiplying these gives 'rBFf', which is the ball's position in field coordinates.
-        Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
+        Eigen::Vector3d rBFf = Hfw * rBWw;
 
         // Find self distance to ball.
-        // 'sensors.Hrw' transforms world to robot.
-        Eigen::Vector3d rBRr         = sensors.Hrw * ball.rBWw;
+        // 'Hrw' transforms world to robot.
+        Eigen::Vector3d rBRr         = Hrw * rBWw;
         double self_distance_to_ball = rBRr.norm();
         robots.push_back({Possession{Possession::SELF}, self_distance_to_ball});
 
@@ -90,14 +106,29 @@ namespace utility::strategy {
     }
 
 
-    Possession get_possession(const Ball& ball,
+    /**
+     * @brief Establishes which robot is in possession of the ball.
+     *
+     * @details
+     * The robot closest to the ball (either SELF or TEAMMATE) within a given threshold has possession of the ball.
+     * If no robot is within the given threshold, NONE is returned.
+     *
+     * @param rBWw ball position in world coordinates.
+     * @param teammates information about teammate positions.
+     * @param Hfw transformation of world to field coordinates.
+     * @param Hrw transformation of world to robot coordinates.
+     * @param threshold maximum distance to the ball to be considered in possession of the ball.
+     *
+     * @return A possession value which determines if any robot (or NONE) has the ball.
+     */
+    Possession get_possession(const Eigen::Vector3d& rBWw,
                               const TeamMates& teammates,
-                              const Field& field,
-                              const Sensors& sensors,
+                              const Eigen::Isometry3d& Hfw,
+                              const Eigen::Isometry3d& Hrw,
                               double threshold) {
 
         // Function determines who has possession based on proximity and a threshold distance.
-        auto sorted_robots = get_sorted_bots(ball, teammates, field, sensors);
+        auto sorted_robots = get_sorted_bots(rBWw, teammates, Hfw, Hrw);
 
         // If no robots are available, no robot will have possession.
         if (sorted_robots.empty()) {
