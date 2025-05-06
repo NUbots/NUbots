@@ -244,8 +244,16 @@ namespace module::platform {
                 mjv_makeScene(m, &scn, 2000);
                 mjr_makeContext(m, &con, 200);
 
-                // default free camera
-                mjv_defaultFreeCamera(m, &cam);
+                // Set up tracking camera
+                int camera_id = mj_name2id(m, mjOBJ_CAMERA, "track");
+                if (camera_id != -1) {
+                    cam.type       = mjCAMERA_FIXED;
+                    cam.fixedcamid = camera_id;
+                }
+                else {
+                    log<WARN>("Could not find tracking camera, using default free camera");
+                    mjv_defaultFreeCamera(m, &cam);
+                }
 
                 // set rendering to offscreen buffer
                 mjr_setBuffer(mjFB_OFFSCREEN, &con);

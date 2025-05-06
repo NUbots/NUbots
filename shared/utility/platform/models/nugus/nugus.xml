@@ -110,6 +110,7 @@
       <inertial pos="-0.000971341 -7.63301e-05 0.0898493" quat="0.998034 0.00199235 0.0599357 0.0182343" mass="1.83264" diaginertia="0.0156368 0.0131516 0.00578565"/>
       <joint name="torso_free_joint" type="free"/>
       <site name='imu' size='0.01' pos='0 0 0'/>
+      <camera name="track" pos="0.805 -1.105 0.2" xyaxes="0.814 0.580 0.000 -0.140 0.196 0.971" mode="trackcom"/>
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.286275 0.286275 0.286275 1" mesh="torso_visual"/>
       <geom size="0.0697546 0.0949914 0.130902" pos="-0.00200103 -1.04979e-05 0.108568" type="box" rgba="0.286275 0.286275 0.286275 0"/>
       <body name="left_hip_yaw" pos="0 0.055 0" quat="1 0 0 0">
