@@ -133,51 +133,75 @@ namespace module::platform {
                 // accelerometer
                 int accel_sensor_id = mj_name2id(m, mjOBJ_SENSOR, "accelerometer");
                 if (accel_sensor_id != -1) {
-                    raw_sensors->accelerometer.x() = d->sensordata[accel_sensor_id + 0];  // X
-                    raw_sensors->accelerometer.y() = d->sensordata[accel_sensor_id + 1];  // Y
-                    raw_sensors->accelerometer.z() = d->sensordata[accel_sensor_id + 2];  // Z
+                    int adr = m->sensor_adr[accel_sensor_id];
+                    int dim = m->sensor_dim[accel_sensor_id];
+                    if (dim == 3) {
+                        raw_sensors->accelerometer.x() = d->sensordata[adr + 0];  // X
+                        raw_sensors->accelerometer.y() = d->sensordata[adr + 1];  // Y
+                        raw_sensors->accelerometer.z() = d->sensordata[adr + 2];  // Z
+                    }
+                    else {
+                        log<WARN>("Accelerometer sensor dimension not 3, got:", dim);
+                    }
+                }
+                else {
+                    log<WARN>("Accelerometer sensor not found");
                 }
 
                 // gyroscope
                 int gyro_sensor_id = mj_name2id(m, mjOBJ_SENSOR, "gyro");
                 if (gyro_sensor_id != -1) {
-                    raw_sensors->gyroscope.x() = d->sensordata[gyro_sensor_id + 0];  // X
-                    raw_sensors->gyroscope.y() = d->sensordata[gyro_sensor_id + 1];  // Y
-                    raw_sensors->gyroscope.z() = d->sensordata[gyro_sensor_id + 2];  // Z
+                    int adr = m->sensor_adr[gyro_sensor_id];
+                    int dim = m->sensor_dim[gyro_sensor_id];
+                    if (dim == 3) {
+                        raw_sensors->gyroscope.x() = d->sensordata[adr + 0];  // X
+                        raw_sensors->gyroscope.y() = d->sensordata[adr + 1];  // Y
+                        raw_sensors->gyroscope.z() = d->sensordata[adr + 2];  // Z
+                    }
+                    else {
+                        log<WARN>("Gyroscope sensor dimension not 3, got:", dim);
+                    }
+                }
+                else {
+                    log<WARN>("Gyroscope sensor not found");
                 }
 
                 // joint encoders
-                raw_sensors->servo.r_shoulder_pitch.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_shoulder_pitch")];
-                raw_sensors->servo.l_shoulder_pitch.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_shoulder_pitch")];
-                raw_sensors->servo.r_shoulder_roll.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_shoulder_roll")];
-                raw_sensors->servo.l_shoulder_roll.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_shoulder_roll")];
-                raw_sensors->servo.r_elbow.present_position   = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_elbow")];
-                raw_sensors->servo.l_elbow.present_position   = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_elbow")];
-                raw_sensors->servo.r_hip_yaw.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_hip_yaw")];
-                raw_sensors->servo.l_hip_yaw.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_hip_yaw")];
-                raw_sensors->servo.r_hip_roll.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_hip_roll")];
-                raw_sensors->servo.l_hip_roll.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_hip_roll")];
-                raw_sensors->servo.r_hip_pitch.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_hip_pitch")];
-                raw_sensors->servo.l_hip_pitch.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_hip_pitch")];
-                raw_sensors->servo.r_knee.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_knee")];
-                raw_sensors->servo.l_knee.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_knee")];
-                raw_sensors->servo.r_ankle_pitch.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_ankle_pitch")];
-                raw_sensors->servo.l_ankle_pitch.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_ankle_pitch")];
-                raw_sensors->servo.r_ankle_roll.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "right_ankle_roll")];
-                raw_sensors->servo.l_ankle_roll.present_position =
-                    d->act[mj_name2id(m, mjOBJ_ACTUATOR, "left_ankle_roll")];
-                raw_sensors->servo.neck_yaw.present_position   = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "neck_yaw")];
-                raw_sensors->servo.neck_pitch.present_position = d->act[mj_name2id(m, mjOBJ_ACTUATOR, "neck_pitch")];
+                auto get_sensor_data = [&](const char* sensor_name) -> double {
+                    int sensor_id = mj_name2id(m, mjOBJ_SENSOR, sensor_name);
+                    if (sensor_id == -1) {
+                        log<WARN>("Sensor not found:", sensor_name);
+                        return 0.0;
+                    }
+                    int adr = m->sensor_adr[sensor_id];
+                    int dim = m->sensor_dim[sensor_id];
+                    if (dim != 1) {
+                        log<WARN>("Sensor dimension not 1:", sensor_name, "dim:", dim);
+                        return 0.0;
+                    }
+                    return d->sensordata[adr];
+                };
+
+                raw_sensors->servo.r_shoulder_pitch.present_position = get_sensor_data("right_shoulder_pitch_pos");
+                raw_sensors->servo.l_shoulder_pitch.present_position = get_sensor_data("left_shoulder_pitch_pos");
+                raw_sensors->servo.r_shoulder_roll.present_position  = get_sensor_data("right_shoulder_roll_pos");
+                raw_sensors->servo.l_shoulder_roll.present_position  = get_sensor_data("left_shoulder_roll_pos");
+                raw_sensors->servo.r_elbow.present_position          = get_sensor_data("right_elbow_pitch_pos");
+                raw_sensors->servo.l_elbow.present_position          = get_sensor_data("left_elbow_pitch_pos");
+                raw_sensors->servo.r_hip_yaw.present_position        = get_sensor_data("right_hip_yaw_pos");
+                raw_sensors->servo.l_hip_yaw.present_position        = get_sensor_data("left_hip_yaw_pos");
+                raw_sensors->servo.r_hip_roll.present_position       = get_sensor_data("right_hip_roll_pos");
+                raw_sensors->servo.l_hip_roll.present_position       = get_sensor_data("left_hip_roll_pos");
+                raw_sensors->servo.r_hip_pitch.present_position      = get_sensor_data("right_hip_pitch_pos");
+                raw_sensors->servo.l_hip_pitch.present_position      = get_sensor_data("left_hip_pitch_pos");
+                raw_sensors->servo.r_knee.present_position           = get_sensor_data("right_knee_pitch_pos");
+                raw_sensors->servo.l_knee.present_position           = get_sensor_data("left_knee_pitch_pos");
+                raw_sensors->servo.r_ankle_pitch.present_position    = get_sensor_data("right_ankle_pitch_pos");
+                raw_sensors->servo.l_ankle_pitch.present_position    = get_sensor_data("left_ankle_pitch_pos");
+                raw_sensors->servo.r_ankle_roll.present_position     = get_sensor_data("right_ankle_roll_pos");
+                raw_sensors->servo.l_ankle_roll.present_position     = get_sensor_data("left_ankle_roll_pos");
+                raw_sensors->servo.neck_yaw.present_position         = get_sensor_data("neck_yaw_pos");
+                raw_sensors->servo.neck_pitch.present_position       = get_sensor_data("head_pitch_pos");
 
                 emit(std::move(raw_sensors));
 

@@ -103,6 +103,28 @@
     <!-- Foot force sensors. -->
     <force site="left_foot" name="left_foot_force"/>
     <force site="right_foot" name="right_foot_force"/>
+
+    <!-- Joint position sensors -->
+    <jointpos joint="right_shoulder_pitch" name="right_shoulder_pitch_pos"/>
+    <jointpos joint="left_shoulder_pitch" name="left_shoulder_pitch_pos"/>
+    <jointpos joint="right_shoulder_roll" name="right_shoulder_roll_pos"/>
+    <jointpos joint="left_shoulder_roll" name="left_shoulder_roll_pos"/>
+    <jointpos joint="right_elbow_pitch" name="right_elbow_pitch_pos"/>
+    <jointpos joint="left_elbow_pitch" name="left_elbow_pitch_pos"/>
+    <jointpos joint="right_hip_yaw" name="right_hip_yaw_pos"/>
+    <jointpos joint="left_hip_yaw" name="left_hip_yaw_pos"/>
+    <jointpos joint="right_hip_roll" name="right_hip_roll_pos"/>
+    <jointpos joint="left_hip_roll" name="left_hip_roll_pos"/>
+    <jointpos joint="right_hip_pitch" name="right_hip_pitch_pos"/>
+    <jointpos joint="left_hip_pitch" name="left_hip_pitch_pos"/>
+    <jointpos joint="right_knee_pitch" name="right_knee_pitch_pos"/>
+    <jointpos joint="left_knee_pitch" name="left_knee_pitch_pos"/>
+    <jointpos joint="right_ankle_pitch" name="right_ankle_pitch_pos"/>
+    <jointpos joint="left_ankle_pitch" name="left_ankle_pitch_pos"/>
+    <jointpos joint="right_ankle_roll" name="right_ankle_roll_pos"/>
+    <jointpos joint="left_ankle_roll" name="left_ankle_roll_pos"/>
+    <jointpos joint="neck_yaw" name="neck_yaw_pos"/>
+    <jointpos joint="head_pitch" name="head_pitch_pos"/>
   </sensor>
 
   <worldbody>
