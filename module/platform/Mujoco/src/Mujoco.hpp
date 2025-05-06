@@ -102,9 +102,9 @@ namespace module::platform {
             // std::unique_lock<std::mutex> lock(render_mutex);
 
             // Ensure we're on the correct thread and context TODO: FIX THIS
-            // if (!glfwGetCurrentContext()) {
-            //     glfwMakeContextCurrent(window);
-            // }
+            if (!glfwGetCurrentContext()) {
+                glfwMakeContextCurrent(window);
+            }
 
             // update abstract scene
             mjv_updateScene(m, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
