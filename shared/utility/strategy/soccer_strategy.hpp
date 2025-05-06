@@ -99,15 +99,21 @@ namespace utility::strategy {
         // Function determines who has possession based on proximity and a threshold distance.
         auto sorted_robots = get_sorted_bots(ball, teammates, field, sensors);
 
+        // If no robots are available, no robot will have possession.
         if (sorted_robots.empty()) {
             return Possession{Possession::NONE};
         }
 
+        // Picks the first robot in the sorted list.
         auto& closest_bot = sorted_robots[0];
 
+        // 'closest_bot.second' is the distance to the ball
+        // If the distance is greater than the threshold, then the robot is too far
+        // for possession.
         if (closest_bot.second > threshold) {
             return Possession{Possession::NONE};
         }
+        // If robot is close to ball, robot that is closest will possess the ball.
         return closest_bot.first;
     }
 }  // namespace utility::strategy
