@@ -47,4 +47,7 @@ message Ball {
 
     /// Homogeneous transformation matrix from world to camera space
     iso3 Hcw = 5;
+
+    /// Average ball position collected from the team when using robot-to-robot communication
+    vec3 average_rBWw = 6;
 }

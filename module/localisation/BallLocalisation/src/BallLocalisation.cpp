@@ -114,8 +114,8 @@ namespace module::localisation {
         });
 
         /* To run whenever a ball has been detected */
-        on<Trigger<VisionBalls>, With<FieldDescription>>().then(
-            [this](const VisionBalls& balls, const FieldDescription& fd) {
+        on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>>().then(
+            [this](const VisionBalls& balls, const FieldDescription& fd, const Field& field) {
                 if (!balls.balls.empty()) {
                     Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
                     auto state            = BallModel<double>::StateVec(ukf.get_state());
@@ -154,10 +154,10 @@ namespace module::localisation {
                     }
 
                     bool accept_team_guess;
-                    Eigen::Vector3d team_guess_average = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d average_rBFf = Eigen::Vector3d::Zero();
 
                     if (cfg.use_r2r_balls) {
-                        accept_team_guess = get_team_guess(team_guess_average);
+                        accept_team_guess = get_average_team_rBFf(average_rBFf);
                     }
                     else {
                         accept_team_guess = false;
@@ -185,7 +185,7 @@ namespace module::localisation {
                         auto ball = std::make_unique<Ball>();
 
                         if (low_confidence && accept_team_guess) {
-                            ball->rBWw = balls.Hcw * team_guess_average;
+                            ball->rBWw = field.Hfw.inverse() * average_rBFf;
                             ball->vBw  = Eigen::Vector3d::Zero();
                         }
                         else {
@@ -195,11 +195,20 @@ namespace module::localisation {
 
                         ball->time_of_measurement = last_time_update;
                         ball->Hcw                 = balls.Hcw;
+                        ball->average_rBWw        = field.Hfw.inverse() * average_rBFf;
                         if (log_level <= DEBUG) {
                             log<DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
                             log<DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
+                            log<DEBUG>("average rBWw: ",
+                                       ball->average_rBWw.x(),
+                                       ball->average_rBWw.y(),
+                                       ball->average_rBWw.z());
                             emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
                             emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
+                            log<DEBUG>("average_rBWw: ",
+                                       ball->average_rBWw.x(),
+                                       ball->average_rBWw.y(),
+                                       ball->average_rBWw.z());
                         }
 
                         emit(ball);
@@ -218,40 +227,36 @@ namespace module::localisation {
         });
 
         // Called once a second to default to teammates balls if we haven't seen one recently
-        on<Every<1, Per<std::chrono::seconds>>, Optional<With<VisionBalls>>>().then(
-            [this](const std::shared_ptr<const VisionBalls>& balls) {
-                if (cfg.use_r2r_balls) {
-                    if (balls && !balls->balls.empty()) {
-                        last_Hcw = Eigen::Isometry3d(balls->Hcw.cast<double>());
-                    }
+        on<Every<1, Per<std::chrono::seconds>>, With<Field>>().then([this](const std::shared_ptr<const Field>& field) {
+            if (cfg.use_r2r_balls) {
 
-                    const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
-                                                                                              - last_time_update)
-                                        .count();
+                const auto dt =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
+                        .count();
 
-                    if (dt > cfg.team_guess_default_timer) {
+                if (dt > cfg.team_guess_default_timer) {
 
-                        Eigen::Vector3d average = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d average_rBFf = Eigen::Vector3d::Zero();
+                    get_average_team_rBFf(average_rBFf);
 
-                        get_team_guess(average);
+                    average_rBFf = field->Hfw.inverse() * average_rBFf;
 
-                        last_time_update = NUClear::clock::now();
+                    last_time_update = NUClear::clock::now();
+                    auto ball        = std::make_unique<Ball>();
 
-                        auto ball = std::make_unique<Ball>();
-
-                        ball->rBWw                = last_Hcw * average;
-                        ball->vBw                 = Eigen::Vector3d::Zero();
-                        ball->time_of_measurement = last_time_update;
-                        ball->Hcw                 = last_Hcw;
-                        emit(ball);
-                    }
+                    ball->rBWw                = average_rBFf;
+                    ball->vBw                 = Eigen::Vector3d::Zero();
+                    ball->time_of_measurement = last_time_update;
+                    ball->Hcw                 = last_Hcw;
+                    emit(ball);
                 }
-            });
+            }
+        });
     }
 
     // Run to calculate balls using robot to robot communication
     // Returns whether we have a valid guess from teammates balls
-    bool BallLocalisation::get_team_guess(Eigen::Vector3d& average) {
+    bool BallLocalisation::get_average_team_rBFf(Eigen::Vector3d& average) {
 
         std::vector<Eigen::Vector3d> to_check;
 

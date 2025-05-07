@@ -106,7 +106,7 @@ namespace module::localisation {
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};
 
-        bool get_team_guess(Eigen::Vector3d& average);
+        bool get_average_team_rBFf(Eigen::Vector3d& average_rBFf);
 
         struct TeamGuess {
             NUClear::clock::time_point last_heard = NUClear::clock::now();
