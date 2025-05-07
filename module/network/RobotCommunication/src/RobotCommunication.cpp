@@ -152,10 +152,7 @@ namespace module::network {
             // Make new TeamMates message using data from the old message
             TeamMates teammates = old_teammates;
 
-            // Find if the teammates vector (repeated TeamMate) has ID
-            //...
-            // for (mate in teammates) if mate.id==id then has id
-            //...
+            // Loop through the teammates vector to check if any teammate ID matches given ID.
             bool found = false;
 
             for (auto& mate : teammates.teammates) {  // Loop through each teammate.
