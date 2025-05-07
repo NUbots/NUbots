@@ -3,4 +3,4 @@
 compressors:
   - name: turbojpeg
     concurrent: 2
-    quality: 90
+    quality: 75
