@@ -51,4 +51,5 @@ dependencies = [
     # Optimisation
     "optuna==4.3.0",
     "si-prefix>=1.3.3",
+    "onnx>=1.17.0",
 ]
