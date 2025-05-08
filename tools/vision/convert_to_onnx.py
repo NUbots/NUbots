@@ -30,11 +30,12 @@ import argparse
 import os
 
 import torch
-from train import EfficientSegmentationModel
 
 # Assuming run_on_docker is available in your project structure
 # If not, you might need to adjust the import or remove the decorator
 from utility.dockerise import run_on_docker
+
+from .model import EfficientSegmentationModel
 
 
 def convert_to_onnx(model_path, output_path, img_size=512):
@@ -88,13 +89,13 @@ def register(parser):
     parser.add_argument(
         "--model_path",
         type=str,
-        default="results/best_segmentation_model.pth",
+        default="recordings/best_segmentation_model.pth",
         help="Path to the saved PyTorch model (.pth file)",
     )
     parser.add_argument(
         "--output_path",
         type=str,
-        default="results/segmentation_model.onnx",
+        default="recordings/segmentation_model.onnx",
         help="Path where the ONNX model will be saved",
     )
     parser.add_argument("--img_size", type=int, default=512, help="Input image size used during training/export")
