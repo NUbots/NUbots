@@ -150,6 +150,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
+            # If "player_id" exists in kwargs, set the hostname to "webots" + player_id
+            if kwargs["player_id"] is not None:
+                docker_hostname = f"webots{kwargs['player_id']}"
 
         # Docker arguments
         docker_args = [
@@ -180,6 +183,10 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "render_host",
             "--privileged",
         ]
+
+        # Set name from hostname to search for the container in the multi tool
+        # Add random number so they are unique
+        docker_args.extend(["--name", f"{docker_hostname}{os.getpid()}"])
 
         # Work out if we are using an internal image
         internal_image, image = defaults.internalise_image(requested_image)
