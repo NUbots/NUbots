@@ -60,6 +60,7 @@ namespace module::vision {
             // New parameters
             cfg.filter_by_distance      = config["filter_by_distance"].as<bool>();
             cfg.max_field_line_distance = config["max_field_line_distance"].as<float>();
+            cfg.min_cluster_size        = config["min_cluster_size"].as<int>();
 
             // Compile the model and create inference request object
             compiled_model =
@@ -229,6 +230,47 @@ namespace module::vision {
             // -------- Create field lines from segmentation result --------
             // Field lines are class index 1 in our segmentation
             const int FIELD_LINE_CLASS = 1;
+            const int FIELD_CLASS      = 0;  // Assuming field is class 0
+
+            // Create binary mask for field pixels
+            cv::Mat field_mask = (segmentation_result == FIELD_CLASS);
+            field_mask.convertTo(field_mask, CV_8UC1);
+
+            // Perform connected components analysis
+            cv::Mat labels, stats, centroids;
+            int num_labels = cv::connectedComponentsWithStats(field_mask, labels, stats, centroids);
+
+            // Create a mask for valid clusters
+            cv::Mat valid_cluster_mask = cv::Mat::zeros(height, width, CV_8UC1);
+            for (int i = 1; i < num_labels; i++) {  // Start from 1 to skip background
+                if (stats.at<int>(i, cv::CC_STAT_AREA) >= cfg.min_cluster_size) {
+                    // Add this cluster to the valid mask
+                    valid_cluster_mask |= (labels == i);
+                }
+            }
+
+            // First, collect all field pixels for convex hull from valid clusters only
+            std::vector<cv::Point> field_points;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (valid_cluster_mask.at<uchar>(y, x) > 0) {
+                        field_points.push_back(cv::Point(x, y));
+                    }
+                }
+            }
+
+            // Create convex hull if we have field points
+            std::vector<cv::Point> hull_points;
+            if (!field_points.empty()) {
+                cv::convexHull(field_points, hull_points);
+            }
+
+            // Helper function to check if a point is inside the convex hull
+            auto is_point_in_hull = [&hull_points](const cv::Point& pt) -> bool {
+                if (hull_points.empty())
+                    return false;
+                return cv::pointPolygonTest(hull_points, pt, false) >= 0;
+            };
 
             // Helper function to simplify unprojection calls
             auto pix_to_ray = [&](double x, double y) {
@@ -248,10 +290,6 @@ namespace module::vision {
                 return rFCw;
             };
 
-            // Find field line pixels and convert them to rays
-            std::vector<Eigen::Vector3d> line_rays;
-            std::vector<Eigen::Vector3d> line_world_points;
-
             // Create a field lines message
             auto field_lines       = std::make_unique<FieldLines>();
             field_lines->id        = img.id;
@@ -263,6 +301,11 @@ namespace module::vision {
                 for (int x = 0; x < width; x++) {
                     int class_id = segmentation_result.at<uchar>(y, x);
                     if (class_id == FIELD_LINE_CLASS) {
+                        // Check if the point is within the field convex hull
+                        if (!is_point_in_hull(cv::Point(x, y))) {
+                            continue;  // Skip points outside the hull
+                        }
+
                         // Convert pixel to ray in camera space
                         Eigen::Vector3d uFCc = pix_to_ray(x, y);
 
@@ -281,7 +324,7 @@ namespace module::vision {
                             }
                         }
 
-                        // Only add the ray if it's on the field plane and within distance limit
+                        // Only add the ray if it's valid
                         if (is_valid) {
                             field_lines->points.push_back(uFCc);
                             field_lines->rPWw.push_back(rFWw);
@@ -371,6 +414,45 @@ namespace module::vision {
                 resized_original.copyTo(comparison(cv::Rect(0, 0, width, height)));
                 colored_segmentation_map.copyTo(comparison(cv::Rect(width, 0, width, height)));
                 cv::imwrite("recordings/segmentation_comparison.png", comparison);
+
+                // Add visualization of the convex hull
+                if (!hull_points.empty()) {
+                    // Draw the convex hull on the visualization
+                    for (size_t i = 0; i < hull_points.size(); i++) {
+                        cv::line(visualization,
+                                 hull_points[i],
+                                 hull_points[(i + 1) % hull_points.size()],
+                                 cv::Scalar(0, 255, 0),  // Green color
+                                 2);                     // Line thickness
+                    }
+                }
+                cv::imwrite("recordings/segmentation_with_hull.png", visualization);
+
+                // Add visualization of clusters and hull
+                cv::Mat cluster_visualization = visualization.clone();
+
+                // Draw different clusters in random colors
+                cv::RNG rng(12345);  // Random number generator with seed
+                for (int i = 1; i < num_labels; i++) {
+                    if (stats.at<int>(i, cv::CC_STAT_AREA) >= cfg.min_cluster_size) {
+                        cv::Scalar color(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+                        cv::Mat cluster_mask = (labels == i);
+                        cluster_visualization.setTo(color, cluster_mask);
+                    }
+                }
+
+                // Draw the convex hull on top
+                if (!hull_points.empty()) {
+                    for (size_t i = 0; i < hull_points.size(); i++) {
+                        cv::line(cluster_visualization,
+                                 hull_points[i],
+                                 hull_points[(i + 1) % hull_points.size()],
+                                 cv::Scalar(0, 255, 0),  // Green color
+                                 2);                     // Line thickness
+                    }
+                }
+
+                cv::imwrite("recordings/segmentation_clusters.png", cluster_visualization);
             }
         });
     }

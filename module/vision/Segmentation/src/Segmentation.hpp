@@ -45,6 +45,9 @@ namespace module::vision {
 
             /// @brief Enable distance filtering for field line points
             bool filter_by_distance = true;
+
+            /// @brief Minimum number of pixels in a field cluster to be considered valid
+            int min_cluster_size = 100;
         } cfg;
 
         /// @brief OpenVINO compiled model, used to create inference request object

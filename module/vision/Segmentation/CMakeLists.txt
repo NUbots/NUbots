@@ -1,12 +1,8 @@
 # Build our NUClear module
 find_package(OpenCV REQUIRED)
-set(OpenVINO_DIR /usr/local/runtime/cmake)
-set(InferenceEngine_DIR /usr/local/runtime/cmake)
+set(OpenVINO_DIR /usr/local/lib/cmake)
 find_package(OpenVINO REQUIRED)
-find_package(InferenceEngine REQUIRED)
 find_package(TBB REQUIRED)
 
 # Build our NUClear module
-nuclear_module(
-  LIBRARIES ${OpenCV_LIBRARIES} TBB::tbb openvino::runtime ${OpenVINO_LIBRARIES} ${InferenceEngine_LIBRARIES}
-)
+nuclear_module(LIBRARIES ${OpenCV_LIBRARIES} TBB::tbb openvino::runtime ${OpenVINO_LIBRARIES})
