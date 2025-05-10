@@ -235,7 +235,7 @@ export class LocalisationRobotModel {
     ball?: { rBWw: Vector3 };
     rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
-    robots: { id: number; rRWw: Vector3; color: string; }[];
+    robots: { id: number; rRWw: Vector3; color: string }[];
     purpose: string;
     associationLines?: Line[];
     max_align_radius: number;
@@ -382,7 +382,8 @@ export class LocalisationRobotModel {
     return this.robots?.map((robot) => ({
       position: robot.rRWw.applyMatrix4(this.Hfw),
       color: robot.color,
-    }));}
+    }));
+  }
 
   /** Field intersections in field space */
   @computed
