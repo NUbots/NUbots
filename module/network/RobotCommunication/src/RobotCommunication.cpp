@@ -138,7 +138,7 @@ namespace module::network {
                 }
             });
 
-        on<Every<2, Per<std::chrono::seconds>>,
+        on<Every<1, Per<std::chrono::seconds>>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
