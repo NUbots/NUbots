@@ -228,7 +228,7 @@ namespace module::localisation {
 
             // Check if teammate ID is already assigned
             for (auto& tracked_robot : tracked_robots) {
-                if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != best_match->id) {
+                if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != closest_robot_itr->id) {
                     // If a teammate ID is already assigned to another robot, clear it
                     tracked_robot.teammate_id = 0;
                 }
