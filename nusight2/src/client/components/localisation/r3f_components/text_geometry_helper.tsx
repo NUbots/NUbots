@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
+import type { Font } from "three/examples/jsm/loaders/FontLoader";
 
-export const TextGeometryHelper = (text: string): TextGeometry => {
+// Hook: properly named and safe to call
+export const useTextGeometry = (text: string): TextGeometry | null => {
   const [geometry, setGeometry] = useState<TextGeometry | null>(null);
 
   useEffect(() => {
     const loader = new FontLoader();
 
-    // Load font asynchronously
-    loader.load("/fonts/roboto/Roboto_Medium_Regular.json", (font: any) => {
+    loader.load("/fonts/roboto/Roboto_Medium_Regular.json", (font: Font) => {
       const newGeometry = new TextGeometry(text, {
-        font: font,
+        font,
         size: 0.1,
         height: 0,
       });
@@ -19,5 +20,5 @@ export const TextGeometryHelper = (text: string): TextGeometry => {
     });
   }, [text]);
 
-  return geometry || new TextGeometry("");
+  return geometry;
 };
