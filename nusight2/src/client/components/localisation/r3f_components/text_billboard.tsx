@@ -44,7 +44,6 @@ export const TextBillboard = ({
 }) => {
   const textGeometry = useTextGeometry(text);
 
-  // Always define fallback dimensions
   const textWidth = textGeometry?.boundingBox
     ? textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x
     : 0;
@@ -52,13 +51,11 @@ export const TextBillboard = ({
     ? textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y
     : 0;
 
-  // ✅ Always call useMemo
   const backdropGeometry = useMemo(
     () => textBackdropGeometry(textWidth, textHeight),
     [textWidth, textHeight]
   );
 
-  // Early return to avoid rendering broken mesh
   if (!textGeometry) return null;
 
   return (
