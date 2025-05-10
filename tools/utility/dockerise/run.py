@@ -201,6 +201,10 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         if kwargs["gpus"] is not None:
             docker_args.extend(["--gpus", kwargs["gpus"]])
 
+        # Shared memory
+        if kwargs["shm_size"] is not None:
+            docker_args.extend(["--shm-size", kwargs["shm_size"]])
+
         # Pass through devices if requested
         for d in kwargs["device"]:
             docker_args.extend(["--device", d])
