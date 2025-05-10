@@ -421,8 +421,12 @@ RUN npm install -g \
     prettier@3.4.1 \
     eslint@8.57.0
 
-# Install poetry for python package management and set it to use the build directory for storage
-RUN pip install poetry==2.1.2
+# Install uv for python package management and set it to use the build directory for storage
+RUN pip install uv==0.7.2
+
+# When in the docker image uv will use the build directory for storage
+ENV UV_CACHE_DIR=/home/nubots/build/uv-cache
+ENV UV_PROJECT_ENVIRONMENT=/home/nubots/build/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -473,10 +477,7 @@ RUN install -d -m 0755 /home/nubots/NUbots \
     && install -d -m 0777 /home/nubots/build \
     && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
 
-# Configure poetry to use the build directory for storage for the current user
-RUN poetry config cache-dir /home/nubots/build/poetry-cache
-
 # Configure the cache directories
-ENV CCACHE_DIR /home/nubots/build/ccache
+ENV CCACHE_DIR=/home/nubots/build/ccache
 
 WORKDIR /home/nubots/NUbots
