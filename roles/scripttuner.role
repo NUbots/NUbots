@@ -3,6 +3,8 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
+  # Configuration
+  actuation::KinematicsConfiguration # Contains hardware offsets
   # Sensors
   input::SensorFilter
   # Network
