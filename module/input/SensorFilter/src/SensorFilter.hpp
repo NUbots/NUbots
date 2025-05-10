@@ -81,18 +81,6 @@ namespace module::input {
             /// @brief The number of times a button must be pressed before it is considered pressed
             int button_debounce_threshold = 0;
 
-            /// @brief Initial rotation from torso {t} to world {w} space
-            Eigen::Matrix3d initial_Rwt = Eigen::Matrix3d::Identity();
-
-            /// @brief Mahony filter bias
-            Eigen::Vector3d initial_bias = Eigen::Vector3d::Zero();
-
-            /// @brief Mahony filter proportional gain
-            double Ki = 0.0;
-
-            /// @brief Mahony filter integral gain
-            double Kp = 0.0;
-
             /// @brief Cutoff frequency for the low pass filter of torso x velocity
             double x_cut_off_frequency = 0.0;
 
