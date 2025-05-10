@@ -197,7 +197,7 @@ namespace module::localisation {
         tracked_robots = std::move(new_tracked_robots);
     }
 
-    void RobotLocalisation::debug_info() {
+    void RobotLocalisation::debug_info() const {
         // Print tracked_robots ids
         log<DEBUG>("Robots tracked:");
         for (const auto& tracked_robot : tracked_robots) {
