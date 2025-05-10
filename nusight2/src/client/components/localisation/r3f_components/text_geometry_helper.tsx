@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import type { Font } from "three/examples/jsm/loaders/FontLoader";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 export const useTextGeometry = (text: string): TextGeometry | null => {
   const [geometry, setGeometry] = useState<TextGeometry | null>(null);
