@@ -44,17 +44,10 @@ export const TextBillboard = ({
 }) => {
   const textGeometry = useTextGeometry(text);
 
-  const textWidth = textGeometry?.boundingBox
-    ? textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x
-    : 0;
-  const textHeight = textGeometry?.boundingBox
-    ? textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y
-    : 0;
+  const textWidth = textGeometry?.boundingBox ? textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x : 0;
+  const textHeight = textGeometry?.boundingBox ? textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y : 0;
 
-  const backdropGeometry = useMemo(
-    () => textBackdropGeometry(textWidth, textHeight),
-    [textWidth, textHeight]
-  );
+  const backdropGeometry = useMemo(() => textBackdropGeometry(textWidth, textHeight), [textWidth, textHeight]);
 
   if (!textGeometry) return null;
 
