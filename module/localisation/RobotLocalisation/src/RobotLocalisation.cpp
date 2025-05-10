@@ -34,7 +34,6 @@
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
-#include "message/vision/GreenHorizon.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
@@ -77,7 +76,6 @@ namespace module::localisation {
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
         });
-
 
         on<Trigger<RoboCup>, With<GreenHorizon>, With<Field>, Optional<With<GameState>>, Single>().then(
             [this](const RoboCup& robocup,
@@ -143,11 +141,7 @@ namespace module::localisation {
                 maintenance(horizon);
 
                 // **Debugging output**
-                // Print tracked_robots ids
-                log<DEBUG>("Robots tracked:");
-                for (const auto& tracked_robot : tracked_robots) {
-                    log<DEBUG>("\tID: ", tracked_robot.id);
-                }
+                debug_info();
 
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
@@ -169,6 +163,7 @@ namespace module::localisation {
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
+
                 emit(std::move(localisation_robots));
             });
     }
@@ -181,52 +176,61 @@ namespace module::localisation {
                 std::chrono::duration_cast<std::chrono::duration<double>>(now - tracked_robot.last_time_update).count();
             tracked_robot.last_time_update = now;
             tracked_robot.ukf.time(dt);
-            tracked_robot.seen = false;  // Reset 'seen' status
+            tracked_robot.seen = false;
         }
     }
 
     void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw, uint teammate_id) {
         for (const auto& rRWw : robots_rRWw) {
-            TrackedRobot* best_match = nullptr;
-            double best_distance     = std::numeric_limits<double>::max();
-
-            // Find closest existing robot
-            for (auto& tracked_robot : tracked_robots) {
-                double distance = (rRWw.head<2>() - tracked_robot.get_rRWw()).norm();
-                if (distance < cfg.association_distance && distance < best_distance) {
-                    best_distance = distance;
-                    best_match    = &tracked_robot;  // Use reference to the existing tracked robot
-                }
+            if (tracked_robots.empty()) {
+                // If there are no tracked robots, add this as a new robot
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
+                tracked_robots.back().seen = true;
+                continue;
             }
 
-            if (best_match) {
-                // Update matched robot with the vision measurement
-                best_match->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                        cfg.ukf.noise.measurement.position,
-                                        MeasurementType::ROBOT_POSITION());
-                best_match->seen = true;
+            // Get the closest robot we have to the given vision measurement
+            auto closest_robot_itr =
+                std::min_element(tracked_robots.begin(),
+                                 tracked_robots.end(),
+                                 [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
+                                     // Get each robot's x-y 2D position in the world
+                                     auto a_rRWw = a.get_rRWw();
+                                     auto b_rRWw = b.get_rRWw();
+                                     // Compare to see which is closer to the robot vision measurement position
+                                     return (rRWw.head<2>() - a_rRWw).norm() < (rRWw.head<2>() - b_rRWw).norm();
+                                 });
+            double closest_distance = (rRWw.head<2>() - closest_robot_itr->get_rRWw()).norm();
 
-                // If the robot is identified as a teammate via Wi-Fi, mark it as a teammate
-                if (teammate_id != 0) {
-                    best_match->teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
-                }
-
-                // Check if teammate ID is already assigned
-                for (auto& tracked_robot : tracked_robots) {
-                    if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != best_match->id) {
-                        // If a teammate ID is already assigned to another robot, clear it
-                        tracked_robot.teammate_id = 0;
-                    }
-                }
-            }
-            else {
-                // No close robot: start tracking a new one
+            // If the closest robot is far enough away, add this as a new robot
+            if (closest_distance > cfg.association_distance) {
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
                 tracked_robots.back().seen = true;
 
                 // Mark this new robot as a teammate if it is identified as such
                 if (teammate_id != 0) {
                     tracked_robots.back().teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
+                }
+
+                continue;
+            }
+
+            // Update matched robot with the vision measurement
+            closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
+                                           cfg.ukf.noise.measurement.position,
+                                           MeasurementType::ROBOT_POSITION());
+            closest_robot_itr->seen = true;
+
+            // If the robot is identified as a teammate via Wi-Fi, mark it as a teammate
+            if (teammate_id != 0) {
+                closest_robot_itr->teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
+            }
+
+            // Check if teammate ID is already assigned
+            for (auto& tracked_robot : tracked_robots) {
+                if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != best_match->id) {
+                    // If a teammate ID is already assigned to another robot, clear it
+                    tracked_robot.teammate_id = 0;
                 }
             }
         }
@@ -238,24 +242,43 @@ namespace module::localisation {
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
 
-            bool inside_view =
-                point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0));
-
-            if (!inside_view) {
-                // If outside field of view, keep robot marked as 'seen' (prevent early deletion)
+            // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
+            // A robot is outside of view if it is not within the green horizon
+            // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
+            if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
                 tracked_robot.seen = true;
             }
 
-            // Update missed counter
+            // If the tracked robot has not been seen, increment the consecutively missed count
             tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
 
-            // Keep only robots that have not been missed too many times
-            if (tracked_robot.missed_count <= cfg.max_missed_count) {
-                new_tracked_robots.push_back(std::move(tracked_robot));
+            // Don't add this robot if it has been missed too many times
+            if (tracked_robot.missed_count > cfg.max_missed_count) {
+                log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                continue;
             }
+
+            // Check if this robot is too close to any kept robot
+            if (std::any_of(new_tracked_robots.begin(), new_tracked_robots.end(), [&](const auto& other_robot) {
+                    return (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
+                })) {
+                log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+                continue;
+            }
+
+            // If removal conditions not met, keep the robot
+            new_tracked_robots.push_back(tracked_robot);
         }
 
         tracked_robots = std::move(new_tracked_robots);
+    }
+
+    void RobotLocalisation::debug_info() const {
+        // Print tracked_robots ids
+        log<DEBUG>("Robots tracked:");
+        for (const auto& tracked_robot : tracked_robots) {
+            log<DEBUG>("\tID: ", tracked_robot.id);
+        }
     }
 
 }  // namespace module::localisation
