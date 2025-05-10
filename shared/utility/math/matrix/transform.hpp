@@ -91,9 +91,9 @@ namespace utility::math::transform {
         Eigen::Matrix<Scalar, 3, 1> t2Translation = t2.translation();
 
         // Create and return interpolated transform
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> result;
-        result.linear()      = (t1Rot.slerp(alpha, t2Rot)).toRotationMatrix();
-        result.translation() = alpha * (t2Translation - t1Translation) + t1Translation;
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> result = Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
+        result.linear()                                     = (t1Rot.slerp(alpha, t2Rot)).toRotationMatrix();
+        result.translation()                                = alpha * (t2Translation - t1Translation) + t1Translation;
         return result;
     }
 
