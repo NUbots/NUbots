@@ -1,5 +1,9 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af1e2a5d3115baf9be61986d2fad0df1e":[3,0,3,8,1,9,1],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216":[3,0,3,8,1,9,4],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6e65a63edaf8af2bc5eb4d0e28ac2e3":[3,0,3,8,1,9,7],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#afc86710d9415fef0a150f776adc88fa8":[3,0,3,8,1,9,22],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html":[3,0,3,8,1,10],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7":[3,0,3,8,1,10,0],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a021321e8c168ba3ae39ce3a2e7b3ec87":[3,0,3,8,1,10,0,2],
@@ -245,9 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1IKKick.html#acdf7eb5a68fd0b3b5a0026caec2f1a8b":[3,0,3,10,4,6],
 "classmodule_1_1skill_1_1IKKick.html#aeb771485a0197654038961384f0cb297":[3,0,3,10,4,13],
 "classmodule_1_1skill_1_1KickBalancer.html":[3,0,3,10,5],
-"classmodule_1_1skill_1_1KickBalancer.html#a497acf8c00ab75b46e4acbd86f6715a9":[3,0,3,10,5,2],
-"classmodule_1_1skill_1_1KickBalancer.html#a89e4d2efba739f33a5d9915e432e6e6a":[3,0,3,10,5,3],
-"classmodule_1_1skill_1_1KickBalancer.html#aa3ed3037fb4bd07fdf4d484e235cb955":[3,0,3,10,5,1],
-"classmodule_1_1skill_1_1KickBalancer.html#af4a4c13dfd319fc3d8d4d59cfd75f691":[3,0,3,10,5,4],
-"classmodule_1_1skill_1_1Kicker.html":[3,0,3,10,6]
+"classmodule_1_1skill_1_1KickBalancer.html#a497acf8c00ab75b46e4acbd86f6715a9":[3,0,3,10,5,2]
 };

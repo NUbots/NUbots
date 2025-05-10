@@ -169,6 +169,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1localisation_1_1RobotLo
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1localisation_1_1RobotLocalisation-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -217,6 +218,23 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a4851e95a87c7372db55791c797858f37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tests if this robot measurement is associated with a tracked robot or if it is a new robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4851e95a87c7372db55791c797858f37">More...</a><br /></td></tr>
 <tr class="separator:a4851e95a87c7372db55791c797858f37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:aafd4cc6a588d20ceb0849dfcb37bceee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aafd4cc6a588d20ceb0849dfcb37bceee">data_association</a> (const std::vector&lt; Eigen::Vector3d &gt; &amp;robots_rRWw)</td></tr>
+<tr class="memdesc:aafd4cc6a588d20ceb0849dfcb37bceee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the given robot measurements with the tracked robots Creates a new tracked robot if the measurement is not associated with an existing robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#aafd4cc6a588d20ceb0849dfcb37bceee">More...</a><br /></td></tr>
+<tr class="separator:aafd4cc6a588d20ceb0849dfcb37bceee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a071bc744ede53369f339230f8b68130e"><td class="memItemLeft" align="right" valign="top"><a id="a071bc744ede53369f339230f8b68130e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a071bc744ede53369f339230f8b68130e">debug_info</a> () const</td></tr>
+<tr class="memdesc:a071bc744ede53369f339230f8b68130e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print out the current state of the tracked robots. <br /></td></tr>
+<tr class="separator:a071bc744ede53369f339230f8b68130e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a033dec9298861daaa3f397784f75ebb5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a033dec9298861daaa3f397784f75ebb5">maintenance</a> (const message::vision::GreenHorizon &amp;horizon)</td></tr>
+<tr class="memdesc:a033dec9298861daaa3f397784f75ebb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run maintenance on the tracked robots This will remove any viewable robots that have been missed too many times or are too close to another robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a033dec9298861daaa3f397784f75ebb5">More...</a><br /></td></tr>
+<tr class="separator:a033dec9298861daaa3f397784f75ebb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a767cb02d9117e7d7c2c1080ba489a3a1"><td class="memItemLeft" align="right" valign="top"><a id="a767cb02d9117e7d7c2c1080ba489a3a1"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a767cb02d9117e7d7c2c1080ba489a3a1">prediction</a> ()</td></tr>
+<tr class="memdesc:a767cb02d9117e7d7c2c1080ba489a3a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run Kalman filter prediction step for all tracked robots. <br /></td></tr>
+<tr class="separator:a767cb02d9117e7d7c2c1080ba489a3a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a54629a860d8e32912ae8f5bd5f792f9d"><td class="memItemLeft" align="right" valign="top"><a id="a54629a860d8e32912ae8f5bd5f792f9d"></a>
@@ -233,7 +251,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a4851e95a87c7372db55791c797858f37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4851e95a87c7372db55791c797858f37">&#9670;&nbsp;</a></span>data_association()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4851e95a87c7372db55791c797858f37">&#9670;&nbsp;</a></span>data_association() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -258,6 +276,74 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 
 </div>
 </div>
+<a id="aafd4cc6a588d20ceb0849dfcb37bceee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafd4cc6a588d20ceb0849dfcb37bceee">&#9670;&nbsp;</a></span>data_association() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::localisation::RobotLocalisation::data_association </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; Eigen::Vector3d &gt; &amp;&#160;</td>
+          <td class="paramname"><em>robots_rRWw</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Associate the given robot measurements with the tracked robots Creates a new tracked robot if the measurement is not associated with an existing robot. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">robots_rRWw</td><td>The new robot measurements in world coordinates </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a033dec9298861daaa3f397784f75ebb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a033dec9298861daaa3f397784f75ebb5">&#9670;&nbsp;</a></span>maintenance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::localisation::RobotLocalisation::maintenance </td>
+          <td>(</td>
+          <td class="paramtype">const message::vision::GreenHorizon &amp;&#160;</td>
+          <td class="paramname"><em>horizon</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Run maintenance on the tracked robots This will remove any viewable robots that have been missed too many times or are too close to another robot. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">horizon</td><td>The green horizon from the vision system, to determine if a robot is in view </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/localisation/RobotLocalisation/src/<a class="el" href="RobotLocalisation_8hpp_source.html">RobotLocalisation.hpp</a></li>
 <li>module/localisation/RobotLocalisation/src/RobotLocalisation.cpp</li>
@@ -268,7 +354,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li>
-    <li class="footer">Generated on Sat May 10 2025 05:28:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat May 10 2025 09:33:19 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

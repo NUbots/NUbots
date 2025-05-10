@@ -1,5 +1,9 @@
 var NAVTREEINDEX8 =
 {
+"classutility_1_1math_1_1geometry_1_1Quad.html#a435db4aca18e218dda8e77fd0cef02ec":[3,0,7,5,1,0,26],
+"classutility_1_1math_1_1geometry_1_1Quad.html#a4b008644d3503fc9dee54389b6697c1d":[3,0,7,5,1,0,37],
+"classutility_1_1math_1_1geometry_1_1Quad.html#a4b825e3a419c099083fa482842b17f2c":[3,0,7,5,1,0,33],
+"classutility_1_1math_1_1geometry_1_1Quad.html#a5b51b6dc2d4f467dd277e65cb222a90f":[3,0,7,5,1,0,7],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a5dcb813ce6ddff95c7e91e497d69bc82":[3,0,7,5,1,0,5],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a69211859f9c7512f72b79bbc876ecd6c":[3,0,7,5,1,0,23],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a73376f63b883f4afa949ff3a62c1dcb1":[3,0,7,5,1,0,10],
@@ -245,9 +249,5 @@ var NAVTREEINDEX8 =
 "classutility_1_1skill_1_1WalkGenerator.html#af2d39521a2eb7b71ededc319f688f4fc":[3,0,7,11,5,32],
 "classutility_1_1skill_1_1WalkGenerator.html#af5dee0f79529dc611ca665ae84dd0c35":[3,0,7,11,5,7],
 "classutility_1_1skill_1_1splines_1_1QuinticSpline.html":[3,0,7,11,0,0],
-"classutility_1_1skill_1_1splines_1_1QuinticSpline.html#a47ccc0f4d46c1cb7641fba477cfffa57":[3,0,7,11,0,0,1],
-"classutility_1_1skill_1_1splines_1_1QuinticSpline.html#a6cb86e097797051588314948f3acf260":[3,0,7,11,0,0,3],
-"classutility_1_1skill_1_1splines_1_1QuinticSpline.html#a798446114962dffa08d4c2eeb46890da":[3,0,7,11,0,0,4],
-"classutility_1_1skill_1_1splines_1_1QuinticSpline.html#a9f4928bedd5badfa6e50c2b10e6b42bd":[3,0,7,11,0,0,2],
-"classutility_1_1skill_1_1splines_1_1QuinticSpline.html#af971acc607b0f432004a5d35b7ecf75c":[3,0,7,11,0,0,0]
+"classutility_1_1skill_1_1splines_1_1QuinticSpline.html#a47ccc0f4d46c1cb7641fba477cfffa57":[3,0,7,11,0,0,1]
 };

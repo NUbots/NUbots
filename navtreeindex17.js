@@ -1,5 +1,9 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1skill_1_1Walk_1_1Config.html":[3,0,3,10,13,0],
+"structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087":[3,0,3,10,13,0,0],
+"structmodule_1_1skill_1_1Walk_1_1Config.html#ac3e157e8398d2fab854ef92459d9e6d1":[3,0,3,10,13,0,2],
+"structmodule_1_1skill_1_1Walk_1_1Config.html#ae7ba1c4e2415aa67e85d22c4fc1c6252":[3,0,3,10,13,0,1],
 "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html":[3,0,3,11,0,0],
 "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#a9071a554cc6a41123f346fd865f32b18":[3,0,3,11,0,0,1],
 "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#ac3dd980a1fcaa21eba31f847444b67b4":[3,0,3,11,0,0,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4.html":[3,0,7,0,11],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4.html#af74d33fb3d492cb4414b346c25a0fdc9":[3,0,7,0,11,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html":[3,0,7,0,12],
-"structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html#a9364de0183bfd6f352697566fd637b75":[3,0,7,0,12,0],
-"structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html":[3,0,7,0,13],
-"structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html#a1717d9ecff1fefac53e86e0ada9c8e23":[3,0,7,0,13,0],
-"structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html":[3,0,7,0,14],
-"structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html#a1260265851d8fde2f7abc2c9b946b497":[3,0,7,0,14,0]
+"structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html#a9364de0183bfd6f352697566fd637b75":[3,0,7,0,12,0]
 };

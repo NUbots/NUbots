@@ -1,5 +1,9 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#abea73a65255417e77f2c9933bacd2baa":[3,0,3,8,1,4,4],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#ad7d4760639dc4f93afdb3ff4d0782edc":[3,0,3,8,1,4,6],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#af94d63ebcf0d89048b335bccdb9432e7":[3,0,3,8,1,4,7],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html":[3,0,3,8,1,5],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dc":[3,0,3,8,1,5,0],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca021321e8c168ba3ae39ce3a2e7b3ec87":[3,0,3,8,1,5,0,2],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca134bd3e98dcbf3cf8c62b892889f44bf":[3,0,3,8,1,5,0,6],
@@ -245,9 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aadf7006a3d0ed60282a4ac26df744753":[3,0,3,10,10,0,1],
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html":[3,0,3,10,12,0],
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html#a694f1827ae796ad5c6a94c3c4dd9d94e":[3,0,3,10,12,0,1],
-"structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289":[3,0,3,10,12,0,0],
-"structmodule_1_1skill_1_1Walk_1_1Config.html":[3,0,3,10,13,0],
-"structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087":[3,0,3,10,13,0,0],
-"structmodule_1_1skill_1_1Walk_1_1Config.html#ac3e157e8398d2fab854ef92459d9e6d1":[3,0,3,10,13,0,2],
-"structmodule_1_1skill_1_1Walk_1_1Config.html#ae7ba1c4e2415aa67e85d22c4fc1c6252":[3,0,3,10,13,0,1]
+"structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289":[3,0,3,10,12,0,0]
 };
