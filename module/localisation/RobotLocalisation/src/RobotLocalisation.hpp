@@ -116,6 +116,9 @@ namespace module::localisation {
         /// @param horizon The green horizon from the vision system, to determine if a robot is in view
         void maintenance(const message::vision::GreenHorizon& horizon);
 
+        /// @brief Print out the current state of the tracked robots
+        void debug_info() const;
+
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);

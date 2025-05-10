@@ -92,11 +92,7 @@ namespace module::localisation {
                 maintenance(horizon);
 
                 // **Debugging output**
-                // Print tracked_robots ids
-                log<DEBUG>("Robots tracked:");
-                for (const auto& tracked_robot : tracked_robots) {
-                    log<DEBUG>("\tID: ", tracked_robot.id);
-                }
+                debug_info();
 
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
@@ -199,6 +195,14 @@ namespace module::localisation {
         }
 
         tracked_robots = std::move(new_tracked_robots);
+    }
+
+    void RobotLocalisation::debug_info() {
+        // Print tracked_robots ids
+        log<DEBUG>("Robots tracked:");
+        for (const auto& tracked_robot : tracked_robots) {
+            log<DEBUG>("\tID: ", tracked_robot.id);
+        }
     }
 
 }  // namespace module::localisation
