@@ -142,10 +142,10 @@ namespace module::localisation {
                         localisation_field.Hfw
                         * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
 
-                    if (rRFf.x() < field_description.dimensions.field_length / 2
-                        && rRFf.x() > -field_description.dimensions.field_length / 2
-                        && rRFf.y() < field_description.dimensions.field_width / 2
-                        && rRFf.y() > -field_description.dimensions.field_width / 2) {
+                    if (rRFf.x() < -field_description.dimensions.field_length / 2
+                        || rRFf.x() > field_description.dimensions.field_length / 2
+                        || rRFf.y() < -field_description.dimensions.field_width / 2
+                        || rRFf.y() > field_description.dimensions.field_width / 2) {
                         log<DEBUG>(fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
                         continue;
                     }
