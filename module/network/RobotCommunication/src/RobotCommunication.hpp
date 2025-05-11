@@ -44,6 +44,8 @@ namespace module::network {
             std::string broadcast_ip = "";
             /// @brief Set this to only receive packets from this IP address
             std::string udp_filter_address = "";
+            /// @brief A delay before the first message is sent, to allow reasonable data to be collected
+            int startup_delay = 0;
         } cfg;
 
         /// @brief ignore packets from these IP addresses
