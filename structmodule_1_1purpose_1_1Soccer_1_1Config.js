@@ -6,6 +6,7 @@ var structmodule_1_1purpose_1_1Soccer_1_1Config =
     [ "goalie_bounding_box", "structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3c3e573498c06480c2a5f56601f7c355", null ],
     [ "max_robots", "structmodule_1_1purpose_1_1Soccer_1_1Config.html#af0aba3644ee1af62fea5b22d6415eb9f", null ],
     [ "position", "structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3531788a0bcc3a269ed43d2ec3768b4b", null ],
+    [ "startup_delay", "structmodule_1_1purpose_1_1Soccer_1_1Config.html#ac2654612a0baa52bd0489fedb9afd270", null ],
     [ "striker_bounding_box", "structmodule_1_1purpose_1_1Soccer_1_1Config.html#a39cf8c935121dbe806becc2181896783", null ],
     [ "timeout", "structmodule_1_1purpose_1_1Soccer_1_1Config.html#abe62903cdf1b131e84c523c825f6003b", null ]
 ];

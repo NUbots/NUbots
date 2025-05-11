@@ -1,5 +1,7 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html":[3,0,7,0,12],
+"structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html#a9364de0183bfd6f352697566fd637b75":[3,0,7,0,12,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html":[3,0,7,0,13],
 "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html#a1717d9ecff1fefac53e86e0ada9c8e23":[3,0,7,0,13,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html":[3,0,7,0,14],
@@ -247,7 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#a0a0d61b5d9007e5d56af8e91dabb1305":[3,0,7,7,0,0,0,0],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#ab9b683c3f7dca89cf47211a93cb8a2f1":[3,0,7,7,0,0,0,1],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#ad368bc1c6d87225229814097c75e2f9d":[3,0,7,7,0,0,0,3],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#ae19ab0c5e2467e73752d9aa74095bcdc":[3,0,7,7,0,0,0,2],
-"structutility_1_1nbs_1_1IndexItem.html":[3,0,7,7,3],
-"structutility_1_1nbs_1_1IndexItem.html#a24ad36421839d2e30b63b6a25af74f26":[3,0,7,7,3,1]
+"structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#ae19ab0c5e2467e73752d9aa74095bcdc":[3,0,7,7,0,0,0,2]
 };
