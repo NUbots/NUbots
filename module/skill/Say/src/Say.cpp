@@ -24,70 +24,118 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "Say.hpp"
 
-#include <cstdlib>
+#include <fstream>
+#include <functional>
+#include <iostream>
 #include <onnxruntime_cxx_api.h>
+#include <optional>
 #include <piper-phonemize/phoneme_ids.hpp>
 #include <piper-phonemize/phonemize.hpp>
 #include <piper-phonemize/tashkeel.hpp>
+#include <stdexcept>
 #include <string>
-#include <thread>
+#include <vector>
 
+#include "json.hpp"
 #include "piper.hpp"
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/Limbs.hpp"
 #include "message/skill/Say.hpp"
-
-#include "utility/skill/Script.hpp"
 
 namespace module::skill {
 
+    using json = nlohmann::json;
     using extension::Configuration;
-    using message::actuation::HeadSequence;
-    using utility::skill::load_script;
     using SayTask = message::skill::Say;
 
     Say::Say(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
+        // Get our configuration from configuration system
         on<Configuration>("Say.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file Say.yaml
-            this->log_level  = config["log_level"].as<NUClear::LogLevel>();
+            // Store our configuration
             cfg.voice        = config["voice"].as<std::string>();
             cfg.device_name  = config["device_name"].as<std::string>();
             cfg.startup_text = config["startup_text"].as<std::string>();
+
+            // Get espeak data path
+            auto espeak_data_path = config["espeak_data_path"].as<std::string>();
+
+            // Get model path
+            auto model_path = config["model_path"].as<std::string>();
+
+            // Initialize piper
+            // try {
+            //     log<INFO>("Initializing piper TTS with voice model:", this->cfg.voice);
+
+            //     // Setup piper configuration
+            //     piper_config.eSpeakDataPath = espeak_data_path;
+
+            //     // Load the voice
+            //     std::optional<piper::SpeakerId> speakerId;
+            //     piper::loadVoice(piper_config,
+            //                      model_path + "/" + this->cfg.voice,
+            //                      model_path + "/" + this->cfg.voice + ".json",
+            //                      voice,
+            //                      speakerId,
+            //                      false);
+
+            //     // Initialize piper
+            //     piper::initialize(piper_config);
+
+            //     // Say startup text if provided
+            //     if (!this->cfg.startup_text.empty()) {
+            //         log<INFO>("Saying startup text:", this->cfg.startup_text);
+
+            //         // Prepare audio buffer
+            //         std::vector<int16_t> audioBuffer;
+            //         piper::SynthesisResult result;
+
+            //         // Convert text to audio
+            //         piper::textToAudio(piper_config, voice, this->cfg.startup_text, audioBuffer, result, []() {});
+
+            //         // Play audio (implementation depends on your audio playback system)
+            //         // playAudio(audioBuffer, this->cfg.device_name);
+            //         log<INFO>("Startup text TTS completed in", result.inferSeconds, "seconds");
+            //         log<INFO>("Audio length:", result.audioSeconds, "seconds (RTF:", result.realTimeFactor, ")");
+            //     }
+
+            // log<INFO>("Piper TTS initialized successfully");
+            //     }
+            //     catch (const std::exception& e) {
+            // log<ERROR>("Failed to initialize piper TTS:", e.what());
+            //     }
         });
 
-        on<Startup>().then([this] {
-            if (!cfg.startup_text.empty()) {
-                emit<Task>(std::make_unique<SayTask>(cfg.startup_text, false));
-            }
-        });
+        // Handle Say requests
+        // on<Provide<SayTask>>().then([this](const SayTask& say) {
+        //     try {
+        //         log<INFO>("Converting text to speech:", say.text);
 
-        on<Provide<SayTask>>().then([this](const SayTask& say, const RunReason& run_reason) {
-            // Only say text if it is a new task
-            if (run_reason == RunReason::NEW_TASK) {
-                // Play the requested audio using python command-line tool mimic3 and aplay
-                // Sanitize the text to remove special characters which could break the command
-                std::string sanitized_text         = say.text;
-                const std::string chars_to_replace = "'\"`|;&$\\";
-                for (char c : chars_to_replace) {
-                    sanitized_text.erase(std::remove(sanitized_text.begin(), sanitized_text.end(), c),
-                                         sanitized_text.end());
-                }
-                log<DEBUG>("Saying: ", sanitized_text);
-                system(std::string("echo '" + sanitized_text + "' | piper --model en_US-lessac-medium | aplay -D "
-                                   + cfg.device_name)
-                           .c_str());
+        //         // Prepare audio buffer
+        //         std::vector<int16_t> audioBuffer;
+        //         piper::SynthesisResult result;
 
-                // Nod head to indicate that the robot is "talking"
-                if (say.nod) {
-                    emit<Task>(load_script<HeadSequence>("Say.yaml"));
-                }
-            }
-        });
+        //         // Convert text to audio
+        //         piper::textToAudio(piper_config, voice, say.text, audioBuffer, result, []() {});
+
+        //         // Play audio (implementation depends on your audio playback system)
+        //         // playAudio(audioBuffer, this->cfg.device_name);
+        //         log<INFO>("Text to speech completed in", result.inferSeconds, "seconds");
+        //         log<INFO>("Audio length:", result.audioSeconds, "seconds (RTF:", result.realTimeFactor, ")");
+        //     }
+        //     catch (const std::exception& e) {
+        //         log<ERROR>("Text to speech failed:", e.what());
+        //     }
+        // });
+
+        // On shutdown, terminate piper
+        // on<Shutdown>().then([this] {
+        //     log<INFO>("Shutting down piper TTS");
+        //     piper::terminate(piper_config);
+        // });
     }
-
 }  // namespace module::skill

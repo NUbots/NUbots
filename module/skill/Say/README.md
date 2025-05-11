@@ -4,7 +4,7 @@
 
 Module that enables the robot to vocalize specified text using a text-to-speech tool and optionally perform a nodding gesture to indicate speaking.
 
-To run in docker use `./b run {role} --device /dev/snd:/dev/snd LD_LIBRARY_PATH=/openvino/piper/build/pi/lib`
+To run in docker use `./b run {role} --device /dev/snd:/dev/snd LD_LIBRARY_PATH=/openvino/piper/build/pi/lib --volume "./module/skill/Say/data/en_US-lessac-medium.onnx:/home/nubots/build/en_US-lessac-medium.onnx"`
 
 ## Usage
 
