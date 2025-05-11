@@ -95,6 +95,9 @@ namespace module::purpose {
         /// @brief Stores whether the robot will change its head direction or not
         bool head_locked = true;
 
+        /// @brief Stores whether scripts are enabled or not
+        bool scripts_enabled = false;
+
         /// @brief stores the head pitch value
         double head_pitch = 0.0;
 
