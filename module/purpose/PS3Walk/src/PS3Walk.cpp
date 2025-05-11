@@ -119,7 +119,6 @@ namespace module::purpose {
                                 if (moving) {
                                     log<INFO>("Stop walking");
                                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
-                                    // emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 }
                                 else {
                                     log<INFO>("Start walking");
