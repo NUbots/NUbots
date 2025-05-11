@@ -25,7 +25,7 @@ head:
     base_position_from_origin: [-0.007, 0, 0.21] # [x, y, z]
   # head movement limits
   limits: # pitch limit is a function of yaw ... need to calculate this properly
-    yaw: [-1.14, 1.14] # [min_yaw, max_yaw]
+    yaw: [-0.95, 0.95] # [min_yaw, max_yaw]
     pitch: [-0.57, 0.46] # [min_pitch, max_pitch]
 # rough measurements
 arm:
