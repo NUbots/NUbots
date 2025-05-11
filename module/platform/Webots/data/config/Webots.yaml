@@ -10,7 +10,7 @@ max_velocity_mx106: 5.76
 # Requested time step between sensors
 time_step: 8
 # Minimum time step allowed between camera sensors
-min_camera_time_step: 16
+min_camera_time_step: 40
 # Minimum time step allowed between other sensors
 min_sensor_time_step: 8
 
