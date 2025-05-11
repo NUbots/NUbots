@@ -58,7 +58,7 @@ def run(j, args, purge_messages, build_dir, **kwargs):
 
     # Run cmake if we don't have a ninja build file
     if not os.path.isfile("build.ninja"):
-        configure(interactive=False, set_roles=[], unset_roles=[], args=[])
+        configure(interactive=False, build_dir=build_dir, set_roles=[], unset_roles=[], args=[])
 
     # Purge compiled messages
     if purge_messages:
