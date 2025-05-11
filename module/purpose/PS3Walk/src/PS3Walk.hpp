@@ -88,7 +88,7 @@ namespace module::purpose {
         bool moving = false;
 
         /// @brief Stores whether the robot will change its head direction or not
-        bool head_locked = false;
+        bool head_locked = true;
 
         /// @brief stores the head pitch value
         double head_pitch = 0.0;
