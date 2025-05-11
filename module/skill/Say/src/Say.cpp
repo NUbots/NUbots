@@ -27,6 +27,10 @@
 #include "Say.hpp"
 
 #include <cstdlib>
+#include <onnxruntime_cxx_api.h>
+#include <piper-phonemize/phoneme_ids.hpp>
+#include <piper-phonemize/phonemize.hpp>
+#include <piper-phonemize/tashkeel.hpp>
 #include <string>
 #include <thread>
 
@@ -71,7 +75,7 @@ namespace module::skill {
                     sanitized_text.erase(std::remove(sanitized_text.begin(), sanitized_text.end(), c),
                                          sanitized_text.end());
                 }
-                log<NUClear::DEBUG>("Saying: ", sanitized_text);
+                log<DEBUG>("Saying: ", sanitized_text);
                 system(std::string("echo '" + sanitized_text + "' | piper --model en_US-lessac-medium | aplay -D "
                                    + cfg.device_name)
                            .c_str());
