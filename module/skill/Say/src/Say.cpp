@@ -34,6 +34,8 @@
 #include <string>
 #include <thread>
 
+#include "piper.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/Limbs.hpp"
