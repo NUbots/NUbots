@@ -164,6 +164,7 @@ var hierarchy =
     [ "module::network::NetworkForwarder::Handle", "structmodule_1_1network_1_1NetworkForwarder_1_1Handle.html", null ],
     [ "module::network::NetworkForwarder::Handle::TargetHandle", "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html", null ],
     [ "module::network::RobotCommunication::Config", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html", null ],
+    [ "module::network::StartupDelay", "structmodule_1_1network_1_1StartupDelay.html", null ],
     [ "module::output::compressor::Compressor", "classmodule_1_1output_1_1compressor_1_1Compressor.html", [
       [ "module::output::compressor::turbojpeg::Compressor", "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html", null ],
       [ "module::output::compressor::vaapi::Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html", null ]

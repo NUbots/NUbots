@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['xh540_5fw270_1888',['XH540_W270',['../structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html',1,'module::platform::OpenCR']]]
+  ['xh540_5fw270_1884',['XH540_W270',['../structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html',1,'module::platform::OpenCR']]]
 ];

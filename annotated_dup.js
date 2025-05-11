@@ -150,7 +150,8 @@ var annotated_dup =
         [ "NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", "classmodule_1_1network_1_1NetworkForwarder" ],
         [ "NUClearNet", "classmodule_1_1network_1_1NUClearNet.html", "classmodule_1_1network_1_1NUClearNet" ],
         [ "PlotJuggler", "classmodule_1_1network_1_1PlotJuggler.html", "classmodule_1_1network_1_1PlotJuggler" ],
-        [ "RobotCommunication", "classmodule_1_1network_1_1RobotCommunication.html", "classmodule_1_1network_1_1RobotCommunication" ]
+        [ "RobotCommunication", "classmodule_1_1network_1_1RobotCommunication.html", "classmodule_1_1network_1_1RobotCommunication" ],
+        [ "StartupDelay", "structmodule_1_1network_1_1StartupDelay.html", null ]
       ] ],
       [ "output", null, [
         [ "compressor", null, [
