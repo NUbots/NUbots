@@ -394,6 +394,16 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+# MuJoCo
+RUN install-package libx11
+RUN install-package libxrandr
+RUN install-package libxinerama
+RUN install-package libxcursor
+RUN install-package libxi
+RUN install-package mesa
+RUN install-from-source https://github.com/Tom0Brien/mujoco/archive/e1b4a73e845b2096cfc026afc1566233c9844b85.tar.gz
+RUN install-package glfw-x11
+
 # lame
 RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
