@@ -229,7 +229,7 @@ namespace module::purpose {
         });
 
         // output walk command based on updated strafe and rotation speed from joystick
-        on<Every<20, Per<std::chrono::seconds>>>().then([this] {
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
             if (!head_locked) {
                 // Create a unit vector in the direction the head should be pointing
                 Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw, Eigen::Vector3d::UnitZ())
@@ -241,8 +241,7 @@ namespace module::purpose {
 
             if (moving) {
                 // Apply acceleration limiting
-                // Calculate time elapsed (20 per second = 0.05 seconds per cycle)
-                const double dt = 0.05;
+                const double dt = 1.0 / UPDATE_FREQUENCY;
 
                 // Calculate maximum allowed change in velocity components
                 double max_delta = cfg.max_acceleration * dt;

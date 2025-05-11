@@ -77,7 +77,7 @@ namespace module::purpose {
             double maximum_forward_velocity    = 0;
             double maximum_rotational_velocity = 0;
             /// @brief Maximum allowed acceleration per second (in m/s²)
-            double max_acceleration = 0.5;  // This value can be configured
+            double max_acceleration = 0.5;
         } cfg;
 
         /// @brief Controls interactions with the PS3 controller
@@ -100,6 +100,9 @@ namespace module::purpose {
 
         /// @brief Stores the previous walk command for acceleration limiting
         Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
+
+        /// @brief The frequency at which the PS3Walk commands are updated
+        static constexpr size_t UPDATE_FREQUENCY = 20;
     };
 }  // namespace module::purpose
 
