@@ -60,6 +60,10 @@ namespace module::localisation {
             /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
             double association_distance = 0.0;
 
+            /// @brief The maximum distance a teammate robot can be from another robot to be associated
+            /// This is used to componsate for error between vision measurement and the robot's position message
+            double teammate_association_distance = 0.0;
+
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
 

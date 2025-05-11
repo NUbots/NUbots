@@ -15,5 +15,6 @@ ukf:
     velocity: [1e-3, 1e-3]
 
 association_distance: 0.4
+teammate_association_distance: 1.0
 
 max_missed_count: 25
