@@ -25,7 +25,7 @@ export const Checkbox = (props: CheckboxProps) => {
       <span
         className={classNames(
           "border-2 rounded-sm w-full h-full absolute transition-colors",
-          checked ? "bg-nusight-500 border-nusight-500" : "bg-white border-[#757575]",
+          checked ? "bg-blue-500 border-blue-500 " : "bg-surface border-primary dark:border-primary-inverse",
         )}
       >
         <Icon

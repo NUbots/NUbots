@@ -7,7 +7,9 @@
 .emptyIcon {
   background-color: #888;
   border-radius: 100%;
-  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2), 1px 1px 4px 0 rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 8px 0 rgba(0, 0, 0, 0.2),
+    1px 1px 4px 0 rgba(0, 0, 0, 0.2);
   color: #fff;
   height: 3em;
   margin: 0 auto 1em auto;

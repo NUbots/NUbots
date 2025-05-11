@@ -1,7 +1,7 @@
 #[[
 MIT License
 
-Copyright (c) 2023 NUbots
+Copyright (c) 2024 NUbots
 
 This file is part of the NUbots codebase.
 See https://github.com/NUbots/NUbots for further info.
@@ -24,11 +24,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
-# Check subcontroller before we build
-if(NOT SUBCONTROLLER STREQUAL "NUSense")
-  return()
-endif()
 
 # Build our NUClear module
 nuclear_module()

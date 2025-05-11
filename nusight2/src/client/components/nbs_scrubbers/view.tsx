@@ -53,13 +53,13 @@ interface NbsScrubbersProps {
 
 const NbsScrubbers = observer(({ viewModel, onScrubberFocused }: NbsScrubbersProps) => {
   return (
-    <div className="divide-y divide-gray-300 border-y border-gray-300">
+    <div className="divide-y divide-auto border-y border-auto">
       {viewModel.scrubberList.map((scrubber) => (
         <NbsScrubberView key={scrubber.id} model={scrubber} onFocus={() => onScrubberFocused(scrubber)} />
       ))}
       {viewModel.scrubberList.length === 0 ? (
-        <div className="flex px-2 h-12 items-center bg-gray-200">
-          <Icon className="text-icon mr-2">info</Icon>
+        <div className="flex px-2 h-12 items-center bg-auto-surface-2">
+          <Icon className="mr-2">info</Icon>
           <span>No scrubbers currently loaded. Click the “Scrub NBS” button to load NBS files for scrubbing.</span>
         </div>
       ) : null}
@@ -80,20 +80,18 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
   return (
     <div className="flex relative">
       <button
-        className={classNames(
-          "inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px] hover:bg-[#f8f8f8] focus:bg-[#f8f8f8] active:bg-[#eee]",
-        )}
+        className={classNames("inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]")}
         onClick={onClick}
       >
         {showScrubbers ? (
-          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px]" />
+          <IconNbsFilled className="w-7 h-7 mt-1 -ml-5 fill-blue-500 text-white" />
         ) : (
-          <IconNbs className="w-7 h-7 mt-1 -ml-[20px]" />
+          <IconNbs className="w-7 h-7 mt-1 -ml-5" />
         )}
         <span className="text-[0.7rem]">Scrub NBS</span>
       </button>
       <button
-        className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:bg-gray-200 h-8 rounded inline-flex items-center"
+        className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:bg-auto-contrast-1 h-8 rounded inline-flex items-center"
         onClick={onToggle}
       >
         <Icon size="20" weight="500" rotate={showScrubbers ? 180 : 0} className="transition-transform">

@@ -4,13 +4,13 @@ import { NUClearNetSend } from "nuclearnet.js";
 import { NUClearNetPeer } from "nuclearnet.js";
 import { NUClearNetPacket } from "nuclearnet.js";
 
+import { hashType } from "../../shared/nuclearnet/hash_type";
 import { NUClearEventListener, NUClearNetPeerWithType } from "../../shared/nuclearnet/nuclearnet_client";
 import { NUClearPacketListener } from "../../shared/nuclearnet/nuclearnet_client";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 
 import { decodePacketId } from "./decode_packet_id";
 import { FakeNUClearNetServer } from "./fake_nuclearnet_server";
-import { hashType } from "./hash_type";
 import { parseEventString } from "./parse_event_string";
 
 /**

@@ -13,24 +13,23 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
+  network::PlotJuggler
+  # Output
   output::Overview
   output::ImageCompressor
   # Input
   input::Camera
   input::SensorFilter
-  # Network
-  network::NUClearNet
-  network::PlotJuggler
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::GoalDetector
   vision::BallDetector
   vision::FieldLineDetector
   vision::Yolo
   # Localisation
   localisation::BallLocalisation
   localisation::FieldLocalisationNLopt
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos
@@ -46,6 +45,7 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
+  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   # Purpose

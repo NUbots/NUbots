@@ -42,20 +42,19 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 6> {
     public:
         /// Print the subtask state
-        std::string decode_run_state(GroupInfo::RunState state) {
+        std::string decode_run_state(RunState state) {
             switch (state) {
-                case GroupInfo::RunState::NO_TASK: return "NO_TASK";
-                case GroupInfo::RunState::RUNNING: return "RUNNING";
-                case GroupInfo::RunState::QUEUED: return "QUEUED";
+                case RunState::NO_TASK: return "NO_TASK";
+                case RunState::RUNNING: return "RUNNING";
+                case RunState::QUEUED: return "QUEUED";
                 default: return "ERROR";
             }
         }
 
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
 
             on<Provide<PrimaryTask>, Uses<SubTask>>().then([this](const Uses<SubTask>& subtask) {
@@ -111,15 +110,6 @@ namespace {
                 events.push_back("emitting secondary task again");
                 emit<Task>(std::make_unique<SecondaryTask>());
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-            });
         }
 
         bool executed = false;
@@ -129,7 +119,7 @@ namespace {
 TEST_CASE("Test that the Uses run state information is correct", "[director][uses][state]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

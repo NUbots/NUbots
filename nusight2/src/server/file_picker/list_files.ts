@@ -54,11 +54,7 @@ export async function listFiles(rawDirectory: string, type: FilesRequestType) {
           name: entryName,
           path: fullPath,
           size: stats.size,
-          // Even though `stats.mtime` is a Date, we reconstruct it date here using the current global Date
-          // constructor so we can do instanceof checks in Jest. This is necessary since Jest overrides
-          // the global Date constructor, but not the one used by fs.stat() internally, leading to
-          // failing instanceof checks when running in Jest.
-          dateModified: new Date(stats.mtime),
+          dateModified: stats.mtime,
         });
       }
     } catch (e) {

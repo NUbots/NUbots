@@ -51,10 +51,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask<0>>>().then([this](const SimpleTask<0>& t) {  //
                 events.push_back("task 0 " + t.msg);
@@ -105,14 +104,6 @@ namespace {
                 events.push_back("emitting optional blocker task");
                 emit<Task>(std::make_unique<BlockerTask>("optional"), 50, true);
             });
-
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-            });
         }
     };
 
@@ -122,7 +113,7 @@ TEST_CASE("Test that if a task is optional then it does not need to be executed 
           "[director][priority][optional]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

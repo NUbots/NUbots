@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "NBSPlayback.hpp"
 
 #include "extension/Configuration.hpp"
@@ -6,9 +32,9 @@ namespace module::tools {
 
     using extension::Configuration;
 
-    using message::nbs::player::Finished;
     using message::nbs::player::LoadRequest;
     using message::nbs::player::PauseRequest;
+    using message::nbs::player::PlaybackFinished;
     using message::nbs::player::PlaybackState;
     using message::nbs::player::PlayRequest;
     using message::nbs::player::SetModeRequest;
@@ -37,7 +63,7 @@ namespace module::tools {
                 config.mode = REALTIME;
             }
             else {
-                log<NUClear::ERROR>("Playback mode is invalid, stopping playback");
+                log<ERROR>("Playback mode is invalid, stopping playback");
                 powerplant.shutdown();
             }
 
@@ -55,16 +81,16 @@ namespace module::tools {
             // Set playback mode
             auto set_mode_request  = std::make_unique<SetModeRequest>();
             set_mode_request->mode = config.mode;
-            emit<Scope::DIRECT>(set_mode_request);
+            emit<Scope::INLINE>(set_mode_request);
 
             // Load the files
             auto load_request      = std::make_unique<LoadRequest>();
             load_request->files    = std::vector<std::string>(std::next(args.begin()), args.end());
             load_request->messages = config.messages;
-            emit<Scope::DIRECT>(std::move(load_request));
+            emit<Scope::INLINE>(std::move(load_request));
 
             // Start playback
-            emit<Scope::DIRECT>(std::make_unique<PlayRequest>());
+            emit<Scope::INLINE>(std::make_unique<PlayRequest>());
         });
 
         on<Trigger<PlaybackState>>().then([this](const PlaybackState& playback_state) {
@@ -72,8 +98,8 @@ namespace module::tools {
             progress_bar.update(playback_state.current_message, playback_state.total_messages, "", "NBS Playback");
         });
 
-        on<Trigger<Finished>>().then([this] {
-            log<NUClear::INFO>("Finished playback");
+        on<Trigger<PlaybackFinished>>().then([this] {
+            log<INFO>("Finished playback");
             progress_bar.close();
             powerplant.shutdown();
         });

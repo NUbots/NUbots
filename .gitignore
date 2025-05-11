@@ -80,6 +80,9 @@ log
 log/*
 nsga2-output/*
 
+# ScriptTuner autosaves
+/.scripttuner/
+
 # Generated documentation
 /doc/Generated/*
 !/doc/Generated/html
@@ -103,3 +106,6 @@ tags
 \.vscode/ipch
 .ccls-cache
 .vscode/launch.json
+
+# Datasets folder
+/datasets/

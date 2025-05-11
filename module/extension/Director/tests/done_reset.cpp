@@ -43,41 +43,40 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 15> {
     public:
-        std::string decode_reason(const RunInfo::RunReason& reason) {
+        std::string decode_reason(const RunReason& reason) {
             switch (reason) {
-                case RunInfo::RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
-                case RunInfo::RunReason::NEW_TASK: return "NEW_TASK"; break;
-                case RunInfo::RunReason::STARTED: return "STARTED"; break;
-                case RunInfo::RunReason::STOPPED: return "STOPPED"; break;
-                case RunInfo::RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
-                case RunInfo::RunReason::PUSHED: return "PUSHED"; break;
+                case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER"; break;
+                case RunReason::NEW_TASK: return "NEW_TASK"; break;
+                case RunReason::STARTED: return "STARTED"; break;
+                case RunReason::STOPPED: return "STOPPED"; break;
+                case RunReason::SUBTASK_DONE: return "SUBTASK_DONE"; break;
+                case RunReason::PUSHED: return "PUSHED"; break;
                 default: return "ERROR"; break;
             };
         }
 
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, Uses<SubtaskA>, Uses<SubtaskB>>().then(
-                [this](const RunInfo& info, const Uses<SubtaskA>& a, const Uses<SubtaskB>& b) {
-                    events.push_back("SimpleTask " + decode_reason(info.run_reason)
-                                     + " a.done: " + std::to_string(a.done) + " b.done: " + std::to_string(b.done));
+                [this](const RunReason& run_reason, const Uses<SubtaskA>& a, const Uses<SubtaskB>& b) {
+                    events.push_back("SimpleTask " + decode_reason(run_reason) + " a.done: " + std::to_string(a.done)
+                                     + " b.done: " + std::to_string(b.done));
 
                     // Emit tasks if new task happens
-                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                    if (run_reason == RunReason::NEW_TASK) {
                         events.push_back("emitting SubtaskA and SubtaskB");
                         emit<Task>(std::make_unique<SubtaskA>());
                         emit<Task>(std::make_unique<SubtaskB>());
                     }
                     else {
-                        emit<Task>(std::make_unique<Idle>());
+                        emit<Task>(std::make_unique<Continue>());
                     }
                 });
 
-            on<Provide<SubtaskA>, Trigger<PokeA>>().then([this](const RunInfo& info) {
-                if (info.run_reason == RunInfo::RunReason::OTHER_TRIGGER) {
+            on<Provide<SubtaskA>, Trigger<PokeA>>().then([this](const RunReason& run_reason) {
+                if (run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("SubtaskA done");
                     emit<Task>(std::make_unique<Done>());
                 }
@@ -86,8 +85,8 @@ namespace {
                 }
             });
 
-            on<Provide<SubtaskB>, Trigger<PokeB>>().then([this](const RunInfo& info) {
-                if (info.run_reason == RunInfo::RunReason::OTHER_TRIGGER) {
+            on<Provide<SubtaskB>, Trigger<PokeB>>().then([this](const RunReason& run_reason) {
+                if (run_reason == RunReason::OTHER_TRIGGER) {
                     events.push_back("SubtaskB done");
                     emit<Task>(std::make_unique<Done>());
                 }
@@ -132,26 +131,33 @@ namespace {
                 events.push_back("removing simple task");
                 emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
-
-            // Repeat steps
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-                emit(std::make_unique<Step<7>>());
-                emit(std::make_unique<Step<8>>());
-
-                // Repeat steps 2-7 to test again
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-                emit(std::make_unique<Step<7>>());
-                emit(std::make_unique<Step<8>>());
+            on<Trigger<Step<9>>, Priority::LOW>().then([this] {
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Trigger<Step<10>>, Priority::LOW>().then([this] {
+                events.push_back("emitting PokeA");
+                emit(std::make_unique<PokeA>());
+            });
+            on<Trigger<Step<11>>, Priority::LOW>().then([this] {
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Trigger<Step<12>>, Priority::LOW>().then([this] {
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Trigger<Step<13>>, Priority::LOW>().then([this] {
+                events.push_back("emitting PokeB");
+                emit(std::make_unique<PokeB>());
+            });
+            on<Trigger<Step<14>>, Priority::LOW>().then([this] {
+                events.push_back("emitting PokeA");
+                emit(std::make_unique<PokeA>());
+            });
+            on<Trigger<Step<15>>, Priority::LOW>().then([this] {
+                events.push_back("removing simple task");
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
         }
 
@@ -162,7 +168,7 @@ namespace {
 TEST_CASE("Test that task done resets when given a new task to execute", "[director][done][reset]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

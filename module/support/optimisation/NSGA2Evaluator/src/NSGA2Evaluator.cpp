@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -91,7 +91,7 @@ namespace module::support::optimisation {
             State old_state = current_state;
             State new_state = handle_transition(current_state, event);
 
-            log<NUClear::DEBUG>("Transitioning on", event, ", from state", old_state, "to state", new_state);
+            log<DEBUG>("Transitioning on", event, ", from state", old_state, "to state", new_state);
 
             switch (new_state.value) {
                 case State::Value::WAITING_FOR_REQUEST:
@@ -122,7 +122,7 @@ namespace module::support::optimisation {
                     current_state = new_state;
                     finished();
                     break;
-                default: log<NUClear::WARN>("Unable to transition to unknown state from", current_state, "on", event);
+                default: log<WARN>("Unable to transition to unknown state from", current_state, "on", event);
             }
         });
 
@@ -149,7 +149,7 @@ namespace module::support::optimisation {
         });
 
         on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
-            log<NUClear::INFO>("Reset done");
+            log<INFO>("Reset done");
             task->reset_trial();
             emit(std::make_unique<Event>(Event(Event::Value::RESET_DONE)));
         });
@@ -198,13 +198,13 @@ namespace module::support::optimisation {
 
     // Handle the WAITING_FOR_REQUEST state
     void NSGA2Evaluator::waiting_for_request() {
-        log<NUClear::DEBUG>("Waiting For Request");
+        log<DEBUG>("Waiting For Request");
         emit(std::make_unique<NSGA2EvaluatorReady>());  // Let the optimiser know we're ready
     }
 
     // Handle the SETTING_UP_TRIAL state
     void NSGA2Evaluator::setting_up_trial() {
-        log<NUClear::DEBUG>("Setting Up Trial");
+        log<DEBUG>("Setting Up Trial");
 
         generation = last_eval_request_msg.generation;
         individual = last_eval_request_msg.id;
@@ -215,7 +215,7 @@ namespace module::support::optimisation {
             case int(message::support::optimisation::Task::ROTATION):
                 task = std::make_unique<RotationEvaluator>();
                 break;
-            default: log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
+            default: log<ERROR>("Unhandled task type:", last_eval_request_msg.task);
         }
 
         task->set_up_trial(last_eval_request_msg);
@@ -225,7 +225,7 @@ namespace module::support::optimisation {
 
     // Handle the RESETTING_TRIAL state
     void NSGA2Evaluator::resetting_trial() {
-        log<NUClear::DEBUG>("Resetting Trial");
+        log<DEBUG>("Resetting Trial");
 
         // Tell Webots to reset the world
         std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
@@ -235,7 +235,7 @@ namespace module::support::optimisation {
 
     // Handle the EVALUATING state
     void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
-        log<NUClear::DEBUG>("Evaluating");
+        log<DEBUG>("Evaluating");
 
         if (event.value == Event::Value::RESET_DONE) {
             if (last_eval_request_msg.task == message::support::optimisation::Task::WALK
@@ -246,7 +246,7 @@ namespace module::support::optimisation {
                 evaluation_running = true;
             }
             else {
-                log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
+                log<ERROR>("Unhandled task type:", last_eval_request_msg.task);
             }
         }
     }
@@ -259,13 +259,13 @@ namespace module::support::optimisation {
         message->trial_stage                       = trial_stage;
 
         // Schedule the end of the walk trial after the duration limit
-        log<NUClear::DEBUG>("Scheduling expired message with time", delay_time.count());
+        log<DEBUG>("Scheduling expired message with time", delay_time.count());
         emit<Scope::DELAY>(message, delay_time);
     }
 
     // Handle the TERMINATING_EARLY state
     void NSGA2Evaluator::terminating_early() {
-        log<NUClear::DEBUG>("Terminating Early");
+        log<DEBUG>("Terminating Early");
 
         evaluation_running = false;
 
@@ -281,7 +281,7 @@ namespace module::support::optimisation {
 
     // Handle the TERMINATING_GRACEFULLY state
     void NSGA2Evaluator::terminating_gracefully() {
-        log<NUClear::DEBUG>("Terminating Gracefully");
+        log<DEBUG>("Terminating Gracefully");
 
         // Send a zero walk command to stop walking
         emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
@@ -294,6 +294,6 @@ namespace module::support::optimisation {
     }
 
     void NSGA2Evaluator::finished() {
-        log<NUClear::INFO>("Finished");
+        log<INFO>("Finished");
     }
 }  // namespace module::support::optimisation

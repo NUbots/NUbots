@@ -197,6 +197,32 @@ namespace utility::math::euler {
         Eigen::Quaternion<Scalar> quat = yaw_rot * pitch_rot * roll_rot;
         return quat.matrix();
     }
+
+    /**
+     * @brief Create a homogeneous transformation matrix from position and Euler angles.
+     * @param position The position vector [x, y, z].
+     * @param angles Euler angles [roll, pitch, yaw].
+     * @return A homogeneous transformation matrix as Eigen::Transform.
+     */
+    template <typename Scalar>
+    inline Eigen::Transform<Scalar, 3, Eigen::Isometry> pos_rpy_to_transform(
+        const Eigen::Matrix<Scalar, 3, 1>& position,
+        const Eigen::Matrix<Scalar, 3, 1>& angles) {
+
+        // Create the rotation matrix from Euler angles
+        Eigen::Matrix<Scalar, 3, 3> rotation_matrix = rpy_intrinsic_to_mat(angles);
+
+        // Create the transformation object
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> transform;
+
+        // Set the translation (position)
+        transform.translation() = position;
+
+        // Set the rotation
+        transform.linear() = rotation_matrix;
+
+        return transform;
+    }
 }  // namespace utility::math::euler
 
 #endif

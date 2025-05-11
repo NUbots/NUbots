@@ -1,2 +1,16 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Map of possible ssid and passwords
+wifi_networks:
+  Humanoid_A: "rc2024humanoid"
+  Humanoid_B: "rc2024humanoid"
+  Humanoid_C: "rc2024humanoid"
+  Humanoid_D: "rc2024humanoid"
+
+common_ips: [
+    "10.1.1.X", # Typical ethernet/lab IP
+    "192.168.1.X", # RoboCup NUbots IP
+    "192.168.31.X", # RoboCup Drop-In Team A IP
+    "192.168.32.X", # RoboCup Drop-In Team B IP
+  ]

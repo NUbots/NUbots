@@ -35,8 +35,17 @@ namespace module::tools {
 
     class RoboCupConfiguration : public NUClear::Reactor {
     private:
+        struct Config {
+            /// @brief Map of ssid and passwords that are possible
+            std::map<std::string, std::string> wifi_networks{};
+            /// @brief Common IPs to toggle
+            std::vector<std::string> common_ips{};
+        } cfg;
+
         /// @brief The hostname of the robot
         std::string hostname = "";
+        /// @brief The name of the robot
+        std::string robot_name = "";
         /// @brief The wifi interface that the robot is connected to
         std::string wifi_interface = "";
         /// @brief The IP address of the robot
@@ -47,26 +56,26 @@ namespace module::tools {
         std::string password = "";
         /// @brief The ID that the robot is player for
         int team_id = 0;
+        /// @brief Max team team ID
+        static const int MAX_TEAM_ID = 33;
         /// @brief The player ID of the robot
         int player_id = 0;
-        /// @brief The position the robot will move to in READY
-        Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
+        /// @brief Max player ID
+        static const int MAX_PLAYER_ID = 6;
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value {
-                STRIKER,
-                GOALIE,
-                DEFENDER,
-            };
-            Value value = Value::STRIKER;
+            enum Value { ALL_ROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
+            Value value = Value::ALL_ROUNDER;
 
             Position() = default;
             Position(std::string const& str) {
                 // clang-format off
-                if (str == "STRIKER") { value = Value::STRIKER; }
+                if (str == "ALL_ROUNDER") { value = Value::ALL_ROUNDER; }
+                else if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
+                else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
                 else { throw std::runtime_error("Invalid robot position"); }
                 // clang-format on
             }
@@ -74,9 +83,11 @@ namespace module::tools {
             /// @brief Convert the enum to a string
             operator std::string() const {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "ALL_ROUNDER";
                     case Value::STRIKER: return "STRIKER";
                     case Value::DEFENDER: return "DEFENDER";
                     case Value::GOALIE: return "GOALIE";
+                    case Value::DYNAMIC: return "DYNAMIC";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
@@ -85,28 +96,58 @@ namespace module::tools {
             /// @return The full yaml name of the config for the current position
             std::string get_config_name() {
                 switch (value) {
+                    case Value::ALL_ROUNDER: return "AllRounder.yaml";
                     case Value::STRIKER: return "Striker.yaml";
                     case Value::DEFENDER: return "Defender.yaml";
                     case Value::GOALIE: return "Goalie.yaml";
+                    case Value::DYNAMIC: return "Dynamic.yaml";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
 
             /// @brief Increment the enum, for toggle
             void operator++() {
-                value =
-                    value == Value::DEFENDER ? Value::STRIKER : (value == Value::STRIKER ? Value::GOALIE : DEFENDER);
+                switch (value) {
+                    case Value::ALL_ROUNDER: value = Value::STRIKER; break;
+                    case Value::STRIKER: value = Value::GOALIE; break;
+                    case Value::GOALIE: value = Value::DEFENDER; break;
+                    case Value::DEFENDER: value = Value::DYNAMIC; break;
+                    case Value::DYNAMIC: value = Value::ALL_ROUNDER; break;
+                    default: value = Value::STRIKER;
+                }
             }
         } robot_position;
 
-        /// @brief The index of the item the user is selecting
-        size_t row_selection = 0;
 
-        /// @brief Index of the column the user is selecting
-        size_t column_selection = 0;
-
-        /// @brief The log message to print to the user at the bottom of the window
-        std::string log_message = "";
+        /// @brief Display values
+        struct Display {
+            /// @brief Enum for options in first column
+            enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
+            /// @brief Enum for options in second column
+            enum class Column2 { PLAYER_ID, TEAM_ID, POSITION, END };
+            /// @brief Column 1 padding
+            static const size_t C1_PAD = 2;
+            /// @brief Column 1 selection position
+            static const size_t C1_SEL_POS = 20;
+            /// @brief Column 2 padding
+            static const size_t C2_PAD = 40;
+            /// @brief Column 2 selection position
+            static const size_t C2_SEL_POS = 51;
+            /// @brief Selection highlight width
+            static const size_t SELECT_WIDTH = 18;
+            /// @brief How much to pad the commands from the bottom of the window
+            static const size_t COMMAND_BOTTOM_PAD = 10;
+            /// @brief How much to pad the log message from the bottom of the window
+            static const size_t LOG_BOTTOM_PAD = 2;
+            /// @brief Gap between commands
+            static const size_t COMMAND_GAP = 17;
+            /// @brief The index of the item the user is selecting
+            size_t row_selection = 0;
+            /// @brief Index of the column the user is selecting
+            size_t column_selection = 0;
+            /// @brief The log message to print to the user at the bottom of the window
+            std::string log_message = "";
+        } display{};
 
         /// @brief Displays the screen with any updated values to the user
         void refresh_view();

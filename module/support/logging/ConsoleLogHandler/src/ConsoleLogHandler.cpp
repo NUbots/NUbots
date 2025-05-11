@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -27,6 +27,9 @@
 
 #include "ConsoleLogHandler.hpp"
 
+#include <iostream>
+#include <regex>
+
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/evil/pure_evil.hpp"
 
@@ -36,107 +39,86 @@ namespace module::support::logging {
     using NUClear::message::ReactionStatistics;
     using utility::strutil::Colour;
 
+    void ConsoleLogHandler::print_log(const NUClear::LogLevel& level,
+                                      const std::string& reactor,
+                                      const std::string& name,
+                                      const std::string& message,
+                                      const std::vector<utility::support::evil::StackFrame>& stack_trace) {
+        std::lock_guard<std::mutex> lock(mutex);
+
+        // Remove the namespace from the Reactor with a regex
+        auto simple_reactor = std::regex_replace(reactor, std::regex("[A-Za-z_][A-Za-z0-9_]+::"), "");
+        simple_reactor      = simple_reactor.empty() ? "PowerPlant" : simple_reactor;
+
+        // Reactor - <name>
+        std::cerr << (simple_reactor + (name.empty() ? "" : " - " + name));
+        std::cerr << " ";
+
+        // Output the level
+        switch (level) {
+            case NUClear::LogLevel::TRACE: std::cerr << "TRACE: "; break;
+            case NUClear::LogLevel::DEBUG: std::cerr << Colour::green << "DEBUG: "; break;
+            case NUClear::LogLevel::INFO: std::cerr << Colour::brightblue << "INFO: "; break;
+            case NUClear::LogLevel::WARN: std::cerr << Colour::yellow << "WARN: "; break;
+            case NUClear::LogLevel::ERROR: std::cerr << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
+            case NUClear::LogLevel::UNKNOWN:  // Unknown shouldn't happen so we treat it as an error
+            case NUClear::LogLevel::FATAL: std::cerr << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
+        }
+
+        // Output the message
+        std::cerr << message << std::endl;
+
+        // Output the stack trace
+        for (const auto& s : stack_trace) {
+            std::cerr << "\t" << Colour::brightmagenta << s.file << ":" << Colour::brightmagenta << s.lineno << " "
+                      << s.function << std::endl;
+        }
+    }
+
+    std::string exception_what(const std::exception_ptr& ptr) {
+        try {
+            std::rethrow_exception(ptr);
+        }
+        catch (const std::exception& ex) {
+            return ex.what();
+        }
+        catch (...) {
+            return utility::support::evil::last_exception_name();
+        }
+    }
+
     ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
-        on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+        on<Trigger<ReactionStatistics>, Inline::ALWAYS>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
 
-                std::lock_guard<std::mutex> lock(mutex);
+                // Get our reactor name and reaction name
+                std::string reactor = stats.identifiers->reactor;
+                std::string name    = stats.identifiers->name;
 
-                // Get our reactor name
-                std::string reactor = stats.identifiers.reactor;
+                // Get the exception string
+                std::string msg = exception_what(stats.exception);
 
-                // Strip to the last semicolon if we have one
-                size_t lastC = reactor.find_last_of(':');
-                reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+                // Make sure we are on the thread that the exception was thrown on otherwise this will not work
+                auto stack_trace = utility::support::evil::last_exception_stack_trace();
 
-#ifndef NDEBUG  // We have a cold hearted monstrosity that got built!
-
-                std::string exception_what;
-                try {
-                    std::rethrow_exception(stats.exception);
-                }
-                catch (const std::exception& ex) {
-                    exception_what = ex.what();
-                }
-                // We don't actually want to crash
-                catch (...) {
-                }
-
-                // Print our exception details
-                std::cerr << reactor << " "
-                          << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
-                          << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
-                          << " " << Colour::brightred << utility::support::evil::exception_name << " " << exception_what
-                          << std::endl;
-
-                // Print our stack trace
-                for (auto& s : utility::support::evil::stack) {
-                    std::cerr << "\t" << Colour::brightmagenta << s.file << ":" << Colour::brightmagenta << s.lineno
-                              << " " << s.function << std::endl;
-                }
-#else
-                try {
-                    std::rethrow_exception(stats.exception);
-                }
-                catch (const std::exception& ex) {
-
-                    std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
-
-                    std::cerr << reactor << " "
-                              << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
-                              << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
-                              << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
-                }
-                // We don't actually want to crash
-                catch (...) {
-
-                    std::cerr << reactor << " "
-                              << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
-                              << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻" << std::endl;
-                }
-#endif
+                print_log(NUClear::LogLevel::FATAL, reactor, name, msg, stack_trace);
             }
         });
 
-
         on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
-            // Only display messages that are above the display level of the reactor that made the log
             if (message.level < message.display_level) {
                 return;
-            };
-            std::lock_guard<std::mutex> lock(mutex);
+            }
+
+            // Grab identifiers if they exist
+            const auto& ids = message.statistics != nullptr ? message.statistics->identifiers : nullptr;
 
             // Where this message came from
-            std::string source = "";
+            std::string reactor = ids != nullptr ? ids->reactor : "NUClear::PowerPlant";
+            std::string name    = ids != nullptr ? ids->name : "";
 
-            // If we know where this log message came from, we display that
-            if (message.task != nullptr) {
-                // Get our reactor name
-                std::string reactor = message.task->identifiers.reactor;
-
-                // Strip to the last semicolon if we have one
-                size_t lastC = reactor.find_last_of(':');
-                reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
-
-                // This is our source
-                source = reactor + " "
-                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
-            }
-
-            // Output the level
-            switch (message.level) {
-                case NUClear::TRACE: std::cerr << source << "TRACE: "; break;
-                case NUClear::DEBUG: std::cerr << source << Colour::green << "DEBUG: "; break;
-                case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;
-                case NUClear::WARN: std::cerr << source << Colour::yellow << "WARN: "; break;
-                case NUClear::ERROR: std::cerr << source << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
-                case NUClear::UNKNOWN:;
-                case NUClear::FATAL: std::cerr << source << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
-            }
-
-            // Output the message
-            std::cerr << message.message << std::endl;
+            print_log(message.level, reactor, name, message.message, {});
         });
     }
 

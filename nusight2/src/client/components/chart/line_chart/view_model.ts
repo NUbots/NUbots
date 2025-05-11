@@ -110,7 +110,6 @@ export class LineChartViewModel {
             }),
           }),
         );
-
         lines.push(
           Shape.of({
             geometry: TextGeometry.of({
@@ -123,7 +122,7 @@ export class LineChartViewModel {
             }),
             appearance: BasicAppearance.of({
               fill: {
-                color: "#000000",
+                color: "#888888",
               },
             }),
           }),

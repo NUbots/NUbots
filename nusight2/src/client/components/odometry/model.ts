@@ -24,7 +24,10 @@ export class OdometryModel {
 }
 
 export class OdometryRobotModel {
-  constructor(readonly robotModel: RobotModel, readonly visualizerModel: OdometryVisualizerModel) {}
+  constructor(
+    readonly robotModel: RobotModel,
+    readonly visualizerModel: OdometryVisualizerModel,
+  ) {}
 
   static of = memoize((robotModel: RobotModel) => {
     return new OdometryRobotModel(

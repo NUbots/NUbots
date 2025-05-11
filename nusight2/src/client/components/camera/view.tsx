@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { action, computed } from "mobx";
 import { observer } from "mobx-react";
 import { Object3D } from "three";
-import { Event } from "three";
 
 import { SwitchesMenu, SwitchesMenuOption } from "../switches_menu/view";
 import { Canvas, ObjectFit, Three } from "../three/three";
@@ -12,7 +11,7 @@ import { CameraController } from "./controller";
 import { IconZoomIn, IconZoomOut, IconZoomReset } from "./icons";
 import { CameraViewModel } from "./view_model";
 
-export type Renderable = false | Object3D<Event> | undefined;
+export type Renderable = false | Object3D | undefined;
 
 export interface CameraViewProps {
   switchMenuOptions?: SwitchesMenuOption[];
@@ -78,20 +77,35 @@ export class CameraView extends Component<CameraViewProps> {
           />
         )}
         {viewType === "full" ? (
-          <div className="flex flex-col absolute top-0 right-0">
+          <div className="text-white flex flex-col absolute top-0 right-0 bg-black/30 rounded-lg m-4">
             <SwitchesMenu dropdownMenuPosition="right" options={this.drawOptions} />
             {allowPanAndZoom ? (
-              <div className="flex flex-col">
-                <IconButton Icon={IconZoomIn} title="Zoom In" onClick={() => controller.zoomCenter(1)} />
-                <IconButton Icon={IconZoomOut} title="Zoom Out" onClick={() => controller.zoomCenter(-1)} />
-                <IconButton Icon={IconZoomReset} title="Zoom Reset" onClick={controller.resetCamera} />
+              <div className="flex flex-col mb-2">
+                <IconButton
+                  className="hover:text-gray-300 py-2"
+                  Icon={IconZoomIn}
+                  title="Zoom In"
+                  onClick={() => controller.zoomCenter(1)}
+                />
+                <IconButton
+                  className="hover:text-gray-300 py-2"
+                  Icon={IconZoomOut}
+                  title="Zoom Out"
+                  onClick={() => controller.zoomCenter(-1)}
+                />
+                <IconButton
+                  className="hover:text-gray-300 py-2"
+                  Icon={IconZoomReset}
+                  title="Zoom Reset"
+                  onClick={controller.resetCamera}
+                />
               </div>
             ) : null}
           </div>
         ) : null}
         <div
-          className={classNames("absolute bg-[rgba(0,0,0,0.6)] text-white text-sm leading-none", {
-            "top-0 left-0 rounded-br px-2 pt-2 pb-[6px] text-sm": viewType === "thumbnail",
+          className={classNames("absolute bg-black/30 text-white text-sm leading-none", {
+            "top-0 left-0 rounded-br px-2 pt-2 pb-1.5 text-sm": viewType === "thumbnail",
             "top-2 left-[50%] translate-x-[-50%] rounded p-2": viewType === "full",
           })}
         >

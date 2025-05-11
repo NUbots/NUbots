@@ -151,22 +151,22 @@ export class LocalisationController {
     switch (field_type) {
       case "lab":
         model.field.dimensions = new FieldDimensions({
-          lineWidth: 0.07,
+          lineWidth: 0.05,
           markWidth: 0.1,
-          fieldLength: 6.4,
-          fieldWidth: 3.55,
+          fieldLength: 6.8,
+          fieldWidth: 5.0,
           goalDepth: 0.4,
-          goalWidth: 1.65,
-          goalAreaLength: 0.72,
-          goalAreaWidth: 2.3,
-          penaltyAreaLength: 0,
-          penaltyAreaWidth: 0,
+          goalWidth: 1.95,
+          goalAreaLength: 1.05,
+          goalAreaWidth: 2.62,
+          penaltyAreaLength: 1.55,
+          penaltyAreaWidth: 4.05,
           goalCrossbarHeight: 0.55,
           goalPostDiameter: 0.1,
           goalNetHeight: 1.0,
-          penaltyMarkDistance: 0,
-          centerCircleDiameter: 1.2,
-          borderStripMinWidth: 0.5,
+          penaltyMarkDistance: 1.27,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 0.38,
         });
         break;
       case "robocup":
@@ -346,8 +346,9 @@ export class LocalisationController {
     model.particlesVisible = !model.particlesVisible;
   };
 
+  @action
   toggleGoalVisibility = (model: LocalisationModel) => {
-    model.goalVisible = !model.goalVisible;
+    model.goalsVisible = !model.goalsVisible;
   };
 
   @action
@@ -363,5 +364,15 @@ export class LocalisationController {
   @action
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
+  };
+
+  @action
+  toggleWalkToDebugVisibility = (model: LocalisationModel) => {
+    model.walkToDebugVisible = !model.walkToDebugVisible;
+  };
+
+  @action
+  toggleBoundedBoxVisibility = (model: LocalisationModel) => {
+    model.boundedBoxVisible = !model.boundedBoxVisible;
   };
 }

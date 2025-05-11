@@ -46,7 +46,7 @@ namespace module::skill {
         explicit Walk(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Frequency of walk engine updates
-        static constexpr int UPDATE_FREQUENCY = 200;
+        static constexpr int UPDATE_FREQUENCY = 100;
 
     private:
         struct Config {

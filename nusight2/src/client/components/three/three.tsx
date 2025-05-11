@@ -7,7 +7,6 @@ import { IComputedValue } from "mobx";
 import { observable } from "mobx";
 import { action } from "mobx";
 import { autorun } from "mobx";
-import { disposeOnUnmount } from "mobx-react";
 import { observer } from "mobx-react";
 import { ContentRect } from "react-measure";
 import Measure from "react-measure";
@@ -37,6 +36,8 @@ export class Three extends Component<{
   onWheel?(deltaY: number, preventDefault: () => void): void;
   renderScheduler?: (callback: () => void) => any;
 }> {
+  private dispose?: () => void;
+  private disposeStages?: () => void;
   @observable private containerSize = { width: 0, height: 0 };
   @observable private canvas: Canvas = { width: 0, height: 0 };
   private ref: HTMLCanvasElement | null = null;
@@ -51,15 +52,14 @@ export class Three extends Component<{
     this.props.clearColor && this.renderer.setClearColor(this.props.clearColor);
     const stages = this.props.stage!(this.canvas);
     // TODO (Annable): Extract this and add unit tests.
-    let dispose: () => void = () => undefined;
-    disposeOnUnmount(this, [
+    this.dispose = compose([
       reaction(
         () => stages.get(),
         (stages) => {
-          dispose();
+          this.disposeStages?.();
           if (stages instanceof Array) {
             // Create individual reactions for each stage, so they may react and re-render independently.
-            dispose = compose(
+            this.disposeStages = compose(
               stages.map((stage) =>
                 autorun(() => this.renderStage(stage()), {
                   scheduler: this.props.renderScheduler ?? requestAnimationFrame,
@@ -67,11 +67,10 @@ export class Three extends Component<{
               ),
             );
           } else {
-            dispose = autorun(() => this.renderStage(stages), {
+            this.disposeStages = autorun(() => this.renderStage(stages), {
               scheduler: this.props.renderScheduler ?? requestAnimationFrame,
             });
           }
-          disposeOnUnmount(this, dispose);
         },
         { fireImmediately: true },
       ),
@@ -93,6 +92,10 @@ export class Three extends Component<{
     this.renderer?.forceContextLoss();
     this.renderer?.dispose();
     delete this.renderer;
+    this.dispose?.();
+    this.dispose = undefined;
+    this.disposeStages?.();
+    this.disposeStages = undefined;
   }
 
   render() {

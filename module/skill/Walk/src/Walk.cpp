@@ -37,6 +37,7 @@
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -59,6 +60,7 @@ namespace module::skill {
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
+    using utility::input::FrameID;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -112,9 +114,9 @@ namespace module::skill {
 
         // Start - Runs every time the Walk provider starts (wasn't running)
         on<Start<WalkTask>>().then([this]() {
-            // Reset the last update time and walk engine
+            // Reset the last update time
             last_update_time = NUClear::clock::now();
-            walk_generator.reset();
+
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
@@ -132,7 +134,8 @@ namespace module::skill {
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
-           Single>()
+           Single,
+           Priority::HIGH>()
             .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
                 // Compute time since the last update
                 auto time_delta =
@@ -150,7 +153,7 @@ namespace module::skill {
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                         case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                         case WalkState::State::UNKNOWN:
-                        default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                        default: NUClear::log<NUClear::LogLevel::WARN>("Unknown state."); break;
                     }
                 }
 
@@ -186,7 +189,7 @@ namespace module::skill {
                                                               walk_generator.get_phase());
 
                 // Debugging
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     Eigen::Vector3d thetaTL = mat_to_rpy_intrinsic(Htl.linear());
                     emit(graph("Left foot desired position rLTt (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
                     emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
@@ -207,6 +210,18 @@ namespace module::skill {
                                walk_task.velocity_target.z()));
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
+
+                    // Sample trajectory points
+                    const int num_samples = 10;
+                    for (double t = 0; t <= walk_generator.get_step_period();
+                         t += walk_generator.get_step_period() / num_samples) {
+                        walk_state->torso_trajectory.push_back(walk_generator.get_torso_pose(t).matrix());
+                        walk_state->swing_foot_trajectory.push_back(walk_generator.get_swing_foot_pose(t).matrix());
+                    }
+                    auto Htp        = walk_generator.get_phase() == WalkState::Phase::RIGHT
+                                          ? sensors.Htx[FrameID::R_FOOT_BASE]
+                                          : sensors.Htx[FrameID::L_FOOT_BASE];
+                    walk_state->Hwp = sensors.Htw.inverse() * Htp;
                 }
                 emit(walk_state);
             });

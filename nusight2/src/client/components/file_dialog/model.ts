@@ -248,8 +248,8 @@ export function parsePathSegments(path: string): FileDialogPathSegment[] {
             segmentName.length === 0
               ? "/" // Only empty segment is the root
               : i === 0 && /:/.test(segmentName)
-              ? segmentName + "/" // If the first segment has a colon then it's a Windows root, so add a trailing slash
-              : allSegmentNames.slice(0, i + 1).join("/"), // Otherwise, build the full path from the segments
+                ? segmentName + "/" // If the first segment has a colon then it's a Windows root, so add a trailing slash
+                : allSegmentNames.slice(0, i + 1).join("/"), // Otherwise, build the full path from the segments
         };
       })
   );

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package message.nuclear;
+
+/**
+ * Replicates the NUClear::util::ThreadPoolDescriptor class from NUClear
+ */
+message ThreadPoolDescriptor {
+    /// The name of the threadpool
+    string name = 1;
+    /// The size of the threadpool
+    uint32 concurrency = 2;
+    /// If the threadpool participates in Idle
+    bool counts_for_idle = 3;
+    /// If this thread pool is persistent (continues after shutdown until empty)
+    bool persistent = 4;
+}

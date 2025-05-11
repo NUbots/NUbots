@@ -4,7 +4,12 @@ import { Vector } from "./vector";
 import { Vector3 } from "./vector3";
 
 export class Vector4 extends Vector {
-  constructor(readonly x: number, readonly y: number, readonly z: number, readonly t: number) {
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly z: number,
+    readonly t: number,
+  ) {
     super();
   }
 

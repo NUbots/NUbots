@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package message.nuclear;
+
+/**
+ * Replicates the NUClear::threading::ReactionIdentifiers type from NUClear
+ */
+message ReactionIdentifiers {
+    /// The name of the reaction provided by the user
+    string name = 1;
+    /// The name of the reactor that this reaction belongs to
+    string reactor = 2;
+    /// The DSL that this reaction was created from
+    string dsl = 3;
+    /// The callback function that this reaction is bound to
+    string function = 4;
+}

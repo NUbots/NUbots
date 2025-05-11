@@ -113,11 +113,11 @@ namespace module::purpose {
                         case BUTTON_START:
                             if (event.value > 0) {  // button down
                                 if (moving) {
-                                    log<NUClear::INFO>("Stop walking");
+                                    log<INFO>("Stop walking");
                                     emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 }
                                 else {
-                                    log<NUClear::INFO>("Start walking");
+                                    log<INFO>("Start walking");
                                 }
                                 moving = !moving;
                             }
@@ -125,10 +125,10 @@ namespace module::purpose {
                         case BUTTON_SELECT:
                             if (event.value > 0) {  // button down
                                 if (head_locked) {
-                                    log<NUClear::INFO>("Head unlocked");
+                                    log<INFO>("Head unlocked");
                                 }
                                 else {
-                                    log<NUClear::INFO>("Head locked");
+                                    log<INFO>("Head locked");
                                     emit<Task>(std::unique_ptr<Look>(nullptr));
                                 }
                                 head_locked = !head_locked;
@@ -137,61 +137,61 @@ namespace module::purpose {
                             // dance moves here:
                         case BUTTON_DPAD_UP:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance move Dpad up");
+                                log<INFO>("Do a dance move Dpad up");
                                 emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_DOWN:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance Dpad down");
+                                log<INFO>("Do a dance Dpad down");
                                 emit<Task>(load_script<LimbsSequence>("TheRobot.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_LEFT:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance Dpad left");
+                                log<INFO>("Do a dance Dpad left");
                                 emit<Task>(load_script<LimbsSequence>("Dab.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_RIGHT:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance Dpad right");
+                                log<INFO>("Do a dance Dpad right");
                                 emit<Task>(load_script<LimbsSequence>("ArmDangle.yaml"), 3);
                             }
                             break;
                         case BUTTON_TRIANGLE:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance triangle");
+                                log<INFO>("Do a dance triangle");
                                 emit<Task>(load_script<LimbsSequence>("Star.yaml"), 3);
                             }
                             break;
                         case BUTTON_CIRCLE:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance circle");
+                                log<INFO>("Do a dance circle");
                                 emit<Task>(load_script<LimbsSequence>("RaiseTheRoof.yaml"), 3);
                             }
                             break;
                         case BUTTON_CROSS:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance cross");
+                                log<INFO>("Do a dance cross");
                                 emit<Task>(load_script<LimbsSequence>("Crouch.yaml"), 3);
                             }
                             break;
                         case BUTTON_SQUARE:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a wave");
+                                log<INFO>("Do a wave");
                                 emit<Task>(load_script<LimbsSequence>("Wave.yaml"), 3);
                             }
                             break;
                         case BUTTON_L1:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Requesting Left Front Kick");
+                                log<INFO>("Requesting Left Front Kick");
                                 emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
                             }
                             break;
                         case BUTTON_R1:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Requesting Right Front Kick");
+                                log<INFO>("Requesting Right Front Kick");
                                 emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
                             }
                             break;

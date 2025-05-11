@@ -49,6 +49,9 @@ namespace module::platform::OpenCR {
         /// @brief Called by the powerplant to build and setup the HardwareIO reactor.
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
+        /// @brief Makes HardwareIO a threadpool descriptor type
+        static constexpr int concurrency = 1;
+
     private:
         /// @brief Manages the connection with OpenCR
         utility::io::uart opencr{};
@@ -241,6 +244,14 @@ namespace module::platform::OpenCR {
         /// @returns the number of packets cleared
         int queue_clear_all();
 
+        /// @brief Creates the model watchdog thread
+        /// @return NUClear::threading::ReactionHandle object
+        ReactionHandle create_model_watchdog();
+
+        /// @brief Creates the packet watchdog thread
+        /// @return NUClear::threading::ReactionHandle object
+        ReactionHandle create_packet_watchdog();
+
         struct PacketWatchdog {};
         struct ModelWatchdog {};
 
@@ -261,6 +272,8 @@ namespace module::platform::OpenCR {
                 } temperature;
             } alarms;
         } cfg;
+
+        enum UnstuffingState : uint8_t { DATA, UNSTUFF_1, UNSTUFF_2, UNSTUFF_3 };
     };
 
 }  // namespace module::platform::OpenCR

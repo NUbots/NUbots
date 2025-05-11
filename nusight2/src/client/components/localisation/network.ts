@@ -15,7 +15,10 @@ import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
 
 export class LocalisationNetwork {
-  constructor(private network: Network, private model: LocalisationModel) {
+  constructor(
+    private network: Network,
+    private model: LocalisationModel,
+  ) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.localisation.Ball, this.onBall);
@@ -23,7 +26,11 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
+    this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
+    this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -35,12 +42,70 @@ export class LocalisationNetwork {
     this.network.off();
   }
 
+  // Reverse lookup for protobuf enums
+  getKey(enumType: any, enumValue: number) {
+    return Object.keys(enumType).find((key) => enumType[key] === enumValue);
+  }
+
   @action
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
-    robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
+    robot.particles = field.particles.map((particle) => Vector3.from(particle));
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
+
+  @action
+  private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
+    robot.max_align_radius = walk_to_debug.maxAlignRadius;
+    robot.min_align_radius = walk_to_debug.minAlignRadius;
+    robot.angle_to_final_heading = walk_to_debug.angleToFinalHeading;
+    robot.angle_to_target = walk_to_debug.angleToTarget;
+    robot.translational_error = walk_to_debug.translationalError;
+    robot.min_angle_error = walk_to_debug.minAngleError;
+    robot.max_angle_error = walk_to_debug.maxAngleError;
+    robot.velocity_target = Vector3.from(walk_to_debug.velocityTarget);
+  };
+
+  @action.bound
+  private WalkInsideBoundedBox(robotModel: RobotModel, boundedBox: message.strategy.WalkInsideBoundedBox) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.boundingBox = {
+      minX: boundedBox.xMin,
+      maxX: boundedBox.xMax,
+      minY: boundedBox.yMin,
+      maxY: boundedBox.yMax,
+    };
+  }
+
+  @action.bound
+  private onPurpose(robotModel: RobotModel, purpose: message.purpose.Purpose) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    const position = purpose.purpose;
+    robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
+
+    robot.player_id = purpose.playerId!;
+
+    // Update colour based on player id
+    if (robot.player_id === 1) {
+      robot.color = "blue";
+    } else if (robot.player_id === 2) {
+      robot.color = "purple";
+    } else if (robot.player_id === 3) {
+      robot.color = "red";
+    } else if (robot.player_id === 4) {
+      robot.color = "orange";
+    } else if (robot.player_id === 5) {
+      robot.color = "yellow";
+    } else {
+      robot.color = "black";
+    }
+  }
 
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
@@ -67,7 +132,7 @@ export class LocalisationNetwork {
   private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+    robot.rIWw = fieldIntersections.intersections.map((intersection) => {
       let intersection_type = "";
       if (intersection.type === 0) {
         intersection_type = "UNKNOWN";
@@ -106,6 +171,7 @@ export class LocalisationNetwork {
 
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
+    robot.Hrw = Matrix4.from(sensors.Hrw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;
@@ -129,6 +195,22 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
+
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // If phase changed, add current trajectories to history before updating
+    if (robot.walk_phase !== walk_state.phase && robot.torso_trajectory.length > 0) {
+      robot.addToTrajectoryHistory(robot.torso_trajectoryF, robot.swing_foot_trajectoryF);
+    }
+
+    // Update current state
+    robot.torso_trajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
+    robot.swing_foot_trajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
+    robot.Hwp = Matrix4.from(walk_state.Hwp);
+    robot.walk_phase = walk_state.phase;
+  }
 }
 
 function decompose(m: THREE.Matrix4): {

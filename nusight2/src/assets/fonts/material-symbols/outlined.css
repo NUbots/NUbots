@@ -36,7 +36,10 @@
   width: 1em;
   height: 1em;
 
-  font-variation-settings: "FILL" var(--mat-icon-fill), "wght" var(--mat-icon-weight), "GRAD" var(--mat-icon-grade),
+  font-variation-settings:
+    "FILL" var(--mat-icon-fill),
+    "wght" var(--mat-icon-weight),
+    "GRAD" var(--mat-icon-grade),
     "opsz" var(--mat-icon-optical-size);
   transform: scaleX(var(--mat-icon-scaleX)) scaleY(var(--mat-icon-scaleY)) rotate(var(--mat-icon-rotate));
 }

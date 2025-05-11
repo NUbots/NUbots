@@ -80,6 +80,28 @@ export const TextAutoUtility: StoryObj<StoryComponent> = {
   },
 };
 
+export const OutlineAutoUtility: StoryObj<StoryComponent> = {
+  name: "outline-auto utility",
+  render: () => {
+    function OutlineBox({ className }: { className: string }) {
+      return <div className={`w-16 h-16 ${className}`} data-compute-color-here />;
+    }
+
+    return (
+      <div className="flex flex-col gap-8 text-red-500">
+        <ColorTable
+          title="Outline Color"
+          subtitle="Use this utility to set an outline color that will automatically change to suit the color scheme in light or dark mode."
+        >
+          <ColorRow colorClassName="outline-auto-divider" notes="Use for outlines in the UI">
+            <OutlineBox className="outline outline-auto-divider" />
+          </ColorRow>
+        </ColorTable>
+      </div>
+    );
+  },
+};
+
 export const BgAutoUtility: StoryObj<StoryComponent> = {
   name: "bg-auto utility",
   render: () => {
@@ -366,6 +388,7 @@ const classPrefixToCssProperty: Record<string, keyof CSSStyleDeclaration> = {
   "double-ring": "boxShadow",
   "ring-": "boxShadow",
   "shadow-auto-": "boxShadow",
+  "outline-auto-": "outlineColor",
 };
 
 function useComputedStyle(colorClassName: string, ref: React.RefObject<HTMLElement>) {

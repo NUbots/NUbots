@@ -44,7 +44,7 @@ namespace module::network {
             netConfig->name             = name.empty() ? utility::support::get_hostname() : name;
             netConfig->announce_address = config["address"].as<std::string>();
             netConfig->announce_port    = config["port"].as<uint16_t>();
-            emit<Scope::DIRECT>(netConfig);
+            emit<Scope::INLINE>(netConfig);
         });
 
         on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {
@@ -65,7 +65,7 @@ namespace module::network {
                     break;
             }
 
-            log<NUClear::INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
+            log<INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
         });
 
         on<Trigger<NUClear::message::NetworkLeave>>().then([this](const NUClear::message::NetworkLeave& event) {
@@ -86,7 +86,7 @@ namespace module::network {
                     break;
             }
 
-            log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
+            log<INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
         });
     }
 }  // namespace module::network

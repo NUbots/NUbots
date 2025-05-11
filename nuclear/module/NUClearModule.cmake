@@ -17,7 +17,7 @@ function(NUCLEAR_MODULE)
   # Keep our modules path for grouping later
   set(module_path "module/${module_target_name}")
 
-  # Stip out slashes to make it a valid target name
+  # Strip out slashes to make it a valid target name
   string(REPLACE "/" "" module_target_name "${module_target_name}")
 
   # Parse our input arguments
@@ -49,7 +49,7 @@ function(NUCLEAR_MODULE)
     # Python Code
   elseif(MODULE_LANGUAGE STREQUAL "PYTHON")
 
-    find_package(PythonInterp 3 REQUIRED)
+    find_package(Python3 REQUIRED)
     find_package(pybind11 REQUIRED)
     find_package(PythonLibsNew 3 REQUIRED)
 
@@ -86,7 +86,7 @@ function(NUCLEAR_MODULE)
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.hpp" "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.cpp"
       COMMAND
         ${CMAKE_COMMAND} ARGS -E env PYTHONPATH="${PROJECT_BINARY_DIR}/python/nuclear/"
-        NUCLEAR_MODULE_DIR="${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}" ${PYTHON_EXECUTABLE}
+        NUCLEAR_MODULE_DIR="${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}" ${Python3_EXECUTABLE}
         "${CMAKE_CURRENT_SOURCE_DIR}/src/${module_name}.py"
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/src"
       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${module_name}.py" nuclear::message

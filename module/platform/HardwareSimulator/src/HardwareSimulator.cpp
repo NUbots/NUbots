@@ -250,7 +250,7 @@ namespace module::platform {
             commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(commandList);
+            emit<Scope::INLINE>(commandList);
         });
     }
 

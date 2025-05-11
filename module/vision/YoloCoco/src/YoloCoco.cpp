@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "YoloCoco.hpp"
 
 #include <chrono>
@@ -57,9 +83,7 @@ namespace module::vision {
                     img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
                     cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
                     break;
-                default:
-                    log<NUClear::WARN>("Image format not supported: ", utility::vision::fourcc(img.format));
-                    return;
+                default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
             }
 
             // -------- Preprocess the image -------
@@ -151,12 +175,12 @@ namespace module::vision {
             emit(std::move(bounding_boxes));
 
             // -------- Benchmark --------
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 auto end      = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                log<NUClear::DEBUG>("Detected ", indices.size(), " objects");
-                log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
-                log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
+                log<DEBUG>("Detected ", indices.size(), " objects");
+                log<DEBUG>("Yolo took: ", duration, "ms");
+                log<DEBUG>("FPS: ", 1000.0 / duration);
             }
         });
     }

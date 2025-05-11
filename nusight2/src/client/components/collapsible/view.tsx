@@ -3,8 +3,6 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { CSSTransition } from "react-transition-group";
 
-import style from "./style.module.css";
-
 export type CollapsibleProps = {
   className?: string;
   open: boolean;
@@ -19,7 +17,12 @@ export const Collapsible = observer((props: CollapsibleProps) => {
   return (
     <div>
       {header && (
-        <button className={style.collapsibleHeader} onClick={onToggle}>
+        <button
+          className={
+            "appearance-none outline-none bg-gray-300 dark:bg-gray-700 w-full py-2 px-3 text-left font-inherit hover:bg-gray-350 dark:hover:bg-gray-650"
+          }
+          onClick={onToggle}
+        >
           {header}
         </button>
       )}
@@ -35,8 +38,10 @@ export const Collapsible = observer((props: CollapsibleProps) => {
         onExiting={onExiting}
         unmountOnExit
       >
-        <div className={style.collapsibleTransition}>
-          <div className={classNames(style.collapsibleBody, className)}>{children}</div>
+        <div className="overflow-hidden transition-all duration-200 ease">
+          <div className={classNames("border border-gray-300 dark:border-gray-700 py-3 px-2", className)}>
+            {children}
+          </div>
         </div>
       </CSSTransition>
     </div>

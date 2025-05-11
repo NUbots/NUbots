@@ -4,7 +4,10 @@ import { Transform } from "./transform";
 import { Vector } from "./vector";
 
 export class Vector2 extends Vector {
-  constructor(readonly x: number, readonly y: number) {
+  constructor(
+    readonly x: number,
+    readonly y: number,
+  ) {
     super();
   }
 

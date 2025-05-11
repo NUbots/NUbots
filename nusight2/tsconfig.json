@@ -7,7 +7,7 @@
     "useDefineForClassFields": false,
     "jsx": "react",
     "skipLibCheck": true,
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "experimentalDecorators": true,

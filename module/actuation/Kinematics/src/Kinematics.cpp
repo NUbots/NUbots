@@ -71,7 +71,7 @@ namespace module::actuation {
             nugus_model_right = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
 
             // Show the model if debug is enabled
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 nugus_model_left.show_details();
             }
 
@@ -87,10 +87,10 @@ namespace module::actuation {
         });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>>().then(
-            [this](const LeftLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
+        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>, Priority::HIGH>().then(
+            [this](const LeftLegIK& leg_ik, const RunReason& run_reason, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
@@ -115,11 +115,11 @@ namespace module::actuation {
                                                               q0,
                                                               options);
 
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     // Compute error between the IK solution and desired pose
                     auto Htf_sol = tinyrobotics::forward_kinematics(nugus_model_left, q_sol, cfg.left_foot_name);
                     auto error   = tinyrobotics::homogeneous_error(leg_ik.Htf, Htf_sol);
-                    log<NUClear::DEBUG>("IK left error: {}", error.squaredNorm());
+                    log<DEBUG>("IK left error: {}", error.squaredNorm());
                 }
 
                 // Convert the IK solution back to servo commands
@@ -129,10 +129,10 @@ namespace module::actuation {
             });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>>().then(
-            [this](const RightLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
+        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>, Priority::HIGH>().then(
+            [this](const RightLegIK& leg_ik, const RunReason& run_reason, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }
@@ -157,11 +157,11 @@ namespace module::actuation {
                                                               q0,
                                                               options);
 
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     // Compute error between the IK solution and desired pose
                     auto Htf_sol = tinyrobotics::forward_kinematics(nugus_model_right, q_sol, cfg.right_foot_name);
                     auto error   = tinyrobotics::homogeneous_error(leg_ik.Htf, Htf_sol);
-                    log<NUClear::DEBUG>("IK right error: {}", error.squaredNorm());
+                    log<DEBUG>("IK right error: {}", error.squaredNorm());
                 }
 
                 // Convert the IK solution back to servo commands
@@ -172,9 +172,9 @@ namespace module::actuation {
 
         /// @brief Calculates head kinematics and makes a task for the Head servos
         on<Provide<HeadIK>, With<KinematicsModel>, Needs<Head>>().then(
-            [this](const HeadIK& head_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
+            [this](const HeadIK& head_ik, const RunReason& run_reason, const KinematicsModel& kinematics_model) {
                 // If the head is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (run_reason == RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
                     return;
                 }

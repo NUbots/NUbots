@@ -44,7 +44,7 @@ namespace module::strategy {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::planning::TurnAroundBall;
+    using message::planning::PivotAroundPoint;
     using message::support::FieldDescription;
     using AlignBallToGoalTask = message::strategy::AlignBallToGoal;
     using utility::support::Expression;
@@ -59,16 +59,11 @@ namespace module::strategy {
             cfg.angle_threshold         = config["angle_threshold"].as<Expression>();
         });
 
-        on<Provide<AlignBallToGoalTask>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>,
-           With<FieldDescription>,
-           Every<30, Per<std::chrono::seconds>>>()
-            .then([this](const Ball& ball,
-                         const Field& field,
-                         const Sensors& sensors,
-                         const FieldDescription& field_description) {
+        on<Provide<AlignBallToGoalTask>, With<Ball>, With<Field>, With<Sensors>, With<FieldDescription>>().then(
+            [this](const Ball& ball,
+                   const Field& field,
+                   const Sensors& sensors,
+                   const FieldDescription& field_description) {
                 // If the ball is close, align towards the goal
                 Eigen::Vector3d rBRr    = sensors.Hrw * ball.rBWw;
                 double distance_to_ball = rBRr.head(2).norm();
@@ -86,10 +81,10 @@ namespace module::strategy {
                     // Only align if we are not within a threshold of the goal
                     if (std::fabs(kick_angle) > cfg.angle_threshold) {
                         if (kick_angle < 0.0) {
-                            emit<Task>(std::make_unique<TurnAroundBall>(true));
+                            emit<Task>(std::make_unique<PivotAroundPoint>(true));
                         }
                         else {
-                            emit<Task>(std::make_unique<TurnAroundBall>(false));
+                            emit<Task>(std::make_unique<PivotAroundPoint>(false));
                         }
                     }
                 }

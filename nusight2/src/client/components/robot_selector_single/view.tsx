@@ -2,12 +2,11 @@ import React from "react";
 import { autorun, computed } from "mobx";
 import { observer } from "mobx-react";
 
-import { Icon } from "../icon/view";
-import { IconRobot } from "../icons";
 import { RobotModel } from "../robot/model";
+import IconRobot from "../robot_selector/icon_robot";
 import { Option, Select } from "../select/view";
 
-import style from "./style.module.css";
+import IconPlug from "./icon_plug";
 
 export type RobotSelectorSingleProps = {
   autoSelect?: boolean;
@@ -50,14 +49,14 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
   render() {
     const { dropDirection } = this.props;
     return (
-      <div className={style.robotSelector}>
+      <div>
         <Select
           options={this.options}
           selectedOption={this.selectedOption}
           onChange={this.onChange}
           placeholder="Select a robot..."
           empty={this.renderEmpty}
-          icon={<IconRobot className="fill-current" />}
+          icon={<IconRobot className="h-5 w-5" />}
           dropDirection={dropDirection}
         />
       </div>
@@ -67,12 +66,10 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
   @computed
   private get renderEmpty() {
     return (
-      <div className={style.empty}>
-        <div className={style.emptyIcon}>
-          <Icon className="text-3xl/none">electrical_services</Icon>
-        </div>
-        <div className={style.emptyTitle}>No connected robots</div>
-        <span className={style.emptyDescription}>Run yarn start:sim to simulate robots</span>
+      <div className="p-[1em] text-center">
+        <IconPlug className="h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em] bg-nusight-500" />
+        <div className="text-md py-2">No connected robots</div>
+        <span className="text-sm text-nusight-500">Run yarn start:sim to simulate robots</span>
       </div>
     );
   }

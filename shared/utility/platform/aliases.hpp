@@ -39,18 +39,24 @@ namespace utility::platform {
         try {
             // Get robot aliases
             YAML::Node config = YAML::LoadFile("config/robot_names.yaml");
-
-            // Return an alias if it matches the hostname
-            for (const auto& node : config["robot_alias"]) {
-                if (node["hostname"].as<std::string>() == hostname) {
-                    return node["name"].as<std::string>();
-                }
-            }
-            return "";
+            return config[hostname] ? config[hostname].as<std::string>() : "";
         }
         // If anything went wrong, return empty string
         catch (const std::exception& e) {
             return "";
+        }
+    }
+
+    inline void set_robot_alias(std::string hostname, std::string robot_name) {
+        try {
+            // Get robot aliases
+            YAML::Node config = YAML::LoadFile("config/robot_names.yaml");
+            config[hostname]  = robot_name;
+            std::ofstream file("config/robot_names.yaml");
+            file << config;
+        }
+        catch (const std::exception& e) {
+            return;
         }
     }
 }  // namespace utility::platform

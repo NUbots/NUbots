@@ -4,7 +4,7 @@ import http from "http";
 import minimist from "minimist";
 import favicon from "serve-favicon";
 import { Server } from "socket.io";
-const { createServer: createViteServer } = require("vite");
+import { createServer as createViteServer } from "vite";
 
 import faviconPath from "../assets/favicon.ico";
 import * as NUClearNetProxyParser from "../shared/nuclearnet/nuclearnet_proxy_parser";

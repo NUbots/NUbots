@@ -17,6 +17,8 @@ Inference can be ran on either the CPU or GPU using OpenVino (https://github.com
 
 Include this module to detect balls, goals, robots and field line intersections in images.
 
+If the GreenHorizon is included in the program, balls, field line intersections and robots outside of the GreenHorizon will be discarded.
+
 To run with GPU device in docker you need to include the following flags `./b run {binary} --gpus all`
 
 ## Consumes

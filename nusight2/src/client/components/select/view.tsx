@@ -9,7 +9,6 @@ import { Button } from "../button/button";
 import { Dropdown } from "../dropdown/view";
 
 import { SelectOption } from "./option";
-import style from "./style.module.css";
 
 export interface Option {
   id: string | number;
@@ -76,10 +75,10 @@ export class Select extends React.Component<SelectProps> {
           isFullwidth={true}
           onToggleClick={this.onToggleClick}
         >
-          <div className={style.dropdown}>
-            {options.length === 0 && <div className={style.empty}>{empty || "No options"}</div>}
+          <div className="bg-auto-surface-2 shadow-md">
+            {options.length === 0 && <div className="p-6 text-center">{empty || "No options"}</div>}
             {options.length > 0 && (
-              <div className={style.options}>
+              <div>
                 {options.map((option) => {
                   const isSelected = Boolean(selectedOption && selectedOption.id === option.id);
                   return (

@@ -75,13 +75,13 @@ const config: Config = {
         // Use for background color of UI surfaces including panels, cards, modals, etc
         surface: {
           0: colors.neutral[200],
-          "0-inverse": colors.slate[950],
+          "0-inverse": colors.neutral[950],
 
           1: colors.neutral[100],
-          "1-inverse": colors.slate[900],
+          "1-inverse": colors.neutral[900],
 
           2: colors.white,
-          "2-inverse": colors.slate[800],
+          "2-inverse": colors.neutral[800],
         },
 
         // Use to create contrast against the current background for indicating states like hovered, pressed, and selected.
@@ -114,16 +114,17 @@ const config: Config = {
         },
 
         nusight: {
-          50: "#e1f4fb",
-          100: "#b2e3f5",
-          200: "#81d0ef",
-          300: "#53bee8",
-          400: "#32b1e5",
-          500: "#17a3e1",
-          600: "#1196d3",
-          700: "#0983c0",
-          800: "#0872ac",
-          900: "#01538a",
+          50: "#fff4e0",
+          100: "#ffe0b3",
+          200: "#ffc980",
+          300: "#ffb24d",
+          400: "#ffaa00",
+          500: "#F9A50D",
+          600: "#e59400",
+          700: "#cc8300",
+          800: "#b37200",
+          900: "#996100",
+          950: "#804f00",
         },
       },
 
@@ -134,6 +135,10 @@ const config: Config = {
       boxShadow: {
         "auto-card":
           "var(--color-auto-contrast-3) 0 0 0 1px, var(--color-auto-shadow-card) 0 5px 15px -3px, var(--color-auto-shadow-card) 0 4px 8px -4px",
+      },
+
+      spacing: {
+        inherit: "inherit",
       },
     },
   },
@@ -197,6 +202,9 @@ const config: Config = {
           "text",
         ),
       );
+
+      // Add the `outline-auto-...` utilities
+      addUtilities(generateAutoColorUtilities(pick(themeColors, ["divider"]), "outline-color", "outline"));
 
       // Add the `bg-auto-...` utilities
       const bg = generateAutoColorUtilities(pick(themeColors, ["surface", "contrast"]), ["background-color"], "bg");

@@ -244,7 +244,7 @@ const FileDialogPathEditor = observer((props: FileDialogPathEditorProps) => {
         autoFocus
         type="text"
         spellCheck={false}
-        className="bg-auto-surface-1 text-auto-primary rounded-l h-10 px-3 w-full outline-none border-2 border-transparent focus:border-nusight-500"
+        className="bg-auto-surface-1 text-auto-primary rounded-l h-10 px-3 w-full outline-none border-2 border-transparent focus:border-blue-500"
         value={newPath}
         onChange={(event) => setNewPath(event.target.value)}
         onKeyDown={(event) => {
@@ -270,7 +270,7 @@ const FileDialogPathEditor = observer((props: FileDialogPathEditorProps) => {
         className={`bg-auto-contrast-1 text-auto-secondary rounded-r h-full px-2 ml-0.5 inline-flex items-center ${
           goButtonDisabled
             ? "opacity-40"
-            : "hover:bg-auto-contrast-2 hover:text-auto-primary focus-visible:bg-nusight-100 focus-visible:text-black"
+            : "hover:bg-auto-contrast-2 hover:text-auto-primary focus-visible:bg-blue-100 focus-visible:text-black"
         }`}
         title="Go to path entered"
         disabled={goButtonDisabled}
@@ -335,8 +335,8 @@ const FileDialogSidebarGroup = observer((props: FileDialogSidebarGroupProps) => 
               title={path}
               className={`flex text-auto-primary text-left items-center px-3 py-1 min-w-0 w-full ${
                 path === props.dialogCurrentPath
-                  ? "bg-nusight-200 dark:bg-nusight-900"
-                  : "hover:bg-nusight-100 dark:hover:bg-nusight-900/25"
+                  ? "bg-blue-200 dark:bg-blue-900"
+                  : "hover:bg-blue-100 dark:hover:bg-blue-900/25"
               }`}
               onClick={() => props.onPathChange(path)}
             >
@@ -460,8 +460,8 @@ const FileDialogListItems = observer((props: FileDialogListItemsProps) => {
           <button
             key={entry.name}
             className={classNames("grid gap-1 w-full items-center text-left py-2 mt-0.5", {
-              "bg-nusight-200 dark:bg-nusight-900": entryIsSelected,
-              "hover:bg-nusight-100 dark:hover:bg-nusight-900/25": !entryIsSelected,
+              "bg-blue-200 dark:bg-blue-900": entryIsSelected,
+              "hover:bg-blue-100 dark:hover:bg-blue-900/25": !entryIsSelected,
               "bg-auto-contrast-1": isParentOfPreviousPath,
             })}
             style={{ gridTemplateColumns }}

@@ -97,7 +97,7 @@ namespace module::localisation {
                 case StartingSide::CUSTOM:
                     cfg.initial_hypotheses.emplace_back(std::make_pair(cfg.initial_state, cfg.initial_covariance));
                     break;
-                default: log<NUClear::ERROR>("Invalid starting_side specified"); break;
+                default: log<ERROR>("Invalid starting_side specified"); break;
             }
             filter.set_state(cfg.initial_hypotheses);
 
@@ -142,11 +142,11 @@ namespace module::localisation {
 
                 auto field(std::make_unique<Field>());
                 field->Hfw = compute_Hfw(filter.get_state());
-                if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                if (log_level <= DEBUG && raw_sensors.localisation_ground_truth.exists) {
                     debug_field_localisation(field->Hfw, raw_sensors);
                 }
                 field->covariance = filter.get_covariance();
-                if (log_level <= NUClear::DEBUG) {
+                if (log_level <= DEBUG) {
                     field->particles = filter.get_particles_as_vector();
                 }
                 emit(field);

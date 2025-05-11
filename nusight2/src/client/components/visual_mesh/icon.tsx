@@ -5,7 +5,7 @@ export default function IconChart(props: { className?: string }) {
     <svg
       className={props.className}
       viewBox="-100 -100 200 100"
-      stroke="#fff"
+      stroke="currentColor"
       fill="transparent"
       strokeWidth="10"
       width="200"

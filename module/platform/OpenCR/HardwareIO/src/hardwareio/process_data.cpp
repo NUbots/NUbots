@@ -29,15 +29,19 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::input::ButtonLeftDown;
     using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::nusight::graph;
 
     /*
         Process the status return packet data
@@ -46,8 +50,8 @@ namespace module::platform::OpenCR {
     void HardwareIO::process_model_information(const StatusReturn& packet) {
         uint16_t model  = (packet.data[1] << 8) | packet.data[0];
         uint8_t version = packet.data[2];
-        log<NUClear::INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
-        log<NUClear::INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
+        log<INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
+        log<INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
     }
 
     void HardwareIO::process_opencr_data(const StatusReturn& packet) {
@@ -157,19 +161,17 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
-        // Buzz if any servo is hot, use the boolean flag to turn the buzzer off once the servo is no longer hot
+        // Buzz if any servo is hot, forever, until power is turned off.
+        // Middle button can be used to disable alarm once no servos are hot, if a power cycle is not desired.
         // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
-        bool any_servo_hot = false;
         for (const auto& servo : servo_states) {
             if (servo.temperature > cfg.alarms.temperature.level) {
-                any_servo_hot = true;
+                log<WARN>("Alarm triggered: Servo ID {} ({}) is hot! (Later servos may also be hot)",
+                          packet.id,
+                          nugus.device_name(static_cast<NUgus::ID>(packet.id)));
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
-        }
-
-        if (!any_servo_hot) {
-            emit(std::make_unique<Buzzer>(0));
         }
 
         // If this servo has not been initialised yet, set the goal states to the current states
@@ -177,6 +179,20 @@ namespace module::platform::OpenCR {
             servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
             servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
             servo_states[servo_index].initialised   = true;
+        }
+
+        // Emit plot for debugging
+        if (log_level == DEBUG) {
+            emit(graph(
+                fmt::format("{} ({}) Packet length", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                packet.length));
+            emit(graph(fmt::format("{} ({}) Present position",
+                                   nugus.device_name(static_cast<NUgus::ID>(packet.id)),
+                                   packet.id),
+                       data.present_position));
+            emit(graph(
+                fmt::format("{} ({}) Present voltage", nugus.device_name(static_cast<NUgus::ID>(packet.id)), packet.id),
+                data.present_voltage));
         }
     }
 
