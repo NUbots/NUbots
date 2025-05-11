@@ -31,6 +31,7 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <unordered_map>
 
 #include "Joystick.hpp"
 
@@ -78,6 +79,8 @@ namespace module::purpose {
             double maximum_rotational_velocity = 0;
             /// @brief Maximum allowed acceleration per second (in m/s²)
             double max_acceleration = 0.5;
+            /// @brief Maps button names to script filenames
+            std::unordered_map<std::string, std::string> button_scripts;
         } cfg;
 
         /// @brief Controls interactions with the PS3 controller
