@@ -74,6 +74,7 @@ namespace module::localisation {
             cfg.ukf.initial_covariance.position = config["ukf"]["initial_covariance"]["position"].as<Expression>();
             cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
             cfg.association_distance            = config["association_distance"].as<double>();
+            cfg.teammate_association_distance   = config["teammate_association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
         });
 
@@ -94,6 +95,9 @@ namespace module::localisation {
 
                 // **Run maintenance step**
                 maintenance(horizon);
+
+                // **Debugging output**
+                debug_info();
 
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
@@ -185,7 +189,8 @@ namespace module::localisation {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-                tracked_robots.back().seen = true;
+                tracked_robots.back().seen        = true;
+                tracked_robots.back().teammate_id = teammate_id;
                 continue;
             }
 
@@ -202,16 +207,21 @@ namespace module::localisation {
                                  });
             double closest_distance = (rRWw.head<2>() - closest_robot_itr->get_rRWw()).norm();
 
-            // If the closest robot is far enough away, add this as a new robot
-            if (closest_distance > cfg.association_distance) {
+            // If the robot is a teammate, be less strict about the distance
+            if ((teammate_id != 0 || closest_robot_itr->teammate_id != 0)
+                && closest_distance > cfg.teammate_association_distance) {
+                // If the closest robot is too far away, add this as a new robot
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-                tracked_robots.back().seen = true;
+                tracked_robots.back().seen        = true;
+                tracked_robots.back().teammate_id = teammate_id;
+                continue;
+            }
 
-                // Mark this new robot as a teammate if it is identified as such
-                if (teammate_id != 0) {
-                    tracked_robots.back().teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
-                }
-
+            // If the closest robot is far enough away, add this as a new robot
+            else if (closest_distance > cfg.association_distance) {
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
+                tracked_robots.back().seen        = true;
+                tracked_robots.back().teammate_id = teammate_id;
                 continue;
             }
 
@@ -221,9 +231,11 @@ namespace module::localisation {
                                            MeasurementType::ROBOT_POSITION());
             closest_robot_itr->seen = true;
 
-            // If the robot is identified as a teammate via Wi-Fi, mark it as a teammate
-            if (teammate_id != 0) {
-                closest_robot_itr->teammate_id = teammate_id;  // Assign a unique teammate ID if necessary
+            if (closest_robot_itr->teammate_id == 0) {
+                // If the existing robot is not a teammate, but a teammate measurement is associated,
+                // assign the teammate ID
+                closest_robot_itr->teammate_id = teammate_id;
+                log<DEBUG>(fmt::format("Assigning teammate id {} to robot {}", teammate_id, closest_robot_itr->id));
             }
 
             // Check if teammate ID is already assigned
@@ -231,6 +243,7 @@ namespace module::localisation {
                 if (tracked_robot.teammate_id == teammate_id && tracked_robot.id != closest_robot_itr->id) {
                     // If a teammate ID is already assigned to another robot, clear it
                     tracked_robot.teammate_id = 0;
+                    log<DEBUG>(fmt::format("Clearing teammate id {} from robot {}", teammate_id, tracked_robot.id));
                 }
             }
         }
@@ -277,7 +290,12 @@ namespace module::localisation {
         // Print tracked_robots ids
         log<DEBUG>("Robots tracked:");
         for (const auto& tracked_robot : tracked_robots) {
-            log<DEBUG>("\tID: ", tracked_robot.id);
+            log<DEBUG>("\tID: ",
+                       tracked_robot.id,
+                       ":",
+                       tracked_robot.teammate_id,
+                       "position: ",
+                       RobotModel<double>::StateVec(tracked_robot.ukf.get_state()).rRWw.transpose());
         }
     }
 
