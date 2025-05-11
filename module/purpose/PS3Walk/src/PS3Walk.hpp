@@ -76,6 +76,8 @@ namespace module::purpose {
         struct Config {
             double maximum_forward_velocity    = 0;
             double maximum_rotational_velocity = 0;
+            /// @brief Maximum allowed acceleration per second (in m/s²)
+            double max_acceleration = 0.5;  // This value can be configured
         } cfg;
 
         /// @brief Controls interactions with the PS3 controller
@@ -95,6 +97,9 @@ namespace module::purpose {
 
         /// @brief stores the head yaw value
         double head_yaw = 0.0;
+
+        /// @brief Stores the previous walk command for acceleration limiting
+        Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
     };
 }  // namespace module::purpose
 

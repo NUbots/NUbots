@@ -69,6 +69,7 @@ namespace module::purpose {
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.maximum_forward_velocity    = config["maximum_forward_velocity"].as<double>();
             cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<double>();
+            cfg.max_acceleration            = config["max_acceleration"].as<double>();
         });
 
 
@@ -78,6 +79,8 @@ namespace module::purpose {
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+            // Look forward
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
         });
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
@@ -112,9 +115,11 @@ namespace module::purpose {
                     switch (event.number) {
                         case BUTTON_START:
                             if (event.value > 0) {  // button down
+                                log<INFO>("Button START pressed");
                                 if (moving) {
                                     log<INFO>("Stop walking");
-                                    emit<Task>(std::unique_ptr<Walk>(nullptr));
+                                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                                    // emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 }
                                 else {
                                     log<INFO>("Start walking");
@@ -124,6 +129,7 @@ namespace module::purpose {
                             break;
                         case BUTTON_SELECT:
                             if (event.value > 0) {  // button down
+                                log<INFO>("Button SELECT pressed");
                                 if (head_locked) {
                                     log<INFO>("Head unlocked");
                                 }
@@ -134,69 +140,86 @@ namespace module::purpose {
                                 head_locked = !head_locked;
                             }
                             break;
-                            // dance moves here:
-                        case BUTTON_DPAD_UP:
+                        // case BUTTON_DPAD_UP:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button DPAD_UP pressed");
+                        //         log<INFO>("Do a dance move Dpad up");
+                        //         emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_DPAD_DOWN:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button DPAD_DOWN pressed");
+                        //         log<INFO>("Do a dance Dpad down");
+                        //         emit<Task>(load_script<LimbsSequence>("TheRobot.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_DPAD_LEFT:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button DPAD_LEFT pressed");
+                        //         log<INFO>("Do a dance Dpad left");
+                        //         emit<Task>(load_script<LimbsSequence>("Dab.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_DPAD_RIGHT:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button DPAD_RIGHT pressed");
+                        //         log<INFO>("Do a dance Dpad right");
+                        //         emit<Task>(load_script<LimbsSequence>("ArmDangle.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_TRIANGLE:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button TRIANGLE pressed");
+                        //         log<INFO>("Do a dance triangle");
+                        //         emit<Task>(load_script<LimbsSequence>("Star.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_CIRCLE:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button CIRCLE pressed");
+                        //         log<INFO>("Do a dance circle");
+                        //         emit<Task>(load_script<LimbsSequence>("RaiseTheRoof.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_CROSS:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button CROSS pressed");
+                        //         log<INFO>("Do a dance cross");
+                        //         emit<Task>(load_script<LimbsSequence>("Crouch.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_SQUARE:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button SQUARE pressed");
+                        //         log<INFO>("Do a wave");
+                        //         emit<Task>(load_script<LimbsSequence>("Wave.yaml"), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_L1:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button L1 pressed");
+                        //         log<INFO>("Requesting Left Front Kick");
+                        //         emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
+                        //     }
+                        //     break;
+                        // case BUTTON_R1:
+                        //     if (event.value > 0) {
+                        //         log<INFO>("Button R1 pressed");
+                        //         log<INFO>("Requesting Right Front Kick");
+                        //         emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
+                        //     }
+                        //     break;
+                        case BUTTON_L2:
                             if (event.value > 0) {
-                                log<INFO>("Do a dance move Dpad up");
-                                emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
+                                log<INFO>("Button L2 pressed");
                             }
                             break;
-                        case BUTTON_DPAD_DOWN:
+                        case BUTTON_R2:
                             if (event.value > 0) {
-                                log<INFO>("Do a dance Dpad down");
-                                emit<Task>(load_script<LimbsSequence>("TheRobot.yaml"), 3);
+                                log<INFO>("Button R2 pressed");
                             }
                             break;
-                        case BUTTON_DPAD_LEFT:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance Dpad left");
-                                emit<Task>(load_script<LimbsSequence>("Dab.yaml"), 3);
-                            }
-                            break;
-                        case BUTTON_DPAD_RIGHT:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance Dpad right");
-                                emit<Task>(load_script<LimbsSequence>("ArmDangle.yaml"), 3);
-                            }
-                            break;
-                        case BUTTON_TRIANGLE:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance triangle");
-                                emit<Task>(load_script<LimbsSequence>("Star.yaml"), 3);
-                            }
-                            break;
-                        case BUTTON_CIRCLE:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance circle");
-                                emit<Task>(load_script<LimbsSequence>("RaiseTheRoof.yaml"), 3);
-                            }
-                            break;
-                        case BUTTON_CROSS:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance cross");
-                                emit<Task>(load_script<LimbsSequence>("Crouch.yaml"), 3);
-                            }
-                            break;
-                        case BUTTON_SQUARE:
-                            if (event.value > 0) {
-                                log<INFO>("Do a wave");
-                                emit<Task>(load_script<LimbsSequence>("Wave.yaml"), 3);
-                            }
-                            break;
-                        case BUTTON_L1:
-                            if (event.value > 0) {
-                                log<INFO>("Requesting Left Front Kick");
-                                emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
-                            }
-                            break;
-                        case BUTTON_R1:
-                            if (event.value > 0) {
-                                log<INFO>("Requesting Right Front Kick");
-                                emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
-                            }
-                            break;
-                        case BUTTON_L2: break;
-                        case BUTTON_R2: break;
                     }
                 }
             }
@@ -218,8 +241,39 @@ namespace module::purpose {
             }
 
             if (moving) {
-                // walk command is set in the joystick event if the event type is axis
-                emit<Task>(std::make_unique<Walk>(walk_command.cast<double>()), 2);
+                // Apply acceleration limiting
+                // Calculate time elapsed (20 per second = 0.05 seconds per cycle)
+                const double dt = 0.05;
+
+                // Calculate maximum allowed change in velocity components
+                double max_delta = cfg.max_acceleration * dt;
+
+                // Create a limited walk command
+                Eigen::Vector3d limited_walk_command = walk_command;
+
+                // Limit each component's acceleration
+                for (int i = 0; i < 3; i++) {
+                    double delta = walk_command[i] - previous_walk_command[i];
+                    if (std::abs(delta) > max_delta) {
+                        limited_walk_command[i] = previous_walk_command[i] + (delta > 0 ? max_delta : -max_delta);
+                    }
+                }
+
+                // Store the new command for next cycle
+                previous_walk_command = limited_walk_command;
+
+                // Emit the limited walk command
+                log<DEBUG>("Walk command:",
+                           limited_walk_command.transpose(),
+                           " (limited from:",
+                           walk_command.transpose(),
+                           ")");
+                emit<Task>(std::make_unique<Walk>(limited_walk_command), 2);
+            }
+            else {
+                // When not moving, also update previous_walk_command to prevent
+                // large accelerations when starting to move again
+                previous_walk_command = Eigen::Vector3d::Zero();
             }
         });
     }
