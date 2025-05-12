@@ -181,7 +181,7 @@ namespace module::network {
             // After updating or adding a teammate,
             // move the updated teammate list into a unique pointer and emit it.
             emit(std::make_unique<TeamMates>(std::move(teammates)));
-
+        }
         on<Startup>().then([this] {
             // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
             emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
@@ -206,96 +206,96 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const GlobalConfig>& config) {
-                auto msg = std::make_unique<RoboCup>();
+            auto msg = std::make_unique<RoboCup>();
 
-                // Timestamp
-                msg->timestamp = NUClear::clock::now();
+            // Timestamp
+            msg->timestamp = NUClear::clock::now();
 
-                // State
-                // If there is game state information, then process
-                if (game_state) {
-                    int penalty_reason = game_state->self.penalty_reason;
-                    switch (penalty_reason) {
-                        case 0: msg->state = 0; break;
-                        case 1: msg->state = 1; break;
-                        default: msg->state = 2; break;
-                    }
-
-                    // Team colour
-                    switch (int(game_state->team.team_colour)) {
-                        case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
-                        case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
-                        default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
-                    }
+            // State
+            // If there is game state information, then process
+            if (game_state) {
+                int penalty_reason = game_state->self.penalty_reason;
+                switch (penalty_reason) {
+                    case 0: msg->state = 0; break;
+                    case 1: msg->state = 1; break;
+                    default: msg->state = 2; break;
                 }
 
-                // Current pose (Position, orientation, and covariance of the player on the field)
-                if (config) {
-                    msg->current_pose.player_id = config->player_id;
-
-                    if (sensors) {
-                        // Get our world transform
-                        Eigen::Isometry3d Htw(sensors->Htw);
-
-                        // If we have field information
-                        if (field) {
-                            // Transform the field state into Hfw
-                            Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
-
-                            // Get our torso in field space
-                            Eigen::Isometry3d Hft = Hfw * Htw.inverse();
-                            Eigen::Vector3d rTFf  = Hft.translation();
-
-                            // Store our position from field to torso
-                            msg->current_pose.position     = rTFf.cast<float>();
-                            msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
-
-                            msg->current_pose.covariance = field->covariance.cast<float>();
-
-                            msg->current_pose.team = config->team_id;
-                        }
-                    }
+                // Team colour
+                switch (int(game_state->team.team_colour)) {
+                    case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
+                    case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
+                    default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
                 }
+            }
 
-                // Walk command
-                if (walk_state != nullptr) {
-                    msg->walk_command = walk_state->velocity_target.cast<float>();
-                }
+            // Current pose (Position, orientation, and covariance of the player on the field)
+            if (config) {
+                msg->current_pose.player_id = config->player_id;
 
-                // TODO: target pose (Position and orientation of the players target on the field specified)
+                if (sensors) {
+                    // Get our world transform
+                    Eigen::Isometry3d Htw(sensors->Htw);
 
-                // Kick target
-                if (kick) {
-                    // take x and y components of vec3 to convert to fvec2
-                    msg->kick_target.x() = kick->target.x();
-                    msg->kick_target.y() = kick->target.y();
-                }
-
-                // Ball
-                if (loc_ball) {
-                    // convert position of ball from world to field space
+                    // If we have field information
                     if (field) {
-                        Eigen::Vector3d rBWw = loc_ball->rBWw;
                         // Transform the field state into Hfw
                         Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
-                        Eigen::Vector3d rBFf  = Hfw * rBWw;
-                        // Store our position from field to ball
-                        msg->ball.position = rBFf.cast<float>();
+
+                        // Get our torso in field space
+                        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
+                        Eigen::Vector3d rTFf  = Hft.translation();
+
+                        // Store our position from field to torso
+                        msg->current_pose.position     = rTFf.cast<float>();
+                        msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
+
+                        msg->current_pose.covariance = field->covariance.cast<float>();
+
+                        msg->current_pose.team = config->team_id;
                     }
+                }
+            }
 
-                    msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
+            // Walk command
+            if (walk_state != nullptr) {
+                msg->walk_command = walk_state->velocity_target.cast<float>();
+            }
 
-                    msg->ball.velocity = (loc_ball->vBw).cast<float>();
+            // TODO: target pose (Position and orientation of the players target on the field specified)
+
+            // Kick target
+            if (kick) {
+                // take x and y components of vec3 to convert to fvec2
+                msg->kick_target.x() = kick->target.x();
+                msg->kick_target.y() = kick->target.y();
+            }
+
+            // Ball
+            if (loc_ball) {
+                // convert position of ball from world to field space
+                if (field) {
+                    Eigen::Vector3d rBWw = loc_ball->rBWw;
+                    // Transform the field state into Hfw
+                    Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
+                    Eigen::Vector3d rBFf  = Hfw * rBWw;
+                    // Store our position from field to ball
+                    msg->ball.position = rBFf.cast<float>();
                 }
 
-                // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+                msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
-                // Current purpose (soccer position) of the Robot
-                if (purpose) {
-                    msg->purpose = *purpose;
-                }
+                msg->ball.velocity = (loc_ball->vBw).cast<float>();
+            }
 
-                emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
+            // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+
+            // Current purpose (soccer position) of the Robot
+            if (purpose) {
+                msg->purpose = *purpose;
+            }
+
+            emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
     }
 }  // namespace module::network
