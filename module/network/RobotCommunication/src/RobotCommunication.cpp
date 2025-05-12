@@ -43,7 +43,6 @@
 
 #include "utility/math/euler.hpp"
 
-
 namespace module::network {
 
     // add usings
@@ -60,6 +59,8 @@ namespace module::network {
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
+    struct StartupDelay {};
+
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -67,6 +68,8 @@ namespace module::network {
             .then([this](const Configuration& config, const GlobalConfig& global_config) {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
+                // Delay before sending messages
+                cfg.startup_delay = config["startup_delay"].as<int>();
 
                 // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
@@ -138,7 +141,13 @@ namespace module::network {
                 }
             });
 
+        on<Startup>().then([this] {
+            // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
+            emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
         on<Every<2, Per<std::chrono::seconds>>,
+           With<StartupDelay>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
