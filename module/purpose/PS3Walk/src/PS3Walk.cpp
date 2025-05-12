@@ -28,6 +28,7 @@
 #include "PS3Walk.hpp"
 
 #include <nuclear>
+#include <unordered_map>
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -70,6 +71,11 @@ namespace module::purpose {
             cfg.maximum_forward_velocity    = config["maximum_forward_velocity"].as<double>();
             cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<double>();
             cfg.max_acceleration            = config["max_acceleration"].as<double>();
+
+            // Load button to script mappings
+            for (const auto& script : config["button_scripts"].as<std::map<std::string, std::string>>()) {
+                cfg.button_scripts[script.first] = script.second;
+            }
         });
 
 
@@ -139,76 +145,148 @@ namespace module::purpose {
                                 head_locked = !head_locked;
                             }
                             break;
-                        // case BUTTON_DPAD_UP:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button DPAD_UP pressed");
-                        //         log<INFO>("Do a dance move Dpad up");
-                        //         emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_DPAD_DOWN:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button DPAD_DOWN pressed");
-                        //         log<INFO>("Do a dance Dpad down");
-                        //         emit<Task>(load_script<LimbsSequence>("TheRobot.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_DPAD_LEFT:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button DPAD_LEFT pressed");
-                        //         log<INFO>("Do a dance Dpad left");
-                        //         emit<Task>(load_script<LimbsSequence>("Dab.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_DPAD_RIGHT:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button DPAD_RIGHT pressed");
-                        //         log<INFO>("Do a dance Dpad right");
-                        //         emit<Task>(load_script<LimbsSequence>("ArmDangle.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_TRIANGLE:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button TRIANGLE pressed");
-                        //         log<INFO>("Do a dance triangle");
-                        //         emit<Task>(load_script<LimbsSequence>("Star.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_CIRCLE:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button CIRCLE pressed");
-                        //         log<INFO>("Do a dance circle");
-                        //         emit<Task>(load_script<LimbsSequence>("RaiseTheRoof.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_CROSS:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button CROSS pressed");
-                        //         log<INFO>("Do a dance cross");
-                        //         emit<Task>(load_script<LimbsSequence>("Crouch.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_SQUARE:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button SQUARE pressed");
-                        //         log<INFO>("Do a wave");
-                        //         emit<Task>(load_script<LimbsSequence>("Wave.yaml"), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_L1:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button L1 pressed");
-                        //         log<INFO>("Requesting Left Front Kick");
-                        //         emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
-                        //     }
-                        //     break;
-                        // case BUTTON_R1:
-                        //     if (event.value > 0) {
-                        //         log<INFO>("Button R1 pressed");
-                        //         log<INFO>("Requesting Right Front Kick");
-                        //         emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
-                        //     }
-                        //     break;
+                        case BUTTON_DPAD_UP:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_UP pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_UP") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_UP");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_DPAD_DOWN:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_DOWN pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_DOWN") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_DOWN");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_DPAD_LEFT:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_LEFT pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_LEFT") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_LEFT");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_DPAD_RIGHT:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_RIGHT pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_RIGHT") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_RIGHT");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_TRIANGLE:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button TRIANGLE pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("TRIANGLE") > 0) {
+                                    const auto& script = cfg.button_scripts.at("TRIANGLE");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_CIRCLE:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button CIRCLE pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("CIRCLE") > 0) {
+                                    const auto& script = cfg.button_scripts.at("CIRCLE");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_CROSS:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button CROSS pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("CROSS") > 0) {
+                                    const auto& script = cfg.button_scripts.at("CROSS");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_SQUARE:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button SQUARE pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("SQUARE") > 0) {
+                                    const auto& script = cfg.button_scripts.at("SQUARE");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_L1:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button L1 pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("L1") > 0) {
+                                    const auto& action = cfg.button_scripts.at("L1");
+                                    if (action == "LEFT_LEG_KICK") {
+                                        log<INFO>("Requesting Left Front Kick");
+                                        emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
+                                    }
+                                    else {
+                                        log<INFO>("Running script:", action);
+                                        emit<Task>(load_script<LimbsSequence>(action), 3);
+                                    }
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
+                        case BUTTON_R1:
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button R1 pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("R1") > 0) {
+                                    const auto& action = cfg.button_scripts.at("R1");
+                                    if (action == "RIGHT_LEG_KICK") {
+                                        log<INFO>("Requesting Right Front Kick");
+                                        emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
+                                    }
+                                    else {
+                                        log<INFO>("Running script:", action);
+                                        emit<Task>(load_script<LimbsSequence>(action), 3);
+                                    }
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
+                            }
+                            break;
                         case BUTTON_L2:
                             if (event.value > 0) {
                                 log<INFO>("Button L2 pressed");
@@ -217,6 +295,13 @@ namespace module::purpose {
                         case BUTTON_R2:
                             if (event.value > 0) {
                                 log<INFO>("Button R2 pressed");
+                                if (scripts_enabled) {
+                                    log<INFO>("Scripts disabled");
+                                }
+                                else {
+                                    log<INFO>("Scripts enabled");
+                                }
+                                scripts_enabled = !scripts_enabled;
                             }
                             break;
                     }
