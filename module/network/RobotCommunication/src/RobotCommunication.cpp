@@ -39,9 +39,11 @@
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
+#include "message/strategy/TeamMates.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
+#include "utility/strategy/soccer_strategy.hpp"
 
 namespace module::network {
 
@@ -56,6 +58,8 @@ namespace module::network {
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
+    using message::strategy::TeamMate;
+    using message::strategy::TeamMates;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
@@ -139,7 +143,45 @@ namespace module::network {
                                 }
                             });
                 }
+
+                emit(std::unique_ptr<TeamMates>());
             });
+
+
+        // include teammates and add a using teammates
+        on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates) {
+            // Get the id of this robot
+            u_int32_t id = robocup.current_pose.player_id;
+
+            // Make new TeamMates message using data from the old message
+            TeamMates teammates = old_teammates;
+
+            // Loop through the teammates vector to check if any teammate ID matches given ID.
+            bool found = false;
+
+            for (auto& mate : teammates.teammates) {  // Loop through each teammate.
+                if (mate.id == id) {  // If the ID of a teammate is found to be the same, update the position.
+                    mate.rRFf = robocup.current_pose.position.cast<double>();  // Update position
+                    found     = true;
+                    break;  // Break out of the loop.
+                }
+            }
+
+            // Else this robot is not in the list of team mates already, add it in
+            if (!found) {
+                // Make the mate
+                TeamMate mate;
+                // Set the variables
+                mate.id   = id;
+                mate.rRFf = robocup.current_pose.position.cast<double>();
+                // Add it to the teammates list
+                teammates.teammates.emplace_back(mate);
+            }
+
+            // After updating or adding a teammate,
+            // move the updated teammate list into a unique pointer and emit it.
+            emit(std::make_unique<TeamMates>(std::move(teammates)));
+        });
 
         on<Startup>().then([this] {
             // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
@@ -209,6 +251,8 @@ namespace module::network {
                             msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                             msg->current_pose.covariance = field->covariance.cast<float>();
+
+                            msg->current_pose.team = config->team_id;
                         }
                     }
                 }
