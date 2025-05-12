@@ -182,6 +182,7 @@ namespace module::network {
             // move the updated teammate list into a unique pointer and emit it.
             emit(std::make_unique<TeamMates>(std::move(teammates)));
         }
+
         on<Startup>().then([this] {
             // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
             emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
