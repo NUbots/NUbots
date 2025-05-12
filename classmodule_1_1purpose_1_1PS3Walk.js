@@ -34,5 +34,8 @@ var classmodule_1_1purpose_1_1PS3Walk =
     [ "head_yaw", "classmodule_1_1purpose_1_1PS3Walk.html#ab52e5fe52fa42c2db5014a26a7ce1614", null ],
     [ "joystick", "classmodule_1_1purpose_1_1PS3Walk.html#a38ebcd2e5acebabe72307365a1cdd616", null ],
     [ "moving", "classmodule_1_1purpose_1_1PS3Walk.html#ac5c3d6c5825a6c26804afc15f582a6bd", null ],
+    [ "previous_walk_command", "classmodule_1_1purpose_1_1PS3Walk.html#a9c3a1cf614c98c0261842e1e8da85a75", null ],
+    [ "scripts_enabled", "classmodule_1_1purpose_1_1PS3Walk.html#a9fca4d7cd9e7b68a6cc090b6dfb326ce", null ],
+    [ "UPDATE_FREQUENCY", "classmodule_1_1purpose_1_1PS3Walk.html#a2b0b61492a18f90ab7b66499f350bdc9", null ],
     [ "walk_command", "classmodule_1_1purpose_1_1PS3Walk.html#a6496ebb0ead34764c2fe6fa0487745d3", null ]
 ];

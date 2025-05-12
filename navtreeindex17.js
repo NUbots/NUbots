@@ -1,5 +1,10 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1skill_1_1Say_1_1Config.html#aa09089b09d518621e02011e648efdae6":[3,0,3,10,8,0,0],
+"structmodule_1_1skill_1_1Say_1_1Config.html#adc2ef9a30368b30476d16f5dbfa4f595":[3,0,3,10,8,0,1],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html":[3,0,3,10,10,0],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#a20664031fff3e7548c667abfc82cc4d2":[3,0,3,10,10,0,2],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aa792ec536bd87cc3d67b0f76d2fae25d":[3,0,3,10,10,0,0],
 "structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aadf7006a3d0ed60282a4ac26df744753":[3,0,3,10,10,0,1],
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html":[3,0,3,10,12,0],
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html#a694f1827ae796ad5c6a94c3c4dd9d94e":[3,0,3,10,12,0,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html#aeb7afc617038656d8601af36a0be8e1e":[3,0,7,0,6,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4.html":[3,0,7,0,7],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4.html#a26ce962a84b64a6673fef615a048762c":[3,0,7,0,7,0],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html":[3,0,7,0,8],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html#aa532ae1c025c9a297c003eb302e8cbff":[3,0,7,0,8,0],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html":[3,0,7,0,9],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html#a383e32712623e0a0869bfcef016cf84e":[3,0,7,0,9,0],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4.html":[3,0,7,0,10],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4.html#a4a705c10de0acddf79cffce56a30736c":[3,0,7,0,10,0]
+"structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html":[3,0,7,0,8]
 };

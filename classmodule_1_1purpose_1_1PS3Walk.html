@@ -171,6 +171,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1purpose_1_1PS3Walk.html
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classmodule_1_1purpose_1_1PS3Walk-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::purpose::PS3Walk Class Reference</div>  </div>
@@ -297,7 +298,7 @@ Private Attributes</h2></td></tr>
 struct <a class="el" href="structmodule_1_1purpose_1_1PS3Walk_1_1Config.html">module::purpose::PS3Walk::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a7e6daf74a6296113172a7697374d1df4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28d06688fa59aae0f2a0dbfa30886428"><td class="memItemLeft" align="right" valign="top"><a id="a28d06688fa59aae0f2a0dbfa30886428"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#a28d06688fa59aae0f2a0dbfa30886428">head_locked</a> = false</td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#a28d06688fa59aae0f2a0dbfa30886428">head_locked</a> = true</td></tr>
 <tr class="memdesc:a28d06688fa59aae0f2a0dbfa30886428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores whether the robot will change its head direction or not. <br /></td></tr>
 <tr class="separator:a28d06688fa59aae0f2a0dbfa30886428"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e7d9928b0374bb96d5730b51d7b7a9c"><td class="memItemLeft" align="right" valign="top"><a id="a2e7d9928b0374bb96d5730b51d7b7a9c"></a>
@@ -316,10 +317,25 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#ac5c3d6c5825a6c26804afc15f582a6bd">moving</a> = false</td></tr>
 <tr class="memdesc:ac5c3d6c5825a6c26804afc15f582a6bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores whether the robot can move or not. <br /></td></tr>
 <tr class="separator:ac5c3d6c5825a6c26804afc15f582a6bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c3a1cf614c98c0261842e1e8da85a75"><td class="memItemLeft" align="right" valign="top"><a id="a9c3a1cf614c98c0261842e1e8da85a75"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#a9c3a1cf614c98c0261842e1e8da85a75">previous_walk_command</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a9c3a1cf614c98c0261842e1e8da85a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the previous walk command for acceleration limiting. <br /></td></tr>
+<tr class="separator:a9c3a1cf614c98c0261842e1e8da85a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fca4d7cd9e7b68a6cc090b6dfb326ce"><td class="memItemLeft" align="right" valign="top"><a id="a9fca4d7cd9e7b68a6cc090b6dfb326ce"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#a9fca4d7cd9e7b68a6cc090b6dfb326ce">scripts_enabled</a> = false</td></tr>
+<tr class="memdesc:a9fca4d7cd9e7b68a6cc090b6dfb326ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores whether scripts are enabled or not. <br /></td></tr>
+<tr class="separator:a9fca4d7cd9e7b68a6cc090b6dfb326ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6496ebb0ead34764c2fe6fa0487745d3"><td class="memItemLeft" align="right" valign="top"><a id="a6496ebb0ead34764c2fe6fa0487745d3"></a>
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#a6496ebb0ead34764c2fe6fa0487745d3">walk_command</a> = Eigen::Vector3d::Zero()</td></tr>
 <tr class="memdesc:a6496ebb0ead34764c2fe6fa0487745d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores a vector describing the current direction to walk in. <br /></td></tr>
 <tr class="separator:a6496ebb0ead34764c2fe6fa0487745d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a2b0b61492a18f90ab7b66499f350bdc9"><td class="memItemLeft" align="right" valign="top"><a id="a2b0b61492a18f90ab7b66499f350bdc9"></a>
+static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html#a2b0b61492a18f90ab7b66499f350bdc9">UPDATE_FREQUENCY</a> = 20</td></tr>
+<tr class="memdesc:a2b0b61492a18f90ab7b66499f350bdc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The frequency at which the <a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html">PS3Walk</a> commands are updated. <br /></td></tr>
+<tr class="separator:a2b0b61492a18f90ab7b66499f350bdc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/purpose/PS3Walk/src/<a class="el" href="PS3Walk_8hpp_source.html">PS3Walk.hpp</a></li>
@@ -331,7 +347,7 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1PS3Walk.html">PS3Walk</a></li>
-    <li class="footer">Generated on Sun May 11 2025 13:07:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon May 12 2025 04:46:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

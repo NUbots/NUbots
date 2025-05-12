@@ -1,5 +1,8 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#a42b9d55dd96c65fa0f82f555617be7f5":[3,0,3,8,1,4,5],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#a5de711e1b6a6b732d4ce3e77d184bf00":[3,0,3,8,1,4,2],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#a9365e42a6119e138281b76a893ec1aeb":[3,0,3,8,1,4,1],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#a97cf61b143130f47f0b4620a92445c44":[3,0,3,8,1,4,3],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#abd7c67eb268f52371f84a620e0f46c5a":[3,0,3,8,1,4,0],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html#abea73a65255417e77f2c9933bacd2baa":[3,0,3,8,1,4,4],
@@ -145,8 +148,10 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html#abe33008a0e413b9c81d5bc8a738fe786":[3,0,3,9,5,0,0],
 "structmodule_1_1purpose_1_1LockServo.html":[3,0,3,9,7],
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html":[3,0,3,9,8,0],
-"structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a033860e0019e22b3473990451ae1cd3c":[3,0,3,9,8,0,0],
-"structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a60e9926ee255ef901e35453f9508eabe":[3,0,3,9,8,0,1],
+"structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a033860e0019e22b3473990451ae1cd3c":[3,0,3,9,8,0,2],
+"structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a2aadeb117331e707ed064408697d9ff6":[3,0,3,9,8,0,1],
+"structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a4b65c8987fb57d5c168e90b930ca58fe":[3,0,3,9,8,0,0],
+"structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a60e9926ee255ef901e35453f9508eabe":[3,0,3,9,8,0,3],
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html":[3,0,3,9,11,0],
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3531788a0bcc3a269ed43d2ec3768b4b":[3,0,3,9,11,0,5],
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html#a39cf8c935121dbe806becc2181896783":[3,0,3,9,11,0,7],
@@ -244,10 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[3,0,3,10,7,0,2],
 "structmodule_1_1skill_1_1Look_1_1Config.html#ae0180a11f87c07d2c869a2be246f43e7":[3,0,3,10,7,0,1],
 "structmodule_1_1skill_1_1Say_1_1Config.html":[3,0,3,10,8,0],
-"structmodule_1_1skill_1_1Say_1_1Config.html#a09584485648c860af66fab30075d7927":[3,0,3,10,8,0,2],
-"structmodule_1_1skill_1_1Say_1_1Config.html#aa09089b09d518621e02011e648efdae6":[3,0,3,10,8,0,0],
-"structmodule_1_1skill_1_1Say_1_1Config.html#adc2ef9a30368b30476d16f5dbfa4f595":[3,0,3,10,8,0,1],
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html":[3,0,3,10,10,0],
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#a20664031fff3e7548c667abfc82cc4d2":[3,0,3,10,10,0,2],
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aa792ec536bd87cc3d67b0f76d2fae25d":[3,0,3,10,10,0,0]
+"structmodule_1_1skill_1_1Say_1_1Config.html#a09584485648c860af66fab30075d7927":[3,0,3,10,8,0,2]
 };

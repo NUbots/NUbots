@@ -1,5 +1,10 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html#aa532ae1c025c9a297c003eb302e8cbff":[3,0,7,0,8,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html":[3,0,7,0,9],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html#a383e32712623e0a0869bfcef016cf84e":[3,0,7,0,9,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4.html":[3,0,7,0,10],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4.html#a4a705c10de0acddf79cffce56a30736c":[3,0,7,0,10,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4.html":[3,0,7,0,11],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4.html#af74d33fb3d492cb4414b346c25a0fdc9":[3,0,7,0,11,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html":[3,0,7,0,12],
@@ -244,10 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#aedf750f864c272bbd55e8fb703c85dfa":[3,0,7,7,0,0,17],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#aee0d41df451de6d2ba50dc777f4c56e7":[3,0,7,7,0,0,18],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#af0bf637382496d9759800a197ffd1c53":[3,0,7,7,0,0,6],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#af123fc22a1ccfe0639b465ceaf4ba2e1":[3,0,7,7,0,0,22],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#af8db6525ac2a1d0f097b26464ebc34a7":[3,0,7,7,0,0,19],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html":[3,0,7,7,0,0,0],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#a0937a69da04f17db9e07f85172374e80":[3,0,7,7,0,0,0,4],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#a0a0d61b5d9007e5d56af8e91dabb1305":[3,0,7,7,0,0,0,0],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator_1_1Type.html#ab9b683c3f7dca89cf47211a93cb8a2f1":[3,0,7,7,0,0,0,1]
+"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#af123fc22a1ccfe0639b465ceaf4ba2e1":[3,0,7,7,0,0,22]
 };

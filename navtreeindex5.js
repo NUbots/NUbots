@@ -1,5 +1,8 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1skill_1_1IKKick.html#aeb771485a0197654038961384f0cb297":[3,0,3,10,4,13],
+"classmodule_1_1skill_1_1KickBalancer.html":[3,0,3,10,5],
+"classmodule_1_1skill_1_1KickBalancer.html#a497acf8c00ab75b46e4acbd86f6715a9":[3,0,3,10,5,2],
 "classmodule_1_1skill_1_1KickBalancer.html#a89e4d2efba739f33a5d9915e432e6e6a":[3,0,3,10,5,3],
 "classmodule_1_1skill_1_1KickBalancer.html#aa3ed3037fb4bd07fdf4d484e235cb955":[3,0,3,10,5,1],
 "classmodule_1_1skill_1_1KickBalancer.html#af4a4c13dfd319fc3d8d4d59cfd75f691":[3,0,3,10,5,4],
@@ -246,8 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ac80b18626025541fb02f22494df2f395":[3,0,3,12,2,7,1],
 "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ad0e2d5f4edfb450027507a0bfc9473c5":[3,0,3,12,2,7,6],
 "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ad5650439dc12ea6197ac8daaa67091ea":[3,0,3,12,2,7,0],
-"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#aef82b2c7638fe9f3a7300963810d4149":[3,0,3,12,2,7,2],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html":[3,0,3,12,2,8],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a06c79b489f52b6180f427d51dfdc28f9":[3,0,3,12,2,8,13],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a0d032346d1a58d44e948c9b846998919":[3,0,3,12,2,8,7]
+"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#aef82b2c7638fe9f3a7300963810d4149":[3,0,3,12,2,7,2]
 };
