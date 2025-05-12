@@ -98,6 +98,8 @@ namespace module::purpose {
             bool force_playing = false;
             /// @brief Delay in seconds before the robot starts playing after button press
             int disable_idle_delay = 0;
+            /// @brief Delay in seconds before the robot can start playing after startup
+            int startup_delay = 0;
             /// @brief The soccer position of the robot
             Position position{};
             /// @brief The number of seconds to wait before assuming a teammate is inactive
