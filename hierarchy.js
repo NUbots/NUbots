@@ -584,6 +584,7 @@ var hierarchy =
     [ "utility::skill::splines::Waypoint< Scalar >", "structutility_1_1skill_1_1splines_1_1Waypoint.html", null ],
     [ "utility::skill::WalkGenerator< Scalar >", "classutility_1_1skill_1_1WalkGenerator.html", null ],
     [ "utility::skill::WalkGenerator< Scalar >::WalkParameters", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html", null ],
+    [ "utility::strategy::Possession", "structutility_1_1strategy_1_1Possession.html", null ],
     [ "utility::strutil::ANSISGR< First, Codes >", "structutility_1_1strutil_1_1ANSISGR.html", null ],
     [ "utility::strutil::ANSISGR< First, Codes >::Apply", "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html", null ],
     [ "utility::strutil::Colour", "structutility_1_1strutil_1_1Colour.html", null ],

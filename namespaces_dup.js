@@ -1069,6 +1069,11 @@ var namespaces_dup =
         [ "unknown_message", "structutility_1_1reflection_1_1unknown__message.html", "structutility_1_1reflection_1_1unknown__message" ]
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", "namespaceutility_1_1skill" ],
+      [ "strategy", null, [
+        [ "Possession", "structutility_1_1strategy_1_1Possession.html", "structutility_1_1strategy_1_1Possession" ],
+        [ "get_possession", "soccer__strategy_8hpp.html#ada672fe44e2ff9e0b27c03e02ba41309", null ],
+        [ "get_sorted_bots", "soccer__strategy_8hpp.html#a8d9ba7f2b4f5e0e22f3b915c61f2d194", null ]
+      ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", "namespaceutility_1_1strutil" ],
       [ "support", null, [
         [ "evil", null, [

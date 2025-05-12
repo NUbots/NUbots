@@ -473,6 +473,9 @@ var annotated_dup =
         [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
         [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ]
       ] ],
+      [ "strategy", null, [
+        [ "Possession", "structutility_1_1strategy_1_1Possession.html", "structutility_1_1strategy_1_1Possession" ]
+      ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [
         [ "ANSISGR", "structutility_1_1strutil_1_1ANSISGR.html", [
           [ "Apply", "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html", "structutility_1_1strutil_1_1ANSISGR_1_1Apply" ]
