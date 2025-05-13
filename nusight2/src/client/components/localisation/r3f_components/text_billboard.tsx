@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 
-import { TextGeometryHelper } from "./text_geometry_helper";
+import { useTextGeometry } from "./text_geometry_helper";
 
 const TEXT_OPACITY = 1;
 const TEXT_BACKDROP_OPACITY = 0.5;
@@ -24,9 +24,7 @@ const textBackdropGeometry = (width: number, height: number) => {
   shape.lineTo(x + radius, y);
   shape.quadraticCurveTo(x, y, x, y + radius);
 
-  const geometry = new THREE.ShapeGeometry(shape);
-
-  return geometry;
+  return new THREE.ShapeGeometry(shape);
 };
 
 export const TextBillboard = ({
@@ -44,11 +42,14 @@ export const TextBillboard = ({
   cameraPitch: number;
   cameraYaw: number;
 }) => {
-  const textGeometry = useMemo(() => TextGeometryHelper(text), [text]);
-  textGeometry.computeBoundingBox();
-  const textWidth = textGeometry.boundingBox ? textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x : 0;
-  const textHeight = textGeometry.boundingBox ? textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y : 0;
+  const textGeometry = useTextGeometry(text);
+
+  const textWidth = textGeometry?.boundingBox ? textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x : 0;
+  const textHeight = textGeometry?.boundingBox ? textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y : 0;
+
   const backdropGeometry = useMemo(() => textBackdropGeometry(textWidth, textHeight), [textWidth, textHeight]);
+
+  if (!textGeometry) return null;
 
   return (
     <object3D position={position} rotation={[Math.PI / 2 + cameraPitch, 0, -Math.PI / 2 + cameraYaw, "ZXY"]}>

@@ -32,6 +32,8 @@
 
 #include "RobotModel.hpp"
 
+#include "message/vision/GreenHorizon.hpp"
+
 #include "utility/math/filter/UKF.hpp"
 
 namespace module::localisation {
@@ -100,6 +102,22 @@ namespace module::localisation {
         /// This variable will increase by one each time a new robot is added
         /// As it is unbounded, an unsigned long is used to store it
         unsigned long next_id = 0;
+
+        /// @brief Run Kalman filter prediction step for all tracked robots
+        void prediction();
+
+        /// @brief Associate the given robot measurements with the tracked robots
+        /// Creates a new tracked robot if the measurement is not associated with an existing robot
+        /// @param robots_rRWw The new robot measurements in world coordinates
+        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw);
+
+        /// @brief Run maintenance on the tracked robots
+        /// This will remove any viewable robots that have been missed too many times or are too close to another robot
+        /// @param horizon The green horizon from the vision system, to determine if a robot is in view
+        void maintenance(const message::vision::GreenHorizon& horizon);
+
+        /// @brief Print out the current state of the tracked robots
+        void debug_info() const;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
