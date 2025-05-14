@@ -96,6 +96,8 @@ namespace module::vision {
             cv::Mat resized_img;
             cv::resize(img_cv, resized_img, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
 
+            cv::imwrite("recordings/segmentation_original.png", resized_img);
+
             // Convert to float and normalize using ImageNet mean and std
             cv::Mat normalized_img;
             resized_img.convertTo(normalized_img, CV_32F, 1.0 / 255.0);
@@ -116,9 +118,8 @@ namespace module::vision {
             cv::Mat blob = cv::dnn::blobFromImage(normalized_img,
                                                   1.0,  // scale factor
                                                   cv::Size(IMAGE_SIZE, IMAGE_SIZE),
-                                                  cv::Scalar(0, 0, 0),  // no mean subtraction (already done)
-                                                  false,                // don't swap R and B channels
-                                                  CV_32F);              // output depth
+                                                  cv::Scalar(),
+                                                  true);
 
             // -------- Feed the blob into the input node of the Model -------
             // Get input port for model with one input
