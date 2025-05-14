@@ -108,9 +108,9 @@ namespace module::vision {
             cv::split(normalized_img, channels);
 
             // Normalize each channel
-            channels[0] = (channels[0] - 0.485) / 0.229;  // R channel
+            channels[2] = (channels[2] - 0.485) / 0.229;  // R channel
             channels[1] = (channels[1] - 0.456) / 0.224;  // G channel
-            channels[2] = (channels[2] - 0.406) / 0.225;  // B channel
+            channels[0] = (channels[0] - 0.406) / 0.225;  // B channel
 
             cv::merge(channels, normalized_img);
 
