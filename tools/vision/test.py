@@ -34,15 +34,17 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-# Import the model definition
-from train import EfficientSegmentationModel
 
 # Assuming run_on_docker is available in your project structure
 # If not, you might need to adjust the import or remove the decorator
 from utility.dockerise import run_on_docker
 
+# Import the model definitions
+from .efficient_segmentation_model import EfficientSegmentationModel
+from .lightweight_segmentation_model import LightSegmentationModel
 
-def visualize_segmentation(model_path, test_image_path, img_size=512):
+
+def visualize_segmentation(model_path, test_image_path, img_size=512, model_type="efficient"):
     """
     Loads a model, performs segmentation on a test image, and visualizes the result.
     """
@@ -58,13 +60,17 @@ def visualize_segmentation(model_path, test_image_path, img_size=512):
         [0, 0, 0],  # Background - #000000
     ]
 
-    # Create results directory if it doesn't exist
-    os.makedirs("results", exist_ok=True)
-
     # Load the model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # Updated to use the new model
-    model = EfficientSegmentationModel(in_channels=3, num_classes=3)
+
+    # Initialize model based on model_type
+    if model_type.lower() == "lightweight":
+        model = LightSegmentationModel(in_channels=3, num_classes=3)
+        print("Using Lightweight Segmentation Model")
+    else:
+        model = EfficientSegmentationModel(num_classes=3)
+        print("Using Efficient Segmentation Model")
+
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
     model.eval()
@@ -141,10 +147,10 @@ def visualize_segmentation(model_path, test_image_path, img_size=512):
     plt.axis("off")
 
     plt.tight_layout()
-    plt.savefig("results/segmentation_result.png")
+    plt.savefig("recordings/segmentation_result.png")
     plt.show()
 
-    print("Visualization saved as 'results/segmentation_result.png'")
+    print("Visualization saved as 'recordings/segmentation_result.png'")
 
 
 @run_on_docker
@@ -156,7 +162,7 @@ def register(parser):
     parser.add_argument(
         "--model_path",
         type=str,
-        default="results/best_segmentation_model.pth",
+        default="recordings/best_segmentation_model.pth",
         help="Path to the saved PyTorch model (.pth file)",
     )
     parser.add_argument(
@@ -166,18 +172,20 @@ def register(parser):
         help="Path to the test image file",
     )
     parser.add_argument("--img_size", type=int, default=512, help="Input image size the model expects")
+    parser.add_argument(
+        "--model_type",
+        type=str,
+        default="lightweight",
+        choices=["efficient", "lightweight"],
+        help="Type of model to use (efficient, lightweight)",
+    )
     # Add hostname if necessary for your docker setup
     # parser.add_argument("--hostname", type=str, default="some_default_host", help="Specify the Docker hostname")
 
 
 @run_on_docker  # Add relevant hostname if needed
-def run(model_path, test_image_path, img_size, **kwargs):
+def run(model_path, test_image_path, img_size, model_type, **kwargs):
     """
     Run the segmentation visualization.
     """
-    visualize_segmentation(model_path, test_image_path, img_size)
-
-
-# Remove the old if __name__ == "__main__": block
-# if __name__ == "__main__":
-#    visualize_segmentation()
+    visualize_segmentation(model_path, test_image_path, img_size, model_type)

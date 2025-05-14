@@ -44,12 +44,17 @@ from tqdm import tqdm
 # If not, you might need to adjust the import or remove the decorator
 from utility.dockerise import run_on_docker
 
-from .model import EfficientSegmentationModel, SegmentationDataset
+from .dataset import SegmentationDataset
+from .efficient_segmentation_model import EfficientSegmentationModel
+from .lightweight_segmentation_model import LightSegmentationModel
 
 
 # Improved training function with learning rate scheduling
 def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=20, best_model_save_path="results/best_segmentation_model.pth"):
     best_loss = float("inf")
+
+    # Add mixed precision training
+    scaler = torch.cuda.amp.GradScaler()
 
     # Add learning rate scheduler for better convergence
     scheduler = ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3)
@@ -67,10 +72,16 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
             masks = masks.to(device)
 
             optimizer.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs, masks)
-            loss.backward()
-            optimizer.step()
+
+            # Use mixed precision training
+            with torch.cuda.amp.autocast():
+                outputs = model(images)
+                loss = criterion(outputs, masks)
+
+            # Scale loss and backpropagate
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
 
             train_loss += loss.item() * images.size(0)
 
@@ -120,18 +131,18 @@ def register(parser):
     """
     Register command-line arguments for the training script.
     """
-    parser.description = "Train an EfficientSegmentationModel."
-    parser.add_argument("--train_img_dir", type=str, default="datasets/torso21/train/images", help="Directory for training images")
+    parser.description = "Train a segmentation model."
+    parser.add_argument("--train_img_dir", type=str, default="datasets/webots/train/images", help="Directory for training images")
     parser.add_argument(
-        "--train_mask_dir", type=str, default="datasets/torso21/train/segmentations", help="Directory for training masks"
+        "--train_mask_dir", type=str, default="datasets/webots/train/segmentations", help="Directory for training masks"
     )
-    parser.add_argument("--test_img_dir", type=str, default="datasets/torso21/test/images", help="Directory for validation images")
+    parser.add_argument("--test_img_dir", type=str, default="datasets/webots/test/images", help="Directory for validation images")
     parser.add_argument(
-        "--test_mask_dir", type=str, default="datasets/torso21/test/segmentations", help="Directory for validation masks"
+        "--test_mask_dir", type=str, default="datasets/webots/test/segmentations", help="Directory for validation masks"
     )
     parser.add_argument("--img_size", type=int, default=512, help="Image size for training and validation")
     parser.add_argument("--batch_size", type=int, default=8, help="Training batch size")
-    parser.add_argument("--num_epochs", type=int, default=30, help="Number of training epochs")
+    parser.add_argument("--num_epochs", type=int, default=10, help="Number of training epochs")
     parser.add_argument("--lr", type=float, default=0.001, help="Initial learning rate")
     parser.add_argument("--weight_decay", type=float, default=1e-4, help="Optimizer weight decay")
     parser.add_argument("--num_workers", type=int, default=2, help="Number of workers for DataLoader")
@@ -139,7 +150,14 @@ def register(parser):
     parser.add_argument(
         "--export_onnx", action="store_true", help="Export the final model to ONNX format after training"
     )
-    parser.add_argument("--shm_size", type=str, default="16G", help="Shared memory size for training")
+    # parser.add_argument("--shm_size", type=str, default="16G", help="Shared memory size for training")
+    parser.add_argument(
+        "--model_type",
+        type=str,
+        default="lightweight",
+        choices=["efficient", "lightweight"],
+        help="Type of model to train (efficient, lightweight)",
+    )
 
 @run_on_docker  # Add relevant hostname if needed
 def run(
@@ -155,6 +173,7 @@ def run(
     num_workers,
     results_dir,
     export_onnx,
+    model_type,
     **kwargs,
 ):
     """
@@ -194,12 +213,30 @@ def run(
         augment=False,
     )
 
-    # Create dataloaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    # Create dataloaders with pin_memory=True
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True
+    )
 
-    # Initialize model
-    model = EfficientSegmentationModel(in_channels=3, num_classes=3)
+    # Initialize model based on model_type
+    if model_type.lower() == "lightweight":
+        model = LightSegmentationModel(in_channels=3, num_classes=3)
+        print("Using Lightweight Segmentation Model")
+    else:
+        model = EfficientSegmentationModel(num_classes=3)
+        print("Using Efficient Segmentation Model")
+
     model = model.to(device)
 
     # Loss function for multi-class segmentation

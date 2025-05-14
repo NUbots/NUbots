@@ -35,10 +35,11 @@ import torch
 # If not, you might need to adjust the import or remove the decorator
 from utility.dockerise import run_on_docker
 
-from .model import EfficientSegmentationModel
+from .efficient_segmentation_model import EfficientSegmentationModel
+from .lightweight_segmentation_model import LightSegmentationModel
 
 
-def convert_to_onnx(model_path, output_path, img_size=512):
+def convert_to_onnx(model_path, output_path, img_size=512, model_type="efficient"):
     """
     Convert a PyTorch model to ONNX format
 
@@ -46,6 +47,7 @@ def convert_to_onnx(model_path, output_path, img_size=512):
         model_path: Path to the saved PyTorch model
         output_path: Path where the ONNX model will be saved
         img_size: Input image size for the model
+        model_type: Type of model to use ('efficient' or 'lightweight')
     """
     # Create output directory if it doesn't exist
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -54,8 +56,13 @@ def convert_to_onnx(model_path, output_path, img_size=512):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Initialize model
-    model = EfficientSegmentationModel(in_channels=3, num_classes=3)
+    # Initialize model based on model_type
+    if model_type.lower() == "lightweight":
+        model = LightSegmentationModel(in_channels=3, num_classes=3)
+        print("Using Lightweight Segmentation Model")
+    else:
+        model = EfficientSegmentationModel(num_classes=3)
+        print("Using Efficient Segmentation Model")
 
     # Load model weights
     model.load_state_dict(torch.load(model_path, map_location=device))
@@ -99,13 +106,20 @@ def register(parser):
         help="Path where the ONNX model will be saved",
     )
     parser.add_argument("--img_size", type=int, default=512, help="Input image size used during training/export")
+    parser.add_argument(
+        "--model_type",
+        type=str,
+        default="lightweight",
+        choices=["efficient", "lightweight"],
+        help="Type of model to convert (efficient or lightweight)",
+    )
     # Add hostname if necessary for your docker setup, similar to optimise_localisation.py
     # parser.add_argument("--hostname", type=str, default="some_default_host", help="Specify the Docker hostname")
 
 
 @run_on_docker  # Add relevant hostname if needed: @run_on_docker(hostname="some_host")
-def run(model_path, output_path, img_size, **kwargs):
+def run(model_path, output_path, img_size, model_type, **kwargs):
     """
     Run the ONNX conversion process.
     """
-    convert_to_onnx(model_path, output_path, img_size)
+    convert_to_onnx(model_path, output_path, img_size, model_type)
