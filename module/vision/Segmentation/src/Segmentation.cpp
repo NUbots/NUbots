@@ -86,6 +86,7 @@ namespace module::vision {
                     break;
                 case utility::vision::fourcc("RGBA"):
                     img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
+                    // OpenCV expects BGRA images, so the following is actually converting to RGB...
                     cv::cvtColor(img_cv, img_cv, cv::COLOR_RGBA2BGR);
                     break;
                 default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
@@ -95,38 +96,29 @@ namespace module::vision {
             cv::Mat resized_img;
             cv::resize(img_cv, resized_img, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
 
-            // Save a copy of the original resized image before preprocessing
-            cv::imwrite("recordings/segmentation_original.png", resized_img);
-
-            // Normalize image (same as in the Python training code)
+            // Convert to float and normalize using ImageNet mean and std
             cv::Mat normalized_img;
             resized_img.convertTo(normalized_img, CV_32F, 1.0 / 255.0);
 
-            // Apply normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            // Apply normalization with same values as in Python code
+            // Python uses: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
             std::vector<cv::Mat> channels(3);
             cv::split(normalized_img, channels);
 
             // Normalize each channel
-            channels[0] = (channels[0] - 0.485) / 0.229;
-            channels[1] = (channels[1] - 0.456) / 0.224;
-            channels[2] = (channels[2] - 0.406) / 0.225;
+            channels[0] = (channels[0] - 0.485) / 0.229;  // R channel
+            channels[1] = (channels[1] - 0.456) / 0.224;  // G channel
+            channels[2] = (channels[2] - 0.406) / 0.225;  // B channel
 
             cv::merge(channels, normalized_img);
 
-            // For visualization of normalized image, we need to convert back to 0-255 range
-            // First convert normalized values to 0-1 range (approximately)
-            cv::Mat viz_normalized;
-            normalized_img = normalized_img * 0.5 + 0.5;  // Convert from roughly [-1,1] to [0,1]
-            normalized_img.convertTo(viz_normalized, CV_8UC3, 255.0);
-            cv::imwrite("recordings/segmentation_normalized.png", viz_normalized);
-
             // Convert to blob format
             cv::Mat blob = cv::dnn::blobFromImage(normalized_img,
-                                                  1.0,
+                                                  1.0,  // scale factor
                                                   cv::Size(IMAGE_SIZE, IMAGE_SIZE),
-                                                  cv::Scalar(0, 0, 0),
-                                                  false,
-                                                  false);
+                                                  cv::Scalar(0, 0, 0),  // no mean subtraction (already done)
+                                                  false,                // don't swap R and B channels
+                                                  CV_32F);              // output depth
 
             // -------- Feed the blob into the input node of the Model -------
             // Get input port for model with one input
