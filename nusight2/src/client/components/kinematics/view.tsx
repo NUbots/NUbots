@@ -7,8 +7,33 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
+import { KinematicsRobotModel } from "./robot_model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper";
-import { JointDataDisplay } from "./r3f_components/joint_data_display";
+
+const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
+  return (
+    <div className="p-4 border border-black dark:border-white rounded-lg w-full">
+      <h3 className="text-xl font-semibold mb-4 pb-2">Joint Angles</h3>
+      <ul className="space-y-2">
+        {Object.entries(robot.motors).map(([jointName, motor]) => {
+          // Format joint name from camelCase to "Camel Case"
+          const formattedLabel = jointName
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .replace(/^./, (match) => match.toUpperCase());
+          return (
+            <li
+              key={jointName}
+              className="flex justify-between items-center p-2 border-black dark:border-white border-b"
+            >
+              <span className="font-medium">{formattedLabel}</span>
+              <span className="text-right">{motor.angle.toFixed(2)}°</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+});
 
 @observer
 export class KinematicsView extends React.Component<{
