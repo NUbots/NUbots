@@ -14,19 +14,20 @@ const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
   return (
     <div className="p-4 border border-black dark:border-white rounded-lg w-full">
       <h3 className="text-xl font-semibold mb-4 pb-2">Joint Angles</h3>
-      <ul className="space-y-2">
+      <ul className="divide-y divide-black dark:divide-white">
         {Object.entries(robot.motors).map(([jointName, motor]) => {
-          // Format joint name from camelCase to "Camel Case"
           const formattedLabel = jointName
             .replace(/([a-z])([A-Z])/g, "$1 $2")
             .replace(/^./, (match) => match.toUpperCase());
+
           return (
             <li
               key={jointName}
-              className="flex justify-between items-center p-2 border-black dark:border-white border-b"
+              className="grid grid-cols-[auto_2rem_4rem] gap-4 p-2"
             >
               <span className="font-medium">{formattedLabel}</span>
-              <span className="text-right">{motor.angle.toFixed(2)}°</span>
+              <span className="justify-self-end">{motor.angle.toFixed(2)}°</span>
+              <span className="justify-self-end">{(motor.angle * Math.PI / 180).toFixed(2)} rad</span>
             </li>
           );
         })}
