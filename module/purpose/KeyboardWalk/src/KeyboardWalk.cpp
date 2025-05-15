@@ -323,15 +323,9 @@ namespace module::purpose {
 
     void KeyboardWalk::kick(LimbID::Value l) {
         reset();
-        Eigen::Vector3d test_point     = {0.05, -0.055, -0.05};
-        Eigen::Vector3d test_direction = {0.05, 0.0, 0.0};
         switch (l) {
-            case LimbID::LEFT_LEG:
-                emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG, test_point, test_direction), 3);
-                break;
-            case LimbID::RIGHT_LEG:
-                emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG, test_point, test_direction), 3);
-                break;
+            case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3); break;
+            case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3); break;
             default: log<ERROR>("Invalid limb ID");
         }
     }
