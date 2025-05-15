@@ -8,6 +8,8 @@ nuclear_role(
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
+  network::NUClearNet
+  network::NetworkForwarder
   network::PlotJuggler
   # Sensors
   input::SensorFilter
