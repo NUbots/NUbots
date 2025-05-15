@@ -36,3 +36,23 @@ arms:
   left_shoulder_roll: 0.2
   right_elbow: -0.7
   left_elbow: -0.7
+
+# Balance parameters
+active_balance:
+  enabled: true
+  angle_gain: # Angle gain for the balance controller
+    p: 0.001 # proportional gain: Scale of the correction
+    i: 0.001 # integral gain: Correct for systematic error
+    d: 0.005 # derivative gain: Helps prevent overshoot.
+  hip_rotation_scale: 0.9 # Percentage of balance correction applied to hips
+  ankle_rotation_scale: 0.1 # Percentage of balance correction applied to ankles
+  translation_gain:
+    X:
+      p: 0.05 # proportional gain forward/backward: How strong to correct for forward/backward tilt (by shifting foot position?)
+      d: 0.001 # derivative gain: Helps prevent overshoot.
+    Y:
+      p: 0.05 # proportional gain left/right: How strong to correct for left/right tilt (by shifting foot position?)
+      d: 0.001 # derivative gain: Helps prevent overshoot.
+    Z:
+      p: -0.0001 # proportional gain up/down: How strong to correct for up/down tilt (by shifting foot position?)
+      d: 0.01 # derivative gain: Helps prevent overshoot.
