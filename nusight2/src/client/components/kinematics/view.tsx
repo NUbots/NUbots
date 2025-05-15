@@ -23,11 +23,11 @@ const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
           return (
             <li
               key={jointName}
-              className="grid grid-cols-[auto_2rem_4rem] gap-4 p-2"
+              className="grid grid-cols-[auto_auto_4rem] gap-4 p-2"
             >
               <span className="font-medium">{formattedLabel}</span>
-              <span className="justify-self-end">{motor.angle.toFixed(2)}°</span>
-              <span className="justify-self-end">{(motor.angle * Math.PI / 180).toFixed(2)} rad</span>
+              <span className="justify-self-end">{motor.angle.toFixed(2)} rad</span>
+              <span className="justify-self-end">{(motor.angle * 180 / Math.PI).toFixed(2)}°</span>
             </li>
           );
         })}
