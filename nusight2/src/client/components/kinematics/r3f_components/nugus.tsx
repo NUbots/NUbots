@@ -25,49 +25,55 @@ export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
   const motors = model.motors;
 
   React.useEffect(() => {
-    // Update robot's pose
     if (robotRef.current) {
       const joints = (robotRef.current?.children[0] as any)?.joints;
-      // Update robot's joints
       if (joints) {
-        joints?.head_pitch.setJointValue(motors.headTilt.angle);
-        joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
-        joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
-        joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
-        joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
-        joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
-        joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
-        joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
-        joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
-        joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
-        joints?.neck_yaw.setJointValue(motors.headPan.angle);
-        joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
-        joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
-        joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
-        joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
-        joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
-        joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
-        joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
-        joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
-        joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
+        const apply = (jointKey: string, angle: number) => {
+          const joint = joints[jointKey];
+          joint?.setJointValue(angle);
+
+          joint?.traverse((child: any) => {
+            if (child.type === "URDFVisual" && child.children.length > 0) {
+              const mesh = child.children[0] as THREE.Mesh;
+
+              if (mesh?.material && !Array.isArray(mesh.material) && "color" in mesh.material) {
+                if (!mesh.userData.customizedMaterial) {
+                  mesh.material = mesh.material.clone();
+                  mesh.userData.customizedMaterial = true;
+                }
+
+                const material = mesh.material as THREE.Material & { color: THREE.Color };
+                const isZero = Math.abs(angle) < 1e-4;
+                material.color.set(isZero ? "#FFCC00" : "#A2A2A2");
+              }
+            }
+          });
+        };
+
+        apply("head_pitch", motors.headTilt.angle);
+        apply("left_ankle_pitch", motors.leftAnklePitch.angle);
+        apply("left_ankle_roll", motors.leftAnkleRoll.angle);
+        apply("left_elbow_pitch", motors.leftElbow.angle);
+        apply("left_hip_pitch", motors.leftHipPitch.angle);
+        apply("left_hip_roll", motors.leftHipRoll.angle);
+        apply("left_hip_yaw", motors.leftHipYaw.angle);
+        apply("left_knee_pitch", motors.leftKnee.angle);
+        apply("left_shoulder_pitch", motors.leftShoulderPitch.angle);
+        apply("left_shoulder_roll", motors.leftShoulderRoll.angle);
+        apply("neck_yaw", motors.headPan.angle);
+        apply("right_ankle_pitch", motors.rightAnklePitch.angle);
+        apply("right_ankle_roll", motors.rightAnkleRoll.angle);
+        apply("right_elbow_pitch", motors.rightElbow.angle);
+        apply("right_hip_pitch", motors.rightHipPitch.angle);
+        apply("right_hip_roll", motors.rightHipRoll.angle);
+        apply("right_hip_yaw", motors.rightHipYaw.angle);
+        apply("right_knee_pitch", motors.rightKnee.angle);
+        apply("right_shoulder_pitch", motors.rightShoulderPitch.angle);
+        apply("right_shoulder_roll", motors.rightShoulderRoll.angle);
       }
     }
   }, [rotation, motors]);
 
-  // Update the material of the robot
-  const material = new THREE.MeshStandardMaterial({
-    color: "#A2A2A2",
-    roughness: 0.5,
-    metalness: 0.2,
-  });
-  if (robotRef.current) {
-    robotRef.current.traverse((child) => {
-      if (child.type === "URDFVisual" && child.children.length > 0) {
-        const mesh = child.children[0] as THREE.Mesh;
-        mesh.material = material;
-      }
-    });
-  }
 
   return <object3D ref={robotRef} />;
 });
