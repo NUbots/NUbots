@@ -43,10 +43,12 @@ namespace module::skill {
 
     using extension::Configuration;
 
+    using message::actuation::KinematicsModel;
     using message::actuation::LeftArm;
     using message::actuation::RightArm;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
+    using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using message::skill::Kick;
@@ -98,6 +100,11 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+
+            // Configure the balancer
+            auto balance_config = config["active_balance"];
+            feedback_active     = balance_config["enabled"].as<bool>();
+            feedback_balancer.configure(balance_config);
         });
 
         // Start - Runs every time the Kick provider starts (wasn't running)
@@ -107,8 +114,15 @@ namespace module::skill {
             kick_generator.reset();
         });
 
-        on<Provide<Kick>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then(
-            [this](const Kick& kick, const RunReason& run_reason) {
+        on<Provide<Kick>,
+           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
+           With<Sensors>,
+           With<KinematicsModel>,
+           Single>()
+            .then([this](const Kick& kick,
+                         const RunReason& run_reason,
+                         const Sensors& sensors,
+                         const KinematicsModel& kinematics_model) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -137,6 +151,27 @@ namespace module::skill {
                 // Get desired feet poses in the torso {t} frame from the walk engine
                 Eigen::Isometry3d Htl = kick_generator.get_foot_pose(LimbID::LEFT_LEG);
                 Eigen::Isometry3d Htr = kick_generator.get_foot_pose(LimbID::RIGHT_LEG);
+
+                // Determine the support foot
+                LimbID support_foot = (kick.leg == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
+
+                // Apply balance to the support foot
+                if (feedback_active) {
+                    // Choose the correct foot goal
+                    Eigen::Isometry3f support_foot_goal_float =
+                        (support_foot == LimbID::LEFT_LEG) ? Htl.cast<float>() : Htr.cast<float>();
+
+                    // Apply balance
+                    feedback_balancer.balance(kinematics_model, support_foot_goal_float, support_foot, sensors);
+
+                    // Cast back to double
+                    if (support_foot == LimbID::LEFT_LEG) {
+                        Htl = support_foot_goal_float.cast<double>();
+                    }
+                    else {
+                        Htr = support_foot_goal_float.cast<double>();
+                    }
+                }
 
                 // Construct ControlFoot tasks
                 emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));

@@ -35,6 +35,7 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/motion/Balance.hpp"
 #include "utility/skill/KickGenerator.hpp"
 #include "utility/skill/splines/Trajectory.hpp"
 
@@ -60,6 +61,10 @@ namespace module::skill {
 
         /// @brief Kick generator
         utility::skill::KickGenerator<double> kick_generator{};
+
+        /// @brief Balancer
+        utility::motion::Balancer feedback_balancer{};
+        bool feedback_active = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the SplineKick reactor.
