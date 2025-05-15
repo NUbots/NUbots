@@ -86,7 +86,7 @@ namespace module::vision {
                     break;
                 case utility::vision::fourcc("RGBA"):
                     img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
-                    // OpenCV expects BGRA images, so the following is actually converting to RGB...
+                    // OpenCV expects BGR images
                     cv::cvtColor(img_cv, img_cv, cv::COLOR_RGBA2BGR);
                     break;
                 default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
@@ -108,9 +108,9 @@ namespace module::vision {
             cv::split(normalized_img, channels);
 
             // Normalize each channel
-            channels[2] = (channels[2] - 0.485) / 0.229;  // R channel
-            channels[1] = (channels[1] - 0.456) / 0.224;  // G channel
             channels[0] = (channels[0] - 0.406) / 0.225;  // B channel
+            channels[1] = (channels[1] - 0.456) / 0.224;  // G channel
+            channels[2] = (channels[2] - 0.485) / 0.229;  // R channel
 
             cv::merge(channels, normalized_img);
 
@@ -119,7 +119,7 @@ namespace module::vision {
                                                   1.0,  // scale factor
                                                   cv::Size(IMAGE_SIZE, IMAGE_SIZE),
                                                   cv::Scalar(),
-                                                  true);
+                                                  true);  // Swap to RGB
 
             // -------- Feed the blob into the input node of the Model -------
             // Get input port for model with one input
