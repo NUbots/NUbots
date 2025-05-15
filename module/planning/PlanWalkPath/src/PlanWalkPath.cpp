@@ -29,11 +29,11 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/vision/Goal.hpp"
 
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
@@ -45,6 +45,8 @@ namespace module::planning {
 
     using extension::Configuration;
 
+    using message::localisation::Field;
+    using message::support::FieldDescription;
     using message::input::Sensors;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
@@ -102,37 +104,61 @@ namespace module::planning {
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        on<Provide<WalkTo>,
+           Optional<With<Robots>>,
+           With<Sensors>,
+           With<Field>,
+           With<FieldDescription>>()
+            .then([this](const WalkTo& walk_to,
+                         const std::shared_ptr<const Robots>& robots,
+                         const Sensors& sensors,
+                         const Field& field,
+                         const FieldDescription& field_Desc
+                         ) {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
                 const double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
-                // Calculate the angle between the robot and the final desired heading
+                // Calculate the angle between the robot (where it is facing) and the final desired heading
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
 
-                // If there are robots, check if there are obstacles in the way
+                std::vector<Eigen::Vector2d> all_obstacles{};
+
+                // New list to store goalpost positions
+                std::vector<Eigen::Vector3d> list_goalposts {};
+                list_goalposts.emplace_back(Eigen::Vector3d(field_Desc.goalpost_own_l.x(),field_Desc.goalpost_own_l.y() , 0));
+                list_goalposts.emplace_back(Eigen::Vector3d(field_Desc.goalpost_own_r.x(),field_Desc.goalpost_own_r.y() , 0));
+                list_goalposts.emplace_back(Eigen::Vector3d(field_Desc.goalpost_opp_l.x(),field_Desc.goalpost_opp_l.y() , 0));
+                list_goalposts.emplace_back(Eigen::Vector3d(field_Desc.goalpost_opp_r.x(),field_Desc.goalpost_opp_r.y() , 0));
+
+                Eigen::Isometry3d Hwf = field.Hfw.inverse();
+                Eigen::Isometry3d Hrw = sensors.Hrw;
+
+                all_obstacles = add_goalpost_as_obstacles(all_obstacles, list_goalposts, Hwf, Hrw);
+
+                // If there are goals in sight, or other robots
                 if (robots != nullptr) {
-                    // Get the positions of all robots in the world
-                    std::vector<Eigen::Vector2d> all_obstacles{};
-                    for (const auto& robot : robots->robots) {
-                        all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
+
+                    // If there are robots, check if there are obstacles in the way
+                    if (robots != nullptr) {
+                        // Get the positions of all robots in the world
+                        for (const auto& robot : robots->robots) {
+                            all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
+                        }
                     }
                     // Sort obstacles based on distance from the robot
                     std::sort(all_obstacles.begin(),
                               all_obstacles.end(),
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
-
                     // Get the obstacles in the way of the current path
                     const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
-
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
                         // Adjust the target direction to avoid obstacles
                         rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
 
-                        // Override the heading when walking around obstacles
+                        //  Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
@@ -224,6 +250,19 @@ namespace module::planning {
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
         });
+    }
+
+    std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, std::vector<Eigen::Vector3d> list_goalposts ,Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw){
+
+        // Loop through this list, converting all of the goalpost position from field space to robot space, then add them back in all_obstacles list
+        for(const auto& goalpost_pos : list_goalposts){
+            auto rFWw = Hwf * goalpost_pos;        // Convert goalpost position from field space to world space
+            auto rFRr = Hrw * rFWw;                        // Convert that to robot space
+
+            all_obstacles.emplace_back(rFRr.head(2));
+        }
+
+        return all_obstacles;
     }
 
     double PlanWalkPath::strafe_to_target(const double error) {
