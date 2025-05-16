@@ -74,10 +74,14 @@ namespace module::localisation {
             cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
+            cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
 
-        on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then(
-            [this](const VisionRobots& vision_robots, const GreenHorizon& horizon) {
+        on<Trigger<VisionRobots>, With<GreenHorizon>, With<LocalisationField>, With<FieldDescription>, Single>().then(
+            [this](const VisionRobots& vision_robots,
+                   const GreenHorizon& horizon,
+                   const LocalisationField& lf,
+                   const FieldDescription& fd) {
                 // **Run prediction step**
                 prediction();
 
@@ -94,7 +98,7 @@ namespace module::localisation {
                 data_association(robots_rRWw);
 
                 // **Run maintenance step**
-                maintenance(horizon);
+                maintenance(horizon, lf, fd);
 
                 // **Debugging output**
                 debug_info();
@@ -164,7 +168,9 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::maintenance(const GreenHorizon& horizon) {
+    void RobotLocalisation::maintenance(const GreenHorizon& horizon,
+                                        const LocalisationField& lf,
+                                        const FieldDescription& fd) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
         for (auto& tracked_robot : tracked_robots) {
@@ -191,6 +197,17 @@ namespace module::localisation {
                     return (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
                 })) {
                 log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+                continue;
+            }
+
+            Eigen::Vector3d rRFf =
+                lf.Hfw * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
+
+            if (rRFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
+                || rRFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
+                || rRFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
+                || rRFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+                log<DEBUG>(fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
                 continue;
             }
 

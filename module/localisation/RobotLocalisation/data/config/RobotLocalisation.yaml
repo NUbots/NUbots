@@ -17,3 +17,5 @@ ukf:
 association_distance: 0.4
 
 max_missed_count: 25
+
+max_distance_from_field: 1.0

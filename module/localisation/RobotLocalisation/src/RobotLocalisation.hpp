@@ -32,6 +32,8 @@
 
 #include "RobotModel.hpp"
 
+#include "message/localisation/Field.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/filter/UKF.hpp"
@@ -62,6 +64,9 @@ namespace module::localisation {
 
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
+
+            /// @brief The maximum distance a robot can be outside the field before it is ignored
+            double max_distance_from_field = 0.0;
 
         } cfg;
 
@@ -114,7 +119,11 @@ namespace module::localisation {
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot
         /// @param horizon The green horizon from the vision system, to determine if a robot is in view
-        void maintenance(const message::vision::GreenHorizon& horizon);
+        /// @param lf The field localisation, used to determine location of the tracked robot on field
+        /// @param fd Field description, used to get the length and width of the field
+        void maintenance(const message::vision::GreenHorizon& horizon,
+                         const message::localisation::Field& lf,
+                         const message::support::FieldDescription& fd);
 
         /// @brief Print out the current state of the tracked robots
         void debug_info() const;
