@@ -30,10 +30,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
-#include "message/support/FieldDescription.hpp"
-#include "message/vision/GreenHorizon.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
@@ -46,10 +43,10 @@ namespace module::localisation {
 
     using LocalisationRobot  = message::localisation::Robot;
     using LocalisationRobots = message::localisation::Robots;
-    using LocalisationField  = message::localisation::Field;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
-    using FieldDescription   = message::support::FieldDescription;
+    using message::localisation::Field;
+    using message::support::FieldDescription;
 
     using message::eye::DataPoint;
     using message::vision::GreenHorizon;
@@ -77,11 +74,11 @@ namespace module::localisation {
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
 
-        on<Trigger<VisionRobots>, With<GreenHorizon>, With<LocalisationField>, With<FieldDescription>, Single>().then(
+        on<Trigger<VisionRobots>, With<GreenHorizon>, With<Field>, With<FieldDescription>, Single>().then(
             [this](const VisionRobots& vision_robots,
                    const GreenHorizon& horizon,
-                   const LocalisationField& lf,
-                   const FieldDescription& fd) {
+                   const LocalisationField& field,
+                   const FieldDescription& field_desc) {
                 // **Run prediction step**
                 prediction();
 
@@ -98,7 +95,7 @@ namespace module::localisation {
                 data_association(robots_rRWw);
 
                 // **Run maintenance step**
-                maintenance(horizon, lf, fd);
+                maintenance(horizon, field, field_desc);
 
                 // **Debugging output**
                 debug_info();
@@ -169,8 +166,8 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::maintenance(const GreenHorizon& horizon,
-                                        const LocalisationField& lf,
-                                        const FieldDescription& fd) {
+                                        const LocalisationField& field,
+                                        const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
         for (auto& tracked_robot : tracked_robots) {
@@ -201,12 +198,12 @@ namespace module::localisation {
             }
 
             Eigen::Vector3d rRFf =
-                lf.Hfw * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
+                field.Hfw * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
 
-            if (rRFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
-                || rRFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
-                || rRFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
-                || rRFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+            if (rRFf.x() < (-field_desc.dimensions.field_length / 2) - cfg.max_distance_from_field
+                || rRFf.x() > (field_desc.dimensions.field_length / 2) + cfg.max_distance_from_field
+                || rRFf.y() < (-field_desc.dimensions.field_width / 2) - cfg.max_distance_from_field
+                || rRFf.y() > (field_desc.dimensions.field_width / 2) + cfg.max_distance_from_field) {
                 log<DEBUG>(fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
                 continue;
             }

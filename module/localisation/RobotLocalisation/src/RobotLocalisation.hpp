@@ -119,11 +119,11 @@ namespace module::localisation {
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot
         /// @param horizon The green horizon from the vision system, to determine if a robot is in view
-        /// @param lf The field localisation, used to determine location of the tracked robot on field
-        /// @param fd Field description, used to get the length and width of the field
+        /// @param field The field localisation, used to determine location of the tracked robot on field
+        /// @param field_desc Field description, used to get the length and width of the field
         void maintenance(const message::vision::GreenHorizon& horizon,
-                         const message::localisation::Field& lf,
-                         const message::support::FieldDescription& fd);
+                         const message::localisation::Field& field,
+                         const message::support::FieldDescription& field_desc);
 
         /// @brief Print out the current state of the tracked robots
         void debug_info() const;
