@@ -16,6 +16,8 @@ Incluide this role to track other robots on the field.
 
 - `message::vision::Robots` uses the robot position estimates from vision
 - `message::vision::GreenHorizon` uses the GreenHorizon to manage tracked robots
+- `message::localisation::Field` uses the field transformation matrix Hfw to get the location of the tracked robots in field space
+- `mesage::support::FieldDescription` uses the field dimensions to determine whether the robot is outside the field (plus a given distance outside the field)
 
 ## Emits
 
