@@ -172,7 +172,7 @@ namespace utility::motion {
             Eigen::Vector3f(
                 -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
                 translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
-                -translationPGainZ * total - translationDGainY * dTotal)
+                -translationPGainZ * total - translationDGainZ * dTotal)
                 .cast<float>();
 
         // Apply opposite translation to the foot position
