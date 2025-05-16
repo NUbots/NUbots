@@ -77,7 +77,7 @@ namespace module::localisation {
         on<Trigger<VisionRobots>, With<GreenHorizon>, With<Field>, With<FieldDescription>, Single>().then(
             [this](const VisionRobots& vision_robots,
                    const GreenHorizon& horizon,
-                   const LocalisationField& field,
+                   const Field& field,
                    const FieldDescription& field_desc) {
                 // **Run prediction step**
                 prediction();
@@ -166,7 +166,7 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::maintenance(const GreenHorizon& horizon,
-                                        const LocalisationField& field,
+                                        const Field& field,
                                         const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
