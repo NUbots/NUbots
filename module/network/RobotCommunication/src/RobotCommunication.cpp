@@ -251,8 +251,6 @@ namespace module::network {
                             msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                             msg->current_pose.covariance = field->covariance.cast<float>();
-
-                            msg->current_pose.team = config->team_id;
                         }
                     }
                 }

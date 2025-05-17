@@ -22,7 +22,6 @@ export const FieldObjects: React.FC<FieldObjectProps> = ({
   defaultColor = "magenta",
 }) => {
   const geometry = useMemo(() => new THREE.CylinderGeometry(1, 1, 1, 20), []);
-  const material = useMemo(() => new THREE.MeshStandardMaterial(), []);
 
   return (
     <object3D>
@@ -40,7 +39,7 @@ export const FieldObjects: React.FC<FieldObjectProps> = ({
             scale={[radius, height, radius]}
           >
             <primitive object={geometry} />
-            <primitive object={material} attach="material" color={color} />
+            <meshStandardMaterial color={color} />
           </mesh>
         );
       })}
