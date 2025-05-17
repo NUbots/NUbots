@@ -32,7 +32,6 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -55,6 +54,7 @@ namespace module::localisation {
     using message::input::GameState;
     using message::input::RoboCup;
     using message::localisation::Field;
+    using message::support::FieldDescription;
     using message::vision::GreenHorizon;
 
     using utility::math::geometry::point_in_convex_hull;
@@ -81,11 +81,18 @@ namespace module::localisation {
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
 
-        on<Trigger<RoboCup>, With<GreenHorizon>, With<Field>, Optional<With<GameState>>, Single>().then(
-            [this](const RoboCup& robocup,
-                   const GreenHorizon& horizon,
-                   const Field& field,
-                   const std::shared_ptr<const GameState>& game_state) {
+
+        on<Trigger<RoboCup>,
+           With<GreenHorizon>,
+           With<Field>,
+           With<FieldDescription>,
+           Optional<With<GameState>>,
+           Single>()
+            .then([this](const RoboCup& robocup,
+                         const GreenHorizon& horizon,
+                         const Field& field,
+                         const FieldDescription& field_description,
+                         const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -97,7 +104,7 @@ namespace module::localisation {
                 data_association(robots_rRWw, robocup.current_pose.player_id);
 
                 // **Run maintenance step**
-                maintenance(horizon);
+                maintenance(horizon, field, field_description);
 
                 // **Debugging output**
                 debug_info();
@@ -122,13 +129,21 @@ namespace module::localisation {
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
+
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<VisionRobots>, With<GreenHorizon>, Optional<With<GameState>>, Single>().then(
-            [this](const VisionRobots& vision_robots,
-                   const GreenHorizon& horizon,
-                   const std::shared_ptr<const GameState>& game_state) {
+        on<Trigger<VisionRobots>,
+           With<GreenHorizon>,
+           With<Field>,
+           With<FieldDescription>,
+           Optional<With<GameState>>,
+           Single>()
+            .then([this](const VisionRobots& vision_robots,
+                         const GreenHorizon& horizon,
+                         const Field& field,
+                         const FieldDescription& field_description,
+                         const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -273,6 +288,17 @@ namespace module::localisation {
             // Don't add this robot if it has been missed too many times
             if (tracked_robot.missed_count > cfg.max_missed_count) {
                 log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                continue;
+            }
+
+            // Skip checking count and adding if the robot is too far off the field
+            Eigen::Vector3d rRFf = field.Hfw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+
+            if (rRFf.x() > (field_description.dimensions.field_length + 1.0) / 2
+                || rRFf.x() < -(field_description.dimensions.field_length + 1.0) / 2
+                || rRFf.y() > (field_description.dimensions.field_width + 1.0) / 2
+                || rRFf.y() < -(field_description.dimensions.field_width + 1.0) / 2) {
+                log<DEBUG>("Removing robot due to location (outside field)", tracked_robot.id);
                 continue;
             }
 
