@@ -81,6 +81,9 @@ namespace module::localisation {
             long missed_count = 0;
             /// @brief A unique identifier for the robot
             const unsigned long id;
+            /// @brief The unique identifier of the robot if it is a teammate
+            /// If it is not a teammate, this will be 0
+            unsigned long teammate_id = 0;
 
             /// @brief Constructor that sets the state for the UKF
             TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
@@ -114,7 +117,8 @@ namespace module::localisation {
         /// @brief Associate the given robot measurements with the tracked robots
         /// Creates a new tracked robot if the measurement is not associated with an existing robot
         /// @param robots_rRWw The new robot measurements in world coordinates
-        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw);
+        /// @param teammate_id The unique identifier of the robot if it is a teammate
+        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw, uint teammate_id);
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot
@@ -131,10 +135,6 @@ namespace module::localisation {
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
-
-        /// @brief Tests if this robot measurement is associated with a tracked robot or if it is a new robot
-        /// @param vision_robot The robot detection from the vision system
-        void data_association(const Eigen::Vector3d& rRWw);
     };
 
 }  // namespace module::localisation
