@@ -129,7 +129,6 @@ export class LocalisationNetwork {
         color: localisation_robot.isBlue ? "blue" : "red",
       };
     });
-
   }
 
   @action.bound
