@@ -91,7 +91,7 @@ namespace module::localisation {
             .then([this](const RoboCup& robocup,
                          const GreenHorizon& horizon,
                          const Field& field,
-                         const FieldDescription& field_description,
+                         const FieldDescription& field_desc,
                          const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
@@ -104,7 +104,7 @@ namespace module::localisation {
                 data_association(robots_rRWw, robocup.current_pose.player_id);
 
                 // **Run maintenance step**
-                maintenance(horizon, field, field_description);
+                maintenance(horizon, field, field_desc);
 
                 // **Debugging output**
                 debug_info();
@@ -142,7 +142,7 @@ namespace module::localisation {
             .then([this](const VisionRobots& vision_robots,
                          const GreenHorizon& horizon,
                          const Field& field,
-                         const FieldDescription& field_description,
+                         const FieldDescription& field_desc,
                          const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
