@@ -48,6 +48,8 @@ namespace module::localisation {
     using LocalisationRobots = message::localisation::Robots;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
+    using message::localisation::Field;
+    using message::support::FieldDescription;
 
     using message::eye::DataPoint;
     using message::input::GameState;
@@ -76,6 +78,7 @@ namespace module::localisation {
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.teammate_association_distance   = config["teammate_association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
+            cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
 
         on<Trigger<RoboCup>, With<GreenHorizon>, With<Field>, Optional<With<GameState>>, Single>().then(
@@ -142,7 +145,7 @@ namespace module::localisation {
                 data_association(robots_rRWw, 0);
 
                 // **Run maintenance step**
-                maintenance(horizon);
+                maintenance(horizon, field, field_desc);
 
                 // **Debugging output**
                 debug_info();
@@ -249,7 +252,9 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::maintenance(const GreenHorizon& horizon) {
+    void RobotLocalisation::maintenance(const GreenHorizon& horizon,
+                                        const Field& field,
+                                        const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
         for (auto& tracked_robot : tracked_robots) {
@@ -278,6 +283,18 @@ namespace module::localisation {
                 log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
                 continue;
             }
+
+            Eigen::Vector3d rRFf =
+                field.Hfw * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
+
+            if (rRFf.x() < (-field_desc.dimensions.field_length / 2) - cfg.max_distance_from_field
+                || rRFf.x() > (field_desc.dimensions.field_length / 2) + cfg.max_distance_from_field
+                || rRFf.y() < (-field_desc.dimensions.field_width / 2) - cfg.max_distance_from_field
+                || rRFf.y() > (field_desc.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+                log<DEBUG>(fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
+                continue;
+            }
+
 
             // If removal conditions not met, keep the robot
             new_tracked_robots.push_back(tracked_robot);
