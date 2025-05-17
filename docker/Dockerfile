@@ -41,7 +41,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM --platform=linux/amd64 archlinux:base-devel-20241117.0.280007
+FROM archlinux:base-devel-20250511.0.348143
 
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -126,7 +126,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.5/llvm-project-20.1.5.src.tar.xz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -135,13 +135,13 @@ RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v20.1.2.tar.gz \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
-RUN install-from-source https://github.com/intel/opencl-clang/archive/470cf0018e1ef6fc92eda1356f5f31f7da452abc.tar.gz \
+RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v20.1.0.tar.gz \
     --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
 
 # Intel graphics compiler dependencies
