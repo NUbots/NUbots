@@ -1,0 +1,18 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# Number of segmentation classes
+num_classes: 3
+
+# Path to the model weights
+model_path: "segmentation_model_webots.onnx"
+
+# OpenVino device (CPU, GPU)
+device: CPU
+
+# Field line distance filtering
+filter_by_distance: true
+max_field_line_distance: 5.0 # Maximum distance in meters to consider field line points valid
+
+# Field point clustering parameters
+min_cluster_size: 400  # Minimum number of pixels in a field cluster to be considered valid
