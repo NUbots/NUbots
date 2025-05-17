@@ -7,9 +7,9 @@ foot_waypoints:
   - [0, 0.19, 0, 0]
   - [0, 0.19, 0, 0.25]
   - [0, 0.19, 0.0, 0.4]
-  - [-0.05, 0.19, 0.07, 0.6]
-  - [0.085, 0.19, 0.07, 0.8]
-  - [-0.03, 0.19, 0.05, 1.0]
+  - [-0.10, 0.19, 0.09, 0.6]
+  - [0.115, 0.19, 0.09, 0.8]
+  - [-0.03, 0.19, 0.07, 1.0]
   - [-0.02, 0.2, 0.01, 1.25]
   - [0.0, 0.21, 0, 1.5]
 
@@ -18,8 +18,8 @@ foot_waypoints:
 torso_waypoints:
   - [0.0, 0.09, 0.46, 0]
   - [0.0, 0.09, 0.44, 0.25]
-  - [0.0, 0.015, 0.44, 0.5]
-  - [0.0, 0.015, 0.44, 0.75]
+  - [0.0, 0.020, 0.44, 0.5]
+  - [0.0, 0.020, 0.44, 0.75]
   - [0.0, 0.05, 0.44, 1.0]
   - [0.0, 0.1, 0.46, 1.5]
 
@@ -37,3 +37,23 @@ arms:
   left_shoulder_roll: 0.35
   right_elbow: -0.7
   left_elbow: -0.7
+
+# Balance parameters
+active_balance:
+  enabled: true
+  angle_gain: # Angle gain for the balance controller
+    p: 0.004 # proportional gain: Scale of the correction
+    i: 0.00 # integral gain: Correct for systematic error
+    d: 0.01 # derivative gain: Helps prevent overshoot.
+  hip_rotation_scale: 0.5 # Percentage of balance correction applied to hips
+  ankle_rotation_scale: 0.5 # Percentage of balance correction applied to ankles
+  translation_gain:
+    X:
+      p: 0.016 # proportional gain forward/backward: How strong to correct for forward/backward tilt (by shifting foot position?)
+      d: 0.01 # derivative gain: Helps prevent overshoot.
+    Y:
+      p: 0.003 # proportional gain left/right: How strong to correct for left/right tilt (by shifting foot position?)
+      d: 0.01 # derivative gain: Helps prevent overshoot.
+    Z:
+      p: 0.0001 # proportional gain up/down: How strong to correct for up/down tilt (by shifting foot position?)
+      d: 0.01 # derivative gain: Helps prevent overshoot.
