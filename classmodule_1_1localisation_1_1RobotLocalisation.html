@@ -214,15 +214,12 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#af046bea223f24f0d09055cc54bfd6d77">RobotLocalisation</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:af046bea223f24f0d09055cc54bfd6d77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a> reactor. <br /></td></tr>
 <tr class="separator:af046bea223f24f0d09055cc54bfd6d77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4851e95a87c7372db55791c797858f37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4851e95a87c7372db55791c797858f37">data_association</a> (const Eigen::Vector3d &amp;rRWw)</td></tr>
-<tr class="memdesc:a4851e95a87c7372db55791c797858f37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tests if this robot measurement is associated with a tracked robot or if it is a new robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4851e95a87c7372db55791c797858f37">More...</a><br /></td></tr>
-<tr class="separator:a4851e95a87c7372db55791c797858f37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:aafd4cc6a588d20ceb0849dfcb37bceee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aafd4cc6a588d20ceb0849dfcb37bceee">data_association</a> (const std::vector&lt; Eigen::Vector3d &gt; &amp;robots_rRWw)</td></tr>
-<tr class="memdesc:aafd4cc6a588d20ceb0849dfcb37bceee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the given robot measurements with the tracked robots Creates a new tracked robot if the measurement is not associated with an existing robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#aafd4cc6a588d20ceb0849dfcb37bceee">More...</a><br /></td></tr>
-<tr class="separator:aafd4cc6a588d20ceb0849dfcb37bceee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a2547b3b3cda56dafce9242d006261f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a7a2547b3b3cda56dafce9242d006261f">data_association</a> (const std::vector&lt; Eigen::Vector3d &gt; &amp;robots_rRWw, uint teammate_id)</td></tr>
+<tr class="memdesc:a7a2547b3b3cda56dafce9242d006261f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the given robot measurements with the tracked robots Creates a new tracked robot if the measurement is not associated with an existing robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a7a2547b3b3cda56dafce9242d006261f">More...</a><br /></td></tr>
+<tr class="separator:a7a2547b3b3cda56dafce9242d006261f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a071bc744ede53369f339230f8b68130e"><td class="memItemLeft" align="right" valign="top"><a id="a071bc744ede53369f339230f8b68130e"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a071bc744ede53369f339230f8b68130e">debug_info</a> () const</td></tr>
 <tr class="memdesc:a071bc744ede53369f339230f8b68130e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print out the current state of the tracked robots. <br /></td></tr>
@@ -250,34 +247,8 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 <tr class="separator:ad38e2ef06617a1ec28699f7131ec589e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a4851e95a87c7372db55791c797858f37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4851e95a87c7372db55791c797858f37">&#9670;&nbsp;</a></span>data_association() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void module::localisation::RobotLocalisation::data_association </td>
-          <td>(</td>
-          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
-          <td class="paramname"><em>rRWw</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Tests if this robot measurement is associated with a tracked robot or if it is a new robot. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">vision_robot</td><td>The robot detection from the vision system </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aafd4cc6a588d20ceb0849dfcb37bceee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aafd4cc6a588d20ceb0849dfcb37bceee">&#9670;&nbsp;</a></span>data_association() <span class="overload">[2/2]</span></h2>
+<a id="a7a2547b3b3cda56dafce9242d006261f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a2547b3b3cda56dafce9242d006261f">&#9670;&nbsp;</a></span>data_association()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -289,8 +260,18 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
           <td class="memname">void module::localisation::RobotLocalisation::data_association </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; Eigen::Vector3d &gt; &amp;&#160;</td>
-          <td class="paramname"><em>robots_rRWw</em></td><td>)</td>
+          <td class="paramname"><em>robots_rRWw</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint&#160;</td>
+          <td class="paramname"><em>teammate_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -304,6 +285,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">robots_rRWw</td><td>The new robot measurements in world coordinates </td></tr>
+    <tr><td class="paramname">teammate_id</td><td>The unique identifier of the robot if it is a teammate </td></tr>
   </table>
   </dd>
 </dl>
@@ -372,7 +354,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li>
-    <li class="footer">Generated on Fri May 16 2025 11:22:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat May 17 2025 06:20:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
