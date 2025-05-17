@@ -47,8 +47,6 @@ namespace module::localisation {
     using LocalisationRobots = message::localisation::Robots;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
-    using message::localisation::Field;
-    using message::support::FieldDescription;
 
     using message::eye::DataPoint;
     using message::input::GameState;
@@ -227,14 +225,12 @@ namespace module::localisation {
                     tracked_robots.back().teammate_id = teammate_id;
                     continue;
                 }
-                else {
-                    // If the robot is in the list, update it with the new position
-                    teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                              cfg.ukf.noise.measurement.position,
-                                              MeasurementType::ROBOT_POSITION());
-                    teammate_itr->seen = true;
-                    continue;
-                }
+                // If the robot is in the list, update it with the new position
+                teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
+                                          cfg.ukf.noise.measurement.position,
+                                          MeasurementType::ROBOT_POSITION());
+                teammate_itr->seen = true;
+                continue;
             }
 
             // Get the closest robot we have to the given vision measurement
@@ -258,7 +254,7 @@ namespace module::localisation {
                 continue;
             }
 
-            // Update matched robot with the vision measurement
+            // Otherwise update matched robot with the vision measurement
             closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                            cfg.ukf.noise.measurement.position,
                                            MeasurementType::ROBOT_POSITION());
@@ -290,17 +286,6 @@ namespace module::localisation {
                 continue;
             }
 
-            // Skip checking count and adding if the robot is too far off the field
-            Eigen::Vector3d rRFf = field.Hfw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
-
-            if (rRFf.x() > (field_description.dimensions.field_length + 1.0) / 2
-                || rRFf.x() < -(field_description.dimensions.field_length + 1.0) / 2
-                || rRFf.y() > (field_description.dimensions.field_width + 1.0) / 2
-                || rRFf.y() < -(field_description.dimensions.field_width + 1.0) / 2) {
-                log<DEBUG>("Removing robot due to location (outside field)", tracked_robot.id);
-                continue;
-            }
-
             // Check if this robot is too close to any kept robot
             if (std::any_of(new_tracked_robots.begin(), new_tracked_robots.end(), [&](const auto& other_robot) {
                     return (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
@@ -309,8 +294,7 @@ namespace module::localisation {
                 continue;
             }
 
-            Eigen::Vector3d rRFf =
-                field.Hfw * Eigen::Vector3d(tracked_robot.get_rRWw().x(), tracked_robot.get_rRWw().y(), 0);
+            Eigen::Vector3d rRFf = field.Hfw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
 
             if (rRFf.x() < (-field_desc.dimensions.field_length / 2) - cfg.max_distance_from_field
                 || rRFf.x() > (field_desc.dimensions.field_length / 2) + cfg.max_distance_from_field
@@ -319,7 +303,6 @@ namespace module::localisation {
                 log<DEBUG>(fmt::format("Removing robot {} due to location (outside field)", tracked_robot.id));
                 continue;
             }
-
 
             // If removal conditions not met, keep the robot
             new_tracked_robots.push_back(tracked_robot);
