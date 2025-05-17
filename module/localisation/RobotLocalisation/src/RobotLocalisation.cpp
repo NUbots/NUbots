@@ -76,7 +76,6 @@ namespace module::localisation {
             cfg.ukf.initial_covariance.position = config["ukf"]["initial_covariance"]["position"].as<Expression>();
             cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
             cfg.association_distance            = config["association_distance"].as<double>();
-            cfg.teammate_association_distance   = config["teammate_association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
