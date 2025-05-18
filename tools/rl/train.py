@@ -23,6 +23,11 @@ from mujoco_playground._src.gait import draw_joystick_command
 from mujoco_playground.config import locomotion_params
 from orbax import checkpoint as ocp
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# from common.export_onnx import export_onnx
+from nugus.joystick import Joystick, nugus_env_config
+from nugus.ppo_config import nugus_ppo_config
+
 from utility.dockerise import run_on_docker
 
 # Configure MuJoCo to use the EGL rendering backend (requires GPU)
@@ -91,8 +96,8 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
     """
     # Choose the bipedal environment
     env_name = 'NugusJoystick'
-    env = registry.load(env_name)
-    env_cfg = registry.get_default_config(env_name)
+    env = Joystick()
+    env_cfg = nugus_env_config()
 
     # Save environment configuration if checkpoint path is provided
     if ckpt_path is not None:
@@ -100,7 +105,7 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
             json.dump(env_cfg.to_dict(), fp, indent=4)
 
     # Get PPO config and set episode length from env_cfg
-    ppo_params = locomotion_params.brax_ppo_config(env_name)
+    ppo_params = nugus_ppo_config() # TODO: Figure out how to get the PPO config locally
     ppo_params.episode_length = env_cfg.episode_length
 
     # If in play_only mode, set num_timesteps to 0 to skip training
@@ -126,7 +131,14 @@ def train_bipedal_joystick_policy(ckpt_path=None, play_only=False, load_checkpoi
             path = ckpt_path / f"{current_step}"
             orbax_checkpointer.save(path, params, force=True, save_args=save_args)
             print(f"Saved checkpoint at step {current_step} to {path}")
-
+            # onnx_path = ckpt_path / f"{current_step}.onnx"
+            # export_onnx(
+            #     params,
+            #     env.action_size,
+            #     ppo_params,
+            #     env.obs_size,  # may not work
+            #     output_path=onnx_path
+            # )
     # Use monotonic time for more accurate timing
     times = [time.monotonic()]
 
