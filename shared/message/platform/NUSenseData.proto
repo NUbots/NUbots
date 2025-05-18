@@ -91,6 +91,19 @@ message IMU {
     uint32 temperature = 3;
 }
 
+message BackPanel {
+
+    // For now, I am only including the two buttons since I see no current need to poll the state of the LEDs, and I
+    // want to conserve as much bandwidth as possible. If such a need arises, then one can add it under the BackPanel
+    // message.
+    message Buttons {
+        bool left   = 1;
+        bool middle = 2;
+    }
+
+    Buttons  buttons   = 4;
+}
+
 message NUSense {
     /* INDEX MAPPING
      *  0  : r_shoulder_pitch
@@ -114,6 +127,7 @@ message NUSense {
      *  18 : head_yaw
      *  19 : head_pitch
      */
-    map<uint32, Servo> servo_map = 1;
-    IMU                imu       = 2;
+    map<uint32, Servo> servo_map  = 1;
+    IMU                imu        = 2;
+    BackPanel          back_panel = 3;
 }

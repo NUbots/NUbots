@@ -105,7 +105,8 @@ namespace module::platform::NUSense {
             sensors->led_panel           = 0;  // TODO (NUSense people) not yet implemented
             sensors->head_led            = 0;  // TODO (NUSense people) not yet implemented
             sensors->eye_led             = 0;  // TODO (NUSense people) not yet implemented
-            sensors->buttons             = 0;  // TODO (NUSense people) not yet implemented
+            sensors->buttons.left        = data.back_panel.button.left;
+            sensors->buttons.middle      = data.back_panel.button.middle;
 
             // Set IMU
             sensors->accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
