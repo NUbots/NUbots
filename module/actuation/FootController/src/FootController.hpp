@@ -113,6 +113,10 @@ namespace module::actuation {
             double roll_d_gain = 0.0;
             /// @brief Derivative gain for torso orientation pitch correction
             double pitch_d_gain = 0.0;
+            /// @brief offsets for support foot when kicking
+            double support_foot_offset_x = 0.0;
+            double support_foot_offset_y = 0.0;
+            double support_foot_offset_z = 0.0;
         } cfg;
 
         // *************** //
@@ -147,6 +151,8 @@ namespace module::actuation {
                 double fused_roll;
                 double fused_pitch;
                 FusedFromQuat(Hwt_quat, fused_pitch, fused_roll);
+                fused_pitch += cfg.support_foot_offset_x;
+                fused_roll += cfg.support_foot_offset_y;
                 emit(graph("fused_roll", fused_roll));
                 emit(graph("fused_pitch", fused_pitch));
 
@@ -186,7 +192,7 @@ namespace module::actuation {
                 desired_pitch += cfg.pitch_i_gain * integral_pitch_error;
 
                 // D control
-
+                // NOTE: Can get the values from the gyroscope
                 auto roll_error_rate  = (roll_error - prev_roll_error) / dt;
                 auto pitch_error_rate = (pitch_error - prev_pitch_error) / dt;
                 prev_roll_error       = roll_error;

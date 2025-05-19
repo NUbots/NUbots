@@ -31,3 +31,7 @@ pitch_i_gain: 0.1
 max_i_error: 0.1
 roll_d_gain: 0.1
 pitch_d_gain: 0.1
+support_foot_offset:
+  x: -0.55
+  y: 0
+  z: 0
