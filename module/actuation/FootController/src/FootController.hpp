@@ -193,13 +193,22 @@ namespace module::actuation {
 
                 // D control
                 // NOTE: Can get the values from the gyroscope
-                auto roll_error_rate  = (roll_error - prev_roll_error) / dt;
-                auto pitch_error_rate = (pitch_error - prev_pitch_error) / dt;
-                prev_roll_error       = roll_error;
-                prev_pitch_error      = pitch_error;
+                // *****Original implementation****
+                // auto roll_error_rate  = (roll_error - prev_roll_error) / dt;
+                // auto pitch_error_rate = (pitch_error - prev_pitch_error) / dt;
+                // prev_roll_error       = roll_error;
+                // prev_pitch_error      = pitch_error;
 
-                desired_roll += cfg.roll_d_gain * roll_error_rate;
-                desired_pitch += cfg.pitch_d_gain * pitch_error_rate;
+                // desired_roll += cfg.roll_d_gain * roll_error_rate;
+                // desired_pitch += cfg.pitch_d_gain * pitch_error_rate;
+                // ********************************
+
+                // *****Using gyroscope values*****
+                auto roll_rate  = sensors.gyroscope.x();
+                auto pitch_rate = sensors.gyroscope.y();
+                desired_roll -= cfg.roll_d_gain * roll_rate;
+                desired_pitch -= cfg.pitch_d_gain * pitch_rate;
+                // ********************************
 
                 double desired_yaw = mat_to_rpy_intrinsic(Hft_quat.toRotationMatrix()).z();
                 emit(graph("corrected roll", desired_roll));
