@@ -50,17 +50,14 @@ namespace module::actuation {
                 cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
             }
 
-            cfg.correction_enabled    = config["correction_enabled"].as<bool>();
-            cfg.roll_p_gain           = config["roll_p_gain"].as<double>();
-            cfg.pitch_p_gain          = config["pitch_p_gain"].as<double>();
-            cfg.roll_i_gain           = config["roll_i_gain"].as<double>();
-            cfg.pitch_i_gain          = config["pitch_i_gain"].as<double>();
-            cfg.max_i_error           = config["max_i_error"].as<double>();
-            cfg.roll_d_gain           = config["roll_d_gain"].as<double>();
-            cfg.pitch_d_gain          = config["pitch_d_gain"].as<double>();
-            cfg.support_foot_offset_x = config["support_foot_offset"]["x"].as<double>();
-            cfg.support_foot_offset_y = config["support_foot_offset"]["y"].as<double>();
-            cfg.support_foot_offset_z = config["support_foot_offset"]["z"].as<double>();
+            cfg.correction_enabled = config["correction_enabled"].as<bool>();
+            cfg.roll_p_gain        = config["roll_p_gain"].as<double>();
+            cfg.pitch_p_gain       = config["pitch_p_gain"].as<double>();
+            cfg.roll_i_gain        = config["roll_i_gain"].as<double>();
+            cfg.pitch_i_gain       = config["pitch_i_gain"].as<double>();
+            cfg.max_i_error        = config["max_i_error"].as<double>();
+            cfg.roll_d_gain        = config["roll_d_gain"].as<double>();
+            cfg.pitch_d_gain       = config["pitch_d_gain"].as<double>();
 
             // Emit request to set desired gains after a delay
             emit<Scope::DELAY>(std::make_unique<SetGains>(),
