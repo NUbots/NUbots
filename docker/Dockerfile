@@ -126,7 +126,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.5/llvm-project-20.1.5.src.tar.xz \
+RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.0/llvm-project-20.1.0.src.tar.xz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -135,14 +135,14 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v20.1.2.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v20.1.0.tar.gz \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
 RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v20.1.0.tar.gz \
-    --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
+    --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/30062e0c4c4ae71f8f0e23a0375933d71dd1bc5c/resource_linker_skip_cross.patch
 
 # Intel graphics compiler dependencies
 RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
