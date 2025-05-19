@@ -27,16 +27,14 @@ syntax = "proto3";
 
 package message.strategy;
 
-import "Vector.proto";
-
-message TeamMate {
-    /// ID of the robot
-    uint32 id = 1;
-
-    /// Vector from field to the position of this robot
-    vec3 rRFf = 2;
-}
-
-message TeamMates {
-    repeated TeamMate teammates = 1;
+/// Who are we talking about?
+enum Who {
+    /// No one
+    NONE = 0;
+    /// Ourself
+    SELF = 1;
+    /// A teammate
+    TEAMMATE = 2;
+    /// An opponent
+    OPPONENT = 3;
 }
