@@ -139,8 +139,14 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = kick_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
+                // emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
+                // emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
+
+                // Boolean to determine which foot will have balance applied
+                bool left_foot_is_planted = kick_generator.is_left_foot_planted();
+
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, left_foot_is_planted, false));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !left_foot_is_planted, false));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
