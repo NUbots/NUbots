@@ -24,13 +24,17 @@ servo_gains:
 
 correction_enabled: true
 
-roll_p_gain: 0.6
+roll_p_gain: 0.7
 pitch_p_gain: 0.4
 
-roll_i_gain: 0.2
-pitch_i_gain: 0.15
+roll_i_gain: 0.25
+pitch_i_gain: 0.10
 
-roll_d_gain: 0.003
-pitch_d_gain: 0.003
+roll_d_gain: 0.002
+pitch_d_gain: 0.002
 
 max_i_error: 0.08
+support_foot_offset:
+  x: -0.55
+  y: 0
+  z: 0
