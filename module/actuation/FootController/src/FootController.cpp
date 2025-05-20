@@ -61,6 +61,7 @@ namespace module::actuation {
             cfg.support_foot_offset_x = config["support_foot_offset"]["x"].as<double>();
             cfg.support_foot_offset_y = config["support_foot_offset"]["y"].as<double>();
             cfg.support_foot_offset_z = config["support_foot_offset"]["z"].as<double>();
+            cfg.hip_correction_ratio  = config["hip_correction_ratio"].as<double>();
 
             // Emit request to set desired gains after a delay
             emit<Scope::DELAY>(std::make_unique<SetGains>(),

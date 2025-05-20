@@ -117,6 +117,8 @@ namespace module::actuation {
             double support_foot_offset_x = 0.0;
             double support_foot_offset_y = 0.0;
             double support_foot_offset_z = 0.0;
+            /// @brief Ratio of the hip correction
+            double hip_correction_ratio = 0.0;
         } cfg;
 
         // *************** //
@@ -151,8 +153,13 @@ namespace module::actuation {
                 double fused_roll;
                 double fused_pitch;
                 FusedFromQuat(Hwt_quat, fused_pitch, fused_roll);
+                // Add offset from the config.
+                // NOTE: This is a hack to counter a backwards tilt
+                // that i don't know where it comes from.
+                // TODO: Test if this occurs with the balancer disabled
                 fused_pitch += cfg.support_foot_offset_x;
                 fused_roll += cfg.support_foot_offset_y;
+
                 emit(graph("fused_roll", fused_roll));
                 emit(graph("fused_pitch", fused_pitch));
 
@@ -210,16 +217,35 @@ namespace module::actuation {
                 desired_pitch -= cfg.pitch_d_gain * pitch_rate;
                 // ********************************
 
+                // TEST/HACK: Hip ratio correction. Note that this will effect all leg tasks, so isn't permanent.
+                double ankle_roll  = desired_roll * (1.0 - cfg.hip_correction_ratio);
+                double ankle_pitch = desired_pitch * (1.0 - cfg.hip_correction_ratio);
+                double hip_roll    = desired_roll * cfg.hip_correction_ratio;
+                double hip_pitch   = desired_pitch * cfg.hip_correction_ratio;
+
                 double desired_yaw = mat_to_rpy_intrinsic(Hft_quat.toRotationMatrix()).z();
                 emit(graph("corrected roll", desired_roll));
                 emit(graph("corrected pitch", desired_pitch));
 
                 // Compute desired orientation: yaw * fused_roll_pitch
                 Eigen::Matrix3d desired_Rft = Eigen::AngleAxisd(desired_yaw, Eigen::Vector3d::UnitZ())
-                                              * QuatFromFused(desired_pitch, desired_roll).toRotationMatrix();
+                                              * QuatFromFused(ankle_pitch, ankle_roll).toRotationMatrix();
+
                 Eigen::Isometry3d Htf_corrected = foot_control_task.Htf;
                 Htf_corrected.linear()          = desired_Rft.transpose();
-                ik_task->Htf                    = Htf_corrected;
+
+                // Apply hip portion by shifting the foot position slightly
+                // Scale factors convert angles to positional offset (needs tuning)
+                double hip_pitch_scale = 0.03;  // ~3cm per radian of correction
+                double hip_roll_scale  = 0.03;  // ~3cm per radian of correction
+
+                // For pitch correction: shift X position
+                Htf_corrected.translation().x() += hip_pitch * hip_pitch_scale;
+
+                // For roll correction: shift Y position
+                Htf_corrected.translation().y() += hip_roll * hip_roll_scale;
+
+                ik_task->Htf = Htf_corrected;
             }
             else {
                 ik_task->Htf = foot_control_task.Htf;
