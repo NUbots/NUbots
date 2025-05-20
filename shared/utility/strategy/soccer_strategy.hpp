@@ -156,6 +156,37 @@ namespace utility::strategy {
         // Return true if the closest robot is us
         return closest_robot.first == Who{Who::SELF};
     }
+
+    /**
+     * @brief Determines if we are the furthest back robot on our team
+     *
+     * @param robots localisation of every known robot in the game
+     * @param Hfw transformation of world to field coordinates
+     * @param Hrw transformation of world to robot coordinates
+     *
+     * @return true if we are the furthest back robot on our team, false otherwise
+     */
+    bool furthest_back(const Robots& robots, const Eigen::Isometry3d& Hfw, const Eigen::Isometry3d& Hrw) {
+        // Put ourselves and teammates in a pair with their distance to the goal line
+        std::vector<std::pair<Who, double>> players{};
+        for (const auto& robot : robots.robots) {
+            if (robot.teammate_id != 0) {
+                players.push_back({Who{robot.teammate_id}, std::abs(rRFf.y())});
+            }
+        }
+
+        // Transform our position to field coordinates
+        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
+        players.push_back({Who{Who::SELF}, std::abs(rRFf.y())});
+
+        // Sort the robots by y distance to our goal line
+        auto furthest_robot = std::max_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
+            return a.second < b.second;
+        });
+
+        // Return true if the furthest robot is us
+        return furthest_robot.first == Who{Who::SELF};
+    }
 }  // namespace utility::strategy
 
 #endif  // UTILITY_STRATEGY_SOCCER_STRATEGY_HPP
