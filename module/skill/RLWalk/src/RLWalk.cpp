@@ -109,8 +109,11 @@ namespace module::skill {
                     log<INFO>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
                     idx += GYRO_SIZE;
 
-                    // Gravity/Accelerometer data (3)
-                    observation.segment<GRAVITY_SIZE>(idx) = sensors.accelerometer;
+                    // Gravity/Accelerometer data in world frame (3)
+                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
+                    log<INFO>("Gravity: ", gravity.transpose());
+                    log<INFO>("Gravity magnitude: ", gravity.norm());
+                    observation.segment<GRAVITY_SIZE>(idx) = gravity;
                     log<INFO>("Accelerometer: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
                     idx += GRAVITY_SIZE;
 
@@ -166,7 +169,7 @@ namespace module::skill {
                     for (int i = 0; i < cfg.num_joints; ++i) {
                         auto servo      = std::make_unique<ServoCommand>();
                         servo->time     = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-                        servo->position = default_pose[i];
+                        servo->position = default_pose[i];       // + joint_angles[i];
                         servo->state    = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }

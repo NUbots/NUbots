@@ -38,14 +38,11 @@ xla_flags = os.environ.get('XLA_FLAGS', '')
 xla_flags += ' --xla_gpu_triton_gemm_any=True'
 os.environ['XLA_FLAGS'] = xla_flags
 
-
-@run_on_docker
 def register(command):
     command.description = "Train a RL joystick policy for NUgus"
     command.add_argument("--play_only", action="store_true", help="Only run inference with a trained model without training")
     command.add_argument("--load_checkpoint_path", type=str, help="Path to checkpoint to load for inference or continued training")
 
-@run_on_docker
 def run(**kwargs):
     """
     Trains a joystick policy for a bipedal robot using MuJoCo Playground and Brax PPO.

@@ -14,15 +14,13 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from nugus.joystick import Joystick, nugus_env_config
 from nugus.ppo_config import nugus_ppo_config
 from common.export_onnx import export_onnx
-from utility.dockerise import run_on_docker
 
-@run_on_docker
 def register(command):
     command.description = "Export a trained RL model to ONNX format"
     command.add_argument("--checkpoint_path", type=str, required=True, help="Path to the checkpoint directory")
     command.add_argument("--output_path", type=str, default="model.onnx", help="Path to save the ONNX model")
 
-@run_on_docker
+
 def run(**kwargs):
     """
     Exports a trained RL model to ONNX format.

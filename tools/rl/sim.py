@@ -18,7 +18,6 @@ from test_onnx import OnnxInfer
 
 def register(command):
     command.description = "Run a simulation of the Nugus robot with joystick control and ONNX policy"
-    command.add_argument("--duration", type=float, default=5.0, help="Simulation duration in seconds")
     command.add_argument("--xml_path", type=str, default="nugus/xmls/scene.xml", help="Path to the XML model file")
     command.add_argument("--onnx_model_path", type=str, required=True, help="Path to the ONNX model file")
 
@@ -31,37 +30,24 @@ def get_observation(data, command, last_action):
     gyro_dim = data.model.sensor_dim[gyro_id]
     gyro = data.sensordata[gyro_adr:gyro_adr + gyro_dim]
 
-    # Get accelerometer
-    accelerometer_id = data.model.sensor("accelerometer").id
-    accelerometer_adr = data.model.sensor_adr[accelerometer_id]
-    accelerometer_dim = data.model.sensor_dim[accelerometer_id]
-    accelerometer = data.sensordata[accelerometer_adr:accelerometer_adr + accelerometer_dim]
+    # Get gravity
+    gravity_id = data.model.sensor("upvector").id
+    gravity_adr = data.model.sensor_adr[gravity_id]
+    gravity_dim = data.model.sensor_dim[gravity_id]
+    gravity = data.sensordata[gravity_adr:gravity_adr + gravity_dim]
 
     # Get joint positions relative to default pose
     default_pose = data.model.keyframe("stand_bent_knees").qpos[7:]
     joint_positions = data.qpos[7:] - default_pose
 
-    # Print dimensions for debugging
-    print(f"Gyro dim: {gyro_dim}, Accelerometer dim: {accelerometer_dim}, Joint positions dim: {len(joint_positions)}, Last action dim: {len(last_action)}")
-
     # Combine into observation
     obs = np.concatenate([
         gyro,           # 3
-        accelerometer,  # 3
+        gravity,        # 3
         command,        # 3
         joint_positions, # 20
         last_action,    # 20
     ])
-
-    # Ensure we have exactly 49 dimensions
-    if len(obs) != 49:
-        print(f"Warning: Observation has {len(obs)} dimensions, expected 49")
-        # If we have too many dimensions, truncate
-        if len(obs) > 49:
-            obs = obs[:49]
-        # If we have too few dimensions, pad with zeros
-        elif len(obs) < 49:
-            obs = np.pad(obs, (0, 49 - len(obs)))
 
     return obs.astype(np.float32)
 
@@ -70,7 +56,6 @@ def run(**kwargs):
     """
     Runs a simulation of the Nugus robot with joystick control and ONNX policy.
     """
-    duration = kwargs.get("duration", 5.0)
     xml_path = kwargs.get("xml_path", "nugus/xmls/scene.xml")
     onnx_model_path = kwargs.get("onnx_model_path")
 
@@ -96,59 +81,96 @@ def run(**kwargs):
 
     # Initialize control variables
     last_action = np.zeros(model.nu)
-    command = np.array([0.5, 0.0, 0.0])  # Initial command: move forward
+    command = np.array([0.0, 0.0, 0.0])  # [lin_vel_x, lin_vel_y, ang_vel_yaw]
     default_pose = model.keyframe("stand_bent_knees").qpos[7:]
     lowers = model.actuator_ctrlrange[:, 0]
     uppers = model.actuator_ctrlrange[:, 1]
 
-    print(f"Starting simulation for {duration} seconds...")
+    # Set timesteps to match joystick environment
+    ctrl_dt = 0.02  # Control timestep
+    sim_dt = 0.002  # Simulation timestep
+    model.opt.timestep = sim_dt  # Set simulation timestep
+    n_substeps = int(ctrl_dt / sim_dt)  # Number of simulation steps per control step
+
+    # Velocity control parameters
+    max_lin_vel = 1.5  # Maximum linear velocity
+    max_ang_vel = 0.6  # Maximum angular velocity
+    vel_step = 0.1     # Velocity change per keypress
+    action_scale = 1.0  # Match the config in joystick.py
+
+    print(f"Starting simulation...")
     print(f"Using model from: {model_path}")
+    print(f"Control timestep: {ctrl_dt}s, Simulation timestep: {sim_dt}s")
+    print("Controls:")
+    print("  Arrow keys: Control linear velocity (forward/backward/left/right)")
+    print("  A/D: Control angular velocity (turn left/right)")
+    print("  ESC or close window to stop")
+
+    def key_callback(keycode):
+        nonlocal command
+        print(f"Keycode: {keycode}")
+        if keycode == 265:  # Up arrow
+            command[0] = min(command[0] + vel_step, max_lin_vel)
+        elif keycode == 264:  # Down arrow
+            command[0] = max(command[0] - vel_step, -max_lin_vel)
+        elif keycode == 263:  # Left arrow
+            command[1] = min(command[1] + vel_step, max_lin_vel)
+        elif keycode == 262:  # Right arrow
+            command[1] = max(command[1] - vel_step, -max_lin_vel)
+        elif keycode == 65:  # 'A' key
+            command[2] = min(command[2] + vel_step, max_ang_vel)
+        elif keycode == 68:  # 'D' key
+            command[2] = max(command[2] - vel_step, -max_ang_vel)
+        elif keycode == 342:  # 'r' key
+            # reset command
+            command = np.array([0.0, 0.0, 0.0])
+        print(f"Command: {command}")
 
     # Launch the viewer
-    with mujoco.viewer.launch_passive(model, data) as viewer:
+    with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
         # Track simulation time
         sim_start = time.time()
+        last_ctrl_time = time.time()
 
-        while viewer.is_running() and data.time < duration:
+        while viewer.is_running():
             step_start = time.time()
 
-            # Get observation from MuJoCo data
-            obs = get_observation(data, command, last_action)
+            # Check if it's time for a control step
+            current_time = time.time()
+            if current_time - last_ctrl_time >= ctrl_dt:
+                # Get observation from MuJoCo data
+                obs = get_observation(data, command, last_action)
 
-            # Get action from policy
-            action = policy.infer(obs)
+                # Get action from policy
+                action = policy.infer(obs)
 
-            # Apply action to control
-            motor_targets = default_pose + action
-            motor_targets = np.clip(motor_targets, lowers, uppers)
-            data.ctrl[:] = motor_targets
+                # Apply action to control (with action scaling)
+                motor_targets = default_pose + action * action_scale
+                motor_targets = np.clip(motor_targets, lowers, uppers)
+                data.ctrl[:] = motor_targets
 
-            # Store last action
-            last_action = action
+                # Store last action
+                last_action = action
+
+                # Update last control time
+                last_ctrl_time = current_time
 
             # Step the simulation
             mujoco.mj_step(model, data)
             viewer.sync()
 
             # Wait until real time catches up with simulation time
-            time_until_next_step = model.opt.timestep - (time.time() - step_start)
+            time_until_next_step = sim_dt - (time.time() - step_start)
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
-
-            # Print current command and state occasionally
-            if int(data.time * 10) % 10 == 0:
-                print(f"Time: {data.time:.2f}s, Command: {command}")
-                print(f"Base position: {data.qpos[:3]}")
-                print(f"Base orientation: {data.qpos[3:7]}")
 
         print(f"Simulation complete. Total time: {time.time() - sim_start:.2f} seconds")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--duration", type=float, default=5.0)
     parser.add_argument("--xml_path", type=str, default="nugus/xmls/scene.xml")
     parser.add_argument("--onnx_model_path", type=str, required=True)
     args = parser.parse_args()
 
-    run(duration=args.duration, xml_path=args.xml_path, onnx_model_path=args.onnx_model_path)
+    run(xml_path=args.xml_path, onnx_model_path=args.onnx_model_path)
