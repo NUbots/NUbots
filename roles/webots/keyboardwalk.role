@@ -22,7 +22,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::SplineKick
+  # skill::SplineKick
   skill::GetUp
   skill::Look
   # Planners

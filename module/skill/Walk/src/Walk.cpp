@@ -35,6 +35,7 @@
 #include "message/eye/DataPoint.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
+#include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/input/FrameID.hpp"
@@ -57,6 +58,7 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
+    using message::skill::Kick;
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
@@ -89,6 +91,17 @@ namespace module::skill {
             walk_generator.set_parameters(cfg.walk_generator_parameters);
             cfg.walk_generator_parameters.only_switch_when_planted =
                 config["walk"]["only_switch_when_planted"].as<bool>();
+
+            // Configure step kick parameters
+            cfg.walk_generator_parameters.step_kick.enabled = config["walk"]["step_kick"]["enabled"].as<bool>();
+            cfg.walk_generator_parameters.step_kick.forward_distance =
+                config["walk"]["step_kick"]["forward_distance"].as<double>();
+            cfg.walk_generator_parameters.step_kick.side_distance =
+                config["walk"]["step_kick"]["side_distance"].as<double>();
+            cfg.walk_generator_parameters.step_kick.extra_height =
+                config["walk"]["step_kick"]["extra_height"].as<double>();
+            cfg.walk_generator_parameters.step_kick.retraction_ratio =
+                config["walk"]["step_kick"]["retraction_ratio"].as<double>();
 
             // Reset the walk engine and last update time
             walk_generator.reset();
@@ -129,6 +142,7 @@ namespace module::skill {
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
+           Optional<With<Kick>>,
            With<Sensors>,
            With<Stability>,
            Needs<LeftLegIK>,
@@ -136,7 +150,48 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
            Priority::HIGH>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
+            .then([this](const WalkTask& walk_task,
+                         const std::shared_ptr<const Kick>& kick,
+                         const Sensors& sensors,
+                         const Stability& stability) {
+                // Check if we received a kick command
+                // log the kick command
+                // log<INFO>("Kick command is null: ", kick != nullptr);
+                if (kick != nullptr) {
+                    // Check if we can execute a step kick based on current state
+                    // Debug output
+                    log<INFO>("Received step kick command: ",
+                              kick->leg,
+                              " ",
+                              kick->direction.x(),
+                              " ",
+                              kick->direction.y());
+                    bool right_kick      = (kick->leg == LimbID::RIGHT_LEG);
+                    bool in_proper_phase = (walk_generator.get_phase() == WalkState::Phase::LEFT && right_kick)
+                                           || (walk_generator.get_phase() == WalkState::Phase::RIGHT && !right_kick);
+
+                    bool early_in_step  = walk_generator.get_time() < 0.1;
+                    bool walking_stable = walk_generator.get_state() == WalkState::State::WALKING;
+
+                    if (in_proper_phase && early_in_step && walking_stable && !walk_generator.is_step_kick_active()) {
+                        // Calculate kick parameters
+                        double kick_power     = std::min(kick->direction.norm(), 1.0);
+                        double kick_direction = std::atan2(kick->direction.y(), kick->direction.x());
+
+                        if (log_level <= INFO) {
+                            log<INFO>("Executing step kick with power: ",
+                                      kick_power,
+                                      ", direction: ",
+                                      kick_direction * 180.0 / M_PI,
+                                      " degrees");
+                        }
+
+                        // Configure walk generator for step kick
+                        walk_generator.set_step_kick_active(true);
+                        walk_generator.configure_step_kick(kick_power, kick_direction, right_kick);
+                    }
+                }
+
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
