@@ -1,8 +1,12 @@
-
 import tensorflow as tf
 from tensorflow.keras import layers
-import tf2onnx
 import numpy as np
+
+# Add compatibility fix for numpy object deprecation
+if not hasattr(np, 'object'):
+    np.object = object
+
+import tf2onnx
 
 def export_onnx(
     params, act_size, ppo_params, obs_size, output_path="ONNX.onnx"
