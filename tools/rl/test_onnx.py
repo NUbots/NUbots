@@ -2,6 +2,7 @@ import onnxruntime
 import numpy as np
 import time
 import argparse
+import json
 from pathlib import Path
 from utility.dockerise import run_on_docker
 
@@ -30,6 +31,7 @@ def register(command):
     command.add_argument("--onnx_model_path", type=str, required=True, help="Path to the ONNX model file")
     command.add_argument("--num_tests", type=int, default=1000, help="Number of test iterations")
     command.add_argument("--obs_size", type=int, default=49, help="Size of observation vector")
+    command.add_argument("--verify_data", action="store_true", help="Verify against example data")
 
 @run_on_docker
 def run(**kwargs):
@@ -39,6 +41,7 @@ def run(**kwargs):
     onnx_model_path = kwargs.get("onnx_model_path")
     num_tests = kwargs.get("num_tests", 1000)
     obs_size = kwargs.get("obs_size", 49)
+    verify_data = kwargs.get("verify_data", False)
 
     # Verify model exists
     model_path = Path(onnx_model_path)
@@ -53,7 +56,40 @@ def run(**kwargs):
     # Initialize ONNX inference
     oi = OnnxInfer(onnx_model_path, awd=True)
 
-    # Run tests
+    # Verify against example data if requested
+    if verify_data:
+        try:
+            with open("recordings/example_data.json", "r") as f:
+                example_data = json.load(f)
+
+            print("\nVerifying against example data:")
+            print("Loading observation:", example_data["observation"])
+            print("Expected action:", example_data["action"])
+
+            # Convert to numpy array and run inference
+            inputs = np.array(example_data["observation"], dtype=np.float32)
+            output = oi.infer(inputs)
+
+            print("Actual action:", output)
+
+            # Calculate error
+            error = np.abs(output - np.array(example_data["action"]))
+            print("Maximum absolute error:", np.max(error))
+            print("Mean absolute error:", np.mean(error))
+
+            if np.max(error) < 1e-5:
+                print("Verification successful! Outputs match within tolerance.")
+            else:
+                print("Warning: Outputs differ from expected values.")
+
+        except FileNotFoundError:
+            print("Error: example_data.json not found. Run RLWalk first to generate example data.")
+            return
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON in example_data.json")
+            return
+
+    # Run tests with random inputs
     times = []
     for i in range(num_tests):
         # Generate random input
@@ -86,8 +122,10 @@ if __name__ == "__main__":
     parser.add_argument("--onnx_model_path", type=str, required=True)
     parser.add_argument("--num_tests", type=int, default=1000)
     parser.add_argument("--obs_size", type=int, default=46)
+    parser.add_argument("--verify_data", action="store_true")
     args = parser.parse_args()
 
     run(onnx_model_path=args.onnx_model_path,
         num_tests=args.num_tests,
-        obs_size=args.obs_size)
+        obs_size=args.obs_size,
+        verify_data=args.verify_data)

@@ -1,5 +1,8 @@
 #include "RLWalk.hpp"
 
+#include <fstream>
+#include <iomanip>
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/Limbs.hpp"
@@ -133,6 +136,28 @@ namespace module::skill {
                     JointVector joint_angles = run_inference(observation);
                     log<INFO>("Joint angles: ", joint_angles.transpose());
 
+                    // Save example data to file
+                    std::ofstream data_file("recordings/example_data.json");
+                    data_file << std::fixed << std::setprecision(6);
+                    data_file << "{\n";
+                    data_file << "  \"observation\": [";
+                    for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
+                        data_file << observation[i];
+                        if (i < TOTAL_OBS_SIZE - 1)
+                            data_file << ", ";
+                    }
+                    data_file << "],\n";
+                    data_file << "  \"action\": [";
+                    for (int i = 0; i < JOINT_POS_SIZE; ++i) {
+                        data_file << joint_angles[i];
+                        if (i < JOINT_POS_SIZE - 1)
+                            data_file << ", ";
+                    }
+                    data_file << "]\n";
+                    data_file << "}\n";
+                    data_file.close();
+                    log<INFO>("Saved example data to example_data.json");
+
                     // Store the last action
                     last_action = joint_angles;
 
@@ -204,6 +229,22 @@ namespace module::skill {
 
             // Log compilation info
             log<INFO>("Model compiled successfully");
+
+            // Validate input shape
+            auto input_shape = model->input().get_shape();
+            if (input_shape[1] != TOTAL_OBS_SIZE) {
+                log<ERROR>("Model input size mismatch. Expected: ", TOTAL_OBS_SIZE, " Got: ", input_shape[1]);
+                model_initialized = false;
+                return;
+            }
+
+            // Validate output shape
+            auto output_shape = model->output().get_shape();
+            if (output_shape[1] != JOINT_POS_SIZE) {
+                log<ERROR>("Model output size mismatch. Expected: ", JOINT_POS_SIZE, " Got: ", output_shape[1]);
+                model_initialized = false;
+                return;
+            }
 
             model_initialized = true;
             log<INFO>("RLWalk model initialized successfully");
