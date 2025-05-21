@@ -323,7 +323,7 @@ namespace module::purpose {
 
     void KeyboardWalk::kick(LimbID::Value l) {
         log<INFO>("kick");
-        // reset();
+        reset();
         switch (l) {
             case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3); break;
             case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3); break;

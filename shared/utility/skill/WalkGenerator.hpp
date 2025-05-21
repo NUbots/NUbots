@@ -90,17 +90,6 @@ namespace utility::skill {
 
             /// @brief Option to only switch between planted foot if the next foot is planted
             bool only_switch_when_planted = false;
-
-            // Step kick parameters
-            struct StepKickParameters {
-                bool enabled            = true;
-                double forward_distance = 0.12;  // Maximum kick distance in meters
-                double side_distance    = 0.05;  // Maximum side kick distance in meters
-                double extra_height     = 0.02;  // Additional foot height during kick
-                double retraction_ratio = 0.7;   // How much to retract foot after kick (0-1)
-            };
-
-            StepKickParameters step_kick;
         };
 
         /**
@@ -299,43 +288,11 @@ namespace utility::skill {
             return p.step_period;
         }
 
-        /**
-         * @brief Enable step kick for the next step
-         */
-        void set_step_kick_active(bool active) {
-            step_kick_active = active;
-        }
-
-        /**
-         * @brief Configure the step kick parameters
-         * @param power Kick power from 0.0 to 1.0
-         * @param direction Direction in radians (0=forward, positive=left)
-         * @param is_right_kick Whether the right leg should be used for kicking
-         */
-        void configure_step_kick(double power, double direction, bool is_right_kick) {
-            kick_power     = power;
-            kick_direction = direction;
-            right_kick     = is_right_kick;
-        }
-
-        /**
-         * @brief Check if step kick is active
-         */
-        bool is_step_kick_active() const {
-            return step_kick_active;
-        }
-
     private:
         /// @brief Walk engine parameters.
         WalkParameters p;
 
         // ******************************** State ********************************
-
-        // Step kick state
-        bool step_kick_active = false;
-        double kick_power     = 0.0;
-        double kick_direction = 0.0;
-        bool right_kick       = false;
 
         /// @brief Current engine state.
         WalkState::State engine_state = WalkState::State::STOPPED;
@@ -424,107 +381,29 @@ namespace utility::skill {
 
             // ******************************** Swing Foot Trajectory ********************************
             swing_foot_trajectory.clear();
-            if (!step_kick_active) {
-                // Start waypoint: Current swing foot position
-                wp.time_point       = 0.0;
-                wp.position         = Hps_start.translation();
-                wp.velocity         = Vec3::Zero();
-                wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
+            // Start waypoint: Current swing foot position
+            wp.time_point       = 0.0;
+            wp.position         = Hps_start.translation();
+            wp.velocity         = Vec3::Zero();
+            wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
+            wp.angular_velocity = Vec3::Zero();
+            swing_foot_trajectory.add_waypoint(wp);
 
-                // Middle waypoint: Raise foot to step height
-                wp.time_point       = p.step_apex_ratio * p.step_period;
-                wp.position         = Vec3(0, get_foot_width_offset(), p.step_height);
-                wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
-                wp.orientation      = Vec3(0.0, 0.0, velocity_target.z() * p.step_apex_ratio * p.step_period);
-                wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
-                swing_foot_trajectory.add_waypoint(wp);
+            // Middle waypoint: Raise foot to step height
+            wp.time_point       = p.step_apex_ratio * p.step_period;
+            wp.position         = Vec3(0, get_foot_width_offset(), p.step_height);
+            wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
+            wp.orientation      = Vec3(0.0, 0.0, velocity_target.z() * p.step_apex_ratio * p.step_period);
+            wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
+            swing_foot_trajectory.add_waypoint(wp);
 
-                // End waypoint: Next foot placement on ground
-                wp.time_point       = p.step_period;
-                wp.position         = Vec3(step.x(), get_foot_width_offset() + step.y(), 0);
-                wp.velocity         = Vec3::Zero();
-                wp.orientation      = Vec3(0, 0, step.z());
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-            }
-            else {
-                // Direction vector for kick
-                Vec3 kick_dir;
-                kick_dir << std::cos(kick_direction), std::sin(kick_direction), 0.0;
-                kick_dir.normalize();
-
-                // Compute kick distance based on power and direction
-                double forward_kick_dist =
-                    p.step_kick.forward_distance * kick_power * std::abs(std::cos(kick_direction));
-                double side_kick_dist = p.step_kick.side_distance * kick_power * std::abs(std::sin(kick_direction));
-
-                // Start waypoint: Current swing foot position
-                wp.time_point       = 0.0;
-                wp.position         = Hps_start.translation();
-                wp.velocity         = Vec3::Zero();
-                wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-
-                // Wind-up waypoint: Raise foot higher
-                wp.time_point = 0.3 * p.step_period;
-                wp.position   = Vec3(0.0, get_foot_width_offset(), p.step_height + p.step_kick.extra_height);
-                wp.velocity   = Vec3(0, 0, 0);
-                // Prepare foot angle for kick
-                wp.orientation      = Vec3(0, kick_direction * -0.1, 0);
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-
-                // Pre-kick waypoint
-                wp.time_point = 0.5 * p.step_period;
-                Vec3 pre_kick_pos;
-                pre_kick_pos << -0.02, get_foot_width_offset(), p.step_height;
-                wp.position = pre_kick_pos;
-                // Build momentum for kick
-                wp.velocity         = kick_dir * 0.2;
-                wp.orientation      = Vec3(0, 0, 0);
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-
-                // Kick waypoint: Extend foot
-                wp.time_point = 0.65 * p.step_period;
-                Vec3 kick_pos;
-                kick_pos << forward_kick_dist,
-                    get_foot_width_offset() + (right_kick ? -1 : 1) * side_kick_dist * std::sin(kick_direction),
-                    p.step_height * 0.7;
-                wp.position = kick_pos;
-                // Kick velocity proportional to power
-                wp.velocity = kick_dir * kick_power * 0.5;
-                // Foot angle aligned with kick direction
-                double pitch_angle  = 0.2 * std::cos(kick_direction);
-                double roll_angle   = 0.1 * std::sin(kick_direction) * (right_kick ? -1 : 1);
-                wp.orientation      = Vec3(roll_angle, pitch_angle, 0);
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-
-                // Recovery waypoint: Pull foot back for landing
-                wp.time_point       = 0.85 * p.step_period;
-                wp.position         = Vec3(step.x() * p.step_kick.retraction_ratio,
-                                   get_foot_width_offset() + step.y() * p.step_kick.retraction_ratio,
-                                   p.step_height * 0.6);
-                wp.velocity         = Vec3::Zero();
-                wp.orientation      = Vec3(0, 0, 0);
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-
-                // End waypoint: Place foot down normally
-                wp.time_point       = p.step_period;
-                wp.position         = Vec3(step.x(), get_foot_width_offset() + step.y(), 0);
-                wp.velocity         = Vec3::Zero();
-                wp.orientation      = Vec3(0, 0, step.z());
-                wp.angular_velocity = Vec3::Zero();
-                swing_foot_trajectory.add_waypoint(wp);
-
-                // Reset step kick flag after generating trajectory
-                step_kick_active = false;
-            }
+            // End waypoint: Next foot placement on ground
+            wp.time_point       = p.step_period;
+            wp.position         = Vec3(step.x(), get_foot_width_offset() + step.y(), 0);
+            wp.velocity         = Vec3::Zero();
+            wp.orientation      = Vec3(0, 0, step.z());
+            wp.angular_velocity = Vec3::Zero();
+            swing_foot_trajectory.add_waypoint(wp);
         }
 
         /**
