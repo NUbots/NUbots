@@ -1,0 +1,32 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+model:
+  path: model.onnx
+  device: CPU
+  input_name: input
+  output_name: output
+  num_joints: 20
+  obs_size: 49
+
+default_pose:
+  - -3.39000e-02
+  - 1.63000e-01
+  - -9.04000e-01
+  - 1.20000e+00
+  - -5.10000e-01
+  - -1.66000e-01
+  - -3.29000e-02
+  - -1.62000e-01
+  - -9.04000e-01
+  - 1.20000e+00
+  - -5.08000e-01
+  - 1.67000e-01
+  - -2.22000e-08
+  - 6.45000e-05
+  - 1.71000e+00
+  - 1.97000e-01
+  - -7.13000e-01
+  - 1.71000e+00
+  - -1.97000e-01
+  - -7.18000e-01
