@@ -35,7 +35,7 @@
 #include "message/skill/GPT.hpp"
 #include "message/skill/Say.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
-#include "message/strategy/FindFeature.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"

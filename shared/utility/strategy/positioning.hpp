@@ -53,8 +53,8 @@ namespace utility::strategy {
     template <typename Scalar>
     Scalar cost(const Eigen::Vector3d& X,
                 const Eigen::Vector3d& neutral_point,
-                const vector<Eigen::Vector3d>& opponent_positions,
-                const vector<Eigen::Vector3d>& all_robot_positions,
+                const std::vector<Eigen::Vector3d>& opponent_positions,
+                const std::vector<Eigen::Vector3d>& all_robot_positions,
                 Scalar clearance,
                 Scalar equidist_weight,
                 Scalar neutral_weight,
@@ -66,7 +66,7 @@ namespace utility::strategy {
         for (const auto& opp : opponent_positions) {
             av_dist_opp += (X.head<2>() - opp.head<2>()).norm();
         }
-        Scalar av_dist_opp = av_dist_opp / opponent_positions.size();
+        av_dist_opp = av_dist_opp / opponent_positions.size();
 
         // Cost for not being equidistant to all opponents
         for (const auto& opp : opponent_positions) {
@@ -96,10 +96,10 @@ namespace utility::strategy {
     }
 
     template <typename Scalar>
-    Eigen::Vector3d optimal_pos(const Eigen::Vector2d& initial,
-                                const Eigen::Vector2d& neutral_point,
-                                const vector<Eigen::Vector2d>& opponent_positions,
-                                const vector<Eigen::Vector2d>& all_robot_positions,
+    Eigen::Vector3d optimal_pos(const Eigen::Vector3d& initial,
+                                const Eigen::Vector3d& neutral_point,
+                                const std::vector<Eigen::Vector3d>& opponent_positions,
+                                const std::vector<Eigen::Vector3d>& all_robot_positions,
                                 Scalar clearance,
                                 Scalar equidist_weight,
                                 Scalar neutral_weight,
@@ -109,7 +109,7 @@ namespace utility::strategy {
         Eigen::Vector3d X = initial;
 
         for (int iter = 0; iter < max_iters; ++iter) {
-            Eigen::Vector3d grad(0.0, 0.0);
+            Eigen::Vector3d grad(0.0, 0.0, 0.0);
 
             // Numerical gradient
             Scalar eps = 1e-5;

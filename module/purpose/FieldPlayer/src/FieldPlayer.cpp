@@ -4,6 +4,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/localisation/Robot.hpp"
+#include "message/purpose/FieldPlayer.hpp"
 #include "message/strategy/Who.hpp"
 
 #include "utility/strategy/soccer_strategy.hpp"
@@ -12,6 +13,7 @@ namespace module {
 
     using extension::Configuration;
     using message::localisation::Robots;
+    using FieldPlayerMsg = message::purpose::FieldPlayer;
     using message::strategy::Who;
 
 
@@ -25,17 +27,17 @@ namespace module {
         });
 
         // When not playing or in ready, stand still
-        on<Provide<FieldPlayer>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<FieldPlayerMsg>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // READY state
-        on<Purpose<FieldPlayer>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
+        on<Provide<FieldPlayerMsg>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // todo Determine dynamically the best ready position
             Hfr = Eigen::Isometry3d::Identity();
             emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
         });
 
         // PLAYING state
-        on<Purpose<FieldPlayer>,
+        on<Provide<FieldPlayerMsg>,
            With<Ball>,
            With<Robots>,
            With<Sensors>,

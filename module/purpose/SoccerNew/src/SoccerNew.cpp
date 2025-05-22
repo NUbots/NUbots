@@ -39,13 +39,15 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/purpose/FieldPZZayer.hpp"
 #include "message/purpose/Goalie.hpp"
+#include "message/purpose/Player.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
+#include "message/strategy/StandStill.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::purpose {

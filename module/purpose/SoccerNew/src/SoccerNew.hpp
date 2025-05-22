@@ -3,12 +3,14 @@
 
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
+
 namespace module {
 
     struct EnableIdle {};
     struct DisableIdle {};
 
-    class SoccerNew : public NUClear::Reactor {
+    class SoccerNew : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {

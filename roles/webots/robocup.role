@@ -63,9 +63,9 @@ nuclear_role(
   strategy::AlignBallToGoal
   strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::AllRounder
-  purpose::Striker
-  purpose::Defender
-  purpose::Soccer
+  purpose::Attack
+  purpose::Defend
+  #purpose::Support
+  purpose::SoccerNew
   purpose::Goalie
 )

@@ -32,7 +32,7 @@
 #include "message/localisation/Ball.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/planning/WalkPath.hpp"
-#include "message/strategy/FindFeature.hpp"
+#include "message/strategy/FindBall.hpp"
 
 namespace module::strategy {
 

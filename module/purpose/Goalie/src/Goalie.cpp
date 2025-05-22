@@ -33,7 +33,7 @@
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
-#include "message/strategy/FindFeature.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
