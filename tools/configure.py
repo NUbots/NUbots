@@ -96,10 +96,13 @@ def register(command):
             const=ROLE_GROUPS[group],
         )
     command.add_argument("args", nargs="...", help="the arguments to pass through to cmake")
+    command.add_argument(
+        "--build-dir", help="The directory to build the code in", default=os.path.join(b.project_dir, "..", "build")
+    )
 
 
 @run_on_docker
-def run(interactive, set_roles, unset_roles, args, **kwargs):
+def run(interactive, set_roles, unset_roles, args, build_dir, **kwargs):
     pty = WrapPty()
 
     default_args = [
@@ -132,7 +135,8 @@ def run(interactive, set_roles, unset_roles, args, **kwargs):
             raise RuntimeError(f"No roles matching {pattern}")
 
     # If interactive then run ccmake else just run cmake
-    os.chdir(os.path.join(b.project_dir, "..", "build"))
+    os.makedirs(build_dir, exist_ok=True)
+    os.chdir(build_dir)
     if interactive:
         exit(pty.spawn(["ccmake", "-GNinja", *default_args, *args, b.project_dir]))
     else:

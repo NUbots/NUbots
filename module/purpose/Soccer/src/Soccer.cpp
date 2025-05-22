@@ -90,6 +90,8 @@ namespace module::purpose {
     using message::strategy::StartSafely;
     using message::support::GlobalConfig;
 
+    struct StartSoccer {};
+
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration, Trigger<GlobalConfig>>("Soccer.yaml")
@@ -102,6 +104,7 @@ namespace module::purpose {
                 cfg.position = Position(config["position"].as<std::string>());
 
                 cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
+                cfg.startup_delay      = config["startup_delay"].as<int>();
 
                 // Get the number of seconds until we assume a teammate is inactive
                 cfg.timeout = config["timeout"].as<int>();
@@ -143,11 +146,14 @@ namespace module::purpose {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Stand idle
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
-            // Idle look forward if the head isn't doing anything else
+            // Look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
-            // This emit starts the tree to play soccer
+            // After a startup delay, start the soccer scenario
+            emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
+        on<Trigger<StartSoccer>>().then([this] {
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
