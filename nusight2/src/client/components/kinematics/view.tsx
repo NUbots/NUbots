@@ -7,8 +7,8 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { KinematicsController } from "./controller";
 import { KinematicsModel } from "./model";
-import { KinematicsRobotModel } from "./robot_model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper";
+import { KinematicsRobotModel } from "./robot_model";
 
 const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
   const [unit, setUnit] = useState<"rad" | "deg">("rad");
@@ -31,13 +31,10 @@ const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
             .replace(/^./, (match) => match.toUpperCase());
 
           const angle =
-            unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${(motor.angle * 180 / Math.PI).toFixed(2)}°`;
+            unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${((motor.angle * 180) / Math.PI).toFixed(2)}°`;
 
           return (
-            <li
-              key={jointName}
-              className="grid grid-cols-[auto_auto] gap-4 p-2"
-            >
+            <li key={jointName} className="grid grid-cols-[auto_auto] gap-4 p-2">
               <span className="font-medium">{formattedLabel}</span>
               <span className="justify-self-end">{angle}</span>
             </li>
