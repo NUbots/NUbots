@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useState } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
 
@@ -11,23 +11,35 @@ import { KinematicsRobotModel } from "./robot_model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper";
 
 const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ robot }) => {
+  const [unit, setUnit] = useState<"rad" | "deg">("rad");
+
   return (
     <div className="p-4 border border-black dark:border-white rounded-lg w-full">
-      <h3 className="text-xl font-semibold mb-4 pb-2">Joint Angles</h3>
+      <div className="flex justify-between items-center mb-4 pb-2">
+        <h3 className="text-xl font-semibold">Joint Angles</h3>
+        <button
+          onClick={() => setUnit(unit === "rad" ? "deg" : "rad")}
+          className="text-sm px-2 py-1 border rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          Show in {unit === "rad" ? "Degrees" : "Radians"}
+        </button>
+      </div>
       <ul className="divide-y divide-black dark:divide-white">
         {Object.entries(robot.motors).map(([jointName, motor]) => {
           const formattedLabel = jointName
             .replace(/([a-z])([A-Z])/g, "$1 $2")
             .replace(/^./, (match) => match.toUpperCase());
 
+          const angle =
+            unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${(motor.angle * 180 / Math.PI).toFixed(2)}°`;
+
           return (
             <li
               key={jointName}
-              className="grid grid-cols-[auto_auto_4rem] gap-4 p-2"
+              className="grid grid-cols-[auto_auto] gap-4 p-2"
             >
               <span className="font-medium">{formattedLabel}</span>
-              <span className="justify-self-end">{motor.angle.toFixed(2)} rad</span>
-              <span className="justify-self-end">{(motor.angle * 180 / Math.PI).toFixed(2)}°</span>
+              <span className="justify-self-end">{angle}</span>
             </li>
           );
         })}
@@ -63,12 +75,10 @@ export class KinematicsView extends React.Component<{
 
         {selectedRobot && (
           <div className="flex flex-1 overflow-hidden">
-            {/* Left Side: 3D Canvas */}
             <div className="flex-1 relative">
               <CanvasWrapper selectedRobot={selectedRobot} />
             </div>
 
-            {/* Right Side: Joint Data Pane */}
             <div className="w-1/4 h-full overflow-y-auto">
               <JointDataDisplay robot={selectedRobot} />
             </div>
