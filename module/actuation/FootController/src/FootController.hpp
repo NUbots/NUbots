@@ -158,23 +158,31 @@ namespace module::actuation {
                 fused_pitch += cfg.support_foot_offset_x;
                 fused_roll += cfg.support_foot_offset_y;
 
-                emit(graph("fused_roll", fused_roll));
-                emit(graph("fused_pitch", fused_pitch));
-
                 // Get the desired roll and pitch
                 Eigen::Quaterniond Hft_quat(ik_task->Htf.inverse().linear());
+                // ***** DEBUG *****
+                // Debug the raw position components
+                // Extract rotation matrix from sensors
+                Eigen::Matrix3d sensors_rot_matrix = sensors.Htw.inverse().linear();
+
+                // Graph each element of the rotation matrix
+                emit(graph("SensorsMatrix/R_00", sensors_rot_matrix(0, 0)));
+                emit(graph("SensorsMatrix/R_01", sensors_rot_matrix(0, 1)));
+                emit(graph("SensorsMatrix/R_02", sensors_rot_matrix(0, 2)));
+                emit(graph("SensorsMatrix/R_10", sensors_rot_matrix(1, 0)));
+                emit(graph("SensorsMatrix/R_11", sensors_rot_matrix(1, 1)));
+                emit(graph("SensorsMatrix/R_12", sensors_rot_matrix(1, 2)));
+                emit(graph("SensorsMatrix/R_20", sensors_rot_matrix(2, 0)));
+                emit(graph("SensorsMatrix/R_21", sensors_rot_matrix(2, 1)));
+                emit(graph("SensorsMatrix/R_22", sensors_rot_matrix(2, 2)));
+                // ***** ***** *****
                 double desired_roll;
                 double desired_pitch;
                 FusedFromQuat(Hft_quat, desired_pitch, desired_roll);
-                emit(graph("desired_roll", desired_roll));
-                emit(graph("desired_pitch", desired_pitch));
-
 
                 // Compute the error between the desired torso orientation and the actual torso orientation
                 auto roll_error  = desired_roll - fused_roll;
                 auto pitch_error = desired_pitch - fused_pitch;
-                emit(graph("roll_error", roll_error));
-                emit(graph("pitch_error", pitch_error));
 
                 auto dt =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -215,8 +223,6 @@ namespace module::actuation {
                 desired_pitch -= cfg.pitch_d_gain * pitch_rate;
                 // ********************************
                 double desired_yaw = mat_to_rpy_intrinsic(Hft_quat.toRotationMatrix()).z();
-                emit(graph("corrected roll", desired_roll));
-                emit(graph("corrected pitch", desired_pitch));
 
                 // Compute desired orientation: yaw * fused_roll_pitch
                 Eigen::Matrix3d desired_Rft = Eigen::AngleAxisd(desired_yaw, Eigen::Vector3d::UnitZ())
@@ -225,7 +231,33 @@ namespace module::actuation {
                 Htf_corrected.linear()          = desired_Rft.transpose();
 
                 ik_task->Htf = Htf_corrected;
+                // Actual roll and pitch
+                emit(graph("FootController/actual_roll", fused_roll));
+                emit(graph("FootController/actual_pitch", fused_pitch));
+                // Desired roll and pitch
+                emit(graph("FootController/desired_roll", desired_roll));
+                emit(graph("FootController/desired_pitch", desired_pitch));
+                if (log_level <= DEBUG) {
+                    // // Actual roll and pitch
+                    // emit(graph("FootController/actual_roll", fused_roll));
+                    // emit(graph("FootController/actual_pitch", fused_pitch));
+                    // // Desired roll and pitch
+                    // emit(graph("FootController/desired_roll", desired_roll));
+                    // emit(graph("FootController/desired_pitch", desired_pitch));
+                    // Roll and pitch error
+                    emit(graph("FootController/roll_error", roll_error));
+                    emit(graph("FootController/pitch_error", pitch_error));
+                    // Quaternion components representing foot orientation
+                    emit(graph("FootController/Hft_quat_w", Hft_quat.w()));
+                    emit(graph("FootController/Hft_quat_x", Hft_quat.x()));
+                    emit(graph("FootController/Hft_quat_y", Hft_quat.y()));
+                    emit(graph("FootController/Hft_quat_z", Hft_quat.z()));
+                    // Planned and corrected foot y positions
+                    emit(graph("FootController/planned_foot_y", foot_control_task.Htf.translation().y()));
+                    emit(graph("FootController/corrected_foot_y", Htf_corrected.translation().y()));
+                }
             }
+
             else {
                 ik_task->Htf = foot_control_task.Htf;
             }
