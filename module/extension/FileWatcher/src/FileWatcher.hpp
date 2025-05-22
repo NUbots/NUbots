@@ -28,49 +28,56 @@
 #ifndef MODULES_EXTENSION_FILEWATCHER_HPP
 #define MODULES_EXTENSION_FILEWATCHER_HPP
 
+#include <filesystem>
+#include <map>
 #include <nuclear>
+#include <regex>
 #include <uv.h>
+#include <vector>
 
 namespace module::extension {
 
     class FileWatcher : public NUClear::Reactor {
     private:
-        struct ReactionMap {
-            // The reaction to run
-            std::shared_ptr<NUClear::threading::Reaction> reaction;
-
-            // The events it is interested in
-            int events;
+        struct WatchMap {
+            /// File/directory, relative to the parent directory, being watched by this handle
+            std::filesystem::path path{};
+            /// Handle for filesystem events
+            std::unique_ptr<uv_fs_event_t> handle{nullptr};
+            /// Indicates that the handle is actively watching the path
+            bool active{false};
         };
 
-        struct FileMap {
-            // The reactions for this file
-            std::vector<ReactionMap> reactions;
+        struct Watch {
+            /// List of files currently known about
+            std::set<std::filesystem::path> files{};
+            /// The files/directories that are being watched under this path
+            std::map<std::filesystem::path, WatchMap> watches{};
+            /// Directory being watched
+            std::filesystem::path path{"."};
+            /// Regular expression for filtering file events
+            std::regex re{"", std::regex_constants::ECMAScript};
+            /// Indicates whether the watched directory also includes all sub-directories
+            bool recursive{false};
+            /// The events that this reaction is interested in
+            int events{0};
         };
 
-        struct PathMap {
-            // The files that are being watched, empty string is the directory
-            std::map<std::string, FileMap> files;
+        /// The storage for paths
+        std::mutex watch_mutex;
+        std::map<std::shared_ptr<NUClear::threading::Reaction>, Watch> watches;
 
-            // The string for this path, given to the handle below
-            std::string path;
-
-            // The libuv handle for this folder
-            std::unique_ptr<uv_fs_event_t> handle;
-        };
-
-        // The storage for paths
-        std::map<std::string, PathMap> paths;
-        std::mutex paths_mutex;
-
-        // The event queue for adding and removing watches
-        std::vector<PathMap*> add_queue;
+        /// The event queue for adding watches
+        std::vector<Watch*> add_queue;
         std::vector<std::unique_ptr<uv_fs_event_t>> remove_queue;
 
-        // The libuv event loop
+        /// The libuv event loop
         std::unique_ptr<uv_loop_t> loop;
+        /// The libuv async handle for adding new watches
         std::unique_ptr<uv_async_t> add_watch;
+        /// The libuv async handle for removing watches
         std::unique_ptr<uv_async_t> remove_watch;
+        /// The libuv async handle for triggering shutdown
         std::unique_ptr<uv_async_t> shutdown;
 
         /// True on the first loop then turns false after the FileWatcherReady event is emitted
@@ -79,16 +86,12 @@ namespace module::extension {
     public:
         /// @brief Called by the powerplant to build and setup the FileWatcher reactor.
         explicit FileWatcher(std::unique_ptr<NUClear::Environment> environment);
+        FileWatcher(const FileWatcher&)            = delete;
+        FileWatcher(FileWatcher&&)                 = delete;
+        FileWatcher& operator=(const FileWatcher&) = delete;
+        FileWatcher& operator=(FileWatcher&&)      = delete;
         ~FileWatcher() override;
-
         static void file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int status);
-
-        // Delete the move and copy constructors and operators, because we only want one filewatcher per powerplant
-        // and it shouldn't change (rule of 5)
-        FileWatcher(FileWatcher& other)              = delete;
-        FileWatcher(FileWatcher&& other)             = delete;
-        FileWatcher& operator=(FileWatcher& other)   = delete;
-        FileWatcher&& operator=(FileWatcher&& other) = delete;
     };
 
 }  // namespace module::extension

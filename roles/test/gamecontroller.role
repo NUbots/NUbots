@@ -13,8 +13,9 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   # Sensors for button testing
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # GameController communications
   input::GameController
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

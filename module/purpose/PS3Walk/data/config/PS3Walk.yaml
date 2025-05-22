@@ -1,0 +1,19 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+maximum_forward_velocity: 0.15
+maximum_rotational_velocity: 0.25
+max_acceleration: 0.1
+
+# Button to script mappings
+button_scripts:
+  DPAD_UP: "Clap.yaml"
+  DPAD_DOWN: "TheRobot.yaml"
+  DPAD_LEFT: "Dab.yaml"
+  DPAD_RIGHT: "ArmDangle.yaml"
+  TRIANGLE: "Star.yaml"
+  CIRCLE: "RaiseTheRoof.yaml"
+  CROSS: "Crouch.yaml"
+  SQUARE: "Wave.yaml"
+  L1: "LEFT_LEG_KICK"
+  R1: "RIGHT_LEG_KICK"

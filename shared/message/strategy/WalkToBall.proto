@@ -29,3 +29,6 @@ package message.strategy;
 
 /// Robot walks to the ball or searches if it can't find it
 message WalkToBall {}
+
+/// Robot walks to the position where it can kick the ball or searches if it can't find it
+message WalkToKickBall {}

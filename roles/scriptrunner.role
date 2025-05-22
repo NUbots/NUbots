@@ -6,7 +6,6 @@ nuclear_role(
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Director
   extension::Director
@@ -14,4 +13,6 @@ nuclear_role(
   actuation::Servos
   # Purpose
   purpose::ScriptRunner
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

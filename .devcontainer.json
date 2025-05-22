@@ -1,7 +1,7 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
   "name": "${localWorkspaceFolderBasename}",
-  "image": "nubots:generic",
+  "image": "${localEnv:USER}/nubots:generic",
   "initializeCommand": "docker buildx use default",
   "workspaceMount": "type=bind,consistency=delegated,src=${localWorkspaceFolder},dst=/home/nubots/NUbots",
   "workspaceFolder": "/home/nubots/NUbots",

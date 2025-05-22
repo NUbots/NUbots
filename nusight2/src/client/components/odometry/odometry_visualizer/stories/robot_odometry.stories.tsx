@@ -1,7 +1,6 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { reaction } from "mobx";
-import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
 
@@ -28,24 +27,29 @@ export const Animated: StoryObj<StoryProps> = {
 };
 
 class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
+  private dispose?: () => void;
+
   private model = OdometryVisualizerModel.of({
     Hwt: Matrix4.fromThree(new THREE.Matrix4().makeTranslation(0, 0, 1)),
     accelerometer: new Vector3(0, 0, -9.8),
   });
 
   componentDidMount() {
-    this.props.animate &&
-      disposeOnUnmount(
-        this,
-        reaction(
+    this.dispose = this.props.animate
+      ? reaction(
           () => now("frame") / 1000,
           (t) => {
             this.model.Hwt = Matrix4.fromThree(
               new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(t) / 5, 0, t)).setPosition(0, 0, 1),
             );
           },
-        ),
-      );
+        )
+      : undefined;
+  }
+
+  componentWillUnmount() {
+    this.dispose?.();
+    this.dispose = undefined;
   }
 
   render() {

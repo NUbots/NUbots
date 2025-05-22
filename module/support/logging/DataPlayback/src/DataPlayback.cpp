@@ -87,7 +87,7 @@ namespace module::support::logging {
 
                         // Don't print this on the first loop
                         if (file_index >= 0) {
-                            log<NUClear::INFO>("Playback of file", files[file_index], "finished");
+                            log<INFO>("Playback of file", files[file_index], "finished");
                         }
 
                         // If we have more files to go in our list
@@ -102,10 +102,10 @@ namespace module::support::logging {
                             // Open the first file again
                             if (std::filesystem::exists(files[file_index])) {
                                 input_file = std::make_unique<std::ifstream>(files[file_index]);
-                                log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                                log<INFO>("Starting playback of file", files[file_index]);
                             }
                             else {
-                                log<NUClear::ERROR>("The file", files[file_index], "does not exist!");
+                                log<ERROR>("The file", files[file_index], "does not exist!");
                             }
                         }
                         // We are done and should shutdown the system now
@@ -124,12 +124,10 @@ namespace module::support::logging {
                             // Open the first file again
                             if (std::filesystem::exists(files[file_index])) {
                                 input_file = std::make_unique<std::ifstream>(files[file_index]);
-                                log<NUClear::INFO>("Restarting playback with file", files[file_index]);
+                                log<INFO>("Restarting playback with file", files[file_index]);
                             }
                             else {
-                                log<NUClear::ERROR>("Cannot restart with file",
-                                                    files[file_index],
-                                                    "as it does not exist!");
+                                log<ERROR>("Cannot restart with file", files[file_index], "as it does not exist!");
                             }
                         }
                         // Just stop playing back the recording
@@ -168,15 +166,15 @@ namespace module::support::logging {
 
                         if (enabled && !player.enabled) {
                             player.enabled = true;
-                            log<NUClear::INFO>("Playback for message type", name, "enabled");
+                            log<INFO>("Playback for message type", name, "enabled");
                         }
                         else if (!enabled && player.enabled) {
                             player.enabled = false;
-                            log<NUClear::INFO>("Playback for message type", name, "disabled");
+                            log<INFO>("Playback for message type", name, "disabled");
                         }
                     }
                     else {
-                        log<NUClear::WARN>("The playback system does not know about the message type", name);
+                        log<WARN>("The playback system does not know about the message type", name);
                     }
                 }
 
@@ -209,7 +207,7 @@ namespace module::support::logging {
 
                 // If we still have no files
                 if (files.empty()) {
-                    log<NUClear::WARN>("No files were provided for playback, stopping");
+                    log<WARN>("No files were provided for playback, stopping");
                     playback_handle.disable();
                 }
                 else {

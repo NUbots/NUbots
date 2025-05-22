@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -76,7 +76,7 @@ namespace module::support::optimisation {
         // Read the QuinticWalk config and overwrite the config parameters with the current individual's
         // parameters
         YAML::Node walk_config = YAML::LoadFile(current_request.task_config_path);
-        NUClear::log<NUClear::INFO>("CurrentConfigPath", current_request.task_config_path);
+        NUClear::log<NUClear::LogLevel::INFO>("CurrentConfigPath", current_request.task_config_path);
 
         // The mapping of parameters depends on how the config file was read by the optimiser
         auto walk      = walk_config["walk"];
@@ -120,9 +120,9 @@ namespace module::support::optimisation {
         overwrite_file_stream.close();
 
         // Write the config to keep for later
-        NUClear::log<NUClear::DEBUG>(fmt::format("Saving as: gen{:03d}_ind{:03d}_task-walk.yaml",
-                                                 current_request.generation,
-                                                 current_request.id));
+        NUClear::log<NUClear::LogLevel::DEBUG>(fmt::format("Saving as: gen{:03d}_ind{:03d}_task-walk.yaml",
+                                                           current_request.generation,
+                                                           current_request.id));
         std::ofstream save_file_stream(
             fmt::format("gen{:03d}_ind{:03d}_task-walk.yaml", current_request.generation, current_request.id));
         save_file_stream << YAML::Dump(walk_config);
@@ -145,12 +145,12 @@ namespace module::support::optimisation {
     }
 
     void WalkEvaluator::evaluating_state(NSGA2Evaluator* evaluator) {
-        NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
-                                                 walk_command_velocity.x(),
-                                                 walk_command_velocity.y(),
-                                                 walk_command_rotation));
+        NUClear::log<NUClear::LogLevel::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
+                                                           walk_command_velocity.x(),
+                                                           walk_command_velocity.y(),
+                                                           walk_command_rotation));
 
-        NUClear::log<NUClear::DEBUG>("Walk started");
+        NUClear::log<NUClear::LogLevel::DEBUG>("Walk started");
         evaluator->walk(Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation));
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
@@ -165,7 +165,7 @@ namespace module::support::optimisation {
 
         // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
         if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
-            NUClear::log<NUClear::DEBUG>("Fallen!");
+            NUClear::log<NUClear::LogLevel::DEBUG>("Fallen!");
             fallen = true;
             return true;
         }
@@ -191,10 +191,13 @@ namespace module::support::optimisation {
         auto scores      = calculate_scores();
         auto constraints = early_termination ? calculate_constraints(trial_duration) : constraints_not_violated();
 
-        NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
-        NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
-        NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
-        NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
+        NUClear::log<NUClear::LogLevel::DEBUG>("Trial ran for", trial_duration);
+        NUClear::log<NUClear::LogLevel::DEBUG>("SendFitnessScores for generation",
+                                               generation,
+                                               "individual",
+                                               individual);
+        NUClear::log<NUClear::LogLevel::DEBUG>("    scores:", scores[0], scores[1]);
+        NUClear::log<NUClear::LogLevel::DEBUG>("    constraints:", constraints[0], constraints[1]);
 
         // Create the fitness scores message based on the given results and emit it back to the Optimiser
         std::unique_ptr<NSGA2FitnessScores> fitness_scores = std::make_unique<NSGA2FitnessScores>();
@@ -207,8 +210,8 @@ namespace module::support::optimisation {
 
     std::vector<double> WalkEvaluator::calculate_scores() {
         auto robot_distance_travelled = std::fabs(initial_robot_position.x() - robot_position.x());
-        NUClear::log<NUClear::DEBUG>("Distance travelled", robot_distance_travelled);
-        NUClear::log<NUClear::DEBUG>("Max field plane sway", max_field_plane_sway);
+        NUClear::log<NUClear::LogLevel::DEBUG>("Distance travelled", robot_distance_travelled);
+        NUClear::log<NUClear::LogLevel::DEBUG>("Max field plane sway", max_field_plane_sway);
         return {
             max_field_plane_sway,           // Reduce the torso sway
             1.0 / robot_distance_travelled  // 1/x since the NSGA2 optimiser is a minimiser

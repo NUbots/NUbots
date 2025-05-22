@@ -15,7 +15,7 @@ import { WebSocketServer } from "./web_socket/web_socket_server";
 
 const args = minimist(process.argv.slice(2));
 const withVirtualRobots = args["virtual-robots"] || false;
-const nuclearnetAddress = args.address || "10.1.255.255";
+const nuclearnetAddress = args.address || "239.226.152.162";
 
 const app = express();
 const server = http.createServer(app);

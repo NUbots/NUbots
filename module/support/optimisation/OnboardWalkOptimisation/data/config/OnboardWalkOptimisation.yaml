@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Threshold angle for standing stably, from torso z axis to world z axis
 standing_angle: 0.4

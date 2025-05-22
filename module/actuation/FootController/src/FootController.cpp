@@ -28,80 +28,55 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/LimbsIK.hpp"
-#include "message/actuation/ServoCommand.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/skill/ControlFoot.hpp"
-
-#include "utility/input/LimbID.hpp"
-#include "utility/nusight/NUhelpers.hpp"
-
 namespace module::actuation {
 
     using extension::Configuration;
 
-    using message::actuation::LeftLegIK;
-    using message::actuation::RightLegIK;
-    using message::actuation::ServoState;
-    using message::input::Sensors;
-    using message::skill::ControlLeftFoot;
-    using message::skill::ControlRightFoot;
-
-    using utility::input::LimbID;
 
     FootController::FootController(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("FootController.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file FootController.yaml
+            // Set log level from the configuration
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.servo_gain  = config["servo_gain"].as<double>();
-            cfg.keep_level  = config["keep_level"].as<bool>();
+            cfg.mode        = config["mode"].as<std::string>();
+
+            cfg.desired_gains = config["servo_gains"].as<std::map<std::string, double>>();
+            // Set gains of servo to startup phase values
+            cfg.servo_states.clear();
+            cfg.startup_gain = config["startup"]["servo_gain"].as<double>();
+            for (const auto& servo : cfg.desired_gains) {
+                utility::input::ServoID servo_id(servo.first);
+                cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
+            }
+            // Emit request to set desired gains after a delay
+            emit<Scope::DELAY>(std::make_unique<SetGains>(),
+                               std::chrono::seconds(config["startup"]["duration"].as<int>()));
         });
 
-        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
-            [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
-                // Construct Leg IK tasks
-                auto left_leg  = std::make_unique<LeftLegIK>();
-                left_leg->time = left_foot.time;
-                if (left_foot.keep_level && cfg.keep_level) {
-                    // Calculate the desired foot orientation to keep the foot level with the ground
-                    Eigen::Isometry3d Htr           = sensors.Htw * sensors.Hrw.inverse();
-                    Eigen::Isometry3d Htf_corrected = left_foot.Htf;
-                    Htf_corrected.linear()          = Htr.linear();
-                    left_leg->Htl                   = Htf_corrected;
-                }
-                else {
-                    left_leg->Htl = left_foot.Htf;
-                }
+        on<Trigger<SetGains>>().then([this] {
+            for (const auto& [key, gain] : cfg.desired_gains) {
+                utility::input::ServoID servo_id(key);
+                cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
+            }
+        });
 
-                for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
-                    left_leg->servos[id] = ServoState(cfg.servo_gain, 100);
-                }
+
+        on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>, Priority::HIGH>().then(
+            [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
+                auto left_leg = std::make_unique<LeftLegIK>();
+
+                control_foot(left_foot, left_leg, sensors, LimbID::LimbID::LEFT_LEG);
 
                 // Emit IK tasks to achieve the desired pose
                 emit<Task>(left_leg, 0, false, "Control left foot");
             });
 
-        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>>().then(
+        on<Provide<ControlRightFoot>, With<Sensors>, Needs<RightLegIK>, Priority::HIGH>().then(
             [this](const ControlRightFoot& right_foot, const Sensors& sensors) {
-                auto right_leg  = std::make_unique<RightLegIK>();
-                right_leg->time = right_foot.time;
+                auto right_leg = std::make_unique<RightLegIK>();
 
-                if (right_foot.keep_level && cfg.keep_level) {
-                    // Calculate the desired foot orientation to keep the foot level with the ground
-                    Eigen::Isometry3d Htr           = sensors.Htw * sensors.Hrw.inverse();
-                    Eigen::Isometry3d Htf_corrected = right_foot.Htf;
-                    Htf_corrected.linear()          = Htr.linear();
-                    right_leg->Htr                  = Htf_corrected;
-                }
-                else {
-                    right_leg->Htr = right_foot.Htf;
-                }
-
-                for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
-                    right_leg->servos[id] = ServoState(cfg.servo_gain, 100);
-                }
+                control_foot(right_foot, right_leg, sensors, LimbID::RIGHT_LEG);
 
                 // Emit IK tasks to achieve the desired pose
                 emit<Task>(right_leg, 0, false, "Control right foot");

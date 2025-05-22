@@ -8,10 +8,11 @@ nuclear_role(
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
+  network::NUClearNet
+  network::NetworkForwarder
   network::PlotJuggler
   # Sensors
   input::SensorFilter
-  platform::${SUBCONTROLLER}::HardwareIO
   # Director
   extension::Director
   # Servos
@@ -31,4 +32,6 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::PS3Walk
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

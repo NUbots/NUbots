@@ -30,7 +30,7 @@
 #include <Eigen/Core>
 #include <queue>
 
-namespace module::localisation {
+namespace utility::localisation {
 
     template <typename Scalar>
     class OccupancyMap {
@@ -252,6 +252,6 @@ namespace module::localisation {
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> map;
     };
 
-}  // namespace module::localisation
+}  // namespace utility::localisation
 
-#endif  // MODULE_LOCALISATION_MAP_HPP
+#endif  // UTILITY_LOCALISATION_OCCUPANCYMAP_HPP

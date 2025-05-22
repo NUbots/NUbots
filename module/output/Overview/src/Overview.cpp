@@ -67,12 +67,12 @@ namespace module::output {
 
             // clang-format off
             auto lvl = cfg["log_level"].as<std::string>();
-            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            if (lvl == "TRACE") { this->log_level = TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = DEBUG; }
+            else if (lvl == "INFO") { this->log_level = INFO; }
+            else if (lvl == "WARN") { this->log_level = WARN; }
+            else if (lvl == "ERROR") { this->log_level = ERROR; }
+            else if (lvl == "FATAL") { this->log_level = FATAL; }
             // clang-format on
         });
 
@@ -140,10 +140,9 @@ namespace module::output {
                 }
 
                 // Set our game mode properties
-                msg->game_mode  = game_state ? game_state->data.mode : GameState::Data::Mode(0);
-                msg->game_phase = game_state ? game_state->data.phase : GameState::Data::Phase(0);
-                msg->penalty_reason =
-                    game_state ? game_state->data.self.penalty_reason : GameState::Data::PenaltyReason(0);
+                msg->game_mode      = game_state ? game_state->mode : GameState::Mode(0);
+                msg->game_phase     = game_state ? game_state->phase : GameState::Phase(0);
+                msg->penalty_reason = game_state ? game_state->self.penalty_reason : GameState::PenaltyReason(0);
 
                 // Set our last seen times
                 msg->last_camera_image = last_camera_image;

@@ -39,10 +39,18 @@ message ServoState {
 }
 
 message ServoCommand {
+    enum DoneType {
+        /// Do nothing when the servo reaches the destination
+        NONE = 0;
+        /// Call the done function when the time to move expires
+        TIME = 1;
+    }
     /// The time that the servo should reach the given position
     google.protobuf.Timestamp time = 1;
     /// The position value of the destination in radians.
     float position = 2;
     /// Gain and torque of the servo
     ServoState state = 3;
+    /// Whether to call done and in what way when it is finished moving
+    DoneType done_type = 4;
 }

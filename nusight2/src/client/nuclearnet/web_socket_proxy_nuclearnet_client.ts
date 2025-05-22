@@ -49,19 +49,21 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   }
 
   onJoin(listener: NUClearEventListener): () => void {
-    this.socket.on("nuclear_join", listener);
+    const cb = this.wrapCallbackToAckWithTime(listener);
+    this.socket.on("nuclear_join", cb);
     this.joinListeners.add(listener);
     return () => {
-      this.socket.off("nuclear_join", listener);
+      this.socket.off("nuclear_join", cb);
       this.joinListeners.delete(listener);
     };
   }
 
   onLeave(listener: NUClearEventListener): () => void {
-    this.socket.on("nuclear_leave", listener);
+    const cb = this.wrapCallbackToAckWithTime(listener);
+    this.socket.on("nuclear_leave", cb);
     this.leaveListeners.add(listener);
     return () => {
-      this.socket.off("nuclear_leave", listener);
+      this.socket.off("nuclear_leave", cb);
       this.leaveListeners.delete(listener);
     };
   }
@@ -84,7 +86,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     const requestToken = String(this.nextRequestToken++);
     this.socket.send("listen", event, requestToken);
 
-    const onEventPacket: PacketListener = async (packet, ack) => {
+    const onEventPacket = this.wrapCallbackToAckWithTime(async (packet, ack) => {
       // Any async work in the packet callback should be awaited, to have an
       // accurate measurement of the time it took to process the packet.
       await cb(packet);
@@ -94,7 +96,8 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
         // the time spent processing and rendering a packet.
         ack(Date.now());
       }
-    };
+    });
+
     this.socket.on(event, onEventPacket);
 
     let existingListeners = this.packetListeners.get(event);
@@ -149,5 +152,25 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
    */
   useSocket(cb: (socket: WebSocketClient) => void) {
     cb(this.socket);
+  }
+
+  private wrapCallbackToAckWithTime(fn: (...args: any[]) => void): (...args: any[]) => void {
+    return (...args: any[]) => {
+      const now = Date.now();
+
+      // Go through the args and replace the ack function with a wrapper that adds the time we
+      // received the message here. This is used for performance measurements on the server.
+      const argsWithAckWrapped = args.map((arg) => {
+        // We assume that any function in args is an ack function, since the only function
+        // we will ever get from a Socket.io connection is the ack function.
+        return typeof arg === "function"
+          ? (...ackArgs: any[]) => {
+              arg(...ackArgs, now);
+            }
+          : arg;
+      });
+
+      fn(...argsWithAckWrapped);
+    };
   }
 }

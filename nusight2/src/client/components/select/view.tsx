@@ -5,12 +5,10 @@ import { observable } from "mobx";
 import { observer } from "mobx-react";
 import OutsideClickHandler from "react-outside-click-handler/esm/OutsideClickHandler";
 
-import { Button } from "../button/view";
+import { Button } from "../button/button";
 import { Dropdown } from "../dropdown/view";
-import { Icon } from "../icon/view";
 
 import { SelectOption } from "./option";
-import style from "./style.module.css";
 
 export interface Option {
   id: string | number;
@@ -57,11 +55,11 @@ export class Select extends React.Component<SelectProps> {
 
     const button = (
       <Button
+        contentAlign="left"
+        className="w-full"
         iconBefore={icon}
-        iconAfter={<Icon className="-mr-0.5">arrow_drop_down</Icon>}
-        textAlign="left"
-        iconAfterAlignedRight
-        fullwidth
+        iconAfter="arrow_drop_down"
+        iconAfterProps={{ className: "ml-auto" }}
       >
         {selectedOption ? selectedOption.label : placeholder}
       </Button>
@@ -77,10 +75,10 @@ export class Select extends React.Component<SelectProps> {
           isFullwidth={true}
           onToggleClick={this.onToggleClick}
         >
-          <div className={style.dropdown}>
-            {options.length === 0 && <div className={style.empty}>{empty || "No options"}</div>}
+          <div className="bg-auto-surface-2 shadow-md">
+            {options.length === 0 && <div className="p-6 text-center">{empty || "No options"}</div>}
             {options.length > 0 && (
-              <div className={style.options}>
+              <div>
                 {options.map((option) => {
                   const isSelected = Boolean(selectedOption && selectedOption.id === option.id);
                   return (

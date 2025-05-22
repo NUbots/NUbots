@@ -33,6 +33,17 @@
 
 namespace utility::nbs {
 
+    /// @brief Returns the subtype field of data or, if subtype does not exist, 0
+    template <typename T>
+    std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& /*data*/) {
+        return 0;
+    }
+
+    template <typename T>
+    std::enable_if_t<utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& data) {
+        return data.id;
+    }
+
     /// @brief Returns the id field of data or, if id does not exist, 0
     template <typename T>
     std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_id(const T& /*data*/) {

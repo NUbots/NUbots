@@ -4,7 +4,7 @@ import http from "http";
 import minimist from "minimist";
 import favicon from "serve-favicon";
 import { Server } from "socket.io";
-const { createServer: createViteServer } = require("vite");
+import { createServer as createViteServer } from "vite";
 
 import faviconPath from "../assets/favicon.ico";
 import * as NUClearNetProxyParser from "../shared/nuclearnet/nuclearnet_proxy_parser";
@@ -16,7 +16,7 @@ import { WebSocketServer } from "./web_socket/web_socket_server";
 const args = minimist(process.argv.slice(2));
 
 const withVirtualRobots = args["virtual-robots"] || false;
-const nuclearnetAddress = args.address || "10.1.255.255";
+const nuclearnetAddress = args.address || "239.226.152.162";
 
 async function main() {
   const app = express();

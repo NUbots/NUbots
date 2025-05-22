@@ -19,7 +19,7 @@ Add this module to play as a defender in soccer!
 ## Consumes
 
 - `message::input::GameState` to get information about the state of the game
-- `message::input::GameState::Data::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
+- `message::input::GameState::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
 - `message::purpose::Defender` a Task requesting to play as a Defender
 
 ## Emits

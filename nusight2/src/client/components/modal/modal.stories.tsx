@@ -1,33 +1,21 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
+import { Button } from "../button/button";
+import { lightAndDarkDecorator } from "../storybook/color_mode";
+
 import { Modal } from "./view";
 
 const meta: Meta<typeof Modal> = {
   title: "components/Modal",
   component: Modal,
-  parameters: {
-    layout: "fullscreen",
-  },
-  decorators: [
-    (story) => {
-      return <div className="min-h-screen p-4">{story()}</div>;
-    },
-  ],
+
+  decorators: [lightAndDarkDecorator({ horizontal: true })],
 };
 
 export default meta;
 
 type Story = StoryObj<typeof Modal>;
-
-// TODO: Replace this with the NUsight <Button> component once that gets proper keyboard focus styles
-function Button(props: { onClick?: () => void; children: React.ReactNode }) {
-  return (
-    <button className="border rounded px-3 py-1 hover:bg-gray-100 active:bg-gray-300" onClick={props.onClick}>
-      {props.children}
-    </button>
-  );
-}
 
 function PlaceholderContent() {
   return (

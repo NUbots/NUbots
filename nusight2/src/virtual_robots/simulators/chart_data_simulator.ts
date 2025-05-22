@@ -2,11 +2,12 @@ import { autorun } from "mobx";
 
 import { message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { toTimestamp } from "../../shared/time/timestamp";
+import { TimestampObject } from "../../shared/time/timestamp";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";
 
 import { periodic } from "./periodic";
+
 import DataPoint = message.eye.DataPoint;
 
 export class ChartSimulator extends Simulator {
@@ -31,7 +32,7 @@ export class ChartSimulator extends Simulator {
     const buffer = DataPoint.encode({
       label: "Debug Waves",
       value: [sin, cos, 2 * sin, 4 * cos],
-      timestamp: toTimestamp(time),
+      timestamp: TimestampObject.fromSeconds(time),
     }).finish();
 
     const message = { messageType, buffer };

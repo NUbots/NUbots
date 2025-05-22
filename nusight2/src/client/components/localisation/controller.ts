@@ -1,6 +1,7 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
+import { FieldDimensions } from "../../../shared/field/dimensions";
 import { Vector3 } from "../../../shared/math/vector3";
 
 import { KeyCode } from "./keycodes";
@@ -141,6 +142,55 @@ export class LocalisationController {
           model.controls.down = false;
           return;
       }
+    }
+  }
+
+  @action
+  setFieldDimensions(field_type: string, model: LocalisationModel) {
+    model.field.fieldType = field_type;
+    switch (field_type) {
+      case "lab":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.05,
+          markWidth: 0.1,
+          fieldLength: 6.8,
+          fieldWidth: 5.0,
+          goalDepth: 0.4,
+          goalWidth: 1.95,
+          goalAreaLength: 1.05,
+          goalAreaWidth: 2.62,
+          penaltyAreaLength: 1.55,
+          penaltyAreaWidth: 4.05,
+          goalCrossbarHeight: 0.55,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1.0,
+          penaltyMarkDistance: 1.27,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 0.38,
+        });
+        break;
+      case "robocup":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.06,
+          markWidth: 0.1,
+          fieldLength: 9,
+          fieldWidth: 6,
+          goalDepth: 0.6,
+          goalWidth: 2.6,
+          goalAreaLength: 1,
+          goalAreaWidth: 3,
+          penaltyAreaLength: 2,
+          penaltyAreaWidth: 5,
+          goalCrossbarHeight: 1.25,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1,
+          penaltyMarkDistance: 1.5,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 1.0,
+        });
+        break;
+      default:
+        console.error("Unknown field dimension");
     }
   }
 
@@ -292,6 +342,16 @@ export class LocalisationController {
   };
 
   @action
+  toggleParticlesVisibility = (model: LocalisationModel) => {
+    model.particlesVisible = !model.particlesVisible;
+  };
+
+  @action
+  toggleGoalVisibility = (model: LocalisationModel) => {
+    model.goalsVisible = !model.goalsVisible;
+  };
+
+  @action
   toggleRobotVisibility = (model: LocalisationModel) => {
     model.robotVisible = !model.robotVisible;
   };
@@ -304,5 +364,15 @@ export class LocalisationController {
   @action
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
+  };
+
+  @action
+  toggleWalkToDebugVisibility = (model: LocalisationModel) => {
+    model.walkToDebugVisible = !model.walkToDebugVisible;
+  };
+
+  @action
+  toggleBoundedBoxVisibility = (model: LocalisationModel) => {
+    model.boundedBoxVisible = !model.boundedBoxVisible;
   };
 }

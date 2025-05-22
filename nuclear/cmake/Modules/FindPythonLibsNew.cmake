@@ -58,7 +58,7 @@ endif()
 # on unix, and "27" on windows.
 execute_process(
   COMMAND
-    "${PYTHON_EXECUTABLE}" "-c" "from distutils import sysconfig as s;import sys;import struct;
+    "${Python3_EXECUTABLE}" "-c" "from distutils import sysconfig as s;import sys;import struct;
 print('.'.join(str(v) for v in sys.version_info));
 print(sys.prefix);
 print(s.get_python_inc(plat_specific=True));
@@ -169,4 +169,4 @@ set(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
 set(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
 set(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
-find_package_message(PYTHON "Found PythonLibs: ${PYTHON_LIBRARY}" "${PYTHON_EXECUTABLE}${PYTHON_VERSION}")
+find_package_message(PYTHON "Found PythonLibs: ${PYTHON_LIBRARY}" "${Python3_EXECUTABLE}${PYTHON_VERSION}")

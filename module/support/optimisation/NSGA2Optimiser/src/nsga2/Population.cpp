@@ -1,8 +1,7 @@
-/* Adapted from https://github.com/dojeda/nsga2-cpp
- *
+/*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -221,7 +220,7 @@ namespace nsga2 {
 
     void Population::merge(const Population& pop_1_, const Population& pop_2_) {
         if (get_size() < pop_1_.get_size() + pop_2_.get_size()) {
-            NUClear::log<NUClear::WARN>("merge: target population not big enough");
+            NUClear::log<NUClear::LogLevel::WARN>("merge: target population not big enough");
             inds.reserve(pop_1_.get_size() + pop_2_.get_size());
         }
 

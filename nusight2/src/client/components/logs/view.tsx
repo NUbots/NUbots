@@ -33,15 +33,15 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
         </div>
       </Menu>
       {selectedLogsRobot ? (
-        <div className="flex-grow border-t border-gray-300 flex flex-col">
+        <div className="flex-grow flex flex-col">
           <Toolbar model={selectedLogsRobot} controller={controller} />
           <div className="relative h-full w-full">
             <LogLines model={selectedLogsRobot} />
           </div>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center h-full w-full bg-gray-100">
-          <div className="text-icon mb-2">
+        <div className="flex flex-col justify-center items-center h-full w-full">
+          <div className="text-nusight-500 mb-2">
             <Icon size={48}>electrical_services</Icon>
           </div>
           <div className="text-2xl">No connected robots</div>
@@ -71,10 +71,10 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
   const { model, controller } = props;
 
   return (
-    <div className="bg-gray-100 px-2 py-1.5 border-b border-gray-300 flex">
+    <div className="bg-auto-surface-2 px-2 py-1.5 flex border-y border-auto">
       <SearchBox model={model} controller={controller} />
 
-      <div className="flex gap-1 border-x px-2 mx-2">
+      <div className="flex gap-1 border-x border-auto px-2 mx-2">
         <ToggleButton on={model.filters.levels.trace} onClick={(on) => controller.setFilter(model, "trace", !on)}>
           <Icon size={20}>{logLevelToIcon.trace}</Icon>
           Trace
@@ -121,10 +121,10 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
 
   return (
     <div className="relative">
-      <Icon className="absolute left-1 top-1 text-icon pointer-events-none">search</Icon>
+      <Icon className="absolute left-1 top-1 pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-white focus:outline-none focus:border-transparent focus:ring-2 focus:ring-nusight-500"
+        className="pl-8 pr-2 h-7 w-80 border border-auto rounded bg-auto-surface-1 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
         placeholder="Filter logs"
         value={model.filters.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -143,8 +143,8 @@ function ToggleButton(props: ToggleButtonProps) {
   return (
     <button
       className={`h-7 px-2 inline-flex items-center border rounded ${
-        props.on ? "bg-nusight-500 border-nusight-500 text-white" : "bg-white border-gray-300"
-      }`}
+        props.on ? "bg-blue-600 border-blue-700 text-gray-100" : "bg-white dark:bg-gray-600 border-auto"
+      } `}
       onClick={() => props.onClick(props.on)}
     >
       {props.children}
@@ -169,9 +169,13 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
 
   if (model.messagesFilteredBySearch.length === 0) {
     if (model.messages.length === 0) {
-      return <div className="text-center py-4 text-lg text-gray-400">No log messages yet</div>;
+      return <div className="text-center py-4 text-lg text-gray-500 dark:text-gray-650">No log messages yet</div>;
     } else {
-      return <div className="text-center py-4 text-lg text-gray-400">No messages match your filters and search</div>;
+      return (
+        <div className="text-center py-4 text-lg text-gray-500 dark:text-gray-650">
+          No messages match your filters and search
+        </div>
+      );
     }
   }
 
@@ -185,13 +189,13 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
 });
 
 const logLevelToTextColor: Record<LogLevel, string> = {
-  unknown: "text-gray-800",
-  trace: "text-gray-800",
-  debug: "text-green-800",
-  info: "text-blue-800",
-  warn: "text-yellow-800",
-  error: "text-red-800",
-  fatal: "text-red-800",
+  unknown: "text-gray-700 dark:text-gray-300",
+  trace: "text-gray-700 dark:text-gray-300",
+  debug: "text-green-700 dark:text-green-300",
+  info: "text-blue-700 dark:text-blue-300",
+  warn: "text-yellow-700 dark:text-yellow-300",
+  error: "text-red-700 dark:text-red-300",
+  fatal: "text-red-700 dark:text-red-300",
 };
 
 interface LogLineProps {
@@ -203,7 +207,11 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
   const { model, message } = props;
 
   return (
-    <div className={`flex gap-3 items-center py-0.5 border-b border-black/10 ${logLevelToTextColor[message.level]}`}>
+    <div
+      className={`flex gap-3 items-center py-0.5 bg-auto-surface-1 border-b border-auto ${
+        logLevelToTextColor[message.level]
+      }`}
+    >
       <div className="inline-flex items-end self-start gap-1">
         <div className="w-12 uppercase text-right">{message.level}</div>
         <Icon fill className="text-lg/none">

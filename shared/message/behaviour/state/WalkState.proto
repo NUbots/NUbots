@@ -28,16 +28,19 @@ syntax = "proto3";
 package message.behaviour.state;
 
 import "Vector.proto";
+import "Matrix.proto";
+import "Transform.proto";
 
 message WalkState {
     enum State {
         UNKNOWN  = 0;
-        WALKING  = 1;
-        STOPPING = 2;
-        STOPPED  = 3;
+        STARTING = 1;
+        WALKING  = 2;
+        STOPPING = 3;
+        STOPPED  = 4;
     }
 
-    enum SupportPhase {
+    enum Phase {
         DOUBLE = 0;
         LEFT   = 1;
         RIGHT  = 2;
@@ -49,6 +52,15 @@ message WalkState {
     /// Current requested velocity target (dx, dy, dtheta)
     vec3 velocity_target = 2;
 
-    /// Support phase
-    SupportPhase support_phase = 3;
+    /// Walk phase
+    Phase phase = 3;
+
+    /// Torso trajectory Hpt
+    repeated mat4 torso_trajectory = 4;
+
+    /// Swing foot trajectory Hps
+    repeated mat4 swing_foot_trajectory = 5;
+
+    /// Hwp transform from planted foot to world
+    iso3 Hwp = 6;
 }

@@ -28,6 +28,8 @@ package message.eye;
 
 import "google/protobuf/timestamp.proto";
 
+import "message/eye/Rpc.proto";
+
 message ScrubberState {
     enum State {
         UNKNOWN = 0;
@@ -56,16 +58,12 @@ message ScrubberState {
 
 message ScrubberLoadRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// What to call the loaded scrubber
     string name = 2;
     /// The files to load into the scrubber. Must be a list of absolute paths to NBS files.
@@ -74,48 +72,36 @@ message ScrubberLoadRequest {
 
 message ScrubberPlayRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// The ID of the scrubber to play
     uint32 id = 2;
 }
 
 message ScrubberPauseRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// The ID of the scrubber to pause
     uint32 id = 2;
 }
 
 message ScrubberSetPlaybackSpeedRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// The ID of the scrubber to set the playback speed of
     uint32 id = 2;
     /// The playback speed to set. Used as a power of 2, so 0 is 1x, 1 is 2x, -1 is 0.5x, etc.
@@ -124,16 +110,12 @@ message ScrubberSetPlaybackSpeedRequest {
 
 message ScrubberSetRepeatRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// The ID of the scrubber to set the repeat state of
     uint32 id = 2;
     /// The repeat state to set
@@ -142,16 +124,12 @@ message ScrubberSetRepeatRequest {
 
 message ScrubberSeekRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// The ID of the scrubber to seek
     uint32 id = 2;
     /// The timestamp to seek to
@@ -160,16 +138,12 @@ message ScrubberSeekRequest {
 
 message ScrubberCloseRequest {
     message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
     }
 
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
     /// The ID of the scrubber to close
     uint32 id = 2;
 }
@@ -177,44 +151,4 @@ message ScrubberCloseRequest {
 message ScrubberClosed {
     /// The ID of the scrubber that was closed
     uint32 id = 1;
-}
-
-message ScrubberFileEntry {
-    enum Type {
-        UNKNOWN   = 0;
-        DIRECTORY = 1;
-        FILE      = 2;
-    }
-
-    /// The entry type: directory or file
-    Type type = 1;
-    /// The name of the entry
-    string name = 2;
-    /// The absolute path of the entry
-    string path = 3;
-    /// The size of the entry in bytes
-    uint64 size = 4;
-    /// The last modified time of the entry
-    google.protobuf.Timestamp date_modified = 5;
-}
-
-message ScrubberListFilesRequest {
-    message Response {
-        /// The token of the RPC request this response is for
-        uint32 rpc_token = 1;
-        /// Whether the request was successful
-        bool ok = 2;
-        /// An error message if the request was not successful
-        string error = 3;
-
-        /// The absolute path of the directory
-        string directory = 4;
-        /// The entries in the directory
-        repeated ScrubberFileEntry entries = 5;
-    }
-
-    /// The token of the RPC request
-    uint32 rpc_token = 1;
-    /// The absolute path of the directory to list
-    string directory = 2;
 }

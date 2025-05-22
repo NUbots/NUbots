@@ -1,0 +1,98 @@
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: 1.37001359
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -0.461325437
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -0.69268626
+      gain: 10
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: -0.0614355877
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -1.41050529
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -0.694222152
+      gain: 10
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: -0.0614355877
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -1.41050529
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -1.92907751
+      gain: 10
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: -0.0614355877
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -1.41050529
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -0.923069715
+      gain: 10
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: -0.0614355877
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -1.41050529
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -2.11799192
+      gain: 10
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: -0.0614355877
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -1.41050529
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -1.03211784
+      gain: 10
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_PITCH
+      position: 1.56353569
+      gain: 10
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -0.461325437
+      gain: 10
+      torque: 100
+    - id: R_ELBOW
+      position: -1.02904606
+      gain: 10
+      torque: 100

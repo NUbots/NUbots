@@ -81,7 +81,7 @@ export function NumericStepper(props: NumericStepperProps) {
   }
 
   return (
-    <div className="inline-flex items-center gap-1 rounded p-1 shadow-sm start bg-gray-200 dark:bg-gray-900">
+    <div className="inline-flex items-center gap-1 rounded p-1 shadow-sm start bg-gray-200 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:ring-gray-700">
       {label ? <div className="pl-1.5 pr-2 text-sm leading-none dark:text-white">{label}</div> : null}
 
       <NumericStepperButton
@@ -133,6 +133,7 @@ export function NumericStepper(props: NumericStepperProps) {
         <NumericStepperButton
           title={props.resetButtonTitle ?? "Reset"}
           icon="undo"
+          disabled={value === props.defaultValue}
           onClick={() => {
             setValue(props.defaultValue);
           }}
@@ -153,7 +154,7 @@ function NumericStepperButton(props: NumericStepperButtonProps) {
   return (
     <button
       title={props.title}
-      className="rounded-sm inline-flex items-center disabled:opacity-60 justify-center w-6 h-6 bg-white text-gray-700 enabled:hover:text-blue-600 enabled:active:bg-gray-300 dark:bg-slate-700 dark:p-0.5 dark:text-white/95 dark:enabled:hover:text-sky-400 dark:enabled:active:bg-slate-800"
+      className="rounded-sm inline-flex items-center disabled:opacity-60 justify-center w-6 h-6 bg-white text-gray-700 enabled:hover:text-blue-600 enabled:active:bg-gray-100 dark:bg-gray-700 dark:p-0.5 dark:text-white/95 dark:enabled:hover:text-blue-400 dark:enabled:active:bg-gray-800"
       disabled={props.disabled}
       onClick={props.onClick}
     >

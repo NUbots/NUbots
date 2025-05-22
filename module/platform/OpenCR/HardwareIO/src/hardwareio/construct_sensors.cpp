@@ -53,7 +53,7 @@ namespace module::platform::OpenCR {
         /* Servos data */
         for (int i = 0; i < 20; i++) {
             // Get a reference to the servo we are populating
-            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::get_raw_servo(i, sensors);
 
 
             // Booleans
@@ -105,9 +105,6 @@ namespace module::platform::OpenCR {
             else {
                 // Error code
                 servo.hardware_error = servo_states[i].hardware_error;
-
-                // Accumulate all packet error flags to read at once
-                sensors.subcontroller_error |= servo_states[i].packet_error;
 
                 // Present Data
                 servo.present_position = servo_states[i].present_position;

@@ -3,9 +3,9 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
-  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Contains hardware offsets
   # Sensors
-  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Network
   network::NUClearNet
@@ -18,4 +18,6 @@ nuclear_role(
   actuation::Servos
   # Purpose
   purpose::ScriptTuner
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

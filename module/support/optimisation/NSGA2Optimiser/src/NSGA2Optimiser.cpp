@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -56,7 +56,7 @@ namespace module::support::optimisation {
 
         // Read NSGA2Optimiser.yaml file and initialize the values we're going to use for the optimisation
         on<Configuration>("NSGA2Optimiser.yaml").then([this](const Configuration& config) {
-            log<NUClear::INFO>("Trying to setup NSGA2");
+            log<INFO>("Trying to setup NSGA2");
 
             // Set up the NSGA2 algorithm based on our config values
             nsga2_algorithm.set_objective_count(config["num_objectives"].as<int>());
@@ -75,23 +75,23 @@ namespace module::support::optimisation {
             auto task_type = config["task"].as<std::string>();
 
             if (task_type == "walk") {
-                log<NUClear::INFO>("Task type is Walk");
+                log<INFO>("Task type is Walk");
                 task = std::make_unique<WalkOptimiser>();
             }
             else if (task_type == "strafe") {
-                log<NUClear::INFO>("Task type is Strafe");
+                log<INFO>("Task type is Strafe");
                 task = std::make_unique<StrafeOptimiser>();
             }
             else if (task_type == "rotation") {
-                log<NUClear::INFO>("Task type is Rotate");
+                log<INFO>("Task type is Rotate");
                 task = std::make_unique<RotationOptimiser>();
             }
             else if (task_type == "multipath") {
-                log<NUClear::INFO>("Task type is Multipath");
+                log<INFO>("Task type is Multipath");
                 task = std::make_unique<MultiPathOptimiser>();
             }
             else {
-                log<NUClear::ERROR>("Unrecognised optimiser task", task_type);
+                log<ERROR>("Unrecognised optimiser task", task_type);
                 powerplant.shutdown();
             }
             task->setup_nsga2(config, nsga2_algorithm);
@@ -99,10 +99,10 @@ namespace module::support::optimisation {
 
         on<Startup>().then([this]() {
             // Create a message to request an evaluation of an individual
-            log<NUClear::INFO>("Starting up in 4 seconds");
+            log<INFO>("Starting up in 4 seconds");
             std::this_thread::sleep_for(std::chrono::seconds(4));
 
-            log<NUClear::INFO>("Optimiser ready, starting first evaluation");
+            log<INFO>("Optimiser ready, starting first evaluation");
 
             // If initialisation succeeded, evaluate the first individual of the first generation
             // Subsequent individuals will be evaluated after we get the evaluation scores for this
@@ -111,7 +111,7 @@ namespace module::support::optimisation {
                 emit(std::make_unique<NSGA2EvaluatorReady>());
             }
             else {
-                log<NUClear::ERROR>("Failed to initialise NSGA2");
+                log<ERROR>("Failed to initialise NSGA2");
             }
         });
 
@@ -119,15 +119,12 @@ namespace module::support::optimisation {
             auto next_ind = nsga2_algorithm.get_current_pop()->get_next_individual();
             if (next_ind.has_value()) {
                 auto ind = next_ind.value();
-                log<NUClear::INFO>("\n\nSending request to evaluator. Generation:",
-                                   ind.generation,
-                                   "individual",
-                                   ind.id);
+                log<INFO>("\n\nSending request to evaluator. Generation:", ind.generation, "individual", ind.id);
                 // Create a message to request an evaluation of an individual
                 emit(task->make_evaluation_request(ind.id, ind.generation, ind.reals));
             }
             else {
-                log<NUClear::INFO>("Evaluator ready, but optimiser is not");
+                log<INFO>("Evaluator ready, but optimiser is not");
                 emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(),
                                    std::chrono::seconds(1));  // Wait for a bit for us to become ready, then
                                                               // ask the evaluator if it is ready
@@ -135,7 +132,7 @@ namespace module::support::optimisation {
         });
 
         on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
-            log<NUClear::DEBUG>("Got evaluation fitness scores", scores.obj_score[0], scores.obj_score[1]);
+            log<DEBUG>("Got evaluation fitness scores", scores.obj_score[0], scores.obj_score[1]);
 
             // Tell the algorithm the evaluation scores for this individual
             nsga2_algorithm.get_current_pop()->set_evaluation_results(scores.id, scores.obj_score, scores.constraints);
@@ -145,7 +142,7 @@ namespace module::support::optimisation {
                 nsga2_algorithm.complete_generation_and_advance();
 
                 if (nsga2_algorithm.has_met_optimisation_terminal_condition()) {
-                    log<NUClear::INFO>("NSGA2 evaluation finished!");
+                    log<INFO>("NSGA2 evaluation finished!");
 
                     // Tell Webots to terminate
                     std::unique_ptr<OptimisationCommand> msg = std::make_unique<OptimisationCommand>();
@@ -157,18 +154,18 @@ namespace module::support::optimisation {
                     emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
                 }
                 else {
-                    log<NUClear::INFO>("Advanced to new generation", nsga2_algorithm.get_current_pop()->generation);
+                    log<INFO>("Advanced to new generation", nsga2_algorithm.get_current_pop()->generation);
                 }
             }
             else {
-                log<NUClear::DEBUG>("Recorded Evaluation for individual", scores.id, "more to come...");
+                log<DEBUG>("Recorded Evaluation for individual", scores.id, "more to come...");
             }
         });
 
         on<Trigger<NSGA2Terminate>, Single>().then([this]() {
             // NSGA2Terminate is emitted when we've finished all generations and all individuals
             // Tell ourselves to terminate
-            log<NUClear::INFO>("Powerplant shutdown");
+            log<INFO>("Powerplant shutdown");
             powerplant.shutdown();
         });
     }

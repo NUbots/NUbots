@@ -53,7 +53,7 @@ export class ChartView extends Component<{
           <div className="flex-grow flex flex-col">
             <LineChart />
           </div>
-          <div className="w-[400px] border-l border-gray-300">
+          <div className="w-[400px] p-4 border-l border-t border-auto bg-auto-surface-2">
             <CheckboxTree
               model={model.tree}
               onCheck={controller.onNodeCheck}

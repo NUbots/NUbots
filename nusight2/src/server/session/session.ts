@@ -2,6 +2,7 @@ import { NUClearNetSend } from "nuclearnet.js";
 
 import { compose } from "../../shared/base/compose";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
+import { createFilePicker } from "../file_picker/create";
 import { createNbsScrubber } from "../nbs_scrubber/create";
 import { ScrubberSet } from "../nbs_scrubber/scrubber_set";
 import { ClientConnection } from "../web_socket/client_connection";
@@ -58,7 +59,7 @@ export class NUsightSession {
   }
 
   static of(nuclearnetClient: NUClearNetClient) {
-    return new NUsightSession(nuclearnetClient, [createNbsScrubber]);
+    return new NUsightSession(nuclearnetClient, [createNbsScrubber, createFilePicker]);
   }
 
   /** Add a client for the given connection to the session */

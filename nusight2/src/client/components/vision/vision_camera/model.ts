@@ -5,6 +5,7 @@ import { Image } from "../../camera/image";
 import { CameraDefaultDrawOptions, CameraModel } from "../../camera/model";
 
 import { BallModel } from "./balls";
+import { BoundingBoxesModel } from "./bounding_boxes";
 import { GoalModel } from "./goals";
 import { GreenHorizonModel } from "./green_horizon";
 import { OtherRobotsModel } from "./other_robots";

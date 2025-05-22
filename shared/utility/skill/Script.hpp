@@ -37,7 +37,8 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/platform/aliases.hpp"
+#include "utility/support/network.hpp"
 
 
 /**
@@ -112,18 +113,25 @@ namespace utility::skill {
     /// @throws Runtime error when the script doesn't exist.
     static YAML::Node load(const std::string& script) {
         // Set paths to the script files.
-        auto hostname      = utility::support::getHostname();
+        auto hostname      = utility::support::get_hostname();
         auto robot_path    = "scripts/" + hostname + "/" + script;
         auto platform_path = "scripts/" + get_platform(hostname) + "/" + script;
+        auto robot_name    = utility::platform::get_robot_alias(hostname);
+        auto name_path     = "scripts/" + robot_name + "/" + script;
 
-        // Try getting the robot-specific script first
-        if (utility::file::exists(robot_path)) {
-            NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
+        // If robot name script exists, use it
+        if (!robot_name.empty() && utility::file::exists(name_path)) {
+            NUClear::log<NUClear::LogLevel::INFO>("Parsing name specific script:", script);
+            return YAML::LoadFile(name_path);
+        }
+        // If robot name script doesn't exist, try to use the robot-specific script
+        else if (utility::file::exists(robot_path)) {
+            NUClear::log<NUClear::LogLevel::INFO>("Parsing robot specific script:", script);
             return YAML::LoadFile(robot_path);
         }
         // If there was no robot-specific script, then get the platform-specific script
         else if (utility::file::exists(platform_path)) {
-            NUClear::log<NUClear::INFO>("Parsing default platform script:", script);
+            NUClear::log<NUClear::LogLevel::INFO>("Parsing default platform script:", script);
             return YAML::LoadFile(platform_path);
         }
         // The script doesn't exist, tell the user
@@ -161,7 +169,10 @@ namespace utility::skill {
                 // Add the servos in the frame to a map
                 std::map<uint32_t, ServoCommand> servos{};
                 for (const auto& target : frame.targets) {
-                    servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                    servos[target.id] = ServoCommand(time,
+                                                     target.position,
+                                                     ServoState(target.gain, target.torque),
+                                                     ServoCommand::DoneType::TIME);
                 }
 
                 // Add the map to the pack. This represents one sequence of servos.
@@ -235,7 +246,10 @@ namespace utility::skill {
             // Add the servos in the frame to a map
             std::map<uint32_t, ServoCommand> servos{};
             for (const auto& target : frame.targets) {
-                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                servos[target.id] = ServoCommand(time,
+                                                 target.position,
+                                                 ServoState(target.gain, target.torque),
+                                                 ServoCommand::DoneType::TIME);
             }
 
             // Add the map to the pack. This represents one sequence of servos.
@@ -279,15 +293,15 @@ namespace YAML {
                                                       node["torque"].IsDefined() ? node["torque"].as<float>() : 100.0f};
             }
             catch (const YAML::Exception& e) {
-                NUClear::log<NUClear::ERROR>("Error parsing script -",
-                                             "Line:",
-                                             e.mark.line,
-                                             "Column:",
-                                             e.mark.column,
-                                             "Pos:",
-                                             e.mark.pos,
-                                             "Message:",
-                                             e.msg);
+                NUClear::log<NUClear::LogLevel::ERROR>("Error parsing script -",
+                                                       "Line:",
+                                                       e.mark.line,
+                                                       "Column:",
+                                                       e.mark.column,
+                                                       "Pos:",
+                                                       e.mark.pos,
+                                                       "Message:",
+                                                       e.msg);
                 return false;
             }
 
@@ -322,15 +336,15 @@ namespace YAML {
                 rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
-                NUClear::log<NUClear::ERROR>("Error parsing script -",
-                                             "Line:",
-                                             e.mark.line,
-                                             "Column:",
-                                             e.mark.column,
-                                             "Pos:",
-                                             e.mark.pos,
-                                             "Message:",
-                                             e.msg);
+                NUClear::log<NUClear::LogLevel::ERROR>("Error parsing script -",
+                                                       "Line:",
+                                                       e.mark.line,
+                                                       "Column:",
+                                                       e.mark.column,
+                                                       "Pos:",
+                                                       e.mark.pos,
+                                                       "Message:",
+                                                       e.msg);
                 return false;
             }
 
@@ -361,15 +375,15 @@ namespace YAML {
                 rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
-                NUClear::log<NUClear::ERROR>("Error parsing script -",
-                                             "Line:",
-                                             e.mark.line,
-                                             "Column:",
-                                             e.mark.column,
-                                             "Pos:",
-                                             e.mark.pos,
-                                             "Message:",
-                                             e.msg);
+                NUClear::log<NUClear::LogLevel::ERROR>("Error parsing script -",
+                                                       "Line:",
+                                                       e.mark.line,
+                                                       "Column:",
+                                                       e.mark.column,
+                                                       "Pos:",
+                                                       e.mark.pos,
+                                                       "Message:",
+                                                       e.msg);
                 return false;
             }
 

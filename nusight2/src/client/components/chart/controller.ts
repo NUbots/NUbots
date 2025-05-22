@@ -39,7 +39,10 @@ export class ChartController {
   ];
   private usedColors: Set<string> = new Set(["#ffffff"]);
 
-  constructor(private model: ChartModel, private clock: Clock) {
+  constructor(
+    private model: ChartModel,
+    private clock: Clock,
+  ) {
     this.model = model;
     this.clock = clock;
   }

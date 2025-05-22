@@ -1,11 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Radius to begin aligning with desired field heading
-align_radius: 0.5
-
-# Error tolerance for stopping at desired field position
-stop_tolerance: 0.25
-
-# Resume walking to field position tolerance
-resume_tolerance: 0.5
+stop_threshold: 0.2
+stopped_threshold: 0.4

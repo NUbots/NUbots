@@ -27,6 +27,10 @@ SOFTWARE.
 cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
+# Set the compiler version of the project
+set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
+set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
+
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)
 
@@ -78,14 +82,14 @@ if(NOT SUBCONTROLLER)
       CACHE STRING "Choose the subcontroller to build for." FORCE
   )
   # Set the possible values of subcontroller for cmake-gui
-  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR")
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR" "NUSense")
 endif()
 
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY) # Turn back on for CI_BUILD once we have fixed all the warnings
-  find_package(PythonInterp 3 REQUIRED)
-  set(CMAKE_CXX_CLANG_TIDY "${PYTHON_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
+  find_package(Python3 REQUIRED)
+  set(CMAKE_CXX_CLANG_TIDY "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
                            "${PROJECT_BINARY_DIR}/clang-tidy-fixes" clang-tidy
   )
   set(CMAKE_C_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY})
@@ -130,9 +134,6 @@ add_compile_options(-fnon-call-exceptions)
 # We use C++20
 add_compile_options(-std=c++20)
 
-# Make NUClear use the system clock, as we are syncing it with ptp
-add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::steady_clock)
-
 # Make the compiler display colours always (even when we build with ninja)
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
   add_compile_options(-fdiagnostics-color=always)
@@ -152,24 +153,18 @@ option(BUILD_ALL_MODULES "Create a role with all modules included" OFF)
 # Include the NUClear roles system
 add_subdirectory(nuclear)
 
-# Setting to use the custom clock with an adaptable rate
-option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
-if(USE_CUSTOM_CLOCK)
-  add_subdirectory(shared/clock)
-endif()
-
 # Add the shared tests. Must happen after adding NUClear so that this variable is cached
 if(BUILD_TESTS)
   add_subdirectory(${NUCLEAR_SHARED_DIR}/tests)
 endif()
 
 # Generate VSCode launch configurations
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 REQUIRED)
 list(JOIN NUCLEAR_ROLES " " launch_roles)
 add_custom_command(
   OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
   COMMAND
-    ${PYTHON_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
+    ${Python3_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
     "${PROJECT_SOURCE_DIR}" "-b" "${PROJECT_BINARY_DIR}" "-l" "${PROJECT_SOURCE_DIR}/.vscode/launch.json" "-a"
     "${USE_ASAN}" "${launch_roles}"
   DEPENDS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py"

@@ -27,12 +27,16 @@ export class DirectNUClearNetClient implements NUClearNetClient {
   }
 
   onJoin(cb: NUClearEventListener): () => void {
-    this.nuclearNetwork.on("nuclear_join", cb);
+    this.nuclearNetwork.on("nuclear_join", (peer) => {
+      cb({ ...peer, type: "nuclearnet-peer" });
+    });
     return () => this.nuclearNetwork.removeListener("nuclear_join", cb);
   }
 
   onLeave(cb: NUClearEventListener): () => void {
-    this.nuclearNetwork.on("nuclear_leave", cb);
+    this.nuclearNetwork.on("nuclear_leave", (peer) => {
+      cb({ ...peer, type: "nuclearnet-peer" });
+    });
     return () => this.nuclearNetwork.removeListener("nuclear_leave", cb);
   }
 

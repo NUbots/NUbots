@@ -35,7 +35,7 @@
 #include "message/eye/DataPoint.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 
 namespace module::network {
 
@@ -51,26 +51,26 @@ namespace module::network {
 
             send_address = cfg["udp_server"]["ip_address"].as<std::string>();
             send_port    = cfg["udp_server"]["port"].as<int>();
-            hostname     = utility::support::getHostname();
+            hostname     = utility::support::get_hostname();
 
             bool forward_datapoints = cfg["forward_datapoints"].as<bool>();
             forwarder_reaction.enable(forward_datapoints);
 
             if (forward_datapoints) {
-                log<NUClear::INFO>("DataPoint forwarding setup for PlotJuggler. Sending to UDP server at",
-                                   send_address,
-                                   "port",
-                                   send_port);
+                log<INFO>("DataPoint forwarding setup for PlotJuggler. Sending to UDP server at",
+                          send_address,
+                          "port",
+                          send_port);
             }
             else {
-                log<NUClear::WARN>("DataPoint forwarding via UDP disabled in PlotJuggler.yaml config file");
+                log<WARN>("DataPoint forwarding via UDP disabled in PlotJuggler.yaml config file");
             }
 
             bool send_debug_waves = cfg["send_debug_waves"].as<bool>();
             debug_waves_reaction.enable(send_debug_waves);
 
             if (send_debug_waves) {
-                log<NUClear::INFO>("Debug waves enabled");
+                log<INFO>("Debug waves enabled");
             }
         });
 

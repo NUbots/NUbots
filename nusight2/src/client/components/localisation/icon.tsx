@@ -7,7 +7,7 @@ export default function IconLocalisation(props: { className?: string }) {
       viewBox="0 0 32 32"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
-      stroke="#fff"
+      stroke="currentColor"
       strokeLinejoin="round"
       strokeWidth="2"
     >

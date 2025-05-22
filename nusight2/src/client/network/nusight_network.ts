@@ -1,13 +1,13 @@
 import { runInAction } from "mobx";
 import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetOptions } from "nuclearnet.js";
-import { NUClearNetPeer } from "nuclearnet.js";
 import { NUClearNetSend } from "nuclearnet.js";
 
 import { MessageType } from "../../shared/messages";
 import { Emit } from "../../shared/messages/emit";
 import { messageTypeToName } from "../../shared/messages/type_converters";
-import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
+import { NUClearNetClient, NUClearNetPeerWithType } from "../../shared/nuclearnet/nuclearnet_client";
+import { memoize } from "../base/memoize";
 import { AppModel } from "../components/app/model";
 import { RobotModel } from "../components/robot/model";
 import { WebSocketClient } from "../nuclearnet/web_socket_client";
@@ -27,6 +27,7 @@ const nusightServerRobotModel = RobotModel.of({
   enabled: true,
   id: "nusight",
   port: 0,
+  type: "nusight-server",
 });
 
 /**
@@ -35,12 +36,15 @@ const nusightServerRobotModel = RobotModel.of({
  * instead create their own ComponentNetwork class which uses the Network helper class.
  */
 export class NUsightNetwork {
-  constructor(private nuclearnetClient: NUClearNetClient, private appModel: AppModel) {}
+  constructor(
+    private nuclearnetClient: NUClearNetClient,
+    private appModel: AppModel,
+  ) {}
 
-  static of(appModel: AppModel) {
+  static of = memoize((appModel: AppModel) => {
     const nuclearnetClient: NUClearNetClient = WebSocketProxyNUClearNetClient.of();
     return new NUsightNetwork(nuclearnetClient, appModel);
-  }
+  });
 
   connect(opts: NUClearNetOptions): () => void {
     return this.nuclearnetClient.connect(opts);
@@ -108,11 +112,11 @@ export class NUsightNetwork {
     });
   }
 
-  onNUClearJoin(cb: (peer: NUClearNetPeer) => void) {
+  onNUClearJoin(cb: (peer: NUClearNetPeerWithType) => void) {
     this.nuclearnetClient.onJoin(cb);
   }
 
-  onNUClearLeave(cb: (peer: NUClearNetPeer) => void) {
+  onNUClearLeave(cb: (peer: NUClearNetPeerWithType) => void) {
     this.nuclearnetClient.onLeave(cb);
   }
 }

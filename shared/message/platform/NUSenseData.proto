@@ -1,0 +1,119 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+/**
+ * @author Johanne Montano
+ */
+
+syntax = "proto3";
+
+package message.platform;
+
+// Message mainly for NUSense <-> NUC communication. NUSense will encode this message via nanopb after it queries all
+// servo states and send it to the NUC.
+message Servo {
+
+    message PacketCounts {
+        /// The total number of packets received.
+        uint32 total = 1;
+        /// The number of timeouts.
+        uint32 timeouts = 2;
+        /// The number of CRC-errors.
+        uint32 crc_errors = 3;
+        /// The number of packet-errors.
+        uint32 packet_errors = 4;
+    }
+
+    /// The ID of the servo
+    uint32 id = 1;
+    /// Current error state of the servo
+    /// different to the dynamixel packet error status
+    uint32 hardware_error = 2;
+    /// Whether the servo's torque is enabled, allowing it to move
+    bool torque_enabled = 3;
+    // Values that are either simulated or read from the servos
+    /// The last read pulse width modulation of the servo
+    float present_pwm = 4;
+    /// The last read current of the servo
+    float present_current = 5;
+    /// The last read velocity of the servo
+    float present_velocity = 6;
+    /// The last read position of the servo
+    float present_position = 7;
+    // The desired pwm value for motor control
+    float goal_pwm = 8;
+    // The desired current value for the servo
+    float goal_current = 9;
+    // The desired velocity value for the servo
+    float goal_velocity = 10;
+    // The desired position value for the servo
+    float goal_position = 11;
+    /// The last read voltage of the servo
+    float voltage = 12;
+    /// The last read temperature of the servo
+    float temperature = 13;
+    /// The windowed counts of the dynamixel packets since the last NUSense message
+    PacketCounts packet_counts = 14;
+}
+
+message IMU {
+
+    message fvec3 {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+
+    fvec3  accel       = 1;
+    fvec3  gyro        = 2;
+    uint32 temperature = 3;
+}
+
+message NUSense {
+    /* INDEX MAPPING
+     *  0  : r_shoulder_pitch
+     *  1  : l_shoulder_pitch
+     *  2  : r_shoulder_roll
+     *  3  : l_shoulder_roll
+     *  4  : r_elbow
+     *  5  : l_elbow
+     *  6  : r_hip_yaw
+     *  7  : l_hip_yaw
+     *  8  : r_hip_roll
+     *  9  : l_hip_roll
+     *  10 : r_hip_pitch
+     *  11 : l_hip_pitch
+     *  12 : r_knee
+     *  13 : l_knee
+     *  14 : r_ankle_pitch
+     *  15 : l_ankle_pitch
+     *  16 : r_ankle_roll
+     *  17 : l_ankle_roll
+     *  18 : head_yaw
+     *  19 : head_pitch
+     */
+    map<uint32, Servo> servo_map = 1;
+    IMU                imu       = 2;
+}

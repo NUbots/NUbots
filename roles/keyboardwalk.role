@@ -8,10 +8,11 @@ nuclear_role(
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
+  network::NUClearNet
+  network::NetworkForwarder
   network::PlotJuggler
   # Sensors
   input::SensorFilter
-  platform::${SUBCONTROLLER}::HardwareIO
   # Director
   extension::Director
   # Servos
@@ -27,8 +28,11 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
+  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )

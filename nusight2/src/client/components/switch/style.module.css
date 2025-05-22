@@ -17,7 +17,10 @@
 
 .thumb {
   border-radius: 100%;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
   height: 1.6em;
   left: 0;
   position: absolute;
@@ -31,7 +34,7 @@
 }
 
 .thumbOn {
-  background-color: #1197d3;
+  background-color: var(--color-nusight-500);
   transform: translateX(1.3em);
 }
 
@@ -47,6 +50,6 @@
 }
 
 .trackOn {
-  background-color: #1197d3;
+  background-color: var(--color-nusight-500);
   opacity: 0.5;
 }

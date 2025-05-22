@@ -2,7 +2,7 @@ import React from "react";
 import { action } from "@storybook/addon-actions";
 import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable, reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import { now } from "mobx-utils";
 
 import { SeededRandom } from "../../../../shared/base/random/seeded_random";
@@ -72,6 +72,7 @@ function getRobots(): RobotModel[] {
       enabled: true,
       address: "",
       port: 0,
+      type: "nuclearnet-peer",
     },
     {
       id: "2",
@@ -80,6 +81,7 @@ function getRobots(): RobotModel[] {
       enabled: true,
       address: "",
       port: 0,
+      type: "nuclearnet-peer",
     },
     {
       id: "3",
@@ -88,6 +90,7 @@ function getRobots(): RobotModel[] {
       enabled: true,
       address: "",
       port: 0,
+      type: "nuclearnet-peer",
     },
   ];
 }
@@ -96,6 +99,8 @@ const random = SeededRandom.of("random-stats");
 
 @observer
 export class UpdatingStatsStory extends React.Component<{ robots: RobotModel[] }> {
+  private dispose?: () => void;
+
   render() {
     const { robots } = this.props;
 
@@ -118,9 +123,11 @@ export class UpdatingStatsStory extends React.Component<{ robots: RobotModel[] }
   };
 
   componentDidMount() {
-    disposeOnUnmount(
-      this,
-      reaction(() => now("frame"), this.updateStats, { fireImmediately: true }),
-    );
+    this.dispose = reaction(() => now("frame"), this.updateStats, { fireImmediately: true });
+  }
+
+  componentWillUnmount() {
+    this.dispose?.();
+    this.dispose = undefined;
   }
 }

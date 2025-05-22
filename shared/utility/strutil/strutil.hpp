@@ -29,6 +29,7 @@
 #define UTILITY_STRUTIL_HPP
 
 #include <algorithm>
+#include <functional>
 #include <string>
 
 
@@ -119,6 +120,45 @@ namespace utility::strutil {
         std::transform(output.begin(), output.end(), output.begin(), ::toupper);
 
         return output;
+    }
+
+    // Joins elements of a vector into a single string using a delimiter.
+    template <typename T>
+    [[nodiscard]] inline std::string join(const std::vector<T>& list, const std::string& delimiter) {
+        std::stringstream stream;
+
+        for (int i = 0; i < int(list.size()); ++i) {
+            stream << list[i];
+            if ((i + 1) < int(list.size())) {
+                stream << delimiter;
+            }
+        }
+
+        return stream.str();
+    }
+
+
+    inline std::string dedent(const std::string& input) {
+
+        size_t min_leading             = std::numeric_limits<size_t>::max();
+        std::vector<std::string> lines = split(input, '\n');
+        for (const auto& l : lines) {
+            // Count the amount of leading whitespace on non empty lines
+            auto it     = std::find_if(l.begin(), l.end(), std::not_fn(std::iswspace));
+            min_leading = it == l.end() ? min_leading : std::min(min_leading, size_t(std::distance(l.begin(), it)));
+        }
+
+        // Remove the common leading whitespace from each line
+        for (auto& l : lines) {
+            if (l.size() >= min_leading) {
+                l.erase(0, min_leading);
+            }
+            else {
+                l.clear();
+            }
+        }
+
+        return join(lines, "\n");
     }
 }  // namespace utility::strutil
 

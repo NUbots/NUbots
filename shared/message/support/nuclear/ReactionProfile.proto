@@ -1,0 +1,60 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+package message.support.nuclear;
+
+message ReactionProfile {
+    /// Name of the reaction
+    string name = 1;
+    /// Name of the reactor
+    string reactor = 2;
+    /// ID of the reaction
+    uint32 reaction_id = 3;
+    /// Total time spent in the reaction
+    double total_time = 4;
+    /// Number of times the reaction was called
+    uint64 count = 5;
+    /// Maximum time spent in the reaction
+    double max_time = 6;
+    /// Minimum time spent in the reaction
+    double min_time = 7;
+    /// Average time spent in the reaction
+    double avg_time = 8;
+    /// Percentage of time spent in the reaction (total_time / total time since start)
+    double percentage = 9;
+}
+
+message ReactionProfiles {
+    /// List of reaction profiles
+    repeated ReactionProfile reaction_profiles = 1;
+
+    /// Total time for all reactions
+    double total_time = 2;
+
+    /// Total number of reactions
+    uint64 total_count = 3;
+}

@@ -5,7 +5,6 @@ import { observer } from "mobx-react";
 import { Renderer } from "../../../render2d/renderer";
 
 import { FieldModel } from "./model";
-import style from "./style.module.css";
 import { FieldViewModel } from "./view_model";
 
 export type FieldProps = {
@@ -18,10 +17,10 @@ export class Field extends Component<FieldProps> {
     const model = this.props.model;
     const viewModel = FieldViewModel.of(model);
     return (
-      <div className={style.container}>
+      <div className="h-full m-0 p-0 bottom-0 absolute w-full">
         <Renderer
           engine="svg"
-          className={style.field}
+          className="h-full m-0 p-0 absolute w-full"
           scene={viewModel.scene}
           camera={viewModel.camera}
           aspectRatio={viewModel.aspectRatio}

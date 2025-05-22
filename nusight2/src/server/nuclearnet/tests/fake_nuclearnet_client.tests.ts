@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { FakeNUClearNetClient } from "../fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../fake_nuclearnet_server";
 
@@ -15,7 +17,7 @@ describe("FakeNUClearNetClient", () => {
   });
 
   it("receives own join event", () => {
-    const onJoin = jest.fn();
+    const onJoin = vi.fn();
     bob.onJoin(onJoin);
 
     bob.connect({ name: "bob" });
@@ -25,7 +27,7 @@ describe("FakeNUClearNetClient", () => {
   });
 
   it("does not receive own leave event", () => {
-    const onLeave = jest.fn();
+    const onLeave = vi.fn();
     bob.onLeave(onLeave);
 
     const disconnect = bob.connect({ name: "bob" });
@@ -38,10 +40,10 @@ describe("FakeNUClearNetClient", () => {
     bob.connect({ name: "bob" });
     alice.connect({ name: "alice" });
 
-    const bobOnJoin = jest.fn();
+    const bobOnJoin = vi.fn();
     bob.onJoin(bobOnJoin);
 
-    const aliceOnJoin = jest.fn();
+    const aliceOnJoin = vi.fn();
     alice.onJoin(aliceOnJoin);
 
     eve.connect({ name: "eve" });
@@ -57,11 +59,11 @@ describe("FakeNUClearNetClient", () => {
     bob.connect({ name: "bob" });
     alice.connect({ name: "alice" });
 
-    const bobOnJoin = jest.fn();
+    const bobOnJoin = vi.fn();
     const bobOffJoin = bob.onJoin(bobOnJoin);
     bobOffJoin();
 
-    const aliceOnJoin = jest.fn();
+    const aliceOnJoin = vi.fn();
     alice.onJoin(aliceOnJoin);
 
     eve.connect({ name: "eve" });
@@ -76,10 +78,10 @@ describe("FakeNUClearNetClient", () => {
     bob.connect({ name: "bob" });
     alice.connect({ name: "alice" });
 
-    const bobOnLeave = jest.fn();
+    const bobOnLeave = vi.fn();
     bob.onLeave(bobOnLeave);
 
-    const aliceOnLeave = jest.fn();
+    const aliceOnLeave = vi.fn();
     alice.onLeave(aliceOnLeave);
 
     const disconnectEve = eve.connect({ name: "eve" });
@@ -96,11 +98,11 @@ describe("FakeNUClearNetClient", () => {
     bob.connect({ name: "bob" });
     alice.connect({ name: "alice" });
 
-    const bobOnLeave = jest.fn();
+    const bobOnLeave = vi.fn();
     const bobOffLeave = bob.onLeave(bobOnLeave);
     bobOffLeave();
 
-    const aliceOnLeave = jest.fn();
+    const aliceOnLeave = vi.fn();
     alice.onLeave(aliceOnLeave);
 
     const disconnectEve = eve.connect({ name: "eve" });
@@ -116,7 +118,7 @@ describe("FakeNUClearNetClient", () => {
     bob.connect({ name: "bob" });
     alice.connect({ name: "alice" });
 
-    const onJoin = jest.fn();
+    const onJoin = vi.fn();
     eve.onJoin(onJoin);
     eve.connect({ name: "eve" });
 
@@ -129,7 +131,7 @@ describe("FakeNUClearNetClient", () => {
   it("receives own messages", () => {
     bob.connect({ name: "bob" });
 
-    const onSensors = jest.fn();
+    const onSensors = vi.fn();
     bob.on("sensors", onSensors);
 
     const payload = Buffer.alloc(8);
@@ -149,13 +151,13 @@ describe("FakeNUClearNetClient", () => {
     alice.connect({ name: "alice" });
     eve.connect({ name: "eve" });
 
-    const bobOnSensors = jest.fn();
+    const bobOnSensors = vi.fn();
     bob.on("sensors", bobOnSensors);
 
-    const aliceOnSensors = jest.fn();
+    const aliceOnSensors = vi.fn();
     alice.on("sensors", aliceOnSensors);
 
-    const eveOnSensors = jest.fn();
+    const eveOnSensors = vi.fn();
     eve.on("sensors", eveOnSensors);
 
     const payload = Buffer.alloc(8);
@@ -191,13 +193,13 @@ describe("FakeNUClearNetClient", () => {
     alice.connect({ name: "alice" });
     eve.connect({ name: "eve" });
 
-    const bobOnPacket = jest.fn();
+    const bobOnPacket = vi.fn();
     bob.onPacket(bobOnPacket);
 
-    const aliceOnPacket = jest.fn();
+    const aliceOnPacket = vi.fn();
     alice.onPacket(aliceOnPacket);
 
-    const eveOnSensors = jest.fn();
+    const eveOnSensors = vi.fn();
     eve.on("sensors", eveOnSensors);
 
     const payload = Buffer.alloc(8);
@@ -233,13 +235,13 @@ describe("FakeNUClearNetClient", () => {
     alice.connect({ name: "alice" });
     eve.connect({ name: "eve" });
 
-    const bobOnSensors = jest.fn();
+    const bobOnSensors = vi.fn();
     bob.on("sensors", bobOnSensors);
 
-    const aliceOnSensors = jest.fn();
+    const aliceOnSensors = vi.fn();
     alice.on("sensors", aliceOnSensors);
 
-    const eveOnSensors = jest.fn();
+    const eveOnSensors = vi.fn();
     eve.on("sensors", eveOnSensors);
 
     const payload = Buffer.alloc(8);
@@ -265,13 +267,13 @@ describe("FakeNUClearNetClient", () => {
     bob2.connect({ name: "bob" });
     eve.connect({ name: "eve" });
 
-    const bobOnSensors1 = jest.fn();
+    const bobOnSensors1 = vi.fn();
     bob1.on("sensors", bobOnSensors1);
 
-    const bobOnSensors2 = jest.fn();
+    const bobOnSensors2 = vi.fn();
     bob2.on("sensors", bobOnSensors2);
 
-    const eveOnSensors = jest.fn();
+    const eveOnSensors = vi.fn();
     eve.on("sensors", eveOnSensors);
 
     const payload = Buffer.alloc(8);

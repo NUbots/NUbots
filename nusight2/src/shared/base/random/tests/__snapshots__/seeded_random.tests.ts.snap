@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SeededRandom #choice should always return the same element from the array 1`] = `59`;
+exports[`SeededRandom > #choice > should always return the same element from the array 1`] = `59`;
 
-exports[`SeededRandom #float should always generate the same set of values 1`] = `
+exports[`SeededRandom > #float > should always generate the same set of values 1`] = `
 [
   0.598581516914215,
   0.06231463079092458,
@@ -107,7 +107,7 @@ exports[`SeededRandom #float should always generate the same set of values 1`] =
 ]
 `;
 
-exports[`SeededRandom #integer should always generate the same set of values 1`] = `
+exports[`SeededRandom > #integer > should always generate the same set of values 1`] = `
 [
   59,
   6,

@@ -45,11 +45,16 @@ def register(command):
     command.add_argument(
         "--gdb", dest="use_gdb", action="store_true", default=False, help="Run the specified program using gdb"
     )
+    command.add_argument("--trace", action="store_true", default=False, help="Generate a trace file for the program")
+    command.add_argument("--trace-output", default="recordings/trace.pftrace", help="The output file for the trace")
+    command.add_argument("--webots_port", type=int, default=None, help="The port to use for webots")
+    command.add_argument("--player_id", type=int, default=None, help="The player id to use for the player")
+    command.add_argument("--team_id", type=int, default=None, help="The team id to use for the player")
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 
 
 @run_on_docker
-def run(args, use_gdb, **kwargs):
+def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **kwargs):
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
@@ -62,9 +67,12 @@ def run(args, use_gdb, **kwargs):
     # Get current environment
     env = os.environ
 
+    if trace:
+        env["NUCLEAR_TRACE_FILE"] = trace_output
+
     # Make sure default log path exists
     if use_asan:
-        log_path = os.path.join(os.sep, "home", "NUbots", "NUbots", "log")
+        log_path = os.path.join(os.sep, "home", "nubots", "NUbots", "log")
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     # Add necessary ASAN environment variables
@@ -109,6 +117,14 @@ def run(args, use_gdb, **kwargs):
         cmd.extend(["-ex", "r", "--args"])
     else:
         cmd = []
+
+    # Add webots settings to the args if they are set
+    if webots_port is not None:
+        args.extend(["--webots_port", str(webots_port)])
+    if player_id is not None:
+        args.extend(["--player_id", str(player_id)])
+    if team_id is not None:
+        args.extend(["--team_id", str(team_id)])
 
     # Run the command
     pty = WrapPty()
