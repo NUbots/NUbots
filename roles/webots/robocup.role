@@ -67,6 +67,6 @@ nuclear_role(
   purpose::Attack
   purpose::Defend
   purpose::FieldPlayer
-  #purpose::Support
+  # purpose::Support
   purpose::Goalie
 )
