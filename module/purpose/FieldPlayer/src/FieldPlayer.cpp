@@ -43,16 +43,6 @@ namespace module::purpose {
             cfg.ball_threshold = config["ball_threshold"].as<double>();
         });
 
-        // When not playing or in ready, stand still
-        on<Provide<FieldPlayerMsg>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
-
-        // READY state
-        on<Provide<FieldPlayerMsg>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
-            // todo Determine dynamically the best ready position
-            Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
-            emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
-        });
-
         // PLAYING state
         on<Provide<FieldPlayerMsg>,
            With<Ball>,
@@ -127,6 +117,15 @@ namespace module::purpose {
                     "We are not the attacker, nor are we the robot hanging back to protect, so we should help out");
                 emit<Task>(std::make_unique<Support>());
             });
+
+        // READY state
+        on<Provide<FieldPlayerMsg>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
+            // todo Determine dynamically the best ready position
+            Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
+            emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
+        });
+        // When not playing or in ready, stand still
+        on<Provide<FieldPlayerMsg>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
 }  // namespace module::purpose
