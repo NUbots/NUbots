@@ -267,6 +267,11 @@ namespace module::localisation {
                                         const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
+        // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
+        std::sort(tracked_robots.begin(), tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
+            return a.teammate_id > b.teammate_id;
+        });
+
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
 
