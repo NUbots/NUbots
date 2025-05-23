@@ -44,7 +44,6 @@
 #include "utility/math/euler.hpp"
 namespace module::network {
 
-    // add usings
     using extension::Configuration;
     using message::behaviour::state::WalkState;
     using message::input::GameState;
