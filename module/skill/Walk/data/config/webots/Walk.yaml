@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 walk:
   # Time for one complete step (in seconds).
@@ -9,9 +9,9 @@ walk:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]
     # Step height (in meters)
-    height: 0.085
+    height: 0.1
     # Lateral distance in meters between feet (how spread apart the feet should be)
-    width: 0.22
+    width: 0.24
     # Ratio of the step_period where the foot should be at its highest point, between [0 1].
     apex_ratio: 0.4
   torso:

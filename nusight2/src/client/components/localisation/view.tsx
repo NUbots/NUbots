@@ -439,4 +439,200 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
   </object3D>
 ));
 
-export default LocalisationView;
+const Balls = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible &&
+          robot.rBFf && (
+            <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
+              <sphereBufferGeometry args={[1, 32, 32]} /> {/* Increased detail for the texture */}
+              <meshStandardMaterial map={soccerBallTexture} />
+            </mesh>
+          ),
+      )}
+    </>
+  );
+};
+
+const Goals = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible &&
+        robot.rGFf && (
+          <object3D key={robot.id}>
+            {robot.rGFf.map((goal, i) => {
+              return (
+                <mesh
+                  key={String(i)}
+                  position={goal.bottom.add(new Vector3(0, 0, goal.top.z / 2)).toArray()}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
+                  <cylinderBufferGeometry args={[0.05, 0.05, goal.top.z, 20]} />
+                  <meshStandardMaterial color="magenta" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Robots = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible &&
+        robot.robots && (
+          <object3D key={robot.id}>
+            {robot.rRFf.map((r, i) => {
+              return (
+                <mesh key={String(i)} position={r.add(new Vector3(0, 0, 0.4)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderBufferGeometry args={[0.1, 0.1, 0.8, 20]} />
+                  <meshStandardMaterial color="orange" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Robot = ({ model }: { model: LocalisationRobotModel }) => {
+  const robotRef = React.useRef<URDFRobot | null>(null);
+
+  // Load the URDF model only once
+  React.useEffect(() => {
+    const loader = new URDFLoader();
+    loader.load(nugusUrdfPath, (robot: URDFRobot) => {
+      if (robotRef.current) {
+        robotRef.current.add(robot);
+      }
+    });
+  }, [nugusUrdfPath]);
+
+  const position = model.Hft.decompose().translation;
+  const rotation = model.Hft.decompose().rotation;
+  const motors = model.motors;
+
+  React.useEffect(() => {
+    // Update robot's pose
+    if (robotRef.current) {
+      robotRef.current.position.copy(new THREE.Vector3(position.x, position.y, position.z));
+      robotRef.current.quaternion.copy(new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+      const joints = (robotRef.current?.children[0] as any)?.joints;
+      // Update robot's joints
+      if (joints) {
+        joints?.head_pitch.setJointValue(motors.headTilt.angle);
+        joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
+        joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
+        joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
+        joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
+        joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
+        joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
+        joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
+        joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
+        joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
+        joints?.neck_yaw.setJointValue(motors.headPan.angle);
+        joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
+        joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
+        joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
+        joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
+        joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
+        joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
+        joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
+        joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
+        joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
+      }
+    }
+  }, [position, rotation, motors]);
+
+  // Update the material of the robot
+  const material = new THREE.MeshStandardMaterial({
+    color: "#666666",
+    roughness: 0.5,
+    metalness: 0.2,
+  });
+  if (robotRef.current) {
+    robotRef.current.traverse((child) => {
+      if (child.type === "URDFVisual" && child.children.length > 0) {
+        const mesh = child.children[0] as THREE.Mesh;
+        mesh.material = material;
+      }
+    });
+  }
+
+  return <object3D ref={robotRef} />;
+};
+const MujocoRobot = ({ model }: { model: LocalisationRobotModel }) => {
+  const robotRef = React.useRef<URDFRobot | null>(null);
+
+  // Load the URDF model only once
+  React.useEffect(() => {
+    const loader = new URDFLoader();
+    loader.load(nugusUrdfPath, (robot: URDFRobot) => {
+      if (robotRef.current) {
+        robotRef.current.add(robot);
+      }
+    });
+  }, [nugusUrdfPath]);
+
+  const Hwt = model.Htw_mujoco.invert();
+
+  const position = Hwt.decompose().translation;
+  const rotation = Hwt.decompose().rotation;
+  const motors = model.motors_mujoco;
+
+  React.useEffect(() => {
+    // Update robot's pose
+    if (robotRef.current) {
+      robotRef.current.position.copy(new THREE.Vector3(position.x, position.y, position.z));
+      robotRef.current.quaternion.copy(new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+      const joints = (robotRef.current?.children[0] as any)?.joints;
+      // Update robot's joints
+      if (joints) {
+        joints?.head_pitch.setJointValue(motors.headTilt.angle);
+        joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
+        joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
+        joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
+        joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
+        joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
+        joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
+        joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
+        joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
+        joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
+        joints?.neck_yaw.setJointValue(motors.headPan.angle);
+        joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
+        joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
+        joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
+        joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
+        joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
+        joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
+        joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
+        joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
+        joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
+      }
+    }
+  }, [position, rotation, motors]);
+
+  // Update the material of the robot
+  const material = new THREE.MeshStandardMaterial({
+    color: "#111111",
+    roughness: 0.5,
+    metalness: 0.2,
+  });
+  if (robotRef.current) {
+    robotRef.current.traverse((child) => {
+      if (child.type === "URDFVisual" && child.children.length > 0) {
+        const mesh = child.children[0] as THREE.Mesh;
+        mesh.material = material;
+      }
+    });
+  }
+
+  return <object3D ref={robotRef} />;
+};
