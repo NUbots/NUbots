@@ -146,6 +146,13 @@ namespace module::actuation {
             if (foot_control_task.correction_enabled && cfg.correction_enabled) {
                 // Hwt quaternion
                 Eigen::Quaterniond Hwt_quat(sensors.Htw.inverse().linear());
+                // Eigen::Quaterniond Hwt_quat;
+                // Hwt_quat = sensors.Htw.inverse().linear();
+                // Test before use
+                emit(graph("Debug/Hwt_quat_w_before_use", Hwt_quat.w()));
+                emit(graph("Debug/Hwt_quat_x_before_use", Hwt_quat.x()));
+                emit(graph("Debug/Hwt_quat_y_before_use", Hwt_quat.y()));
+                emit(graph("Debug/Hwt_quat_z_before_use", Hwt_quat.z()));
 
                 // Get fused roll and pitch
                 double fused_roll;
@@ -159,23 +166,15 @@ namespace module::actuation {
                 fused_roll += cfg.support_foot_offset_y;
 
                 // Get the desired roll and pitch
-                Eigen::Quaterniond Hft_quat(ik_task->Htf.inverse().linear());
-                // ***** DEBUG *****
-                // Debug the raw position components
-                // Extract rotation matrix from sensors
-                Eigen::Matrix3d sensors_rot_matrix = sensors.Htw.inverse().linear();
+                Eigen::Quaterniond Hft_quat;
+                Hft_quat = ik_task->Htf.inverse().linear();
+                // Eigen::Quaterniond Hft_quat(ik_task->Htf.inverse().linear());
+                // Debug quat before use
+                emit(graph("Debug/Hft_quat_w_before_use", Hft_quat.w()));
+                emit(graph("Debug/Hft_quat_x_before_use", Hft_quat.x()));
+                emit(graph("Debug/Hft_quat_y_before_use", Hft_quat.y()));
+                emit(graph("Debug/Hft_quat_z_before_use", Hft_quat.z()));
 
-                // Graph each element of the rotation matrix
-                emit(graph("SensorsMatrix/R_00", sensors_rot_matrix(0, 0)));
-                emit(graph("SensorsMatrix/R_01", sensors_rot_matrix(0, 1)));
-                emit(graph("SensorsMatrix/R_02", sensors_rot_matrix(0, 2)));
-                emit(graph("SensorsMatrix/R_10", sensors_rot_matrix(1, 0)));
-                emit(graph("SensorsMatrix/R_11", sensors_rot_matrix(1, 1)));
-                emit(graph("SensorsMatrix/R_12", sensors_rot_matrix(1, 2)));
-                emit(graph("SensorsMatrix/R_20", sensors_rot_matrix(2, 0)));
-                emit(graph("SensorsMatrix/R_21", sensors_rot_matrix(2, 1)));
-                emit(graph("SensorsMatrix/R_22", sensors_rot_matrix(2, 2)));
-                // ***** ***** *****
                 double desired_roll;
                 double desired_pitch;
                 FusedFromQuat(Hft_quat, desired_pitch, desired_roll);
@@ -231,30 +230,49 @@ namespace module::actuation {
                 Htf_corrected.linear()          = desired_Rft.transpose();
 
                 ik_task->Htf = Htf_corrected;
-                // Actual roll and pitch
-                emit(graph("FootController/actual_roll", fused_roll));
-                emit(graph("FootController/actual_pitch", fused_pitch));
-                // Desired roll and pitch
-                emit(graph("FootController/desired_roll", desired_roll));
-                emit(graph("FootController/desired_pitch", desired_pitch));
+
                 if (log_level <= DEBUG) {
-                    // // Actual roll and pitch
-                    // emit(graph("FootController/actual_roll", fused_roll));
-                    // emit(graph("FootController/actual_pitch", fused_pitch));
-                    // // Desired roll and pitch
-                    // emit(graph("FootController/desired_roll", desired_roll));
-                    // emit(graph("FootController/desired_pitch", desired_pitch));
-                    // Roll and pitch error
-                    emit(graph("FootController/roll_error", roll_error));
-                    emit(graph("FootController/pitch_error", pitch_error));
-                    // Quaternion components representing foot orientation
-                    emit(graph("FootController/Hft_quat_w", Hft_quat.w()));
-                    emit(graph("FootController/Hft_quat_x", Hft_quat.x()));
-                    emit(graph("FootController/Hft_quat_y", Hft_quat.y()));
-                    emit(graph("FootController/Hft_quat_z", Hft_quat.z()));
-                    // Planned and corrected foot y positions
-                    emit(graph("FootController/planned_foot_y", foot_control_task.Htf.translation().y()));
-                    emit(graph("FootController/corrected_foot_y", Htf_corrected.translation().y()));
+                    // Htw quaternion debug
+                    // Graph the original quaternion
+                    // emit(graph("Debug/original_quat_w", Hwt_quat.w()));
+                    // emit(graph("Debug/original_quat_x", Hwt_quat.x()));
+                    // emit(graph("Debug/original_quat_y", Hwt_quat.y()));
+                    // emit(graph("Debug/original_quat_z", Hwt_quat.z()));
+                    // // Debug the sensor quaternion conversion
+                    // Eigen::Matrix3d sensor_rotation = sensors.Htw.inverse().linear();
+                    // emit(graph("Debug/sensor_det", sensor_rotation.determinant()));
+                    // emit(graph("Debug/sensor_R00", sensor_rotation(0, 0)));
+                    // emit(graph("Debug/sensor_R11", sensor_rotation(1, 1)));
+                    // emit(graph("Debug/sensor_R22", sensor_rotation(2, 2)));
+
+                    // // Check sensor quaternion conversion
+                    // Eigen::Quaterniond Hwt_quat2;
+                    // emit(graph("Debug/sensor_quat_before", Hwt_quat2.norm()));
+
+                    // Hwt_quat2 = sensor_rotation;
+
+                    // emit(graph("Debug/sensor_quat_w", Hwt_quat2.w()));
+                    // emit(graph("Debug/sensor_quat_x", Hwt_quat2.x()));
+                    // emit(graph("Debug/sensor_quat_y", Hwt_quat2.y()));
+                    // emit(graph("Debug/sensor_quat_z", Hwt_quat2.z()));
+                    // emit(graph("Debug/sensor_quat_norm", Hwt_quat2.norm()));
+
+                    // // Htf quaternion debug
+                    // // Debug the foot quaternion conversion
+                    // Eigen::Matrix3d foot_rotation = ik_task->Htf.inverse().linear();
+                    // emit(graph("Debug/foot_det", foot_rotation.determinant()));
+                    // emit(graph("Debug/foot_R00", foot_rotation(0, 0)));
+                    // emit(graph("Debug/foot_R11", foot_rotation(1, 1)));
+                    // emit(graph("Debug/foot_R22", foot_rotation(2, 2)));
+                    // // Check foot quaternion conversion
+                    // Eigen::Quaterniond Htf_quat2;
+                    // emit(graph("Debug/foot_quat_before", Htf_quat2.norm()));
+                    // Htf_quat2 = foot_rotation;
+                    // emit(graph("Debug/foot_quat_w", Htf_quat2.w()));
+                    // emit(graph("Debug/foot_quat_x", Htf_quat2.x()));
+                    // emit(graph("Debug/foot_quat_y", Htf_quat2.y()));
+                    // emit(graph("Debug/foot_quat_z", Htf_quat2.z()));
+                    // emit(graph("Debug/foot_quat_norm", Htf_quat2.norm()));
                 }
             }
 
@@ -316,7 +334,8 @@ namespace module::actuation {
         double sgamma = sin(gamma);
 
         // Return the required quaternion orientation (a rotation about (cgamma, sgamma, 0) by angle alpha)
-        return Eigen::Quaterniond(chalpha, cgamma * shalpha, sgamma * shalpha, 0.0);  // Order: (w,x,y,z)
+        Eigen::Quaterniond result = Eigen::Quaterniond(chalpha, cgamma * shalpha, sgamma * shalpha, 0.0);
+        return result;  // Order: (w,x,y,z)
     }
 
 
