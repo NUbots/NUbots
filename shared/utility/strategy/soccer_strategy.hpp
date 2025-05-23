@@ -31,6 +31,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <nuclear>
 #include <utility>
 #include <vector>
 
@@ -73,19 +74,17 @@ namespace utility::strategy {
         // 'Hfw' transforms from world to field coordinates.
         // Multiplying these gives 'rBFf', which is the ball's position in field coordinates.
         Eigen::Vector3d rBFf = Hfw * rBWw;
-
-        // Find self distance to ball.
         // 'Hrw' transforms world to robot.
-        Eigen::Vector3d rBRr         = Hrw * rBWw;
-        double self_distance_to_ball = rBRr.norm();
+        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
+        // Find self distance to ball.
+        double self_distance_to_ball = (rRFf - rBFf).head<2>().norm();
         players.push_back({Who{Who::SELF}, self_distance_to_ball});
 
         // Loop through each robot,
         // Subtract ball position (rBFf) from robots position (rRFf) to get vector between both.
         for (const auto& robot : robots.robots) {
-            Eigen::Vector3d rRFf    = Hfw * robot.rRWw;
-            double distance_to_ball = (rRFf - rBFf).norm();
-
+            rRFf                    = Hfw * robot.rRWw;
+            double distance_to_ball = (rRFf - rBFf).head<2>().norm();
             // Skip if not a teammate and not including opponents
             if (robot.teammate_id == 0 && !include_opponents) {
                 continue;
@@ -95,10 +94,13 @@ namespace utility::strategy {
                 std::pair(robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball));
         }
 
-        // The robot closest to the ball is returned
-        return *std::max_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
+        // Find the min element in the list of players' ball distances
+        auto closest = std::min_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
             return a.second < b.second;
         });
+
+        // The robot closest to the ball is returned
+        return closest == players.end() ? std::pair{Who{Who::NONE}, 0.0} : *closest;
     }
 
 
