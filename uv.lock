@@ -457,7 +457,7 @@ wheels = [
 ]
 
 [[package]]
-name = "horus"
+name = "nubots"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
