@@ -82,6 +82,7 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
                     pos_rpy_to_transform(optimal_position, Eigen::Vector3d(0, 0, M_PI_2)),
                     true));
+                log<INFO>("Defending at optimal position: ", optimal_position.transpose());
             });
     }
 

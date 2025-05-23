@@ -42,19 +42,21 @@
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/support/GlobalConfig.hpp"
 
 namespace module::purpose {
 
     using extension::Configuration;
+
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
+
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::ButtonLeftDown;
@@ -66,27 +68,29 @@ namespace module::purpose {
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
+    using message::purpose::FieldPlayer;
+    using message::purpose::FindPurpose;
+    using message::purpose::Goalie;
     using message::purpose::Purpose;
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
-    using message::support::GlobalConfig;
 
     SoccerNew::SoccerNew(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration, Trigger<GlobalConfig>>("SoccerNew.yaml")
-            .then([this](const Configuration& config, const GlobalConfig& global_config) {
-                this->log_level   = config["log_level"].as<NUClear::LogLevel>();
-                cfg.force_playing = config["force_playing"].as<bool>();
+        on<Configuration>("SoccerNew.yaml").then([this](const Configuration& config) {
+            this->log_level   = config["log_level"].as<NUClear::LogLevel>();
+            cfg.force_playing = config["force_playing"].as<bool>();
 
-                cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
+            cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
 
-                cfg.is_goalie = config["is_goalie"].as<bool>();
+            cfg.is_goalie = config["is_goalie"].as<bool>();
 
-                // Particularly if config is changed, run find purpose again
-                emit<Task>(std::make_unique<FindPurpose>(), 1);
-            });
+            // Particularly if config is changed, run find purpose again
+            log<INFO>("Configuration changed, re-emitting FindPurpose");
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
+        });
 
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
@@ -95,78 +99,82 @@ namespace module::purpose {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Stand idle
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
+            // emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
-            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
+            // emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
             // This emit starts the tree to play soccer
-            emit<Task>(std::make_unique<FindPurpose>(), 1);
+            log<INFO>("Start FindPurpose");
+            emit<Task>(std::make_unique<FindPurpose>(), 3);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 2);
+            // emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>>().then([this]() {
-            if (is_goalie) {
+        on<Always>().then([this] {
+            log<INFO>("Starting FindPurpose");
+            if (cfg.is_goalie) {
+                log<INFO>("Starting as a goalie");
                 emit<Task>(std::make_unique<Goalie>());
             }
             else {
+                log<INFO>("Starting as a field player");
                 emit<Task>(std::make_unique<FieldPlayer>());
             }
         });
 
-        on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
-            // If the robot is penalised, it must stand still
-            if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
-                emit(std::make_unique<ResetWebotsServos>());
-                emit(std::make_unique<Stability>(Stability::UNKNOWN));
-                emit(std::make_unique<ResetFieldLocalisation>());
-                emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-            }
-        });
+        // on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
+        //     // If the robot is penalised, it must stand still
+        //     if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
+        //         emit(std::make_unique<ResetWebotsServos>());
+        //         emit(std::make_unique<Stability>(Stability::UNKNOWN));
+        //         emit(std::make_unique<ResetFieldLocalisation>());
+        //         emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+        //     }
+        // });
 
-        on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
-            // If the robot is unpenalised, stop standing still and find its purpose
-            if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
-                emit<Task>(std::make_unique<FindPurpose>(), 1);
-            }
-        });
+        // on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
+        //     // If the robot is unpenalised, stop standing still and find its purpose
+        //     if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
+        //         emit<Task>(std::make_unique<FindPurpose>(), 1);
+        //     }
+        // });
 
-        // Left button pauses the soccer scenario
-        on<Trigger<ButtonLeftDown>>().then([this] {
-            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
-            emit<Scope::INLINE>(std::make_unique<EnableIdle>());
-            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
-            idle = true;
-        });
+        // // Left button pauses the soccer scenario
+        // on<Trigger<ButtonLeftDown>>().then([this] {
+        //     emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
+        //     emit<Scope::INLINE>(std::make_unique<EnableIdle>());
+        //     emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
+        //     idle = true;
+        // });
 
-        on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
+        // on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<EnableIdle>>().then([this] {
-            // Stop all tasks and stand still
-            emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-            emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
-            emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            log<INFO>("Idle mode enabled");
-        });
+        // on<Trigger<EnableIdle>>().then([this] {
+        //     // Stop all tasks and stand still
+        //     emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+        //     emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
+        //     emit(std::make_unique<Stability>(Stability::UNKNOWN));
+        //     log<INFO>("Idle mode enabled");
+        // });
 
-        // Middle button resumes the soccer scenario
-        on<Trigger<ButtonMiddleDown>>().then([this] {
-            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
-            // Restart the Director graph for the soccer scenario after a delay
-            emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
-            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
-            idle = false;
-        });
+        // // Middle button resumes the soccer scenario
+        // on<Trigger<ButtonMiddleDown>>().then([this] {
+        //     emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
+        //     // Restart the Director graph for the soccer scenario after a delay
+        //     emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
+        //     emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
+        //     idle = false;
+        // });
 
-        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
+        // on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<DisableIdle>>().then([this] {
-            // If the robot is not idle, restart the Director graph for the soccer scenario!
-            if (!idle) {
-                emit<Task>(std::make_unique<FindPurpose>(), 1);
-                emit<Task>(std::make_unique<FallRecovery>(), 2);
-                log<INFO>("Idle mode disabled");
-            }
-        });
+        // on<Trigger<DisableIdle>>().then([this] {
+        //     // If the robot is not idle, restart the Director graph for the soccer scenario!
+        //     if (!idle) {
+        //         emit<Task>(std::make_unique<FindPurpose>(), 1);
+        //         emit<Task>(std::make_unique<FallRecovery>(), 2);
+        //         log<INFO>("Idle mode disabled");
+        //     }
+        // });
     }
 
 }  // namespace module::purpose

@@ -1,2 +1,13 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# For the robot playing without listening to GameController
+force_playing: false
+
+# Delay in seconds before the robot starts playing after button press
+disable_idle_delay: 5
+
+# Delay in seconds before the robot can start playing after startup
+startup_delay: 3
+
+is_goalie: false

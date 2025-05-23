@@ -5,12 +5,14 @@
 
 #include "extension/Behaviour.hpp"
 
-namespace module {
+namespace module::purpose {
 
     class FieldPlayer : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief The distance from the ball to consider it in possession
+            double ball_threshold = 0.0;
         } cfg;
 
     public:
@@ -18,6 +20,6 @@ namespace module {
         explicit FieldPlayer(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module
+}  // namespace module::purpose
 
 #endif  // MODULE_FIELDPLAYER_HPP

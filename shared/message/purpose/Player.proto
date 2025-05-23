@@ -37,3 +37,5 @@ message Attack {
 message Defend {}
 
 message Support {}
+
+message ReadyAttack {}
