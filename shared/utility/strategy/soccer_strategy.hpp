@@ -31,7 +31,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <algorithm>
-#include <nuclear>
 #include <utility>
 #include <vector>
 
@@ -83,12 +82,16 @@ namespace utility::strategy {
         // Loop through each robot,
         // Subtract ball position (rBFf) from robots position (rRFf) to get vector between both.
         for (const auto& robot : robots.robots) {
-            rRFf                    = Hfw * robot.rRWw;
-            double distance_to_ball = (rRFf - rBFf).head<2>().norm();
             // Skip if not a teammate and not including opponents
             if (robot.teammate_id == 0 && !include_opponents) {
                 continue;
             }
+            // Skip penalised robots as they are not in play
+            if (robot.penalised) {
+                continue;
+            }
+            // Calculate distance, rRFf - rBFf
+            double distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head<2>().norm();
             // Add the robot to the list of players
             players.push_back(
                 std::pair(robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball));
@@ -102,7 +105,6 @@ namespace utility::strategy {
         // The robot closest to the ball is returned
         return closest == players.end() ? std::pair{Who{Who::NONE}, 0.0} : *closest;
     }
-
 
     /**
      * @brief Establishes which robot is in possession of the ball.
@@ -172,7 +174,8 @@ namespace utility::strategy {
         // Put ourselves and teammates in a pair with their distance to the goal line
         std::vector<std::pair<Who, double>> players{};
         for (const auto& robot : robots.robots) {
-            if (robot.teammate_id != 0) {
+            // Only add nonpenalised teammates to the list
+            if (robot.teammate_id != 0 && !robot.penalised) {
                 // Transform robot position to field coordinates
                 Eigen::Vector3d rRFf = Hfw * robot.rRWw;
                 // Add the robot to the list of players
