@@ -78,18 +78,21 @@ namespace module::localisation {
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
 
-
-        on<Trigger<RoboCup>,
+        on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
-           Optional<With<GameState>>,
-           Single>()
-            .then([this](const RoboCup& robocup,
-                         const GreenHorizon& horizon,
-                         const Field& field,
-                         const FieldDescription& field_desc,
-                         const std::shared_ptr<const GameState>& game_state) {
+           Sync<RobotLocalisation>>()
+            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
+                // **Run maintenance step**
+                maintenance(horizon, field, field_desc);
+
+                // **Debugging output**
+                debug_info();
+            });
+
+        on<Trigger<RoboCup>, With<Field>, Optional<With<GameState>>, Sync<RobotLocalisation>>().then(
+            [this](const RoboCup& robocup, const Field& field, const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -99,9 +102,6 @@ namespace module::localisation {
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
                 // Run data association step
                 data_association(robots_rRWw, robocup.current_pose.player_id);
-
-                // **Run maintenance step**
-                maintenance(horizon, field, field_desc);
 
                 // **Debugging output**
                 debug_info();
@@ -130,17 +130,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<VisionRobots>,
-           With<GreenHorizon>,
-           With<Field>,
-           With<FieldDescription>,
-           Optional<With<GameState>>,
-           Single>()
-            .then([this](const VisionRobots& vision_robots,
-                         const GreenHorizon& horizon,
-                         const Field& field,
-                         const FieldDescription& field_desc,
-                         const std::shared_ptr<const GameState>& game_state) {
+        on<Trigger<VisionRobots>, Optional<With<GameState>>, Sync<RobotLocalisation>>().then(
+            [this](const VisionRobots& vision_robots, const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -155,9 +146,6 @@ namespace module::localisation {
                 }
                 // Run data association step
                 data_association(robots_rRWw, 0);
-
-                // **Run maintenance step**
-                maintenance(horizon, field, field_desc);
 
                 // **Debugging output**
                 debug_info();

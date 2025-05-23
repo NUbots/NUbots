@@ -80,7 +80,7 @@ namespace module::localisation {
             /// @brief The number of times the robot has been undetected in a row
             long missed_count = 0;
             /// @brief A unique identifier for the robot
-            const unsigned long id;
+            unsigned long id;
             /// @brief The unique identifier of the robot if it is a teammate
             /// If it is not a teammate, this will be 0
             unsigned long teammate_id = 0;
@@ -110,6 +110,9 @@ namespace module::localisation {
         /// This variable will increase by one each time a new robot is added
         /// As it is unbounded, an unsigned long is used to store it
         unsigned long next_id = 0;
+
+        /// @brief How many times per second to run the maintenance step
+        static constexpr int UPDATE_RATE = 15;
 
         /// @brief Run Kalman filter prediction step for all tracked robots
         void prediction();
