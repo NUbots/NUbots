@@ -61,9 +61,9 @@ namespace module::purpose {
 
                 // The middle of the front of the penalty area is the defender's neutral spot
                 Eigen::Vector3d neutral_point(
-                    (-field_desc.dimensions.field_length / 2.0) + field_desc.dimensions.penalty_area_length,
-                    field_desc.dimensions.field_width / 2.0,
-                    0);
+                    (field_desc.dimensions.field_length / 2.0) - field_desc.dimensions.penalty_area_length,
+                    0.0,
+                    0.0);
 
                 // Get the optimal position to defend from
                 Eigen::Vector3d optimal_position = optimal_pos(neutral_point,
@@ -77,12 +77,10 @@ namespace module::purpose {
                                                                cfg.step_size,
                                                                cfg.max_iter);
 
-                // todo: face the ball or just up the field
                 // Walk to the optimal position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
-                    pos_rpy_to_transform(optimal_position, Eigen::Vector3d(0, 0, M_PI_2)),
+                    pos_rpy_to_transform(optimal_position, Eigen::Vector3d(0, 0, M_PI)),
                     true));
-                log<INFO>("Defending at optimal position: ", optimal_position.transpose());
             });
     }
 
@@ -90,8 +88,8 @@ namespace module::purpose {
                                                                   const Field& field,
                                                                   const FieldDescription& field_desc) {
         // If between our goal line and the first third of the field, we can mark them
-        const double first_third = -field_desc.dimensions.field_length / (2.0 * 3.0);
-        const double goal_line   = -field_desc.dimensions.field_length / 2.0;
+        const double first_third = field_desc.dimensions.field_length / (2.0 * 3.0);
+        const double goal_line   = field_desc.dimensions.field_length / 2.0;
 
         // Check if any opponents are in the first third of the field
         std::vector<Eigen::Vector3d> opponents_in_first_third{};
