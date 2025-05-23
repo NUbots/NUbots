@@ -81,7 +81,7 @@ namespace module::purpose {
                           allowed_to_attack);
 
                 // Todo: if another robot/s within a threshold distance, the lowest robot id should be the attacker,
-                // same with defender but opposite If we are in possession of the ball, Or it's free or opponent is in
+                // same with defender but opposite. If we are in possession of the ball, Or it's free or opponent is in
                 // possession, then we can attack if we are closest BUT we have to be in a situation where we are
                 // allowed to attack, eg it can't be the other team's penalty or their kick off
                 if ((ball_pos == Who::SELF || ((ball_pos != Who::TEAMMATE) && closest_to_ball_on_team))
@@ -101,9 +101,9 @@ namespace module::purpose {
                     return;
                 }
 
-                // If we can't attack, eg another robot is attacking, we don't want to get in the way
+                // If we can't attack, eg another robot is attacking, we don't want to get in the way.
                 // We should hang back in the penalty box and wait in case the ball comes toward us.
-                // We should only hang back if we are the furthest back
+                // We should only hang back if we are the furthest back, ignoring the goalie.
                 bool furthest_back = utility::strategy::furthest_back(robots, field.Hfw, sensors.Hrw);
                 if (furthest_back) {
                     log<INFO>("We are the furthest back, so we should defend");
