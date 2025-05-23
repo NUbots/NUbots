@@ -290,6 +290,7 @@ var namespaces_dup =
         [ "LocalisationRobot", "RobotLocalisation_8cpp.html#a7137bee73270988498c35b99c9007c44", null ],
         [ "LocalisationRobots", "RobotLocalisation_8cpp.html#aba13498fd60767a1850e1db2aaf87ed7", null ],
         [ "ObjectiveFunction", "FieldLocalisationNLopt_8hpp.html#a82451e4bbd8a3a4823802e6646945052", null ],
+        [ "PenaltyState", "RobotLocalisation_8cpp.html#a485912685bd8977fc9d51ba7cfe1cc92", null ],
         [ "VisionBall", "BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
         [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
         [ "VisionRobot", "RobotLocalisation_8cpp.html#a3f0996cc36d1916267841766556b79fb", null ],

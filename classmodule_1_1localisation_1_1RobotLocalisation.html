@@ -171,6 +171,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1localisation_1_1RobotLo
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classmodule_1_1localisation_1_1RobotLocalisation-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::localisation::RobotLocalisation Class Reference</div>  </div>
@@ -217,9 +218,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a7a2547b3b3cda56dafce9242d006261f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a7a2547b3b3cda56dafce9242d006261f">data_association</a> (const std::vector&lt; Eigen::Vector3d &gt; &amp;robots_rRWw, uint teammate_id)</td></tr>
-<tr class="memdesc:a7a2547b3b3cda56dafce9242d006261f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the given robot measurements with the tracked robots Creates a new tracked robot if the measurement is not associated with an existing robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a7a2547b3b3cda56dafce9242d006261f">More...</a><br /></td></tr>
-<tr class="separator:a7a2547b3b3cda56dafce9242d006261f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c747b78c5525de579a45f79b0fd6520"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4c747b78c5525de579a45f79b0fd6520">data_association</a> (const std::vector&lt; Eigen::Vector3d &gt; &amp;robots_rRWw, uint teammate_id=0, bool penalised=false)</td></tr>
+<tr class="memdesc:a4c747b78c5525de579a45f79b0fd6520"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the given robot measurements with the tracked robots Creates a new tracked robot if the measurement is not associated with an existing robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4c747b78c5525de579a45f79b0fd6520">More...</a><br /></td></tr>
+<tr class="separator:a4c747b78c5525de579a45f79b0fd6520"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a071bc744ede53369f339230f8b68130e"><td class="memItemLeft" align="right" valign="top"><a id="a071bc744ede53369f339230f8b68130e"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a071bc744ede53369f339230f8b68130e">debug_info</a> () const</td></tr>
 <tr class="memdesc:a071bc744ede53369f339230f8b68130e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print out the current state of the tracked robots. <br /></td></tr>
@@ -245,10 +246,17 @@ unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" h
 std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html">TrackedRobot</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#ad38e2ef06617a1ec28699f7131ec589e">tracked_robots</a> {}</td></tr>
 <tr class="memdesc:ad38e2ef06617a1ec28699f7131ec589e"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of tracked robots. <br /></td></tr>
 <tr class="separator:ad38e2ef06617a1ec28699f7131ec589e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a9970e371306fd5ea5b726a31a89c30a4"><td class="memItemLeft" align="right" valign="top"><a id="a9970e371306fd5ea5b726a31a89c30a4"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a9970e371306fd5ea5b726a31a89c30a4">UPDATE_RATE</a> = 15</td></tr>
+<tr class="memdesc:a9970e371306fd5ea5b726a31a89c30a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many times per second to run the maintenance step. <br /></td></tr>
+<tr class="separator:a9970e371306fd5ea5b726a31a89c30a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a7a2547b3b3cda56dafce9242d006261f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7a2547b3b3cda56dafce9242d006261f">&#9670;&nbsp;</a></span>data_association()</h2>
+<a id="a4c747b78c5525de579a45f79b0fd6520"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c747b78c5525de579a45f79b0fd6520">&#9670;&nbsp;</a></span>data_association()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -266,7 +274,13 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>teammate_id</em>&#160;</td>
+          <td class="paramname"><em>teammate_id</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>penalised</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -286,6 +300,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
   <table class="params">
     <tr><td class="paramname">robots_rRWw</td><td>The new robot measurements in world coordinates </td></tr>
     <tr><td class="paramname">teammate_id</td><td>The unique identifier of the robot if it is a teammate </td></tr>
+    <tr><td class="paramname">penalised</td><td>Whether the robot is penalised or not </td></tr>
   </table>
   </dd>
 </dl>
@@ -354,7 +369,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1RobotLocalis
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li>
-    <li class="footer">Generated on Fri May 23 2025 08:16:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri May 23 2025 08:17:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

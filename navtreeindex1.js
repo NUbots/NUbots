@@ -13,8 +13,9 @@ var NAVTREEINDEX1 =
 "RawSensors_8hpp.html#af5589a17b45a3543f82530a2d2353bcb":[2,0,7,11,1],
 "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca":[2,0,7,11,4],
 "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f":[2,0,3,11,18],
-"RobotLocalisation_8cpp.html#a3227cfc5a27f79496dff606608bccaa0":[2,0,3,3,17],
-"RobotLocalisation_8cpp.html#a3f0996cc36d1916267841766556b79fb":[2,0,3,3,16],
+"RobotLocalisation_8cpp.html#a3227cfc5a27f79496dff606608bccaa0":[2,0,3,3,18],
+"RobotLocalisation_8cpp.html#a3f0996cc36d1916267841766556b79fb":[2,0,3,3,17],
+"RobotLocalisation_8cpp.html#a485912685bd8977fc9d51ba7cfe1cc92":[2,0,3,3,14],
 "RobotLocalisation_8cpp.html#a7137bee73270988498c35b99c9007c44":[2,0,3,3,11],
 "RobotLocalisation_8cpp.html#aba13498fd60767a1850e1db2aaf87ed7":[2,0,3,3,12],
 "RunReason_8hpp.html#ab1ef139235b80b2166172845f8776025":[2,0,1,0,19],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classmodule_1_1extension_1_1Director.html#a90923156eb8865e70b76295c7f2925ac":[3,0,3,1,1,15],
 "classmodule_1_1extension_1_1Director.html#a98348af06fa8b1126bc28e2d21695668":[3,0,3,1,1,19],
 "classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e":[3,0,3,1,1,18],
-"classmodule_1_1extension_1_1Director.html#aaa959f154ca485d8bb435b898ecb3223":[3,0,3,1,1,9],
-"classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812":[3,0,3,1,1,13]
+"classmodule_1_1extension_1_1Director.html#aaa959f154ca485d8bb435b898ecb3223":[3,0,3,1,1,9]
 };

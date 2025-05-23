@@ -1,5 +1,8 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a60525613066ade744ee17c9f46f77f9f":[3,0,3,8,1,3,1],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a6278746008df001eccc7658d177f6346":[3,0,3,8,1,3,2],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a7bb7146f91f85e7a2d2b1743e96bc6be":[3,0,3,8,1,3,3],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#ad50744a4ecd6acbd067ef0325641fd3d":[3,0,3,8,1,3,5],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#ad61420aae4d526cbdddbfc264ae268fd":[3,0,3,8,1,3,4],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html":[3,0,3,8,1,4],
@@ -246,8 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1skill_1_1Kicker_1_1Config.html#a8b3cb2cea24eaf7f52daa4fb67f16196":[3,0,3,10,6,0,0],
 "structmodule_1_1skill_1_1Kicker_1_1Config.html#a8ba88ee869f7d4fae1643ae72bdeedc3":[3,0,3,10,6,0,1],
 "structmodule_1_1skill_1_1Kicker_1_1Config.html#a8ebc54b51daf2e97671fe34e64517f31":[3,0,3,10,6,0,3],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#ae21ba2008c01e5dd36fa4e0061ca63c9":[3,0,3,10,6,0,4],
-"structmodule_1_1skill_1_1Look_1_1Config.html":[3,0,3,10,7,0],
-"structmodule_1_1skill_1_1Look_1_1Config.html#a424bf993615a006af07d97f0a523497a":[3,0,3,10,7,0,0],
-"structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[3,0,3,10,7,0,2]
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#ae21ba2008c01e5dd36fa4e0061ca63c9":[3,0,3,10,6,0,4]
 };

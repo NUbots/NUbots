@@ -1,5 +1,8 @@
 var NAVTREEINDEX19 =
 {
+"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#acb7c217d1ec0b998d6fd3a14244db641":[3,0,7,7,0,0,9],
+"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#ae7caf1b5b592570018be5bdfffd89cf7":[3,0,7,7,0,0,14],
+"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#aedf750f864c272bbd55e8fb703c85dfa":[3,0,7,7,0,0,17],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#aee0d41df451de6d2ba50dc777f4c56e7":[3,0,7,7,0,0,18],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#af0bf637382496d9759800a197ffd1c53":[3,0,7,7,0,0,6],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#af123fc22a1ccfe0639b465ceaf4ba2e1":[3,0,7,7,0,0,22],
@@ -196,12 +199,12 @@ var NAVTREEINDEX19 =
 "structutility_1_1support_1_1Expression.html#a85557b6cbcf5c7fb2465415956552b74":[3,0,7,14,2,2],
 "structutility_1_1support_1_1Expression.html#aa98ac82792d5e9302f95c379ba772372":[3,0,7,14,2,1],
 "structutility_1_1support_1_1Expression.html#acb87986fbdf5badbb3e40e983187887c":[3,0,7,14,2,9],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,5],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,4],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,6],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,7],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,8],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,3],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,7],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,14,2,5],
 "structutility_1_1support_1_1LazyEvaluation.html":[3,0,7,14,3],
 "structutility_1_1support_1_1LazyEvaluation.html#a405f3e6a7d2f4a3630296a9a291b7c46":[3,0,7,14,3,1],
 "structutility_1_1support_1_1LazyEvaluation.html#a6fc2eba1f57246dd848e823a211111ba":[3,0,7,14,3,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX19 =
 "structutility_1_1type__traits_1_1is__iterable.html#a646c0785c7190b2ade16008452c5a05f":[3,0,7,15,2,2],
 "structutility_1_1type__traits_1_1is__iterable.html#aa2462ded2e0a7709e9d9a3a059dcfdc7":[3,0,7,15,2,3],
 "structutility_1_1type__traits_1_1is__iterable.html#ad23b3f287d01137c771cf5bc827cfbee":[3,0,7,15,2,1],
-"structutility_1_1type__traits_1_1is__iterable.html#afe4ea4ff90ba8a6c179a0d4378cd0406":[3,0,7,15,2,5],
-"structutility_1_1vision_1_1Colour.html":[3,0,7,16,0],
-"structutility_1_1vision_1_1Colour.html#a06c6a8fe6f30be9b72729a8ae209b4da":[3,0,7,16,0,9],
-"structutility_1_1vision_1_1Colour.html#a11b3ca09fa6d725d12e07f56248957eb":[3,0,7,16,0,14]
+"structutility_1_1type__traits_1_1is__iterable.html#afe4ea4ff90ba8a6c179a0d4378cd0406":[3,0,7,15,2,5]
 };

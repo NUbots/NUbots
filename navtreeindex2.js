@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812":[3,0,3,1,1,13],
 "classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d":[3,0,3,1,1,30],
 "classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3":[3,0,3,1,1,7],
 "classmodule_1_1extension_1_1Director.html#ab5cb1189cc1ccd5680fdc36dcbf47178":[3,0,3,1,1,20],
@@ -216,9 +217,10 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1FieldModel.html#afd9b0d67b46d1cee522bd1894ae0d1d9":[3,0,3,3,5,13],
 "classmodule_1_1localisation_1_1RobotLocalisation.html":[3,0,3,3,7],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a071bc744ede53369f339230f8b68130e":[3,0,3,3,7,4],
+"classmodule_1_1localisation_1_1RobotLocalisation.html#a4c747b78c5525de579a45f79b0fd6520":[3,0,3,3,7,3],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a54629a860d8e32912ae8f5bd5f792f9d":[3,0,3,3,7,7],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a767cb02d9117e7d7c2c1080ba489a3a1":[3,0,3,3,7,6],
-"classmodule_1_1localisation_1_1RobotLocalisation.html#a7a2547b3b3cda56dafce9242d006261f":[3,0,3,3,7,3],
+"classmodule_1_1localisation_1_1RobotLocalisation.html#a9970e371306fd5ea5b726a31a89c30a4":[3,0,3,3,7,10],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a9bd170b4b4ef9c02219fdf4719527ab6":[3,0,3,3,7,5],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde":[3,0,3,3,7,8],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#ad38e2ef06617a1ec28699f7131ec589e":[3,0,3,3,7,9],
@@ -247,7 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1nbs_1_1Player.html#a59c01d75596965d064fa79c5c41ddbae":[3,0,3,4,0,10],
 "classmodule_1_1nbs_1_1Player.html#a5cf0774dfdd7920f535c341ef0f699a2":[3,0,3,4,0,5],
 "classmodule_1_1nbs_1_1Player.html#a6cd14280f6f80f5851ea48a4856a9a53":[3,0,3,4,0,0],
-"classmodule_1_1nbs_1_1Player.html#a795356048fc939b9f673dc243eb61896":[3,0,3,4,0,6],
-"classmodule_1_1nbs_1_1Player.html#a7dd2d60c500619b72d20083a083282e0":[3,0,3,4,0,17],
-"classmodule_1_1nbs_1_1Player.html#a839131b29981f810ae27f5744b25640c":[3,0,3,4,0,20]
+"classmodule_1_1nbs_1_1Player.html#a795356048fc939b9f673dc243eb61896":[3,0,3,4,0,6]
 };

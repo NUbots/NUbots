@@ -196,10 +196,10 @@ Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><b>get_rRWw</
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:aba1bf61f3c2e9f27bbd265886cf2b1d9"><td class="memItemLeft" align="right" valign="top"><a id="aba1bf61f3c2e9f27bbd265886cf2b1d9"></a>
-const unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aba1bf61f3c2e9f27bbd265886cf2b1d9">id</a></td></tr>
-<tr class="memdesc:aba1bf61f3c2e9f27bbd265886cf2b1d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">A unique identifier for the robot. <br /></td></tr>
-<tr class="separator:aba1bf61f3c2e9f27bbd265886cf2b1d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6edc2d1948e44ce1d1d2f785ed20d27e"><td class="memItemLeft" align="right" valign="top"><a id="a6edc2d1948e44ce1d1d2f785ed20d27e"></a>
+unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6edc2d1948e44ce1d1d2f785ed20d27e">id</a></td></tr>
+<tr class="memdesc:a6edc2d1948e44ce1d1d2f785ed20d27e"><td class="mdescLeft">&#160;</td><td class="mdescRight">A unique identifier for the robot. <br /></td></tr>
+<tr class="separator:a6edc2d1948e44ce1d1d2f785ed20d27e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a426ffc5eaeecb31002d3794c404eef"><td class="memItemLeft" align="right" valign="top"><a id="a6a426ffc5eaeecb31002d3794c404eef"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef">last_time_update</a> = NUClear::clock::now()</td></tr>
 <tr class="memdesc:a6a426ffc5eaeecb31002d3794c404eef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time of the last time update. <br /></td></tr>
@@ -208,6 +208,10 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a
 long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8">missed_count</a> = 0</td></tr>
 <tr class="memdesc:a300e5fbc842cfdc2b57439f4486b10d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of times the robot has been undetected in a row. <br /></td></tr>
 <tr class="separator:a300e5fbc842cfdc2b57439f4486b10d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95e4186e3e097e93b64ef14720ed0a4d"><td class="memItemLeft" align="right" valign="top"><a id="a95e4186e3e097e93b64ef14720ed0a4d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a95e4186e3e097e93b64ef14720ed0a4d">penalised</a> = false</td></tr>
+<tr class="memdesc:a95e4186e3e097e93b64ef14720ed0a4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalisation state for teammate This allows behaviour systems to ignore teammates that are not in the game, but keep tracking them. <br /></td></tr>
+<tr class="separator:a95e4186e3e097e93b64ef14720ed0a4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbd5ead6444a9e92181221310ec2a17e"><td class="memItemLeft" align="right" valign="top"><a id="abbd5ead6444a9e92181221310ec2a17e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e">seen</a> = true</td></tr>
 <tr class="memdesc:abbd5ead6444a9e92181221310ec2a17e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the robot was and should have been seen in the last vision update. <br /></td></tr>
@@ -230,7 +234,7 @@ unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html">TrackedRobot</a></li>
-    <li class="footer">Generated on Fri May 23 2025 08:16:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri May 23 2025 08:17:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
