@@ -64,19 +64,19 @@
       position: 0
       gain: .NaN
       torque: 0
-    - id: HEAD_YAW
-      position: 0
-      gain: .NaN
-      torque: 0
-    - id: HEAD_PITCH
-      position: 0
-      gain: .NaN
-      torque: 0
     - id: R_ANKLE_ROLL
       position: 0
       gain: .NaN
       torque: 0
     - id: L_ANKLE_ROLL
+      position: 0
+      gain: .NaN
+      torque: 0
+    - id: HEAD_YAW
+      position: 0
+      gain: .NaN
+      torque: 0
+    - id: HEAD_PITCH
       position: 0
       gain: .NaN
       torque: 0
