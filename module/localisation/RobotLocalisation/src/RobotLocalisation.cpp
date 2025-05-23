@@ -47,6 +47,7 @@ namespace module::localisation {
     using LocalisationRobots = message::localisation::Robots;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
+    using PenaltyState       = message::input::State;
 
     using message::eye::DataPoint;
     using message::input::GameState;
@@ -101,7 +102,7 @@ namespace module::localisation {
                 std::vector<Eigen::Vector3d> robots_rRWw{
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
                 // Run data association step
-                data_association(robots_rRWw, robocup.current_pose.player_id);
+                data_association(robots_rRWw, robocup.current_pose.player_id, robocup.state == PenaltyState::PENALISED);
 
                 // **Debugging output**
                 debug_info();
@@ -123,6 +124,7 @@ namespace module::localisation {
                     // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
                     localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
                     localisation_robot.teammate_id = tracked_robot.teammate_id;
+                    localisation_robot.penalised   = tracked_robot.penalised;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
@@ -145,7 +147,7 @@ namespace module::localisation {
                     robots_rRWw.push_back(rRWw);
                 }
                 // Run data association step
-                data_association(robots_rRWw, 0);
+                data_association(robots_rRWw);
 
                 // **Debugging output**
                 debug_info();
@@ -187,13 +189,16 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw, uint teammate_id) {
+    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
+                                             uint teammate_id,
+                                             bool penalised) {
         for (const auto& rRWw : robots_rRWw) {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
                 tracked_robots.back().seen        = true;
                 tracked_robots.back().teammate_id = teammate_id;
+                tracked_robots.back().penalised   = penalised;
                 continue;
             }
 
