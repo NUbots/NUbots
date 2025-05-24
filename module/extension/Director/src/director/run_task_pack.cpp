@@ -365,10 +365,6 @@ namespace module::extension {
                 remove_task(t);
             }
         }
-        // Print all groups
-        // for (const auto& [type, group] : groups) {
-        //     NUClear::log<NUClear::LogLevel::INFO>("Group", type.name(), group.subtasks.size());
-        // }
     }
 
 }  // namespace module::extension
