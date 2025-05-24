@@ -60,11 +60,11 @@ namespace utility::strategy {
      *
      *  @return A vector of pairs, these contain a Possession type and distance to the ball.
      */
-    std::vector<std::pair<Who, double>> get_closest_bot(const Eigen::Vector3d& rBWw,
-                                                        const Robots& robots,
-                                                        const Eigen::Isometry3d& Hfw,
-                                                        const Eigen::Isometry3d& Hrw,
-                                                        bool include_opponents = true) {
+    std::pair<Who, double> get_closest_bot(const Eigen::Vector3d& rBWw,
+                                           const Robots& robots,
+                                           const Eigen::Isometry3d& Hfw,
+                                           const Eigen::Isometry3d& Hrw,
+                                           bool include_opponents = true) {
         // The players in the game represented by team and distance to ball
         std::vector<std::pair<Who, double>> players{};
 
@@ -83,7 +83,7 @@ namespace utility::strategy {
         // Loop through each robot,
         // Subtract ball position (rBFf) from robots position (rRFf) to get vector between both.
         for (const auto& robot : robots.robots) {
-            Eigen::Vector3d rRFf    = robot.rRFf;
+            Eigen::Vector3d rRFf    = Hfw * robot.rRWw;
             double distance_to_ball = (rRFf - rBFf).norm();
 
             // Skip if not a teammate and not including opponents
@@ -91,14 +91,14 @@ namespace utility::strategy {
                 continue;
             }
             // Add the robot to the list of players
-            players.push_back(robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball);
+            players.push_back(
+                std::pair(robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball));
         }
 
         // The robot closest to the ball is returned
-        return std::max_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
+        return *std::max_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
             return a.second < b.second;
         });
-        ;
     }
 
 
@@ -125,14 +125,14 @@ namespace utility::strategy {
         // Function determines who has possession based on proximity and a threshold distance.
         auto closest_robot = get_closest_bot(rBWw, robots.robots, Hfw, Hrw);
 
-        // 'closest_bot.second' is the distance to the ball
+        // 'closest_robot.second' is the distance to the ball
         // If the distance is greater than the threshold, then the robot is too far
         // for possession.
-        if (closest_bot.second > threshold) {
+        if (closest_robot.second > threshold) {
             return Who{Who::NONE};
         }
         // If robot is close to ball, robot that is closest will possess the ball.
-        return closest_bot.first;
+        return closest_robot.first;
     }
 
     /**
@@ -171,13 +171,16 @@ namespace utility::strategy {
         std::vector<std::pair<Who, double>> players{};
         for (const auto& robot : robots.robots) {
             if (robot.teammate_id != 0) {
-                players.push_back({Who{robot.teammate_id}, std::abs(rRFf.y())});
+                // Transform robot position to field coordinates
+                Eigen::Vector3d rRFf = Hfw * robot.rRWw;
+                // Add the robot to the list of players
+                players.push_back({Who::TEAMMATE, std::abs(rRFf.y())});
             }
         }
 
         // Transform our position to field coordinates
         Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
-        players.push_back({Who{Who::SELF}, std::abs(rRFf.y())});
+        players.push_back({Who::SELF, std::abs(rRFf.y())});
 
         // Sort the robots by y distance to our goal line
         auto furthest_robot = std::max_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
@@ -185,7 +188,7 @@ namespace utility::strategy {
         });
 
         // Return true if the furthest robot is us
-        return furthest_robot.first == Who{Who::SELF};
+        return furthest_robot->first == Who{Who::SELF};
     }
 }  // namespace utility::strategy
 
