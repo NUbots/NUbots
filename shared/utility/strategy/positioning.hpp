@@ -101,6 +101,22 @@ namespace utility::strategy {
         return cost;
     }
 
+    /**
+     * @brief Find the optimal position for a robot using gradient descent
+     *
+     * @param initial The initial position of the robot
+     * @param neutral_point The neutral point to be close to
+     * @param opponent_positions The positions of the opponent robots
+     * @param all_robot_positions The positions of all robots (including self)
+     * @param clearance The clearance distance to avoid other robots
+     * @param equidist_weight Weight for equidistance cost
+     * @param neutral_weight Weight for closeness to neutral point
+     * @param avoid_weight Weight for avoiding other robots
+     * @param step_size Step size for gradient descent
+     * @param max_iters Maximum number of iterations for gradient descent
+     *
+     * @return The optimal position for the robot
+     */
     template <typename Scalar>
     Eigen::Vector3d optimal_pos(const Eigen::Vector3d& initial,
                                 const Eigen::Vector3d& neutral_point,
@@ -114,6 +130,7 @@ namespace utility::strategy {
                                 const int max_iters) {
         Eigen::Vector3d X = initial;
 
+        // Gradient descent to find the optimal position
         for (int iter = 0; iter < max_iters; ++iter) {
             Eigen::Vector3d grad(0.0, 0.0, 0.0);
 
@@ -149,6 +166,14 @@ namespace utility::strategy {
         return X;
     }
 
+    /**
+     * @brief Find the index of a target position in a list of positions
+     *
+     * @param list The list of positions to search
+     * @param target The target position to find
+     *
+     * @return The index of the target position in the list, or -1 if not found
+     */
     int index_of(const std::vector<Eigen::Vector3d>& list, const Eigen::Vector3d& target) {
         auto it = std::find_if(list.begin(), list.end(), [&](const Eigen::Vector3d& p) {
             return (p - target).norm() < 1e-4;
@@ -156,6 +181,12 @@ namespace utility::strategy {
         return std::distance(list.begin(), it);
     }
 
+    /**
+     * @brief Remove a robot from a list of positions if it is close enough to the specified robot position
+     *
+     * @param list The list of positions to remove the robot from
+     * @param robot The position of the robot to be removed
+     */
     void remove_robot(std::vector<Eigen::Vector3d>& list, const Eigen::Vector3d& robot) {
         list.erase(std::remove_if(list.begin(),
                                   list.end(),
@@ -163,6 +194,17 @@ namespace utility::strategy {
                    list.end());
     }
 
+    /**
+     * @brief Calculate the ready position for a robot based on its teammates and field dimensions
+     *
+     * @param Hfw Transformation from world to field coordinates
+     * @param Hrw Transformation from world to robot coordinates
+     * @param teammates List of teammate positions in field coordinates
+     * @param field_desc Field description containing dimensions of the field
+     * @param kick_off Whether the robot is in a kick-off situation
+     *
+     * @return The ready position for the robot in field coordinates
+     */
     Eigen::Isometry3d ready_position(const Eigen::Isometry3d& Hfw,
                                      const Eigen::Isometry3d& Hrw,
                                      const std::vector<Eigen::Vector3d>& teammates,
