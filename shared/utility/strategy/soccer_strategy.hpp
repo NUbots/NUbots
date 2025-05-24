@@ -59,6 +59,9 @@ namespace utility::strategy {
      *  @param robots information about robot positions.
      *  @param Hfw transformation of world to field coordinates.
      *  @param Hrw transformation of world to robot coordinates.
+     *  @param equidistant_threshold maximum distance for two robots to be considered equidistant
+     *  @param self_id the ID of the robot that is calling this function
+     *  @param include_opponents whether to include opponents in the search
      *
      *  @return A vector of pairs, these contain a Possession type and distance to the ball.
      */
@@ -92,29 +95,12 @@ namespace utility::strategy {
             // Calculate distance to the ball
             double distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head<2>().norm();
 
-            // if (robot.teammate_id != 0) {
-            //     NUClear::log<NUClear::LogLevel::INFO>("Robot", robot.teammate_id, "distance to ball",
-            //     distance_to_ball); NUClear::log<NUClear::LogLevel::INFO>("Closest Robot",
-            //                                           highest_id,
-            //                                           "distance to ball",
-            //                                           self_distance_to_ball);
-            // }
-
             // Check if close to the closest robot
             bool equidistant = std::abs(distance_to_ball - closest_robot.second) < equidistant_threshold;
-            // NUClear::log<NUClear::LogLevel::INFO>("Equidistant",
-            //                                       equidistant,
-            //                                       (equidistant && (robot.teammate_id > highest_id),
-            //                                        (!equidistant && (distance_to_ball < closest_robot.second))));
             // If it is close to the closest robot, highest ID wins
             // Otherwise it has to be closer to win
             if ((equidistant && (robot.teammate_id > highest_id))
                 || (!equidistant && (distance_to_ball < closest_robot.second))) {
-                // NUClear::log<NUClear::LogLevel::INFO>("Closer robot found",
-                //                                       robot.teammate_id,
-                //                                       distance_to_ball,
-                //                                       closest_robot.second,
-                //                                       highest_id);
                 closest_robot = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};
                 highest_id    = robot.teammate_id;
             }
@@ -135,6 +121,8 @@ namespace utility::strategy {
      * @param Hfw transformation of world to field coordinates.
      * @param Hrw transformation of world to robot coordinates.
      * @param threshold maximum distance to the ball to be considered in possession of the ball.
+     * @param equidistant_threshold maximum distance for two robots to be considered equidistant
+     * @param self_id the ID of the robot that is calling this function
      *
      * @return A possession value which determines if any robot (or NONE) has the ball.
      */
@@ -165,6 +153,8 @@ namespace utility::strategy {
      * @param robots localisation of every known robot in the game
      * @param Hfw transformation of world to field coordinates
      * @param Hrw transformation of world to robot coordinates
+     * @param equidistant_threshold maximum distance to the ball to be considered equidistant
+     * @param self_id the ID of the robot that is calling this function
      *
      * @return true if we are the closest robot to the ball on our team, false otherwise
      */
