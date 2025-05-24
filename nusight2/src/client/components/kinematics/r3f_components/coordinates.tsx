@@ -41,7 +41,7 @@ export const CoordinateLabel = ({ text, position }: { text: string; position: [n
       const textGeometry = new TextGeometry(text, {
         font: font,
         size: 0.2,
-        height: 0,
+        depth: 0,
       });
 
       if (meshRef.current) {

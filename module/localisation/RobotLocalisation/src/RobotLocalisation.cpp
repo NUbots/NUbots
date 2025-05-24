@@ -112,6 +112,7 @@ namespace module::localisation {
                     // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
                     localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
                     localisation_robot.teammate_id = tracked_robot.teammate_id;
+                    localisation_robot.penalised   = tracked_robot.penalised;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
