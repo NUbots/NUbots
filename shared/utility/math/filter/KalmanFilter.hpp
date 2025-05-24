@@ -119,8 +119,10 @@ namespace utility::math::filter {
          * @brief Performs a measurement update on the state and covariance using the measurement model and measurement.
          *
          * @param[in] measurement
+         *
+         * @return The Normalised Innovation Squared (NIS) value for the measurement.
          */
-        void measure(const MeasVec& measurement) {
+        double measure(const MeasVec& measurement) {
             // Calculate the optimal Kalman gain
             GainMat K = covariance * C.transpose() * (C * covariance * C.transpose() + R).inverse();
             // Update the state estimate
@@ -128,6 +130,10 @@ namespace utility::math::filter {
             // Update the covariance estimate
             covariance = (StateMat::Identity() - K * C) * covariance * (StateMat::Identity() - K * C).transpose()
                          + K * R * K.transpose();
+
+            // Calculate the Normalised Innovation Squared (NIS)
+            Eigen::Matrix<double, NumStates, 1> residual = measurement - C * state;
+            return nis = residual.transpose() * (C * covariance * C.transpose() + R).inverse() * residual;
         }
 
         /// @brief Get the current state estimate

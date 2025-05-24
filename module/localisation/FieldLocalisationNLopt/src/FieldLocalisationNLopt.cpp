@@ -226,7 +226,7 @@ namespace module::localisation {
                     kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
 
                     // Measurement update
-                    kf.measure(state);
+                    double nis = kf.measure(state);
 
                     // Emit the field message
                     auto field = std::make_unique<Field>();
@@ -241,6 +241,12 @@ namespace module::localisation {
                     for (const auto& association : associations) {
                         field->association_lines.push_back({association.first, association.second});
                     }
+
+                    // Add NIS, covariance, and uncertainty to the field message
+                    field->nis         = nis;
+                    field->covariance  = kf.get_covariance();
+                    field->uncertainty = kf.get_covariance().diagonal().sum();
+
                     emit(field);
                 });
     }
