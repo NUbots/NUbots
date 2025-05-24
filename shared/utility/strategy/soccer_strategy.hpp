@@ -33,8 +33,6 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
-// todo remove after testing
-#include <nuclear>
 
 #include "message/localisation/Robot.hpp"
 #include "message/strategy/Who.hpp"
