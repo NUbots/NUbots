@@ -33,6 +33,8 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+// todo remove after testing
+#include <nuclear>
 
 #include "message/localisation/Robot.hpp"
 #include "message/strategy/Who.hpp"
@@ -64,23 +66,19 @@ namespace utility::strategy {
                                            const Robots& robots,
                                            const Eigen::Isometry3d& Hfw,
                                            const Eigen::Isometry3d& Hrw,
+                                           double equidistant_threshold,
+                                           int self_id,
                                            bool include_opponents = true) {
-        // The players in the game represented by team and distance to ball
-        std::vector<std::pair<Who, double>> players{};
-
-        // Transform ball position to field coordinates.
-        // 'rBWw' is ball position in world coordinates.
-        // 'Hfw' transforms from world to field coordinates.
-        // Multiplying these gives 'rBFf', which is the ball's position in field coordinates.
-        Eigen::Vector3d rBFf = Hfw * rBWw;
-        // 'Hrw' transforms world to robot.
-        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
-        // Find self distance to ball.
+        // Transform ball position to field coordinates
+        Eigen::Vector3d rBFf         = Hfw * rBWw;
+        Eigen::Vector3d rRFf         = (Hfw * Hrw.inverse()).translation();
         double self_distance_to_ball = (rRFf - rBFf).head<2>().norm();
-        players.push_back({Who{Who::SELF}, self_distance_to_ball});
 
-        // Loop through each robot,
-        // Subtract ball position (rBFf) from robots position (rRFf) to get vector between both.
+        // Initialise to self
+        std::pair<Who, double> closest_robot = {Who{Who::SELF}, self_distance_to_ball};
+        unsigned long highest_id             = self_id;
+
+        // Loop through each robot
         for (const auto& robot : robots.robots) {
             // Skip if not a teammate and not including opponents
             if (robot.teammate_id == 0 && !include_opponents) {
@@ -90,20 +88,39 @@ namespace utility::strategy {
             if (robot.penalised) {
                 continue;
             }
-            // Calculate distance, rRFf - rBFf
+
+            // Calculate distance to the ball
             double distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head<2>().norm();
-            // Add the robot to the list of players
-            players.push_back(
-                std::pair(robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball));
+
+            // if (robot.teammate_id != 0) {
+            //     NUClear::log<NUClear::LogLevel::INFO>("Robot", robot.teammate_id, "distance to ball",
+            //     distance_to_ball); NUClear::log<NUClear::LogLevel::INFO>("Closest Robot",
+            //                                           highest_id,
+            //                                           "distance to ball",
+            //                                           self_distance_to_ball);
+            // }
+
+            // Check if close to the closest robot
+            bool equidistant = std::abs(distance_to_ball - closest_robot.second) < equidistant_threshold;
+            // NUClear::log<NUClear::LogLevel::INFO>("Equidistant",
+            //                                       equidistant,
+            //                                       (equidistant && (robot.teammate_id > highest_id),
+            //                                        (!equidistant && (distance_to_ball < closest_robot.second))));
+            // If it is close to the closest robot, highest ID wins
+            // Otherwise it has to be closer to win
+            if ((equidistant && (robot.teammate_id > highest_id))
+                || (!equidistant && (distance_to_ball < closest_robot.second))) {
+                // NUClear::log<NUClear::LogLevel::INFO>("Closer robot found",
+                //                                       robot.teammate_id,
+                //                                       distance_to_ball,
+                //                                       closest_robot.second,
+                //                                       highest_id);
+                closest_robot = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};
+                highest_id    = robot.teammate_id;
+            }
         }
 
-        // Find the min element in the list of players' ball distances
-        auto closest = std::min_element(players.begin(), players.end(), [](const auto& a, const auto& b) {
-            return a.second < b.second;
-        });
-
-        // The robot closest to the ball is returned
-        return closest == players.end() ? std::pair{Who{Who::NONE}, 0.0} : *closest;
+        return closest_robot;
     }
 
     /**
@@ -125,9 +142,11 @@ namespace utility::strategy {
                         const Robots& robots,
                         const Eigen::Isometry3d& Hfw,
                         const Eigen::Isometry3d& Hrw,
-                        double threshold) {
+                        double threshold,
+                        double equidistant_threshold,
+                        int self_id) {
         // Function determines who has possession based on proximity and a threshold distance.
-        auto closest_robot = get_closest_bot(rBWw, robots.robots, Hfw, Hrw);
+        auto closest_robot = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id);
 
         // 'closest_robot.second' is the distance to the ball
         // If the distance is greater than the threshold, then the robot is too far
@@ -152,10 +171,12 @@ namespace utility::strategy {
     bool closest_to_ball_on_team(const Eigen::Vector3d& rBWw,
                                  const Robots& robots,
                                  const Eigen::Isometry3d& Hfw,
-                                 const Eigen::Isometry3d& Hrw) {
+                                 const Eigen::Isometry3d& Hrw,
+                                 double equidistant_threshold,
+                                 int self_id) {
         // Function determines who has possession based on proximity and a threshold distance.
         // Exclude opponents from the search
-        auto closest_robot = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, false);
+        auto closest_robot = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, false);
 
         // Return true if the closest robot is us
         return closest_robot.first == Who{Who::SELF};
