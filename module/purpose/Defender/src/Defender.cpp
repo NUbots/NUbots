@@ -33,7 +33,7 @@
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/UpdateBoundingBox.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
-#include "message/strategy/FindFeature.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
