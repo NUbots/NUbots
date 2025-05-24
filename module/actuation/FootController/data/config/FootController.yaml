@@ -37,6 +37,6 @@ max_i_error: 0.08
 
 # Hack to account for a strange pitch when enabling the foot controller
 support_foot_offset:
-  x: -0.55
+  x: 0
   y: 0
   z: 0
