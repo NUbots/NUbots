@@ -13,8 +13,10 @@
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 
+#include "utility/strategy/positioning.hpp"
 #include "utility/strategy/soccer_strategy.hpp"
 
 namespace module::purpose {
@@ -36,8 +38,8 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
+    using message::support::FieldDescription;
     using message::support::GlobalConfig;
-
 
     FieldPlayer::FieldPlayer(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -145,11 +147,34 @@ namespace module::purpose {
             });
 
         // READY state
-        on<Provide<FieldPlayerMsg>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
-            // todo Determine dynamically the best ready position
-            Eigen::Isometry3d Hfr = Eigen::Isometry3d::Identity();
-            emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
-        });
+        on<Provide<FieldPlayerMsg>,
+           Optional<With<Robots>>,
+           With<FieldDescription>,
+           With<Field>,
+           With<Sensors>,
+           When<Phase, std::equal_to, Phase::READY>>()
+            .then([this](const std::shared_ptr<const Robots>& robots,
+                         const FieldDescription& field_desc,
+                         const Field& field,
+                         const Sensors& sensors) {
+                // Collect up teammates ; empty if no one is around
+                std::vector<Eigen::Vector3d> teammates{};
+                if (robots) {
+                    // Collect all teammates in a vector
+                    for (const auto& robot : robots->robots) {
+                        if (robot.teammate_id != 0) {
+                            teammates.push_back(field.Hfw * robot.rRWw);
+                        }
+                    }
+                }
+
+                // Calculate optimal ready position based on everyone's position
+                Eigen::Isometry3d Hfr =
+                    utility::strategy::ready_position(field.Hfw, sensors.Hrw, teammates, field_desc, false);
+                emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
+            });
+
+
         // When not playing or in ready, stand still
         on<Provide<FieldPlayerMsg>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }

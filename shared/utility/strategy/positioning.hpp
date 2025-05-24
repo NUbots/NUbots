@@ -34,7 +34,13 @@
 #include <utility>
 #include <vector>
 
+#include "message/support/FieldDescription.hpp"
+
+#include "utility/math/euler.hpp"
+
 namespace utility::strategy {
+
+    using message::support::FieldDescription;
 
     /**
      * @brief Cost function for positioning robots in a formation
@@ -100,12 +106,12 @@ namespace utility::strategy {
                                 const Eigen::Vector3d& neutral_point,
                                 const std::vector<Eigen::Vector3d>& opponent_positions,
                                 const std::vector<Eigen::Vector3d>& all_robot_positions,
-                                Scalar clearance,
-                                Scalar equidist_weight,
-                                Scalar neutral_weight,
-                                Scalar avoid_weight,
-                                Scalar step_size,
-                                int max_iters) {
+                                const Scalar clearance,
+                                const Scalar equidist_weight,
+                                const Scalar neutral_weight,
+                                const Scalar avoid_weight,
+                                const Scalar step_size,
+                                const int max_iters) {
         Eigen::Vector3d X = initial;
 
         for (int iter = 0; iter < max_iters; ++iter) {
@@ -141,6 +147,73 @@ namespace utility::strategy {
         }
 
         return X;
+    }
+
+    int index_of(const std::vector<Eigen::Vector3d>& list, const Eigen::Vector3d& target) {
+        auto it = std::find_if(list.begin(), list.end(), [&](const Eigen::Vector3d& p) {
+            return (p - target).norm() < 1e-4;
+        });
+        return std::distance(list.begin(), it);
+    }
+
+    void remove_robot(std::vector<Eigen::Vector3d>& list, const Eigen::Vector3d& robot) {
+        list.erase(std::remove_if(list.begin(),
+                                  list.end(),
+                                  [&](const Eigen::Vector3d& p) { return (p - robot).norm() < 1e-4; }),
+                   list.end());
+    }
+
+    Eigen::Isometry3d ready_position(const Eigen::Isometry3d& Hfw,
+                                     const Eigen::Isometry3d& Hrw,
+                                     const std::vector<Eigen::Vector3d>& teammates,
+                                     const FieldDescription& field_desc,
+                                     const bool kick_off) {
+        // Transform robot position to field coordinates and get side
+        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
+        bool is_left         = rRFf.y() > 0;
+
+        // Sort teammates into left and right
+        std::vector<Eigen::Vector3d> left, right;
+        for (const auto& t : teammates)
+            (t.y() > 0 ? left : right).push_back(t);
+
+        // Sort out kick off side and find our side vector
+        auto& side = is_left ? left : right;
+        side.push_back(rRFf);
+        bool left_kick_off = left.size() >= right.size();
+
+        // Sort the side vector by x position, so that the first robot is the closest to the centre
+        std::sort(side.begin(), side.end(), [](auto& a, auto& b) { return std::abs(a.x()) < std::abs(b.x()); });
+
+        // Check if we are the kick off robot
+        bool kicking_side             = (is_left && left_kick_off) || (!is_left && !left_kick_off);
+        Eigen::Vector3d kickoff_robot = kicking_side ? side.front() : Eigen::Vector3d::Zero();
+        bool is_kickoff_robot         = kicking_side && (rRFf - kickoff_robot).norm() < 1e-4;
+
+        // If we are the kick off robot, we want to be in the centre circle
+        double c_rad = field_desc.dimensions.center_circle_diameter / 2.0;
+        if (is_kickoff_robot) {
+            Eigen::Vector3d p =
+                kick_off ? Eigen::Vector3d(c_rad / 2, 0.0, 0.0) : Eigen::Vector3d(c_rad + 0.3, 0.0, M_PI);
+            return utility::math::euler::pos_rpy_to_transform(p, Eigen::Vector3d(0, 0, -M_PI));
+        }
+
+        // Remove the kick off robot from the side vector if it's our side
+        if (kicking_side) {
+            remove_robot(side, kickoff_robot);
+        }
+
+        // Make equidistant grid and find where we should be in the grid
+        int index = index_of(side, rRFf);
+        int rows  = static_cast<int>(side.size());
+
+        // Equally space the robots between the kick off robot and goalie
+        double penalty_x = field_desc.dimensions.field_length / 2.0 - field_desc.dimensions.penalty_mark_distance;
+        double x         = c_rad + (index + 1) * (penalty_x - c_rad) / rows;
+        // Space the robots out with an offset based on their index, so that robots are not directly behind each other
+        double y = (is_left ? 1 : -1) * ((index + 1) * field_desc.dimensions.field_width / (4.0 * rows));
+
+        return utility::math::euler::pos_rpy_to_transform(Eigen::Vector3d(x, y, 0.0), Eigen::Vector3d(0, 0, -M_PI));
     }
 
 
