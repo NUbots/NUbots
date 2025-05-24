@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "message/localisation/Robot.hpp"
-#include "message/strategy/Possession.hpp"
+#include "message/strategy/Who.hpp"
 
 namespace utility::strategy {
 
