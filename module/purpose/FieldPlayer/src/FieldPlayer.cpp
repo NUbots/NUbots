@@ -13,6 +13,7 @@
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 #include "utility/strategy/soccer_strategy.hpp"
 
@@ -35,14 +36,17 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
+    using message::support::GlobalConfig;
+
 
     FieldPlayer::FieldPlayer(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("FieldPlayer.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FieldPlayer.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_threshold = config["ball_threshold"].as<double>();
+            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ball_threshold        = config["ball_threshold"].as<double>();
+            cfg.equidistant_threshold = config["equidistant_threshold"].as<double>();
         });
 
         // PLAYING state
@@ -51,12 +55,16 @@ namespace module::purpose {
            Optional<With<Robots>>,
            With<Sensors>,
            With<Field>,
+           With<GlobalConfig>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
                          const Sensors& sensors,
-                         const Field& field) {
-                log<INFO>("Playing as a FieldPlayer");
+                         const Field& field,
+                         const GlobalConfig& global_config) {
+                // emit<Task>(std::make_unique<Defend>());
+                // return;
+                // log<INFO>("Playing as a FieldPlayer");
 
                 // Todo determine if we have enough information to play
                 // Eg localisation confidence
@@ -70,14 +78,21 @@ namespace module::purpose {
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
                 bool closest_to_ball_on_team =
-                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw, *robots, field.Hfw, sensors.Hrw)
+                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
+                                                                        *robots,
+                                                                        field.Hfw,
+                                                                        sensors.Hrw,
+                                                                        cfg.equidistant_threshold,
+                                                                        global_config.player_id)
                            : true;
                 // If there are no robots, use an empty vector (might still be self or none)
                 Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
                                                                   (robots ? *robots : Robots{}),
                                                                   field.Hfw,
                                                                   sensors.Hrw,
-                                                                  cfg.ball_threshold);
+                                                                  cfg.ball_threshold,
+                                                                  cfg.equidistant_threshold,
+                                                                  global_config.player_id);
 
                 // Todo Check if we can attack
                 bool allowed_to_attack = true;
@@ -102,7 +117,7 @@ namespace module::purpose {
 
                 // If we are in the best position to attack, but we can't because of the situation
                 // eg because of a throw in for the opponent, then we should stick to a good spot and be ready to attack
-                if (((ball_pos == Who::SELF) && closest_to_ball_on_team) && !allowed_to_attack) {
+                if (closest_to_ball_on_team && !allowed_to_attack) {
                     emit<Task>(std::make_unique<ReadyAttack>());
                     log<INFO>(
                         "We are in the best position to attack, but we can't because of the situation, so get ready to "

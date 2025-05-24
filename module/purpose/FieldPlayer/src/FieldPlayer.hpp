@@ -13,6 +13,8 @@ namespace module::purpose {
         struct Config {
             /// @brief The distance from the ball to consider it in possession
             double ball_threshold = 0.0;
+            /// @brief The distance from a robot to consider it equidistant, to consider error
+            double equidistant_threshold = 0.0;
         } cfg;
 
     public:
