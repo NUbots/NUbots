@@ -64,10 +64,6 @@ namespace module::purpose {
                          const Sensors& sensors,
                          const Field& field,
                          const GlobalConfig& global_config) {
-                // emit<Task>(std::make_unique<Defend>());
-                // return;
-                // log<INFO>("Playing as a FieldPlayer");
-
                 // Todo determine if we have enough information to play
                 // Eg localisation confidence
 
@@ -79,14 +75,15 @@ namespace module::purpose {
 
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
-                bool closest_to_ball_on_team =
-                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
-                                                                        *robots,
-                                                                        field.Hfw,
-                                                                        sensors.Hrw,
-                                                                        cfg.equidistant_threshold,
-                                                                        global_config.player_id)
-                           : true;
+                int closest_to_ball = robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
+                                                                                          *robots,
+                                                                                          field.Hfw,
+                                                                                          sensors.Hrw,
+                                                                                          cfg.equidistant_threshold,
+                                                                                          global_config.player_id)
+                                             : global_config.player_id;
+                bool is_closest     = closest_to_ball == global_config.player_id;
+
                 // If there are no robots, use an empty vector (might still be self or none)
                 Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
                                                                   (robots ? *robots : Robots{}),
@@ -101,17 +98,15 @@ namespace module::purpose {
 
                 log<DEBUG>("Ball possession:",
                            ball_pos,
-                           " closest to ball?",
-                           closest_to_ball_on_team,
+                           " closest to ball:",
+                           closest_to_ball,
                            " allowed to attack?",
                            allowed_to_attack);
 
-                // Todo: if another robot/s within a threshold distance, the lowest robot id should be the attacker,
-                // same with defender but opposite.
                 // If we are in possession of the ball or it's free or opponent is in
                 // possession, then we can attack if we are closest BUT we have to be in a situation where we are
                 // allowed to attack, eg it can't be the other team's penalty or their kick off
-                if (closest_to_ball_on_team && allowed_to_attack) {
+                if (is_closest && allowed_to_attack) {
                     log<INFO>("We are in the best position to attack, going for it!");
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
@@ -119,7 +114,7 @@ namespace module::purpose {
 
                 // If we are in the best position to attack, but we can't because of the situation
                 // eg because of a throw in for the opponent, then we should stick to a good spot and be ready to attack
-                if (closest_to_ball_on_team && !allowed_to_attack) {
+                if (is_closest && !allowed_to_attack) {
                     emit<Task>(std::make_unique<ReadyAttack>());
                     log<INFO>(
                         "We are in the best position to attack, but we can't because of the situation, so get ready to "
@@ -132,7 +127,13 @@ namespace module::purpose {
                 // We should only hang back if we are the furthest back, ignoring the goalie.
                 // If there's no robots, assume we are alone and are the furthest back
                 // Shouldn't happen, as that should make us the attacker
-                bool furthest_back = robots ? utility::strategy::furthest_back(*robots, field.Hfw, sensors.Hrw) : true;
+                bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
+                                                                               field.Hfw,
+                                                                               sensors.Hrw,
+                                                                               cfg.equidistant_threshold,
+                                                                               global_config.player_id,
+                                                                               std::vector<int>{closest_to_ball})
+                                            : true;
                 if (furthest_back) {
                     log<INFO>("We are the furthest back, so we should defend");
                     emit<Task>(std::make_unique<Defend>());

@@ -106,13 +106,10 @@ namespace module::purpose {
         });
 
         on<Provide<FindPurpose>, Every<1, Per<std::chrono::seconds>>>().then([this] {
-            log<INFO>("Starting FindPurpose");
             if (cfg.is_goalie) {
-                log<INFO>("Starting as a goalie");
                 emit<Task>(std::make_unique<Goalie>());
             }
             else {
-                log<INFO>("Starting as a field player");
                 emit<Task>(std::make_unique<FieldPlayer>());
             }
         });
