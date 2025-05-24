@@ -79,7 +79,7 @@ namespace module::purpose {
 
                 // Walk to the optimal position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
-                    pos_rpy_to_transform(optimal_position, Eigen::Vector3d(0, 0, M_PI)),
+                    pos_rpy_to_transform(optimal_position, Eigen::Vector3d(0, 0, -M_PI)),
                     true));
             });
     }
