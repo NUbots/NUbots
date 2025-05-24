@@ -142,6 +142,7 @@ namespace module::actuation {
                           LimbID limb_id) {
 
             ik_task->time = foot_control_task.time;
+            ik_task->Htf  = foot_control_task.Htf;
 
             if (foot_control_task.correction_enabled && cfg.correction_enabled) {
                 // Hwt quaternion
