@@ -20,8 +20,6 @@ Enable ground truth localisation in `SensorFilter` and `FieldLocalisationNLopt` 
 ## Emits
 
 - `message::localisation::RobotPoseGroundTruth`: The ground truth pose of the robot, containing:
-  - Position (x, y, z) in meters
-  - Orientation as a quaternion (w, x, y, z)
-  - Full transformation matrix (Hft) combining position and orientation
+  - Transformation matrix (Hft)
 
 ## Dependencies
