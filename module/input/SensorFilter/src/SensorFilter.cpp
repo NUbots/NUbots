@@ -353,16 +353,25 @@ namespace module::input {
                                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
-            // Construct world {w} to torso {t} space transform from ground truth pose (assume field {f} to world {w} is
-            // identity)
-            sensors->Htw = Eigen::Isometry3d(robot_pose_ground_truth->Hft).inverse();
+            Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+            if (!ground_truth_initialised) {
+                // Initialise the ground truth Hfw
+                ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+                ground_truth_Hfw.translation()[2]        = 0;
+                double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+                ground_truth_initialised                 = true;
+            }
+
+            // Construct world {w} to torso {t} space transform from ground truth pose
+            sensors->Htw = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
             // Construct robot {r} to world {w} space transform from ground truth
             Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
             Hwr.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(sensors->Htw.linear()).z(), Eigen::Vector3d::UnitZ())
                                .toRotationMatrix();
             Hwr.translation() = Eigen::Vector3d(sensors->Htw.translation().x(), sensors->Htw.translation().y(), 0.0);
             sensors->Hrw      = Hwr.inverse();
-            sensors->vTw      = robot_pose_ground_truth->vTf;
+            sensors->vTw      = Eigen::Vector3d(robot_pose_ground_truth->vTf);
             return;
         }
         else if (cfg.use_ground_truth && !robot_pose_ground_truth) {

@@ -280,6 +280,12 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
+        /// @brief Bool indicating ground truth localisation (Hfw) computed
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
         explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);

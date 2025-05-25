@@ -116,6 +116,12 @@ namespace module::input {
         /// @brief Current state of the middle button
         bool middle_down = false;
 
+        /// @brief Bool indicating if the ground truth is initialised
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
         /// @param sensors The sensors message to update
