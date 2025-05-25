@@ -365,6 +365,9 @@ namespace module::input {
             sensors->vTw      = robot_pose_ground_truth->vTf;
             return;
         }
+        else if (cfg.use_ground_truth && !robot_pose_ground_truth) {
+            log<WARN>("No ground truth data received, but use_ground_truth is true");
+        }
 
         // Compute time since last update
         const double dt = std::max(
