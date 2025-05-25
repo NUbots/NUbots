@@ -101,7 +101,7 @@ message BackPanel {
         bool middle = 2;
     }
 
-    Buttons  buttons   = 1;
+    Buttons buttons = 1;
 }
 
 message NUSense {
