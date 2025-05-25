@@ -51,6 +51,8 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    struct OnFieldResetFieldLocalisation {};
+
     FieldLocalisationNLopt::FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -62,6 +64,7 @@ namespace module::localisation {
             cfg.start_time_delay              = std::chrono::seconds(config["start_time_delay"].as<int>());
             cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
+            cfg.nis_threshold                 = config["nis_threshold"].as<double>();
 
             // Field line optimisation parameters
             cfg.field_line_distance_weight = config["field_line_distance_weight"].as<double>();
@@ -170,85 +173,126 @@ namespace module::localisation {
             log<INFO>("Resetting field localisation");
             state = cfg.initial_hypotheses[0];
             kf.set_state(state);
-            startup = true;
+            startup      = true;
+            last_started = NUClear::clock::now();
         });
 
-        on<Trigger<FieldLines>,
+        main_loop =
+            on<Trigger<FieldLines>,
+               Optional<With<FieldIntersections>>,
+               Optional<With<Goals>>,
+               With<Stability>,
+               With<RawSensors>>()
+                .then("NLopt field localisation",
+                      [this](const FieldLines& field_lines,
+                             const std::shared_ptr<const FieldIntersections>& field_intersections,
+                             const std::shared_ptr<const Goals>& goals,
+                             const Stability& stability,
+                             const RawSensors& raw_sensors) {
+                          log<INFO>("Field localisation running");
+                          // Emit field message using ground truth if available
+                          if (cfg.use_ground_truth_localisation) {
+                              auto field(std::make_unique<Field>());
+                              field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+                              emit(field);
+                              return;
+                          }
+
+                          // Don't run an update if there are not enough field line points or the robot is
+                          // unstable
+                          bool unstable = stability <= Stability::FALLING;
+                          if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
+                              log<DEBUG>("Not enough field line points or robot is unstable");
+                              return;
+                          }
+
+                          if (startup && cfg.starting_side == StartingSide::EITHER) {
+                              // Find the best initial state to use based on the optimisation results of each
+                              // hypothesis
+                              std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
+                              for (auto& hypothesis : cfg.initial_hypotheses) {
+                                  opt_results.push_back(run_field_line_optimisation(hypothesis,
+                                                                                    field_lines.rPWw,
+                                                                                    field_intersections,
+                                                                                    goals));
+                              }
+                              auto best_hypothesis =
+                                  std::min_element(opt_results.begin(),
+                                                   opt_results.end(),
+                                                   [](const auto& a, const auto& b) { return a.second < b.second; });
+                              state = best_hypothesis->first;
+                              kf.set_state(state);
+                              startup = false;
+                          }
+                          else {
+                              // Run the optimisation routine
+                              std::pair<Eigen::Vector3d, double> opt_results =
+                                  run_field_line_optimisation(kf.get_state(),
+                                                              field_lines.rPWw,
+                                                              field_intersections,
+                                                              goals);
+                              state = opt_results.first;
+                          }
+
+                          // Time update (no process model)
+                          kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
+
+                          // Measurement update
+                          double nis = kf.measure(state);
+
+                          if (nis > cfg.nis_threshold
+                              && (NUClear::clock::now() - last_started) > std::chrono::seconds(cfg.reset_delay)) {
+                              emit<Scope::INLINE>(std::make_unique<OnFieldResetFieldLocalisation>());
+                          }
+                          else if (nis <= cfg.nis_threshold) {
+                              // Update the last certain state
+                              last_certain_state = kf.get_state();
+                          }
+
+                          // Emit the field message
+                          auto field = std::make_unique<Field>();
+                          field->Hfw = compute_Hfw(kf.get_state());
+
+                          // Debugging
+                          if (log_level <= DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                              debug_field_localisation(field->Hfw, raw_sensors);
+                          }
+                          // Association (run once for debugging in NUsight)
+                          auto associations = data_association(field_intersections, field->Hfw);
+                          for (const auto& association : associations) {
+                              field->association_lines.push_back({association.first, association.second});
+                          }
+
+                          // Add NIS, covariance, and uncertainty to the field message
+                          field->nis         = nis;
+                          field->covariance  = kf.get_covariance();
+                          field->uncertainty = kf.get_covariance().diagonal().sum();
+
+                          emit(field);
+                      });
+
+        on<Trigger<OnFieldResetFieldLocalisation>,
+           With<FieldDescription>,
+           With<FieldLines>,
            Optional<With<FieldIntersections>>,
            Optional<With<Goals>>,
-           With<Stability>,
-           With<RawSensors>>()
-            .then(
-                "NLopt field localisation",
-                [this](const FieldLines& field_lines,
-                       const std::shared_ptr<const FieldIntersections>& field_intersections,
-                       const std::shared_ptr<const Goals>& goals,
-                       const Stability& stability,
-                       const RawSensors& raw_sensors) {
-                    // Emit field message using ground truth if available
-                    if (cfg.use_ground_truth_localisation) {
-                        auto field(std::make_unique<Field>());
-                        field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
-                        emit(field);
-                        return;
-                    }
+           Single>()
+            .then("Uncertainty Reset",
+                  [this](const FieldDescription& fd,
+                         const FieldLines& field_lines,
+                         const std::shared_ptr<const FieldIntersections>& field_intersections,
+                         const std::shared_ptr<const Goals>& goals) {
+                      log<INFO>("Uncertainty reset triggered due to high NIS value");
 
-                    // Don't run an update if there are not enough field line points or the robot is unstable
-                    bool unstable = stability <= Stability::FALLING;
-                    if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
-                        log<DEBUG>("Not enough field line points or robot is unstable");
-                        return;
-                    }
+                      // Stop the main loop to prevent further updates while resetting
+                      main_loop.disable();
 
-                    if (startup && cfg.starting_side == StartingSide::EITHER) {
-                        // Find the best initial state to use based on the optimisation results of each hypothesis
-                        std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
-                        for (auto& hypothesis : cfg.initial_hypotheses) {
-                            opt_results.push_back(
-                                run_field_line_optimisation(hypothesis, field_lines.rPWw, field_intersections, goals));
-                        }
-                        auto best_hypothesis =
-                            std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
-                                return a.second < b.second;
-                            });
-                        state = best_hypothesis->first;
-                        kf.set_state(state);
-                        startup = false;
-                    }
-                    else {
-                        // Run the optimisation routine
-                        std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(kf.get_state(), field_lines.rPWw, field_intersections, goals);
-                        state = opt_results.first;
-                    }
-
-                    // Time update (no process model)
-                    kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
-
-                    // Measurement update
-                    double nis = kf.measure(state);
-
-                    // Emit the field message
-                    auto field = std::make_unique<Field>();
-                    field->Hfw = compute_Hfw(kf.get_state());
-
-                    // Debugging
-                    if (log_level <= DEBUG && raw_sensors.localisation_ground_truth.exists) {
-                        debug_field_localisation(field->Hfw, raw_sensors);
-                    }
-                    // Association (run once for debugging in NUsight)
-                    auto associations = data_association(field_intersections, field->Hfw);
-                    for (const auto& association : associations) {
-                        field->association_lines.push_back({association.first, association.second});
-                    }
-
-                    // Add NIS, covariance, and uncertainty to the field message
-                    field->nis         = nis;
-                    field->covariance  = kf.get_covariance();
-                    field->uncertainty = kf.get_covariance().diagonal().sum();
-
-                    emit(field);
-                });
+                      // Reset the system
+                      uncertainty_reset(fd, field_lines, field_intersections, goals);
+                      last_started = NUClear::clock::now();
+                      // Re-enable the main loop
+                      main_loop.enable();
+                  });
     }
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {

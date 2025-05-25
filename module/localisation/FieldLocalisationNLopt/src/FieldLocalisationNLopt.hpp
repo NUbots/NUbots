@@ -51,6 +51,7 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
+    using message::vision::FieldLines;
     using message::vision::Goals;
 
     using utility::localisation::Landmark;
@@ -255,6 +256,10 @@ namespace module::localisation {
 
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
+
+            /// @brief NIS threshold for resetting the filter
+            double nis_threshold = 0.0;
+            int reset_delay      = 5;
         } cfg;
 
 
@@ -280,9 +285,8 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
-    public:
-        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
-        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
+        ReactionHandle main_loop;
+        NUClear::clock::time_point last_started = NUClear::clock::now();
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
@@ -340,6 +344,16 @@ namespace module::localisation {
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
+
+        void uncertainty_reset(const FieldDescription& fd,
+                               const FieldLines& field_lines,
+                               const std::shared_ptr<const FieldIntersections>& field_intersections,
+                               const std::shared_ptr<const Goals>& goals);
+        Eigen::Vector3d last_certain_state = Eigen::Vector3d::Zero();
+
+    public:
+        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
+        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::localisation
 

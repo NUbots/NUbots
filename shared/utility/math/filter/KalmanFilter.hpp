@@ -133,7 +133,7 @@ namespace utility::math::filter {
 
             // Calculate the Normalised Innovation Squared (NIS)
             Eigen::Matrix<double, NumStates, 1> residual = measurement - C * state;
-            return nis = residual.transpose() * (C * covariance * C.transpose() + R).inverse() * residual;
+            return residual.transpose() * (C * covariance * C.transpose() + R).inverse() * residual;
         }
 
         /// @brief Get the current state estimate
