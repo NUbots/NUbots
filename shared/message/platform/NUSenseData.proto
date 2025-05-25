@@ -93,9 +93,7 @@ message IMU {
 
 message BackPanel {
 
-    // For now, I am only including the two buttons since I see no current need to poll the state of the LEDs, and I
-    // want to conserve as much bandwidth as possible. If such a need arises, then one can add it under the BackPanel
-    // message.
+    // LEDs are not yet added in order to conserve bandwidth. However, they can be added later once the need arises.
     message Buttons {
         bool left   = 1;
         bool middle = 2;
