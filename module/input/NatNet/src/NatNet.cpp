@@ -43,6 +43,7 @@ namespace module::input {
     NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
             // We are updating to a new multicast address
             if (cfg.multicast_address != config["multicast_address"].as<std::string>()
                 || cfg.data_port != config["data_port"].as<uint32_t>()
@@ -69,30 +70,29 @@ namespace module::input {
 
                 // Create a listening UDP port for data
                 std::tie(data_handle, std::ignore, std::ignore) =
-                    on<UDP::Multicast>(cfg.multicast_address, cfg.data_port)
-                        .then("NatNet Data", [this](const UDP::Packet& packet) {
-                            // Test if we are "connected" to this remote
-                            // And if we are we can use the data
-                            std::string address = packet.remote.address;
-                            if (remote == address && version != 0) {
-                                process(packet.payload);
-                            }
-                            // We have started connecting but haven't received a return ping
-                            else if (remote == address && version == 0) {
-                                // TODO(HardwareTeam): maybe set a timeout here to try again
-                            }
-                            // We haven't connected to anything yet
-                            else if (remote.empty()) {
-                                // This is now our remote
-                                remote = address;
+                    on<UDP::Broadcast>(cfg.data_port).then("NatNet Data", [this](const UDP::Packet& packet) {
+                        // Test if we are "connected" to this remote
+                        // And if we are we can use the data
+                        std::string address = packet.remote.address;
+                        if (remote == address && version != 0) {
+                            process(packet.payload);
+                        }
+                        // We have started connecting but haven't received a return ping
+                        else if (remote == address && version == 0) {
+                            // TODO(HardwareTeam): maybe set a timeout here to try again
+                        }
+                        // We haven't connected to anything yet
+                        else if (remote.empty()) {
+                            // This is now our remote
+                            remote = address;
 
-                                // Send a ping command
-                                send_command(Packet::Type::PING);
-                            }
-                            else if (remote != address) {
-                                log<WARN>("There is more than one NatNet server running on this network");
-                            }
-                        });
+                            // Send a ping command
+                            send_command(Packet::Type::PING);
+                        }
+                        else if (remote != address) {
+                            log<WARN>("There is more than one NatNet server running on this network");
+                        }
+                    });
             }
             cfg.dump_packets = config["dump_packets"].as<bool>();
         });
