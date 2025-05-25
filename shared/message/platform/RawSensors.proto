@@ -183,7 +183,7 @@ message RawSensors {
     FSRs     fsr           = 11;
 
     /// Ground truth from a simulator
-    webots.RobotPoseGroundTruth         robot_pose_ground_truth         = 12;
+    webots.RobotPoseGroundTruth robot_pose_ground_truth = 12;
 }
 
 // Reset sensors and servo targets in Webots

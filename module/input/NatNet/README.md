@@ -10,11 +10,13 @@ In the Motive software, ensure the advanced streaming settings are set to the fo
 **Local Interface:** <motive_device_ip> # Set to the ip of the device running motive, sometimes toggling on/off needed
 
 #### Marker Options
+
 - **Labeled Markers:** Off
 - **Unlabeled Markers:** Off
 - **Asset Markers:** Off
 
 #### Rigid Body Options
+
 - **Rigid Bodies:** On
 - **Skeletons:** Off
 - **Skeleton Coordinates:** Global
@@ -23,6 +25,7 @@ In the Motive software, ensure the advanced streaming settings are set to the fo
 - **Up Axis:** Z Up
 
 #### Miscellaneous
+
 - **Remote Trigger:** Off
 - **Transmission Type:** Multicast
 - **Subject Prefix:**
@@ -30,6 +33,7 @@ In the Motive software, ensure the advanced streaming settings are set to the fo
 - **Scale:** 1
 
 #### Networking
+
 - **Command Port:** 1510
 - **Data Port:** 1511
 - **Multicast Interface:** `239.255.42.99`
