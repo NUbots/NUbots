@@ -27,6 +27,7 @@
 
 #include "SensorFilter.hpp"
 
+
 namespace module::input {
 
     using extension::Configuration;
@@ -38,7 +39,7 @@ namespace module::input {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::localisation::ResetFieldLocalisation;
-
+    using message::localisation::RobotPoseGroundTruth;
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
     using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::FrameID;
@@ -98,29 +99,35 @@ namespace module::input {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
-        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<Stability>, Single, Priority::HIGH>().then(
-            "Main Sensors Loop",
-            [this](const RawSensors& raw_sensors,
-                   const std::shared_ptr<const Sensors>& previous_sensors,
-                   const Stability& stability) {
-                auto sensors = std::make_unique<Sensors>();
+        on<Trigger<RawSensors>,
+           Optional<With<Sensors>>,
+           With<Stability>,
+           Optional<With<RobotPoseGroundTruth>>,
+           Single,
+           Priority::HIGH>()
+            .then("Main Sensors Loop",
+                  [this](const RawSensors& raw_sensors,
+                         const std::shared_ptr<const Sensors>& previous_sensors,
+                         const Stability& stability,
+                         const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+                      auto sensors = std::make_unique<Sensors>();
 
-                // Raw sensors (Accelerometer, Gyroscope, etc.)
-                update_raw_sensors(sensors, previous_sensors, raw_sensors);
+                      // Raw sensors (Accelerometer, Gyroscope, etc.)
+                      update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
-                // Kinematics (Htw, foot down, CoM, etc.)
-                update_kinematics(sensors, raw_sensors);
+                      // Kinematics (Htw, foot down, CoM, etc.)
+                      update_kinematics(sensors, raw_sensors);
 
-                // Odometry (Htw and Hrw)
-                update_odometry(sensors, previous_sensors, raw_sensors, stability);
+                      // Odometry (Htw and Hrw)
+                      update_odometry(sensors, previous_sensors, raw_sensors, stability, robot_pose_ground_truth);
 
-                // Graph debug information
-                if (log_level <= DEBUG) {
-                    debug_sensor_filter(sensors, raw_sensors);
-                }
+                      // Graph debug information
+                      if (log_level <= DEBUG) {
+                          debug_sensor_filter(sensors, robot_pose_ground_truth);
+                      }
 
-                emit(std::move(sensors));
-            });
+                      emit(std::move(sensors));
+                  });
 
         on<Last<20, Trigger<RawSensors>>>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {
@@ -342,18 +349,20 @@ namespace module::input {
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
                                        const RawSensors& raw_sensors,
-                                       const Stability& stability) {
+                                       const Stability& stability,
+                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
         // Use ground truth instead of calculating odometry, then return
-        if (cfg.use_ground_truth) {
-            // Construct world {w} to torso {t} space transform from ground truth.inverse();
-            sensors->Htw = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw);
+        if (cfg.use_ground_truth && robot_pose_ground_truth) {
+            // Construct world {w} to torso {t} space transform from ground truth pose (assume field {f} to world {w} is
+            // identity)
+            sensors->Htw = Eigen::Isometry3d(robot_pose_ground_truth->Hft).inverse();
             // Construct robot {r} to world {w} space transform from ground truth
             Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
             Hwr.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(sensors->Htw.linear()).z(), Eigen::Vector3d::UnitZ())
                                .toRotationMatrix();
             Hwr.translation() = Eigen::Vector3d(sensors->Htw.translation().x(), sensors->Htw.translation().y(), 0.0);
             sensors->Hrw      = Hwr.inverse();
-            sensors->vTw      = raw_sensors.odometry_ground_truth.vTw;
+            sensors->vTw      = robot_pose_ground_truth->vTf;
             return;
         }
 
@@ -436,7 +445,8 @@ namespace module::input {
         sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
     }
 
-    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
+    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                           const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
         // Raw accelerometer and gyroscope information
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
         emit(
@@ -467,8 +477,8 @@ namespace module::input {
         emit(graph("vTw (estimate)", vTw.x(), vTw.y(), vTw.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
-        if (raw_sensors.odometry_ground_truth.exists) {
-            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
+        if (robot_pose_ground_truth) {
+            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
 
             // Determine translation and orientation error
             Eigen::Vector3d true_rTWw  = true_Hwt.translation();
@@ -476,7 +486,7 @@ namespace module::input {
             Eigen::Vector3d true_Rwt   = mat_to_rpy_intrinsic(true_Hwt.rotation());
             Eigen::Vector3d error_Rwt  = (true_Rwt - est_Rwt).cwiseAbs();
             double quat_rot_error      = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
-            Eigen::Vector3d true_vTw   = Eigen::Vector3d(raw_sensors.odometry_ground_truth.vTw);
+            Eigen::Vector3d true_vTw   = Eigen::Vector3d(robot_pose_ground_truth->vTf);
             Eigen::Vector3d error_vTw  = (true_vTw - sensors->vTw).cwiseAbs();
 
             // Graph translation, angles and error

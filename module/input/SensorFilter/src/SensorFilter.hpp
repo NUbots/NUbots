@@ -63,6 +63,7 @@ namespace module::input {
 
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
 
     class SensorFilter : public NUClear::Reactor {
@@ -138,15 +139,18 @@ namespace module::input {
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
         /// @param raw_sensors The raw sensor data
+        /// @param robot_pose_ground_truth The ground truth robot pose
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
-                             const message::behaviour::state::Stability& stability);
+                             const message::behaviour::state::Stability& stability,
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
-        /// @param raw_sensors The raw sensor data
-        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
+        /// @param robot_pose_ground_truth The ground truth robot pose
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                 const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP
