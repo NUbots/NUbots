@@ -324,18 +324,6 @@ namespace module::localisation {
             const std::shared_ptr<const Goals>& goals);
 
         /**
-         * @brief Setup field line distance map
-         * @param fd The field dimensions
-         */
-        void setup_fieldline_distance_map(const FieldDescription& fd);
-
-        /**
-         * @brief Setup field landmarks
-         * @param fd The field dimensions
-         */
-        void setup_field_landmarks(const FieldDescription& fd);
-
-        /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
