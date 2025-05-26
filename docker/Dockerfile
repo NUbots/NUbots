@@ -132,7 +132,8 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DLLVM_USE_HOST_TOOLS=ON
 
 # SPIRV LLVM Translator
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v20.1.0.tar.gz \
