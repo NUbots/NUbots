@@ -91,15 +91,9 @@ message IMU {
     uint32 temperature = 3;
 }
 
-message BackPanel {
-
-    // LEDs are not yet added in order to conserve bandwidth. However, they can be added later once the need arises.
-    message Buttons {
-        bool left   = 1;
-        bool middle = 2;
-    }
-
-    Buttons buttons = 1;
+message Buttons {
+    bool left   = 1;
+    bool middle = 2;
 }
 
 message NUSense {
@@ -125,7 +119,7 @@ message NUSense {
      *  18 : head_yaw
      *  19 : head_pitch
      */
-    map<uint32, Servo> servo_map  = 1;
-    IMU                imu        = 2;
-    BackPanel          back_panel = 3;
+    map<uint32, Servo> servo_map = 1;
+    IMU                imu       = 2;
+    Buttons            buttons   = 3;
 }
