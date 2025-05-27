@@ -265,6 +265,11 @@ namespace module::actuation {
                     // Graph final corrected desired values
                     emit(graph("Balance/Desired_Roll_Final", desired_roll));
                     emit(graph("Balance/Desired_Pitch_Final", desired_pitch));
+
+                    // Graph the raw sensor values
+                    emit(graph("Debug/Raw_Accel_X", sensors.accelerometer.x()));
+                    emit(graph("Debug/Raw_Accel_Y", sensors.accelerometer.y()));
+                    emit(graph("Debug/Raw_Accel_Z", sensors.accelerometer.z()));
                 }
 
                 double desired_yaw = mat_to_rpy_intrinsic(Hft_quat.toRotationMatrix()).z();
