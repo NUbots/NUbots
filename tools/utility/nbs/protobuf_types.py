@@ -27,6 +27,7 @@
 #
 
 import glob
+import importlib.util
 import os
 import pkgutil
 import shutil
@@ -86,7 +87,12 @@ with tempfile.TemporaryDirectory() as protobuf_path:
             if module_name.endswith("pb2"):
 
                 # Load our protobuf module
-                module = loader.find_module(module_name).load_module(module_name)
+                spec = loader.find_spec(module_name)
+                if spec is not None:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                else:
+                    raise ImportError(f"Could not find module {module_name}")
 
     # Now that we've imported them all get all the subclasses of protobuf message
     for message in google.protobuf.message.Message.__subclasses__():
