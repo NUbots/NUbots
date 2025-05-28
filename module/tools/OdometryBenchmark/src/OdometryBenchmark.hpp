@@ -19,6 +19,12 @@ namespace module::tools {
             std::vector<std::string> messages{};
         } config;
 
+        /// @brief The initialised ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw;
+
+        /// @brief Whether the ground truth Hfw has been initialised
+        bool ground_truth_initialised = false;
+
         /// @brief The total error in the odometry translation
         double total_odometry_translation_error = 0.0;
 

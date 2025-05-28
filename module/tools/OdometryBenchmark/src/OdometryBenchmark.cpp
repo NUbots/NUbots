@@ -33,7 +33,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
-#include "message/platform/RawSensors.hpp"
+#include "message/localisation/Field.hpp"
+
+#include "utility/math/euler.hpp"
 
 namespace module::tools {
 
@@ -50,9 +52,13 @@ namespace module::tools {
     using message::nbs::player::PlaybackMode::SEQUENTIAL;
 
     using message::input::Sensors;
-    using message::platform::RawSensors;
+
+    using message::localisation::RobotPoseGroundTruth;
 
     using NUClear::message::CommandLineArguments;
+
+    using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
 
     OdometryBenchmark::OdometryBenchmark(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
@@ -108,41 +114,46 @@ namespace module::tools {
             emit<Scope::INLINE>(std::make_unique<PlayRequest>());
         });
 
-        on<Trigger<Sensors>, With<RawSensors>>().then([this](const Sensors& sensors, const RawSensors& raw_sensors) {
-            // Check if ground truth odometry data exists
-            if (!raw_sensors.odometry_ground_truth.exists) {
-                log<ERROR>("No ground truth odometry data found");
-                powerplant.shutdown();
-                return;
-            }
+        on<Trigger<Sensors>, With<RobotPoseGroundTruth>>().then(
+            [this](const Sensors& sensors, const RobotPoseGroundTruth& robot_pose_ground_truth) {
+                Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth.Hft);
+                if (!ground_truth_initialised) {
+                    // Initialise the ground truth Hfw
+                    ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+                    ground_truth_Hfw.translation()[2]        = 0;
+                    double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                    ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+                    ground_truth_initialised                 = true;
+                }
 
-            // Compute estimated Htw
-            Eigen::Isometry3d Htw_est = sensors.Htw;
 
-            // Compute ground truth Htw
-            Eigen::Isometry3d Htw_gt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw);
+                // Compute estimated Htw
+                Eigen::Isometry3d Htw_est = sensors.Htw;
 
-            // Compute odometry error
-            Eigen::Matrix<double, 6, 1> odometry_error = tinyrobotics::homogeneous_error(Htw_gt, Htw_est);
-            double odometry_translation_error          = odometry_error.head<3>().norm();
-            total_odometry_translation_error += odometry_translation_error * odometry_translation_error;
+                // Compute ground truth Htw
+                Eigen::Isometry3d Htw_gt = ground_truth_Hfw.inverse() * Hft;
 
-            // Compute odometry rotation error, ignore yaw for now
-            // TODO: Add yaw error
-            double odometry_rotation_error = odometry_error.tail<3>().head<2>().norm();
-            total_odometry_rotation_error += odometry_rotation_error * odometry_rotation_error;
+                // Compute odometry error
+                Eigen::Matrix<double, 6, 1> odometry_error = tinyrobotics::homogeneous_error(Htw_gt, Htw_est);
+                double odometry_translation_error          = odometry_error.head<3>().norm();
+                total_odometry_translation_error += odometry_translation_error * odometry_translation_error;
 
-            // Accumulate squared errors for each individual DoF
-            total_error_x += std::pow(odometry_error(0), 2);
-            total_error_y += std::pow(odometry_error(1), 2);
-            total_error_z += std::pow(odometry_error(2), 2);
-            total_error_roll += std::pow(odometry_error(3), 2);
-            total_error_pitch += std::pow(odometry_error(4), 2);
-            total_error_yaw += std::pow(odometry_error(5), 2);
+                // Compute odometry rotation error, ignore yaw for now
+                // TODO: Add yaw error
+                double odometry_rotation_error = odometry_error.tail<3>().head<2>().norm();
+                total_odometry_rotation_error += odometry_rotation_error * odometry_rotation_error;
 
-            // Increment counter
-            count++;
-        });
+                // Accumulate squared errors for each individual DoF
+                total_error_x += std::pow(odometry_error(0), 2);
+                total_error_y += std::pow(odometry_error(1), 2);
+                total_error_z += std::pow(odometry_error(2), 2);
+                total_error_roll += std::pow(odometry_error(3), 2);
+                total_error_pitch += std::pow(odometry_error(4), 2);
+                total_error_yaw += std::pow(odometry_error(5), 2);
+
+                // Increment counter
+                count++;
+            });
 
         on<Trigger<PlaybackFinished>>().then([this] {
             // Check if we have any data before dividing by count
