@@ -490,7 +490,7 @@ namespace module::input {
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (robot_pose_ground_truth) {
-            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(ground_truth_Hfw.inverse() * robot_pose_ground_truth->Hft);
 
             // Determine translation and orientation error
             Eigen::Vector3d true_rTWw  = true_Hwt.translation();
