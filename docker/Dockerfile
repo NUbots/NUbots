@@ -151,7 +151,7 @@ RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/
     -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
 
 # Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.3.0.tar.gz \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
