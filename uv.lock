@@ -457,7 +457,7 @@ wheels = [
 ]
 
 [[package]]
-name = "horus"
+name = "nubots"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
@@ -495,7 +495,7 @@ dependencies = [
 requires-dist = [
     { name = "black", specifier = "==24.10.0" },
     { name = "cmakelang", specifier = "==0.6.13" },
-    { name = "colorama", specifier = "==0.4.5" },
+    { name = "colorama", specifier = "==0.4.6" },
     { name = "gcovr", specifier = "==7.2" },
     { name = "isort", specifier = "==5.13.2" },
     { name = "jsonschema", specifier = "==4.23.0" },
