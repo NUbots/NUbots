@@ -133,8 +133,10 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON \
-    -DLLVM_USE_HOST_TOOLS=ON
-
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_INSTALL_PREFIX=${prefix} \
+    -DLLVM_HOST_TRIPLE=arm-linux-gnueabihf \
+    -DLLVM_TARGETS_TO_BUILD=ARM
 # SPIRV LLVM Translator
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v20.1.0.tar.gz \
     --build-system cmake \
@@ -143,7 +145,9 @@ RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/ar
 
 # opencl-clang
 RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v20.1.0.tar.gz \
-    --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/30062e0c4c4ae71f8f0e23a0375933d71dd1bc5c/resource_linker_skip_cross.patch
+    --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/30062e0c4c4ae71f8f0e23a0375933d71dd1bc5c/resource_linker_skip_cross.patch \
+    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DSPIRV_TRANSLATOR_DIR=${prefix}
 
 # Intel graphics compiler dependencies
 RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
