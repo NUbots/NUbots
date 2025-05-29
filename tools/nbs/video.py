@@ -39,7 +39,8 @@ from .images import decode_image
 from .images.video_recorder import Recorder
 
 # Configure TensorFlow to use CPU only for multiprocessing compatibility
-tf.config.set_visible_devices([], 'GPU')
+tf.config.set_visible_devices([], "GPU")
+
 
 def register(command):
     command.description = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
@@ -59,7 +60,7 @@ def register(command):
 
 def init_worker():
     """Initialize worker process with TensorFlow CPU-only configuration"""
-    tf.config.set_visible_devices([], 'GPU')
+    tf.config.set_visible_devices([], "GPU")
 
 
 def process_frame(item):
