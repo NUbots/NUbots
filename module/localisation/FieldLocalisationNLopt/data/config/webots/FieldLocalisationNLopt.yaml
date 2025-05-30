@@ -28,6 +28,9 @@ use_ground_truth_localisation: false
 # The NIS threshold value for the Kalman filter to trigger a reset
 nis_threshold: 0.01
 
+# Cost threshold for the optimisation to trigger a reset
+cost_threshold: 20.0
+
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 0.8347155755999723
 

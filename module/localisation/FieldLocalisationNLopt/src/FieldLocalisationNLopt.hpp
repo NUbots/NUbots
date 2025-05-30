@@ -259,7 +259,12 @@ namespace module::localisation {
 
             /// @brief NIS threshold for resetting the filter
             double nis_threshold = 0.0;
-            int reset_delay      = 5;
+
+            /// @brief Cost threshold for resetting the filter
+            double cost_threshold = 0.0;
+
+            /// @brief Reset delay in seconds
+            int reset_delay = 5;
         } cfg;
 
 
@@ -285,8 +290,11 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
+        /// @brief The main field localisation loop
         ReactionHandle main_loop;
-        NUClear::clock::time_point last_started = NUClear::clock::now();
+
+        /// @brief The last time the field localisation was reset
+        NUClear::clock::time_point last_reset = NUClear::clock::now();
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
@@ -333,7 +341,8 @@ namespace module::localisation {
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
 
-        void uncertainty_reset(const FieldDescription& fd,
+        void uncertainty_reset(double cost,
+                               const FieldDescription& fd,
                                const FieldLines& field_lines,
                                const std::shared_ptr<const FieldIntersections>& field_intersections,
                                const std::shared_ptr<const Goals>& goals);

@@ -51,7 +51,11 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    struct OnFieldResetFieldLocalisation {};
+    /// @brief The robot is on the field and is lost, try to reset the localisation
+    struct OnFieldResetFieldLocalisation {
+        /// @brief The cost that triggered the reset
+        double cost = 0.0;
+    };
 
     FieldLocalisationNLopt::FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -65,6 +69,7 @@ namespace module::localisation {
             cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
             cfg.nis_threshold                 = config["nis_threshold"].as<double>();
+            cfg.cost_threshold                = config["cost_threshold"].as<double>();
 
             // Field line optimisation parameters
             cfg.field_line_distance_weight = config["field_line_distance_weight"].as<double>();
@@ -173,8 +178,8 @@ namespace module::localisation {
             log<INFO>("Resetting field localisation");
             state = cfg.initial_hypotheses[0];
             kf.set_state(state);
-            startup      = true;
-            last_started = NUClear::clock::now();
+            startup    = true;
+            last_reset = NUClear::clock::now();
         });
 
         main_loop =
@@ -206,6 +211,8 @@ namespace module::localisation {
                               return;
                           }
 
+                          double chosen_state_cost = 0.0;
+
                           if (startup && cfg.starting_side == StartingSide::EITHER) {
                               // Find the best initial state to use based on the optimisation results of each
                               // hypothesis
@@ -220,7 +227,8 @@ namespace module::localisation {
                                   std::min_element(opt_results.begin(),
                                                    opt_results.end(),
                                                    [](const auto& a, const auto& b) { return a.second < b.second; });
-                              state = best_hypothesis->first;
+                              state             = best_hypothesis->first;
+                              chosen_state_cost = best_hypothesis->second;
                               kf.set_state(state);
                               startup = false;
                           }
@@ -231,20 +239,25 @@ namespace module::localisation {
                                                               field_lines.rPWw,
                                                               field_intersections,
                                                               goals);
-                              state = opt_results.first;
+                              state             = opt_results.first;
+                              chosen_state_cost = opt_results.second;
                           }
 
                           // Time update (no process model)
                           kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
 
                           // Measurement update
-                          double nis = kf.measure(state);
+                          kf.measure(state);
 
-                          if (nis > cfg.nis_threshold
-                              && (NUClear::clock::now() - last_started) > std::chrono::seconds(cfg.reset_delay)) {
-                              emit<Scope::INLINE>(std::make_unique<OnFieldResetFieldLocalisation>());
+                          // Get confidence metrics
+                          double nis     = kf.get_nis(state);
+                          bool uncertain = (nis > cfg.nis_threshold) && (chosen_state_cost > cfg.cost_threshold);
+                          log<INFO>("NIS:", nis, "Cost:", chosen_state_cost, "Uncertain:", uncertain);
+                          if (uncertain
+                              && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
+                              emit<Scope::INLINE>(std::make_unique<OnFieldResetFieldLocalisation>(chosen_state_cost));
                           }
-                          else if (nis <= cfg.nis_threshold) {
+                          else if (!uncertain) {
                               // Update the last certain state
                               last_certain_state = kf.get_state();
                           }
@@ -278,18 +291,19 @@ namespace module::localisation {
            Optional<With<Goals>>,
            Single>()
             .then("Uncertainty Reset",
-                  [this](const FieldDescription& fd,
+                  [this](const OnFieldResetFieldLocalisation& reset_loc,
+                         const FieldDescription& fd,
                          const FieldLines& field_lines,
                          const std::shared_ptr<const FieldIntersections>& field_intersections,
                          const std::shared_ptr<const Goals>& goals) {
-                      log<INFO>("Uncertainty reset triggered due to high NIS value");
+                      log<INFO>("Uncertainty reset triggered due to high NIS and cost values");
 
                       // Stop the main loop to prevent further updates while resetting
                       main_loop.disable();
 
                       // Reset the system
-                      uncertainty_reset(fd, field_lines, field_intersections, goals);
-                      last_started = NUClear::clock::now();
+                      uncertainty_reset(reset_loc.cost, fd, field_lines, field_intersections, goals);
+                      last_reset = NUClear::clock::now();
                       // Re-enable the main loop
                       main_loop.enable();
                   });
@@ -445,6 +459,7 @@ namespace module::localisation {
             if (log_level <= DEBUG) {
                 emit(graph("Cost", cost));
             }
+
             return cost;
         };
         // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations
