@@ -36,6 +36,13 @@ message Line {
     vec3 end   = 2;
 }
 
+message RobotPoseGroundTruth {
+    /// Homogeneous transformation matrix from field to torso space
+    iso3 Hft = 1;
+    /// Velocity of the robot torso in the field space
+    vec3 vTf = 2;
+}
+
 message Field {
     /// Homogeneous transformation matrix from world to field space
     iso3 Hfw = 1;
