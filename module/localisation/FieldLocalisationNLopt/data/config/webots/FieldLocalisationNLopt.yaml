@@ -32,22 +32,23 @@ nis_threshold: 0.01
 cost_threshold: 20.0
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 0.8347155755999723
+field_line_distance_weight: 0.9439527458126644
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 0.49597117987743783
+field_line_intersection_weight: 7.631548579411429
 
 # Weighting associated with change between last solution result
-state_change_weight: 0.921829339205462
+state_change_weight: 0.02480121910085493
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 6.745911006158417
+goal_post_distance_weight: 4.494546379185571
 
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.8089336479857134, 0.6285285250343745, 0.20832038702389086]
-
-# Minimum distance an associated landmark needs to be for measurement update
-max_association_distance: 0.5
+change_limit:
+  - 0.03379241736537422
+  - 0.9101752727583227
+  - 0.010117827606743983
+max_association_distance: 5.241746373959887
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
@@ -76,11 +77,22 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-2, 0, 0]
-    - [0, 1e-2, 0]
-    - [0, 0, 1e-3]
-  # Measurement model noise
+    - - 0.0029527627707046774
+      - 0
+      - 0
+    - - 0
+      - 1.5106536134854267e-06
+      - 0
+    - - 0
+      - 0
+      - 0.0017559165899632613
   R:
-    - [3.3360958461859638, 0, 0]
-    - [0, 9.634512251900503, 0]
-    - [0, 0, 2.1363860657428577]
+    - - 5.7015410799196165
+      - 0
+      - 0
+    - - 0
+      - 3.123101158544384
+      - 0
+    - - 0
+      - 0
+      - 4.37215045186137

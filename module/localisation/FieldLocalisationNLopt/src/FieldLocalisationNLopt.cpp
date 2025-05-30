@@ -412,6 +412,8 @@ namespace module::localisation {
                 cost += cfg.field_line_distance_weight
                         * std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
             }
+            // Normalise the cost by the number of field lines
+            cost /= field_lines.size() > 0 ? field_lines.size() : 1;
 
             // Compute the cost and gradient
             auto Hfw = compute_Hfw(x);
@@ -424,6 +426,8 @@ namespace module::localisation {
                     double distance = (association.first - association.second).norm();
                     cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
                 }
+                // Normalise the cost by the number of associations
+                cost /= associations.size() > 0 ? associations.size() : 1;
             }
 
             // --- Goal post cost ---
