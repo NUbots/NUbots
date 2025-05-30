@@ -61,12 +61,13 @@ namespace module::localisation {
                     continue;
                 }
 
-                log<INFO>("Hypothesis position:", x, y);
+                // Compass headings in radians
                 hypotheses.emplace_back(x, y, 0);
                 hypotheses.emplace_back(x, y, M_PI_2);
                 hypotheses.emplace_back(x, y, M_PI);
                 hypotheses.emplace_back(x, y, -M_PI_2);
 
+                // Diagonal headings in radians
                 hypotheses.emplace_back(x, y, M_PI_4);
                 hypotheses.emplace_back(x, y, 3 * M_PI_4);
                 hypotheses.emplace_back(x, y, -M_PI_4);
@@ -90,9 +91,7 @@ namespace module::localisation {
 
         // Check if cost is below threshold, if not then check the whole field
         if (ranked_hypotheses[0].second > cfg.cost_threshold) {
-            log<INFO>("Uncertainty reset (global): Cost too high, searching whole field",
-                      "Cost:",
-                      ranked_hypotheses[0].second);
+            log<INFO>("Uncertainty reset (global): Cost too high, searching whole field");
             hypotheses.clear();
             for (double x = -fd.dimensions.field_length / 2; x <= fd.dimensions.field_length / 2; x += 0.5) {
                 for (double y = -fd.dimensions.field_width / 2; y <= fd.dimensions.field_width / 2; y += 0.5) {
@@ -119,20 +118,20 @@ namespace module::localisation {
             // Fix mirror field issue by using the top 2 hypothesis closest to the last certain state
             if ((ranked_hypotheses[0].first - last_certain_state).norm()
                 > (ranked_hypotheses[1].first - last_certain_state).norm()) {
-                log<INFO>("Using second best hypothesis to avoid mirror field issue");
                 best_hypothesis = ranked_hypotheses[1].first;
             }
             else {
                 best_hypothesis = ranked_hypotheses[0].first;
             }
         }
+        else {
+            log<INFO>("Uncertainty reset (local): Cost below threshold, using best hypothesis");
+        }
 
         // Set the state to the best hypothesis
         state = best_hypothesis;
         kf.set_state(state);
         kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
-
-        log<INFO>("Uncertainty reset (local): Chosen hypothesis:", state.transpose());
     }
 
 }  // namespace module::localisation

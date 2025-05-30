@@ -194,7 +194,7 @@ namespace module::localisation {
                              const std::shared_ptr<const Goals>& goals,
                              const Stability& stability,
                              const RawSensors& raw_sensors) {
-                          log<INFO>("Field localisation running");
+                          //   log<INFO>("Field localisation running");
                           // Emit field message using ground truth if available
                           if (cfg.use_ground_truth_localisation) {
                               auto field(std::make_unique<Field>());
@@ -252,7 +252,6 @@ namespace module::localisation {
                           // Get confidence metrics
                           double nis     = kf.get_nis(state);
                           bool uncertain = (nis > cfg.nis_threshold) && (chosen_state_cost > cfg.cost_threshold);
-                          log<INFO>("NIS:", nis, "Cost:", chosen_state_cost, "Uncertain:", uncertain);
                           if (uncertain
                               && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                               emit<Scope::INLINE>(std::make_unique<OnFieldResetFieldLocalisation>(chosen_state_cost));
