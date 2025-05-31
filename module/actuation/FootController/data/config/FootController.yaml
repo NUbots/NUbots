@@ -24,16 +24,16 @@ servo_gains:
 
 correction_enabled: true
 
-roll_p_gain: 0.7
-pitch_p_gain: 0.4
+roll_p_gain: 0.9
+pitch_p_gain: 0.925
 
-roll_i_gain: 0.25
-pitch_i_gain: 0.10
+roll_i_gain: 0.0
+pitch_i_gain: 0.0
 
-roll_d_gain: 0.002
-pitch_d_gain: 0.002
+roll_d_gain: 0.01
+pitch_d_gain: 0.08
 
-max_i_error: 0.08
+max_i_error: 0.1
 
 # Hack to account for a strange pitch when enabling the foot controller
 support_foot_offset:
