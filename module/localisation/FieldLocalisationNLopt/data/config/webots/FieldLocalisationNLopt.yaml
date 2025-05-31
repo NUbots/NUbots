@@ -25,6 +25,9 @@ start_time_delay: 1
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
 
+# The NIS threshold value for the Kalman filter to trigger a reset
+nis_threshold: 0.01
+
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 0.8347155755999723
 
