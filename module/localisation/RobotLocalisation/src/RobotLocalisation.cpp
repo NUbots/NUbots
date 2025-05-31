@@ -47,6 +47,7 @@ namespace module::localisation {
     using LocalisationRobots = message::localisation::Robots;
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
+    using PenaltyState       = message::input::State;
 
     using message::eye::DataPoint;
     using message::input::GameState;
@@ -78,18 +79,21 @@ namespace module::localisation {
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
         });
 
-
-        on<Trigger<RoboCup>,
+        on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
-           Optional<With<GameState>>,
-           Single>()
-            .then([this](const RoboCup& robocup,
-                         const GreenHorizon& horizon,
-                         const Field& field,
-                         const FieldDescription& field_desc,
-                         const std::shared_ptr<const GameState>& game_state) {
+           Sync<RobotLocalisation>>()
+            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
+                // **Run maintenance step**
+                maintenance(horizon, field, field_desc);
+
+                // **Debugging output**
+                debug_info();
+            });
+
+        on<Trigger<RoboCup>, With<Field>, Optional<With<GameState>>, Sync<RobotLocalisation>>().then(
+            [this](const RoboCup& robocup, const Field& field, const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -98,10 +102,7 @@ namespace module::localisation {
                 std::vector<Eigen::Vector3d> robots_rRWw{
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
                 // Run data association step
-                data_association(robots_rRWw, robocup.current_pose.player_id);
-
-                // **Run maintenance step**
-                maintenance(horizon, field, field_desc);
+                data_association(robots_rRWw, robocup.current_pose.player_id, robocup.state == PenaltyState::PENALISED);
 
                 // **Debugging output**
                 debug_info();
@@ -123,6 +124,7 @@ namespace module::localisation {
                     // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
                     localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
                     localisation_robot.teammate_id = tracked_robot.teammate_id;
+                    localisation_robot.penalised   = tracked_robot.penalised;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
@@ -130,17 +132,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<VisionRobots>,
-           With<GreenHorizon>,
-           With<Field>,
-           With<FieldDescription>,
-           Optional<With<GameState>>,
-           Single>()
-            .then([this](const VisionRobots& vision_robots,
-                         const GreenHorizon& horizon,
-                         const Field& field,
-                         const FieldDescription& field_desc,
-                         const std::shared_ptr<const GameState>& game_state) {
+        on<Trigger<VisionRobots>, Optional<With<GameState>>, Sync<RobotLocalisation>>().then(
+            [this](const VisionRobots& vision_robots, const std::shared_ptr<const GameState>& game_state) {
                 // **Run prediction step**
                 prediction();
 
@@ -154,10 +147,7 @@ namespace module::localisation {
                     robots_rRWw.push_back(rRWw);
                 }
                 // Run data association step
-                data_association(robots_rRWw, 0);
-
-                // **Run maintenance step**
-                maintenance(horizon, field, field_desc);
+                data_association(robots_rRWw);
 
                 // **Debugging output**
                 debug_info();
@@ -199,13 +189,16 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw, uint teammate_id) {
+    void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
+                                             uint teammate_id,
+                                             bool penalised) {
         for (const auto& rRWw : robots_rRWw) {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
                 tracked_robots.back().seen        = true;
                 tracked_robots.back().teammate_id = teammate_id;
+                tracked_robots.back().penalised   = penalised;
                 continue;
             }
 
@@ -266,6 +259,11 @@ namespace module::localisation {
                                         const Field& field,
                                         const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
+
+        // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
+        std::sort(tracked_robots.begin(), tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
+            return a.teammate_id > b.teammate_id;
+        });
 
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
