@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"classutility_1_1skill_1_1WalkGenerator.html#ae4a2cf23845d5ccc8550db4b29028447":[3,0,7,11,5,8],
+"classutility_1_1skill_1_1WalkGenerator.html#aea30c58f294dec9157af6a747ca30b9f":[3,0,7,11,5,13],
 "classutility_1_1skill_1_1WalkGenerator.html#af2d39521a2eb7b71ededc319f688f4fc":[3,0,7,11,5,32],
 "classutility_1_1skill_1_1WalkGenerator.html#af5dee0f79529dc611ca665ae84dd0c35":[3,0,7,11,5,7],
 "classutility_1_1skill_1_1splines_1_1QuinticSpline.html":[3,0,7,11,0,0],
@@ -129,8 +131,8 @@ var NAVTREEINDEX9 =
 "functions_type.html":[3,3,3],
 "functions_u.html":[3,3,0,20],
 "functions_v.html":[3,3,0,21],
-"functions_vars.html":[3,3,2],
 "functions_vars.html":[3,3,2,0],
+"functions_vars.html":[3,3,2],
 "functions_vars_b.html":[3,3,2,1],
 "functions_vars_c.html":[3,3,2,2],
 "functions_vars_d.html":[3,3,2,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "namespaceutility_1_1math_1_1angle.html#ad2ac2cb47e41dcec768e82c097bd2c90":[2,0,7,5,0,0],
 "namespaceutility_1_1math_1_1angle.html#ad768a98e6ebcc91ecf92252e8bdd7340":[2,0,7,5,0,7],
 "namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945":[2,0,7,5,0,4],
-"namespaceutility_1_1math_1_1coordinates.html":[2,0,7,5,1],
-"namespaceutility_1_1math_1_1coordinates.html#a01e89eb3bda815a486ee7a0823a74f05":[2,0,7,5,1,3],
-"namespaceutility_1_1math_1_1coordinates.html#a208468c2d587343fa313ce096bd670f1":[2,0,7,5,1,4]
+"namespaceutility_1_1math_1_1coordinates.html":[2,0,7,5,1]
 };

@@ -1,5 +1,7 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ad0e2d5f4edfb450027507a0bfc9473c5":[3,0,3,12,2,7,6],
+"classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#ad5650439dc12ea6197ac8daaa67091ea":[3,0,3,12,2,7,0],
 "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html#aef82b2c7638fe9f3a7300963810d4149":[3,0,3,12,2,7,2],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html":[3,0,3,12,2,8],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a06c79b489f52b6180f427d51dfdc28f9":[3,0,3,12,2,8,13],
@@ -247,7 +249,5 @@ var NAVTREEINDEX6 =
 "classnsga2_1_1NSGA2.html#a1ab1e69e4901ee6f3453f0518469d27b":[3,0,4,2,58],
 "classnsga2_1_1NSGA2.html#a1cdbdf4a56b4590c6595c0cec892dd19":[3,0,4,2,27],
 "classnsga2_1_1NSGA2.html#a1f16056d734e419ff198fe7ea04f9f3e":[3,0,4,2,26],
-"classnsga2_1_1NSGA2.html#a268a4b76c952f665baea350431f819f0":[3,0,4,2,40],
-"classnsga2_1_1NSGA2.html#a28e65b96d6d84437619283680c4edf5d":[3,0,4,2,68],
-"classnsga2_1_1NSGA2.html#a2bd709e015d9acda51884e2f28b008f3":[3,0,4,2,45]
+"classnsga2_1_1NSGA2.html#a268a4b76c952f665baea350431f819f0":[3,0,4,2,40]
 };

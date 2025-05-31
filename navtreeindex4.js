@@ -1,5 +1,7 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae3c45f44402ffa517065206e46a23135":[3,0,3,8,1,9,8],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae50f0e505f49f69c1f0c907744fdcea5":[3,0,3,8,1,9,5],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#aefc6746236a4d356498d0b02732895af":[3,0,3,8,1,9,21],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af1e2a5d3115baf9be61986d2fad0df1e":[3,0,3,8,1,9,1],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216":[3,0,3,8,1,9,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1IKKick.html#a54f677a3c536f51eb4bbd7fbf85c2337":[3,0,3,10,4,1],
 "classmodule_1_1skill_1_1IKKick.html#a712a9a87c6feeef78ddb4ed673f78308":[3,0,3,10,4,4],
 "classmodule_1_1skill_1_1IKKick.html#a9a2264ecc519d1d5f3094b9f793e7a7f":[3,0,3,10,4,5],
-"classmodule_1_1skill_1_1IKKick.html#aa1ec49b10189e59a85f67fa44a787710":[3,0,3,10,4,10],
-"classmodule_1_1skill_1_1IKKick.html#aaf5e7a6ac30f6255d77b499d6c6862af":[3,0,3,10,4,3],
-"classmodule_1_1skill_1_1IKKick.html#ab45ffa497d5df1bae091ebd0aa1c8413":[3,0,3,10,4,9]
+"classmodule_1_1skill_1_1IKKick.html#aa1ec49b10189e59a85f67fa44a787710":[3,0,3,10,4,10]
 };

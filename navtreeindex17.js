@@ -1,5 +1,12 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#a33c5e8be970777a5d1d0acdff594fa33":[3,0,3,10,6,0,2],
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#a7e42d193eeb6264f4607390e054c4598":[3,0,3,10,6,0,6],
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#a84edb88c5d2cfccd9697241b52fe17ee":[3,0,3,10,6,0,5],
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#a8b3cb2cea24eaf7f52daa4fb67f16196":[3,0,3,10,6,0,0],
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#a8ba88ee869f7d4fae1643ae72bdeedc3":[3,0,3,10,6,0,1],
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#a8ebc54b51daf2e97671fe34e64517f31":[3,0,3,10,6,0,3],
+"structmodule_1_1skill_1_1Kicker_1_1Config.html#ae21ba2008c01e5dd36fa4e0061ca63c9":[3,0,3,10,6,0,4],
 "structmodule_1_1skill_1_1Look_1_1Config.html":[3,0,3,10,7,0],
 "structmodule_1_1skill_1_1Look_1_1Config.html#a424bf993615a006af07d97f0a523497a":[3,0,3,10,7,0,0],
 "structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[3,0,3,10,7,0,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX17 =
 "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html":[3,0,6,1],
 "structutility_1_1actuation_1_1ServoMap.html":[3,0,7,0,0],
 "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html":[3,0,7,0,1],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html#a690fc0a10878a580f023df38d277cfa0":[3,0,7,0,1,0],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html":[3,0,7,0,2],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html#ad6a8f3533793d1cea4245d4e8c3b070e":[3,0,7,0,2,0],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html":[3,0,7,0,3],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html#a92577dac919bdb0c173dfdc3d06ea3e0":[3,0,7,0,3,0],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html":[3,0,7,0,4],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html#a5bf82e187f2a57ad8367efaaab10cf13":[3,0,7,0,4,0],
-"structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html":[3,0,7,0,5]
+"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html#a690fc0a10878a580f023df38d277cfa0":[3,0,7,0,1,0]
 };

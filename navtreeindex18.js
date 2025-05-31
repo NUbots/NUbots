@@ -1,5 +1,12 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html":[3,0,7,0,2],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html#ad6a8f3533793d1cea4245d4e8c3b070e":[3,0,7,0,2,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html":[3,0,7,0,3],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html#a92577dac919bdb0c173dfdc3d06ea3e0":[3,0,7,0,3,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html":[3,0,7,0,4],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html#a5bf82e187f2a57ad8367efaaab10cf13":[3,0,7,0,4,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html":[3,0,7,0,5],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html#aaa4af5fb3d249fffdaaf8888a7266503":[3,0,7,0,5,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html":[3,0,7,0,6],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html#aeb7afc617038656d8601af36a0be8e1e":[3,0,7,0,6,0],
@@ -242,12 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a3f2a4f96d8469dd34eaf10bbd37d2729":[3,0,7,7,0,0,7],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a428dbd3581f36d5e9de4bb43d1a653e3":[3,0,7,7,0,0,26],
 "structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a4e57fe944e482f1ff710c6f2ff63cfd1":[3,0,7,7,0,0,5],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a6a5dc7a48d8b560f3a0ede93535d90ad":[3,0,7,7,0,0,3],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a6c4cd0602e21dc482a7701b1865d6673":[3,0,7,7,0,0,23],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a76505f62e794a4968c3d0bd4dda6484f":[3,0,7,7,0,0,8],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a780e3c1e0db81823bd47d2002fd7980c":[3,0,7,7,0,0,25],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a8997f26da73c2474da1b5d9e3f8bc710":[3,0,7,7,0,0,2],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#aa787a64ff5dc3221d899c7e1bdad15f1":[3,0,7,7,0,0,4],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#abf6e59c8b0da2d4510ec92e71a95a275":[3,0,7,7,0,0,10],
-"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#ac746313d8500f2f12bec52f3db1c3749":[3,0,7,7,0,0,20]
+"structutility_1_1nbs_1_1Decoder_1_1Iterator.html#a6a5dc7a48d8b560f3a0ede93535d90ad":[3,0,7,7,0,0,3]
 };

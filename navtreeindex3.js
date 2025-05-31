@@ -129,10 +129,12 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1HardwareSimulator.html#aec186f556a351f61e2cc273b468e53aa":[3,0,3,8,2,4],
 "classmodule_1_1platform_1_1HardwareSimulator.html#afbd63a4c90c3b560815d3dc4932ff23d":[3,0,3,8,2,9],
 "classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html":[3,0,3,8,0,2],
-"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a01a4e68d110db0e6ff852b9e35634e21":[3,0,3,8,0,2,4],
-"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a992a5c7737a95e67d89c900553b15511":[3,0,3,8,0,2,2],
-"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#abc81d9fab50deed1c2673278c88b38e4":[3,0,3,8,0,2,1],
-"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#ae8b0bd4fa00c1292b86f84725f538fad":[3,0,3,8,0,2,3],
+"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a01a4e68d110db0e6ff852b9e35634e21":[3,0,3,8,0,2,6],
+"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a3f1d0cb253f145c6ff229be2f0b72ce0":[3,0,3,8,0,2,7],
+"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a992a5c7737a95e67d89c900553b15511":[3,0,3,8,0,2,3],
+"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#aa59875aa402235ec7c3ff601edb3a3a1":[3,0,3,8,0,2,5],
+"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#abc81d9fab50deed1c2673278c88b38e4":[3,0,3,8,0,2,2],
+"classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#ae8b0bd4fa00c1292b86f84725f538fad":[3,0,3,8,0,2,4],
 "classmodule_1_1platform_1_1NUSense_1_1NUgus.html":[3,0,3,8,0,3],
 "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a064b35ad9a703010b19fd15e46e93d6c":[3,0,3,8,0,3,0],
 "classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a064b35ad9a703010b19fd15e46e93d6ca030f0c84845f487bc2ea21969e450d58":[3,0,3,8,0,3,0,23],
@@ -247,7 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a9dd0fa446e384e99451e4db3af2bd6c4":[3,0,3,8,1,9,19],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ac9f5682a2a56b4f0ad2b859eab0f4e8d":[3,0,3,8,1,9,16],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ade5ea8211516dc2994d75e48a5d3aa2a":[3,0,3,8,1,9,6],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae0f7070051752e5c09845fcacae36c40":[3,0,3,8,1,9,13],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae3c45f44402ffa517065206e46a23135":[3,0,3,8,1,9,8],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae50f0e505f49f69c1f0c907744fdcea5":[3,0,3,8,1,9,5]
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae0f7070051752e5c09845fcacae36c40":[3,0,3,8,1,9,13]
 };
