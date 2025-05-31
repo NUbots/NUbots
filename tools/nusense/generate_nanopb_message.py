@@ -31,9 +31,7 @@ def run(proto_file, selections, **kwargs):
 
     proto_dir = os.path.dirname(proto_file)
     file_name_no_ext = os.path.splitext(os.path.split(proto_file)[-1])[0]
-    options_file_name = (
-        f"{file_name_no_ext}.options" if not proto_dir else f"{proto_dir}/{file_name_no_ext}.options"
-    )
+    options_file_name = f"{file_name_no_ext}.options" if not proto_dir else f"{proto_dir}/{file_name_no_ext}.options"
 
     # If options were specified, write the options file to the same directory as the proto file
     if not os.path.isfile(options_file_name):
