@@ -125,11 +125,11 @@ message NUSense {
 }
 
 message ServoConfiguration {
-    int32 direction = 1;
-    double offset = 2;
+    int32  direction = 1;
+    double offset    = 2;
 }
 
 message NUSenseHandshake {
-    string msg = 1;
+    string                      msg           = 1;
     repeated ServoConfiguration servo_configs = 2;
 }
