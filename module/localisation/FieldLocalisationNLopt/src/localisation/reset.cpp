@@ -45,22 +45,24 @@ namespace module::localisation {
                                                    const std::shared_ptr<const FieldIntersections>& field_intersections,
                                                    const std::shared_ptr<const Goals>& goals) {
         // Define search window around last known good position
-        const double window_size = cost * 0.1;
-        const double step_size   = 0.5;
+        const double window_size = 2.0;
+        const double step_size   = 0.25;
+
+        // Field bounds
+        double x_max = last_certain_state.x() - fd.dimensions.field_length / 2 + 0.2;
+        double y_max = last_certain_state.y() - fd.dimensions.field_width / 2 + 0.2;
 
         std::vector<Eigen::Vector3d> hypotheses;
         for (double dx = -window_size; dx <= window_size; dx += step_size) {
             for (double dy = -window_size; dy <= window_size; dy += step_size) {
+                // Try hypotheses around the last certain state (state is world position)
                 double x = last_certain_state.x() + dx;
                 double y = last_certain_state.y() + dy;
 
                 // Skip hypotheses outside the field boundaries
-                double x_max = fd.dimensions.field_length / 2 + 0.2;
-                double y_max = fd.dimensions.field_width / 2 + 0.2;
                 if (x < -x_max || x > x_max || y < -y_max || y > y_max) {
                     continue;
                 }
-
                 // Compass headings in radians
                 hypotheses.emplace_back(x, y, 0);
                 hypotheses.emplace_back(x, y, M_PI_2);
@@ -87,18 +89,25 @@ namespace module::localisation {
             return a.second < b.second;
         });
 
-        Eigen::Vector3d best_hypothesis = ranked_hypotheses[0].first;
-
+        Eigen::Vector3d best_hypothesis = Eigen::Vector3d::Zero();
         // Check if cost is below threshold, if not then check the whole field
-        if (ranked_hypotheses[0].second > cfg.cost_threshold) {
-            log<INFO>("Uncertainty reset (global): Cost too high, searching whole field");
+        if (ranked_hypotheses.empty() || ranked_hypotheses[0].second > 1.0) {
+            log<INFO>("Uncertainty reset (global): Cost too high, searching whole field", ranked_hypotheses[0].second);
             hypotheses.clear();
-            for (double x = -fd.dimensions.field_length / 2; x <= fd.dimensions.field_length / 2; x += 0.5) {
-                for (double y = -fd.dimensions.field_width / 2; y <= fd.dimensions.field_width / 2; y += 0.5) {
-                    hypotheses.emplace_back(x, y, 0);
-                    hypotheses.emplace_back(x, y, M_PI_2);
-                    hypotheses.emplace_back(x, y, M_PI);
-                    hypotheses.emplace_back(x, y, -M_PI_2);
+            for (double x = -x_max; x <= x_max; x += 0.5) {
+                for (double y = -y_max; y <= y_max; y += 0.5) {
+                    // x and y need to be shifted relative to the last certain state
+                    // Compass headings in radians
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, 0));
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, M_PI_2));
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, M_PI));
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, -M_PI_2));
+
+                    // Diagonal headings in radians
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, M_PI_4));
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, 3 * M_PI_4));
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, -M_PI_4));
+                    hypotheses.emplace_back(last_certain_state - Eigen::Vector3d(x, y, -3 * M_PI_4));
                 }
             }
 
@@ -116,18 +125,24 @@ namespace module::localisation {
             });
 
             // Fix mirror field issue by using the top 2 hypothesis closest to the last certain state
-            if ((ranked_hypotheses[0].first - last_certain_state).norm()
-                > (ranked_hypotheses[1].first - last_certain_state).norm()) {
+            // If the second best hypothesis is too far away, use the first one
+            if (((ranked_hypotheses[0].first - last_certain_state).norm()
+                 > (ranked_hypotheses[1].first - last_certain_state).norm())
+                || (ranked_hypotheses[1].second > cfg.cost_threshold)) {
                 best_hypothesis = ranked_hypotheses[1].first;
+                log<INFO>("Uncertainty reset (global): Using second best hypothesis", ranked_hypotheses[1].second);
             }
             else {
+                log<INFO>("Uncertainty reset (global): Using best hypothesis", ranked_hypotheses[0].second);
                 best_hypothesis = ranked_hypotheses[0].first;
             }
         }
         else {
-            log<INFO>("Uncertainty reset (local): Cost below threshold, using best hypothesis");
+            log<INFO>("Uncertainty reset (local): Cost below threshold, using best hypothesis",
+                      ranked_hypotheses[0].second);
+            best_hypothesis = ranked_hypotheses[0].first;
         }
-
+        log<INFO>("Best hypothesis: ", best_hypothesis.x(), ", ", best_hypothesis.y());
         // Set the state to the best hypothesis
         state = best_hypothesis;
         kf.set_state(state);
