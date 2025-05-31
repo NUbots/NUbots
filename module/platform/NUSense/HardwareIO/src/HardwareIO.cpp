@@ -87,15 +87,6 @@ namespace module::platform::NUSense {
             // Tell the stream reactor to connect to the device
             emit(std::make_unique<ConnectSerial>(device, baud));
 
-            // TODO: Apply the servo offsets within NUSense instead
-            // Apply servo offsets
-            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
-                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
-
-                cfg.servo_configurations[i].direction = config["servos"][i]["direction"].as<int32_t>();
-                cfg.servo_configurations[i].offset    = config["servos"][i]["offset"].as<double>();
-            }
 
             handshake_watchdog =
                 on<Watchdog<HandshakeWatchdog, 1, std::chrono::seconds>, Sync<HandshakeWatchdog>>().then(
@@ -118,9 +109,10 @@ namespace module::platform::NUSense {
                     });
 
             // Sync is used because uart write is a shared resource
-            NUC_packet_catcher =
-                on<Trigger<ServoTargets>, Sync<HardwareIO>>()
-                    .then([this](const ServoTargets& commands) {
+            servo_targets_catcher =
+                // Sync is used because uart write is a shared resource
+                on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then(
+                    [this](const ServoTargets& commands, const ServoOffsets& offsets) {
                         // Copy the data into a new message so we can use a duration instead of a timepoint
                         // and take the offsets and switch the direction.
                         auto servo_targets = SubcontrollerServoTargets();
@@ -128,17 +120,16 @@ namespace module::platform::NUSense {
                         // Change the timestamp in servo targets to the difference between the timestamp and now
                         // Take away the offset and switch the direction if needed
                         for (auto& target : commands.targets) {
-                            servo_targets.targets.emplace_back(
-                                target.time - NUClear::clock::now(),
-                                target.id,
-                                (target.position - nugus.servo_offset[target.id]) * nugus.servo_direction[target.id],
-                                target.gain,
-                                target.torque);
+                            servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
+                                                               target.id,
+                                                               (target.position - offsets.offsets[target.id].offset)
+                                                                   * offsets.offsets[target.id].direction,
+                                                               target.gain,
+                                                               target.torque);
                         }
 
                         send_packet(servo_targets);
-                    })
-                    .disable();
+                    });
         });
 
         // If this triggers, then that means that NUSense has acknowledged the NUC's message and the watchdog can be
@@ -148,7 +139,7 @@ namespace module::platform::NUSense {
             handshake_watchdog.disable();
             handshake_watchdog.unbind();
 
-            NUC_packet_catcher.enable();
+            servo_targets_catcher.enable();
             log<INFO>("From NUSense: ", handshake.msg);
         });
 
@@ -270,28 +261,6 @@ namespace module::platform::NUSense {
             // Emit the raw sensor data
             emit(std::move(sensors));
         });
-
-
-        // Sync is used because uart write is a shared resource
-        on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then(
-            [this](const ServoTargets& commands, const ServoOffsets& offsets) {
-                // Copy the data into a new message so we can use a duration instead of a timepoint
-                // and take the offsets and switch the direction.
-                auto servo_targets = SubcontrollerServoTargets();
-
-                // Change the timestamp in servo targets to the difference between the timestamp and now
-                // Take away the offset and switch the direction if needed
-                for (auto& target : commands.targets) {
-                    servo_targets.targets.emplace_back(
-                        target.time - NUClear::clock::now(),
-                        target.id,
-                        (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
-                        target.gain,
-                        target.torque);
-                }
-
-                send_packet(servo_targets);
-            });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto command_list = std::make_unique<ServoTargets>();

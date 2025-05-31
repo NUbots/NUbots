@@ -68,7 +68,7 @@ namespace module::platform::NUSense {
         /// @brief Watchdog handle for the handshake stage
         ReactionHandle handshake_watchdog;
         /// @brief Reaction handle for the lambda that catches ServoTargets messages
-        ReactionHandle NUC_packet_catcher;
+        ReactionHandle servo_targets_catcher;
 
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
