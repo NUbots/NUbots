@@ -8,5 +8,5 @@ send_debug_waves: true
 
 # Config for the PlotJuggler UDP server
 udp_server:
-  ip_address: 127.0.0.1
+  ip_address: 10.1.91.119
   port: 9870
