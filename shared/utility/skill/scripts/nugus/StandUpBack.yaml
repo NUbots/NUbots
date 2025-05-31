@@ -1,13 +1,5 @@
-- duration: 1000
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.80774212
       gain: 6.63999987
@@ -80,16 +72,8 @@
       position: 0.127000004
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.80774212
       gain: 6.63999987
@@ -162,16 +146,8 @@
       position: -2.1099999
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: R_KNEE
       position: 0.121893801
       gain: 6.63999987
@@ -244,16 +220,8 @@
       position: -0.0434346236
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: R_KNEE
       position: 0.121893801
       gain: 6.63999987
@@ -326,16 +294,8 @@
       position: 2.96943331
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: R_KNEE
       position: 0.121893801
       gain: 6.63999987
@@ -408,16 +368,8 @@
       position: 2.71908331
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: L_ELBOW
       position: -0.688078582
       gain: 6.63999987
@@ -486,16 +438,12 @@
       position: -2.66634774
       gain: 6.63999987
       torque: 100
-- duration: 1000
+    - id: R_SHOULDER_PITCH
+      position: -2.73600006
+      gain: 6.63999987
+      torque: 0
+- duration: 500
   targets:
-    - id: HEAD_YAW
-      position: -0.147411987
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.291407079
-      gain: 6.63999987
-      torque: 100
     - id: L_ELBOW
       position: -0.688078582
       gain: 6.63999987
@@ -568,7 +516,7 @@
       position: 2.65611172
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 500
   targets:
     - id: R_HIP_YAW
       position: -0.176627308
@@ -592,14 +540,6 @@
       torque: 100
     - id: L_ANKLE_ROLL
       position: -0.118263505
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: 0.267656773
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_YAW
-      position: -0.144340202
       gain: 6.63999987
       torque: 100
     - id: L_ANKLE_PITCH
@@ -650,7 +590,7 @@
       position: -0.408546656
       gain: 6.63999987
       torque: 100
-- duration: 200
+- duration: 100
   targets:
     - id: R_HIP_YAW
       position: -0.176627308
@@ -674,14 +614,6 @@
       torque: 100
     - id: L_ANKLE_ROLL
       position: -0.118263505
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: 0.267656773
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_YAW
-      position: -0.144340202
       gain: 6.63999987
       torque: 100
     - id: L_ANKLE_PITCH
@@ -732,7 +664,7 @@
       position: -0.184306771
       gain: 6.63999987
       torque: 100
-- duration: 200
+- duration: 100
   targets:
     - id: L_HIP_YAW
       position: 0.185842648
@@ -752,14 +684,6 @@
       torque: 100
     - id: L_ANKLE_ROLL
       position: -0.118263505
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: 0.267656773
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_YAW
-      position: -0.144340202
       gain: 6.63999987
       torque: 100
     - id: L_ANKLE_PITCH
@@ -814,16 +738,8 @@
       position: -1.05208445
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 600
   targets:
-    - id: HEAD_PITCH
-      position: 0.267656773
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_YAW
-      position: -0.144340202
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.6961807
       gain: 6.63999987
@@ -841,7 +757,7 @@
       gain: 6.63999987
       torque: 100
     - id: L_HIP_YAW
-      position: -0.0230383463
+      position: 0.136999995
       gain: 6.63999987
       torque: 100
     - id: R_HIP_ROLL
@@ -896,16 +812,8 @@
       position: 1.69310892
       gain: 6.63999987
       torque: 100
-- duration: 1000
+- duration: 600
   targets:
-    - id: HEAD_PITCH
-      position: 0.267656773
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_YAW
-      position: -0.144340202
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.6961807
       gain: 6.63999987
@@ -932,10 +840,6 @@
       torque: 100
     - id: R_HIP_YAW
       position: -0.136694178
-      gain: 6.63999987
-      torque: 100
-    - id: L_HIP_YAW
-      position: -0.0230383463
       gain: 6.63999987
       torque: 100
     - id: R_HIP_ROLL
@@ -978,16 +882,12 @@
       position: -1.31740105
       gain: 6.63999987
       torque: 100
-- duration: 2000
+    - id: L_HIP_YAW
+      position: 0.136999995
+      gain: 6.63999987
+      torque: 100
+- duration: 800
   targets:
-    - id: HEAD_YAW
-      position: -0.0030383463
-      gain: 6.63999987
-      torque: 100
-    - id: HEAD_PITCH
-      position: 0.00655553816
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.68389368
       gain: 6.63999987
@@ -1017,7 +917,7 @@
       gain: 6.63999987
       torque: 100
     - id: L_HIP_YAW
-      position: 0.0430049114
+      position: 0.0350000001
       gain: 6.63999987
       torque: 100
     - id: R_HIP_ROLL

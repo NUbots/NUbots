@@ -28,6 +28,7 @@
 #ifndef UTILITY_INPUT_SERVOID_HPP
 #define UTILITY_INPUT_SERVOID_HPP
 
+#include <cstdint>
 #include <set>
 #include <string>
 
