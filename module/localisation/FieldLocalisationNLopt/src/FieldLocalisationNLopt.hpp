@@ -257,16 +257,18 @@ namespace module::localisation {
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
 
-            /// @brief NIS threshold for resetting the filter
-            double nis_threshold = 0.0;
-
             /// @brief Cost threshold for resetting the filter
             double cost_threshold = 0.0;
 
             /// @brief Reset delay in seconds
             int reset_delay = 5;
+
+            /// @brief Maximum number of times the cost can be over the threshold before resetting
+            int max_over_cost = 0;
         } cfg;
 
+        /// @brief Number of times the cost has been over the threshold
+        int num_over_cost = 0;
 
         // Kalman filter
         utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
