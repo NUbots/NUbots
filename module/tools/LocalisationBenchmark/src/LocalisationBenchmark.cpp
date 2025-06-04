@@ -52,9 +52,9 @@ namespace module::tools {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
-    using message::field::RobotPoseGroundTruth
+    using message::localisation::RobotPoseGroundTruth;
 
-        using NUClear::message::CommandLineArguments;
+    using NUClear::message::CommandLineArguments;
 
     LocalisationBenchmark::LocalisationBenchmark(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
