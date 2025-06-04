@@ -22,15 +22,6 @@ namespace module::tools {
 
     using tinyrobotics::InverseKinematicsMethod;
 
-    inline std::vector<std::pair<int, ServoID>> joint_map = {
-        {0, ServoID::L_ANKLE_ROLL},     {1, ServoID::L_ANKLE_PITCH},     {2, ServoID::L_KNEE},
-        {3, ServoID::L_HIP_PITCH},      {4, ServoID::L_HIP_ROLL},        {5, ServoID::L_HIP_YAW},
-        {6, ServoID::R_ANKLE_ROLL},     {7, ServoID::R_ANKLE_PITCH},     {8, ServoID::R_KNEE},
-        {9, ServoID::R_HIP_PITCH},      {10, ServoID::R_HIP_ROLL},       {11, ServoID::R_HIP_YAW},
-        {12, ServoID::HEAD_PITCH},      {13, ServoID::HEAD_YAW},         {14, ServoID::L_ELBOW},
-        {15, ServoID::L_SHOULDER_ROLL}, {16, ServoID::L_SHOULDER_PITCH}, {17, ServoID::R_ELBOW},
-        {18, ServoID::R_SHOULDER_ROLL}, {19, ServoID::R_SHOULDER_PITCH}};
-
     // servo id to joint id map
     inline std::map<ServoID, int> servo_id_to_joint_id = {
         {ServoID::L_ANKLE_ROLL, 0},     {ServoID::L_ANKLE_PITCH, 1},     {ServoID::L_KNEE, 2},
@@ -48,6 +39,13 @@ namespace module::tools {
         /// @brief Stores configuration values
         struct Config {
             std::string file_path;
+
+            /// @brief Playback configuration
+            struct Playback {
+                bool enabled             = false;
+                Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
+                double rate              = 1.0;
+            } playback;
 
             /// @brief Stores the gains for each servo
             std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
@@ -106,6 +104,14 @@ namespace module::tools {
         /// @brief tinyrobotics inverse kinematics options
         tinyrobotics::InverseKinematicsOptions<double, n_joints> options;
 
+        /// @brief Playback state
+        struct PlaybackState {
+            nlohmann::json current_trajectory;
+            size_t current_index = 0;
+            NUClear::clock::time_point start_time;
+            bool initialized = false;
+        } playback_state;
+
         /// @brief Generate trajectory data for a given velocity target
         nlohmann::json generate_trajectory(const Eigen::Vector3d& velocity_target);
 
@@ -116,6 +122,15 @@ namespace module::tools {
          * @return InverseKinematicsMethod
          */
         InverseKinematicsMethod ik_string_to_method(const std::string& method_string);
+
+        /// @brief Load and start playback of reference trajectory
+        void start_playback();
+
+        /// @brief Continue playback by emitting next sensor message
+        void update_playback();
+
+        /// @brief Find trajectory matching the specified velocity
+        nlohmann::json find_trajectory_for_velocity(const Eigen::Vector3d& velocity);
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkingReferenceGenerator reactor.

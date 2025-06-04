@@ -45,9 +45,8 @@ arms:
   right_elbow: -0.7
   left_elbow: -0.7
 
-
+# Reference velocity command ranges
 ranges:
-  sampling_time_step: 0.01
   x_vel_range: [-0.5, 0.5]
   y_vel_range: [-0.3, 0.3]
   yaw_vel_range: [-0.5, 0.5]
@@ -66,3 +65,10 @@ links:
   torso: "torso"
   left_foot: "left_foot_base"
   right_foot: "right_foot_base"
+
+  # Playback mode settings
+playback:
+  # Velocity to playback [x_vel, y_vel, yaw_vel]
+  velocity: [0.2, 0.0, 0.0]
+  # Playback rate multiplier (1.0 = realtime, 2.0 = 2x speed, etc.)
+  rate: 0.1

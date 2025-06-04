@@ -9,4 +9,6 @@ nuclear_role(
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   tools::WalkingReferenceGenerator # Generates reference data for the robot to follow
+  network::NUClearNet
+  network::NetworkForwarder
 )
