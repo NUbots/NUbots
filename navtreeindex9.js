@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"classutility_1_1skill_1_1WalkGenerator.html#abc8142387c3a276fe9df4b11a3585c95":[3,0,7,11,5,23],
+"classutility_1_1skill_1_1WalkGenerator.html#acd7f26d8f7eada562239f7f92f5b70ab":[3,0,7,11,5,10],
 "classutility_1_1skill_1_1WalkGenerator.html#ad071f35adbd7687051b46998617ce8fe":[3,0,7,11,5,1],
 "classutility_1_1skill_1_1WalkGenerator.html#ad890e59fc66b4284047d18611ef4f100":[3,0,7,11,5,28],
 "classutility_1_1skill_1_1WalkGenerator.html#ad8ad2da1eeeae5b00f87eb1b3b06a641":[3,0,7,11,5,19],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "namespaceutility_1_1math_1_1angle.html":[2,0,7,5,0],
 "namespaceutility_1_1math_1_1angle.html#a2172e5d7bac696b4ddb6dd02cecc7f61":[2,0,7,5,0,6],
 "namespaceutility_1_1math_1_1angle.html#a3711ea87a2dc9adfb4ddfea0d65d42d6":[2,0,7,5,0,8],
-"namespaceutility_1_1math_1_1angle.html#a58909fc949c49bd2efc0a444ecd55560":[2,0,7,5,0,3],
-"namespaceutility_1_1math_1_1angle.html#a8dde4f83b354755ccea82a77538302e3":[2,0,7,5,0,5],
-"namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599":[2,0,7,5,0,2]
+"namespaceutility_1_1math_1_1angle.html#a58909fc949c49bd2efc0a444ecd55560":[2,0,7,5,0,3]
 };

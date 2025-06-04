@@ -1,5 +1,12 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafaf2968c402621ef4f5d1b9f07d4e929":[3,0,3,8,1,1,0,260],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafda3cdaaa60f6c6b7d95ae2c5fbadfa4":[3,0,3,8,1,1,0,191],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafe4624cc906d618eeb8ccfbf5cfd8161":[3,0,3,8,1,1,0,5],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dafec5cc3fbea01e9dc369c369c8a74fef":[3,0,3,8,1,1,0,227],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daffd2e280250afd1ffda16c33a8dcd90c":[3,0,3,8,1,1,0,10],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html":[3,0,3,8,1,2],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a069b32f80eec7ac821e5fa7d3f27c042":[3,0,3,8,1,2,5],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a0adf4cf526ba349b60f8b95719c3b40c":[3,0,3,8,1,2,4],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a258322d776ca8b41dbe0c364c219a032":[3,0,3,8,1,2,6],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a453bd7d9e6fd1355f7d4f45aa60fbd01":[3,0,3,8,1,2,7],
@@ -242,12 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a7199e1a9117a0abe3af6baa9245a5477":[3,0,3,10,2,0,1],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a8bb878da98cd25b75bb68cd8b41e8428":[3,0,3,10,2,0,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#aa461ba2a0b63d6630c3ae09313b4ad4f":[3,0,3,10,2,0,2],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#abc7ef6bf001f5957a2738764547086a8":[3,0,3,10,2,0,3],
-"structmodule_1_1skill_1_1IKKick_1_1Config.html":[3,0,3,10,4,0],
-"structmodule_1_1skill_1_1IKKick_1_1Config.html#a3b57582fb26ba5077649e6358df3eb1a":[3,0,3,10,4,0,1],
-"structmodule_1_1skill_1_1IKKick_1_1Config.html#acf4e38b0feec7b6f5d5868b947eb69bd":[3,0,3,10,4,0,0],
-"structmodule_1_1skill_1_1KickBalancer_1_1Config.html":[3,0,3,10,5,0],
-"structmodule_1_1skill_1_1KickBalancer_1_1Config.html#a18fad506c7117becc9a8a7c3d82dca96":[3,0,3,10,5,0,0],
-"structmodule_1_1skill_1_1KickBalancer_1_1Config.html#a400a42c11ffd70ac65f4d8f684a33c5c":[3,0,3,10,5,0,3],
-"structmodule_1_1skill_1_1KickBalancer_1_1Config.html#a890f858bbc6399d2b1d3f073c272c012":[3,0,3,10,5,0,2]
+"structmodule_1_1skill_1_1GetUp_1_1Config.html#abc7ef6bf001f5957a2738764547086a8":[3,0,3,10,2,0,3]
 };

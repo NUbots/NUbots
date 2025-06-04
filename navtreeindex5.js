@@ -1,5 +1,7 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1skill_1_1IKKick.html#a2bb670a35ce1614d36281c3eef7cdec0":[3,0,3,10,4,8],
+"classmodule_1_1skill_1_1IKKick.html#a2f5b1cb2658bc4ca8fae4a051fbcb66a":[3,0,3,10,4,11],
 "classmodule_1_1skill_1_1IKKick.html#a41828dddc5877a3b5967ed959b78669f":[3,0,3,10,4,7],
 "classmodule_1_1skill_1_1IKKick.html#a54f677a3c536f51eb4bbd7fbf85c2337":[3,0,3,10,4,1],
 "classmodule_1_1skill_1_1IKKick.html#a712a9a87c6feeef78ddb4ed673f78308":[3,0,3,10,4,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aba1b7b4d6c6055e31febec56fd7be9dd":[3,0,3,12,2,6,10],
 "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac5546445cd54d0b0ead99909b93ec88b":[3,0,3,12,2,6,4],
 "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac61228519f19a7e62dc7d3dddcfb7b85":[3,0,3,12,2,6,15],
-"classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac6f0339573e2a7c02f7d0f1a28e96883":[3,0,3,12,2,6,12],
-"classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae4b435518893ae0a1a011d04d98e2416":[3,0,3,12,2,6,5],
-"classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae9691ab7643e875d50d323d3ca15573a":[3,0,3,12,2,6,9]
+"classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac6f0339573e2a7c02f7d0f1a28e96883":[3,0,3,12,2,6,12]
 };

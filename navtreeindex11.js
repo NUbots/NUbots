@@ -1,5 +1,7 @@
 var NAVTREEINDEX11 =
 {
+"structdynamixel_1_1v2_1_1BulkWriteCommand.html#a1efdf12fa4c83965d7c58e6a73f3887e":[3,0,0,0,3,2],
+"structdynamixel_1_1v2_1_1BulkWriteCommand.html#a20737b6fb6c5015220d4750dac179bc9":[3,0,0,0,3,1],
 "structdynamixel_1_1v2_1_1BulkWriteCommand.html#a413a2585c3b8a28aadfe281d386f9a08":[3,0,0,0,3,6],
 "structdynamixel_1_1v2_1_1BulkWriteCommand.html#a58b81c6dbc9d79223a9a42927ce8e1df":[3,0,0,0,3,5],
 "structdynamixel_1_1v2_1_1BulkWriteCommand.html#a7f01b4031de31bec21de2f38b7001e4f":[3,0,0,0,3,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1actuation_1_1FootController_1_1Config.html#aa772658fae4ab489bb27dc7894e54054":[3,0,3,0,0,0,2],
 "structmodule_1_1actuation_1_1FootController_1_1Config.html#adbbcc34ccc45dc005c323ac7479b2b32":[3,0,3,0,0,0,4],
 "structmodule_1_1actuation_1_1FootController_1_1Config.html#ae7ffbc157832192edf8ac52b55d965a1":[3,0,3,0,0,0,1],
-"structmodule_1_1actuation_1_1Kinematics_1_1Config.html":[3,0,3,0,1,0],
-"structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a28a41cd2b52aead9251e89dc18c748c1":[3,0,3,0,1,0,0],
-"structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a701a6b09dad69851545bff0a044f8c5a":[3,0,3,0,1,0,1]
+"structmodule_1_1actuation_1_1Kinematics_1_1Config.html":[3,0,3,0,1,0]
 };

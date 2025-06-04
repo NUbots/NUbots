@@ -1,5 +1,7 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1network_1_1NetworkForwarder_1_1Handle.html":[3,0,3,5,0,0],
+"structmodule_1_1network_1_1NetworkForwarder_1_1Handle.html#ac0945d27448cf6bf161ed63c655fbc96":[3,0,3,5,0,0,2],
 "structmodule_1_1network_1_1NetworkForwarder_1_1Handle.html#ac22d5746598632ebad5e71c65525e03a":[3,0,3,5,0,0,1],
 "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html":[3,0,3,5,0,0,0],
 "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html#a6705f726fef96daf09c8412eb7bd66d8":[3,0,3,5,0,0,0,1],
@@ -193,9 +195,14 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html#a1ceecf42080b2d3de4f6dcd7277b9286":[3,0,3,8,0,1,0],
 "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html#a9f7ca29a7f6fe2dee9e2a5d488bc1c29":[3,0,3,8,0,1,1],
 "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html":[3,0,3,8,0,2,0],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a5068f68dd606db1039090d209765ab8c":[3,0,3,8,0,2,0,2],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a607d75ed948a8e4e0752887a2d1e19b7":[3,0,3,8,0,2,0,1],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#aa4e7f5944f271c9ff3170a403b072f75":[3,0,3,8,0,2,0,0],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a5068f68dd606db1039090d209765ab8c":[3,0,3,8,0,2,0,3],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a607d75ed948a8e4e0752887a2d1e19b7":[3,0,3,8,0,2,0,2],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a7bbc5c256a9d51f36e5ee05af3d5598f":[3,0,3,8,0,2,0,4],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#aa4e7f5944f271c9ff3170a403b072f75":[3,0,3,8,0,2,0,1],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html":[3,0,3,8,0,2,0,0],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html#a017925976b949017a096b342367e8173":[3,0,3,8,0,2,0,0,1],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html#a0f01406fa80fd4f261d9e457410ac8a5":[3,0,3,8,0,2,0,0,0],
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1HandshakeWatchdog.html":[3,0,3,8,0,2,1],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html":[3,0,3,8,0,4],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a52549bae4e1626fa2f77c5a657e98fe1":[3,0,3,8,0,4,4],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a6169502c3fccd70da3cb08bf02909ebc":[3,0,3,8,0,4,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da15020e0a539231933b030557aa7cc9ce":[3,0,3,8,1,1,0,130],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da16ae11d51ac4b2fca8c4584062007510":[3,0,3,8,1,1,0,9],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da17b1057258f06ced4dac7a254ff0bbf1":[3,0,3,8,1,1,0,129],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da17cd8cc4491c3499521e37ce1acbd9ee":[3,0,3,8,1,1,0,246],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da192262a7143f1f661cf6bf92afecdc53":[3,0,3,8,1,1,0,200],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da195b646932953e059ea6f2db079fbed5":[3,0,3,8,1,1,0,138],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da19e325d0e6745d607e7c930b830183b7":[3,0,3,8,1,1,0,276],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1b945e074a8236add855bf4a2c77b19e":[3,0,3,8,1,1,0,134],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1c710f09a0a9c9d842e45385c0eb70a6":[3,0,3,8,1,1,0,2],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1cf453d78da031a342f8cb66f8f8197f":[3,0,3,8,1,1,0,169],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1dcf3ffda524a94dd17bfed940cfd0f3":[3,0,3,8,1,1,0,193]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da17cd8cc4491c3499521e37ce1acbd9ee":[3,0,3,8,1,1,0,246]
 };

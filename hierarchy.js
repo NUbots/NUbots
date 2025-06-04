@@ -197,6 +197,8 @@ var hierarchy =
     [ "module::platform::NUSense::EmitReflector< T >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html", null ],
     [ "module::platform::NUSense::EmitReflector< void >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html", null ],
     [ "module::platform::NUSense::HardwareIO::Config", "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html", null ],
+    [ "module::platform::NUSense::HardwareIO::Config::ServoConfiguration", "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html", null ],
+    [ "module::platform::NUSense::HardwareIO::HandshakeWatchdog", "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1HandshakeWatchdog.html", null ],
     [ "module::platform::NUSense::NUgus", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html", null ],
     [ "module::platform::NUSense::NUSenseFrame", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html", null ],
     [ "module::platform::NUSense::NUSenseParser", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html", null ],

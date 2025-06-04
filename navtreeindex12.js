@@ -1,5 +1,7 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a28a41cd2b52aead9251e89dc18c748c1":[3,0,3,0,1,0,0],
+"structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a701a6b09dad69851545bff0a044f8c5a":[3,0,3,0,1,0,1],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a9faa9b4793216f1c85ae65d098720a91":[3,0,3,0,1,0,2],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#aea765f11fa685fc05e49d823e86aa555":[3,0,3,0,1,0,3],
 "structmodule_1_1actuation_1_1Servos_1_1Count.html":[3,0,3,0,3,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html":[3,0,3,2,19],
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html#af203d409bae21fb9dfb3d62916d291b9":[3,0,3,2,19,0],
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html":[3,0,3,2,20],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html#a0e95cbf77069acf7271fcb4a236a2d88":[3,0,3,2,20,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1SkeletonModel_01_4.html":[3,0,3,2,21],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1SkeletonModel_01_4.html#a83a637aa02cd1c2e402e1368ad7331fe":[3,0,3,2,21,0]
+"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html#a0e95cbf77069acf7271fcb4a236a2d88":[3,0,3,2,20,0]
 };
