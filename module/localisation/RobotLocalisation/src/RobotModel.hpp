@@ -65,7 +65,6 @@ namespace module::localisation {
 
             StateVec() = default;
 
-            template <typename OtherDerived>
             StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
                 : rRWw(state.template segment<2>(PX)), vRw(state.template segment<2>(VX)) {}
 

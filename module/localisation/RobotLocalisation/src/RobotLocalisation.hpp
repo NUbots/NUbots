@@ -92,10 +92,10 @@ namespace module::localisation {
             TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
                 : id(next_id) {
                 NUClear::log<NUClear::LogLevel::DEBUG>("Making robot with id: ", id);
-                RobotModel<double>::StateVec initial_state = Eigen::Matrix<double, 4, 1>::Zero();
-                initial_state.rRWw                         = initial_rRWw.head<2>();
+                RobotModel<double>::StateVec initial_state;
+                initial_state.rRWw = initial_rRWw.head<2>();
 
-                ukf.set_state(initial_state.getStateVec(),
+                ukf.set_state(initial_state,
                               RobotModel<double>::StateVec(cfg_ukf.initial_covariance.position).asDiagonal());
                 ukf.model.process_noise = RobotModel<double>::StateVec(cfg_ukf.noise.process.position);
             }
