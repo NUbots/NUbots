@@ -151,7 +151,8 @@ RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/
     -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
 
 # Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.3.0.tar.gz \
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.22.0.tar.gz \
+    --build-system cmake \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
@@ -172,14 +173,15 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.5' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='20.1.0' \
     -DIGC_OPTION__LLVM_MODE=Prebuilds \
     -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
     -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
     -DIGC_OPTION__SPIRV_TOOLS_MODE=Prebuilds \
     -DIGC_OPTION__SPIRV_TRANSLATOR_MODE=Prebuilds \
     -DIGC_OPTION__VC_INTRINSICS_MODE=Prebuilds \
-    -DINSTALL_GENX_IR=ON
+    -DINSTALL_GENX_IR=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 # gmmlib
 RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
