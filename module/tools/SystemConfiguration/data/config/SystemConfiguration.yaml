@@ -41,7 +41,6 @@ groups:
   - wheel
   - lp
   - u3v
-  - uucp
 
 # Necessary symlinks
 # target: name

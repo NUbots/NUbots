@@ -145,9 +145,7 @@ namespace module::input {
         packet->player  = PLAYER_ID;
         packet->message = message;
 
-        if (BROADCAST_IP != "") {
-            emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
-        }
+        emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
     }
 
     void GameController::reset_state() {
