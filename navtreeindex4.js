@@ -1,5 +1,12 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baae1649e3603dd98ab89817111ae170e69":[3,0,3,8,1,9,0,6],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baae811927aba5f37eaf3ed8b8967c99251":[3,0,3,8,1,9,0,22],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baaef1cb6ab05e55af7f1e48b4a9a81df0f":[3,0,3,8,1,9,0,1],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a9dd0fa446e384e99451e4db3af2bd6c4":[3,0,3,8,1,9,19],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ac9f5682a2a56b4f0ad2b859eab0f4e8d":[3,0,3,8,1,9,16],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ade5ea8211516dc2994d75e48a5d3aa2a":[3,0,3,8,1,9,6],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae0f7070051752e5c09845fcacae36c40":[3,0,3,8,1,9,13],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae3c45f44402ffa517065206e46a23135":[3,0,3,8,1,9,8],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae50f0e505f49f69c1f0c907744fdcea5":[3,0,3,8,1,9,5],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#aefc6746236a4d356498d0b02732895af":[3,0,3,8,1,9,21],
@@ -242,12 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1GetUp.html#a68cbe8402e873db6bd28b43cfbdfa0ee":[3,0,3,10,2,1],
 "classmodule_1_1skill_1_1IKKick.html":[3,0,3,10,4],
 "classmodule_1_1skill_1_1IKKick.html#a0c0a0822c622127b01ba5b833fac1d46":[3,0,3,10,4,12],
-"classmodule_1_1skill_1_1IKKick.html#a0c825b67f5e871b6f86075dc7c5a1fee":[3,0,3,10,4,2],
-"classmodule_1_1skill_1_1IKKick.html#a2bb670a35ce1614d36281c3eef7cdec0":[3,0,3,10,4,8],
-"classmodule_1_1skill_1_1IKKick.html#a2f5b1cb2658bc4ca8fae4a051fbcb66a":[3,0,3,10,4,11],
-"classmodule_1_1skill_1_1IKKick.html#a41828dddc5877a3b5967ed959b78669f":[3,0,3,10,4,7],
-"classmodule_1_1skill_1_1IKKick.html#a54f677a3c536f51eb4bbd7fbf85c2337":[3,0,3,10,4,1],
-"classmodule_1_1skill_1_1IKKick.html#a712a9a87c6feeef78ddb4ed673f78308":[3,0,3,10,4,4],
-"classmodule_1_1skill_1_1IKKick.html#a9a2264ecc519d1d5f3094b9f793e7a7f":[3,0,3,10,4,5],
-"classmodule_1_1skill_1_1IKKick.html#aa1ec49b10189e59a85f67fa44a787710":[3,0,3,10,4,10]
+"classmodule_1_1skill_1_1IKKick.html#a0c825b67f5e871b6f86075dc7c5a1fee":[3,0,3,10,4,2]
 };

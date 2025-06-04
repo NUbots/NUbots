@@ -1,5 +1,12 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1nbs_1_1Player.html#a3d121349e38a96b8332f44377f026827":[3,0,3,4,0,15],
+"classmodule_1_1nbs_1_1Player.html#a44104b06077dcc763ac44b9afcd84435":[3,0,3,4,0,9],
+"classmodule_1_1nbs_1_1Player.html#a460c0ea9156b7465aa0fb46f91117ec8":[3,0,3,4,0,13],
+"classmodule_1_1nbs_1_1Player.html#a59c01d75596965d064fa79c5c41ddbae":[3,0,3,4,0,10],
+"classmodule_1_1nbs_1_1Player.html#a5cf0774dfdd7920f535c341ef0f699a2":[3,0,3,4,0,5],
+"classmodule_1_1nbs_1_1Player.html#a6cd14280f6f80f5851ea48a4856a9a53":[3,0,3,4,0,0],
+"classmodule_1_1nbs_1_1Player.html#a795356048fc939b9f673dc243eb61896":[3,0,3,4,0,6],
 "classmodule_1_1nbs_1_1Player.html#a7dd2d60c500619b72d20083a083282e0":[3,0,3,4,0,17],
 "classmodule_1_1nbs_1_1Player.html#a839131b29981f810ae27f5744b25640c":[3,0,3,4,0,20],
 "classmodule_1_1nbs_1_1Player.html#a869d9dd08b5ad65e48649c03dbd489e7":[3,0,3,4,0,8],
@@ -242,12 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baad622b8f179d672a0106ceeaf4978033f":[3,0,3,8,1,9,0,18],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baadad4b8c8d15f1d95f32ec87d7f8ec996":[3,0,3,8,1,9,0,14],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baadbc9c8ecce05e64610c4354653ea78fd":[3,0,3,8,1,9,0,23],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baadde9858bebeb5b031f06e26d8d2bea0c":[3,0,3,8,1,9,0,2],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baae1649e3603dd98ab89817111ae170e69":[3,0,3,8,1,9,0,6],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baae811927aba5f37eaf3ed8b8967c99251":[3,0,3,8,1,9,0,22],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baaef1cb6ab05e55af7f1e48b4a9a81df0f":[3,0,3,8,1,9,0,1],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a9dd0fa446e384e99451e4db3af2bd6c4":[3,0,3,8,1,9,19],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ac9f5682a2a56b4f0ad2b859eab0f4e8d":[3,0,3,8,1,9,16],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ade5ea8211516dc2994d75e48a5d3aa2a":[3,0,3,8,1,9,6],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae0f7070051752e5c09845fcacae36c40":[3,0,3,8,1,9,13]
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baadde9858bebeb5b031f06e26d8d2bea0c":[3,0,3,8,1,9,0,2]
 };
