@@ -205,9 +205,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html">Config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration variables for this reactor.  <a href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1HandshakeWatchdog.html">HandshakeWatchdog</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Empty struct for the watchdog object below.  <a href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1HandshakeWatchdog.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -233,18 +230,10 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:ae8b0bd4fa00c1292b86f84725f538fad"><td class="memItemLeft" align="right" valign="top"><a id="ae8b0bd4fa00c1292b86f84725f538fad"></a>
 struct <a class="el" href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html">module::platform::NUSense::HardwareIO::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:ae8b0bd4fa00c1292b86f84725f538fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa59875aa402235ec7c3ff601edb3a3a1"><td class="memItemLeft" align="right" valign="top"><a id="aa59875aa402235ec7c3ff601edb3a3a1"></a>
-ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#aa59875aa402235ec7c3ff601edb3a3a1">handshake_watchdog</a></td></tr>
-<tr class="memdesc:aa59875aa402235ec7c3ff601edb3a3a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Watchdog handle for the handshake stage. <br /></td></tr>
-<tr class="separator:aa59875aa402235ec7c3ff601edb3a3a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01a4e68d110db0e6ff852b9e35634e21"><td class="memItemLeft" align="right" valign="top"><a id="a01a4e68d110db0e6ff852b9e35634e21"></a>
 <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">NUgus</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a01a4e68d110db0e6ff852b9e35634e21">nugus</a> {}</td></tr>
 <tr class="memdesc:a01a4e68d110db0e6ff852b9e35634e21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains device information specific to the <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">NUgus</a> robot. <br /></td></tr>
 <tr class="separator:a01a4e68d110db0e6ff852b9e35634e21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f1d0cb253f145c6ff229be2f0b72ce0"><td class="memItemLeft" align="right" valign="top"><a id="a3f1d0cb253f145c6ff229be2f0b72ce0"></a>
-ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a3f1d0cb253f145c6ff229be2f0b72ce0">servo_targets_catcher</a></td></tr>
-<tr class="memdesc:a3f1d0cb253f145c6ff229be2f0b72ce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction handle for the lambda that catches ServoTargets messages. <br /></td></tr>
-<tr class="separator:a3f1d0cb253f145c6ff229be2f0b72ce0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -289,7 +278,7 @@ template&lt;typename T &gt; </div>
 <p>Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to NUSense. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td>is the type of the protobuf message to be serialised. In NUSense's case, we expect this to be SubcontrollerServoTargets and NUSense handshake messages. </td></tr>
+    <tr><td class="paramname">T</td><td>is the type of the protobuf message to be serialised. In NUSense's case, we expect this to be SubcontrollerServoTargets. </td></tr>
   </table>
   </dd>
 </dl>
@@ -312,7 +301,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>NUSense</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html">HardwareIO</a></li>
-    <li class="footer">Generated on Wed Jun 4 2025 02:19:33 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 4 2025 02:41:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
