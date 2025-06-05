@@ -1,15 +1,15 @@
 servos:
   - # [0]  R_SHOULDER_PITCH
     direction: -1
-    offset: 0.0
+    offset: pi / 4
     simulated: false
   - # [1]  L_SHOULDER_PITCH
     direction: 1
-    offset: 0.0
+    offset: pi / 4
     simulated: false
   - # [2]  R_SHOULDER_ROLL
     direction: -1
-    offset: -pi / 4 + 0.123
+    offset: -pi / 4
     simulated: false
   - # [3]  L_SHOULDER_ROLL
     direction: -1
@@ -25,15 +25,15 @@ servos:
     simulated: false
   - # [6]  R_HIP_YAW
     direction: -1
-    offset: 0.0
+    offset: -0.231
     simulated: false
   - # [7]  L_HIP_YAW
     direction: -1
-    offset: 0.0
+    offset: -0.175
     simulated: false
   - # [8]  R_HIP_ROLL
     direction: 1
-    offset: 0.0
+    offset: -0.098
     simulated: false
   - # [9]  L_HIP_ROLL
     direction: 1
@@ -41,11 +41,11 @@ servos:
     simulated: false
   - # [10] R_HIP_PITCH
     direction: 1
-    offset: 0.0
+    offset: 0.028
     simulated: false
   - # [11] L_HIP_PITCH
     direction: -1
-    offset: 0.066
+    offset: -0.014
     simulated: false
   - # [12] R_KNEE
     direction: -1
@@ -65,11 +65,11 @@ servos:
     simulated: false
   - # [16] R_ANKLE_ROLL
     direction: -1
-    offset: 0.0
+    offset: -0.214
     simulated: false
   - # [17] L_ANKLE_ROLL
     direction: -1
-    offset: 0.0
+    offset: -0.195
     simulated: false
   - # [18] HEAD_YAW
     direction: 1
