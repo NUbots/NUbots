@@ -44,8 +44,8 @@ namespace utility::math::filter {
         Model model;
 
         // Dimension types for vectors and square matrices
-        using StateVec = typename Model::StateVec;
-        using StateMat = typename Model::StateMat;
+        using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
 
         static constexpr Scalar ALPHA_DEFAULT = Scalar(0.1);
         static constexpr Scalar KAPPA_DEFAULT = Scalar(0.0);
@@ -142,7 +142,7 @@ namespace utility::math::filter {
         }
 
     public:
-        UKF(StateVec initial_mean       = StateVec(),
+        UKF(StateVec initial_mean       = StateVec::Zero(),
             StateMat initial_covariance = StateMat::Identity() * 0.1,
             Scalar alpha                = ALPHA_DEFAULT,
             Scalar kappa                = KAPPA_DEFAULT,
@@ -150,7 +150,7 @@ namespace utility::math::filter {
             : model()
             , mean(initial_mean)
             , covariance(initial_covariance)
-            , sigma_mean(StateVec())
+            , sigma_mean(StateVec::Zero())
             , sigma_points(SigmaMat::Zero())
             , centred_sigma_points(SigmaMat::Zero())
             , d(SigmaVec::Zero())
@@ -188,13 +188,13 @@ namespace utility::math::filter {
             // Calculate our sigma points
             sigma_mean = mean;
             Eigen::ComputationInfo cholesky_info =
-                generate_sigma_points(mean.getStateVec(), covariance, covariance_sigma_weight, sigma_points);
+                generate_sigma_points(mean, covariance, covariance_sigma_weight, sigma_points);
 
             if (cholesky_info == Eigen::Success) {
                 // Reset our state for more measurements
                 covariance_update = covariance_weights.asDiagonal();
                 d.setZero();
-                centred_sigma_points = sigma_points.colwise() - sigma_mean.getStateVec();
+                centred_sigma_points = sigma_points.colwise() - sigma_mean;
             }
 
             return cholesky_info;
@@ -204,35 +204,34 @@ namespace utility::math::filter {
         Eigen::ComputationInfo time(const Scalar& dt, const Args&... params) {
             // Generate our sigma points
             Eigen::ComputationInfo cholesky_info =
-                generate_sigma_points(mean.getStateVec(), covariance, covariance_sigma_weight, sigma_points);
+                generate_sigma_points(mean, covariance, covariance_sigma_weight, sigma_points);
 
             if (cholesky_info == Eigen::Success) {
                 // Write the propagated version of the sigma point
                 for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                    StateVec sigma_point = StateVec(Eigen::Matrix<Scalar, Model::size, 1>(sigma_points.col(i)));
-                    sigma_points.col(i)  = model.time(sigma_point, dt, params...);
+                    sigma_points.col(i) = model.time(sigma_points.col(i), dt, params...);
                 }
 
-                // Calculate the new mean and covariance values
-                mean       = StateVec(mean_from_sigmas(sigma_points, mean_weights));
+                // Calculate the new mean and covariance values.
+                mean       = mean_from_sigmas(sigma_points, mean_weights);
                 mean       = model.limit(mean);
-                covariance = covariance_from_sigmas(sigma_points, mean.getStateVec(), covariance_weights);
+                covariance = covariance_from_sigmas(sigma_points, mean, covariance_weights);
                 covariance += model.noise(dt);
 
-                // Recalculate our sigma points
-                sigma_mean = mean;
-                cholesky_info =
-                    generate_sigma_points(mean.getStateVec(), covariance, covariance_sigma_weight, sigma_points);
+                // Re calculate our sigma points
+                sigma_mean    = mean;
+                cholesky_info = generate_sigma_points(mean, covariance, covariance_sigma_weight, sigma_points);
 
                 if (cholesky_info == Eigen::Success) {
                     // Reset our state for more measurements
                     covariance_update = covariance_weights.asDiagonal();
                     d.setZero();
-                    centred_sigma_points = sigma_points.colwise() - sigma_mean.getStateVec();
+                    centred_sigma_points = sigma_points.colwise() - sigma_mean;
                 }
             }
             return cholesky_info;
         }
+
 
         /**
          * Perform a measurement update using the given measurement and covariance
@@ -248,8 +247,7 @@ namespace utility::math::filter {
 
             // First step is to calculate the predicted measurement for each sigma point.
             for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                StateVec sigma_point = StateVec(Eigen::Matrix<Scalar, Model::size, 1>(sigma_points.col(i)));
-                predictions.col(i)   = model.predict(sigma_point, params...);
+                predictions.col(i) = model.predict(sigma_points.col(i), params...);
             }
 
             // Now calculate the mean of these measurement sigmas.
@@ -272,8 +270,7 @@ namespace utility::math::filter {
                      .template cast<Scalar>();
 
             // Update our mean and covariance
-            mean       = StateVec(Eigen::Matrix<Scalar, StateVec::size, 1>(sigma_mean.getStateVec()
-                                                                     + centred_sigma_points * covariance_update * d));
+            mean       = sigma_mean + centred_sigma_points * covariance_update * d;
             mean       = model.limit(mean);
             covariance = centred_sigma_points * covariance_update * centred_sigma_points.transpose();
 

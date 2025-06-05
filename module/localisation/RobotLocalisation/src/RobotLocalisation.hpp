@@ -95,9 +95,15 @@ namespace module::localisation {
                 RobotModel<double>::StateVec initial_state;
                 initial_state.rRWw = initial_rRWw.head<2>();
 
-                ukf.set_state(initial_state,
-                              RobotModel<double>::StateVec(cfg_ukf.initial_covariance.position).asDiagonal());
-                ukf.model.process_noise = RobotModel<double>::StateVec(cfg_ukf.noise.process.position);
+                RobotModel<double>::StateVec initial_covariance;
+                initial_covariance.rRWw = cfg_ukf.initial_covariance.position;
+                initial_covariance.vRw  = cfg_ukf.initial_covariance.velocity;
+                ukf.set_state(initial_state, initial_covariance.asDiagonal());
+
+                RobotModel<double>::StateVec process_noise;
+                process_noise.rRWw      = cfg_ukf.noise.process.position;
+                process_noise.vRw       = cfg_ukf.noise.process.velocity;
+                ukf.model.process_noise = process_noise;
             }
 
             // Get the robot's position in world space
