@@ -5,12 +5,17 @@
 #include "message/input/MotionCapture.hpp"
 #include "message/localisation/Field.hpp"
 
+#include "utility/math/euler.hpp"
+
 namespace module::localisation {
 
     using extension::Configuration;
 
     using message::input::MotionCapture;
     using message::localisation::RobotPoseGroundTruth;
+
+    using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
 
     Mocap::Mocap(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -30,14 +35,19 @@ namespace module::localisation {
                     log<DEBUG>("Rigid Body Position: ", rigid_body.position);
                     log<DEBUG>("Rigid Body Rotation: ", rigid_body.rotation);
                     auto robot_pose_ground_truth = std::make_unique<message::localisation::RobotPoseGroundTruth>();
-                    Eigen::Isometry3d Hft        = Eigen::Isometry3d::Identity();
+
+                    // Build transform from field {b} frame to torso {t} frame
+                    Eigen::Isometry3d Hft = Eigen::Isometry3d::Identity();
                     Hft.translation() =
-                        Eigen::Vector3d(rigid_body.position.x(), rigid_body.position.y(), rigid_body.position.z());
-                    Eigen::Quaterniond quat(rigid_body.rotation(0),
-                                            rigid_body.rotation(1),
-                                            rigid_body.rotation(2),
-                                            rigid_body.rotation(3));
-                    Hft.linear()                 = quat.toRotationMatrix();
+                        Eigen::Vector3d(-rigid_body.position.y(), rigid_body.position.x(), rigid_body.position.z());
+                    auto rpy                      = mat_to_rpy_intrinsic(Eigen::Quaterniond(rigid_body.rotation(0),
+                                                                       rigid_body.rotation(1),
+                                                                       rigid_body.rotation(2),
+                                                                       rigid_body.rotation(3))
+                                                        .toRotationMatrix());
+                    Eigen::Vector3d rpy_corrected = Eigen::Vector3d(rpy.y(), -(rpy.z() - M_PI), rpy.x());
+                    Hft.linear()                  = rpy_intrinsic_to_mat(rpy_corrected);
+
                     robot_pose_ground_truth->Hft = Hft;
                     emit(robot_pose_ground_truth);
                 }
