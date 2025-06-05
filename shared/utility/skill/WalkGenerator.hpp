@@ -90,6 +90,9 @@ namespace utility::skill {
 
             /// @brief Option to only switch between planted foot if the next foot is planted
             bool only_switch_when_planted = false;
+
+            /// @brief Option to use balance control when walking
+            bool use_balance_control = false;
         };
 
         /**

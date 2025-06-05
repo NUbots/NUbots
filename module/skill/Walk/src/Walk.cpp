@@ -89,6 +89,7 @@ namespace module::skill {
             walk_generator.set_parameters(cfg.walk_generator_parameters);
             cfg.walk_generator_parameters.only_switch_when_planted =
                 config["walk"]["only_switch_when_planted"].as<bool>();
+            cfg.walk_generator_parameters.use_balance_control = config["walk"]["use_balance_control"].as<bool>();
 
             // Reset the walk engine and last update time
             walk_generator.reset();
@@ -166,8 +167,14 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, true, false));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, true, false));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl,
+                                                             goal_time,
+                                                             cfg.walk_generator_parameters.use_balance_control,
+                                                             false));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr,
+                                                              goal_time,
+                                                              cfg.walk_generator_parameters.use_balance_control,
+                                                              false));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
