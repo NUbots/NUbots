@@ -1,4 +1,4 @@
-import React, { ComponentType, PropsWithChildren } from "react";
+import React, { Component, ComponentType, PropsWithChildren } from "react";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { now } from "mobx-utils";
@@ -29,6 +29,11 @@ import { WalkTrajectory } from "./r3f_components/walk_trajectory";
 import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history";
 import { LocalisationRobotModel } from "./robot_model";
 
+import { RobotPanel } from "./robot_panel/view";
+import { RobotPanelViewModel } from "./robot_panel/view_model";
+import { DashboardModel } from "./model";
+import { DashboardFieldView } from "./field/view";
+
 type LocalisationViewProps = {
   controller: LocalisationController;
   Menu: ComponentType<{}>;
@@ -58,11 +63,10 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${
-                this.props.model.field.fieldType === option.value
-                  ? "hover:bg-auto-contrast-1"
-                  : "hover:bg-auto-contrast-1"
-              }`}
+              className={`flex p-2 ${this.props.model.field.fieldType === option.value
+                ? "hover:bg-auto-contrast-1"
+                : "hover:bg-auto-contrast-1"
+                }`}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -133,6 +137,13 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           </ThreeFiber>
         </div>
         <StatusBar model={this.props.model} />
+
+        <Dashboard
+          controller={this.props.controller}
+          Field={() => <DashboardFieldView model={this.props.model.dashboard.field}/>}
+          model={this.props.model.dashboard}
+          network={this.props.network}
+        />
       </div>
     );
   }
@@ -438,5 +449,66 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>
 ));
+
+type DashboardProps = {
+  controller: LocalisationController;
+  Field: ComponentType;
+  model: DashboardModel;
+  network: LocalisationNetwork;
+};
+
+@observer
+export class Dashboard extends Component<DashboardProps> {
+  componentWillUnmount(): void {
+    this.props.network.destroy();
+  }
+
+  render() {
+    const { model } = this.props;
+    const showPanels = model.robots.some((robot) => robot.enabled);
+    const Field = this.props.Field;
+    return (
+      <div className="flex flex-col w-full h-full">
+        <div className="flex flex-col flex-1 bg-auto-surface-0 border-t border-auto h-full">
+          <div className="flex-1 relative h-full">
+            <Button className="mt-5 ml-5 z-10 relative" onClick={this.onToggleOrientationClick}>Flip Orientation</Button>
+            <Field />
+          </div>
+          {showPanels && (
+            <div className="flex p-2">
+              {model.robots.map((robot) => {
+                const model = RobotPanelViewModel.of(robot);
+                return (
+                  robot.enabled && (
+                    <div className="rounded-sm shadow-md flex-1 ml-2 overflow-hidden first:ml-0" key={robot.id}>
+                      <RobotPanel
+                        connected={model.connected}
+                        batteryValue={model.batteryValue}
+                        lastCameraImage={model.lastCameraImage}
+                        lastSeenBall={model.lastSeenBall}
+                        lastSeenGoal={model.lastSeenGoal}
+                        mode={model.mode}
+                        penalised={model.penalised}
+                        penalty={model.penalty}
+                        phase={model.phase}
+                        title={model.title}
+                        walkCommand={model.walkCommand}
+                      />
+                    </div>
+                  )
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  private onToggleOrientationClick = () => {
+    const { controller, model } = this.props;
+    controller.toggleOrientation(model);
+  };
+}
 
 export default LocalisationView;

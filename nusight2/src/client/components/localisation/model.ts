@@ -9,6 +9,10 @@ import { FieldModel } from "./r3f_components/field/model";
 import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
 
+import { RobotModel } from "../robot/model";
+import { DashboardRobotModel } from "./dashboard_robot/model";
+import { DashboardFieldModel } from "./field/model";
+
 export class TimeModel {
   @observable time: number; // seconds
   @observable lastPhysicsUpdate: number; // seconds
@@ -94,6 +98,28 @@ export class ControlsModel {
   }
 }
 
+export class DashboardModel {
+  @observable private robotModels: RobotModel[];
+
+  constructor(robotModels: RobotModel[]) {
+    this.robotModels = robotModels;
+  }
+
+  static of(robots: RobotModel[]): DashboardModel {
+    return new DashboardModel(robots);
+  }
+
+  @computed
+  get field(): DashboardFieldModel {
+    return DashboardFieldModel.of(this.robots);
+  }
+
+  @computed
+  get robots(): DashboardRobotModel[] {
+    return this.robotModels.map((robot) => DashboardRobotModel.of(robot));
+  }
+}
+
 export class LocalisationModel {
   @observable private appModel: AppModel;
   @observable field: FieldModel;
@@ -101,6 +127,7 @@ export class LocalisationModel {
   @observable camera: CameraModel;
   @observable locked: boolean;
   @observable controls: ControlsModel;
+  @observable dashboard: DashboardModel;
   @observable viewMode: ViewMode;
   @observable target?: LocalisationRobotModel;
   @observable time: TimeModel;
@@ -144,6 +171,7 @@ export class LocalisationModel {
     this.camera = camera;
     this.locked = locked;
     this.controls = controls;
+    this.dashboard = DashboardModel.of(appModel.robots);
     this.viewMode = viewMode;
     this.target = target;
     this.time = time;
