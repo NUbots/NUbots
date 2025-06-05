@@ -72,6 +72,8 @@ namespace module::purpose {
     using message::input::RoboCup;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::FinishReset;
+    using message::localisation::OnFieldResetFieldLocalisation;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
@@ -156,6 +158,10 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FindPurpose>(), 1);
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
+
+        on<Trigger<FinishReset>>().then([this] { emit<Task>(std::make_unique<FindPurpose>(), 1); });
+        on<Trigger<OnFieldResetFieldLocalisation>>().then(
+            [this] { emit<Task>(std::unique_ptr<FindPurpose>(nullptr)); });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
             // We are alive!
