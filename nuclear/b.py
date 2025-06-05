@@ -35,6 +35,50 @@ import sys
 # Don't make .pyc files
 sys.dont_write_bytecode = True
 
+# Populate this with dependencies for the script as needed
+class Dependencies:
+    def __init__(self):
+        self.dependencies = set()
+
+    def register(self, *new_deps):
+        """Register new dependencies that will be used when re-executing the script"""
+        self.dependencies.update(new_deps)
+
+    def get(self):
+        """Get the current set of dependencies"""
+        return self.dependencies
+
+
+dependencies = Dependencies()
+
+# Ensure this module is in sys.modules
+sys.modules["b"] = sys.modules[__name__]
+
+
+def reexecute_with_dependencies():
+    """Re-execute the script with additional dependencies if needed"""
+    current_deps = (
+        set() if "B_EXTRA_DEPS" not in os.environ else set([d for d in os.environ["B_EXTRA_DEPS"].split(",") if d])
+    )
+
+    # Only re-execute if we have new dependencies that aren't already included
+    if not dependencies.get().issubset(current_deps):
+        # Combine the dependencies
+        deps_list = list(sorted(current_deps.union(dependencies.get())))
+        os.environ["B_EXTRA_DEPS"] = ",".join(deps_list)
+
+        # Build the uv run command with dependencies
+        cmd = [
+            "uv",
+            "run",
+            *[arg for dep in deps_list for arg in ["--with", dep]],
+            __file__,
+            *sys.argv[1:],
+        ]
+
+        # Re-execute through uv run directly
+        os.execvpe("uv", cmd, os.environ)
+
 # Go and get all the relevant directories and variables from cmake
 nuclear_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(nuclear_dir)
@@ -146,6 +190,8 @@ async def main():
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
                 if hasattr(module, "register") and hasattr(module, "run"):
+                    # Re-run with updated dependencies if we need to
+                    reexecute_with_dependencies()
 
                     # Build up the base subcommands to this point
                     subcommand = subcommands
