@@ -65,11 +65,9 @@ namespace module::localisation {
 
             StateVec() = default;
 
-            StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
+            template <typename OtherDerived>
+            StateVec(const Eigen::MatrixBase<OtherDerived>& state)
                 : rRWw(state.template segment<2>(PX)), vRw(state.template segment<2>(VX)) {}
-
-            StateVec(const Eigen::Matrix<Scalar, 2, 1>& position)
-                : rRWw(position), vRw(Eigen::Matrix<Scalar, 2, 1>::Zero()) {}
 
             [[nodiscard]] Eigen::Matrix<Scalar, size, 1> getStateVec() const {
                 Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
