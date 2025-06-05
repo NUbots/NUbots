@@ -5,13 +5,13 @@ log_level: INFO
 # Waypoints for kick foot relative to planted foot [x, y, z, time]
 # Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
 foot_waypoints:
-  - [0, 0.19, 0, 0]
+  - [0, 0.21, 0, 0]
   - [0, 0.185, 0, 0.5]
   - [0, 0.18, 0.0, 1]
   - [-0.15, 0.170, 0.05, 1.40]
   - [0.26, 0.180, 0.140, 1.7]
-  - [0, 0.19, 0.02, 2.2]
-  - [0, 0.19, 0, 2.5]
+  - [0, 0.21, 0.02, 2.2]
+  - [0, 0.21, 0, 5.0]
 
 # Waypoints for torso relative to planted foot [x, y, z, time]
 # Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
@@ -21,7 +21,7 @@ torso_waypoints:
   - [0, -0.020, 0.46, 1.5]
   - [0, -0.045, 0.46, 2.00]
   - [0, 0.07, 0.46, 2.3]
-  - [0, 0.09, 0.46, 2.5]
+  - [0, 0.09, 0.46, 5.0]
 
 # Torso pitch (in radians)
 torso_pitch: 10 * pi / 180
