@@ -9,6 +9,7 @@ namespace module::localisation {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief The rigid body id of the robot in motive software
             uint32_t robot_rigid_body_id = 0;
         } cfg;
 
