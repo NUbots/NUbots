@@ -131,7 +131,7 @@ namespace module::tools {
                 Eigen::Isometry3d Htw_est = sensors.Htw;
 
                 // Compute ground truth Htw
-                Eigen::Isometry3d Htw_gt = ground_truth_Hfw.inverse() * Hft;
+                Eigen::Isometry3d Htw_gt = Hft.inverse() * ground_truth_Hfw;
 
                 // Compute odometry error
                 Eigen::Matrix<double, 6, 1> odometry_error = tinyrobotics::homogeneous_error(Htw_gt, Htw_est);
