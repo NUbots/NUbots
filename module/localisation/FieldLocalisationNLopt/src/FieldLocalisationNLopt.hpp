@@ -343,11 +343,11 @@ namespace module::localisation {
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
 
-        void uncertainty_reset(double cost,
-                               const FieldDescription& fd,
+        void uncertainty_reset(const FieldDescription& fd,
                                const FieldLines& field_lines,
                                const std::shared_ptr<const FieldIntersections>& field_intersections,
-                               const std::shared_ptr<const Goals>& goals);
+                               const std::shared_ptr<const Goals>& goals,
+                               const Eigen::Vector3d& rRWw);
         Eigen::Vector3d last_certain_state = Eigen::Vector3d::Zero();
 
     public:

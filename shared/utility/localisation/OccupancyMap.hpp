@@ -59,7 +59,7 @@ namespace utility::localisation {
         Scalar get_occupancy_value(int x, int y) {
             // Check if the observation is within the map
             if (x < 0 || x >= get_length() || y < 0 || y >= get_width()) {
-                return -1;
+                return 2;
             }
             else {
                 return map(x, y);
