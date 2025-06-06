@@ -428,7 +428,7 @@ namespace module::localisation {
                     occupancy_value == -1 ? cfg.out_of_field_cost : occupancy_value;  // If no value, set to 3.0
                 cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
             }
-            // Normalise the cost by the number of field lines
+            // Average the cost by the number of field lines
             cost /= field_lines.size() > 0 ? field_lines.size() : 1;
 
             // Compute the cost and gradient
@@ -442,7 +442,7 @@ namespace module::localisation {
                     double distance = (association.first - association.second).norm();
                     cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
                 }
-                // Normalise the cost by the number of associations
+                // Average the cost by the number of associations
                 cost /= associations.size() > 0 ? associations.size() : 1;
             }
 
