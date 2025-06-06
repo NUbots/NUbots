@@ -26,10 +26,10 @@ start_time_delay: 1
 use_ground_truth_localisation: false
 
 # Cost threshold for the optimisation to trigger a reset
-cost_threshold: 2.0
+cost_threshold: 1.5
 
 # Maximum number of times the cost can be over threshold before a reset is triggered
-max_over_cost: 5
+max_over_cost: 7
 
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 0.9439527458126644
