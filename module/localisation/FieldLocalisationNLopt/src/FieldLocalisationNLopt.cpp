@@ -66,8 +66,16 @@ namespace module::localisation {
             cfg.start_time_delay              = std::chrono::seconds(config["start_time_delay"].as<int>());
             cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
-            cfg.cost_threshold                = config["cost_threshold"].as<double>();
-            cfg.max_over_cost                 = config["max_over_cost"].as<int>();
+            cfg.out_of_field_penalty          = config["out_of_field_penalty"].as<double>();
+
+            // Uncertainty reset parameters
+            cfg.reset_on_cost  = config["reset_on_cost"].as<bool>();
+            cfg.cost_threshold = config["cost_threshold"].as<double>();
+            cfg.reset_delay    = config["reset_delay"].as<int>();
+            cfg.max_over_cost  = config["max_over_cost"].as<int>();
+            cfg.step_size      = config["step_size"].as<double>();
+            cfg.window_size    = config["window_size"].as<double>();
+            cfg.num_angles     = config["num_angles"].as<int>();
 
             // Field line optimisation parameters
             cfg.field_line_distance_weight = config["field_line_distance_weight"].as<double>();
@@ -280,7 +288,7 @@ namespace module::localisation {
                               field->association_lines.push_back({association.first, association.second});
                           }
 
-                          // Add NIS, covariance, and uncertainty to the field message
+                          // Add cost, covariance, and uncertainty to the field message
                           field->cost        = chosen_state_cost;
                           field->covariance  = kf.get_covariance();
                           field->uncertainty = kf.get_covariance().diagonal().sum();
@@ -417,7 +425,8 @@ namespace module::localisation {
                 // Get the position [x, y] of the observation in the map for this particle
                 Eigen::Vector2i map_position = position_in_map(x, rORr);
                 double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
-                occupancy_value        = occupancy_value == -1 ? 3.0 : occupancy_value;  // If no value, set to 3.0
+                occupancy_value =
+                    occupancy_value == -1 ? cfg.out_of_field_penalty : occupancy_value;  // If no value, set to 3.0
                 cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
             }
             // Normalise the cost by the number of field lines

@@ -257,14 +257,23 @@ namespace module::localisation {
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
 
+            /// @brief Penalty on the cost for a point being outside of the field
+            double out_of_field_penalty = 0.0;
+
+            /// @brief When this is enabled, the field localisation will reset if the cost is too high
+            bool reset_on_cost = false;
             /// @brief Cost threshold for resetting the filter
             double cost_threshold = 0.0;
-
             /// @brief Reset delay in seconds
-            int reset_delay = 5;
-
+            int reset_delay = 0;
             /// @brief Maximum number of times the cost can be over the threshold before resetting
             int max_over_cost = 0;
+            /// @brief Step size for the grid search during uncertainty reset
+            double step_size = 0.0;
+            /// @brief The window size for the local search during uncertainty reset
+            double window_size = 0.0;
+            /// @brief Number of yaw angles to try during uncertainty reset
+            int num_angles = 0;
         } cfg;
 
         /// @brief Number of times the cost has been over the threshold
