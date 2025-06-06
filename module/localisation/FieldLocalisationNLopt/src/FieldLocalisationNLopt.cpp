@@ -225,8 +225,9 @@ namespace module::localisation {
                                   std::min_element(opt_results.begin(),
                                                    opt_results.end(),
                                                    [](const auto& a, const auto& b) { return a.second < b.second; });
-                              state             = best_hypothesis->first;
-                              chosen_state_cost = best_hypothesis->second;
+                              state              = best_hypothesis->first;
+                              chosen_state_cost  = best_hypothesis->second;
+                              last_certain_state = state;
                               kf.set_state(state);
                               startup = false;
                           }
