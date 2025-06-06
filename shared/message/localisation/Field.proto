@@ -52,5 +52,5 @@ message Field {
 }
 
 message ResetFieldLocalisation {}
-message OnFieldResetFieldLocalisation {}
+message UncertaintyResetFieldLocalisation {}
 message FinishReset {}

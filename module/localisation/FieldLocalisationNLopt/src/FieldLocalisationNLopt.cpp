@@ -46,8 +46,8 @@ namespace module::localisation {
     using message::localisation::Field;
     using message::localisation::FinishReset;
     using message::localisation::Line;
-    using message::localisation::OnFieldResetFieldLocalisation;
     using message::localisation::ResetFieldLocalisation;
+    using message::localisation::UncertaintyResetFieldLocalisation;
     using message::vision::FieldLines;
 
     using utility::localisation::OccupancyMap;
@@ -264,7 +264,7 @@ namespace module::localisation {
                               num_over_cost++;
                               if (num_over_cost > cfg.max_over_cost) {
                                   num_over_cost = 0;
-                                  emit<Scope::INLINE>(std::make_unique<OnFieldResetFieldLocalisation>());
+                                  emit<Scope::INLINE>(std::make_unique<UncertaintyResetFieldLocalisation>());
                               }
                           }
 
@@ -296,7 +296,7 @@ namespace module::localisation {
                           emit(field);
                       });
 
-        on<Trigger<OnFieldResetFieldLocalisation>,
+        on<Trigger<UncertaintyResetFieldLocalisation>,
            With<FieldDescription>,
            With<FieldLines>,
            With<Sensors>,
