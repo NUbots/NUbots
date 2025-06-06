@@ -30,7 +30,7 @@ def run(proto_file, selections, **kwargs):
         prefix = re.search(r"package\s+(.*?);", f.read()).group(1)
 
     # If options were specified, write the options file to the same directory as the proto file
-    if len(selections) > 0:
+    if selections:
         proto_dir = os.path.dirname(proto_file)
         file_name_no_ext = os.path.splitext(os.path.split(proto_file)[-1])[0]
         options_file_name = (
