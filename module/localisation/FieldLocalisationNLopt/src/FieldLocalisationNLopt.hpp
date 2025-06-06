@@ -347,7 +347,7 @@ namespace module::localisation {
                                const FieldLines& field_lines,
                                const std::shared_ptr<const FieldIntersections>& field_intersections,
                                const std::shared_ptr<const Goals>& goals,
-                               const Eigen::Vector3d& rRWw);
+                               const Eigen::Isometry3d& Hrw);
         Eigen::Vector3d last_certain_state = Eigen::Vector3d::Zero();
 
     public:

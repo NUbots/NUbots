@@ -294,25 +294,24 @@ namespace module::localisation {
            Optional<With<FieldIntersections>>,
            Optional<With<Goals>>,
            Single>()
-            .then(
-                "Uncertainty Reset",
-                [this](const FieldDescription& fd,
-                       const FieldLines& field_lines,
-                       const Sensors& sensors,
-                       const std::shared_ptr<const FieldIntersections>& field_intersections,
-                       const std::shared_ptr<const Goals>& goals) {
-                    log<INFO>("Uncertainty reset triggered due to high cost value");
+            .then("Uncertainty Reset",
+                  [this](const FieldDescription& fd,
+                         const FieldLines& field_lines,
+                         const Sensors& sensors,
+                         const std::shared_ptr<const FieldIntersections>& field_intersections,
+                         const std::shared_ptr<const Goals>& goals) {
+                      log<INFO>("Uncertainty reset triggered due to high cost value");
 
-                    // Stop the main loop to prevent further updates while resetting
-                    main_loop.disable();
+                      // Stop the main loop to prevent further updates while resetting
+                      main_loop.disable();
 
-                    // Reset the system
-                    uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw.inverse().translation());
-                    last_reset = NUClear::clock::now();
-                    // Re-enable the main loop
-                    main_loop.enable();
-                    emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
-                });
+                      // Reset the system
+                      uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
+                      last_reset = NUClear::clock::now();
+                      // Re-enable the main loop
+                      main_loop.enable();
+                      emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
+                  });
     }
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
