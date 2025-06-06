@@ -195,7 +195,7 @@ namespace module::localisation {
         for (const auto& rRWw : robots_rRWw) {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
-                tracked_robots.push_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
                 tracked_robots.back().seen        = true;
                 tracked_robots.back().teammate_id = teammate_id;
                 tracked_robots.back().penalised   = penalised;
