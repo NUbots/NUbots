@@ -257,8 +257,8 @@ namespace module::localisation {
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
 
-            /// @brief Penalty on the cost for a point being outside of the field
-            double out_of_field_penalty = 0.0;
+            /// @brief Cost for a point being outside of the field
+            double out_of_field_cost = 0.0;
 
             /// @brief When this is enabled, the field localisation will reset if the cost is too high
             bool reset_on_cost = false;

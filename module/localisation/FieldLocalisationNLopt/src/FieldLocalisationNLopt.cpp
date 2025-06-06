@@ -66,7 +66,7 @@ namespace module::localisation {
             cfg.start_time_delay              = std::chrono::seconds(config["start_time_delay"].as<int>());
             cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
-            cfg.out_of_field_penalty          = config["out_of_field_penalty"].as<double>();
+            cfg.out_of_field_cost             = config["out_of_field_cost"].as<double>();
 
             // Uncertainty reset parameters
             cfg.reset_on_cost  = config["reset_on_cost"].as<bool>();
@@ -257,9 +257,8 @@ namespace module::localisation {
                           kf.measure(state);
 
                           // Check if uncertainty is too high
-                          // log<INFO>("Field localisation cost: ", chosen_state_cost);
                           emit(graph("Cost", chosen_state_cost));
-                          if ((chosen_state_cost > cfg.cost_threshold)
+                          if (cfg.reset_on_cost && (chosen_state_cost > cfg.cost_threshold)
                               && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                               num_over_cost++;
                               if (num_over_cost > cfg.max_over_cost) {
@@ -426,7 +425,7 @@ namespace module::localisation {
                 Eigen::Vector2i map_position = position_in_map(x, rORr);
                 double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
                 occupancy_value =
-                    occupancy_value == -1 ? cfg.out_of_field_penalty : occupancy_value;  // If no value, set to 3.0
+                    occupancy_value == -1 ? cfg.out_of_field_cost : occupancy_value;  // If no value, set to 3.0
                 cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
             }
             // Normalise the cost by the number of field lines

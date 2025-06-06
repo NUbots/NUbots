@@ -33,11 +33,11 @@ reset_on_cost: true
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
-reset_delay: 3.0
+reset_delay: 3
 # Maximum number of times the cost can be over threshold before a reset is triggered
 max_over_cost: 10
 # Step size for localisation reset search (m)
-reset_step_size: 0.25
+step_size: 0.25
 # Local search window size for localisation reset (m)
 window_size: 2.0
 # Number of angles to check during localisation reset search
