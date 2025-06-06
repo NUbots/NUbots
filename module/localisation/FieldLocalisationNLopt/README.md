@@ -89,7 +89,8 @@ Include this module to allow the robot to estimate where the field is in world s
 
 - `message::localisation::Field` contains the estimated (x, y, theta) state
 - `message::localisation::ResetFieldLocalisation` signalling a side-of-field localisation reset
-- `message::localisation::UncertaintyResetFieldLocalisation` indicating a local or field-wide reset
+- `message::localisation::UncertaintyResetFieldLocalisation` signalling a local or field-wide reset, which is a computationally intensive action
+- `message::localisation::FinishReset` signalling that a local or field-wide reset has completed
 
 ## Dependencies
 
