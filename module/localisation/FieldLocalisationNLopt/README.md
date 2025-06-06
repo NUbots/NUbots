@@ -15,7 +15,7 @@ The optimisation framework integrates several cost components and constraints to
    - Measures the alignment of predicted field lines with observed ones.
    - Calculated as the squared Euclidean distance between field line points and the nearest point on any observed line, scaled by a predefined weight and divided by the number of field lines:
 
-    $$J_{\text{fl}} = \frac{w_{\text{fl}} \sum_{i=1}^{N} \left( \text{dist}(r_{\text{obs},i}, r_{\text{line}}) \right)^2}{N}$$
+   $$J_{\text{fl}} = \frac{w_{\text{fl}} \sum_{i=1}^{N} \left( \text{dist}(r_{\text{obs},i}, r_{\text{line}}) \right)^2}{N}$$
 
    - Points off the field are given a constant weight set in configuration.
 
