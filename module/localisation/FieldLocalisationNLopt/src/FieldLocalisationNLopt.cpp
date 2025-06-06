@@ -416,8 +416,9 @@ namespace module::localisation {
             for (auto rORr : field_lines) {
                 // Get the position [x, y] of the observation in the map for this particle
                 Eigen::Vector2i map_position = position_in_map(x, rORr);
-                cost += cfg.field_line_distance_weight
-                        * std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
+                double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
+                occupancy_value        = occupancy_value == -1 ? 3.0 : occupancy_value;  // If no value, set to 3.0
+                cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
             }
             // Normalise the cost by the number of field lines
             cost /= field_lines.size() > 0 ? field_lines.size() : 1;
