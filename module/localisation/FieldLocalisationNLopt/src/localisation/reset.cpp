@@ -50,10 +50,10 @@ namespace module::localisation {
         const std::vector<double> angles = {0, M_PI_2, M_PI, -M_PI_2, M_PI_4, 3 * M_PI_4, -M_PI_4, -3 * M_PI_4};
 
         // Field bounds
-        double x_min = rRWw.x() - (fd.dimensions.field_length / 2 + 0.2);
-        double x_max = rRWw.x() + (fd.dimensions.field_length / 2 + 0.2);
-        double y_min = rRWw.y() - (fd.dimensions.field_width / 2 + 0.2);
-        double y_max = rRWw.y() + (fd.dimensions.field_width / 2 + 0.2);
+        double x_min = -(fd.dimensions.field_length / 2 + 0.2) - rRWw.x();
+        double x_max = (fd.dimensions.field_length / 2 + 0.2) - rRWw.x();
+        double y_min = -(fd.dimensions.field_width / 2 + 0.2) - rRWw.y();
+        double y_max = (fd.dimensions.field_width / 2 + 0.2) - rRWw.y();
 
         std::vector<Eigen::Vector3d> hypotheses;
         for (double dx = -window_size; dx <= window_size; dx += step_size) {
@@ -100,8 +100,8 @@ namespace module::localisation {
             for (double x = x_min; x <= x_max; x += step_size) {
                 for (double y = y_min; y <= y_max; y += step_size) {
                     // Get field positions of robot considering world to field
-                    double pos_x = x - rRWw.x();
-                    double pos_y = y - rRWw.y();
+                    double pos_x = x;  // + rRWw.x();
+                    double pos_y = y;  // + rRWw.y();
 
                     // Add hypotheses for each position with all compass and diagonal headings
                     for (const auto& angle : angles) {
