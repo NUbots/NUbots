@@ -29,11 +29,6 @@
 
 #include "utility/math/angle.hpp"
 
-// #include "message/support/FieldDescription.hpp"
-// #include "message/vision/FieldIntersections.hpp"
-// #include "message/vision/FieldLines.hpp"
-// #include "message/vision/Goal.hpp"
-
 namespace module::localisation {
 
     using message::support::FieldDescription;

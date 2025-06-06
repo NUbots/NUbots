@@ -32,10 +32,8 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/platform/RawSensors.hpp"
 
 #include "utility/math/euler.hpp"
-#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::localisation {
 
@@ -48,7 +46,6 @@ namespace module::localisation {
     using message::localisation::Line;
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::UncertaintyResetFieldLocalisation;
-    using message::vision::FieldLines;
 
     using utility::localisation::OccupancyMap;
     using utility::math::euler::mat_to_rpy_intrinsic;
