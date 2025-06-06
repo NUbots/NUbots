@@ -27,6 +27,8 @@
 
 #include "FieldLocalisationNLopt.hpp"
 
+#include "utility/math/angle.hpp"
+
 // #include "message/support/FieldDescription.hpp"
 // #include "message/vision/FieldIntersections.hpp"
 // #include "message/vision/FieldLines.hpp"
@@ -57,7 +59,7 @@ namespace module::localisation {
 
         // Define search window around last known good position
         const double window_size         = 2.0;
-        const double step_size           = 0.3;
+        const double step_size           = 0.2;
         const std::vector<double> angles = {0, M_PI_2, M_PI, -M_PI_2, M_PI_4, 3 * M_PI_4, -M_PI_4, -3 * M_PI_4};
 
         std::vector<std::pair<Eigen::Vector3d, double>> hypotheses;
@@ -69,6 +71,8 @@ namespace module::localisation {
 
                 // Skip hypotheses outside the field boundaries
                 if (x < x_min || x > x_max || y < y_min || y > y_max) {
+                    log<INFO>("Skipping hypothesis outside field boundaries: (", x, ", ", y, ")");
+                    log<INFO>("Field boundaries: (", x_min, ", ", y_min, ") to (", x_max, ", ", y_max, ")");
                     continue;
                 }
 
@@ -89,13 +93,14 @@ namespace module::localisation {
         });
 
         // If local search is valid, use the lowest cost hypothesis
-        if (!ranked_hypothesis.empty() && hypotheses[0].second < cfg.cost_threshold) {
+        if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
             log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
-            log<INFO>("Best hypothesis: ", hypotheses[0].second.transpose());
+            log<INFO>("Best hypothesis: ", hypotheses[0].first.transpose());
 
             // Set the state to the best hypothesis
-            state = hypotheses[0].second;
+            state = hypotheses[0].first;
             kf.set_state(state);
+            last_certain_state = state;  // Update the last certain state
             kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
             return;
         }
@@ -132,13 +137,16 @@ namespace module::localisation {
         bool same_side = (hypotheses[0].first.x() * last_certain_state.x() >= 0);
         Eigen::Vector3d best_hypothesis =
             same_side ? hypotheses[0].first
-                      : Eigen::Vector3d(-hypotheses[0].first.x(), -hypotheses[0].first.y(), hypotheses[0].first.z());
+                      : Eigen::Vector3d(-hypotheses[0].first.x(),
+                                        -hypotheses[0].first.y(),
+                                        utility::math::angle::normalise_angle(hypotheses[0].first.z() + M_PI));
         log<INFO>("Same side: ", same_side, " (", hypotheses[0].first.x(), ", ", last_certain_state.x(), ")");
 
         log<INFO>("Best hypothesis: ", best_hypothesis.transpose());
         // Set the state to the best hypothesis
         state = best_hypothesis;
         kf.set_state(state);
+        last_certain_state = state;  // Update the last certain state
         kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
     }
 
