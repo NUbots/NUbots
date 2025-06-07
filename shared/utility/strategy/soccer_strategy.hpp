@@ -79,7 +79,7 @@ namespace utility::strategy {
 
         // Initialise to self
         std::pair<Who, double> closest = {Who{Who::SELF}, self_distance_to_ball};
-        unsigned long highest_id       = self_id;
+        unsigned long lowest_id        = self_id;
 
         // Loop through each robot
         for (const auto& robot : robots.robots) {
@@ -97,16 +97,16 @@ namespace utility::strategy {
 
             // Check if close to the closest robot
             bool equidistant = std::abs(distance_to_ball - closest.second) < equidistant_threshold;
-            // If it is close to the closest robot, highest ID wins
-            // Otherwise it has to be closer to win
-            if ((equidistant && (robot.teammate_id > highest_id))
+            // If it is close to the closest robot, lowest ID wins, in this case an opponent is in possession above us
+            // to trigger tackling. Otherwise it has to be closer to win
+            if ((equidistant && (robot.teammate_id < lowest_id))
                 || (!equidistant && (distance_to_ball < closest.second))) {
-                closest    = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};
-                highest_id = robot.teammate_id;
+                closest   = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};
+                lowest_id = robot.teammate_id;
             }
         }
 
-        return {highest_id, closest.second};
+        return {lowest_id, closest.second};
     }
 
     /**
@@ -201,10 +201,10 @@ namespace utility::strategy {
 
                 // Check if equidistant to us
                 bool equidistant = std::abs(std::abs(rRFf.y()) - furthest) < equidistant_threshold;
-                // If the robot is further back than us, or equidistant and has a lower ID, then we are not the
+                // If the robot is further back than us, or equidistant and has a higher ID, then we are not the
                 // furthest back
                 if ((!equidistant && (std::abs(rRFf.y()) > furthest))
-                    || (equidistant && (robot.teammate_id < self_id))) {
+                    || (equidistant && (robot.teammate_id > self_id))) {
                     return false;
                 }
             }
