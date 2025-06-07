@@ -27,8 +27,11 @@
 
 #include "NatNet.hpp"
 
+#include <algorithm>
 #include <arpa/inet.h>
+#include <chrono>
 #include <fmt/format.h>
+#include <numeric>
 
 #include "Parse.hpp"
 
@@ -137,6 +140,8 @@ namespace module::input {
     }
 
     void NatNet::process_frame(const Packet& packet) {
+        // Record when we received this packet
+        auto receive_time = std::chrono::steady_clock::now();
 
         // Our output motion capture object
         auto mocap = std::make_unique<MotionCapture>();
@@ -199,6 +204,9 @@ namespace module::input {
         else {
             mocap->natnet_timestamp = ReadData<float>::read(ptr, version);
         }
+
+        // Estimate network delay
+        estimate_network_delay(receive_time, mocap->natnet_timestamp);
 
         // High res timestamps
         if (version >= 0x03000000) {
@@ -342,6 +350,75 @@ namespace module::input {
 
         // Emit our frame
         emit(std::move(mocap));
+    }
+
+    void NatNet::estimate_network_delay(std::chrono::steady_clock::time_point receive_time, double natnet_timestamp) {
+        // Convert our receive time to seconds since epoch (matching NatNet timestamp format)
+        auto receive_time_seconds = std::chrono::duration<double>(receive_time.time_since_epoch()).count();
+
+        // If this is our first frame, initialize clock offset estimation
+        if (!clock_offset_initialized) {
+            // Assume the first frame has minimal delay and use it to estimate clock offset
+            estimated_clock_offset   = receive_time_seconds - natnet_timestamp;
+            clock_offset_initialized = true;
+            last_frame_receive_time  = receive_time;
+            last_natnet_timestamp    = natnet_timestamp;
+            log<INFO>("Initialized clock offset estimation: {} seconds", estimated_clock_offset);
+            return;
+        }
+
+        // Calculate expected receive time based on NatNet timestamp and estimated clock offset
+        double expected_receive_time = natnet_timestamp + estimated_clock_offset;
+
+        // Calculate delay as the difference between actual and expected receive time
+        double delay = receive_time_seconds - expected_receive_time;
+
+        // Only consider positive delays (negative would indicate clock drift or out-of-order packets)
+        if (delay >= 0) {
+            delay_samples.push_back(delay);
+
+            // Keep only the most recent samples
+            if (delay_samples.size() > MAX_DELAY_SAMPLES) {
+                delay_samples.erase(delay_samples.begin());
+            }
+
+            // Calculate statistics every 50 frames
+            if (delay_samples.size() % 50 == 0) {
+                double sum  = std::accumulate(delay_samples.begin(), delay_samples.end(), 0.0);
+                double mean = sum / delay_samples.size();
+
+                // Calculate standard deviation
+                double sq_sum =
+                    std::inner_product(delay_samples.begin(), delay_samples.end(), delay_samples.begin(), 0.0);
+                double stdev = std::sqrt(sq_sum / delay_samples.size() - mean * mean);
+
+                // Find min and max
+                auto minmax = std::minmax_element(delay_samples.begin(), delay_samples.end());
+
+                log<DEBUG>("Network delay stats - Mean: ",
+                           double(mean * 1000),
+                           " ms, StdDev: ",
+                           double(stdev * 1000),
+                           "ms, Min: ",
+                           double(*minmax.first * 1000),
+                           "ms, Max: ",
+                           double(*minmax.second * 1000));
+            }
+        }
+
+        // Update clock offset estimation using a simple low-pass filter
+        // This helps account for gradual clock drift between systems
+        double time_diff      = receive_time_seconds - last_frame_receive_time.time_since_epoch().count();
+        double timestamp_diff = natnet_timestamp - last_natnet_timestamp;
+
+        if (time_diff > 0 && timestamp_diff > 0) {
+            double instantaneous_offset = receive_time_seconds - natnet_timestamp;
+            // Use exponential moving average with alpha = 0.01 for slow adaptation
+            estimated_clock_offset = 0.99 * estimated_clock_offset + 0.01 * instantaneous_offset;
+        }
+
+        last_frame_receive_time = receive_time;
+        last_natnet_timestamp   = natnet_timestamp;
     }
 
     void NatNet::process_model(const Packet& packet) {
