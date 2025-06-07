@@ -37,7 +37,7 @@ namespace module::purpose {
             if (attack.ball_pos == message::strategy::Who::OPPONENT) {
                 log<INFO>("Opponent has the ball, tackle it!");
                 // todo implement tackle ball
-                // emit<Task>(std::make_unique<TackleBall>(), 3);  // Tackle the ball from the opponent
+                emit<Task>(std::make_unique<TackleBall>(), 3);  // Tackle the ball from the opponent
                 return;
             }
             else {

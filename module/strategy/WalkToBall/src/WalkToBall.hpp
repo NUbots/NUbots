@@ -59,6 +59,9 @@ namespace module::strategy {
             /// @brief Offset from ball in field space to walk to when approaching the ball from in "front"
             Eigen::Vector3d avoid_ball_offset = Eigen::Vector3d::Zero();
 
+            /// @brief Offset from opponent in field space to walk to when avoiding the opponent
+            double avoid_opponent_x_offset = 0.0;
+
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space
