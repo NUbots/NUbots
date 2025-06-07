@@ -12,7 +12,7 @@ services:
       - FLEXO_CACHE_DIRECTORY=/var/cache/flexo/pkg
       - FLEXO_MIRROR_SELECTION_METHOD=predefined
       # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-      - FLEXO_MIRRORS_PREDEFINED=['https://archive.archlinux.org/repos/2021/01/10/']
+      - FLEXO_MIRRORS_PREDEFINED=['https://archive.archlinux.org/repos/2024/11/17/']
       - RUST_BACKTRACE=1
 
 volumes:

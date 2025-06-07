@@ -39,10 +39,11 @@
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
+#include "message/strategy/TeamMates.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
-
+#include "utility/strategy/soccer_strategy.hpp"
 
 namespace module::network {
 
@@ -57,8 +58,12 @@ namespace module::network {
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
+    using message::strategy::TeamMate;
+    using message::strategy::TeamMates;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
+
+    struct StartupDelay {};
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -67,6 +72,8 @@ namespace module::network {
             .then([this](const Configuration& config, const GlobalConfig& global_config) {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
+                // Delay before sending messages
+                cfg.startup_delay = config["startup_delay"].as<int>();
 
                 // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
@@ -87,35 +94,102 @@ namespace module::network {
 
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
-                        on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
-                            std::string remote_addr = p.remote.address;
+                        on<UDP::Broadcast, Optional<With<GameState>>, Single>(cfg.receive_port)
+                            .then([this, &global_config](const UDP::Packet& p,
+                                                         const std::shared_ptr<const GameState>& game_state) {
+                                std::string remote_addr = p.remote.address;
 
-                            // Apply filtering of packets if udp_filter_address is set in config
-                            if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
-                                if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
-                                    == ignored_ip_addresses.end()) {
-                                    ignored_ip_addresses.insert(remote_addr);
-                                    log<INFO>("Ignoring UDP packet from",
-                                              remote_addr,
-                                              "as it doesn't match configured filter address",
-                                              cfg.udp_filter_address);
+                                // Apply filtering of packets if udp_filter_address is set in config
+                                if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
+                                    if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
+                                        == ignored_ip_addresses.end()) {
+                                        ignored_ip_addresses.insert(remote_addr);
+                                        log<INFO>("Ignoring UDP packet from",
+                                                  remote_addr,
+                                                  "as it doesn't match configured filter address",
+                                                  cfg.udp_filter_address);
+                                    }
+
+                                    return;
                                 }
 
-                                return;
-                            }
+                                // Deserialise the incoming RoboCup message
+                                const std::vector<unsigned char>& payload = p.payload;
+                                RoboCup incoming_msg =
+                                    NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
-                            const std::vector<unsigned char>& payload = p.payload;
-                            RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                                // Check if the incoming message is from the same player
+                                bool own_player_message =
+                                    global_config.player_id == incoming_msg.current_pose.player_id;
 
-                            // filter out own messages
-                            if (global_config.player_id != incoming_msg.current_pose.player_id) {
-                                emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
-                            }
-                        });
+                                // If there is game state information, get the colour
+                                message::input::Team team_colour = message::input::Team::UNKNOWN_TEAM;
+                                if (game_state) {
+                                    switch (int(game_state->team.team_colour)) {
+                                        case GameState::TeamColour::BLUE:
+                                            team_colour = message::input::Team::BLUE;
+                                            break;
+                                        case GameState::TeamColour::RED: team_colour = message::input::Team::RED; break;
+                                        default: team_colour = message::input::Team::UNKNOWN_TEAM;
+                                    }
+                                }
+
+                                // Check if the incoming message is from the same team
+                                bool own_team_message = team_colour == incoming_msg.current_pose.team;
+
+                                // Filter out messages from ourselves and from other teams
+                                if (!own_player_message && own_team_message) {
+                                    emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
+                                }
+                            });
                 }
+
+                emit(std::unique_ptr<TeamMates>());
             });
 
+
+        // include teammates and add a using teammates
+        on<Trigger<RoboCup>, With<TeamMates>>().then([this](const RoboCup& robocup, const TeamMates& old_teammates) {
+            // Get the id of this robot
+            u_int32_t id = robocup.current_pose.player_id;
+
+            // Make new TeamMates message using data from the old message
+            TeamMates teammates = old_teammates;
+
+            // Loop through the teammates vector to check if any teammate ID matches given ID.
+            bool found = false;
+
+            for (auto& mate : teammates.teammates) {  // Loop through each teammate.
+                if (mate.id == id) {  // If the ID of a teammate is found to be the same, update the position.
+                    mate.rRFf = robocup.current_pose.position.cast<double>();  // Update position
+                    found     = true;
+                    break;  // Break out of the loop.
+                }
+            }
+
+            // Else this robot is not in the list of team mates already, add it in
+            if (!found) {
+                // Make the mate
+                TeamMate mate;
+                // Set the variables
+                mate.id   = id;
+                mate.rRFf = robocup.current_pose.position.cast<double>();
+                // Add it to the teammates list
+                teammates.teammates.emplace_back(mate);
+            }
+
+            // After updating or adding a teammate,
+            // move the updated teammate list into a unique pointer and emit it.
+            emit(std::make_unique<TeamMates>(std::move(teammates)));
+        });
+
+        on<Startup>().then([this] {
+            // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
+            emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
         on<Every<2, Per<std::chrono::seconds>>,
+           With<StartupDelay>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
@@ -140,11 +214,18 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->data.self.penalty_reason;
+                    int penalty_reason = game_state->self.penalty_reason;
                     switch (penalty_reason) {
                         case 0: msg->state = 0; break;
                         case 1: msg->state = 1; break;
                         default: msg->state = 2; break;
+                    }
+
+                    // Team colour
+                    switch (int(game_state->team.team_colour)) {
+                        case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
+                        case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
+                        default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
                     }
                 }
 
@@ -170,8 +251,6 @@ namespace module::network {
                             msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                             msg->current_pose.covariance = field->covariance.cast<float>();
-
-                            msg->current_pose.team = config->team_id;
                         }
                     }
                 }

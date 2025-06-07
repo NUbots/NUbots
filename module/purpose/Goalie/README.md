@@ -15,7 +15,7 @@ Add this module to the role and emit a Goalie Task.
 ## Consumes
 
 - `message::input::GameState` to get information about the state of the game
-- `message::input::GameState::Data::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
+- `message::input::GameState::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
 - `message::strategy::Goalie` a Task requesting to play as a Goalie
 - `message::strategy::NormalGoalie` a Test requesting to play as a Goalie in the normal game state
 - `message::strategy::PenaltyShootoutGoalie` a Task requesting to play as a Goalie in the penalty shootout game state

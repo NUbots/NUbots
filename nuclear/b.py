@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
 #
 # MIT License
 #
@@ -26,13 +26,11 @@
 # SOFTWARE.
 #
 import argparse
+import asyncio
+import importlib.util
 import os
-import pkgutil
 import re
-import subprocess
 import sys
-
-from dependencies import find_dependency, install_dependency
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
@@ -56,7 +54,7 @@ if os.path.isfile("CMakeCache.txt"):
 
 # Look for a build directory
 else:
-    dirs = ["build", os.path.join(os.pardir, "build")]
+    dirs = [os.path.join(os.pardir, "build"), "build"]
     try:
         dirs.extend([os.path.join("build", f) for f in os.listdir("build")])
     except FileNotFoundError:
@@ -99,7 +97,8 @@ try:
 except:
     source_dir = project_dir
 
-if __name__ == "__main__":
+
+async def main():
 
     # Prepend nuclear and user tools to the path, so we prefer our packages
     sys.path.insert(0, nuclear_tools_path)
@@ -114,7 +113,7 @@ if __name__ == "__main__":
     )
     subcommands.required = True
 
-    # Look thorough our tools directories and find all the files and folders that could be a command
+    # Look through our tools directories and find all the files and folders that could be a command
     candidates = []
     for path in [user_tools_path, nuclear_tools_path]:
         for dirpath, dnames, fnames in os.walk(path):
@@ -141,71 +140,70 @@ if __name__ == "__main__":
 
     for components in useable:
         if sys.argv[1 : len(components) + 1] == components:
-            loader = pkgutil.find_loader(".".join(components))
-            if loader:
-                try:
-                    module = loader.load_module()
-                    if hasattr(module, "register") and hasattr(module, "run"):
+            module_name = ".".join(components)
+            if spec := importlib.util.find_spec(module_name):
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
+                spec.loader.exec_module(module)
+                if hasattr(module, "register") and hasattr(module, "run"):
 
-                        # Build up the base subcommands to this point
-                        subcommand = subcommands
-                        for c in components[:-1]:
-                            subcommand = subcommand.add_parser(c).add_subparsers(
-                                dest="{}_command".format(c),
-                                help="Commands related to working with {} functionality".format(c),
-                            )
-                        subcommand.required = True
+                    # Build up the base subcommands to this point
+                    subcommand = subcommands
+                    for c in components[:-1]:
+                        subcommand = subcommand.add_parser(c).add_subparsers(
+                            dest="{}_command".format(c),
+                            help="Commands related to working with {} functionality".format(c),
+                        )
+                    subcommand.required = True
 
+                    if asyncio.iscoroutinefunction(module.register):
+                        await module.register(subcommand.add_parser(components[-1]))
+                    else:
                         module.register(subcommand.add_parser(components[-1]))
+
+                    # Run the module
+                    if asyncio.iscoroutinefunction(module.run):
+                        await module.run(**vars(command.parse_args()))
+                    else:
                         module.run(**vars(command.parse_args()))
 
-                        # We're done, exit
-                        exit(0)
-
-                except ModuleNotFoundError as e:
-                    print(f'missing command dependency "{e.name}"')
-
-                    dependency = find_dependency(e.name, user_tools_path)
-                    package = dependency["version"]
-
-                    print(f'installing missing dependency "{package}"...')
-                    print()
-
-                    install_dependency(package)
-
-                    # Try re-running the current command now that the library exists
-                    sys.exit(subprocess.call([sys.executable, *sys.argv]))
+                    # We're done, exit
+                    exit(0)
 
     # If we reach this point, we couldn't find a tool to use.
     # In this case we need to look through all the tools so we can register them all.
     # This will provide a complete help for the function call so the user can try again
     tools = {}
     for components in candidates:
-        try:
-            loader = pkgutil.find_loader(".".join(components))
-            if loader:
-                module = loader.load_module()
-                if hasattr(module, "register") and hasattr(module, "run"):
+        module_name = ".".join(components)
+        if spec := importlib.util.find_spec(module_name):
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
 
-                    subcommand = subcommands
-                    tool = tools
-                    for c in components[:-1]:
-                        if c in tool:
-                            tool, subcommand = tool[c]
-                        else:
-                            subcommand = subcommand.add_parser(c).add_subparsers(
-                                dest="{}_command".format(c),
-                                help="Commands related to working with {} functionality".format(c),
-                            )
-                            subcommand.required = True
-                            tool[c] = ({}, subcommand)
-                            tool = tool[c][0]
+            if hasattr(module, "register") and hasattr(module, "run"):
+                subcommand = subcommands
+                tool = tools
+                for c in components[:-1]:
+                    if c in tool:
+                        tool, subcommand = tool[c]
+                    else:
+                        subcommand = subcommand.add_parser(c).add_subparsers(
+                            dest="{}_command".format(c),
+                            help="Commands related to working with {} functionality".format(c),
+                        )
+                        subcommand.required = True
+                        tool[c] = ({}, subcommand)
+                        tool = tool[c][0]
 
+                if asyncio.iscoroutinefunction(module.register):
+                    await module.register(subcommand.add_parser(components[-1]))
+                else:
                     module.register(subcommand.add_parser(components[-1]))
-        except ModuleNotFoundError as e:
-            pass
-        except BaseException as e:
-            pass
 
     # Given what we know, this will fail here and give the user some help
     command.parse_args()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
