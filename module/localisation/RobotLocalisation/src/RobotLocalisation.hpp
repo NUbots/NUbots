@@ -32,6 +32,8 @@
 
 #include "RobotModel.hpp"
 
+#include "message/localisation/Field.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/filter/UKF.hpp"
@@ -63,6 +65,9 @@ namespace module::localisation {
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
 
+            /// @brief The maximum distance a robot can be outside the field before it is ignored
+            double max_distance_from_field = 0.0;
+
         } cfg;
 
         struct TrackedRobot {
@@ -75,18 +80,30 @@ namespace module::localisation {
             /// @brief The number of times the robot has been undetected in a row
             long missed_count = 0;
             /// @brief A unique identifier for the robot
-            const unsigned long id;
+            unsigned long id;
+            /// @brief The unique identifier of the robot if it is a teammate
+            /// If it is not a teammate, this will be 0
+            unsigned long teammate_id = 0;
+            /// @brief Penalisation state for teammate
+            /// This allows behaviour systems to ignore teammates that are not in the game, but keep tracking them
+            bool penalised = false;
 
             /// @brief Constructor that sets the state for the UKF
             TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
                 : id(next_id) {
                 NUClear::log<NUClear::LogLevel::DEBUG>("Making robot with id: ", id);
-                RobotModel<double>::StateVec initial_state = Eigen::Matrix<double, 4, 1>::Zero();
-                initial_state.rRWw                         = initial_rRWw.head<2>();
+                RobotModel<double>::StateVec initial_state;
+                initial_state.rRWw = initial_rRWw.head<2>();
 
-                ukf.set_state(initial_state.getStateVec(),
-                              RobotModel<double>::StateVec(cfg_ukf.initial_covariance.position).asDiagonal());
-                ukf.model.process_noise = RobotModel<double>::StateVec(cfg_ukf.noise.process.position);
+                RobotModel<double>::StateVec initial_covariance;
+                initial_covariance.rRWw = cfg_ukf.initial_covariance.position;
+                initial_covariance.vRw  = cfg_ukf.initial_covariance.velocity;
+                ukf.set_state(initial_state, initial_covariance.asDiagonal());
+
+                RobotModel<double>::StateVec process_noise;
+                process_noise.rRWw      = cfg_ukf.noise.process.position;
+                process_noise.vRw       = cfg_ukf.noise.process.velocity;
+                ukf.model.process_noise = process_noise;
             }
 
             // Get the robot's position in world space
@@ -103,18 +120,29 @@ namespace module::localisation {
         /// As it is unbounded, an unsigned long is used to store it
         unsigned long next_id = 0;
 
+        /// @brief How many times per second to run the maintenance step
+        static constexpr int UPDATE_RATE = 15;
+
         /// @brief Run Kalman filter prediction step for all tracked robots
         void prediction();
 
         /// @brief Associate the given robot measurements with the tracked robots
         /// Creates a new tracked robot if the measurement is not associated with an existing robot
         /// @param robots_rRWw The new robot measurements in world coordinates
-        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw);
+        /// @param teammate_id The unique identifier of the robot if it is a teammate
+        /// @param penalised Whether the robot is penalised or not
+        void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
+                              uint teammate_id = 0,
+                              bool penalised   = false);
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot
         /// @param horizon The green horizon from the vision system, to determine if a robot is in view
-        void maintenance(const message::vision::GreenHorizon& horizon);
+        /// @param field The field localisation, used to determine location of the tracked robot on field
+        /// @param field_desc Field description, used to get the length and width of the field
+        void maintenance(const message::vision::GreenHorizon& horizon,
+                         const message::localisation::Field& field,
+                         const message::support::FieldDescription& field_desc);
 
         /// @brief Print out the current state of the tracked robots
         void debug_info() const;
@@ -122,10 +150,6 @@ namespace module::localisation {
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
-
-        /// @brief Tests if this robot measurement is associated with a tracked robot or if it is a new robot
-        /// @param vision_robot The robot detection from the vision system
-        void data_association(const Eigen::Vector3d& rRWw);
     };
 
 }  // namespace module::localisation
