@@ -29,6 +29,7 @@
 #define MODULES_INPUT_NATNET_HPP
 
 #include <Eigen/Core>
+#include <chrono>
 #include <nuclear>
 
 namespace module::input {
@@ -47,6 +48,21 @@ namespace module::input {
             /// @brief Allows motive packets to be dumped to file
             bool dump_packets = false;
         } cfg;
+
+        ///@brief Time point when the last frame was received
+        std::chrono::steady_clock::time_point last_frame_receive_time;
+        ///@brief Timestamp from the last NatNet frame
+        double last_natnet_timestamp = 0.0;
+        ///@brief Vector storing recent network delay samples
+        std::vector<double> delay_samples;
+        ///@brief Maximum number of delay samples to store
+        static constexpr size_t MAX_DELAY_SAMPLES = 100;
+        ///@brief Estimated offset between local and NatNet clock
+        double estimated_clock_offset = 0.0;
+        ///@brief Flag indicating if clock offset has been initialized
+        bool clock_offset_initialized = false;
+
+        void estimate_network_delay(std::chrono::steady_clock::time_point receive_time, double natnet_timestamp);
 
     public:
         struct Packet {

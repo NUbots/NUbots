@@ -1,0 +1,6 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# The ID of the rigid body that represents the robot in the motion capture system
+# This is called "Streaming ID" in the OptiTrack Motive software
+robot_rigid_body_id: 1

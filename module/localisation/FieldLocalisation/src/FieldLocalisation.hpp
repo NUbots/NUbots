@@ -34,6 +34,7 @@
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/RobotPoseGroundTruth.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
@@ -137,6 +138,12 @@ namespace module::localisation {
         /// @brief Time at startup
         NUClear::clock::time_point startup_time;
 
+        /// @brief Bool indicating ground truth localisation (Hfw) computed
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
         explicit FieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
@@ -153,9 +160,11 @@ namespace module::localisation {
          * @brief Find error between computed Hfw and ground truth if available
          *
          * @param Hfw Computed Hfw to be compared against ground truth
-         * @param raw_sensors The raw sensor data
+         * @param robot_pose_ground_truth The robot pose ground truth data
          */
-        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
+        void debug_field_localisation(
+            Eigen::Isometry3d Hfw,
+            const std::shared_ptr<const message::localisation::RobotPoseGroundTruth>& robot_pose_ground_truth);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
