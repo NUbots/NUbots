@@ -65,6 +65,12 @@ namespace module::strategy {
         on<Provide<LookAtBall>, Trigger<Ball>, With<Sensors>>().then([this](const Ball& ball, const Sensors& sensors) {
             // If we have a ball and it is recent, look at it
             if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
+                if ((NUClear::clock::now() - start_time).count() % 1000 < 500) {
+                    log<INFO>("Looking forward");
+                    // If we have been running for too long, emit a LookAtBall Task
+                    emit<Task>(std::make_unique<Look>(Eigen::Vector3d(0, 0, 0), true));
+                }
+
                 Eigen::Vector3d rBCc = ball.Hcw * ball.rBWw;
                 Eigen::Vector3d rBCt = (sensors.Htw * ball.Hcw.inverse()).rotation() * rBCc;
                 emit<Task>(std::make_unique<Look>(rBCt, true));
