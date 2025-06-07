@@ -235,21 +235,20 @@ namespace module::strategy {
                 // if not robot is not yet aligned, add the offset to approach to the side of the opponent
                 Eigen::Vector3d rApproachFf = rBFf;
                 if (std::abs(angle_error) > 0.2) {
-                    log<INFO>("Tackling ball, but not aligned yet, so walking to offset point",
-                              angle_error,
-                              robot_heading,
-                              heading);
-
                     // Add y offset in the direction of the perpendicular vector
                     rApproachFf -= uHf * cfg.approach_offset;
                 }
                 // Always add some distance backwards from opponent along opponent vector
                 rApproachFf -= uOBf * cfg.avoid_opponent_offset;
 
-
-                // // Compute heading to face the ball from the approach point
-                // rBApproachf = rBFf - rApproachFf;
-                // heading     = std::atan2(rBApproachf.y(), rBApproachf.x());
+                // If the distance to the ball is very small, ie we are actively tackling, the heading should be equal
+                // to the robot's current heading Otherwise small changed causes the robot to recalibrate its heading by
+                // walking backwards
+                log<INFO>("Distance", rBRr.head<2>().norm());
+                if (rBRr.head<2>().norm() < 0.5) {
+                    log<INFO>("Close! So using robot's own heading");
+                    heading = robot_heading;
+                }
 
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(rApproachFf, Eigen::Vector3d(0, 0, heading));
                 log<INFO>("Tackling ball, walking to approach point", rApproachFf, "with heading", heading);
