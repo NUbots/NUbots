@@ -27,6 +27,21 @@ start_time_delay: 1
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
 
+# Reset localisation if the cost is above a threshold
+reset_on_cost: true
+# Cost threshold for the optimisation to trigger a reset
+cost_threshold: 3.0
+# Time (s) to wait before allowing a localisation reset again
+reset_delay: 3
+# Maximum number of times the cost can be over threshold before a reset is triggered
+max_over_cost: 20
+# Step size for localisation reset search (m)
+step_size: 0.25
+# Local search window size for localisation reset (m)
+window_size: 2.0
+# Number of angles to check during localisation reset search
+num_angles: 8
+
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 10.0
 

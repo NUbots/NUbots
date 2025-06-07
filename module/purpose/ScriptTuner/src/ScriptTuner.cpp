@@ -762,7 +762,7 @@ namespace module::purpose {
                     num = deg_or_rad ? num * M_PI / 180 : num;
 
                     // Normalize our angle to be between -pi and pi
-                    num = utility::math::angle::normalizeAngle(num);
+                    num = utility::math::angle::normalise_angle(num);
 
                     // Set the new position
                     it->position = num;
