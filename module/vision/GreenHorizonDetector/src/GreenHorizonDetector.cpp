@@ -58,6 +58,10 @@ namespace module::vision {
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
+            // HACK: Quick implementation that accepts any ray
+            // Comment out all the complex processing below
+
+            /*
             // Convenience variables
             const auto& cls                                      = mesh.classifications;
             const auto& neighbours                               = mesh.neighbourhood;
@@ -151,7 +155,9 @@ namespace module::vision {
                     emit(graph("Convex hull point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
             }
+            */
 
+            // Create a fake green horizon message that accepts any ray
             auto msg = std::make_unique<GreenHorizon>();
 
             // Preserve mesh so that anyone using the GreenHorizon can access the original data
@@ -167,15 +173,15 @@ namespace module::vision {
                 msg->vision_ground_truth = mesh.vision_ground_truth;
             }
 
-            // Add the unit vectors of the convex hull to the green horizon message
-            msg->horizon.reserve(hull_indices.size());
-            for (const auto& idx : hull_indices) {
-                msg->horizon.emplace_back(rPWw.col(idx));
-            }
+            // HACK: Create a fake horizon that forms a large boundary to accept any ray
+            // This creates a simple square horizon at ground level that should encompass most rays
+            msg->horizon.reserve(4);
+            msg->horizon.emplace_back(Eigen::Vector3d(10.0, 10.0, 0.0));    // Far corner
+            msg->horizon.emplace_back(Eigen::Vector3d(10.0, -10.0, 0.0));   // Far corner
+            msg->horizon.emplace_back(Eigen::Vector3d(-10.0, -10.0, 0.0));  // Far corner
+            msg->horizon.emplace_back(Eigen::Vector3d(-10.0, 10.0, 0.0));   // Far corner
 
-            log<DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
-                                   hull_indices.size(),
-                                   field_cluster.size()));
+            log<DEBUG>("Emitting fake green horizon with 4 boundary points that should accept any ray");
 
             emit(std::move(msg));
         });
