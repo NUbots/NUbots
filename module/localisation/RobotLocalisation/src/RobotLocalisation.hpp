@@ -68,6 +68,9 @@ namespace module::localisation {
             /// @brief The maximum distance a robot can be outside the field before it is ignored
             double max_distance_from_field = 0.0;
 
+            /// @brief Keep robots within this distance with self, to prevent deleting robots that are too close to see
+            double close_distance_to_ignore = 0.0;
+
         } cfg;
 
         struct TrackedRobot {
@@ -142,7 +145,8 @@ namespace module::localisation {
         /// @param field_desc Field description, used to get the length and width of the field
         void maintenance(const message::vision::GreenHorizon& horizon,
                          const message::localisation::Field& field,
-                         const message::support::FieldDescription& field_desc);
+                         const message::support::FieldDescription& field_desc,
+                         const Eigen::Isometry3d Hrw);
 
         /// @brief Print out the current state of the tracked robots
         void debug_info() const;

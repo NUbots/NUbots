@@ -32,6 +32,7 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -52,6 +53,7 @@ namespace module::localisation {
     using message::eye::DataPoint;
     using message::input::GameState;
     using message::input::RoboCup;
+    using message::input::Sensors;
     using message::localisation::Field;
     using message::support::FieldDescription;
     using message::vision::GreenHorizon;
@@ -77,20 +79,23 @@ namespace module::localisation {
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
+            cfg.close_distance_to_ignore        = config["close_distance_to_ignore"].as<double>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
+           With<Sensors>,
            Optional<With<GameState>>,
            Sync<RobotLocalisation>>()
             .then([this](const GreenHorizon& horizon,
                          const Field& field,
                          const FieldDescription& field_desc,
+                         const Sensors& sensors,
                          const std::shared_ptr<const GameState>& game_state) {
                 // **Run maintenance step**
-                maintenance(horizon, field, field_desc);
+                maintenance(horizon, field, field_desc, sensors.Hrw);
 
                 // **Debugging output**
                 debug_info();
@@ -231,7 +236,8 @@ namespace module::localisation {
 
     void RobotLocalisation::maintenance(const GreenHorizon& horizon,
                                         const Field& field,
-                                        const FieldDescription& field_desc) {
+                                        const FieldDescription& field_desc,
+                                        const Eigen::Isometry3d Hrw) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
         // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
@@ -241,11 +247,18 @@ namespace module::localisation {
 
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+            Eigen::Vector3d rRWw(state.rRWw.x(), state.rRWw.y(), 0);
 
             // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
             // A robot is outside of view if it is not within the green horizon
             // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
-            if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+            if (!point_in_convex_hull(horizon.horizon, rRWw)) {
+                tracked_robot.seen = true;
+            }
+
+            // If the robot is very close to the robot, keep it as seen so we don't lose it
+
+            if ((Hrw * rRWw).norm() < cfg.close_distance_to_ignore) {
                 tracked_robot.seen = true;
             }
 
