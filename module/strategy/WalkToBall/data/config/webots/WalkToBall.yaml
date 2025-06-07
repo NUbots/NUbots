@@ -22,4 +22,5 @@ max_angle_error: 45 * pi / 180
 avoid_ball_offset: [0.15, 0.5, 0]
 
 # Y-offset to prevent walking into the opponent when tackling
-avoid_opponent_x_offset: -0.4
+avoid_opponent_offset: 0.15
+approach_offset: 0.6

@@ -60,7 +60,8 @@ namespace module::strategy {
             Eigen::Vector3d avoid_ball_offset = Eigen::Vector3d::Zero();
 
             /// @brief Offset from opponent in field space to walk to when avoiding the opponent
-            double avoid_opponent_x_offset = 0.0;
+            double avoid_opponent_offset = 0.0;
+            double approach_offset       = 0.0;
 
         } cfg;
 

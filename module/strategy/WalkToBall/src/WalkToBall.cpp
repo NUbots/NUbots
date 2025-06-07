@@ -70,13 +70,14 @@ namespace module::strategy {
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
-            cfg.ball_y_offset           = config["ball_y_offset"].as<double>();
-            cfg.ball_kick_distance      = config["ball_kick_distance"].as<double>();
-            cfg.ball_approach_distance  = config["ball_approach_distance"].as<double>();
-            cfg.goal_target_offset      = config["goal_target_offset"].as<double>();
-            cfg.max_angle_error         = config["max_angle_error"].as<Expression>();
-            cfg.avoid_ball_offset       = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
-            cfg.avoid_opponent_x_offset = config["avoid_opponent_x_offset"].as<double>();
+            cfg.ball_y_offset          = config["ball_y_offset"].as<double>();
+            cfg.ball_kick_distance     = config["ball_kick_distance"].as<double>();
+            cfg.ball_approach_distance = config["ball_approach_distance"].as<double>();
+            cfg.goal_target_offset     = config["goal_target_offset"].as<double>();
+            cfg.max_angle_error        = config["max_angle_error"].as<Expression>();
+            cfg.avoid_ball_offset      = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
+            cfg.avoid_opponent_offset  = config["avoid_opponent_offset"].as<double>();
+            cfg.approach_offset        = config["approach_offset"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -205,43 +206,53 @@ namespace module::strategy {
                 Eigen::Vector3d uOBf = rOBf.normalized();
 
                 // Get position of robot on field
-                Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
-                Eigen::Vector3d rRFf  = Hfr.translation();
+                Eigen::Isometry3d Hfr   = field.Hfw * sensors.Hrw.inverse();
+                Eigen::Vector3d rRFf    = Hfr.translation();
+                Eigen::Vector3d robot_x = Hfr.linear().col(0);  // Robot forward direction in field
+                double robot_heading    = std::atan2(robot_x.y(), robot_x.x());
 
                 // Create left/right perpendicular unit vectors to opponent direction
                 Eigen::Vector3d uLeft  = Eigen::Vector3d(-uOBf.y(), uOBf.x(), 0);  // 90 deg left
                 Eigen::Vector3d uRight = Eigen::Vector3d(uOBf.y(), -uOBf.x(), 0);  // 90 deg right
 
                 // Offset positions from the ball on both sides
-                Eigen::Vector3d rLeftFf  = rBFf + uLeft * cfg.ball_approach_distance;
-                Eigen::Vector3d rRightFf = rBFf + uRight * cfg.ball_approach_distance;
+                Eigen::Vector3d rLeftFf  = rBFf + uLeft * cfg.approach_offset;
+                Eigen::Vector3d rRightFf = rBFf + uRight * cfg.approach_offset;
 
-                // Choose side closer to robot
-                Eigen::Vector3d rApproachFf;
-                Eigen::Vector3d approach_dir;
+                // Choose the side to approach based on which is closer to the robot
+                // Unit vector of the heading in field space
+                Eigen::Vector3d uHf = (rRFf - rLeftFf).norm() < (rRFf - rRightFf).norm() ? uRight : uLeft;
                 if ((rRFf - rLeftFf).norm() < (rRFf - rRightFf).norm()) {
-                    rApproachFf  = rLeftFf;
-                    approach_dir = uLeft;
+                    log<INFO>("Tackling ball, approaching from left side");
                 }
                 else {
-                    rApproachFf  = rRightFf;
-                    approach_dir = uRight;
+                    log<INFO>("Tackling ball, approaching from right side");
                 }
-                // Add extra y-offset away from opponent to reduce collision risk
-                rApproachFf.x() += approach_dir.x() * cfg.avoid_opponent_x_offset;
+                double heading = std::atan2(uHf.y(), uHf.x());
+                // Error between the robot's heading and the desired heading perpendicular to the opponent
+                double angle_error = std::atan2(std::sin(heading - robot_heading), std::cos(heading - robot_heading));
 
-                // If not close yet, approach from the side
-                if ((rRFf - rApproachFf).norm() > cfg.ball_approach_distance) {
-                    rApproachFf.y() += approach_dir.y() * 0.5;
+                // if not robot is not yet aligned, add the offset to approach to the side of the opponent
+                Eigen::Vector3d rApproachFf = rBFf;
+                if (std::abs(angle_error) > 0.2) {
+                    log<INFO>("Tackling ball, but not aligned yet, so walking to offset point",
+                              angle_error,
+                              robot_heading,
+                              heading);
+
+                    // Add y offset in the direction of the perpendicular vector
+                    rApproachFf -= uHf * cfg.approach_offset;
                 }
+                // Always add some distance backwards from opponent along opponent vector
+                rApproachFf -= uOBf * cfg.avoid_opponent_offset;
 
 
-                // Compute heading to face the ball from the approach point
-                Eigen::Vector3d rBallFromApproach = rBFf - rApproachFf;
-                double heading                    = std::atan2(rBallFromApproach.y(), rBallFromApproach.x());
+                // // Compute heading to face the ball from the approach point
+                // rBApproachf = rBFf - rApproachFf;
+                // heading     = std::atan2(rBApproachf.y(), rBApproachf.x());
 
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(rApproachFf, Eigen::Vector3d(0, 0, heading));
-
+                log<INFO>("Tackling ball, walking to approach point", rApproachFf, "with heading", heading);
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
             });
     }
