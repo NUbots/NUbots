@@ -31,7 +31,6 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
-#include "message/localisation/RobotPoseGroundTruth.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/euler.hpp"
