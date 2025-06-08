@@ -153,11 +153,12 @@ namespace module::purpose {
            With<FieldDescription>,
            With<Field>,
            With<Sensors>,
+           With<GameState>,
            When<Phase, std::equal_to, Phase::READY>>()
             .then([this](const std::shared_ptr<const Robots>& robots,
                          const FieldDescription& field_desc,
                          const Field& field,
-                         const Sensors& sensors) {
+                         const Sensors& sensors const GameState& game_state) {
                 // Collect up teammates ; empty if no one is around
                 std::vector<Eigen::Vector3d> teammates{};
                 if (robots) {
@@ -170,8 +171,11 @@ namespace module::purpose {
                 }
 
                 // Calculate optimal ready position based on everyone's position
-                Eigen::Isometry3d Hfr =
-                    utility::strategy::ready_position(field.Hfw, sensors.Hrw, teammates, field_desc, false);
+                Eigen::Isometry3d Hfr = utility::strategy::ready_position(field.Hfw,
+                                                                          sensors.Hrw,
+                                                                          teammates,
+                                                                          field_desc,
+                                                                          game_state.our_kick_off);
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
             });
 
