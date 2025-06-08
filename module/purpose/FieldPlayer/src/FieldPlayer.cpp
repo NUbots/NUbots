@@ -26,6 +26,7 @@ namespace module::purpose {
     using FieldPlayerMsg = message::purpose::FieldPlayer;
     using Phase          = message::input::GameState::Phase;
 
+    using message::input::GameState;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
@@ -57,6 +58,7 @@ namespace module::purpose {
            Optional<With<Robots>>,
            With<Sensors>,
            With<Field>,
+           With<GameState>,
            With<GlobalConfig>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
@@ -93,8 +95,23 @@ namespace module::purpose {
                                                                   cfg.equidistant_threshold,
                                                                   global_config.player_id);
 
-                // Todo Check if we can attack
-                bool allowed_to_attack = true;
+
+                // If sub_mode is 1, the robot must freeze for referee ball repositioning
+                bool freeze_penalty = game_state.secondary_state.sub_mode;
+                // If we are in a freeze penalty situation, do nothing
+                // The baseline behaviour will kick in and cause the robot to
+                // look forward and stand still
+                if (freeze_penalty) {
+                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
+                    return;
+                }
+
+                // Check if penalty situation allows for attack or not
+                // True if we need to wait for the other team to kick off
+                bool kickoff_wait = !game_state.our_kick_off && (game_state.secondary_time - NUClear::clock::now()).count() > 0);
+                // Check if it is our penalty to act on or not
+                bool not_our_penalty   = game_state.secondary_state.team_performing != game_state.team.team_id;
+                bool allowed_to_attack = !(kickoff_wait || not_our_penalty);
 
                 log<DEBUG>("Ball possession:",
                            ball_pos,
@@ -169,6 +186,9 @@ namespace module::purpose {
                         }
                     }
                 }
+
+                // Check whose kick off
+
 
                 // Calculate optimal ready position based on everyone's position
                 Eigen::Isometry3d Hfr = utility::strategy::ready_position(field.Hfw,
