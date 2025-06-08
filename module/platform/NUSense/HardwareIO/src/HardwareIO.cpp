@@ -87,17 +87,6 @@ namespace module::platform::NUSense {
             emit(std::make_unique<ConnectSerial>(device, baud));
         });
 
-        // If this triggers, then that means that NUSense has acknowledged the NUC's message and the watchdog can be
-        // unbound since it should not be needed after this point
-        on<Trigger<NUSenseHandshake>>().then([this](const NUSenseHandshake& handshake) {
-            // Unbind the handshake watchdog reaction here since it should not be needed anymore
-            handshake_watchdog.disable();
-            handshake_watchdog.unbind();
-
-            servo_targets_catcher.enable();
-            log<INFO>("From NUSense: ", handshake.msg);
-        });
-
         // Emit any messages sent by the device to the rest of the system
         on<Trigger<NUSenseFrame>>().then("From NUSense", [this](const NUSenseFrame& packet) {
             message::reflection::from_hash<EmitReflector>(packet.hash)->emit(powerplant, packet);
@@ -216,6 +205,7 @@ namespace module::platform::NUSense {
             // Emit the raw sensor data
             emit(std::move(sensors));
         });
+
 
         // Sync is used because uart write is a shared resource
         on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then(
