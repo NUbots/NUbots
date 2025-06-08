@@ -32,6 +32,9 @@
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/input/Sensors.hpp"
 
 namespace module::planning {
 
@@ -96,6 +99,14 @@ namespace module::planning {
 
         /// @brief Boolean value to determine if the robot is walking backwards
         bool is_walking_backwards = false;
+
+        /// @brief Add all the goalpost positions on the field to the obstacles list.
+        /// @param all_obstacles The obstacles list to which goalpost positions will be added.
+        /// @param fieldDesc A reference to the FieldDescription class to access the goalpost coordinates in field space.
+        /// @param Hwf Homogenous transformation matrix from field space to world space
+        /// @param Hwf Homogenous transformation matrix from world space to robot space
+        /// @return A modified obstacle list containing the original obstacles plus the goalpost positions in robot space.
+        std::vector<Eigen::Vector2d> add_goalpost_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, std::vector<Eigen::Vector3d> list_goalposts, Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw );
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain
