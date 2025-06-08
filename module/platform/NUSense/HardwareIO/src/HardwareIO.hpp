@@ -70,6 +70,9 @@ namespace module::platform::NUSense {
         /// @brief Reaction handle for the lambda that catches ServoTargets messages
         ReactionHandle servo_targets_catcher;
 
+        /// @brief  A flag to determine whether NUSense has commenced sending data.
+        bool got_nusense_data = false;
+
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
         /// NUSense.

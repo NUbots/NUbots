@@ -202,18 +202,21 @@ namespace module::platform::NUSense {
                 log<TRACE>(fmt::format("     temp: {}", val.temperature));
             }
 
+            got_nusense_data = true;
+
             // Emit the raw sensor data
             emit(std::move(sensors));
         });
 
 
         // Sync is used because uart write is a shared resource
-        on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then(
-            [this](const ServoTargets& commands, const ServoOffsets& offsets) {
-                // Copy the data into a new message so we can use a duration instead of a timepoint
-                // and take the offsets and switch the direction.
-                auto servo_targets = SubcontrollerServoTargets();
+        on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then([this](const ServoTargets& commands,
+                                                                                      const ServoOffsets& offsets) {
+            // Copy the data into a new message so we can use a duration instead of a timepoint
+            // and take the offsets and switch the direction.
+            auto servo_targets = SubcontrollerServoTargets();
 
+            if (got_nusense_data == true) {
                 // Change the timestamp in servo targets to the difference between the timestamp and now
                 // Take away the offset and switch the direction if needed
                 for (auto& target : commands.targets) {
@@ -224,9 +227,19 @@ namespace module::platform::NUSense {
                         target.gain,
                         target.torque);
                 }
+            }
+            else {
+                auto target = commands.targets[0];
+                servo_targets.targets.emplace_back(
+                    target.time - NUClear::clock::now(),
+                    500,
+                    (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
+                    target.gain,
+                    target.torque);
+            }
 
-                send_packet(servo_targets);
-            });
+            send_packet(servo_targets);
+        });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto command_list = std::make_unique<ServoTargets>();
