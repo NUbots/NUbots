@@ -65,6 +65,7 @@ namespace module::purpose {
                          const std::shared_ptr<const Robots>& robots,
                          const Sensors& sensors,
                          const Field& field,
+                         const GameState& game_state,
                          const GlobalConfig& global_config) {
                 // Todo determine if we have enough information to play
                 // Eg localisation confidence
@@ -95,7 +96,14 @@ namespace module::purpose {
                                                                   cfg.equidistant_threshold,
                                                                   global_config.player_id);
 
-
+                log<INFO>("SUB MODE",
+                          game_state.secondary_state.sub_mode,
+                          "MODE",
+                          game_state.mode.value,
+                          "team performing",
+                          game_state.secondary_state.team_performing,
+                          "our team",
+                          game_state.team.team_id);
                 // If sub_mode is 1, the robot must freeze for referee ball repositioning
                 bool freeze_penalty = game_state.secondary_state.sub_mode;
                 // If we are in a freeze penalty situation, do nothing
@@ -107,8 +115,21 @@ namespace module::purpose {
                 }
 
                 // Check if penalty situation allows for attack or not
+
+
+                // TODO FREE KICK
+                // There are three phase in the free kick:
+                // submode 0 is for ref placing - ie freeze
+                // submode 1 is for setting up for the free kick
+                // submode 2 is between positioning and executing, robot should stand still
+                // the next stage is execution, upon which normal play has resumed
+                // This continues for penalty kickk, throw in, corner kick, goal kick
+
+
                 // True if we need to wait for the other team to kick off
-                bool kickoff_wait = !game_state.our_kick_off && (game_state.secondary_time - NUClear::clock::now()).count() > 0);
+                // If the ball moves, it is in play
+                bool kickoff_wait =
+                    !game_state.our_kick_off && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
                 // Check if it is our penalty to act on or not
                 bool not_our_penalty   = game_state.secondary_state.team_performing != game_state.team.team_id;
                 bool allowed_to_attack = !(kickoff_wait || not_our_penalty);
@@ -175,7 +196,8 @@ namespace module::purpose {
             .then([this](const std::shared_ptr<const Robots>& robots,
                          const FieldDescription& field_desc,
                          const Field& field,
-                         const Sensors& sensors const GameState& game_state) {
+                         const Sensors& sensors,
+                         const GameState& game_state) {
                 // Collect up teammates ; empty if no one is around
                 std::vector<Eigen::Vector3d> teammates{};
                 if (robots) {
@@ -186,9 +208,6 @@ namespace module::purpose {
                         }
                     }
                 }
-
-                // Check whose kick off
-
 
                 // Calculate optimal ready position based on everyone's position
                 Eigen::Isometry3d Hfr = utility::strategy::ready_position(field.Hfw,
