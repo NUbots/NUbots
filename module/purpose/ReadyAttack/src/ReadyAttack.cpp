@@ -23,6 +23,7 @@ namespace module::purpose {
     using message::localisation::Field;
     using ReadyAttackTask = message::purpose::ReadyAttack;
     using message::strategy::FindBall;
+    using message::strategy::PositionBehindBall;
     using message::strategy::WalkToFieldPosition;
     using message::support::FieldDescription;
 
@@ -56,7 +57,8 @@ namespace module::purpose {
                 if (game_state.mode == GameState::Mode::NORMAL) {
                     log<INFO>("Waiting for kick off...");
                     // Waiting for kick off, position outside the center circle
-                    Eigen::Vector3d rPFf = Eigen::Vector3d(0, 0, fd.center_circle_radius + cfg.center_circle_offset);
+                    Eigen::Vector3d rPFf =
+                        Eigen::Vector3d(0, 0, fd.dimensions.center_circle_diameter / 2 + cfg.center_circle_offset);
                     emit<Task>(std::make_unique<WalkToFieldPosition>(
                         utility::math::euler::pos_rpy_to_transform(rPFf, Eigen::Vector3d(0, 0, -M_PI)),
                         true));
@@ -65,21 +67,21 @@ namespace module::purpose {
 
                 // If we are not waiting for kick off, it is the penalty positioning phase
                 // Determine if we are the attacker or not
-                bool attacker =
-                    game_state.secondary_state.team_performing_action == game_state.secondary_state.our_team_id;
+                bool attacker = game_state.secondary_state.team_performing == game_state.team.team_id;
 
                 // If we are defending, position between the ball and our goal at the distance specified in the rules
                 if (!attacker) {
                     log<INFO>("Defending penalty, positioning...");
                     // Position of the center of the goals in field coordinates
-                    Eigen::Vector3d rGFf = Eigen::Vector3d(-(fd.dimensions.field_length / 2) + goal_depth, 0.0, 0.0);
+                    Eigen::Vector3d rGFf =
+                        Eigen::Vector3d((fd.dimensions.field_length / 2) + fd.dimensions.goal_depth, 0.0, 0.0);
                     // Position of the ball in field coordinates
                     Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
 
                     // Unit vector from goal to ball
-                    Eigen::Vector3d uGBf = (rGFf - rBFf).normalize();
+                    Eigen::Vector3d uGBf = (rGFf - rBFf).normalized();
                     // Move the ball position by the penalty defend distance
-                    Eigen::Vector3d rPFf = rBFf + (uBGf * cfg.penalty_defend_distance);
+                    Eigen::Vector3d rPFf = rBFf + (uGBf * cfg.penalty_defend_distance);
 
                     // Rotation should face the ball, get the angle from the field to the ball
                     double angle = std::atan2(rBFf.y(), rBFf.x());
