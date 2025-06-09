@@ -73,10 +73,7 @@ namespace module::purpose {
                 // Eg localisation confidence
 
                 // If we don't know where the ball is, look for it
-                if (!ball) {
-                    emit<Task>(std::make_unique<FindBall>());
-                    return;
-                }
+                emit<Task>(std::make_unique<FindBall>());
 
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
