@@ -3,9 +3,11 @@
 
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
+
 namespace module::purpose {
 
-    class ReadyAttack : public NUClear::Reactor {
+    class ReadyAttack : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
