@@ -63,6 +63,9 @@ namespace module::strategy {
             double avoid_opponent_offset = 0.0;
             double approach_offset       = 0.0;
 
+            /// @brief Distance behind the ball to walk to when positioning
+            double distance_behind_ball = 0.0;
+
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space

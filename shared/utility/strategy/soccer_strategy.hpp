@@ -65,13 +65,13 @@ namespace utility::strategy {
      *
      *  @return A vector of pairs, these contain a Possession type and distance to the ball.
      */
-    std::pair<int, double> get_closest_bot(const Eigen::Vector3d& rBWw,
-                                           const Robots& robots,
-                                           const Eigen::Isometry3d& Hfw,
-                                           const Eigen::Isometry3d& Hrw,
-                                           double equidistant_threshold,
-                                           int self_id,
-                                           bool include_opponents = true) {
+    std::pair<unsigned int, double> get_closest_bot(const Eigen::Vector3d& rBWw,
+                                                    const Robots& robots,
+                                                    const Eigen::Isometry3d& Hfw,
+                                                    const Eigen::Isometry3d& Hrw,
+                                                    double equidistant_threshold,
+                                                    unsigned int self_id,
+                                                    bool include_opponents = true) {
         // Transform ball position to field coordinates
         Eigen::Vector3d rBFf         = Hfw * rBWw;
         Eigen::Vector3d rRFf         = (Hfw * Hrw.inverse()).translation();
@@ -79,7 +79,7 @@ namespace utility::strategy {
 
         // Initialise to self
         std::pair<Who, double> closest = {Who{Who::SELF}, self_distance_to_ball};
-        unsigned long lowest_id        = self_id;
+        unsigned int lowest_id         = self_id;
 
         // Loop through each robot
         for (const auto& robot : robots.robots) {
@@ -132,7 +132,7 @@ namespace utility::strategy {
                         const Eigen::Isometry3d& Hrw,
                         double threshold,
                         double equidistant_threshold,
-                        int self_id) {
+                        unsigned int self_id) {
         // Function determines who has possession based on proximity and a threshold distance.
         auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id);
 
@@ -158,12 +158,12 @@ namespace utility::strategy {
      *
      * @return true if we are the closest robot to the ball on our team, false otherwise
      */
-    bool closest_to_ball_on_team(const Eigen::Vector3d& rBWw,
-                                 const Robots& robots,
-                                 const Eigen::Isometry3d& Hfw,
-                                 const Eigen::Isometry3d& Hrw,
-                                 double equidistant_threshold,
-                                 int self_id) {
+    unsigned int closest_to_ball_on_team(const Eigen::Vector3d& rBWw,
+                                         const Robots& robots,
+                                         const Eigen::Isometry3d& Hfw,
+                                         const Eigen::Isometry3d& Hrw,
+                                         double equidistant_threshold,
+                                         unsigned int self_id) {
         // Function determines who has possession based on proximity and a threshold distance.
         // Exclude opponents from the search
         auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, false);
@@ -185,8 +185,8 @@ namespace utility::strategy {
                        const Eigen::Isometry3d& Hfw,
                        const Eigen::Isometry3d& Hrw,
                        double equidistant_threshold,
-                       int self_id,
-                       std::vector<int> const& ignore_ids = {}) {
+                       unsigned int self_id,
+                       std::vector<unsigned int> const& ignore_ids = {}) {
         // Transform our position to field coordinates
         Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
         double furthest      = std::abs(rRFf.y());

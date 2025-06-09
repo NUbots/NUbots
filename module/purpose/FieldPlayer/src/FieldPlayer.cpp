@@ -80,14 +80,15 @@ namespace module::purpose {
 
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
-                int closest_to_ball = robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
-                                                                                          *robots,
-                                                                                          field.Hfw,
-                                                                                          sensors.Hrw,
-                                                                                          cfg.equidistant_threshold,
-                                                                                          global_config.player_id)
-                                             : global_config.player_id;
-                bool is_closest     = closest_to_ball == global_config.player_id;
+                const unsigned int closest_to_ball =
+                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
+                                                                        *robots,
+                                                                        field.Hfw,
+                                                                        sensors.Hrw,
+                                                                        cfg.equidistant_threshold,
+                                                                        global_config.player_id)
+                           : global_config.player_id;
+                bool is_closest = closest_to_ball == global_config.player_id;
 
                 // If there are no robots, use an empty vector (might still be self or none)
                 Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
@@ -147,13 +148,14 @@ namespace module::purpose {
                 // We should only hang back if we are the furthest back, ignoring the goalie.
                 // If there's no robots, assume we are alone and are the furthest back
                 // Shouldn't happen, as that should make us the attacker
-                bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
-                                                                               field.Hfw,
-                                                                               sensors.Hrw,
-                                                                               cfg.equidistant_threshold,
-                                                                               global_config.player_id,
-                                                                               std::vector<int>{closest_to_ball})
-                                            : true;
+                bool furthest_back = robots
+                                         ? utility::strategy::furthest_back(*robots,
+                                                                            field.Hfw,
+                                                                            sensors.Hrw,
+                                                                            cfg.equidistant_threshold,
+                                                                            global_config.player_id,
+                                                                            std::vector<unsigned int>{closest_to_ball})
+                                         : true;
                 if (furthest_back) {
                     log<INFO>("Defend!");
                     emit<Task>(std::make_unique<Defend>());
@@ -195,7 +197,8 @@ namespace module::purpose {
                                                                           sensors.Hrw,
                                                                           teammates,
                                                                           field_desc,
-                                                                          game_state.our_kick_off);
+                                                                          game_state.our_kick_off,
+                                                                          cfg.center_circle_offset);
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
             });
 

@@ -53,6 +53,7 @@ namespace module::strategy {
     using message::planning::WalkTo;
     using message::strategy::WalkToFieldPosition;
     using WalkToBallTask = message::strategy::WalkToBall;
+    using message::strategy::PositionBehindBall;
     using message::strategy::TackleBall;
     using message::strategy::WalkToKickBall;
     using FieldDescription = message::support::FieldDescription;
@@ -78,6 +79,7 @@ namespace module::strategy {
             cfg.avoid_ball_offset      = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
             cfg.avoid_opponent_offset  = config["avoid_opponent_offset"].as<double>();
             cfg.approach_offset        = config["approach_offset"].as<double>();
+            cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
