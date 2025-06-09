@@ -209,7 +209,8 @@ namespace utility::strategy {
                                      const Eigen::Isometry3d& Hrw,
                                      const std::vector<Eigen::Vector3d>& teammates,
                                      const FieldDescription& field_desc,
-                                     const bool kick_off) {
+                                     const bool kick_off,
+                                     const double center_offset) {
         // Transform robot position to field coordinates and get side
         Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
         bool is_left         = rRFf.y() > 0;
@@ -236,7 +237,7 @@ namespace utility::strategy {
         double c_rad = field_desc.dimensions.center_circle_diameter / 2.0;
         if (is_kickoff_robot) {
             Eigen::Vector3d p =
-                kick_off ? Eigen::Vector3d(c_rad / 2, 0.0, 0.0) : Eigen::Vector3d(c_rad + 0.3, 0.0, M_PI);
+                kick_off ? Eigen::Vector3d(c_rad / 2, 0.0, 0.0) : Eigen::Vector3d(c_rad + center_offset, 0.0, M_PI);
             return utility::math::euler::pos_rpy_to_transform(p, Eigen::Vector3d(0, 0, -M_PI));
         }
 
