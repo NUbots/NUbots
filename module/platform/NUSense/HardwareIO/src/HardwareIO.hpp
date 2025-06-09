@@ -59,14 +59,8 @@ namespace module::platform::NUSense {
             };
             std::map<size_t, ServoConfiguration> servo_configurations;
         } cfg{};
-
         /// @brief Contains device information specific to the NUgus robot
         NUgus nugus{};
-
-        /// @brief Empty struct for the watchdog object below
-        struct HandshakeWatchdog {};
-        /// @brief Watchdog handle for the handshake stage
-        ReactionHandle handshake_watchdog;
         /// @brief Reaction handle for the lambda that catches ServoTargets messages
         ReactionHandle servo_targets_catcher;
 
