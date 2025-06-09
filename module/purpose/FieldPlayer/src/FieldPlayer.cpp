@@ -108,9 +108,13 @@ namespace module::purpose {
                           "our team",
                           game_state.team.team_id);
 
+                // Determine if the game is in a penalty situation
+                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
+                               && game_state.mode.value <= GameState::Mode::THROW_IN;
+
                 // If sub_mode is 0, the robot must freeze for referee ball repositioning
                 // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2) {
+                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }
@@ -122,8 +126,6 @@ namespace module::purpose {
                                     && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
                 // At this point, if a penalty state is in progress, it must be in sub_mode 1,
                 // which is the setup phase where the robot can position to defend or attack.
-                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                               && game_state.mode.value <= GameState::Mode::THROW_IN;
                 bool allowed_to_attack = !(kickoff_wait || penalty);
 
                 // If we are in possession of the ball or it's free or opponent is in
