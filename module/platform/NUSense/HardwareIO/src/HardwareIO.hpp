@@ -63,6 +63,16 @@ namespace module::platform::NUSense {
         NUgus nugus{};
         /// @brief Reaction handle for the lambda that catches ServoTargets messages
         ReactionHandle servo_targets_catcher;
+        /// @brief Tracks the service state of the reactor
+        enum class ServiceState {
+            /// @brief  The reactor is in the initial state from boot, waiting for a handshake response from NUSense
+            INIT,
+            /// @brief  The state of HardwareIO when it allows processing of ServoTargets messages. This state is sent
+            /// to NUSense for reconnection purposes.
+            IN_SERVICE
+        };
+        ServiceState service_state = ServiceState::INIT;
+
 
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to

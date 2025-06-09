@@ -95,6 +95,17 @@ namespace module::platform::NUSense {
             auto handshake = NUSenseHandshake();
             handshake.msg  = "";
 
+            switch (service_state) {
+                case ServiceState::INIT:
+                    handshake.msg  = "NUC Handshake req";
+                    handshake.type = 0;
+                    break;
+                case ServiceState::IN_SERVICE:
+                    handshake.msg  = "NUC Reconnect req";
+                    handshake.type = 1;
+                    break;
+            }
+
             for (size_t i = 0; i < cfg.servo_configurations.size(); ++i) {
                 handshake.servo_configs.emplace_back(cfg.servo_configurations[i].direction,
                                                      cfg.servo_configurations[i].offset);
@@ -110,6 +121,8 @@ namespace module::platform::NUSense {
         on<Trigger<NUSenseHandshake>>().then([this](const NUSenseHandshake& handshake) {
             // Unbind the handshake watchdog reaction here since it should not be needed anymore
             servo_targets_catcher.enable();
+            service_state = ServiceState::IN_SERVICE;
+
             log<INFO>("Processing of ServoTargets enabled.");
             log<INFO>("ACK rx from NUSense: ", handshake.msg);
         });
