@@ -15,6 +15,11 @@ namespace module::purpose {
             double ball_threshold = 0.0;
             /// @brief The distance from a robot to consider it equidistant, to consider error
             double equidistant_threshold = 0.0;
+            /// @brief The distance from the ball to consider it moved from the center position and in play for kickoff
+            double ball_off_center_threshold = 0.0;
+            /// @brief The offset to the center circle for the ready position.
+            /// Avoids being in the center circle during another team's kickoff
+            double center_circle_offset = 0.0;
         } cfg;
 
     public:

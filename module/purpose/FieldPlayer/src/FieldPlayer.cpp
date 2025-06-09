@@ -47,9 +47,11 @@ namespace module::purpose {
 
         on<Configuration>("FieldPlayer.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FieldPlayer.yaml
-            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_threshold        = config["ball_threshold"].as<double>();
-            cfg.equidistant_threshold = config["equidistant_threshold"].as<double>();
+            this->log_level               = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ball_threshold            = config["ball_threshold"].as<double>();
+            cfg.equidistant_threshold     = config["equidistant_threshold"].as<double>();
+            cfg.ball_off_center_threshold = config["ball_off_center_threshold"].as<double>();
+            cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
         });
 
         // PLAYING state
@@ -104,48 +106,30 @@ namespace module::purpose {
                           game_state.secondary_state.team_performing,
                           "our team",
                           game_state.team.team_id);
-                // If sub_mode is 1, the robot must freeze for referee ball repositioning
-                bool freeze_penalty = game_state.secondary_state.sub_mode;
-                // If we are in a freeze penalty situation, do nothing
-                // The baseline behaviour will kick in and cause the robot to
-                // look forward and stand still
-                if (freeze_penalty) {
+
+                // If sub_mode is 0, the robot must freeze for referee ball repositioning
+                // If sub_mode is 2, the robot must freeze until the referee calls execute
+                if (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }
 
-                // Check if penalty situation allows for attack or not
-
-
-                // TODO FREE KICK
-                // There are three phase in the free kick:
-                // submode 0 is for ref placing - ie freeze
-                // submode 1 is for setting up for the free kick
-                // submode 2 is between positioning and executing, robot should stand still
-                // the next stage is execution, upon which normal play has resumed
-                // This continues for penalty kickk, throw in, corner kick, goal kick
-
-
                 // True if we need to wait for the other team to kick off
                 // If the ball moves, it is in play
-                bool kickoff_wait =
-                    !game_state.our_kick_off && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
-                // Check if it is our penalty to act on or not
-                bool not_our_penalty   = game_state.secondary_state.team_performing != game_state.team.team_id;
-                bool allowed_to_attack = !(kickoff_wait || not_our_penalty);
-
-                log<DEBUG>("Ball possession:",
-                           ball_pos,
-                           " closest to ball:",
-                           closest_to_ball,
-                           " allowed to attack?",
-                           allowed_to_attack);
+                bool ball_moved   = (field.Hfw * ball->rBWw).norm() > cfg.ball_off_center_threshold;
+                bool kickoff_wait = !ball_moved && !game_state.our_kick_off
+                                    && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
+                // At this point, if a penalty state is in progress, it must be in sub_mode 1,
+                // which is the setup phase where the robot can position to defend or attack.
+                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
+                               && game_state.mode.value <= GameState::Mode::THROW_IN;
+                bool allowed_to_attack = !(kickoff_wait || penalty);
 
                 // If we are in possession of the ball or it's free or opponent is in
                 // possession, then we can attack if we are closest BUT we have to be in a situation where we are
-                // allowed to attack, eg it can't be the other team's penalty or their kick off
+                // allowed to attack, eg not in penalty set up phase.
                 if (is_closest && allowed_to_attack) {
-                    log<INFO>("We are in the best position to attack, going for it!");
+                    log<INFO>("Attack!");
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
@@ -154,9 +138,7 @@ namespace module::purpose {
                 // eg because of a throw in for the opponent, then we should stick to a good spot and be ready to attack
                 if (is_closest && !allowed_to_attack) {
                     emit<Task>(std::make_unique<ReadyAttack>());
-                    log<INFO>(
-                        "We are in the best position to attack, but we can't because of the situation, so get ready to "
-                        "attack");
+                    log<INFO>("Ready attack!");
                     return;
                 }
 
@@ -173,15 +155,14 @@ namespace module::purpose {
                                                                                std::vector<int>{closest_to_ball})
                                             : true;
                 if (furthest_back) {
-                    log<INFO>("We are the furthest back, so we should defend");
+                    log<INFO>("Defend!");
                     emit<Task>(std::make_unique<Defend>());
                     return;
                 }
 
                 // If we're not the attacker, nor are we the robot hanging back to protect in case the opponent takes
                 // the ball up towards our goal, we should help out the attacker however makes sense in the situation
-                log<INFO>(
-                    "We are not the attacker, nor are we the robot hanging back to protect, so we should help out");
+                log<INFO>("Support!");
                 emit<Task>(std::make_unique<Support>());
             });
 
