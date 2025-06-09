@@ -35,3 +35,6 @@ message WalkToKickBall {}
 
 /// Robot tackles to ball off an opponent - ie dribbles the ball perpendicular to the opponent's direction
 message TackleBall {}
+
+/// Robot walks to a position behind the ball and stops, ready to kick it
+message PositionBehindBall {}
