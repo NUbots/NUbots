@@ -39,19 +39,8 @@ namespace module::purpose {
             cfg.penalty_defend_distance = config["penalty_defend_distance"].as<double>();
         });
 
-        on<Provide<ReadyAttackTask>, With<GameState>, With<FieldDescription>, With<Field>, Optional<With<Ball>>>().then(
-            [this](const GameState& game_state,
-                   const FieldDescription& fd,
-                   const Field& field,
-                   const std::shared_ptr<const Ball>& ball) {
-                // If there's no ball, find it
-                // This shouldn't happen, as it should be taken care of higher up
-                if (!ball) {
-                    log<INFO>("No ball, finding it...");
-                    emit<Task>(std::make_unique<FindBall>());
-                    return;
-                }
-
+        on<Provide<ReadyAttackTask>, With<GameState>, With<FieldDescription>, With<Field>, With<Ball>>().then(
+            [this](const GameState& game_state, const FieldDescription& fd, const Field& field, const Ball& ball) {
                 // Ready state may happen during penalty positioning or kick off
                 // Kickoff will happen in normal mode
                 if (game_state.mode == GameState::Mode::NORMAL) {
@@ -76,7 +65,7 @@ namespace module::purpose {
                     Eigen::Vector3d rGFf =
                         Eigen::Vector3d((fd.dimensions.field_length / 2) + fd.dimensions.goal_depth, 0.0, 0.0);
                     // Position of the ball in field coordinates
-                    Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
+                    Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
 
                     // Unit vector from goal to ball
                     Eigen::Vector3d uGBf = (rGFf - rBFf).normalized();

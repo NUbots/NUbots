@@ -44,10 +44,6 @@ namespace module::purpose {
 
         on<Provide<DefendMsg>, With<Robots>, With<Field>, With<FieldDescription>>().then(
             [this](const Robots& robots, const Field& field, const FieldDescription& field_desc) {
-                // General tasks
-                emit<Task>(std::make_unique<FindBall>(), 1);    // Need to know where the ball is
-                emit<Task>(std::make_unique<LookAtBall>(), 2);  // Track the ball
-
                 // In this state, we are expected to hang back in the case that we become the attacking robot
                 // Stick near an opponent if they are in the first third of the field
                 std::vector<Eigen::Vector3d> threatening_opponents =

@@ -28,10 +28,6 @@ namespace module::purpose {
         });
 
         on<Provide<AttackMsg>>().then([this](const AttackMsg& attack) {
-            // General tasks
-            emit<Task>(std::make_unique<FindBall>(), 1);    // Need to know where the ball is
-            emit<Task>(std::make_unique<LookAtBall>(), 2);  // Track the ball
-
             // In this state, either we have the ball or we are the closest to getting the ball and should go for it
             // If the opponent has the ball, we need to tackle it from them
             if (attack.ball_pos == message::strategy::Who::OPPONENT) {

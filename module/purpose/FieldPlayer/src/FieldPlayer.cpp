@@ -10,6 +10,7 @@
 #include "message/localisation/Robot.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/strategy/FindBall.hpp"
+#include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
@@ -36,6 +37,7 @@ namespace module::purpose {
     using message::purpose::ReadyAttack;
     using message::purpose::Support;
     using message::strategy::FindBall;
+    using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
@@ -72,8 +74,9 @@ namespace module::purpose {
                 // Todo determine if we have enough information to play
                 // Eg localisation confidence
 
-                // If we don't know where the ball is, look for it
-                emit<Task>(std::make_unique<FindBall>());
+                // General tasks
+                emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
+                emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
 
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
