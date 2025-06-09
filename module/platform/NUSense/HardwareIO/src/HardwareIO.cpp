@@ -229,13 +229,21 @@ namespace module::platform::NUSense {
                 }
             }
             else {
-                auto target = commands.targets[0];
-                servo_targets.targets.emplace_back(
-                    target.time - NUClear::clock::now(),
-                    500,
-                    (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
-                    target.gain,
-                    target.torque);
+                // auto target = commands.targets[0];
+                // servo_targets.targets.emplace_back(
+                //     target.time - NUClear::clock::now(),
+                //     500,
+                //     (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
+                //     target.gain,
+                //     target.torque);
+                for (auto& target : commands.targets) {
+                    servo_targets.targets.emplace_back(
+                        target.time - NUClear::clock::now(),
+                        500,
+                        (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
+                        target.gain,
+                        target.torque);
+                }
             }
 
             send_packet(servo_targets);
