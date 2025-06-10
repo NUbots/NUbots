@@ -106,7 +106,8 @@ namespace module::skill {
                 else if (on_right || on_left) {
                     log<INFO>("Landed on side, delaying...");
                     // Delay
-                    emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
+                    emit<Task>(
+                        std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
                 }
                 else if (upright) {
                     log<INFO>("Getting up from upright");
