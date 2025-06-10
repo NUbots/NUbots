@@ -1,7 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-delay_time: 500 #  milliseconds
+delay_time: 2500 #  milliseconds
 
 scripts:
   getup_upright:
@@ -11,12 +11,6 @@ scripts:
     - "Stand.yaml"
   getup_back:
     - "StandUpBack.yaml"
-    - "Stand.yaml"
-  getup_left:
-    - "StandUpFront.yaml"
-    - "Stand.yaml"
-  getup_right:
-    - "StandUpFront.yaml"
     - "Stand.yaml"
   # We run relax when we are upside down
   # The logic for this is if the robot is upside down the most likely scenario is someone picked it up by the legs

@@ -66,7 +66,7 @@ namespace module::skill {
                                                                                  const Sensors& sensors) {
             if (run_reason == RunReason::NEW_TASK) {
                 // Wait so that sensors have time to settle
-                log<DEBUG>("Delaying getup...");
+                log<INFO>("Delaying getup...");
                 emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
             }
             // The initial Wait has completed
@@ -103,13 +103,10 @@ namespace module::skill {
                     log<INFO>("Getting up from back");
                     emit<Task>(load_script<BodySequence>(cfg.getup_back));
                 }
-                else if (on_right) {
-                    log<INFO>("Getting up from right");
-                    emit<Task>(load_script<BodySequence>(cfg.getup_right));
-                }
-                else if (on_left) {
-                    log<INFO>("Getting up from left");
-                    emit<Task>(load_script<BodySequence>(cfg.getup_left));
+                else if (on_right || on_left) {
+                    log<INFO>("Landed on side, delaying...");
+                    // Delay
+                    emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
                 }
                 else if (upright) {
                     log<INFO>("Getting up from upright");
