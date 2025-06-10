@@ -98,11 +98,11 @@ namespace module::platform::NUSense {
             switch (service_state) {
                 case ServiceState::INIT:
                     handshake.msg  = "NUC Handshake req";
-                    handshake.type = 0;
+                    handshake.type = false;
                     break;
                 case ServiceState::IN_SERVICE:
                     handshake.msg  = "NUC Reconnect req";
-                    handshake.type = 1;
+                    handshake.type = true;
                     break;
             }
 
@@ -114,6 +114,7 @@ namespace module::platform::NUSense {
             // Send to stream reactor
             send_packet(handshake);
             log<INFO>("Handshake message sent to NUSense, waiting for response...");
+            log<INFO>(fmt::format("Type, {}", handshake.type));
         });
 
         // If this triggers, then that means that NUSense has acknowledged the NUC's message and the watchdog can be
