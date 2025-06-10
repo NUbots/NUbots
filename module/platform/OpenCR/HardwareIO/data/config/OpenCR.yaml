@@ -17,3 +17,5 @@ alarms:
   temperature:
     level: 60
     buzzer_frequency: 2666 # Hz
+
+gyro_offset: [0.0, 0.0, 0.0]
