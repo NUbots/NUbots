@@ -158,7 +158,7 @@ namespace module::localisation {
                 auto field(std::make_unique<Field>());
                 field->Hfw = compute_Hfw(filter.get_state());
                 if (log_level <= DEBUG && robot_pose_ground_truth) {
-                    debug_field_localisation(field->Hfw, robot_pose_ground_truth);
+                    debug_field_localisation(field->Hfw);
                 }
                 field->covariance = filter.get_covariance();
                 if (log_level <= DEBUG) {
@@ -168,9 +168,7 @@ namespace module::localisation {
             });
     }
 
-    void FieldLocalisation::debug_field_localisation(
-        Eigen::Isometry3d Hfw,
-        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+    void FieldLocalisation::debug_field_localisation(Eigen::Isometry3d Hfw) {
         // Determine translational distance error
         Eigen::Vector3d true_rFWw  = ground_truth_Hfw.translation();
         Eigen::Vector3d rFWw       = (Hfw.translation());

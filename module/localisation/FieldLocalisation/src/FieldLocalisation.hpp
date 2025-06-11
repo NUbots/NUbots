@@ -34,7 +34,6 @@
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/localisation/RobotPoseGroundTruth.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
@@ -160,11 +159,8 @@ namespace module::localisation {
          * @brief Find error between computed Hfw and ground truth if available
          *
          * @param Hfw Computed Hfw to be compared against ground truth
-         * @param robot_pose_ground_truth The robot pose ground truth data
          */
-        void debug_field_localisation(
-            Eigen::Isometry3d Hfw,
-            const std::shared_ptr<const message::localisation::RobotPoseGroundTruth>& robot_pose_ground_truth);
+        void debug_field_localisation(Eigen::Isometry3d Hfw);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
