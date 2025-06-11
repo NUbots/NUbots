@@ -292,9 +292,9 @@ namespace module::purpose {
                                 log<INFO>("Button L2 pressed");
                             }
                             break;
-                        case BUTTON_R2:
+                        case BUTTON_RIGHT_JOYSTICK:
                             if (event.value > 0) {
-                                log<INFO>("Button R2 pressed");
+                                log<INFO>("Button BUTTON_RIGHT_JOYSTICK pressed");
                                 if (scripts_enabled) {
                                     log<INFO>("Scripts disabled");
                                 }
