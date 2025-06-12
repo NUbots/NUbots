@@ -33,6 +33,7 @@ import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
 import { DashboardModel } from "./model";
 import { DashboardFieldView } from "./field/view";
+import { M } from "vite/dist/node/types.d-aGj9QkWt";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -114,23 +115,26 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   render(): JSX.Element {
     return (
-      <div className={"flex flex-grow flex-shrink flex-col relative bg-auto-surface-0"}>
-        <LocalisationMenuBar
-          model={this.props.model}
-          Menu={this.props.Menu}
-          controller={this.props.controller}
-          onHawkEyeClick={this.onHawkEyeClick}
-          toggleGridVisibility={this.toggleGridVisibility}
-          toggleFieldVisibility={this.toggleFieldVisibility}
-          toggleRobotVisibility={this.toggleRobotVisibility}
-          toggleBallVisibility={this.toggleBallVisibility}
-          toggleParticleVisibility={this.toggleParticleVisibility}
-          toggleGoalVisibility={this.toggleGoalVisibility}
-          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
-          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
-          toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
-          toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
-        ></LocalisationMenuBar>
+      <div className="flex flex-col relative bg-auto-surface-0 overflow-x-hidden w-full">
+        <div className="w-full">
+          <LocalisationMenuBar
+            model={this.props.model}
+            Menu={this.props.Menu}
+            controller={this.props.controller}
+            onHawkEyeClick={this.onHawkEyeClick}
+            toggleGridVisibility={this.toggleGridVisibility}
+            toggleFieldVisibility={this.toggleFieldVisibility}
+            toggleRobotVisibility={this.toggleRobotVisibility}
+            toggleBallVisibility={this.toggleBallVisibility}
+            toggleParticleVisibility={this.toggleParticleVisibility}
+            toggleGoalVisibility={this.toggleGoalVisibility}
+            toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+            toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+            toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+            toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+            toggleDashboardVisibility={this.toggleDashboardVisibility}
+          ></LocalisationMenuBar>
+        </div>
         <div className="flex-grow relative border-t border-auto">
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
@@ -138,12 +142,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
         </div>
         <StatusBar model={this.props.model} />
 
-        <Dashboard
-          controller={this.props.controller}
-          Field={() => <DashboardFieldView model={this.props.model.dashboard.field}/>}
-          model={this.props.model.dashboard}
-          network={this.props.network}
-        />
+        {this.props.model.dashboard.visible && (
+          <Dashboard
+            controller={this.props.controller}
+            Field={() => <DashboardFieldView model={this.props.model.dashboard.field} />}
+            model={this.props.model.dashboard}
+            network={this.props.network}
+          />
+        )}
       </div>
     );
   }
@@ -231,6 +237,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleBoundedBoxVisibility = () => {
     this.props.controller.toggleBoundedBoxVisibility(this.props.model);
   };
+
+  private toggleDashboardVisibility = () => {
+    this.props.controller.toggleDashboardVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -251,6 +261,7 @@ interface LocalisationMenuBarProps {
   toggleFieldIntersectionsVisibility(): void;
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
+  toggleDashboardVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -272,34 +283,70 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <ul className="flex h-full items-center">
-        <li className="flex px-4">
+      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-2 px-4 py-2 w-full">
+        <div className="flex items-center gap-4 self-center">
           <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
           </Button>
-        </li>
-        <li className="flex px-4">
           <FieldDimensionSelector controller={controller} model={model} />
-        </li>
-        <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
-        <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
-        <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
-        <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
-        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
-        <MenuItem label="Goals" isVisible={model.goalsVisible} onClick={props.toggleGoalVisibility} />
-        <MenuItem
-          label="Field Line Points"
-          isVisible={model.fieldLinePointsVisible}
-          onClick={props.toggleFieldLinePointsVisibility}
-        />
-        <MenuItem
-          label="Field Intersections"
-          isVisible={model.fieldIntersectionsVisible}
-          onClick={props.toggleFieldIntersectionsVisibility}
-        />
-        <MenuItem label="Walk Path" isVisible={model.walkToDebugVisible} onClick={props.toggleWalkToDebugVisibility} />
-        <MenuItem label="Bounded Box" isVisible={model.boundedBoxVisible} onClick={props.toggleBoundedBoxVisibility} />
-      </ul>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 w-full md:w-auto">
+          <div className="flex justify-end">
+            <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem label="Goals" isVisible={model.goalsVisible} onClick={props.toggleGoalVisibility} />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem
+              label="Field Line Points"
+              isVisible={model.fieldLinePointsVisible}
+              onClick={props.toggleFieldLinePointsVisibility}
+            />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem
+              label="Field Intersections"
+              isVisible={model.fieldIntersectionsVisible}
+              onClick={props.toggleFieldIntersectionsVisibility}
+            />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem
+              label="Walk Path"
+              isVisible={model.walkToDebugVisible}
+              onClick={props.toggleWalkToDebugVisibility}
+            />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem
+              label="Bounded Box"
+              isVisible={model.boundedBoxVisible}
+              onClick={props.toggleBoundedBoxVisibility}
+            />
+          </div>
+          <div className="flex justify-end">
+            <MenuItem
+              label="Dashboard"
+              isVisible={model.dashboard.visible}
+              onClick={props.toggleDashboardVisibility}
+            />
+          </div>
+        </div>
+      </div>
     </Menu>
   );
 });

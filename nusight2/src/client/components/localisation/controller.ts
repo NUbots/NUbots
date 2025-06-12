@@ -26,6 +26,11 @@ export class LocalisationController {
   }
 
   @action
+  toggleDashboardVisibility(model: LocalisationModel) {
+    model.dashboard.visible = !model.dashboard.visible;
+  }
+
+  @action
   onAnimationFrame(model: LocalisationModel, time: number) {
     model.time.time = time / 1000;
     this.updatePosition(model);

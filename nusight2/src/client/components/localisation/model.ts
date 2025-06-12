@@ -100,6 +100,7 @@ export class ControlsModel {
 
 export class DashboardModel {
   @observable private robotModels: RobotModel[];
+  @observable visible = false;
 
   constructor(robotModels: RobotModel[]) {
     this.robotModels = robotModels;
