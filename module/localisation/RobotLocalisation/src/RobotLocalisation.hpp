@@ -141,8 +141,7 @@ namespace module::localisation {
         /// @param field_desc Field description, used to get the length and width of the field
         void maintenance(const message::vision::GreenHorizon& horizon,
                          const message::localisation::Field& field,
-                         const message::support::FieldDescription& field_desc,
-                         const Eigen::Isometry3d Hrw);
+                         const message::support::FieldDescription& field_desc);
 
         /// @brief Print out the current state of the tracked robots
         void debug_info() const;

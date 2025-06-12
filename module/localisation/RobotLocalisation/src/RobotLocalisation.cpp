@@ -32,7 +32,6 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -53,7 +52,6 @@ namespace module::localisation {
     using message::eye::DataPoint;
     using message::input::GameState;
     using message::input::RoboCup;
-    using message::input::Sensors;
     using message::localisation::Field;
     using message::support::FieldDescription;
     using message::vision::GreenHorizon;
@@ -85,16 +83,14 @@ namespace module::localisation {
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
-           With<Sensors>,
            Optional<With<GameState>>,
            Sync<RobotLocalisation>>()
             .then([this](const GreenHorizon& horizon,
                          const Field& field,
                          const FieldDescription& field_desc,
-                         const Sensors& sensors,
                          const std::shared_ptr<const GameState>& game_state) {
                 // **Run maintenance step**
-                maintenance(horizon, field, field_desc, sensors.Hrw);
+                maintenance(horizon, field, field_desc);
 
                 // **Debugging output**
                 debug_info();
@@ -235,8 +231,7 @@ namespace module::localisation {
 
     void RobotLocalisation::maintenance(const GreenHorizon& horizon,
                                         const Field& field,
-                                        const FieldDescription& field_desc,
-                                        const Eigen::Isometry3d Hrw) {
+                                        const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
         // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
