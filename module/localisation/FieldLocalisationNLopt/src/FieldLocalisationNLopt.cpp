@@ -362,6 +362,11 @@ namespace module::localisation {
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
+        // If there are no field intersections, return an empty vector
+        if (!field_intersections || field_intersections->intersections.empty()) {
+            return {};
+        }
+
         // Field intersection measurement associated with a landmark (known landmark, intersection detection)
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
 
