@@ -19,6 +19,3 @@ association_distance: 0.5
 max_missed_count: 25
 
 max_distance_from_field: 1.0
-
-# Ignore robots that are closer than this distance
-close_distance_to_ignore: 2.0

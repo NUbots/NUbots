@@ -67,10 +67,6 @@ namespace module::localisation {
 
             /// @brief The maximum distance a robot can be outside the field before it is ignored
             double max_distance_from_field = 0.0;
-
-            /// @brief Keep robots within this distance with self, to prevent deleting robots that are too close to see
-            double close_distance_to_ignore = 0.0;
-
         } cfg;
 
         struct TrackedRobot {

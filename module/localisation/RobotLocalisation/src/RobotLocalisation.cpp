@@ -79,7 +79,6 @@ namespace module::localisation {
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
-            cfg.close_distance_to_ignore        = config["close_distance_to_ignore"].as<double>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -253,12 +252,6 @@ namespace module::localisation {
             // A robot is outside of view if it is not within the green horizon
             // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
             if (!point_in_convex_hull(horizon.horizon, rRWw)) {
-                tracked_robot.seen = true;
-            }
-
-            // If the robot is very close to the robot, keep it as seen so we don't lose it
-
-            if ((Hrw * rRWw).norm() < cfg.close_distance_to_ignore) {
                 tracked_robot.seen = true;
             }
 
