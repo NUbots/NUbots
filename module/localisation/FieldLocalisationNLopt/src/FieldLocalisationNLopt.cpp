@@ -258,11 +258,16 @@ namespace module::localisation {
                     if (cfg.reset_on_cost && (chosen_state_cost > cfg.cost_threshold)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                         num_over_cost++;
+                        // Cost has been high too many times, reset the localisation
                         if (num_over_cost > cfg.max_over_cost) {
-                            num_over_cost = 0;
+                            // Emit that we are resetting, eg for behaviour
                             emit(std::make_unique<UncertaintyResetFieldLocalisation>());
+                            // Reset localisation by finding a new low cost state
                             uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
-                            last_reset = NUClear::clock::now();
+                            // Reset variables
+                            num_over_cost = 0;
+                            last_reset    = NUClear::clock::now();
+                            // Let other modules know that localisation has finished resetting
                             emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
                         }
                     }
