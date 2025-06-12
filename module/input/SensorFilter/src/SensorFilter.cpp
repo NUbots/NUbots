@@ -348,11 +348,11 @@ namespace module::input {
             // Construct world {w} to torso {t} space transform from ground truth.inverse();
             sensors->Htw = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw);
             // Construct robot {r} to world {w} space transform from ground truth
-            Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-            Hwr.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(sensors->Htw.linear()).z(), Eigen::Vector3d::UnitZ())
+            Eigen::Isometry3d Hrw = Eigen::Isometry3d::Identity();
+            Hrw.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(sensors->Htw.linear()).z(), Eigen::Vector3d::UnitZ())
                                .toRotationMatrix();
-            Hwr.translation() = Eigen::Vector3d(sensors->Htw.translation().x(), sensors->Htw.translation().y(), 0.0);
-            sensors->Hrw      = Hwr.inverse();
+            Hrw.translation() = Eigen::Vector3d(sensors->Htw.translation().x(), sensors->Htw.translation().y(), 0.0);
+            sensors->Hrw      = Hrw;
             sensors->vTw      = raw_sensors.odometry_ground_truth.vTw;
             return;
         }
