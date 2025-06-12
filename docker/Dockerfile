@@ -129,13 +129,15 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-project-15.0.7.src.tar.xz \
     --build-system cmake \
     --configure-path "llvm" \
-    --jobs 12\
+    --patch https://gist.githubusercontent.com/ZeoNyph/415e3cf6230c791e96d1451357781261/raw/01d278c37e08f9db006259a41fe07a77b3e14972/llvm_patch.patch \
+    --jobs 8\
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DCMAKE_INSTALL_PREFIX=${prefix} \
+    -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_HOST_TRIPLE=arm-linux-gnueabihf \
     -DLLVM_TARGETS_TO_BUILD=ARM
 # SPIRV LLVM Translator
@@ -146,8 +148,9 @@ RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/ar
 
 # opencl-clang
 RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v15.0.1.tar.gz \
-    --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/30062e0c4c4ae71f8f0e23a0375933d71dd1bc5c/resource_linker_skip_cross.patch \
+    --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/0ce9b1513ad424dd1cca804413acda7417832640/resource_linker_skip_cross.patch \
     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DSPIRV_TRANSLATOR_DIR=${prefix} \
     -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
 
@@ -174,7 +177,7 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='20.1.0' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='15.0.7' \
     -DIGC_OPTION__LLVM_MODE=Prebuilds \
     -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
     -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
