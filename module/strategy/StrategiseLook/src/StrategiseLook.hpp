@@ -43,9 +43,6 @@ namespace module::strategy {
             NUClear::clock::duration goal_search_timeout{};
         } cfg;
 
-        /// @brief The time when the program started
-        NUClear::clock::time_point start_time = NUClear::clock::now();
-
     public:
         /// @brief Called by the powerplant to build and setup the StrategiseLook reactor.
         explicit StrategiseLook(std::unique_ptr<NUClear::Environment> environment);
