@@ -42,10 +42,10 @@ namespace module::purpose {
                 // Stay in the line of sight between the ball and the goal
 
                 // Vector from the field to the goal
-                Eigen::Vector3d rGFf = Eigen::Vector3d(-fd.dimensions.field_length / 2, 0, 0);
+                Eigen::Vector3d rGFf(fd.dimensions.field_length / 2, 0, 0);
 
                 // The penalty line across the width of the field
-                double penalty_line_x = -fd.dimensions.field_length / 2 + fd.dimensions.penalty_area_length;
+                double penalty_line_x = fd.dimensions.field_length / 2 - fd.dimensions.penalty_area_length;
 
                 // Ball position in field frame
                 Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
@@ -54,7 +54,7 @@ namespace module::purpose {
                 Eigen::Vector3d uGBf = (rGFf - rBFf).normalized();
 
                 // Angle from goal to ball in field frame
-                double goal_ball_angle = std::atan2(uGBf.y(), uGBf.x());
+                double goal_ball_angle = std::atan2(-uGBf.y(), -uGBf.x());
 
                 // Position is the intersection of the penalty line and the line from the ball to the goal
                 double y_position = rBFf.y() + ((uGBf.y() / uGBf.x()) * (penalty_line_x - rBFf.x()));
