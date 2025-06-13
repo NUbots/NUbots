@@ -37,7 +37,6 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
-#include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
@@ -48,7 +47,6 @@
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
-#include "message/strategy/StandStill.hpp"
 
 namespace module::purpose {
 
@@ -64,28 +62,26 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
-    using message::input::RoboCup;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
     using message::purpose::FieldPlayer;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
-    using message::purpose::Purpose;
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
-    using message::strategy::StandStill;
+
+    struct StartSoccer {};
 
     SoccerNew::SoccerNew(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("SoccerNew.yaml").then([this](const Configuration& config) {
-            this->log_level   = config["log_level"].as<NUClear::LogLevel>();
-            cfg.force_playing = config["force_playing"].as<bool>();
-
+            this->log_level        = config["log_level"].as<NUClear::LogLevel>();
+            cfg.force_playing      = config["force_playing"].as<bool>();
             cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
-
-            cfg.is_goalie = config["is_goalie"].as<bool>();
+            cfg.is_goalie          = config["is_goalie"].as<bool>();
+            cfg.startup_delay      = config["startup_delay"].as<int>();
         });
 
         // Start the Director graph for the soccer scenario!
@@ -98,8 +94,12 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
+            // Startup delay to prevent issues with low servo gains at the start
+            emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
+        on<Trigger<StartSoccer>>().then([this] {
             // This emit starts the tree to play soccer
-            log<INFO>("Start FindPurpose");
             emit<Task>(std::make_unique<FindPurpose>(), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
