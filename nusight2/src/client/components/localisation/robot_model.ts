@@ -150,12 +150,14 @@ export class LocalisationRobotModel {
   @observable name: string;
   @observable color: string;
   @observable Htw: Matrix4; // World to torso
+  @observable Htw_mujoco: Matrix4; // World to torso
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
   @observable Hwp: Matrix4; // Planted foot to world
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
+  @observable motors_mujoco: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable particles: Vector3[]; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
@@ -191,12 +193,14 @@ export class LocalisationRobotModel {
     name,
     color,
     Htw,
+    Htw_mujoco,
     Hrw,
     Hfw,
     Hrd,
     Hwp,
     Rwt,
     motors,
+    motors_mujoco,
     fieldLinePoints,
     particles,
     ball,
@@ -224,12 +228,14 @@ export class LocalisationRobotModel {
     name: string;
     color: string;
     Htw: Matrix4;
+    Htw_mujoco: Matrix4;
     Hrw: Matrix4;
     Hfw: Matrix4;
     Hrd?: Matrix4;
     Hwp: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
+    motors_mujoco: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     particles: Vector3[];
     ball?: { rBWw: Vector3 };
@@ -263,12 +269,14 @@ export class LocalisationRobotModel {
     this.name = name;
     this.color = color;
     this.Htw = Htw;
+    this.Htw_mujoco = Htw_mujoco;
     this.Hrw = Hrw;
     this.Hfw = Hfw;
     this.Hrd = Hrd;
     this.Hwp = Hwp;
     this.Rwt = Rwt;
     this.motors = motors;
+    this.motors_mujoco = motors_mujoco;
     this.fieldLinePoints = fieldLinePoints;
     this.particles = particles;
     this.ball = ball;
@@ -299,11 +307,13 @@ export class LocalisationRobotModel {
       name: model.name,
       color: "black",
       Htw: Matrix4.of(),
+      Htw_mujoco: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
       Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
+      motors_mujoco: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
       particles: [],
       goals: { points: [] },
