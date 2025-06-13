@@ -88,7 +88,8 @@ namespace module::purpose {
                            : global_config.player_id;
                 bool is_closest = closest_to_ball == global_config.player_id;
 
-                // If there are no robots, use an empty vector (might still be self or none)
+                // Find who has the ball, if any
+                // If there are no robots, use an empty vector
                 Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
                                                                   (robots ? *robots : Robots{}),
                                                                   field.Hfw,
@@ -96,15 +97,6 @@ namespace module::purpose {
                                                                   cfg.ball_threshold,
                                                                   cfg.equidistant_threshold,
                                                                   global_config.player_id);
-
-                log<INFO>("SUB MODE",
-                          game_state.secondary_state.sub_mode,
-                          "MODE",
-                          game_state.mode.value,
-                          "team performing",
-                          game_state.secondary_state.team_performing,
-                          "our team",
-                          game_state.team.team_id);
 
                 // Determine if the game is in a penalty situation
                 bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
@@ -117,7 +109,7 @@ namespace module::purpose {
                     return;
                 }
 
-                // True if we need to wait for the other team to kick off
+                // Determine if we need to wait for the other team to kick off
                 // If the ball moves, it is in play
                 bool ball_moved   = (field.Hfw * ball->rBWw).norm() > cfg.ball_off_center_threshold;
                 bool kickoff_wait = !ball_moved && !game_state.our_kick_off
@@ -126,26 +118,24 @@ namespace module::purpose {
                 // which is the setup phase where the robot can position to defend or attack.
                 bool allowed_to_attack = !(kickoff_wait || penalty);
 
-                // If we are in possession of the ball or it's free or opponent is in
-                // possession, then we can attack if we are closest BUT we have to be in a situation where we are
-                // allowed to attack, eg not in penalty set up phase.
+                // Attack if we are closest BUT we have to be in a situation where we are allowed to attack, eg not in
+                // penalty set up phase.
                 if (is_closest && allowed_to_attack) {
-                    log<INFO>("Attack!");
+                    log<DEBUG>("Attack!");
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
 
-                // If we are in the best position to attack, but we can't because of the situation
-                // eg because of a throw in for the opponent, then we should stick to a good spot and be ready to attack
+                // If we are in the best position to attack, but we can't because of the situation, eg penalty
+                // positioning or opponent kickoff, then we should stick to a good spot and be ready to attack
                 if (is_closest && !allowed_to_attack) {
+                    log<DEBUG>("Ready attack!");
                     emit<Task>(std::make_unique<ReadyAttack>());
-                    log<INFO>("Ready attack!");
                     return;
                 }
 
                 // If we can't attack, eg another robot is attacking, we don't want to get in the way.
-                // We should hang back in the penalty box and wait in case the ball comes toward us.
-                // We should only hang back if we are the furthest back, ignoring the goalie.
+                // If we are closest to our goals (ignoring the attacking player), then stand back to defend.
                 // If there's no robots, assume we are alone and are the furthest back
                 // Shouldn't happen, as that should make us the attacker
                 bool furthest_back = robots
@@ -157,14 +147,14 @@ namespace module::purpose {
                                                                             std::vector<unsigned int>{closest_to_ball})
                                          : true;
                 if (furthest_back) {
-                    log<INFO>("Defend!");
+                    log<DEBUG>("Defend!");
                     emit<Task>(std::make_unique<Defend>());
                     return;
                 }
 
                 // If we're not the attacker, nor are we the robot hanging back to protect in case the opponent takes
                 // the ball up towards our goal, we should help out the attacker however makes sense in the situation
-                log<INFO>("Support!");
+                log<DEBUG>("Support!");
                 emit<Task>(std::make_unique<Support>());
             });
 
@@ -181,7 +171,7 @@ namespace module::purpose {
                          const Field& field,
                          const Sensors& sensors,
                          const GameState& game_state) {
-                // Collect up teammates ; empty if no one is around
+                // Collect up teammates; empty if no one is around
                 std::vector<Eigen::Vector3d> teammates{};
                 if (robots) {
                     // Collect all teammates in a vector
