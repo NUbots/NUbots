@@ -1,3 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structutility_1_1type__traits_1_1has__timestamp.html" title="SFINAE struct to test if the passed class has a timestamp field." alt="" coords="5,5,175,47"/>
+<area shape="rect" id="node1" href="$structutility_1_1type__traits_1_1is__iterable.html" title="SFINAE struct to test if the passed class has a begin and an end." alt="" coords="5,5,143,47"/>
 </map>

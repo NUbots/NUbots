@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['none_2971',['NONE',['../classutility_1_1nbs_1_1Index.html#a8b558c9cd5df0b2ba76202b22ed8d053ab50339a10e1de285ac99d4c3990b8693',1,'utility::nbs::Index']]]
+  ['in_5fservice_2967',['IN_SERVICE',['../classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06baa3e894fc2e85228440d5c56602be74eb',1,'module::platform::NUSense::HardwareIO']]],
+  ['init_2968',['INIT',['../classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06bafaee4ca3c30ee18148ce3ada37466498',1,'module::platform::NUSense::HardwareIO']]]
 ];

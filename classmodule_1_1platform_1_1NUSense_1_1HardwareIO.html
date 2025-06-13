@@ -169,6 +169,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1platform_1_1NUSense_1_1
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO-members.html">List of all members</a>  </div>
@@ -205,9 +206,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html">Config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration variables for this reactor.  <a href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1HandshakeWatchdog.html">HandshakeWatchdog</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Empty struct for the watchdog object below.  <a href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1HandshakeWatchdog.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -221,6 +219,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:af3d521ac0613eed80a5fdd116edabb16 inherit pub_methods_classutility_1_1reactor_1_1StreamReactor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the StreamReactor. <br /></td></tr>
 <tr class="separator:af3d521ac0613eed80a5fdd116edabb16 inherit pub_methods_classutility_1_1reactor_1_1StreamReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
+Private Types</h2></td></tr>
+<tr class="memitem:a584458edb7e4d938e04210a598a8d06b"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06b">ServiceState</a> { <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06bafaee4ca3c30ee18148ce3ada37466498">INIT</a>
+, <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06baa3e894fc2e85228440d5c56602be74eb">IN_SERVICE</a>
+ }</td></tr>
+<tr class="memdesc:a584458edb7e4d938e04210a598a8d06b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracks the service state of the reactor.  <a href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06b">More...</a><br /></td></tr>
+<tr class="separator:a584458edb7e4d938e04210a598a8d06b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:a992a5c7737a95e67d89c900553b15511"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
@@ -233,14 +239,13 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:ae8b0bd4fa00c1292b86f84725f538fad"><td class="memItemLeft" align="right" valign="top"><a id="ae8b0bd4fa00c1292b86f84725f538fad"></a>
 struct <a class="el" href="structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html">module::platform::NUSense::HardwareIO::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:ae8b0bd4fa00c1292b86f84725f538fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa59875aa402235ec7c3ff601edb3a3a1"><td class="memItemLeft" align="right" valign="top"><a id="aa59875aa402235ec7c3ff601edb3a3a1"></a>
-ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#aa59875aa402235ec7c3ff601edb3a3a1">handshake_watchdog</a></td></tr>
-<tr class="memdesc:aa59875aa402235ec7c3ff601edb3a3a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Watchdog handle for the handshake stage. <br /></td></tr>
-<tr class="separator:aa59875aa402235ec7c3ff601edb3a3a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01a4e68d110db0e6ff852b9e35634e21"><td class="memItemLeft" align="right" valign="top"><a id="a01a4e68d110db0e6ff852b9e35634e21"></a>
 <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">NUgus</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a01a4e68d110db0e6ff852b9e35634e21">nugus</a> {}</td></tr>
 <tr class="memdesc:a01a4e68d110db0e6ff852b9e35634e21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains device information specific to the <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1NUgus.html">NUgus</a> robot. <br /></td></tr>
 <tr class="separator:a01a4e68d110db0e6ff852b9e35634e21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a1ae92e2189fd5c7c837c610bc0af87"><td class="memItemLeft" align="right" valign="top"><a id="a5a1ae92e2189fd5c7c837c610bc0af87"></a>
+<a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06b">ServiceState</a>&#160;</td><td class="memItemRight" valign="bottom"><b>service_state</b> = <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06bafaee4ca3c30ee18148ce3ada37466498">ServiceState::INIT</a></td></tr>
+<tr class="separator:a5a1ae92e2189fd5c7c837c610bc0af87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f1d0cb253f145c6ff229be2f0b72ce0"><td class="memItemLeft" align="right" valign="top"><a id="a3f1d0cb253f145c6ff229be2f0b72ce0"></a>
 ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a3f1d0cb253f145c6ff229be2f0b72ce0">servo_targets_catcher</a></td></tr>
 <tr class="memdesc:a3f1d0cb253f145c6ff229be2f0b72ce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction handle for the lambda that catches ServoTargets messages. <br /></td></tr>
@@ -259,6 +264,37 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <tr class="memdesc:a4d52287af7127948b9c465e1cfecf6d0 inherit pro_attribs_classutility_1_1reactor_1_1StreamReactor"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current connection attempt to remove double ups in reactions. <br /></td></tr>
 <tr class="separator:a4d52287af7127948b9c465e1cfecf6d0 inherit pro_attribs_classutility_1_1reactor_1_1StreamReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a584458edb7e4d938e04210a598a8d06b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a584458edb7e4d938e04210a598a8d06b">&#9670;&nbsp;</a></span>ServiceState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html#a584458edb7e4d938e04210a598a8d06b">module::platform::NUSense::HardwareIO::ServiceState</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tracks the service state of the reactor. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a584458edb7e4d938e04210a598a8d06bafaee4ca3c30ee18148ce3ada37466498"></a>INIT&#160;</td><td class="fielddoc"><p>The reactor is in the initial state from boot, waiting for a handshake response from NUSense. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a584458edb7e4d938e04210a598a8d06baa3e894fc2e85228440d5c56602be74eb"></a>IN_SERVICE&#160;</td><td class="fielddoc"><p>The state of <a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html">HardwareIO</a> when it allows processing of ServoTargets messages. This state is sent to NUSense for reconnection purposes. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a992a5c7737a95e67d89c900553b15511"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a992a5c7737a95e67d89c900553b15511">&#9670;&nbsp;</a></span>send_packet()</h2>
@@ -312,7 +348,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>NUSense</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html">HardwareIO</a></li>
-    <li class="footer">Generated on Fri Jun 13 2025 00:19:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Jun 13 2025 03:48:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
