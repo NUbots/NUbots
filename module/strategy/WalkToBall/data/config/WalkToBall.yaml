@@ -22,3 +22,10 @@ max_angle_error: 45 * pi / 180
 avoid_ball_offset: [0.25, 0.5, 0]
 
 distance_behind_ball: 0.4
+
+# Offset to prevent walking into the opponent when tackling
+avoid_opponent_offset: 0.15
+# Offset to approach the side of the ball when tackling
+approach_offset: 0.6
+# While angle error is larger than this, apply the offset to position next to the ball when tackling
+tackle_angle_offset: 0.2

@@ -38,29 +38,27 @@
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
 
-#include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::strategy {
 
     using extension::Configuration;
+
+    using WalkToBallTask   = message::strategy::WalkToBall;
+    using FieldDescription = message::support::FieldDescription;
+
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::Robots;
     using message::planning::WalkTo;
-    using message::strategy::WalkToFieldPosition;
-    using WalkToBallTask = message::strategy::WalkToBall;
     using message::strategy::PositionBehindBall;
     using message::strategy::TackleBall;
+    using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
-    using FieldDescription = message::support::FieldDescription;
 
-    using utility::math::angle::angle_between;
     using utility::math::euler::pos_rpy_to_transform;
-    using utility::nusight::graph;
     using utility::support::Expression;
 
     WalkToBall::WalkToBall(std::unique_ptr<NUClear::Environment> environment)
@@ -79,6 +77,7 @@ namespace module::strategy {
             cfg.avoid_ball_offset      = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
             cfg.avoid_opponent_offset  = config["avoid_opponent_offset"].as<double>();
             cfg.approach_offset        = config["approach_offset"].as<double>();
+            cfg.tackle_angle_offset    = config["tackle_angle_offset"].as<double>();
             cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
         });
 
@@ -224,36 +223,20 @@ namespace module::strategy {
                 // Choose the side to approach based on which is closer to the robot
                 // Unit vector of the heading in field space
                 Eigen::Vector3d uHf = (rRFf - rLeftFf).norm() < (rRFf - rRightFf).norm() ? uRight : uLeft;
-                if ((rRFf - rLeftFf).norm() < (rRFf - rRightFf).norm()) {
-                    log<INFO>("Tackling ball, approaching from left side");
-                }
-                else {
-                    log<INFO>("Tackling ball, approaching from right side");
-                }
-                double heading = std::atan2(uHf.y(), uHf.x());
+                double heading      = std::atan2(uHf.y(), uHf.x());
                 // Error between the robot's heading and the desired heading perpendicular to the opponent
                 double angle_error = std::atan2(std::sin(heading - robot_heading), std::cos(heading - robot_heading));
 
                 // if not robot is not yet aligned, add the offset to approach to the side of the opponent
                 Eigen::Vector3d rApproachFf = rBFf;
-                if (std::abs(angle_error) > 0.2) {
+                if (std::abs(angle_error) > cfg.tackle_angle_offset) {
                     // Add y offset in the direction of the perpendicular vector
                     rApproachFf -= uHf * cfg.approach_offset;
                 }
                 // Always add some distance backwards from opponent along opponent vector
                 rApproachFf -= uOBf * cfg.avoid_opponent_offset;
 
-                // If the distance to the ball is very small, ie we are actively tackling, the heading should be equal
-                // to the robot's current heading Otherwise small changed causes the robot to recalibrate its heading by
-                // walking backwards
-                log<INFO>("Distance", rBRr.head<2>().norm());
-                if (rBRr.head<2>().norm() < 0.5) {
-                    log<INFO>("Close! So using robot's own heading");
-                    heading = robot_heading;
-                }
-
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(rApproachFf, Eigen::Vector3d(0, 0, heading));
-                log<INFO>("Tackling ball, walking to approach point", rApproachFf, "with heading", heading);
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
             });
 
