@@ -137,6 +137,12 @@ namespace module::localisation {
         /// @brief Time at startup
         NUClear::clock::time_point startup_time;
 
+        /// @brief Bool indicating ground truth localisation (Hfw) computed
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
         explicit FieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
@@ -153,9 +159,8 @@ namespace module::localisation {
          * @brief Find error between computed Hfw and ground truth if available
          *
          * @param Hfw Computed Hfw to be compared against ground truth
-         * @param raw_sensors The raw sensor data
          */
-        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
+        void debug_field_localisation(Eigen::Isometry3d Hfw);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
