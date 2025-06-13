@@ -83,26 +83,14 @@ namespace module::localisation {
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
+           Optional<With<GameState>>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
+            .then([this](const GreenHorizon& horizon,
+                         const Field& field,
+                         const FieldDescription& field_desc,
+                         const std::shared_ptr<const GameState>& game_state) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
-
-                // **Debugging output**
-                debug_info();
-            });
-
-        on<Trigger<RoboCup>, With<Field>, Optional<With<GameState>>, Sync<RobotLocalisation>>().then(
-            [this](const RoboCup& robocup, const Field& field, const std::shared_ptr<const GameState>& game_state) {
-                // **Run prediction step**
-                prediction();
-
-                // **Data association**
-                // RoboCup messages come from teammates. Their position is in field space, so convert to world.
-                std::vector<Eigen::Vector3d> robots_rRWw{
-                    (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
-                // Run data association step
-                data_association(robots_rRWw, robocup.current_pose.player_id, robocup.state == PenaltyState::PENALISED);
 
                 // **Debugging output**
                 debug_info();
@@ -132,49 +120,35 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<VisionRobots>, Optional<With<GameState>>, Sync<RobotLocalisation>>().then(
-            [this](const VisionRobots& vision_robots, const std::shared_ptr<const GameState>& game_state) {
+        on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
+            [this](const RoboCup& robocup, const Field& field) {
                 // **Run prediction step**
                 prediction();
 
                 // **Data association**
-                // Transform the robot positions from camera coordinates to world coordinates
-                Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
-                // Make a vector with the transformed position
-                std::vector<Eigen::Vector3d> robots_rRWw{};
-                for (const auto& vision_robot : vision_robots.robots) {
-                    Eigen::Vector3d rRWw = Hwc * vision_robot.rRCc;
-                    robots_rRWw.push_back(rRWw);
-                }
+                // RoboCup messages come from teammates. Their position is in field space, so convert to world.
+                std::vector<Eigen::Vector3d> robots_rRWw{
+                    (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
                 // Run data association step
-                data_association(robots_rRWw);
-
-                // **Debugging output**
-                debug_info();
-
-                // **Emit the localisation of the robots**
-                auto localisation_robots = std::make_unique<LocalisationRobots>();
-                for (const auto& tracked_robot : tracked_robots) {
-                    auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
-                    LocalisationRobot localisation_robot;
-                    localisation_robot.id                  = tracked_robot.id;
-                    localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
-                    localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
-                    localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
-                    localisation_robot.time_of_measurement = tracked_robot.last_time_update;
-
-                    // Determine our team colour
-                    bool self_blue =
-                        game_state && game_state->team.team_colour == GameState::TeamColour::BLUE ? true : false;
-                    // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
-                    localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
-                    localisation_robot.teammate_id = tracked_robot.teammate_id;
-
-                    localisation_robots->robots.push_back(localisation_robot);
-                }
-
-                emit(std::move(localisation_robots));
+                data_association(robots_rRWw, robocup.current_pose.player_id, robocup.state == PenaltyState::PENALISED);
             });
+
+        on<Trigger<VisionRobots>, Sync<RobotLocalisation>>().then([this](const VisionRobots& vision_robots) {
+            // **Run prediction step**
+            prediction();
+
+            // **Data association**
+            // Transform the robot positions from camera coordinates to world coordinates
+            Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
+            // Make a vector with the transformed position
+            std::vector<Eigen::Vector3d> robots_rRWw{};
+            for (const auto& vision_robot : vision_robots.robots) {
+                Eigen::Vector3d rRWw = Hwc * vision_robot.rRCc;
+                robots_rRWw.push_back(rRWw);
+            }
+            // Run data association step
+            data_association(robots_rRWw);
+        });
     }
 
     void RobotLocalisation::prediction() {
