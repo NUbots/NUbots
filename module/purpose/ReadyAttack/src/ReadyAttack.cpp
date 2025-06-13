@@ -44,8 +44,8 @@ namespace module::purpose {
                 // Ready state may happen during penalty positioning or kick off
                 // Kickoff will happen in normal mode
                 if (game_state.mode == GameState::Mode::NORMAL) {
-                    log<INFO>("Waiting for kick off...");
                     // Waiting for kick off, position outside the center circle
+                    log<DEBUG>("Waiting for kick off...");
                     Eigen::Vector3d rPFf =
                         Eigen::Vector3d(0, 0, fd.dimensions.center_circle_diameter / 2 + cfg.center_circle_offset);
                     emit<Task>(std::make_unique<WalkToFieldPosition>(
@@ -60,8 +60,8 @@ namespace module::purpose {
 
                 // If we are defending, position between the ball and our goal at the distance specified in the rules
                 if (!attacker) {
-                    log<INFO>("Defending penalty, positioning...");
                     // Position of the center of the goals in field coordinates
+                    log<DEBUG>("Defending penalty, positioning...");
                     Eigen::Vector3d rGFf =
                         Eigen::Vector3d((fd.dimensions.field_length / 2) + fd.dimensions.goal_depth, 0.0, 0.0);
                     // Position of the ball in field coordinates
@@ -80,8 +80,9 @@ namespace module::purpose {
                         utility::math::euler::pos_rpy_to_transform(rPFf, Eigen::Vector3d(0, 0, angle)),
                         true));
                 }
-                log<INFO>("Attacking penalty, positioning...");
+
                 // We are attacking, and should position to take the ball towards the opponent's goal
+                log<DEBUG>("Attacking penalty, positioning...");
                 emit<Task>(std::make_unique<PositionBehindBall>());
             });
     }

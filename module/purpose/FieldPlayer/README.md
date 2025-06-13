@@ -12,7 +12,7 @@ The closest robot to the ball will become an Attack player.
 
 The closest robot to our own goal that isn't an Attack player will Defend. Any other player will Support.
 
-If it's the other team's kick off and the kick off time isn't up, the robot will wait.
+If it's the other team's kick off and the kick off time isn't up and ball hasn't moved enough yet, the robot will wait.
 
 In penalty positioning, the player will ReadyAttack. This will position the robot either offensively or defensively, ready for when play resumes.
 
