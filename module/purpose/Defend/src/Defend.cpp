@@ -27,13 +27,7 @@ namespace module::purpose {
 
         on<Configuration>("Defend.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defend.yaml
-            this->log_level     = config["log_level"].as<NUClear::LogLevel>();
-            cfg.clearance       = config["clearance"].as<double>();
-            cfg.equidist_weight = config["equidist_weight"].as<double>();
-            cfg.neutral_weight  = config["neutral_weight"].as<double>();
-            cfg.avoid_weight    = config["avoid_weight"].as<double>();
-            cfg.max_iter        = config["max_iter"].as<int>();
-            cfg.step_size       = config["step_size"].as<double>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
         on<Provide<DefendMsg>, With<Ball>, With<Field>, With<FieldDescription>>().then(

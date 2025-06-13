@@ -11,7 +11,6 @@
 #include "message/purpose/Player.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
-#include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -38,7 +37,6 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
-    using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -203,10 +201,5 @@ namespace module::purpose {
                                                                           cfg.center_circle_offset);
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
             });
-
-
-        // When not playing or in ready, stand still
-        on<Provide<FieldPlayerMsg>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
-
 }  // namespace module::purpose

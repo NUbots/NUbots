@@ -4,8 +4,6 @@
 #include "extension/Configuration.hpp"
 
 #include "message/purpose/Player.hpp"
-#include "message/strategy/FindBall.hpp"
-#include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/Who.hpp"
 
@@ -14,8 +12,6 @@ namespace module::purpose {
     using extension::Configuration;
 
     using AttackMsg = message::purpose::Attack;
-    using message::strategy::FindBall;
-    using message::strategy::LookAtBall;
     using message::strategy::TackleBall;
     using message::strategy::WalkToKickBall;
     using message::strategy::Who;
@@ -31,7 +27,7 @@ namespace module::purpose {
             // In this state, either we have the ball or we are the closest to getting the ball and should go for it
             // If the opponent has the ball, we need to tackle it from them
             if (attack.ball_pos == message::strategy::Who::OPPONENT) {
-                log<INFO>("Opponent has the ball, tackle it!");
+                log<DEBUG>("Opponent has the ball, tackle it!");
                 // todo implement tackle ball
                 emit<Task>(std::make_unique<TackleBall>(), 3);  // Tackle the ball from the opponent
                 return;
