@@ -130,6 +130,10 @@ message ServoConfiguration {
 }
 
 message NUSenseHandshake {
-    string                      msg           = 1;
-    repeated ServoConfiguration servo_configs = 2;
+    /// The type of the message. 0 for init and 1 for during_service
+    bool type = 1;
+    /// The message to be sent to the NUSense
+    string msg = 2;
+    /// The servo configurations to be sent to the NUSense
+    repeated ServoConfiguration servo_configs = 3;
 }
