@@ -34,5 +34,5 @@ Add this module and emit the Task for the desired type of walk to ball.
 - `message::strategy::WalkToFieldPosition` used by all except `WalkToBall` to position at the ball appropriately
 
 ## Dependencies
-`
+
 - `utility::math::euler::pos_rpy_to_transform` for creating the transform for `WalkToFieldPosition`
