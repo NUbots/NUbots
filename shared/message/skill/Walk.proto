@@ -31,4 +31,5 @@ import "Vector.proto";
 
 message Walk {
     vec3 velocity_target = 1;
+    bool kick = 2;
 }
