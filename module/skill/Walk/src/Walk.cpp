@@ -146,7 +146,7 @@ namespace module::skill {
                 // `walk_task.kick` is true if we are kicking, false otherwise
                 // Will need to emit a `emit<Task>(std::make_unique<Done>())` when it is done
                 if (walk_task.kick) {
-                    log<INFO>("Kick in the walk engine!");
+                    log<DEBUG>("Kick in the walk engine!");
                     return;
                 }
 
