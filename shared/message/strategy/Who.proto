@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2025 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -27,14 +27,14 @@ syntax = "proto3";
 
 package message.strategy;
 
-/// Robot walks to the ball or searches if it can't find it
-message WalkToBall {}
-
-/// Robot walks to the position where it can kick the ball or searches if it can't find it
-message WalkToKickBall {}
-
-/// Robot tackles to ball off an opponent - ie dribbles the ball perpendicular to the opponent's direction
-message TackleBall {}
-
-/// Robot walks to a position behind the ball and stops, ready to kick it
-message PositionBehindBall {}
+/// Who are we talking about?
+enum Who {
+    /// No one
+    NONE = 0;
+    /// Ourself
+    SELF = 1;
+    /// A teammate
+    TEAMMATE = 2;
+    /// An opponent
+    OPPONENT = 3;
+}
