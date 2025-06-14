@@ -143,7 +143,12 @@ namespace module::skill {
                         .count();
                 last_update_time = NUClear::clock::now();
 
-                // walk_task.kick is true if we are kicking, false otherwise
+                // `walk_task.kick` is true if we are kicking, false otherwise
+                // Will need to emit a `emit<Task>(std::make_unique<Done>())` when it is done
+                if (walk_task.kick) {
+                    log<INFO>("Kick in the walk engine!");
+                    return;
+                }
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability >= Stability::DYNAMIC) {
