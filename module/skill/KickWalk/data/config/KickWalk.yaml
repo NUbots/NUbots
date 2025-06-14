@@ -2,9 +2,5 @@
 log_level: INFO
 
 # Step kick parameters
-kick_step_length: 0.15 # Length of kick step (m)
-kick_step_height: 0.08 # Height of kick step (m)
-kick_velocity_x: 0.2 # Forward velocity during kick (m/s)
+kick_velocity_x: 0.6 # Forward velocity during kick (m/s)
 kick_velocity_y: 0.05 # Lateral velocity during kick (m/s)
-normal_velocity_x: 0.1 # Normal forward walking velocity (m/s)
-kick_steps: 2 # Number of steps to execute kick over
