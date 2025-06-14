@@ -143,6 +143,7 @@ namespace module::skill {
                         .count();
                 last_update_time = NUClear::clock::now();
 
+                // walk_task.kick is true if we are kicking, false otherwise
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability >= Stability::DYNAMIC) {
