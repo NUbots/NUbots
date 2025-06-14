@@ -202,7 +202,6 @@ namespace module::localisation {
                        const RawSensors& raw_sensors,
                        const FieldDescription& fd,
                        const Sensors& sensors) {
-                    //   log<INFO>("Field localisation running");
                     // Emit field message using ground truth if available
                     if (cfg.use_ground_truth_localisation) {
                         auto field(std::make_unique<Field>());
