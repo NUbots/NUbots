@@ -202,11 +202,11 @@ namespace module::platform {
                         Eigen::Vector3d cross = present.cross(goal);
                         if (cross.z() > 0) {
                             servo.present_position =
-                                utility::math::angle::normalizeAngle(servo.present_position + movingSpeed);
+                                utility::math::angle::normalise_angle(servo.present_position + movingSpeed);
                         }
                         else {
                             servo.present_position =
-                                utility::math::angle::normalizeAngle(servo.present_position - movingSpeed);
+                                utility::math::angle::normalise_angle(servo.present_position - movingSpeed);
                         }
                     }
                 }
@@ -241,7 +241,7 @@ namespace module::platform {
                 // Set our variables
                 auto& servo            = utility::platform::get_raw_servo(command.id, sensors);
                 servo.profile_velocity = speed;
-                servo.goal_position    = utility::math::angle::normalizeAngle(command.position);
+                servo.goal_position    = utility::math::angle::normalise_angle(command.position);
             }
         });
 

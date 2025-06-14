@@ -79,8 +79,8 @@ namespace module::platform::OpenCR {
                 // Get our offset for this servo and apply it
                 // The values are now between -pi and pi around the servos axis
                 auto offset  = nugus.servo_offset[i];
-                auto present = utility::math::angle::normalizeAngle(servo_states[i].present_position - offset);
-                auto goal    = utility::math::angle::normalizeAngle(servo_states[i].goal_position - offset);
+                auto present = utility::math::angle::normalise_angle(servo_states[i].present_position - offset);
+                auto goal    = utility::math::angle::normalise_angle(servo_states[i].goal_position - offset);
 
                 // We have reached our destination
                 if (std::abs(present - goal) < moving_speed) {
@@ -89,7 +89,7 @@ namespace module::platform::OpenCR {
                 }
                 // We have to move towards our destination at moving speed
                 else {
-                    servo_states[i].present_position = utility::math::angle::normalizeAngle(
+                    servo_states[i].present_position = utility::math::angle::normalise_angle(
                         (present + moving_speed * (goal > present ? 1 : -1)) + offset);
                     servo_states[i].present_velocity = moving_speed;
                 }
