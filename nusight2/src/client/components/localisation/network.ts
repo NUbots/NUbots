@@ -15,10 +15,7 @@ import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
 
 export class LocalisationNetwork {
-  constructor(
-    private network: Network,
-    private model: LocalisationModel,
-  ) {
+  constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.localisation.Ball, this.onBall);
@@ -28,6 +25,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.output.Mujoco, this.onMujoco);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
     this.network.on(message.behaviour.state.WalkState, this.onWalkState);

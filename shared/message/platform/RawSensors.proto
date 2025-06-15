@@ -164,8 +164,8 @@ message RawSensors {
         Servo l_ankle_pitch    = 16;
         Servo r_ankle_roll     = 17;
         Servo l_ankle_roll     = 18;
-        Servo head_pan         = 19;
-        Servo head_tilt        = 20;
+        Servo neck_yaw         = 19;
+        Servo neck_pitch        = 20;
     }
 
     google.protobuf.Timestamp timestamp = 1;  // Timestamp when our data were taken
