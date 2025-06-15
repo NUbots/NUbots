@@ -146,9 +146,26 @@ namespace module::skill {
                 // `walk_task.kick` is true if we are kicking, false otherwise
                 // Will need to emit a `emit<Task>(std::make_unique<Done>())` when it is done
                 if (walk_task.kick) {
-                    log<INFO>("Kick in the walk engine!");
-                    // emit<Task>(std::make_unique<Done>());
-                    // return;
+                    log<INFO>("Processing kick step in the walk engine!");
+                    // If this is the first time processing this kick task
+                    if (!kick_step_in_progress) {
+                        // Record initial phase
+                        initial_kick_phase    = sensors.planted_foot_phase;  // or current walk phase
+                        kick_step_in_progress = true;
+                        log<INFO>("Starting kick step, initial phase: ", initial_kick_phase);
+                    }
+
+                    // Check if phase has changed (step completed)
+                    else if (sensors.planted_foot_phase != initial_kick_phase) {
+                        log<INFO>("Phase changed from ",
+                                  initial_kick_phase,
+                                  " to ",
+                                  sensors.planted_foot_phase,
+                                  " - kick step complete!");
+                        kick_step_in_progress = false;
+                        emit<Task>(std::make_unique<Done>());
+                        return;
+                    }
                 }
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen

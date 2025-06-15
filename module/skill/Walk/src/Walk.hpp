@@ -33,6 +33,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoCommand.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkGenerator.hpp"
@@ -65,6 +66,11 @@ namespace module::skill {
 
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
         utility::skill::WalkGenerator<double> walk_generator{};
+
+        /// @brief Used to track the step phase for the step kick
+        bool kick_step_in_progress = false;
+        /// @brief Store the kick phase
+        message::behaviour::state::WalkState::Phase initial_kick_phase;
     };
 }  // namespace module::skill
 
