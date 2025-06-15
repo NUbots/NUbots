@@ -144,13 +144,13 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
                 // `walk_task.kick` is true if we are kicking, false otherwise
-                // Will need to emit a `emit<Task>(std::make_unique<Done>())` when it is done
+                // When the walk task involves a kick, track the foot phase so we only execute a single kick
                 if (walk_task.kick) {
                     log<INFO>("Processing kick step in the walk engine!");
                     // If this is the first time processing this kick task
                     if (!kick_step_in_progress) {
-                        // Record initial phase
-                        initial_kick_phase    = sensors.planted_foot_phase;  // or current walk phase
+                        // initial phase
+                        initial_kick_phase    = sensors.planted_foot_phase;
                         kick_step_in_progress = true;
                         log<INFO>("Starting kick step, initial phase: ", initial_kick_phase);
                     }
