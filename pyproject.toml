@@ -38,7 +38,7 @@ dependencies = [
     "xxhash==3.5.0",
     "stringcase==1.2.0",
     "protoc-wheel==21.1",
-    "protobuf==4.25.3",
+    "protobuf==5.28.1",
     "pycryptodomex==3.21.0",
     "natsort==8.4.0",
     "jsonschema==4.23.0",
