@@ -42,6 +42,8 @@ namespace module::planning {
 
     using extension::Configuration;
     using message::actuation::BodySequence;
+    using message::actuation::HeadSequence;
+    using message::actuation::LimbsSequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::RelaxWhenFalling;
@@ -114,9 +116,11 @@ namespace module::planning {
                                             : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
                                                                                 : State::FALLING;
 
-                    // Falling if both gyro and acc_mag agree
-                    bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING);
-
+                    // Falling if any 2 of 3 sensors report falling or the angle reports falling
+                    bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING)
+                                   || (gyro_mag_state == State::FALLING && acc_angle_state == State::FALLING)
+                                   || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING)
+                                   || (acc_angle_state == State::FALLING);
 
                     //////    Plots    //////
                     emit(graph("Falling sensor: x:gyro, y:acc, z:angle",
@@ -148,7 +152,8 @@ namespace module::planning {
 
                         emit(std::make_unique<Stability>(Stability::FALLING));
                         if (body.run_state == RunState::NO_TASK) {
-                            emit<Task>(load_script<BodySequence>(cfg.fall_script));
+                            emit<Task>(load_script<HeadSequence>(cfg.fall_script));
+                            emit<Task>(load_script<LimbsSequence>(cfg.fall_script));
                         }
                         else {
                             emit<Task>(std::make_unique<Continue>());
