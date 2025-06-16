@@ -241,12 +241,11 @@ namespace module::localisation {
 
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
-            Eigen::Vector3d rRWw(state.rRWw.x(), state.rRWw.y(), 0);
 
             // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
             // A robot is outside of view if it is not within the green horizon
             // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
-            if (!point_in_convex_hull(horizon.horizon, rRWw)) {
+            if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
                 tracked_robot.seen = true;
             }
 
