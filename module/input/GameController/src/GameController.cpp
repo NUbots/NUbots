@@ -31,7 +31,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
