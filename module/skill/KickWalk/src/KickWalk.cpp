@@ -30,42 +30,44 @@ namespace module::skill {
 
         on<Provide<Kick>, With<WalkState>>().then(
             [this](const Kick& kick, const RunReason& run_reason, const WalkState& walk_state) {
-                log<INFO>("KickWalk module received a kick request for leg: ", kick.leg);
+                // log<INFO>("KickWalk module received a kick request for leg: ", kick.leg);
+                log<INFO>("KickWalk starting - checking foot phase for leg: ", kick.leg);
 
-                if (run_reason == RunReason::NEW_TASK) {
-                    log<INFO>("KickWalk starting - checking foot phase for leg: ", kick.leg);
-
-                    // Determine the optimal phase for the kick
-                    WalkState::Phase optimal_phase;
-                    if (kick.leg == LimbID::LEFT_LEG) {
-                        optimal_phase = WalkState::Phase::RIGHT;  // Right foot is planted
-                    }
-                    else {
-                        optimal_phase = WalkState::Phase::LEFT;  // Left foot is planted
-                    }
-
-                    // Guard condition: only proceed if in optimal phase
-                    if (walk_state.phase != optimal_phase) {
-                        log<DEBUG>("Wrong phase for kick - current: ",
-                                   walk_state.phase,
-                                   " needed: ",
-                                   optimal_phase,
-                                   " - not emitting Walk task");
-                        return;  // Don't emit anything - PlanKick will retry
-                    }
-
-                    log<INFO>("Optimal phase detected - executing kick");
-
-                    Eigen::Vector3d walk_velocity;
-                    if (kick.leg == LimbID::RIGHT_LEG) {
-                        walk_velocity = Eigen::Vector3d(cfg.kick_velocity_x, -cfg.kick_velocity_y, 0.0);
-                    }
-                    else {
-                        walk_velocity = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
-                    }
-
-                    emit<Task>(std::make_unique<Walk>(walk_velocity, true));
+                // Determine the optimal phase for the kick
+                WalkState::Phase optimal_phase;
+                if (kick.leg == LimbID::LEFT_LEG) {
+                    optimal_phase = WalkState::Phase::RIGHT;  // Right foot is planted
                 }
+                else {
+                    optimal_phase = WalkState::Phase::LEFT;  // Left foot is planted
+                }
+                log<INFO>("Current walk phase: ", walk_state.phase, " - Optimal phase for kick: ", optimal_phase);
+
+                emit(graph("KickWalk/requested_kick_leg", int(kick.leg)));
+                emit(graph("KickWalk/optimal_phase", int(optimal_phase)));
+                emit(graph("KickWalk/walk_state_phase", int(walk_state.phase)));
+
+                // Guard condition: only proceed if in optimal phase
+                if (walk_state.phase != optimal_phase) {
+                    log<INFO>("Wrong phase for kick - current: ",
+                              walk_state.phase,
+                              " needed: ",
+                              optimal_phase,
+                              " - not emitting Walk task");
+                    return;  // Don't emit anything - PlanKick will retry
+                }
+
+                log<INFO>("Optimal phase detected - executing kick");
+
+                Eigen::Vector3d walk_velocity;
+                if (kick.leg == LimbID::RIGHT_LEG) {
+                    walk_velocity = Eigen::Vector3d(cfg.kick_velocity_x, -cfg.kick_velocity_y, 0.0);
+                }
+                else {
+                    walk_velocity = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
+                }
+
+                emit<Task>(std::make_unique<Walk>(walk_velocity, true));
 
 
                 // If the walk says the kick is done, emit a Done task
