@@ -1,0 +1,175 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NUbots' TDP 2020
+%
+% Date: 24.11.2019
+%
+%
+\documentclass{llncs}
+%
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{verbatim}
+%
+\begin{document}
+%
+
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+\addtocmark{The NUbots Qualification Material for RoboCup 2022} % additional mark in the TOC
+%
+%
+\mainmatter              % start of the contributions
+%
+\title{The NUbots Software Overview for RoboCup 2022}
+%
+\titlerunning{The NUbots Software Overview for RoboCup 2022}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+
+
+\author{Alex Biddulph
+        \and Peta Carlyle
+        \and Stephan Chalup
+        \and Lachlan Court
+        \and Liam Craft
+        \and Nicholas Dziura
+        \and Abigail Hall
+        \and Sam McFarlane
+        \and Alexandre Mendes
+        \and Cameron Murtagh
+        \and Alana Noonan
+        \and Josephus Paye II
+        \and Mikyla Peters
+        \and Thomas O'Brien
+        \and Ysobel Sims
+        \and Bryce Tuppurainen
+        \and Joel Wong
+        \and Benjamin Young
+        \and Taylor Young
+        }
+       
+%
+\authorrunning{Biddulph et al.}   % abbreviated author list (for running head)
+%
+%%%% modified list of auther for the TOC (add the affiliations)
+\tocauthor{
+A. Biddulph,
+P. Carlyle,
+S. Chalup,
+L. Court,
+L. Craft,
+N. Dziura,
+A. Hall,
+S. McFarlane,
+A. Mendes,
+C. Murtagh,
+A. Noonan,
+J. Paye II,
+M. Peters,
+T. O'Brien,
+Y. Sims,
+B. Tuppurainen,
+J. Wong,
+B. Young,
+T. Young
+}
+
+%
+\institute{Newcastle Robotics Laboratory\\ School of Information and Physical Sciences\\
+College of Engineering, Science and Environment\\
+The University of Newcastle, Callaghan 2308, Australia\\
+Contact: \email{nubots@newcastle.edu.au}\\
+Homepage: \url{http://robots.newcastle.edu.au}}
+%
+
+\maketitle              % typeset the title of the contribution
+
+\section{Walking}
+
+% Please give a brief summary of your walking algorithm (max. 1000 characters).
+
+\medskip
+
+NUbots currently use Bit-Bots' Quintic Walk~\cite{bitbotsMotionGit} based off Rhoban's Quintic Walk~\cite{rhobanModelGit} and Rhoban's IK Walk~\cite{rhobanModelGit}. This is an open loop walk engine that creates quintic splines representing the trajectory of the feet and torso rotationally and translationally. The engine interpolates over these splines to find the next target position for the feet, which is then converted into servo joint angles using inverse kinematics.
+
+NUbots use an approximate analytical solution for the inverse kinematics of the NUgus robot based on geometry. The NUbots team are investigating different methods of calculating kinematics with less error, which is planned to be implemented by the 2022 competition. 
+
+Improvements to the walk engine are planned, including exploring aspects of the Bit-Bots walk engine that are currently unused such as the built in kick engine and the IMU feedback that will work towards closing the loop. A current mechatronics final year undergraduate project has shown success with a new quasi-static walk engine and a dynamic walk engine in simulation. Another project involves developing a modular walk engine system, initially comprising of dynamic motion planners and a static walk engine. 
+
+\section{Vision}
+
+% Please give a brief summary of your vision algorithm, i.e. how your robots detect balls, field borders, field lines, goalposts and other robots (max. 1000 characters).
+
+%%% Summary
+% The Visual Mesh underpins the vision system, and is used for sparse detection of balls, points on the field, field lines, goal posts and other robots.
+% From the Visual Mesh a series of specialised detectors are employed to detect field edges, balls, and goal posts. All points that the Visual Mesh has identified as either field points or field line points are clustered into connected regions and each cluster is then either merged or discarded using some heuristics until a single cluster remains, allowing an upper convex hull to be fitted.
+% The ball detector finds all clusters which are below the upper convex hull. A circular cone is then fitted to each cluster. Different heuristics, such as degree of circle fit and different distance metrics, are then used to discard to cones.
+% The goal post detector find all clusters which intersect the upper convex hull. Clusters are formed from goal post edge points and a determination of the bottom mid-point is made for each post.
+
+\medskip
+
+The Visual Mesh~\cite{Houliston2018VisualMR} underpins the vision system, and is used for sparse detection of balls, points on the field, field lines, goal posts and other robots.
+
+The Visual Mesh is a convolutional neural network for object detection based on a mesh which samples pixels from an image. The mesh is depth independent and the number of mesh points is small enough to allow a CNN to run in real-time on a humanoid robot. Tests on the CPU from the Intel\textsuperscript{\textregistered} NUC7i7BNH show that a nine layer visual mesh had an execution time of 2.44ms~\cite{Houliston2018VisualMR}. Furthermore, the visual mesh does not degrade in accuracy when objects occur at different distances. This is due to the depth independence introduced by using the mesh. The visual mesh was used to detect a soccer ball on a field up to 10m away from the camera~\cite{Houliston2018VisualMR}. The visual mesh can detect soccer balls, field lines and goal posts, however it is built assuming the object to be detected is spherical.
+
+The visual mesh is created using the following geometric assumptions for each image:
+\begin{enumerate}
+    \item The camera lens type, height and orientation with respect to the ground are known. 
+    \item The object is spherical with known radius and remains on the ground.
+\end{enumerate}
+The height, orientation and radius are used to create a set of unit vectors based at the camera position. Any vector with origin at the camera can be thought of as a ray of light travelling towards the camera. If the vector is within the field of view of the camera it will be collected by the lens. The vector is mapped to a point on the image using the lens projection equation, provided the point is within the bounds of the image sensor of the camera. The visual mesh is formed by taking an array of vectors and associating each of them with a point and pixel in the image. The array of vectors is specially constructed using two equations to efficiently sample the space around the camera for the object. This means the points (sample points) on the image will efficiently sample the image for the object. Because the vectors are generated in the space around the camera, the sample is consistent despite changes in lens type, image resolution, and the apparent size of an object due to distance. Each sample point is connected to its six closest neighbours and these connections become the edges of the mesh. A fully convolutional neural network~\cite{ShelmarLong2017} is used on the mesh where each sample point and it's neighbours become the input to a convolution. All layers in the network use seven points convolutions since there are six neighbours for each sample point. A parameter controls the number of sample points on the object which determines the level of detail available to the network. 
+
+The height and orientation of the camera is tracked using the kinematics and inertial measurement unit of the robot. The radius of the soccer ball is given. The unit vectors only need to be calculated once for each height and radius pair. As the robot walks its height varies. A series of visual meshes for different heights are calculated on startup. For each image this information is recorded and the appropriate visual mesh is chosen. A binary search pattern is used to select the vectors that will become points on the image based on the camera's orientation. The partitions of the binary search pattern are built on startup and the search is run in real-time. Every training and run-time image is converted into the mesh before the network is run. The network labels each point of the mesh with the probability it belongs to an object class. A post-processing algorithm based on the probabilities of the mesh can cluster the sample points to determine an object's position.
+
+From the Visual Mesh a series of specialised detectors are employed to detect field edges, balls, and goal posts. Firstly, all points that the Visual Mesh has identified as either field points or field line points are clustered into connected regions and, each cluster is then either merged or discarded using some heuristics until a single cluster remains. Finally, an upper convex hull algorithm is applied to the final cluster determine the edge of the field.
+
+The ball detector forms clusters out of all the points that the Visual Mesh has identified as ball points. Specifically, the clusters are formed from Visual Mesh points that are identified as being a ball point, but have at least $1$ neighbour which is \emph{not} a ball point. This allows us to form clusters of ball edge points. Any clusters which are not below the field edge are discarded. A circular cone is then fitted to each cluster. The cone axis is determined from the line segment between the centre on the camera and the average of all ball edge points. The radius of the cone is determined by the maximum distance between the ball edge points and the average of all of the ball edge points. Different heuristics, such as degree of circle fit and different distance metrics, are then used to discard to cones.
+
+The goal post detector follows a similar structure to the ball detector. Clusters are formed from goal post edge points and any clusters that do not intersect the field edge are discarded. The bottom centre point of the goal post is then found by averaging the edge points. The distance to the goal posts are determined and if there are multiple goal posts detected an attempt is made to assign \emph{leftness} and \emph{rightness} to each post.
+
+At present, a field line detector is not implemented, but will likely be implemented before the next competition.
+
+All calculations in all detectors are done in 3D world coordinates.
+
+\section{Localisation}
+
+% Please give a brief summary of how your robots localize themselves on the field (max. 1000 characters).
+
+The localisation on-board the robot is performed using a Particle Filter. This allows us to maintain multiple hypotheses about the current pose of the robot, providing robustness against the mirrored field problem and having multiple potential initial positions when entering the field. The filter relies on measurement updates from the vision module, and on IMU data for time updates. The measurement update previously only tracked the four goal post locations; however, we are working on introducing the tracking of field lines during 2022. In particular, we will be focusing on distinctive field features such as corners and the centre circle.
+
+\medskip
+
+\section{Behaviour}
+
+% Please give a brief summary of your behavioral architecture and the decision processes of your robots (max. 1000 characters).
+
+The robot's behaviour is a basic state machine where, during the playing state, the robot will look for the ball and goals using head movements and the vision system, position itself to kick the ball toward the goals using a simple path planning algorithm and the walk engine, and then kick when it determines it is in the right position to kick. The vision system alongside localisation determines which foot the robot will kick with. The robot will only move its head during the initial state and look for features on the field and localise itself. In the ready state it will walk to a specific position on the field. In the set state, it will stop moving.
+
+\medskip
+
+\section{Contributions to RoboCup}
+
+% List your previous participation (including rank) and contribution to the RoboCup community (release of open-source software, datasets, tools etc.)
+% This description field is optional
+
+The NUbots team participated in the 2021 Humanoid Kid-Size League and finished as semi-finalists. The NUbots have participated in the Four Legged League (2002-2007), the Standard Platform League (2008-2011), the Kid-Size Humanoid League (2012-2017), and the Teen-Size Humanoid league (2018-2019). NUbots were the Four Legged League world champions in 2006. The team won the first Standard Platform League in 2008 as team NUManoid in collaboration with the National University of Maynooth, Ireland.
+
+The team's RoboCup robot code~\cite{nubotsGit}, hardware~\cite{nubotsHardwareGit}, and debugging tools~\cite{nubotsNUsightGit} are open source on GitHub. 
+
+The NUbots team have developed a Blender plugin to generate semi-synthetic images with fully-annotated ground truth segmentation maps~\cite{nubotsNUpbrGit}. The images contain random ball positions, robot positions and kinematic poses, obstacles, and viewer orientations. This tool is public on GitHub for anyone in the League to use.
+
+The NUbots team have been active participants in the Humanoid League rules discussions. A new standard communication protocol~\cite{nubotsProtocolGit}, based on Protobuf messages, was proposed by NUbots to the TC. A prototype tool, based on the NUsight~\cite{nubotsNUsightGit} debugging utility, for monitoring network communications and displaying robot communications in a meaningful manner is currently being developed.
+
+The NUbots team maintains a comprehensive documentation resource in the form of a public website~\cite{nubotsNUbookGit}, providing detailed information about the hardware and software systems, as well as guides on various aspects of our systems. This resource aims to be useful to other RoboCup teams, as well as the wider robotics and AI community.
+
+
+% Please list RoboCup-related papers your team published in 2019.
+% This description field is optional
+
+\bibliographystyle{plain}
+% argument is your BibTeX string definitions and bibliography database(s)
+\bibliography{nubots}
+
+\end{document}
