@@ -28,7 +28,6 @@
 #ifndef MODULE_INPUT_MOTIONMODEL_HPP
 #define MODULE_INPUT_MOTIONMODEL_HPP
 
-/* Motion model Motion Unit*/
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
