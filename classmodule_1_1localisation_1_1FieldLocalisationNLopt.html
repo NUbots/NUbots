@@ -169,6 +169,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1localisation_1_1FieldLo
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt-members.html">List of all members</a>  </div>
@@ -212,6 +213,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4802594fa0756ca2d7caae1caa989297">FieldLocalisationNLopt</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:a4802594fa0756ca2d7caae1caa989297"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a> reactor. <br /></td></tr>
 <tr class="separator:a4802594fa0756ca2d7caae1caa989297"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
 <tr class="memitem:a3ceee27c66409dabd78ec22957d8bfc3"><td class="memItemLeft" align="right" valign="top">Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3ceee27c66409dabd78ec22957d8bfc3">compute_Hfw</a> (const Eigen::Vector3d &amp;<a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a929290aa229515b6dae227829bd91489">state</a>)</td></tr>
 <tr class="memdesc:a3ceee27c66409dabd78ec22957d8bfc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3ceee27c66409dabd78ec22957d8bfc3">More...</a><br /></td></tr>
 <tr class="separator:a3ceee27c66409dabd78ec22957d8bfc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -227,12 +231,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2c6211882d65b38aab49915399034d7c"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Eigen::Vector3d, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c">run_field_line_optimisation</a> (const Eigen::Vector3d &amp;initial_guess, const std::vector&lt; Eigen::Vector3d &gt; &amp;field_lines, const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const std::shared_ptr&lt; const Goals &gt; &amp;goals)</td></tr>
 <tr class="memdesc:a2c6211882d65b38aab49915399034d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the field line optimisation.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c">More...</a><br /></td></tr>
 <tr class="separator:a2c6211882d65b38aab49915399034d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b3a6fbfcde12d569b0e9762b423fd6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0b3a6fbfcde12d569b0e9762b423fd6a">setup_field_landmarks</a> (const FieldDescription &amp;fd)</td></tr>
-<tr class="memdesc:a0b3a6fbfcde12d569b0e9762b423fd6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup field landmarks.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0b3a6fbfcde12d569b0e9762b423fd6a">More...</a><br /></td></tr>
-<tr class="separator:a0b3a6fbfcde12d569b0e9762b423fd6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0225b1d7241a3c8867f5c382eb2b5b4a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0225b1d7241a3c8867f5c382eb2b5b4a">setup_fieldline_distance_map</a> (const FieldDescription &amp;fd)</td></tr>
-<tr class="memdesc:a0225b1d7241a3c8867f5c382eb2b5b4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup field line distance map.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0225b1d7241a3c8867f5c382eb2b5b4a">More...</a><br /></td></tr>
-<tr class="separator:a0225b1d7241a3c8867f5c382eb2b5b4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fa30b90f7d6d279e4b1312a1192dd8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9fa30b90f7d6d279e4b1312a1192dd8c">uncertainty_reset</a> (const FieldDescription &amp;fd, const FieldLines &amp;field_lines, const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const std::shared_ptr&lt; const Goals &gt; &amp;goals, const Eigen::Isometry3d &amp;Hrw)</td></tr>
+<tr class="memdesc:a9fa30b90f7d6d279e4b1312a1192dd8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines a new state by running a grid search and checking the cost of each hypothesis.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9fa30b90f7d6d279e4b1312a1192dd8c">More...</a><br /></td></tr>
+<tr class="separator:a9fa30b90f7d6d279e4b1312a1192dd8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -254,6 +255,22 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 std::vector&lt; <a class="el" href="structutility_1_1localisation_1_1Landmark.html">Landmark</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3d929cfe1f495eeceb7d24a098ce1c6b">landmarks</a> {}</td></tr>
 <tr class="memdesc:a3d929cfe1f495eeceb7d24a098ce1c6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of landmarks (field intersections rLFf) in field space. <br /></td></tr>
 <tr class="separator:a3d929cfe1f495eeceb7d24a098ce1c6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d0353cd56e9f555fd22169b401917ad"><td class="memItemLeft" align="right" valign="top"><a id="a5d0353cd56e9f555fd22169b401917ad"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a5d0353cd56e9f555fd22169b401917ad">last_certain_state</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a5d0353cd56e9f555fd22169b401917ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last certain state of the robot (used for uncertainty reset) <br /></td></tr>
+<tr class="separator:a5d0353cd56e9f555fd22169b401917ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a963567bfed8343ace9b92838dabb8a6e"><td class="memItemLeft" align="right" valign="top"><a id="a963567bfed8343ace9b92838dabb8a6e"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a963567bfed8343ace9b92838dabb8a6e">last_reset</a> = NUClear::clock::now()</td></tr>
+<tr class="memdesc:a963567bfed8343ace9b92838dabb8a6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last time the field localisation was reset. <br /></td></tr>
+<tr class="separator:a963567bfed8343ace9b92838dabb8a6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace821feca5fa8e7f72318adf52406a56"><td class="memItemLeft" align="right" valign="top"><a id="ace821feca5fa8e7f72318adf52406a56"></a>
+ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#ace821feca5fa8e7f72318adf52406a56">main_loop</a></td></tr>
+<tr class="memdesc:ace821feca5fa8e7f72318adf52406a56"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main field localisation loop. <br /></td></tr>
+<tr class="separator:ace821feca5fa8e7f72318adf52406a56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c69156bf32af42aa9f6d01088fc98c2"><td class="memItemLeft" align="right" valign="top"><a id="a1c69156bf32af42aa9f6d01088fc98c2"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1c69156bf32af42aa9f6d01088fc98c2">num_over_cost</a> = 0</td></tr>
+<tr class="memdesc:a1c69156bf32af42aa9f6d01088fc98c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of times the cost has been over the threshold. <br /></td></tr>
+<tr class="separator:a1c69156bf32af42aa9f6d01088fc98c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e537a3bbbd2926d513d2459fa50c983"><td class="memItemLeft" align="right" valign="top"><a id="a2e537a3bbbd2926d513d2459fa50c983"></a>
 <a class="el" href="structmodule_1_1localisation_1_1GoalPost.html">GoalPost</a>&#160;</td><td class="memItemRight" valign="bottom"><b>opp_goal_posts</b></td></tr>
 <tr class="separator:a2e537a3bbbd2926d513d2459fa50c983"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -288,6 +305,9 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Eigen::Isometry3d module::localisation::FieldLocalisationNLopt::compute_Hfw </td>
@@ -297,6 +317,11 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta) </p>
@@ -315,6 +340,9 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt; module::localisation::FieldLocalisationNLopt::data_association </td>
@@ -334,6 +362,11 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Perform data association between intersection observations and landmarks using nearest neighbour. </p>
@@ -353,6 +386,9 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::localisation::FieldLocalisationNLopt::debug_field_localisation </td>
@@ -372,6 +408,11 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Find error between computed Hfw and ground truth if available. </p>
@@ -390,6 +431,9 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Eigen::Vector2i module::localisation::FieldLocalisationNLopt::position_in_map </td>
@@ -409,6 +453,11 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Transform a field line point from world {w} to position in the distance map {m}. </p>
@@ -428,6 +477,9 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">std::pair&lt; Eigen::Vector3d, double &gt; module::localisation::FieldLocalisationNLopt::run_field_line_optimisation </td>
@@ -459,6 +511,11 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Run the field line optimisation. </p>
@@ -474,52 +531,67 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 </div>
 </div>
-<a id="a0b3a6fbfcde12d569b0e9762b423fd6a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b3a6fbfcde12d569b0e9762b423fd6a">&#9670;&nbsp;</a></span>setup_field_landmarks()</h2>
+<a id="a9fa30b90f7d6d279e4b1312a1192dd8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fa30b90f7d6d279e4b1312a1192dd8c">&#9670;&nbsp;</a></span>uncertainty_reset()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::FieldLocalisationNLopt::setup_field_landmarks </td>
+          <td class="memname">void module::localisation::FieldLocalisationNLopt::uncertainty_reset </td>
           <td>(</td>
           <td class="paramtype">const FieldDescription &amp;&#160;</td>
-          <td class="paramname"><em>fd</em></td><td>)</td>
-          <td></td>
+          <td class="paramname"><em>fd</em>, </td>
         </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Setup field landmarks. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">fd</td><td>The field dimensions </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a0225b1d7241a3c8867f5c382eb2b5b4a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0225b1d7241a3c8867f5c382eb2b5b4a">&#9670;&nbsp;</a></span>setup_fieldline_distance_map()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::FieldLocalisationNLopt::setup_fieldline_distance_map </td>
-          <td>(</td>
-          <td class="paramtype">const FieldDescription &amp;&#160;</td>
-          <td class="paramname"><em>fd</em></td><td>)</td>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const FieldLines &amp;&#160;</td>
+          <td class="paramname"><em>field_lines</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::shared_ptr&lt; const FieldIntersections &gt; &amp;&#160;</td>
+          <td class="paramname"><em>field_intersections</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::shared_ptr&lt; const Goals &gt; &amp;&#160;</td>
+          <td class="paramname"><em>goals</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Hrw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Setup field line distance map. </p>
+<p>Determines a new state by running a grid search and checking the cost of each hypothesis. </p>
+<p>First, a local search is performed around the last certain state. If this does not find a low cost hypothesis, a global search is performed on the half of the field that the robot is currently on, to reduce computation and avoid the mirror field problem.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">fd</td><td>The field dimensions </td></tr>
+    <tr><td class="paramname">fd</td><td>The field description containing the field dimensions, in particular the field length and width. </td></tr>
+    <tr><td class="paramname">field_lines</td><td>Field lines, used to find the cost of hypotheses. </td></tr>
+    <tr><td class="paramname">field_intersections</td><td>Field intersections, used to find the cost of hypotheses. </td></tr>
+    <tr><td class="paramname">goals</td><td>Goals, used to find the cost of hypotheses. </td></tr>
+    <tr><td class="paramname">Hrw</td><td>The homogenous transformation from world {w} to robot {r} space. </td></tr>
   </table>
   </dd>
 </dl>
@@ -529,6 +601,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/localisation/FieldLocalisationNLopt/src/<a class="el" href="FieldLocalisationNLopt_8hpp_source.html">FieldLocalisationNLopt.hpp</a></li>
 <li>module/localisation/FieldLocalisationNLopt/src/FieldLocalisationNLopt.cpp</li>
+<li>module/localisation/FieldLocalisationNLopt/src/localisation/reset.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -536,7 +609,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li>
-    <li class="footer">Generated on Mon Jun 16 2025 05:38:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jun 17 2025 08:59:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

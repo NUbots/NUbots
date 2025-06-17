@@ -883,7 +883,7 @@ var namespaces_dup =
           [ "angleDistance", "namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599", null ],
           [ "asin_clamped", "namespaceutility_1_1math_1_1angle.html#a58909fc949c49bd2efc0a444ecd55560", null ],
           [ "difference", "namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945", null ],
-          [ "normalizeAngle", "namespaceutility_1_1math_1_1angle.html#a8dde4f83b354755ccea82a77538302e3", null ],
+          [ "normalise_angle", "namespaceutility_1_1math_1_1angle.html#a681ab160d054924fd5d62d318fe8af3b", null ],
           [ "signedDifference", "namespaceutility_1_1math_1_1angle.html#a2172e5d7bac696b4ddb6dd02cecc7f61", null ],
           [ "solveLinearTrigEquation", "namespaceutility_1_1math_1_1angle.html#ad768a98e6ebcc91ecf92252e8bdd7340", null ],
           [ "vectorToBearing", "namespaceutility_1_1math_1_1angle.html#a3711ea87a2dc9adfb4ddfea0d65d42d6", null ]

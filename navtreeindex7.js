@@ -1,5 +1,8 @@
 var NAVTREEINDEX7 =
 {
+"classmodule_1_1tools_1_1SystemConfiguration.html":[3,0,3,13,7],
+"classmodule_1_1tools_1_1SystemConfiguration.html#a272ed36c30b133276492cb8f4bcfecfd":[3,0,3,13,7,0],
+"classmodule_1_1vision_1_1BallDetector.html":[3,0,3,14,1],
 "classmodule_1_1vision_1_1BallDetector.html#a074f9906f5c203c67397ba469cea4869":[3,0,3,14,1,6],
 "classmodule_1_1vision_1_1BallDetector.html#a07542e3c009cdbda8b747dae65de0443":[3,0,3,14,1,1],
 "classmodule_1_1vision_1_1BallDetector.html#a13c93d4c232967260da96066fa09aaa7":[3,0,3,14,1,5],
@@ -246,8 +249,5 @@ var NAVTREEINDEX7 =
 "classutility_1_1math_1_1filter_1_1KalmanFilter.html#a25a9f5c2a24da5aad77dc728769a0087":[3,0,7,5,0,0,12],
 "classutility_1_1math_1_1filter_1_1KalmanFilter.html#a2e6d08db83c726a91d319c7e1012bb5a":[3,0,7,5,0,0,4],
 "classutility_1_1math_1_1filter_1_1KalmanFilter.html#a4e1399ff9a1498532dad9f324e8e7879":[3,0,7,5,0,0,23],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6209a45501114128641913c3424943f7":[3,0,7,5,0,0,5],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6510ceba313dde456ef22210e5557f14":[3,0,7,5,0,0,8],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6b58111e28c0058c11b4e8080eff150a":[3,0,7,5,0,0,21],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6e5e89688e2473c48e20e892af20f157":[3,0,7,5,0,0,14]
+"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6209a45501114128641913c3424943f7":[3,0,7,5,0,0,5]
 };

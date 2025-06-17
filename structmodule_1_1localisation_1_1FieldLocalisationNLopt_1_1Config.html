@@ -204,6 +204,10 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8705595937f1a6653520bb4d06a13bd2">change_limit</a> = Eigen::Vector3d::Zero()</td></tr>
 <tr class="memdesc:a8705595937f1a6653520bb4d06a13bd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constraint on the maximum change in state. <br /></td></tr>
 <tr class="separator:a8705595937f1a6653520bb4d06a13bd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab53b609b24616aeb15b5191120a51f44"><td class="memItemLeft" align="right" valign="top"><a id="ab53b609b24616aeb15b5191120a51f44"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ab53b609b24616aeb15b5191120a51f44">cost_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:ab53b609b24616aeb15b5191120a51f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cost threshold for resetting the filter. <br /></td></tr>
+<tr class="separator:ab53b609b24616aeb15b5191120a51f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83ad66418e7e75a60da171186d77d46c"><td class="memItemLeft" align="right" valign="top"><a id="a83ad66418e7e75a60da171186d77d46c"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a83ad66418e7e75a60da171186d77d46c">field_line_distance_weight</a> = 0.0</td></tr>
 <tr class="memdesc:a83ad66418e7e75a60da171186d77d46c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar weighting of cost associated with distance to field lines. <br /></td></tr>
@@ -240,6 +244,10 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a07f63c416a788b0509e67934639216db">max_association_distance</a> = 0.0</td></tr>
 <tr class="memdesc:a07f63c416a788b0509e67934639216db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance for landmark association. <br /></td></tr>
 <tr class="separator:a07f63c416a788b0509e67934639216db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25ca04207717bf42c0bdcd5a9c88c8df"><td class="memItemLeft" align="right" valign="top"><a id="a25ca04207717bf42c0bdcd5a9c88c8df"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a25ca04207717bf42c0bdcd5a9c88c8df">max_over_cost</a> = 0</td></tr>
+<tr class="memdesc:a25ca04207717bf42c0bdcd5a9c88c8df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of times the cost can be over the threshold before resetting. <br /></td></tr>
+<tr class="separator:a25ca04207717bf42c0bdcd5a9c88c8df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada3d1d390296b78dc421530278ed1313"><td class="memItemLeft" align="right" valign="top"><a id="ada3d1d390296b78dc421530278ed1313"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ada3d1d390296b78dc421530278ed1313">maxeval</a> = 0</td></tr>
 <tr class="memdesc:ada3d1d390296b78dc421530278ed1313"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of evaluations for the optimization. <br /></td></tr>
@@ -252,6 +260,14 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a39f2469ba1fdb2a7dd474f9517b19115">min_field_line_points</a> = 0</td></tr>
 <tr class="memdesc:a39f2469ba1fdb2a7dd474f9517b19115"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of field line points for an update to run. <br /></td></tr>
 <tr class="separator:a39f2469ba1fdb2a7dd474f9517b19115"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ff55616ba6c719421e305662dc17096"><td class="memItemLeft" align="right" valign="top"><a id="a8ff55616ba6c719421e305662dc17096"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8ff55616ba6c719421e305662dc17096">num_angles</a> = 0</td></tr>
+<tr class="memdesc:a8ff55616ba6c719421e305662dc17096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of yaw angles to try during uncertainty reset. <br /></td></tr>
+<tr class="separator:a8ff55616ba6c719421e305662dc17096"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa77b1afb2752b935715221cd3a7b2b9"><td class="memItemLeft" align="right" valign="top"><a id="afa77b1afb2752b935715221cd3a7b2b9"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#afa77b1afb2752b935715221cd3a7b2b9">out_of_field_cost</a> = 0.0</td></tr>
+<tr class="memdesc:afa77b1afb2752b935715221cd3a7b2b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cost for a point being outside of the field. <br /></td></tr>
+<tr class="separator:afa77b1afb2752b935715221cd3a7b2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96efdd7693b9224d986d2fc3b016b41d"><td class="memItemLeft" align="right" valign="top"><a id="a96efdd7693b9224d986d2fc3b016b41d"></a>
 Eigen::Matrix&lt; double, n_states, n_states &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a96efdd7693b9224d986d2fc3b016b41d">P0</a> = Eigen::Matrix&lt;double, n_states, n_states&gt;::Identity()</td></tr>
 <tr class="memdesc:a96efdd7693b9224d986d2fc3b016b41d"><td class="mdescLeft">&#160;</td><td class="mdescRight">initial covariance <br /></td></tr>
@@ -264,6 +280,14 @@ Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af49a556ddbcb861d7c72f80da2caca4c">R</a> = Eigen::Matrix3d::Identity()</td></tr>
 <tr class="memdesc:af49a556ddbcb861d7c72f80da2caca4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement noise covariance. <br /></td></tr>
 <tr class="separator:af49a556ddbcb861d7c72f80da2caca4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5db03240271953109116f0688b0bbba"><td class="memItemLeft" align="right" valign="top"><a id="aa5db03240271953109116f0688b0bbba"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aa5db03240271953109116f0688b0bbba">reset_delay</a> = 0</td></tr>
+<tr class="memdesc:aa5db03240271953109116f0688b0bbba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset delay in seconds. <br /></td></tr>
+<tr class="separator:aa5db03240271953109116f0688b0bbba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05f5c6ebb82b4f1d68fe2c3a4a961ac3"><td class="memItemLeft" align="right" valign="top"><a id="a05f5c6ebb82b4f1d68fe2c3a4a961ac3"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a05f5c6ebb82b4f1d68fe2c3a4a961ac3">reset_on_cost</a> = false</td></tr>
+<tr class="memdesc:a05f5c6ebb82b4f1d68fe2c3a4a961ac3"><td class="mdescLeft">&#160;</td><td class="mdescRight">When this is enabled, the field localisation will reset if the cost is too high. <br /></td></tr>
+<tr class="separator:a05f5c6ebb82b4f1d68fe2c3a4a961ac3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8183337d3f7078e13d0fab2b9040108"><td class="memItemLeft" align="right" valign="top"><a id="ae8183337d3f7078e13d0fab2b9040108"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae8183337d3f7078e13d0fab2b9040108">save_map</a> = false</td></tr>
 <tr class="memdesc:ae8183337d3f7078e13d0fab2b9040108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to enable/disable saving the generated map as a csv file. <br /></td></tr>
@@ -280,10 +304,18 @@ std::chrono::seconds&#160;</td><td class="memItemRight" valign="bottom"><a class
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a4d73dc8e649957dd7b55bc39d4f997d1">state_change_weight</a> = 0.0</td></tr>
 <tr class="memdesc:a4d73dc8e649957dd7b55bc39d4f997d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar weighting of cost associated with change in state. <br /></td></tr>
 <tr class="separator:a4d73dc8e649957dd7b55bc39d4f997d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab913d6391edc0f63d1f78919843a117"><td class="memItemLeft" align="right" valign="top"><a id="aab913d6391edc0f63d1f78919843a117"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aab913d6391edc0f63d1f78919843a117">step_size</a> = 0.0</td></tr>
+<tr class="memdesc:aab913d6391edc0f63d1f78919843a117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step size for the grid search during uncertainty reset. <br /></td></tr>
+<tr class="separator:aab913d6391edc0f63d1f78919843a117"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af48eb9b6efb78db5298c78077c79e712"><td class="memItemLeft" align="right" valign="top"><a id="af48eb9b6efb78db5298c78077c79e712"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af48eb9b6efb78db5298c78077c79e712">use_ground_truth_localisation</a></td></tr>
 <tr class="memdesc:af48eb9b6efb78db5298c78077c79e712"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to enable/disable using ground truth for localisation. <br /></td></tr>
 <tr class="separator:af48eb9b6efb78db5298c78077c79e712"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3000b4348c1c4df7135398c0925f4c28"><td class="memItemLeft" align="right" valign="top"><a id="a3000b4348c1c4df7135398c0925f4c28"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a3000b4348c1c4df7135398c0925f4c28">window_size</a> = 0.0</td></tr>
+<tr class="memdesc:a3000b4348c1c4df7135398c0925f4c28"><td class="mdescLeft">&#160;</td><td class="mdescRight">The window size for the local search during uncertainty reset. <br /></td></tr>
+<tr class="separator:a3000b4348c1c4df7135398c0925f4c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a15457bdf13245bd8f816e5a80e836a"><td class="memItemLeft" align="right" valign="top"><a id="a7a15457bdf13245bd8f816e5a80e836a"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a7a15457bdf13245bd8f816e5a80e836a">xtol_rel</a> = 0.0</td></tr>
 <tr class="memdesc:a7a15457bdf13245bd8f816e5a80e836a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimization parameters. <br /></td></tr>
@@ -300,7 +332,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Mon Jun 16 2025 05:38:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jun 17 2025 08:59:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

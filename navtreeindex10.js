@@ -1,5 +1,8 @@
 var NAVTREEINDEX10 =
 {
+"functions_vars_y.html":[3,3,2,24],
+"functions_vars_z.html":[3,3,2,25],
+"functions_w.html":[3,3,0,22],
 "functions_x.html":[3,3,0,23],
 "functions_y.html":[3,3,0,24],
 "functions_z.html":[3,3,0,25],
@@ -84,7 +87,7 @@ var NAVTREEINDEX10 =
 "namespaceutility_1_1math_1_1angle.html#a2172e5d7bac696b4ddb6dd02cecc7f61":[2,0,7,5,0,6],
 "namespaceutility_1_1math_1_1angle.html#a3711ea87a2dc9adfb4ddfea0d65d42d6":[2,0,7,5,0,8],
 "namespaceutility_1_1math_1_1angle.html#a58909fc949c49bd2efc0a444ecd55560":[2,0,7,5,0,3],
-"namespaceutility_1_1math_1_1angle.html#a8dde4f83b354755ccea82a77538302e3":[2,0,7,5,0,5],
+"namespaceutility_1_1math_1_1angle.html#a681ab160d054924fd5d62d318fe8af3b":[2,0,7,5,0,5],
 "namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599":[2,0,7,5,0,2],
 "namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a":[2,0,7,5,0,1],
 "namespaceutility_1_1math_1_1angle.html#ad2ac2cb47e41dcec768e82c097bd2c90":[2,0,7,5,0,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX10 =
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaf4724a191551c1036f76fdb39f4af9ee":[2,0,3,6,0,1,0,8,2],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eafb9cdcbf54b74da47c8eab195ede93a2":[2,0,3,6,0,1,0,8,28],
 "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eafcbd52600a208760a180c3bd86211617":[2,0,3,6,0,1,0,8,31],
-"pages.html":[],
-"picture__parameter_8cpp.html#afc2700d2eec8e70ce738fdb76d6cf6bf":[2,0,3,6,0,1,1,6],
-"projection_8hpp.html#a00940814ed9686c920cb1953a2946c49":[2,0,7,20,0,0],
-"projection_8hpp.html#a22b611de984047ae8574396e761da7d6":[2,0,7,20,29]
+"pages.html":[]
 };

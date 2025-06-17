@@ -1,5 +1,16 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9b9f19a9142c527f0bf8ac38676e1345":[3,0,3,8,1,1,0,203],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9bb7be4967d57b9308cee85fd237d47a":[3,0,3,8,1,1,0,264],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9c43c6157abd4f5fac8e7e79f639b24f":[3,0,3,8,1,1,0,204],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9c4d5bb2d3f444cca22d5f27c8bbc548":[3,0,3,8,1,1,0,38],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9d16f962927e4da7d2a7159f0dd3f4ca":[3,0,3,8,1,1,0,254],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9f12c9d76841c6b58aa3cd170c49cf16":[3,0,3,8,1,1,0,73],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa0fba18705570b9e2a773b648358ed97":[3,0,3,8,1,1,0,263],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa2a574870d0034232463461bf106bac7":[3,0,3,8,1,1,0,218],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa3ba6f87b2251c157f7bb4e772e31efd":[3,0,3,8,1,1,0,30],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa3e72656dfd3b37d2ff5e95ce18ff9e0":[3,0,3,8,1,1,0,226],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa453cba319739039e059bf2518b140c3":[3,0,3,8,1,1,0,8],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa49b26e5a8cbb5e66f9fa39677222ef9":[3,0,3,8,1,1,0,172],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa596d771e004ab86fbb7c0b40abc8860":[3,0,3,8,1,1,0,55],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa598e05fd34cc1c40b4ea48b7efe4298":[3,0,3,8,1,1,0,150],
@@ -238,16 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a7068d9443583c2b146dc8c1263debf46":[3,0,3,9,2,0,6],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a72ffbbd37882571ac75e58da7d69f336":[3,0,3,9,2,0,2],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a8e551e6b15600030fb6f8442b1f29432":[3,0,3,9,2,0,0],
-"structmodule_1_1purpose_1_1Defender_1_1Config.html#ab4241fe2ad381f18527232bfa57b2176":[3,0,3,9,2,0,1],
-"structmodule_1_1purpose_1_1Defender_1_1Config.html#ae28ebcaaf2ae49defc3b4c4ba6371fbd":[3,0,3,9,2,0,5],
-"structmodule_1_1purpose_1_1DisableIdle.html":[3,0,3,9,3],
-"structmodule_1_1purpose_1_1EnableIdle.html":[3,0,3,9,4],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html":[3,0,3,9,5,0],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a06da364becece8c798be6ab27caea6a3":[3,0,3,9,5,0,5],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a29ddc74e53077bfa902238edf8c46381":[3,0,3,9,5,0,3],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a2d057bfbad78f3b195297ed571a41dd6":[3,0,3,9,5,0,1],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a5e43eb9277fa5d4a2d86619c64992fe0":[3,0,3,9,5,0,6],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a9c0f6ec31ad09bffbff0340d646bdb20":[3,0,3,9,5,0,4],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#ab6fb3fe4b3fdd735c70be7ae559e5113":[3,0,3,9,5,0,2],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#abe33008a0e413b9c81d5bc8a738fe786":[3,0,3,9,5,0,0]
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#ab4241fe2ad381f18527232bfa57b2176":[3,0,3,9,2,0,1]
 };

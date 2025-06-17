@@ -1,5 +1,8 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a9e126a889034fc2b4b3739a8fac96d8e":[3,0,3,12,1,2,7],
+"classmodule_1_1support_1_1logging_1_1DataPlayback.html#afdf0655c0bb4152acc2d8ac919315702":[3,0,3,12,1,2,2],
+"classmodule_1_1support_1_1logging_1_1FileLogHandler.html":[3,0,3,12,1,3],
 "classmodule_1_1support_1_1logging_1_1FileLogHandler.html#a082a63ec1152a57053e8f792e036f24d":[3,0,3,12,1,3,3],
 "classmodule_1_1support_1_1logging_1_1FileLogHandler.html#a806820fd4a4474c66bed6c7e4f69e3eb":[3,0,3,12,1,3,0],
 "classmodule_1_1support_1_1logging_1_1FileLogHandler.html#a8523f131fce1b085aacffc0b306d5c0b":[3,0,3,12,1,3,2],
@@ -246,8 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#ab8b3216f2bdaee9d5f113c3e131acbba":[3,0,3,13,6,10],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#abb7f978fcc43688b3bba938a3ab571e2":[3,0,3,13,6,16],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#ae094cb0ff576629227f83c8a0320fd44":[3,0,3,13,6,17],
-"classmodule_1_1tools_1_1RoboCupConfiguration.html#af0fbcb70e9a4a5c955cefcfad7eb8289":[3,0,3,13,6,14],
-"classmodule_1_1tools_1_1SystemConfiguration.html":[3,0,3,13,7],
-"classmodule_1_1tools_1_1SystemConfiguration.html#a272ed36c30b133276492cb8f4bcfecfd":[3,0,3,13,7,0],
-"classmodule_1_1vision_1_1BallDetector.html":[3,0,3,14,1]
+"classmodule_1_1tools_1_1RoboCupConfiguration.html#af0fbcb70e9a4a5c955cefcfad7eb8289":[3,0,3,13,6,14]
 };

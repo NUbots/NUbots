@@ -1,5 +1,16 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#ae28ebcaaf2ae49defc3b4c4ba6371fbd":[3,0,3,9,2,0,5],
+"structmodule_1_1purpose_1_1DisableIdle.html":[3,0,3,9,3],
+"structmodule_1_1purpose_1_1EnableIdle.html":[3,0,3,9,4],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html":[3,0,3,9,5,0],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a06da364becece8c798be6ab27caea6a3":[3,0,3,9,5,0,5],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a29ddc74e53077bfa902238edf8c46381":[3,0,3,9,5,0,3],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a2d057bfbad78f3b195297ed571a41dd6":[3,0,3,9,5,0,1],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a5e43eb9277fa5d4a2d86619c64992fe0":[3,0,3,9,5,0,6],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a9c0f6ec31ad09bffbff0340d646bdb20":[3,0,3,9,5,0,4],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#ab6fb3fe4b3fdd735c70be7ae559e5113":[3,0,3,9,5,0,2],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#abe33008a0e413b9c81d5bc8a738fe786":[3,0,3,9,5,0,0],
 "structmodule_1_1purpose_1_1LockServo.html":[3,0,3,9,7],
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html":[3,0,3,9,8,0],
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a033860e0019e22b3473990451ae1cd3c":[3,0,3,9,8,0,2],
@@ -238,16 +249,5 @@ var NAVTREEINDEX17 =
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01":[3,0,3,13,6,1,1],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a3eb694104fa7862ff2669e6e33a4863d":[3,0,3,13,6,1,1,0],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a71c415389b72dc4cfad55dfd85a21204":[3,0,3,13,6,1,1,1],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a90b4ba73224408e82ade8a072a3712c1":[3,0,3,13,6,1,1,2],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01ab1a326c06d88bf042f73d70f50197905":[3,0,3,13,6,1,1,3],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a8c3141a3808245753df80c123c7acf1b":[3,0,3,13,6,1,12],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#aa2b416da17fa169281c9e314c9e0df57":[3,0,3,13,6,1,9],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#acc1318f38c9be38b79df11add77ee73d":[3,0,3,13,6,1,6],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#ad00e706746086a0bc42c24c6fe599622":[3,0,3,13,6,1,10],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#aeb20b920652c3e5f9303ad12697389b2":[3,0,3,13,6,1,3],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#af774fbb0846aa941ebe64aca50ea4bf0":[3,0,3,13,6,1,4],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html":[3,0,3,13,6,2],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html#a03ac6bcc6149c8d69ea5fe95f877ff60":[3,0,3,13,6,2,5],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html#a4692047445b4938c3b9d6946c0f5e7e7":[3,0,3,13,6,2,2],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html#a495a23a569b2980572818ced815e46be":[3,0,3,13,6,2,0]
+"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a90b4ba73224408e82ade8a072a3712c1":[3,0,3,13,6,1,1,2]
 };
