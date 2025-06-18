@@ -2,5 +2,5 @@
 log_level: INFO
 
 # Step kick parameters
-kick_velocity_x: 0.6 # Forward velocity during kick (m/s)
+kick_velocity_x: 0.5 # Forward velocity during kick (m/s)
 kick_velocity_y: 0.05 # Lateral velocity during kick (m/s)
