@@ -107,6 +107,7 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+            cfg.kick_time_to_complete = config["kick"]["time_to_complete"].as<double>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -152,19 +153,29 @@ namespace module::skill {
                         // initial phase
                         initial_kick_phase    = sensors.planted_foot_phase;
                         kick_step_in_progress = true;
+                        kick_step_start_time  = NUClear::clock::now();
                         log<INFO>("Starting kick step, initial phase: ", initial_kick_phase);
                     }
 
                     // Check if phase has changed (step completed)
                     else if (sensors.planted_foot_phase != initial_kick_phase) {
-                        log<INFO>("Phase changed from ",
-                                  initial_kick_phase,
-                                  " to ",
-                                  sensors.planted_foot_phase,
-                                  " - kick step complete!");
-                        kick_step_in_progress = false;
-                        emit<Task>(std::make_unique<Done>());
-                        return;
+                        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now()
+                                                                                                - kick_step_start_time)
+                                              .count();
+                        // Only complete the step if time has elapsed
+                        if (elapsed_ms >= cfg.kick_time_to_complete * 1000) {
+                            log<INFO>("Phase changed from ",
+                                      initial_kick_phase,
+                                      " to ",
+                                      sensors.planted_foot_phase,
+                                      " - kick step complete!");
+                            kick_step_in_progress = false;
+                            emit<Task>(std::make_unique<Done>());
+                            return;
+                        }
+                        else {
+                            log<DEBUG>("Phase changed too quickly (", elapsed_ms, "ms) - waiting for full step");
+                        }
                     }
                 }
 

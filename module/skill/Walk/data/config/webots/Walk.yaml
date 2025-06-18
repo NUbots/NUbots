@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 walk:
   # Time for one complete step (in seconds).
@@ -41,3 +41,6 @@ arms:
   left_shoulder_roll: 0.35
   right_elbow: -0.7
   left_elbow: -0.7
+
+kick:
+  time_to_complete: 0.1 # Allowed time to complete the kick mstep (in seconds)

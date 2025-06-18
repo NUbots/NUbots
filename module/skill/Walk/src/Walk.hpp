@@ -59,6 +59,9 @@ namespace module::skill {
 
             /// @brief Walk engine parameters
             utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};
+
+            /// @brief Allowed time to complete the kick step (in seconds)
+            double kick_time_to_complete = 0.3;
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -71,6 +74,7 @@ namespace module::skill {
         bool kick_step_in_progress = false;
         /// @brief Store the kick phase
         message::behaviour::state::WalkState::Phase initial_kick_phase;
+        NUClear::clock::time_point kick_step_start_time;
     };
 }  // namespace module::skill
 
