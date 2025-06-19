@@ -1,0 +1,108 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NUbots' TDP 2020
+%
+% Date: 24.11.2019
+%
+%
+\documentclass{llncs}
+%
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{verbatim}
+%
+\begin{document}
+%
+
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+\addtocmark{The NUbots Qualification Material for RoboCup 2023} % additional mark in the TOC
+%
+%
+\mainmatter              % start of the contributions
+%
+\title{The NUbots Team Extended Abstract 2023}
+%
+\titlerunning{The NUbots Extended Abstract for 2023}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+
+\author{Joe Bailey \and Clayton Carlon \and Stephan Chalup \and Lachlan Court \and Liam Craft \and Jason Disher \and Joel Ferguson \and Luke Haigh \and Utkrisht Jain \and Sam McFarlane \and Alexandre Mendes \and Johanne Montano \and Cameron Murtagh \and Alana Noonan \and Thomas O'Brien \and Jesse Perrin \and Ysobel Sims \and Jesse Williamson}
+       
+%
+\authorrunning{Bailey et al.}   % abbreviated author list (for running head)
+%
+%%%% modified list of auther for the TOC (add the affiliations)
+\tocauthor{
+J. Bailey,
+C. Carlon,
+S. Chalup,
+L. Court,
+L. Craft,
+J. Disher,
+J. Ferguson,
+L. Haigh,
+U. Jain,
+S. McFarlane,
+A. Mendes,
+J. Montano,
+C. Murtagh,
+A. Noonan,
+T. O'Brien, 
+J. Perrin,
+Y. Sims,
+J. Williamson
+}
+
+%
+\institute{Newcastle Robotics Laboratory\\
+College of Engineering, Science and Environment\\
+The University of Newcastle, Callaghan 2308, Australia\\
+Contact: \email{nubots@newcastle.edu.au}\\
+Homepage: \url{http://robots.newcastle.edu.au}}
+%
+
+\maketitle              % typeset the title of the contribution
+
+% * ... include lessons learned from the participation in the previous RoboCup competition
+% * ... highlight major problems the team is trying to solve for the upcoming competition
+\noindent\textbf{Lessons Learned:} NUbots have been competitors in RoboCup since 2002, and have placed first in 2006 in the Four Legged League and in 2008 in the Standard Platform League. Since joining the Humanoid League the team has faced issues in the areas of mechanics, electronics and control theory. The team has improved in these areas, and will be continuing to address them alongside utilising its strengths to overcome software-focused problems. In 2022, the majority of the team had never attended a RoboCup competition. Furthermore, the airline did not send the team's luggage to Thailand until the end of the first competition day. Despite these problems and the inexperience of the team, the team very quickly had functioning robots for the first game. In the future, robots will be taken in carry-on luggage. In previous years, the walk engine was the biggest issue faced by the team. Now, with a stable walk, the major problems to overcome are vision and localisation. In the last competition, the team learned it was important to have a robust grasp of the networking set up on the robots, and since then a tool has been made to simplify the process. In the last competition the team had a problem with the walk engine not running fast enough, however it was discovered that four threads were assigned to the Visual Mesh when the computer only had four threads in total. Since reducing this to two threads, the system has no computational complexity issues. A full debrief of RoboCup Bangkok can be found on NUbook~\cite{nubotsNUbookGit}, the team handbook.\\
+
+% NUbots are the RoboCup team at the University of Newcastle, Australia. In 2023 they will participate in the Kid Size Humanoid League, with their NUgus design based on the iGus platform\cite{Nimbro2018TDP}. NUbots have previously participated in the Standard Platform League (2002-2011), the Kid Size Humanoid League (2012-2017, 2021-2022), and the Teen Size Humanoid league (2018-2019).% rewrite
+
+% The NUbots' research addresses applications of machine learning, computer vision, sensor fusion and hardware. % The team's current research focus is Deep Learning. % This extended abstract gives an overview of developments made by the team and planned developments.
+
+% In the last RoboCup competition, which was held in 2019, NUbots faced issues with localisation and vision.
+
+% The team learnt at the 2019 competition that the vision system lacked robustness. Because of this the team is working towards new ways to get large robust datasets for vision and improving our existing methods. 
+
+% The walk engine used is a legacy walk engine based on the Team Darwin 2013 code release. This has not been suitable for the larger NUgus robot, and so a major problem the team is trying to solve for the 2020 competition is the walk engine. The team has multiple projects being worked on to develop a new walk engine. 
+
+% The team is working to improve the robot hardware and sensor capabilities. Several mechatronics projects are in progress to address issues with these areas.
+
+% * ... outline the plans of major changes the team anticipates to have implemented by the RoboCup 2020 competition
+% * ... describes the status of implementation of the planned changes by the time of submitting the application
+
+\noindent\textbf{Vision Data Collection:}
+Last year, the vision system was retrained with robots to stop it predicting robots as balls. Issues with the data and the size of the network caused poor results. To combat this, NUbots are currently working on a range of automatic vision data collection tools. The team is exploring using GANs and tracking devices to collect data. Fixes and improvements to the semi-synthetic Blender data creation tool~\cite{nubotsNUpbrGit} are being made, using the released robot models from the Virtual Season. This data will be used to train the Visual Mesh~\cite{Houliston2018VisualMR} for better vision performance in 2023, and the team plans to release the dataset publicly for the benefit of the league.\newline 
+
+\noindent\textbf{Odometry and Localisation}:
+The team's localisation abilities were inadequate in 2022. The team is optimising its odometry filter and adding touch sensors to the feet to improve its performance. With existing field line data from the Visual Mesh, which currently performs well, a grid matching algorithm combined with a particle filter is being implemented for localisation before the next competition.\newline
+
+\noindent\textbf{Subcontroller:}
+In 2022, the team was faced with no spare CM-740 subcontrollers heading into the competition. By the end of the competition, the team had two subcontrollers remaining. The deprication of the CM-740 subcontroller has led the team to investigate new options. Two concurrent projects are running to integrate the OpenCR board in the system and to create a new subcontroller that benefits from parallelism and high communication frequency. Both projects are progressing steadily, with completion planned for early 2023.\newline
+
+\noindent\textbf{Hardware:}
+The NUgus platform, based on the iGus platform~\cite{Nimbro2018TDP}, is in the process of modifications. In 2022, there were issues with flex and brittleness with ABS hips. In 2023 all robots will have aluminium hips, to combat this problem. Another problem was servo strain leading to broken servos. Knee springs and an upgrade of the knees to Dynamixel X-Series motors aims to combat this. The robots are unable to get up from their backs, and needed to roll over, due to limited mobility in the legs. An offset for increased mobility around the hips and servo covers to protect the leg servos will assist with this. The team is working on producing a new robot to meet the four robot requirement.\newline
+
+\noindent\textbf{Composable Behaviour System:}
+A new behaviour system that improves transitions and modularity is being developed, called the `Director'. The base algorithm has been implemented and low-level parts of the codebase converted to the new system. The system has similarities to~\cite{Poppinga2022}, with some additions. A soft transition system allows higher level modules to push lower level modules into particular states before they themselves will run. The Director will be used throughout the system, from high level `purpose' modules to lower level `servo' modules. This system is planned to be fully implemented and used in the 2023 RoboCup competition.\newline
+
+% \noindent\textbf{Benchmarking}:
+% Live odometry and vision benchmarking in Webots has been implemented, with localisation and motion to follow. The team plans to implement similar live benchmarking across the systems using motion capture. 
+
+\bibliographystyle{plain}
+% argument is your BibTeX string definitions and bibliography database(s)
+\bibliography{nubots}
+
+\end{document}
