@@ -129,7 +129,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-project-15.0.7.src.tar.xz \
     --build-system cmake \
     --configure-path "llvm" \
-    --patch https://gist.githubusercontent.com/ZeoNyph/415e3cf6230c791e96d1451357781261/raw/01d278c37e08f9db006259a41fe07a77b3e14972/llvm_patch.patch \
+    --patch https://gist.githubusercontent.com/ZeoNyph/415e3cf6230c791e96d1451357781261/raw/1a014be3fad04de7a9286019948cfd367952f1da/llvm_patch.patch \
     --jobs 8\
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
@@ -141,7 +141,8 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     -DLLVM_HOST_TRIPLE=arm-linux-gnueabihf \
     -DLLVM_TARGETS_TO_BUILD=ARM
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v15.0.4.tar.gz\
+RUN install-from-source http://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/2d4f2e7a7968392de017fcd3e4b503a75f0c12d2.tar.gz\
+    --jobs 8 \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
@@ -158,7 +159,7 @@ RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/
 RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.22.1.tar.gz \
     --build-system cmake \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/vulkan-sdk-1.4.313.0.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/0e71067.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2025.1.rc1.tar.gz \
     -DSPIRV_WERROR=Off \
     -DBUILD_SHARED_LIBS=ON \
@@ -173,7 +174,8 @@ RUN pip install pyyaml mako
 
 # Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/v2.11.7.tar.gz \
-    --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/ea6a0810d885574f11acd910da36eff19d6fc805/built_tools_target.patch \
+    --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch\
+    --jobs 12 \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
@@ -188,8 +190,9 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 # gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.7.2.tar.gz\
     --build-system cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DRUN_TEST_SUITE=OFF
 
 # Libpci access and libdrm for communicating with graphics hardware
@@ -201,18 +204,21 @@ RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz
 
 # Libva and the iHD driver for hardware compression
 RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
-RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
+RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-25.1.4.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
     -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON
+    -DENABLE_NONFREE_KERNELS=ON \
+    -DCMAKE_C_FLAGS="-w" \
+    -DCMAKE_CXX_FLAGS="-w"
 
 # Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
+RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/25.18.33578.6.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
