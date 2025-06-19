@@ -27,8 +27,6 @@
 
 #include "SensorFilter.hpp"
 
-#include "MotionModel.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/localisation/Field.hpp"
