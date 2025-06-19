@@ -29,31 +29,22 @@
 
 #include <algorithm>
 #include <nuclear>
-#include <yaml-cpp/yaml.h>
 
 #include "extension/Behaviour.hpp"
 
-#include "message/actuation/LimbsIK.hpp"
 #include "message/actuation/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/skill/ControlFoot.hpp"
 
-#include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/math/comparison.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 #define TORQUE_ENABLED 100
 
 namespace module::actuation {
 
-    using message::actuation::LeftLegIK;
-    using message::actuation::RightLegIK;
     using message::actuation::ServoState;
     using message::input::Sensors;
-    using message::skill::ControlLeftFoot;
-    using message::skill::ControlRightFoot;
 
     using utility::input::LimbID;
     using utility::nusight::graph;
@@ -68,19 +59,19 @@ namespace module::actuation {
             std::string mode = "IK";
 
             /// @brief Map between ServoID and ServoState
-            std::map<utility::input::ServoID, message::actuation::ServoState> servo_states = {
-                {utility::input::ServoID::L_HIP_YAW, message::actuation::ServoState()},
-                {utility::input::ServoID::L_HIP_ROLL, message::actuation::ServoState()},
-                {utility::input::ServoID::L_HIP_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::L_KNEE, message::actuation::ServoState()},
-                {utility::input::ServoID::L_ANKLE_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::L_ANKLE_ROLL, message::actuation::ServoState()},
-                {utility::input::ServoID::R_HIP_YAW, message::actuation::ServoState()},
-                {utility::input::ServoID::R_HIP_ROLL, message::actuation::ServoState()},
-                {utility::input::ServoID::R_HIP_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::R_KNEE, message::actuation::ServoState()},
-                {utility::input::ServoID::R_ANKLE_PITCH, message::actuation::ServoState()},
-                {utility::input::ServoID::R_ANKLE_ROLL, message::actuation::ServoState()},
+            std::map<utility::input::ServoID, ServoState> servo_states = {
+                {utility::input::ServoID::L_HIP_YAW, ServoState()},
+                {utility::input::ServoID::L_HIP_ROLL, ServoState()},
+                {utility::input::ServoID::L_HIP_PITCH, ServoState()},
+                {utility::input::ServoID::L_KNEE, ServoState()},
+                {utility::input::ServoID::L_ANKLE_PITCH, ServoState()},
+                {utility::input::ServoID::L_ANKLE_ROLL, ServoState()},
+                {utility::input::ServoID::R_HIP_YAW, ServoState()},
+                {utility::input::ServoID::R_HIP_ROLL, ServoState()},
+                {utility::input::ServoID::R_HIP_PITCH, ServoState()},
+                {utility::input::ServoID::R_KNEE, ServoState()},
+                {utility::input::ServoID::R_ANKLE_PITCH, ServoState()},
+                {utility::input::ServoID::R_ANKLE_ROLL, ServoState()},
             };
             /// @brief Startup gain before setting the desired gains
             double startup_gain = 0;
@@ -89,11 +80,6 @@ namespace module::actuation {
             /// @brief Desired gains for each servo
             std::map<std::string, double> desired_gains{};
         } cfg;
-
-
-    public:
-        /// @brief Called by the powerplant to build and setup the FootController reactor.
-        explicit FootController(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Foot controller logic
         template <typename FootControlTask, typename IKTask>
@@ -125,6 +111,10 @@ namespace module::actuation {
                 throw std::runtime_error("Invalid mode");
             }
         }
+
+    public:
+        /// @brief Called by the powerplant to build and setup the FootController reactor.
+        explicit FootController(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::actuation

@@ -32,7 +32,6 @@
 #include "extension/Behaviour.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
-#include "message/input/Sensors.hpp"
 
 #include "utility/actuation/ServoMap.hpp"
 #include "utility/input/ServoID.hpp"
@@ -41,7 +40,7 @@
 namespace module::actuation {
     using message::actuation::ServoCommand;
     using message::actuation::ServoTarget;
-    using message::input::Sensors;
+
     using utility::input::ServoID;
     using utility::nusight::graph;
 
