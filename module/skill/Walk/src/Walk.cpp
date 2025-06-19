@@ -241,6 +241,7 @@ namespace module::skill {
                                walk_task.velocity_target.z()));
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
+                    emit(graph("Kick step in progress", kick_step_in_progress ? 1 : 0));
 
                     // Sample trajectory points
                     const int num_samples = 10;
