@@ -4,7 +4,7 @@ A defending orientated robot.
 
 ## Description
 
-The robot hangs back in line with the edge of the penalty box, in line with vector between the goal and the ball.
+The robot hangs back in line with the edge of the penalty box, in line with vector between our own goal and the ball.
 
 ## Usage
 
