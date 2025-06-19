@@ -107,7 +107,8 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
-            cfg.kick_time_to_complete = config["kick"]["time_to_complete"].as<double>();
+            cfg.max_time = config["kick"]["max_time"].as<double>();
+            cfg.min_time = config["kick"]["min_time"].as<double>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -151,31 +152,26 @@ namespace module::skill {
                     // If this is the first time processing this kick task
                     if (!kick_step_in_progress) {
                         // initial phase
-                        initial_kick_phase    = sensors.planted_foot_phase;
+                        initial_kick_phase    = walk_generator.get_phase();
                         kick_step_in_progress = true;
                         kick_step_start_time  = NUClear::clock::now();
                         log<INFO>("Starting kick step, initial phase: ", initial_kick_phase);
                     }
 
-                    // Check if phase has changed (step completed)
-                    else if (sensors.planted_foot_phase != initial_kick_phase) {
-                        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now()
-                                                                                                - kick_step_start_time)
-                                              .count();
-                        // Only complete the step if time has elapsed
-                        if (elapsed_ms >= cfg.kick_time_to_complete * 1000) {
-                            log<INFO>("Phase changed from ",
-                                      initial_kick_phase,
-                                      " to ",
-                                      sensors.planted_foot_phase,
-                                      " - kick step complete!");
-                            kick_step_in_progress = false;
-                            emit<Task>(std::make_unique<Done>());
-                            return;
-                        }
-                        else {
-                            log<DEBUG>("Phase changed too quickly (", elapsed_ms, "ms) - waiting for full step");
-                        }
+                    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now()
+                                                                                            - kick_step_start_time)
+                                          .count();
+
+                    // Complete on phase change (primary) OR timeout (safety)
+                    bool phase_changed    = (walk_generator.get_phase() != initial_kick_phase);
+                    bool min_time_elapsed = elapsed_ms >= (cfg.min_time * 1000);  // Minimum time for kick to develop
+                    bool max_time_elapsed = elapsed_ms >= (cfg.max_time * 1000);  // Safety timeout
+                    log<INFO>("Kick phase: ", int(walk_generator.get_phase()));
+                    if ((phase_changed && min_time_elapsed) || max_time_elapsed) {
+                        log<INFO>("Kick complete - phase_changed: ", phase_changed, " elapsed: ", elapsed_ms, "ms");
+                        kick_step_in_progress = false;
+                        emit<Task>(std::make_unique<Done>());
+                        return;
                     }
                 }
 

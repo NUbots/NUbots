@@ -61,7 +61,8 @@ namespace module::skill {
             utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};
 
             /// @brief Allowed time to complete the kick step (in seconds)
-            double kick_time_to_complete = 0.3;
+            double max_time = 0.3;
+            double min_time = 0.1;
         } cfg;
 
         /// @brief Last time we updated the walk engine
