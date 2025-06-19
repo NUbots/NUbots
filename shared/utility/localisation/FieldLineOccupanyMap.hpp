@@ -46,7 +46,7 @@ namespace utility::localisation {
             message::vision::FieldIntersection::IntersectionType::UNKNOWN;
     };
 
-    OccupancyMap<double> setup_fieldline_distance_map(const FieldDescription& fd, double grid_size) {
+    inline OccupancyMap<double> setup_fieldline_distance_map(const FieldDescription& fd, double grid_size) {
         // Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};
 
@@ -174,7 +174,7 @@ namespace utility::localisation {
         return fieldline_distance_map;
     }
 
-    std::vector<Landmark> setup_field_landmarks(const FieldDescription& fd) {
+    inline std::vector<Landmark> setup_field_landmarks(const FieldDescription& fd) {
         /// List of landmarks (field intersections rLFf) in field space
         std::vector<Landmark> landmarks{};
 

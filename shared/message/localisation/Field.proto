@@ -43,10 +43,14 @@ message Field {
     mat3 covariance = 2;
     /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
     double uncertainty = 3;
+    /// Cost of the field localisation hypothesis
+    double cost = 4;
     /// Vector of particles representing the robots pose hypothesis (x, y, theta)
-    repeated vec3 particles = 4;
+    repeated vec3 particles = 5;
     /// Association lines between observations and landmarks
-    repeated Line association_lines = 5;
+    repeated Line association_lines = 6;
 }
 
 message ResetFieldLocalisation {}
+message UncertaintyResetFieldLocalisation {}
+message FinishReset {}
