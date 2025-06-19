@@ -43,4 +43,5 @@ arms:
   left_elbow: -0.7
 
 kick:
-  time_to_complete: 0.1 # Allowed time to complete the kick mstep (in seconds)
+  max_time: 0.3 # Max time to complete the kick mstep (in seconds)
+  min_time: 0.04 # Min time to complete the kick mstep (in seconds)
