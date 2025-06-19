@@ -224,17 +224,22 @@ var annotated_dup =
       ] ],
       [ "purpose", null, [
         [ "AllRounder", "classmodule_1_1purpose_1_1AllRounder.html", "classmodule_1_1purpose_1_1AllRounder" ],
+        [ "Attack", "classmodule_1_1purpose_1_1Attack.html", "classmodule_1_1purpose_1_1Attack" ],
         [ "BoundingBox", "structmodule_1_1purpose_1_1BoundingBox.html", "structmodule_1_1purpose_1_1BoundingBox" ],
+        [ "Defend", "classmodule_1_1purpose_1_1Defend.html", "classmodule_1_1purpose_1_1Defend" ],
         [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
         [ "DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
         [ "EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],
+        [ "FieldPlayer", "classmodule_1_1purpose_1_1FieldPlayer.html", "classmodule_1_1purpose_1_1FieldPlayer" ],
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "LockServo", "structmodule_1_1purpose_1_1LockServo.html", null ],
         [ "PS3Walk", "classmodule_1_1purpose_1_1PS3Walk.html", "classmodule_1_1purpose_1_1PS3Walk" ],
+        [ "ReadyAttack", "classmodule_1_1purpose_1_1ReadyAttack.html", "classmodule_1_1purpose_1_1ReadyAttack" ],
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
+        [ "SoccerNew", "classmodule_1_1purpose_1_1SoccerNew.html", "classmodule_1_1purpose_1_1SoccerNew" ],
         [ "StartSoccer", "structmodule_1_1purpose_1_1StartSoccer.html", null ],
         [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
@@ -472,9 +477,6 @@ var annotated_dup =
         [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
         [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
         [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ]
-      ] ],
-      [ "strategy", null, [
-        [ "Possession", "structutility_1_1strategy_1_1Possession.html", "structutility_1_1strategy_1_1Possession" ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [
         [ "ANSISGR", "structutility_1_1strutil_1_1ANSISGR.html", [
