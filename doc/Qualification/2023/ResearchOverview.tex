@@ -1,0 +1,117 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+% \section{Synthetic Data Techniques}
+
+% \subsection{Automatic Annotation using Tracking Devices}
+% \subsubsection{Motivation}
+% \subsubsection{Algorithm}
+% \subsubsection{Application: Robot Soccer Vision Data}
+
+% \subsection{Generative Adversarial Networks}
+% \subsubsection{Background}
+% \subsubsection{Algorithm/s}
+% \subsubsection{Application: Robot Soccer Vision Data}
+% \subsubsection{Application: Realistic Vision in Simulation}
+
+% \subsection{Experiments}
+% \subsubsection{Ablation Study with Synthetic Data Techniques for Computer Vision}
+% \subsubsection{Results}
+% \subsubsection{Discussion}
+
+% \subsection{Summary}
+
+
+\begin{document}
+%
+\title{NUbots Research Overview 2022}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Joe Bailey \and Darcy Byrne \and Clayton Carlon \and Stephan Chalup \and Lachlan Court \and Liam Craft \and
+    Jason Disher \and Joel Ferguson \and Thomas Legge \and Sam McFarlane \and Alexandre Mendes \and Cameron Murtagh \and Alana Noonan \and Thomas O'Brien \and Jesse Perrin \and Ysobel Sims \and Bryce Tuppurainen}
+%
+\authorrunning{J. Bailey et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{The University of Newcastle, Callaghan, NSW, Australia \\
+\email{nubots@newcastle.edu.au}}
+% \url{http://www.springer.com/gp/computer-science/lncs} \and
+% ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+% \email{\{abc,lncs\}@uni-heidelberg.de}}
+% %
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+The NUbots Robotics Research group have been working on projects across a broad range of areas focused on the development on their soccer-playing humanoid robots. The main focus of the team in the research space is machine learning, with a focus on computer vision. The data collection research project involves using motion tracking generative adversarial networks to collect more data to train the Visual Mesh without having to manually collect and annotate data. 
+% \keywords{Computer Vision \and CycleGAN \and Machine Learning.}
+\end{abstract}
+% %
+%
+%
+\section*{Data Collection Methods}
+Manual annotation of data takes time and is monotonous. The team is developing methods to create diverse synthetic and real annotated data for training deep learning models for computer vision. The current vision system utilises the Visual Mesh for object detection.
+
+The team is improving on its computer generated data in Blender. The Blender tool \cite{nubotsNUpbrGit} uses models and HDR images and randomly generates environments which it can automatically annotate based on the positions of objects in the scene. The RoboCup Virtual Season resulted in the release of robot models by the participating teams. This has facilitated the addition of a diverse range of robots in the scene, and the ability to put textures corresponding to team colours on the robot models. Work is being done on bridging the gap between the synthetic data from Blender and the real robot's cameras.
+
+Another avenue being explored for dataset generation is the use of Generative Adversarial Networks (GANs) \cite{Goodfellow2014}. GANs have the potential to perform style transfer on unpaired data. The team is training GANs to perform style transfer between the scenes in Blender and the scenes in Webots (a simulator) to realistic scenes. COCO-FUNIT \cite{saito2020coco} and TuiGAN \cite{Lin2020} are being explored. The addition of attention is also being explored, by making the networks focus on non-background features with the segmentation mask from Webots or the Blender tool. 
+
+A third avenue for dataset generation is automatic annotating using tracking devices. Tracking devices on objects in the real world can be used to create a digital model of the environment. This digital model is then used to generate segmentation masks. Corresponding images for the masks are obtained through the robot's cameras. 
+
+A fourth method is training of a large, slow network to label data to then train the Visual Mesh.
+
+These methods are currently being developed or explored and the team aims to finish them over the next year. The methods could apply to any situation where data is needed for object detection. 
+
+\section*{Speech Recognition}
+
+A third year Computer Science project in speech recognition has been researching the requirements of audio-to-speech systems for low-resource robots. These systems must be real-time, lightweight and simple to use and maintain. Further work will continue next year on natural language processing, audio localisation and filtering of noise. For soccer-playing robots, audio is important for understanding the referee, particularly for when the game starts. It could also be used for object localisation with audio.
+
+Speech recognition has applications in domestic and consumer robotics.
+
+\section*{Motion}
+
+Development of a ZMP walk engine with a novel path planning method has been developed during 2022. 
+
+\section*{Electronics}
+
+Subcontroller.
+
+Touch sensors.
+
+\section*{Organisational}
+The team has put time over the last few years in building strong foundations in team structure, recruitment strategies, and training methods. 
+
+The team structure has become more concrete after identifying key areas for development; hardware, localisation and odometry, motion, vision, behaviour, development operations, and development tools. By ensuring that each of these areas are considered during development planning stages, no area gets neglected and the chain of knowledge is kept intact. It also puts into perspective for team members what areas are required for the given problem of soccer-playing humanoid robots, and gives them an understanding of where they fit in with the team and who is working on similar problems.
+
+Recruitment has undergone major changes based on empirical research across recruitment drives. It was discovered that key recruitment avenues were untapped in the past, primarily course advertising. Discord channels for students in CIT and Engineering, which did not exist previously, became good sources of recruits. Through exploring these avenues, NUbots increased its advertising reach from on average ten students applying per recruitment round to fourty four students in the 2021 recruitment drive. 
+
+Traditionally, retention rate has been low. Multiple strategies have been applied to improve this retention rate. Since a lot of students would join the team and not do any technical work, a technical task was added to the recruitment process. This involved setting up the codebase and making a simulated robot walk, and doing a short research paper on autonomous humanoid soccer-playing robots. Not only did this remove people from the recruitment process who would not do anything on the team, but it also resulted in students joining with foundational knowledge on setting up the code and having some idea of what might be involved in the project as a whole. 
+
+In 2022, data from previous recruitment cycles indicated that certain advertising avenues were significantly more likely to attract students who would stay on the team. These were used exclusively in the 2022 recruitment drive. After three weeks, eight out of ten recruits are still actively working and coming into the NUbots laboratory each week. 
+
+Over 2020 and 2021, the ability of team members to learn skills and be able to contribute to the team was greatly impacted by lockdowns and online learning preventing students from being present in the laboratory space and learning from more experienced team members. Multiple strategies were used to engage team members and train them during this time. One avenue was the development of documentation on the team's website \cite{nubotsNUbookGit}, which has been received positively. Another method was Zoom seminars and workshops, however it was determined that for most students these were hard to engage with online. These resources were developed into face-to-face workshops, which have been trialed when possible. These have received good engagement and the team plans to develop more of these workshops in the future.
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+\bibliographystyle{splncs04}
+\bibliography{nubots}
+
+\end{document}
