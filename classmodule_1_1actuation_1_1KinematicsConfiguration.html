@@ -202,25 +202,296 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
-<tr class="memitem:ae5c63152e073ce2e92e419bc7d29adc9"><td class="memItemLeft" align="right" valign="top"><a id="ae5c63152e073ce2e92e419bc7d29adc9"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>configure</b> (message::actuation::KinematicsModel &amp;model, const ::<a class="el" href="structextension_1_1Configuration.html">extension::Configuration</a> &amp;objNugusModel)</td></tr>
-<tr class="separator:ae5c63152e073ce2e92e419bc7d29adc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5451430453b265814e49ef364f7c2ac"><td class="memItemLeft" align="right" valign="top"><a id="af5451430453b265814e49ef364f7c2ac"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>configureArm</b> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;objArm)</td></tr>
-<tr class="separator:af5451430453b265814e49ef364f7c2ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af29300378cd70a4794fed816f28751a0"><td class="memItemLeft" align="right" valign="top"><a id="af29300378cd70a4794fed816f28751a0"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>configureHead</b> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;objHead)</td></tr>
-<tr class="separator:af29300378cd70a4794fed816f28751a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8598e909da4a62b5395fb33a9f67b924"><td class="memItemLeft" align="right" valign="top"><a id="a8598e909da4a62b5395fb33a9f67b924"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>configureLeg</b> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;objLeg)</td></tr>
-<tr class="separator:a8598e909da4a62b5395fb33a9f67b924"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a831a98eecb18a223e51e029357758496"><td class="memItemLeft" align="right" valign="top"><a id="a831a98eecb18a223e51e029357758496"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>configureMassModel</b> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;objMassModel)</td></tr>
-<tr class="separator:a831a98eecb18a223e51e029357758496"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed99065ba423aaf4e0d91b1091c5e713"><td class="memItemLeft" align="right" valign="top"><a id="aed99065ba423aaf4e0d91b1091c5e713"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>configureTensorModel</b> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;objTensorModel)</td></tr>
-<tr class="separator:aed99065ba423aaf4e0d91b1091c5e713"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab19a5e65e15d571cd9446cd27927dab5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#ab19a5e65e15d571cd9446cd27927dab5">configure</a> (message::actuation::KinematicsModel &amp;model, const ::<a class="el" href="structextension_1_1Configuration.html">extension::Configuration</a> &amp;nugus_model)</td></tr>
+<tr class="memdesc:ab19a5e65e15d571cd9446cd27927dab5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Figures the kinematics model values by calling subfunctions for each part of the robot.  <a href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#ab19a5e65e15d571cd9446cd27927dab5">More...</a><br /></td></tr>
+<tr class="separator:ab19a5e65e15d571cd9446cd27927dab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7f4a96a5dea659f4d960852be40fe90"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#ad7f4a96a5dea659f4d960852be40fe90">configure_arm</a> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;arm)</td></tr>
+<tr class="memdesc:ad7f4a96a5dea659f4d960852be40fe90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Figures the arm kinematics model values.  <a href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#ad7f4a96a5dea659f4d960852be40fe90">More...</a><br /></td></tr>
+<tr class="separator:ad7f4a96a5dea659f4d960852be40fe90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46fcb019ef0313bd4e74e1ef2c9077e7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#a46fcb019ef0313bd4e74e1ef2c9077e7">configure_head</a> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;head)</td></tr>
+<tr class="memdesc:a46fcb019ef0313bd4e74e1ef2c9077e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Figures the head kinematics model values.  <a href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#a46fcb019ef0313bd4e74e1ef2c9077e7">More...</a><br /></td></tr>
+<tr class="separator:a46fcb019ef0313bd4e74e1ef2c9077e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94e4afb6037191becc3c0768fed1ac4a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#a94e4afb6037191becc3c0768fed1ac4a">configure_leg</a> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;leg)</td></tr>
+<tr class="memdesc:a94e4afb6037191becc3c0768fed1ac4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Figures the leg kinematics model values.  <a href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#a94e4afb6037191becc3c0768fed1ac4a">More...</a><br /></td></tr>
+<tr class="separator:a94e4afb6037191becc3c0768fed1ac4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af358f5563c3f54d512d106f40fa58ea7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#af358f5563c3f54d512d106f40fa58ea7">configure_mass_model</a> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;mass_model)</td></tr>
+<tr class="memdesc:af358f5563c3f54d512d106f40fa58ea7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Figures the mass model values.  <a href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#af358f5563c3f54d512d106f40fa58ea7">More...</a><br /></td></tr>
+<tr class="separator:af358f5563c3f54d512d106f40fa58ea7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad227891f31ac3308c589fb1987e3189"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#aad227891f31ac3308c589fb1987e3189">configure_tensor_model</a> (message::actuation::KinematicsModel &amp;model, const YAML::Node &amp;tensor_model)</td></tr>
+<tr class="memdesc:aad227891f31ac3308c589fb1987e3189"><td class="mdescLeft">&#160;</td><td class="mdescRight">Figures the tensor model values.  <a href="classmodule_1_1actuation_1_1KinematicsConfiguration.html#aad227891f31ac3308c589fb1987e3189">More...</a><br /></td></tr>
+<tr class="separator:aad227891f31ac3308c589fb1987e3189"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab19a5e65e15d571cd9446cd27927dab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab19a5e65e15d571cd9446cd27927dab5">&#9670;&nbsp;</a></span>configure()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::actuation::KinematicsConfiguration::configure </td>
+          <td>(</td>
+          <td class="paramtype">message::actuation::KinematicsModel &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ::<a class="el" href="structextension_1_1Configuration.html">extension::Configuration</a> &amp;&#160;</td>
+          <td class="paramname"><em>nugus_model</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Figures the kinematics model values by calling subfunctions for each part of the robot. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">model</td><td>The KinematicsModel message to populate </td></tr>
+    <tr><td class="paramname">nugus_model</td><td>The configuration of the NUgus model </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad7f4a96a5dea659f4d960852be40fe90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7f4a96a5dea659f4d960852be40fe90">&#9670;&nbsp;</a></span>configure_arm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::actuation::KinematicsConfiguration::configure_arm </td>
+          <td>(</td>
+          <td class="paramtype">message::actuation::KinematicsModel &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const YAML::Node &amp;&#160;</td>
+          <td class="paramname"><em>arm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Figures the arm kinematics model values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">model</td><td>The KinematicsModel message to populate </td></tr>
+    <tr><td class="paramname">arm</td><td>The configuration of the arm </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a46fcb019ef0313bd4e74e1ef2c9077e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46fcb019ef0313bd4e74e1ef2c9077e7">&#9670;&nbsp;</a></span>configure_head()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::actuation::KinematicsConfiguration::configure_head </td>
+          <td>(</td>
+          <td class="paramtype">message::actuation::KinematicsModel &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const YAML::Node &amp;&#160;</td>
+          <td class="paramname"><em>head</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Figures the head kinematics model values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">model</td><td>The KinematicsModel message to populate </td></tr>
+    <tr><td class="paramname">head</td><td>The configuration of the head </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a94e4afb6037191becc3c0768fed1ac4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94e4afb6037191becc3c0768fed1ac4a">&#9670;&nbsp;</a></span>configure_leg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::actuation::KinematicsConfiguration::configure_leg </td>
+          <td>(</td>
+          <td class="paramtype">message::actuation::KinematicsModel &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const YAML::Node &amp;&#160;</td>
+          <td class="paramname"><em>leg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Figures the leg kinematics model values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">model</td><td>The KinematicsModel message to populate </td></tr>
+    <tr><td class="paramname">leg</td><td>The configuration of the leg </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af358f5563c3f54d512d106f40fa58ea7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af358f5563c3f54d512d106f40fa58ea7">&#9670;&nbsp;</a></span>configure_mass_model()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::actuation::KinematicsConfiguration::configure_mass_model </td>
+          <td>(</td>
+          <td class="paramtype">message::actuation::KinematicsModel &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const YAML::Node &amp;&#160;</td>
+          <td class="paramname"><em>mass_model</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Figures the mass model values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">model</td><td>The KinematicsModel message to populate </td></tr>
+    <tr><td class="paramname">mass_model</td><td>The configuration of the mass model </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aad227891f31ac3308c589fb1987e3189"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad227891f31ac3308c589fb1987e3189">&#9670;&nbsp;</a></span>configure_tensor_model()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::actuation::KinematicsConfiguration::configure_tensor_model </td>
+          <td>(</td>
+          <td class="paramtype">message::actuation::KinematicsModel &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const YAML::Node &amp;&#160;</td>
+          <td class="paramname"><em>tensor_model</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Figures the tensor model values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">model</td><td>The KinematicsModel message to populate </td></tr>
+    <tr><td class="paramname">tensor_model</td><td>The configuration of the tensor model </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/actuation/KinematicsConfiguration/src/<a class="el" href="KinematicsConfiguration_8hpp_source.html">KinematicsConfiguration.hpp</a></li>
 <li>module/actuation/KinematicsConfiguration/src/KinematicsConfiguration.cpp</li>
@@ -231,7 +502,7 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>configureTenso
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>actuation</b></li><li class="navelem"><a class="el" href="classmodule_1_1actuation_1_1KinematicsConfiguration.html">KinematicsConfiguration</a></li>
-    <li class="footer">Generated on Thu Jun 19 2025 11:07:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jun 19 2025 23:15:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

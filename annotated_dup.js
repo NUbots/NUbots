@@ -94,15 +94,11 @@ var annotated_dup =
           [ "Robot", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html", "structmodule_1_1input_1_1gamecontroller_1_1Robot" ],
           [ "Team", "structmodule_1_1input_1_1gamecontroller_1_1Team.html", "structmodule_1_1input_1_1gamecontroller_1_1Team" ]
         ] ],
-        [ "MeasurementType", null, [
-          [ "FLAT_FOOT_TRANSLATION", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__TRANSLATION.html", null ]
-        ] ],
         [ "Camera", "classmodule_1_1input_1_1Camera.html", "classmodule_1_1input_1_1Camera" ],
         [ "CameraContext", "structmodule_1_1input_1_1CameraContext.html", "structmodule_1_1input_1_1CameraContext" ],
         [ "FakeCamera", "classmodule_1_1input_1_1FakeCamera.html", "classmodule_1_1input_1_1FakeCamera" ],
         [ "GameController", "classmodule_1_1input_1_1GameController.html", "classmodule_1_1input_1_1GameController" ],
         [ "ImageDecompressor", "classmodule_1_1input_1_1ImageDecompressor.html", "classmodule_1_1input_1_1ImageDecompressor" ],
-        [ "MotionModel", "classmodule_1_1input_1_1MotionModel.html", "classmodule_1_1input_1_1MotionModel" ],
         [ "NatNet", "classmodule_1_1input_1_1NatNet.html", "classmodule_1_1input_1_1NatNet" ],
         [ "ReadData", "structmodule_1_1input_1_1ReadData.html", "structmodule_1_1input_1_1ReadData" ],
         [ "ReadData< Device >", "structmodule_1_1input_1_1ReadData_3_01Device_01_4.html", "structmodule_1_1input_1_1ReadData_3_01Device_01_4" ],

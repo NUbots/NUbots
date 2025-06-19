@@ -169,9 +169,9 @@ $(document).ready(function(){initNavTree('classmodule_1_1actuation_1_1Kinematics
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classmodule_1_1actuation_1_1Kinematics-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::actuation::Kinematics Class Reference</div>  </div>
@@ -210,12 +210,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5c06e39205a7d8dc320a1831accc528b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1Kinematics.html#a5c06e39205a7d8dc320a1831accc528b">Kinematics</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:a5c06e39205a7d8dc320a1831accc528b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1actuation_1_1Kinematics.html">Kinematics</a> reactor.  <a href="classmodule_1_1actuation_1_1Kinematics.html#a5c06e39205a7d8dc320a1831accc528b">More...</a><br /></td></tr>
 <tr class="separator:a5c06e39205a7d8dc320a1831accc528b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f6755b6573c355234bf721f129960dd"><td class="memItemLeft" align="right" valign="top">InverseKinematicsMethod&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1Kinematics.html#a2f6755b6573c355234bf721f129960dd">ik_string_to_method</a> (const std::string &amp;method_string)</td></tr>
-<tr class="memdesc:a2f6755b6573c355234bf721f129960dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a string to an InverseKinematicsMethod.  <a href="classmodule_1_1actuation_1_1Kinematics.html#a2f6755b6573c355234bf721f129960dd">More...</a><br /></td></tr>
-<tr class="separator:a2f6755b6573c355234bf721f129960dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a715cc63d464deccc4d37540ee63328b2"><td class="memItemLeft" align="right" valign="top">tinyrobotics::InverseKinematicsMethod&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1Kinematics.html#a715cc63d464deccc4d37540ee63328b2">ik_string_to_method</a> (const std::string &amp;method_string)</td></tr>
+<tr class="memdesc:a715cc63d464deccc4d37540ee63328b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a string to a tinyrobotics InverseKinematicsMethod.  <a href="classmodule_1_1actuation_1_1Kinematics.html#a715cc63d464deccc4d37540ee63328b2">More...</a><br /></td></tr>
+<tr class="separator:a715cc63d464deccc4d37540ee63328b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ad7b1a85dfc1c7fdbfa06ec4a2744845d"><td class="memItemLeft" align="right" valign="top"><a id="ad7b1a85dfc1c7fdbfa06ec4a2744845d"></a>
+struct <a class="el" href="structmodule_1_1actuation_1_1Kinematics_1_1Config.html">module::actuation::Kinematics::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:ad7b1a85dfc1c7fdbfa06ec4a2744845d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c73536a3eb74f5d5de9e8df770c1f70"><td class="memItemLeft" align="right" valign="top"><a id="a2c73536a3eb74f5d5de9e8df770c1f70"></a>
 tinyrobotics::Model&lt; double, <a class="el" href="classmodule_1_1actuation_1_1Kinematics.html#aee7d7fd4b8c9f291ddf6dd863ccfb44b">n_joints</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1Kinematics.html#a2c73536a3eb74f5d5de9e8df770c1f70">nugus_model_left</a></td></tr>
 <tr class="memdesc:a2c73536a3eb74f5d5de9e8df770c1f70"><td class="mdescLeft">&#160;</td><td class="mdescRight">tinyrobotics model of the NUgus robot for left leg IK <br /></td></tr>
@@ -229,18 +235,12 @@ tinyrobotics::InverseKinematicsOptions&lt; double, <a class="el" href="classmodu
 <tr class="memdesc:ae6732ee0313de027c0b34e66bca32a5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">tinyrobotics inverse kinematics options <br /></td></tr>
 <tr class="separator:ae6732ee0313de027c0b34e66bca32a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
 <tr class="memitem:aee7d7fd4b8c9f291ddf6dd863ccfb44b"><td class="memItemLeft" align="right" valign="top"><a id="aee7d7fd4b8c9f291ddf6dd863ccfb44b"></a>
 static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1actuation_1_1Kinematics.html#aee7d7fd4b8c9f291ddf6dd863ccfb44b">n_joints</a> = 20</td></tr>
 <tr class="memdesc:aee7d7fd4b8c9f291ddf6dd863ccfb44b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of actuatable joints in the NUgus robot. <br /></td></tr>
 <tr class="separator:aee7d7fd4b8c9f291ddf6dd863ccfb44b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
-Private Attributes</h2></td></tr>
-<tr class="memitem:ad7b1a85dfc1c7fdbfa06ec4a2744845d"><td class="memItemLeft" align="right" valign="top"><a id="ad7b1a85dfc1c7fdbfa06ec4a2744845d"></a>
-struct <a class="el" href="structmodule_1_1actuation_1_1Kinematics_1_1Config.html">module::actuation::Kinematics::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
-<tr class="separator:ad7b1a85dfc1c7fdbfa06ec4a2744845d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -326,30 +326,38 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a2f6755b6573c355234bf721f129960dd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f6755b6573c355234bf721f129960dd">&#9670;&nbsp;</a></span>ik_string_to_method()</h2>
+<a id="a715cc63d464deccc4d37540ee63328b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a715cc63d464deccc4d37540ee63328b2">&#9670;&nbsp;</a></span>ik_string_to_method()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">InverseKinematicsMethod module::actuation::Kinematics::ik_string_to_method </td>
+          <td class="memname">tinyrobotics::InverseKinematicsMethod module::actuation::Kinematics::ik_string_to_method </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>method_string</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Converts a string to an InverseKinematicsMethod. </p>
+<p>Converts a string to a tinyrobotics InverseKinematicsMethod. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">method_string</td><td></td></tr>
+    <tr><td class="paramname">method_string</td><td>The string representation of the inverse kinematics method </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>InverseKinematicsMethod </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A tinyrobotics inverse kinematics method from the given string </dd></dl>
 
 </div>
 </div>
@@ -363,7 +371,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>actuation</b></li><li class="navelem"><a class="el" href="classmodule_1_1actuation_1_1Kinematics.html">Kinematics</a></li>
-    <li class="footer">Generated on Thu Jun 19 2025 11:07:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jun 19 2025 23:15:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

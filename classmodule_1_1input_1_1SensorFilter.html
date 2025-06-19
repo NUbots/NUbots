@@ -221,9 +221,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a108c8864395b9e74cb4d888497ccecfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">update_kinematics</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a108c8864395b9e74cb4d888497ccecfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the sensors message with kinematics data.  <a href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">More...</a><br /></td></tr>
 <tr class="separator:a108c8864395b9e74cb4d888497ccecfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7473897b2f15bc99992b5722465da73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#ad7473897b2f15bc99992b5722465da73">update_odometry</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors, const message::behaviour::state::Stability &amp;stability)</td></tr>
-<tr class="memdesc:ad7473897b2f15bc99992b5722465da73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using MahonyFilter. This includes the.  <a href="classmodule_1_1input_1_1SensorFilter.html#ad7473897b2f15bc99992b5722465da73">More...</a><br /></td></tr>
-<tr class="separator:ad7473897b2f15bc99992b5722465da73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3478e9fd3641a277099aeb6ccba5b198"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a3478e9fd3641a277099aeb6ccba5b198">update_odometry</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors, const Stability &amp;stability)</td></tr>
+<tr class="memdesc:a3478e9fd3641a277099aeb6ccba5b198"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using MahonyFilter. This includes the.  <a href="classmodule_1_1input_1_1SensorFilter.html#a3478e9fd3641a277099aeb6ccba5b198">More...</a><br /></td></tr>
+<tr class="separator:a3478e9fd3641a277099aeb6ccba5b198"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23d293bdd9daafc76437a515f76e63ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba">update_raw_sensors</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a23d293bdd9daafc76437a515f76e63ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with raw sensor data, including the timestamp, battery voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.  <a href="classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba">More...</a><br /></td></tr>
 <tr class="separator:a23d293bdd9daafc76437a515f76e63ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -394,8 +394,8 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 
 </div>
 </div>
-<a id="ad7473897b2f15bc99992b5722465da73"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad7473897b2f15bc99992b5722465da73">&#9670;&nbsp;</a></span>update_odometry()</h2>
+<a id="a3478e9fd3641a277099aeb6ccba5b198"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3478e9fd3641a277099aeb6ccba5b198">&#9670;&nbsp;</a></span>update_odometry()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -424,7 +424,7 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const message::behaviour::state::Stability &amp;&#160;</td>
+          <td class="paramtype">const Stability &amp;&#160;</td>
           <td class="paramname"><em>stability</em>&#160;</td>
         </tr>
         <tr>
@@ -506,6 +506,11 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/input/SensorFilter/src/<a class="el" href="SensorFilter_8hpp_source.html">SensorFilter.hpp</a></li>
+<li>module/input/SensorFilter/src/sensorfilter/buttons.cpp</li>
+<li>module/input/SensorFilter/src/sensorfilter/debug.cpp</li>
+<li>module/input/SensorFilter/src/sensorfilter/update_kinematics.cpp</li>
+<li>module/input/SensorFilter/src/sensorfilter/update_odometry.cpp</li>
+<li>module/input/SensorFilter/src/sensorfilter/update_raw_sensors.cpp</li>
 <li>module/input/SensorFilter/src/SensorFilter.cpp</li>
 </ul>
 </div><!-- contents -->
@@ -514,7 +519,7 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html">SensorFilter</a></li>
-    <li class="footer">Generated on Thu Jun 19 2025 11:07:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jun 19 2025 23:15:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -212,15 +212,11 @@ var namespaces_dup =
           [ "RETURN_VERSION", "GameControllerData_8hpp.html#ac739fd672d5d657249250d153cf30761", null ],
           [ "SPL_COACH_MESSAGE_SIZE", "GameControllerData_8hpp.html#a24f013b41c05c2fdbe08dfdd8378f8e8", null ]
         ] ],
-        [ "MeasurementType", null, [
-          [ "FLAT_FOOT_TRANSLATION", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__TRANSLATION.html", null ]
-        ] ],
         [ "Camera", "classmodule_1_1input_1_1Camera.html", "classmodule_1_1input_1_1Camera" ],
         [ "CameraContext", "structmodule_1_1input_1_1CameraContext.html", "structmodule_1_1input_1_1CameraContext" ],
         [ "FakeCamera", "classmodule_1_1input_1_1FakeCamera.html", "classmodule_1_1input_1_1FakeCamera" ],
         [ "GameController", "classmodule_1_1input_1_1GameController.html", "classmodule_1_1input_1_1GameController" ],
         [ "ImageDecompressor", "classmodule_1_1input_1_1ImageDecompressor.html", "classmodule_1_1input_1_1ImageDecompressor" ],
-        [ "MotionModel", "classmodule_1_1input_1_1MotionModel.html", "classmodule_1_1input_1_1MotionModel" ],
         [ "NatNet", "classmodule_1_1input_1_1NatNet.html", "classmodule_1_1input_1_1NatNet" ],
         [ "ReadData", "structmodule_1_1input_1_1ReadData.html", "structmodule_1_1input_1_1ReadData" ],
         [ "ReadData< Device >", "structmodule_1_1input_1_1ReadData_3_01Device_01_4.html", "structmodule_1_1input_1_1ReadData_3_01Device_01_4" ],
@@ -267,7 +263,6 @@ var namespaces_dup =
         [ "description_to_fourcc", "description__to__fourcc_8hpp.html#a9eafba3f12c745ee669e27de1a8887d7", null ],
         [ "set_setting", "settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe", null ],
         [ "sync_clocks", "time__sync_8cpp.html#a235ccd7baf919af6cc690c4b193bf879", null ],
-        [ "G", "MotionModel_8hpp.html#a4d17a85472d1380f84733ea2f29565c2", null ],
         [ "MAX_CLOCK_DRIFT", "Camera_8cpp.html#a18ed7bb4fb26212f5032b5bf837d81aa", null ],
         [ "MAX_COUNT_OVER_TIME_FRAMES", "Camera_8cpp.html#ae37c426f9faf2b72db97920370eac673", null ],
         [ "TRANSFER_OFFSET_OBSERVE_TIME", "Camera_8cpp.html#ac248d5d3941892924ca670ecfdfe26a5", null ]
