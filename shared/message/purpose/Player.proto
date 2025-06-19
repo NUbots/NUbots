@@ -25,18 +25,17 @@
 
 syntax = "proto3";
 
-package message.strategy;
+package message.purpose;
+import "message/strategy/Who.proto";
 
-import "Vector.proto";
+message FieldPlayer {}
 
-message TeamMate {
-    /// ID of the robot
-    uint32 id = 1;
-
-    /// Vector from field to the position of this robot
-    vec3 rRFf = 2;
+message Attack {
+    strategy.Who ball_pos = 1;
 }
 
-message TeamMates {
-    repeated TeamMate teammates = 1;
-}
+message Defend {}
+
+message Support {}
+
+message ReadyAttack {}

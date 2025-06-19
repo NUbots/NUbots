@@ -33,22 +33,16 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+// todo remove after testing
+#include <nuclear>
 
-#include "message/strategy/TeamMates.hpp"
-
+#include "message/localisation/Robot.hpp"
+#include "message/strategy/Who.hpp"
 
 namespace utility::strategy {
 
-    using message::strategy::TeamMates;
-
-    /**
-     *   @brief Enum to represent the ball possession status.
-     */
-    struct Possession {
-        enum Value { SELF, TEAMMATE, OPPONENT, NONE };
-        Value value = Value::SELF;
-    };
-
+    using message::localisation::Robots;
+    using message::strategy::Who;
 
     /**
      *   @brief Return a list of robots that are sorted by distance to the ball.
@@ -57,54 +51,63 @@ namespace utility::strategy {
      *  This will calculate the distance from the ball to the:
      *      Robot (SELF)
      *      Teammate (TEAMMATE)
+     *      Opponent (OPPONENT)
      *
      *  The list will be sorted by ascending order of the distance.
      *
      *  @param rBWw ball position in world coordinates.
-     *  @param teammates information about teammate positions.
+     *  @param robots information about robot positions.
      *  @param Hfw transformation of world to field coordinates.
      *  @param Hrw transformation of world to robot coordinates.
+     *  @param equidistant_threshold maximum distance for two robots to be considered equidistant
+     *  @param self_id the ID of the robot that is calling this function
+     *  @param include_opponents whether to include opponents in the search
      *
      *  @return A vector of pairs, these contain a Possession type and distance to the ball.
      */
-    std::vector<std::pair<Possession, double>> get_sorted_bots(const Eigen::Vector3d& rBWw,
-                                                               const TeamMates& teammates,
-                                                               const Eigen::Isometry3d& Hfw,
-                                                               const Eigen::Isometry3d& Hrw) {
-        // Create empty list.
-        std::vector<std::pair<Possession, double>> robots{};
+    std::pair<unsigned int, double> get_closest_bot(const Eigen::Vector3d& rBWw,
+                                                    const Robots& robots,
+                                                    const Eigen::Isometry3d& Hfw,
+                                                    const Eigen::Isometry3d& Hrw,
+                                                    double equidistant_threshold,
+                                                    unsigned int self_id,
+                                                    bool include_opponents = true) {
+        // Transform ball position to field coordinates
+        Eigen::Vector3d rBFf         = Hfw * rBWw;
+        Eigen::Vector3d rRFf         = (Hfw * Hrw.inverse()).translation();
+        double self_distance_to_ball = (rRFf - rBFf).head<2>().norm();
 
-        // Transform ball position to field coordinates.
-        // 'rBWw' is ball position in world coordinates.
-        // 'Hfw' transforms from world to field coordinates.
-        // Multiplying these gives 'rBFf', which is the ball's position in field coordinates.
-        Eigen::Vector3d rBFf = Hfw * rBWw;
+        // Initialise to self
+        std::pair<Who, double> closest = {Who{Who::SELF}, self_distance_to_ball};
+        unsigned int lowest_id         = self_id;
 
-        // Find self distance to ball.
-        // 'Hrw' transforms world to robot.
-        Eigen::Vector3d rBRr         = Hrw * rBWw;
-        double self_distance_to_ball = rBRr.norm();
-        robots.push_back({Possession{Possession::SELF}, self_distance_to_ball});
+        // Loop through each robot
+        for (const auto& robot : robots.robots) {
+            // Skip if not a teammate and not including opponents
+            if (robot.teammate_id == 0 && !include_opponents) {
+                continue;
+            }
+            // Skip penalised robots as they are not in play
+            if (robot.penalised) {
+                continue;
+            }
 
-        // Loop through each teammate,
-        // subtract ball position (rBFf) from teammates position (rRFf) to get vector between both.
-        for (const auto& mate : teammates.teammates) {
-            Eigen::Vector3d rRFf    = mate.rRFf;
-            double distance_to_ball = (rRFf - rBFf).norm();
-            robots.push_back({Possession{Possession::TEAMMATE}, distance_to_ball});
+            // Calculate distance to the ball
+            double distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head<2>().norm();
+
+            // Check if close to the closest robot
+            bool equidistant = std::abs(distance_to_ball - closest.second) < equidistant_threshold;
+            // If it is close to the closest robot, lowest ID wins, in this case an opponent is in possession above us
+            // to trigger tackling. Otherwise it has to be closer to win
+            if ((equidistant && (robot.teammate_id < lowest_id))
+                || (!equidistant && (distance_to_ball < closest.second))) {
+                closest   = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};
+                lowest_id = robot.teammate_id;
+            }
         }
 
-        // Robots are sorted by distance to the ball.
-        // Compare distance smallest to largest.
-        std::sort(robots.begin(), robots.end(), [](const auto& a, const auto& b) {
-            //
-            return a.second < b.second;
-        });
-
-        // Sorted list of robots is returned.
-        return robots;
+        return {lowest_id, closest.second};
     }
-
 
     /**
      * @brief Establishes which robot is in possession of the ball.
@@ -114,38 +117,101 @@ namespace utility::strategy {
      * If no robot is within the given threshold, NONE is returned.
      *
      * @param rBWw ball position in world coordinates.
-     * @param teammates information about teammate positions.
+     * @param robots localisation of every known robot in the game.
      * @param Hfw transformation of world to field coordinates.
      * @param Hrw transformation of world to robot coordinates.
      * @param threshold maximum distance to the ball to be considered in possession of the ball.
+     * @param equidistant_threshold maximum distance for two robots to be considered equidistant
+     * @param self_id the ID of the robot that is calling this function
      *
      * @return A possession value which determines if any robot (or NONE) has the ball.
      */
-    Possession get_possession(const Eigen::Vector3d& rBWw,
-                              const TeamMates& teammates,
-                              const Eigen::Isometry3d& Hfw,
-                              const Eigen::Isometry3d& Hrw,
-                              double threshold) {
-
+    Who ball_possession(const Eigen::Vector3d& rBWw,
+                        const Robots& robots,
+                        const Eigen::Isometry3d& Hfw,
+                        const Eigen::Isometry3d& Hrw,
+                        double threshold,
+                        double equidistant_threshold,
+                        unsigned int self_id) {
         // Function determines who has possession based on proximity and a threshold distance.
-        auto sorted_robots = get_sorted_bots(rBWw, teammates, Hfw, Hrw);
+        auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id);
 
-        // If no robots are available, no robot will have possession.
-        if (sorted_robots.empty()) {
-            return Possession{Possession::NONE};
-        }
-
-        // Picks the first robot in the sorted list.
-        auto& closest_bot = sorted_robots[0];
-
-        // 'closest_bot.second' is the distance to the ball
+        // 'closest.second' is the distance to the ball
         // If the distance is greater than the threshold, then the robot is too far
         // for possession.
-        if (closest_bot.second > threshold) {
-            return Possession{Possession::NONE};
+        if (closest.second > threshold) {
+            return Who{Who::NONE};
         }
         // If robot is close to ball, robot that is closest will possess the ball.
-        return closest_bot.first;
+        return (closest.first == self_id) ? Who::SELF : (closest.first == 0 ? Who::OPPONENT : Who::TEAMMATE);
+    }
+
+    /**
+     * @brief Determines if we are the closest robot to the ball on our team
+     *
+     * @param rBWw ball position in world coordinates
+     * @param robots localisation of every known robot in the game
+     * @param Hfw transformation of world to field coordinates
+     * @param Hrw transformation of world to robot coordinates
+     * @param equidistant_threshold maximum distance to the ball to be considered equidistant
+     * @param self_id the ID of the robot that is calling this function
+     *
+     * @return true if we are the closest robot to the ball on our team, false otherwise
+     */
+    unsigned int closest_to_ball_on_team(const Eigen::Vector3d& rBWw,
+                                         const Robots& robots,
+                                         const Eigen::Isometry3d& Hfw,
+                                         const Eigen::Isometry3d& Hrw,
+                                         double equidistant_threshold,
+                                         unsigned int self_id) {
+        // Function determines who has possession based on proximity and a threshold distance.
+        // Exclude opponents from the search
+        auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, false);
+
+        // Return true if the closest robot is us
+        return closest.first;
+    }
+
+    /**
+     * @brief Determines if we are the furthest back robot on our team
+     *
+     * @param robots localisation of every known robot in the game
+     * @param Hfw transformation of world to field coordinates
+     * @param Hrw transformation of world to robot coordinates
+     *
+     * @return true if we are the furthest back robot on our team, false otherwise
+     */
+    bool furthest_back(const Robots& robots,
+                       const Eigen::Isometry3d& Hfw,
+                       const Eigen::Isometry3d& Hrw,
+                       double equidistant_threshold,
+                       unsigned int self_id,
+                       std::vector<unsigned int> const& ignore_ids = {}) {
+        // Transform our position to field coordinates
+        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
+        double furthest      = std::abs(rRFf.y());
+
+        // Look for any teammates that are further back than us
+        for (const auto& robot : robots.robots) {
+            // Only consider non penalised teammates
+            bool ignore_id = std::find(ignore_ids.begin(), ignore_ids.end(), robot.teammate_id) != ignore_ids.end();
+            if ((robot.teammate_id != 0 && !robot.penalised) && !ignore_id) {
+                // Transform robot position to field coordinates
+                Eigen::Vector3d rRFf = Hfw * robot.rRWw;
+
+                // Check if equidistant to us
+                bool equidistant = std::abs(std::abs(rRFf.y()) - furthest) < equidistant_threshold;
+                // If the robot is further back than us, or equidistant and has a higher ID, then we are not the
+                // furthest back
+                if ((!equidistant && (std::abs(rRFf.y()) > furthest))
+                    || (equidistant && (robot.teammate_id > self_id))) {
+                    return false;
+                }
+            }
+        }
+
+        // If we didn't find any teammates that are further back than us, then we are the furthest back
+        return true;
     }
 }  // namespace utility::strategy
 
