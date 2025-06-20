@@ -76,6 +76,11 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
 
+                // If there's no ball message, only emit the tasks to find it
+                if (ball == nullptr) {
+                    return;
+                }
+
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
                 const unsigned int closest_to_ball =
