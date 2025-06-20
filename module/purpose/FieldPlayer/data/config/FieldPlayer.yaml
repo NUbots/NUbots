@@ -1,0 +1,7 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+ball_threshold: 0.5
+equidistant_threshold: 0.4
+ball_off_center_threshold: 0.75
+center_circle_offset: 0.4
