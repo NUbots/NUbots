@@ -43,5 +43,6 @@ arms:
   left_elbow: -0.7
 
 kick:
-  max_time: 0.3 # Max time to complete the kick mstep (in seconds)
-  min_time: 0.04 # Min time to complete the kick mstep (in seconds)
+  # Step kick parameters
+  kick_velocity_x: 0.5 # Forward velocity during kick (m/s)
+  kick_velocity_y: 0.05 # Lateral velocity during kick (m/s)

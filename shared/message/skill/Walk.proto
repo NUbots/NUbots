@@ -31,5 +31,8 @@ import "Vector.proto";
 
 message Walk {
     vec3 velocity_target = 1;
+    /// Whether to kick or not
     bool kick = 2;
+    /// Leg to kick with
+    uint32 leg = 3;
 }
