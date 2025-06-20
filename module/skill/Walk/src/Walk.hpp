@@ -60,9 +60,10 @@ namespace module::skill {
             /// @brief Walk engine parameters
             utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};
 
-            /// @brief Allowed time to complete the kick step (in seconds)
-            double max_time = 0.3;
-            double min_time = 0.1;
+            /// @brief The velocity to kick the ball with (x direction)
+            double kick_velocity_x = 0.0;
+            /// @brief The velocity to kick the ball with (y direction)
+            double kick_velocity_y = 0.0;
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -73,6 +74,7 @@ namespace module::skill {
 
         /// @brief Used to track the step phase for the step kick
         bool kick_step_in_progress = false;
+        bool done_sent             = false;
         /// @brief Store the kick phase
         message::behaviour::state::WalkState::Phase initial_kick_phase;
         NUClear::clock::time_point kick_step_start_time;
