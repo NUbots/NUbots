@@ -33,6 +33,7 @@ enum SoccerPosition {
     GOALIE      = 2;
     DEFENDER    = 3;
     DYNAMIC     = 4;
+    SUPPORT     = 5;
 }
 
 /// The robot's current purpose configuration
