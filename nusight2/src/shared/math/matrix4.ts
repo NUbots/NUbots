@@ -90,6 +90,17 @@ export class Matrix4 {
       `${format(this.x.t)} ${format(this.y.t)} ${format(this.z.t)} ${format(this.t.t)}`,
     ].join("\n");
   }
+
+  static fromRotationZ(theta: number): Matrix4 {
+    const c = Math.cos(theta);
+    const s = Math.sin(theta);
+    return new Matrix4(
+      new Vector4(c, s, 0, 0),
+      new Vector4(-s, c, 0, 0),
+      new Vector4(0, 0, 1, 0),
+      new Vector4(0, 0, 0, 1),
+    );
+  }
 }
 
 const format = (x: number) => x.toFixed(2).padStart(7);
