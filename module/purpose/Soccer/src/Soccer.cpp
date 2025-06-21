@@ -191,13 +191,16 @@ namespace module::purpose {
             }
         });
 
-        on<Every<5, Per<std::chrono::seconds>>>().then([this] {
-            // Emit the purpose
-            emit(std::make_unique<Purpose>(player_id,
-                                           SoccerPosition(int(robots[player_id - 1].position)),
-                                           robots[player_id - 1].dynamic,
-                                           robots[player_id - 1].active));
-        });
+        on<Every<5, Per<std::chrono::seconds>>, Optional<With<GameState>>>().then(
+            [this](const std::shared_ptr<GameState>& game_state) {
+                // Emit the purpose
+                emit(std::make_unique<Purpose>(
+                    player_id,
+                    SoccerPosition(int(robots[player_id - 1].position)),
+                    robots[player_id - 1].dynamic,
+                    robots[player_id - 1].active,
+                    game_state ? game_state.team.team_colour : GameState::Team::UNKNOWN_TEAM_COLOUR));
+            });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still

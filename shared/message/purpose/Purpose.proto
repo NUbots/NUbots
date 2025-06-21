@@ -26,6 +26,8 @@ syntax = "proto3";
 
 package message.purpose;
 
+import "message/input/GameState.proto";
+
 /// The detected purpose of the robot
 enum SoccerPosition {
     ALL_ROUNDER = 0;
@@ -46,4 +48,6 @@ message Purpose {
     bool dynamic = 3;
     /// Whether we are actively in the game
     bool active = 4;
+    /// Team colour
+    input.GameState.TeamColour team_colour = 5;
 }

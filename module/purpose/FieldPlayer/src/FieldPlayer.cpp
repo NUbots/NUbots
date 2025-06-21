@@ -130,7 +130,11 @@ namespace module::purpose {
                 // penalty set up phase.
                 if (is_closest && allowed_to_attack) {
                     log<DEBUG>("Attack!");
-                    emit(std::make_unique<Purpose>(global_config.player_id, SoccerPosition::ATTACK, true, true));
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::ATTACK,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
@@ -139,7 +143,11 @@ namespace module::purpose {
                 // positioning or opponent kickoff, then we should stick to a good spot and be ready to attack
                 if (is_closest && !allowed_to_attack) {
                     log<DEBUG>("Ready attack!");
-                    emit(std::make_unique<Purpose>(global_config.player_id, SoccerPosition::ATTACK, true, true));
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::ATTACK,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
                     emit<Task>(std::make_unique<ReadyAttack>());
                     return;
                 }
@@ -158,7 +166,11 @@ namespace module::purpose {
                                          : true;
                 if (furthest_back) {
                     log<DEBUG>("Defend!");
-                    emit(std::make_unique<Purpose>(global_config.player_id, SoccerPosition::DEFEND, true, true));
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::DEFEND,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
                     emit<Task>(std::make_unique<Defend>());
                     return;
                 }
@@ -167,7 +179,11 @@ namespace module::purpose {
                 // the ball up towards our goal, we should help out the attacker however makes sense in the situation
                 log<DEBUG>("Support!");
                 emit<Task>(std::make_unique<Support>());
-                emit(std::make_unique<Purpose>(global_config.player_id, SoccerPosition::SUPPORT, true, true));
+                emit(std::make_unique<Purpose>(global_config.player_id,
+                                               SoccerPosition::SUPPORT,
+                                               true,
+                                               true,
+                                               game_state.team.team_colour));
             });
 
         // READY state
