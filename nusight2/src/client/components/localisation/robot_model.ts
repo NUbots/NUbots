@@ -343,10 +343,10 @@ export class LocalisationRobotModel {
   @computed
   get Hft(): Matrix4 {
     const base = this.Hfw.multiply(this.Htw.invert());
+    // If the robot is red, rotate the robot around the field to be on the opposite side
     if (this.team_color === "red") {
-      // Rotate 180 degrees around Z axis
-      const flip = Matrix4.fromRotationZ(Math.PI);
-      return base.multiply(flip);
+      const rotate = Matrix4.fromRotationZ(Math.PI);
+      return rotate.multiply(base);
     }
     return base;
   }
@@ -354,6 +354,7 @@ export class LocalisationRobotModel {
   /** Field line points in field space */
   @computed
   get rPFf(): Vector3[] {
+
     return this.fieldLinePoints.rPWw.map((rPWw) => rPWw.applyMatrix4(this.Hfw));
   }
 
