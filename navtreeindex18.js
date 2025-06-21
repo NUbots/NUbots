@@ -1,5 +1,6 @@
 var NAVTREEINDEX18 =
 {
+"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1eaf4ba15a13c3052563bbd06c34a746757":[3,0,3,13,6,1,0,1],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a319e7cd062381facc5f88326f85d5596":[3,0,3,13,6,1,11],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a320045bd1b89f970cd5a3f8f77be0a7d":[3,0,3,13,6,1,2],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a3b43c8a50c119db0ec043a0add0ee9fe":[3,0,3,13,6,1,7],
@@ -248,6 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1input_1_1ServoID.html#a099d66316df7ca2bd3256dd435a3b272":[3,0,7,2,2,6],
 "structutility_1_1input_1_1ServoID.html#a0ab4348dd30622d26a46182ffc3ed17e":[3,0,7,2,2,25],
 "structutility_1_1input_1_1ServoID.html#a0dccc3c86509d39bc8451a53270806c8":[3,0,7,2,2,1],
-"structutility_1_1input_1_1ServoID.html#a189321f62d9ea01eab6e0163ccefd4d0":[3,0,7,2,2,2],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026da":[3,0,7,2,2,0]
+"structutility_1_1input_1_1ServoID.html#a189321f62d9ea01eab6e0163ccefd4d0":[3,0,7,2,2,2]
 };
