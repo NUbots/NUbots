@@ -105,6 +105,8 @@ export class LocalisationNetwork {
     } else {
       robot.color = "black";
     }
+
+    robot.team_color = purpose.teamColor == message.purpose.TeamColor.BLUE ? "blue" : "red";
   }
 
   @action.bound

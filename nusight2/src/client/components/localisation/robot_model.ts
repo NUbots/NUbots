@@ -175,6 +175,7 @@ export class LocalisationRobotModel {
   @observable velocity_target: Vector3;
   @observable boundingBox?: BoundingBox;
   @observable player_id: number;
+  @observable team_color: "red" | "blue" = "blue";
   @observable torso_trajectory: Matrix4[];
   @observable swing_foot_trajectory: Matrix4[];
   @observable walk_phase: message.behaviour.state.WalkState.Phase;
@@ -215,6 +216,7 @@ export class LocalisationRobotModel {
     velocity_target,
     boundingBox,
     player_id,
+    team_color,
     torso_trajectory,
     swing_foot_trajectory,
     walk_phase,
@@ -248,6 +250,7 @@ export class LocalisationRobotModel {
     velocity_target: Vector3;
     boundingBox?: BoundingBox;
     player_id: number;
+    team_color?: "red" | "blue";
     torso_trajectory: Matrix4[];
     swing_foot_trajectory: Matrix4[];
     walk_phase: message.behaviour.state.WalkState.Phase;
@@ -276,6 +279,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.team_color = team_color || "blue";
     this.associationLines = associationLines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
@@ -319,6 +323,7 @@ export class LocalisationRobotModel {
       max_angle_error: 0,
       velocity_target: Vector3.of(),
       player_id: -1,
+      team_color: "blue",
       torso_trajectory: [],
       swing_foot_trajectory: [],
       walk_phase: message.behaviour.state.WalkState.Phase.DOUBLE,
@@ -337,7 +342,13 @@ export class LocalisationRobotModel {
   /** Torso to field transformation */
   @computed
   get Hft(): Matrix4 {
-    return this.Hfw.multiply(this.Htw.invert());
+    const base = this.Hfw.multiply(this.Htw.invert());
+    if (this.team_color === "red") {
+      // Rotate 180 degrees around Z axis
+      const flip = Matrix4.fromRotationZ(Math.PI);
+      return base.multiply(flip);
+    }
+    return base;
   }
 
   /** Field line points in field space */
