@@ -283,7 +283,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-2 px-4 py-2 w-full">
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-2 px-4 py-2 w-full">
         <div className="flex items-center gap-4 self-center">
           <Button className="px-7" onClick={props.onHawkEyeClick}>
             Hawk Eye
@@ -292,62 +292,27 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 w-full md:w-auto">
-          <div className="flex justify-end">
-            <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem label="Goals" isVisible={model.goalsVisible} onClick={props.toggleGoalVisibility} />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem
-              label="Field Line Points"
-              isVisible={model.fieldLinePointsVisible}
-              onClick={props.toggleFieldLinePointsVisibility}
-            />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem
-              label="Field Intersections"
-              isVisible={model.fieldIntersectionsVisible}
-              onClick={props.toggleFieldIntersectionsVisibility}
-            />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem
-              label="Walk Path"
-              isVisible={model.walkToDebugVisible}
-              onClick={props.toggleWalkToDebugVisibility}
-            />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem
-              label="Bounded Box"
-              isVisible={model.boundedBoxVisible}
-              onClick={props.toggleBoundedBoxVisibility}
-            />
-          </div>
-          <div className="flex justify-end">
-            <MenuItem
-              label="Dashboard"
-              isVisible={model.dashboard.visible}
-              onClick={props.toggleDashboardVisibility}
-            />
-          </div>
+          {[
+            ["Grid", model.gridVisible, props.toggleGridVisibility],
+            ["Field", model.fieldVisible, props.toggleFieldVisibility],
+            ["Robots", model.robotVisible, props.toggleRobotVisibility],
+            ["Balls", model.ballVisible, props.toggleBallVisibility],
+            ["Particles", model.particlesVisible, props.toggleParticleVisibility],
+            ["Goals", model.goalsVisible, props.toggleGoalVisibility],
+            ["Field Line Points", model.fieldLinePointsVisible, props.toggleFieldLinePointsVisibility],
+            ["Field Intersections", model.fieldIntersectionsVisible, props.toggleFieldIntersectionsVisibility],
+            ["Walk Path", model.walkToDebugVisible, props.toggleWalkToDebugVisibility],
+            ["Bounded Box", model.boundedBoxVisible, props.toggleBoundedBoxVisibility],
+            ["Dashboard", model.dashboard.visible, props.toggleDashboardVisibility],
+          ].map(([label, isVisible, onClick]) => (
+            <div key={label as string} className="flex justify-end">
+              <MenuItem label={label as string} isVisible={isVisible as boolean} onClick={onClick as () => void} />
+            </div>
+          ))}
         </div>
       </div>
     </Menu>
+
   );
 });
 
