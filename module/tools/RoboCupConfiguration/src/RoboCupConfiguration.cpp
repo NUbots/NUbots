@@ -154,30 +154,24 @@ namespace module::tools {
     void RoboCupConfiguration::get_config_values() {
         // Information for loading the config file
         hostname      = utility::support::get_hostname();
+        robot_name    = utility::platform::get_robot_alias(hostname);
         auto platform = ::extension::Configuration::get_platform(hostname);
         auto binary   = NUClear::dsl::operation::get_first_command_line_arg();
-        robot_name    = utility::platform::get_robot_alias(hostname);
-
-        // Wifi interface
-        wifi_interface = utility::support::get_wireless_interface();
-
-        // IP Address
-        ip_address = utility::support::get_ip_address(wifi_interface);
 
         // Team ID
         YAML::Node global_config = Configuration("GlobalConfig.yaml", hostname, binary, platform).config;
         team_id                  = global_config["team_id"].as<int>();
         player_id                = global_config["player_id"].as<int>();
 
-        // SSID
-        ssid = utility::support::get_ssid(wifi_interface);
-
-        // Password
-        password = utility::support::get_wifi_password(ssid, wifi_interface);
-
         // Robot position
-        YAML::Node soccer_config = Configuration("Soccer.yaml", hostname, binary, platform).config;
-        robot_position           = soccer_config["position"].as<std::string>();
+        YAML::Node soccer_config = Configuration("SoccerNew.yaml", hostname, binary, platform).config;
+        is_goalie                = soccer_config["is_goalie"].as<bool>();
+
+        // Network info
+        wifi_interface = utility::support::get_wireless_interface();
+        ip_address     = utility::support::get_ip_address(wifi_interface);
+        ssid           = utility::support::get_ssid(wifi_interface);
+        password       = utility::support::get_wifi_password(ssid, wifi_interface);
 
         // Check if we have permissions
         if (geteuid() != 0) {
@@ -221,10 +215,10 @@ namespace module::tools {
     void RoboCupConfiguration::set_config_values() {
         /* GAME CONFIG */
         {  // Write the robot's position to the soccer file
-            std::string soccer_file = get_config_file("Soccer.yaml");
+            std::string soccer_file = get_config_file("SoccerNew.yaml");
             // Write to the yaml file
-            YAML::Node config  = YAML::LoadFile(soccer_file);
-            config["position"] = std::string(robot_position);
+            YAML::Node config   = YAML::LoadFile(soccer_file);
+            config["is_goalie"] = is_goalie;
             std::ofstream file(soccer_file);
             file << config;
         }
@@ -357,7 +351,7 @@ namespace module::tools {
         switch (column) {
             case Display::Column2::PLAYER_ID: player_id = player_id == MAX_PLAYER_ID ? 1 : player_id + 1; break;
             case Display::Column2::TEAM_ID: team_id = team_id == MAX_TEAM_ID ? 1 : team_id + 1; break;
-            case Display::Column2::POSITION: ++robot_position; break;
+            case Display::Column2::GOALIE: is_goalie = !is_goalie; break;
             default: break;
         }
     }
@@ -381,7 +375,12 @@ namespace module::tools {
         switch (column) {
             case Display::Column2::PLAYER_ID: player_id = std::stoi(user_input()); break;
             case Display::Column2::TEAM_ID: team_id = std::stoi(user_input()); break;
-            case Display::Column2::POSITION: robot_position = user_input(); break;
+            case Display::Column2::GOALIE: {
+                std::string i = user_input();
+                is_goalie =
+                    (i == "true" || i == "True" || i == "1" || i == "yes" || i == "Yes" || i == "y" || i == "Y");
+                break;
+            }
             default: break;
         }
     }
@@ -494,7 +493,7 @@ namespace module::tools {
         attroff(A_ITALIC);
         mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
         mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
-        mvprintw(7, display.C2_PAD, ("Position : " + std::string(robot_position)).c_str());
+        mvprintw(7, display.C2_PAD, ("Goalie? : " + std::string(is_goalie ? "True" : "False")).c_str());
 
         // Print commands
         // Heading Commands
