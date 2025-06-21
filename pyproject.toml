@@ -13,6 +13,7 @@ requires-python = ">=3.10,<3.13"
 
 dependencies = [
     # Basically required standard libraries
+    "setuptools>=80.3.1",
     "numpy==1.26.4",
     "termcolor==2.5.0",
     "tqdm==4.67.1",
@@ -38,7 +39,8 @@ dependencies = [
     "xxhash==3.5.0",
     "stringcase==1.2.0",
     "protoc-wheel==21.1",
-    "protobuf==4.25.3",
+    #"protobuf==4.21.12", # Use this for NUSense nanopb message generation
+    "protobuf==5.27.0",
     "pycryptodomex==3.21.0",
     "natsort==8.4.0",
     "jsonschema==4.23.0",
