@@ -32,8 +32,8 @@ import { LocalisationRobotModel } from "./robot_model";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
 import { DashboardModel } from "./model";
+import { DashboardRobotModel } from "./dashboard_robot/model";
 import { DashboardFieldView } from "./field/view";
-import { M } from "vite/dist/node/types.d-aGj9QkWt";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -145,9 +145,9 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
         {this.props.model.dashboard.visible && (
           <Dashboard
             controller={this.props.controller}
-            Field={() => <DashboardFieldView model={this.props.model.dashboard.field} />}
-            model={this.props.model.dashboard}
-            network={this.props.network}
+            Field={() => <DashboardFieldView model={this.props.model.dashboardField} />}
+            model={this.props.model}
+            robots={this.props.model.dashboardRobots}
           />
         )}
       </div>
@@ -465,19 +465,15 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
 type DashboardProps = {
   controller: LocalisationController;
   Field: ComponentType;
-  model: DashboardModel;
-  network: LocalisationNetwork;
+  model: LocalisationModel;
+  robots: DashboardRobotModel[];
 };
 
 @observer
 export class Dashboard extends Component<DashboardProps> {
-  componentWillUnmount(): void {
-    this.props.network.destroy();
-  }
-
   render() {
-    const { model } = this.props;
-    const showPanels = model.robots.some((robot) => robot.enabled);
+    const { robots } = this.props;
+    const showPanels = robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
       <div className="flex flex-col w-full h-full">
@@ -488,7 +484,7 @@ export class Dashboard extends Component<DashboardProps> {
           </div>
           {showPanels && (
             <div className="flex p-2">
-              {model.robots.map((robot) => {
+              {robots.map((robot) => {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (

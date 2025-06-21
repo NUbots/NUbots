@@ -8,8 +8,6 @@ import { KeyCode } from "./keycodes";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 
-import { DashboardModel } from "./model";
-
 interface KeyModifiers {
   shiftKey: boolean;
   ctrlKey: boolean;
@@ -18,16 +16,6 @@ interface KeyModifiers {
 export class LocalisationController {
   static of(): LocalisationController {
     return new LocalisationController();
-  }
-
-  @action
-  toggleOrientation(model: DashboardModel) {
-    model.field.orientation = model.field.orientation === "left" ? "right" : "left";
-  }
-
-  @action
-  toggleDashboardVisibility(model: LocalisationModel) {
-    model.dashboard.visible = !model.dashboard.visible;
   }
 
   @action
@@ -387,4 +375,14 @@ export class LocalisationController {
   toggleBoundedBoxVisibility = (model: LocalisationModel) => {
     model.boundedBoxVisible = !model.boundedBoxVisible;
   };
+
+  @action
+  toggleOrientation(model: LocalisationModel) {
+    model.dashboardField.orientation = model.dashboardField.orientation === "left" ? "right" : "left";
+  }
+
+  @action
+  toggleDashboardVisibility(model: LocalisationModel) {
+    model.dashboard.visible = !model.dashboard.visible;
+  }
 }

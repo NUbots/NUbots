@@ -9,7 +9,6 @@ import { FieldModel } from "./r3f_components/field/model";
 import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
 
-import { RobotModel } from "../robot/model";
 import { DashboardRobotModel } from "./dashboard_robot/model";
 import { DashboardFieldModel } from "./field/model";
 
@@ -99,25 +98,12 @@ export class ControlsModel {
 }
 
 export class DashboardModel {
-  @observable private robotModels: RobotModel[];
   @observable visible = false;
 
-  constructor(robotModels: RobotModel[]) {
-    this.robotModels = robotModels;
-  }
+  constructor() { }
 
-  static of(robots: RobotModel[]): DashboardModel {
-    return new DashboardModel(robots);
-  }
-
-  @computed
-  get field(): DashboardFieldModel {
-    return DashboardFieldModel.of(this.robots);
-  }
-
-  @computed
-  get robots(): DashboardRobotModel[] {
-    return this.robotModels.map((robot) => DashboardRobotModel.of(robot));
+  static of(): DashboardModel {
+    return new DashboardModel();
   }
 }
 
@@ -152,6 +138,7 @@ export class LocalisationModel {
       camera,
       locked,
       controls,
+      dashboard,
       viewMode,
       target,
       time,
@@ -161,6 +148,7 @@ export class LocalisationModel {
       camera: CameraModel;
       locked: boolean;
       controls: ControlsModel;
+      dashboard: DashboardModel;
       viewMode: ViewMode;
       target?: LocalisationRobotModel;
       time: TimeModel;
@@ -172,7 +160,7 @@ export class LocalisationModel {
     this.camera = camera;
     this.locked = locked;
     this.controls = controls;
-    this.dashboard = DashboardModel.of(appModel.robots);
+    this.dashboard = dashboard;
     this.viewMode = viewMode;
     this.target = target;
     this.time = time;
@@ -185,6 +173,7 @@ export class LocalisationModel {
       camera: CameraModel.of(),
       locked: false,
       controls: ControlsModel.of(),
+      dashboard: DashboardModel.of(),
       viewMode: ViewMode.FreeCamera,
       time: TimeModel.of(),
     });
@@ -192,5 +181,13 @@ export class LocalisationModel {
 
   @computed get robots(): LocalisationRobotModel[] {
     return this.appModel.robots.map((robot) => LocalisationRobotModel.of(robot));
+  }
+
+  @computed get dashboardRobots(): DashboardRobotModel[] {
+    return this.appModel.robots.map((robot) => DashboardRobotModel.of(robot));
+  }
+
+  @computed get dashboardField(): DashboardFieldModel {
+    return DashboardFieldModel.of(this.dashboardRobots);
   }
 }
