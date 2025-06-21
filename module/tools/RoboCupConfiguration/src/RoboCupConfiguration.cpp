@@ -152,11 +152,11 @@ namespace module::tools {
     }
 
     void RoboCupConfiguration::get_config_values() {
-        // Hostname
-        hostname = utility::support::get_hostname();
-
-        // Robot name
-        robot_name = utility::platform::get_robot_alias(hostname);
+        // Information for loading the config file
+        hostname      = utility::support::get_hostname();
+        auto platform = ::extension::Configuration::get_platform(hostname);
+        auto binary   = NUClear::dsl::operation::get_first_command_line_arg();
+        robot_name    = utility::platform::get_robot_alias(hostname);
 
         // Wifi interface
         wifi_interface = utility::support::get_wireless_interface();
@@ -165,7 +165,7 @@ namespace module::tools {
         ip_address = utility::support::get_ip_address(wifi_interface);
 
         // Team ID
-        YAML::Node global_config = YAML::LoadFile(get_config_file("GlobalConfig.yaml"));
+        YAML::Node global_config = Configuration("GlobalConfig.yaml", hostname, binary, platform).config;
         team_id                  = global_config["team_id"].as<int>();
         player_id                = global_config["player_id"].as<int>();
 
@@ -176,11 +176,8 @@ namespace module::tools {
         password = utility::support::get_wifi_password(ssid, wifi_interface);
 
         // Robot position
-        {
-            std::string soccer_file = get_config_file("Soccer.yaml");
-            YAML::Node config       = YAML::LoadFile(soccer_file);
-            robot_position          = config["position"].as<std::string>();
-        }
+        YAML::Node soccer_config = Configuration("Soccer.yaml", hostname, binary, platform).config;
+        robot_position           = soccer_config["position"].as<std::string>();
 
         // Check if we have permissions
         if (geteuid() != 0) {
@@ -444,6 +441,15 @@ namespace module::tools {
     }
 
     std::string RoboCupConfiguration::get_config_file(std::string filename) {
+        hostname      = utility::support::get_hostname();
+        auto platform = ::extension::Configuration::get_platform(hostname);
+        auto binary   = NUClear::dsl::operation::get_first_command_line_arg();
+        robot_name    = utility::platform::get_robot_alias(hostname);
+
+        // Check binary config
+        if (!binary.empty() && std::filesystem::exists(fmt::format("config/{}/{}", binary, filename))) {
+            return fmt::format("config/{}/{}", binary, filename);
+        }
         // First check name-specific config
         std::string robot_name = utility::platform::get_robot_alias(hostname);
         if (!robot_name.empty() && std::filesystem::exists(fmt::format("config/{}/{}", robot_name, filename))) {
