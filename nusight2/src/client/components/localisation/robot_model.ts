@@ -175,7 +175,7 @@ export class LocalisationRobotModel {
   @observable velocity_target: Vector3;
   @observable boundingBox?: BoundingBox;
   @observable player_id: number;
-  @observable team_color: "red" | "blue" = "blue";
+  @observable team_colour: "red" | "blue" = "blue";
   @observable torso_trajectory: Matrix4[];
   @observable swing_foot_trajectory: Matrix4[];
   @observable walk_phase: message.behaviour.state.WalkState.Phase;
@@ -216,7 +216,7 @@ export class LocalisationRobotModel {
     velocity_target,
     boundingBox,
     player_id,
-    team_color,
+    team_colour,
     torso_trajectory,
     swing_foot_trajectory,
     walk_phase,
@@ -250,7 +250,7 @@ export class LocalisationRobotModel {
     velocity_target: Vector3;
     boundingBox?: BoundingBox;
     player_id: number;
-    team_color?: "red" | "blue";
+    team_colour?: "red" | "blue";
     torso_trajectory: Matrix4[];
     swing_foot_trajectory: Matrix4[];
     walk_phase: message.behaviour.state.WalkState.Phase;
@@ -279,7 +279,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
-    this.team_color = team_color || "blue";
+    this.team_colour = team_colour || "blue";
     this.associationLines = associationLines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
@@ -323,7 +323,7 @@ export class LocalisationRobotModel {
       max_angle_error: 0,
       velocity_target: Vector3.of(),
       player_id: -1,
-      team_color: "blue",
+      team_colour: "blue",
       torso_trajectory: [],
       swing_foot_trajectory: [],
       walk_phase: message.behaviour.state.WalkState.Phase.DOUBLE,
