@@ -81,6 +81,12 @@ namespace module::purpose {
 
                 // If there's no ball message, only emit the tasks to find it
                 if (ball == nullptr) {
+                    // We don't know what we're doing and we're not active
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::UNKNOWN,
+                                                   true,
+                                                   false,
+                                                   game_state.team.team_colour));
                     return;
                 }
 
