@@ -53,7 +53,7 @@ export class LocalisationNetwork {
 
     // Flip the field if the robot is on the red team
     robot.Hfw =
-      robot.team_colour === "red"
+      robot.teamColour === "red"
         ? (robot.Hfw = Matrix4.fromRotationZ(Math.PI).multiply(Matrix4.from(field.Hfw)))
         : Matrix4.from(field.Hfw);
 
@@ -112,7 +112,7 @@ export class LocalisationNetwork {
       robot.color = "black";
     }
 
-    robot.team_colour = purpose.teamColour == message.input.GameState.TeamColour.RED ? "red" : "blue";
+    robot.teamColour = purpose.teamColour == message.input.GameState.TeamColour.RED ? "red" : "blue";
   }
 
   @action.bound
