@@ -32,7 +32,7 @@ import "google/protobuf/timestamp.proto";
 message GameState {
 
     enum TeamColour {
-        UNKNOWN_TEAM_COLOUR = 0;
+        UNKNOWN = 0;
         BLUE                = 1;
         RED                 = 2;
     };
