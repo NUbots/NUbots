@@ -31,7 +31,6 @@ import { LocalisationRobotModel } from "./robot_model";
 
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
-import { DashboardModel } from "./model";
 import { DashboardRobotModel } from "./dashboard_robot/model";
 import { DashboardFieldView } from "./field/view";
 
@@ -64,10 +63,9 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className={`flex p-2 ${this.props.model.field.fieldType === option.value
-                ? "hover:bg-auto-contrast-1"
-                : "hover:bg-auto-contrast-1"
-                }`}
+              className="flex items-center p-2 cursor-pointer hover:bg-auto-contrast-1"
+              role="menuitem"
+              tabIndex={0}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
               <Icon size={24}>
@@ -283,15 +281,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <div className="flex flex-wrap items-start gap-x-8 gap-y-2 px-4 py-2 w-full">
-        <div className="flex items-center gap-4 self-center">
-          <Button className="px-7" onClick={props.onHawkEyeClick}>
-            Hawk Eye
-          </Button>
+      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 px-4 py-4 w-full items-center">
+        <div className="flex gap-4 items-center w-fit">
+          <Button onClick={props.onHawkEyeClick}>Hawk Eye</Button>
           <FieldDimensionSelector controller={controller} model={model} />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 w-full md:w-auto">
+        <div className="flex flex-wrap justify-end gap-3">
           {[
             ["Grid", model.gridVisible, props.toggleGridVisibility],
             ["Field", model.fieldVisible, props.toggleFieldVisibility],
@@ -305,12 +301,17 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             ["Bounded Box", model.boundedBoxVisible, props.toggleBoundedBoxVisibility],
             ["Dashboard", model.dashboard.visible, props.toggleDashboardVisibility],
           ].map(([label, isVisible, onClick]) => (
-            <div key={label as string} className="flex justify-end">
-              <MenuItem label={label as string} isVisible={isVisible as boolean} onClick={onClick as () => void} />
+            <div key={label as string} className="flex justify-end w-[200px]">
+              <MenuItem
+                label={label as string}
+                isVisible={isVisible as boolean}
+                onClick={onClick as () => void}
+              />
             </div>
           ))}
         </div>
       </div>
+
     </Menu>
 
   );
