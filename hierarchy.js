@@ -292,7 +292,6 @@ var hierarchy =
     [ "module::tools::OdometryBenchmark::Config", "structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html", null ],
     [ "module::tools::RoboCupConfiguration::Config", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html", null ],
     [ "module::tools::RoboCupConfiguration::Display", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html", null ],
-    [ "module::tools::RoboCupConfiguration::Position", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html", null ],
     [ "module::vision::RobotDetector::Config", "structmodule_1_1vision_1_1RobotDetector_1_1Config.html", null ],
     [ "module::vision::VisualMesh::EngineContext", "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html", null ],
     [ "module::vision::VisualMesh::EngineContext::Runner", "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext_1_1Runner.html", null ],

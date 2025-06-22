@@ -73,8 +73,8 @@ var NAVTREEINDEX =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa3ba6f87b2251c157f7bb4e772e31efd",
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html",
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1eaf4ba15a13c3052563bbd06c34a746757",
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026da",
-"structutility_1_1reflection_1_1unknown__message.html#a656e81f14f1a71942e0ba303e1ca7953"
+"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa83992d6862f3b0f78421ed96840c83e6",
+"structutility_1_1skill_1_1ScriptRequest.html#ac3fbe9315df966a2e51e934a852067bd"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
