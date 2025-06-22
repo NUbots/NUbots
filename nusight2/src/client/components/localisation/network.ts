@@ -134,7 +134,7 @@ export class LocalisationNetwork {
       return {
         id: localisation_robot.id!,
         rRWw: Vector3.from(localisation_robot.rRWw),
-        color: localisation_robot.isBlue ? "blue" : "red",
+        ownTeam: !!localisation_robot.teammate,
       };
     });
   }
