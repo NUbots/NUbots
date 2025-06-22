@@ -1,13 +1,3 @@
-log_level: INFO
-
-buttons:
-  debounce_threshold: 7
-
-foot_down:
-  # Either (Z_HEIGHT or FSR)
-  method: Z_HEIGHT # Foot sensor reading
-  threshold: 0.01 # Height difference of the Z for the Z height method
-
 # Mahony filter for roll + pitch
 mahony:
   # Proportional gain
@@ -29,9 +19,3 @@ mahony:
 velocity_low_pass:
   x_cut_off_frequency: 0.015
   y_cut_off_frequency: 0.01
-
-# Specify whether or not to use ground truth odometry from simulator
-use_ground_truth: false
-
-# Path to URDF file
-urdf_path: models/robot.urdf

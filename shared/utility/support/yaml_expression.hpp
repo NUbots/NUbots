@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_SUPPORT_yaml_expression_HPP
-#define UTILITY_SUPPORT_yaml_expression_HPP
+#ifndef UTILITY_SUPPORT_YAML_EXPRESSION_HPP
+#define UTILITY_SUPPORT_YAML_EXPRESSION_HPP
 
 #include <Eigen/Core>
 #include <fmt/format.h>
