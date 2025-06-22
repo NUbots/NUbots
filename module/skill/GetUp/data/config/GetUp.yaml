@@ -1,7 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-delay_time: 2500 #  milliseconds
+delay_time: 1250 #  milliseconds
 
 scripts:
   getup_upright:

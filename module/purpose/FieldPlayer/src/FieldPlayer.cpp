@@ -9,6 +9,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/purpose/Player.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
@@ -33,7 +34,9 @@ namespace module::purpose {
     using message::localisation::Robots;
     using message::purpose::Attack;
     using message::purpose::Defend;
+    using message::purpose::Purpose;
     using message::purpose::ReadyAttack;
+    using message::purpose::SoccerPosition;
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
@@ -75,6 +78,17 @@ namespace module::purpose {
                 // General tasks
                 emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
+
+                // If there's no ball message, only emit the tasks to find it
+                if (ball == nullptr) {
+                    // We don't know what we're doing and we're not active
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::UNKNOWN,
+                                                   true,
+                                                   false,
+                                                   game_state.team.team_colour));
+                    return;
+                }
 
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
@@ -122,6 +136,11 @@ namespace module::purpose {
                 // penalty set up phase.
                 if (is_closest && allowed_to_attack) {
                     log<DEBUG>("Attack!");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::ATTACK,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
@@ -130,6 +149,11 @@ namespace module::purpose {
                 // positioning or opponent kickoff, then we should stick to a good spot and be ready to attack
                 if (is_closest && !allowed_to_attack) {
                     log<DEBUG>("Ready attack!");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::ATTACK,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
                     emit<Task>(std::make_unique<ReadyAttack>());
                     return;
                 }
@@ -148,6 +172,11 @@ namespace module::purpose {
                                          : true;
                 if (furthest_back) {
                     log<DEBUG>("Defend!");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::DEFEND,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
                     emit<Task>(std::make_unique<Defend>());
                     return;
                 }
@@ -156,6 +185,11 @@ namespace module::purpose {
                 // the ball up towards our goal, we should help out the attacker however makes sense in the situation
                 log<DEBUG>("Support!");
                 emit<Task>(std::make_unique<Support>());
+                emit(std::make_unique<Purpose>(global_config.player_id,
+                                               SoccerPosition::SUPPORT,
+                                               true,
+                                               true,
+                                               game_state.team.team_colour));
             });
 
         // READY state
@@ -165,12 +199,14 @@ namespace module::purpose {
            With<Field>,
            With<Sensors>,
            With<GameState>,
+           With<GlobalConfig>,
            When<Phase, std::equal_to, Phase::READY>>()
             .then([this](const std::shared_ptr<const Robots>& robots,
                          const FieldDescription& field_desc,
                          const Field& field,
                          const Sensors& sensors,
-                         const GameState& game_state) {
+                         const GameState& game_state,
+                         const GlobalConfig& global_config) {
                 // Collect up teammates; empty if no one is around
                 std::vector<Eigen::Vector3d> teammates{};
                 if (robots) {
@@ -190,6 +226,23 @@ namespace module::purpose {
                                                                           game_state.our_kick_off,
                                                                           cfg.center_circle_offset);
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
+
+                // Send purpose
+                emit(std::make_unique<Purpose>(global_config.player_id,
+                                               SoccerPosition::UNKNOWN,
+                                               true,
+                                               true,
+                                               game_state.team.team_colour));
+            });
+
+        // When not in playing or ready state, send off the team colour and unknown state
+        on<Provide<FieldPlayerMsg>, With<GameState>, With<GlobalConfig>>().then(
+            [this](const GameState& game_state, const GlobalConfig& global_config) {
+                emit(std::make_unique<Purpose>(global_config.player_id,
+                                               SoccerPosition::UNKNOWN,
+                                               true,
+                                               true,
+                                               game_state.team.team_colour));
             });
     }
 }  // namespace module::purpose
