@@ -71,6 +71,7 @@ namespace utility::strategy {
                                                     const Eigen::Isometry3d& Hrw,
                                                     double equidistant_threshold,
                                                     unsigned int self_id,
+                                                    std::vector<unsigned int> const& ignore_ids,
                                                     bool include_opponents = true) {
         // Transform ball position to field coordinates
         Eigen::Vector3d rBFf         = Hfw * rBWw;
@@ -84,25 +85,34 @@ namespace utility::strategy {
         // Loop through each robot
         for (const auto& robot : robots.robots) {
             // Skip if not a teammate and not including opponents
-            if (robot.teammate_id == 0 && !include_opponents) {
+            if (!robot.teammate && !include_opponents) {
                 continue;
             }
-            // Skip penalised robots as they are not in play
-            if (robot.penalised) {
+            // Skip robots that are in the ignore list
+            if (std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end()) {
                 continue;
             }
 
             // Calculate distance to the ball
             double distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head<2>().norm();
-
             // Check if close to the closest robot
             bool equidistant = std::abs(distance_to_ball - closest.second) < equidistant_threshold;
-            // If it is close to the closest robot, lowest ID wins, in this case an opponent is in possession above us
-            // to trigger tackling. Otherwise it has to be closer to win
-            if ((equidistant && (robot.teammate_id < lowest_id))
-                || (!equidistant && (distance_to_ball < closest.second))) {
-                closest   = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};
-                lowest_id = robot.teammate_id;
+
+            // Opponents that are equidistant win
+            if (equidistant && !robot.teammate) {
+                closest   = {Who{Who::OPPONENT}, distance_to_ball};
+                lowest_id = 0;
+            }
+            // Equidistant teammates with a lower ID win
+            else if (equidistant && (robot.purpose.player_id < lowest_id)) {
+                // If it is equidistant and a teammate, lowest ID wins
+                closest   = {Who{Who::TEAMMATE}, distance_to_ball};
+                lowest_id = robot.purpose.player_id;
+            }
+            // Closer than equidistant wins
+            else if (!equidistant && (distance_to_ball < closest.second)) {
+                closest   = {robot.teammate ? Who{Who::TEAMMATE} : Who{Who::OPPONENT}, distance_to_ball};
+                lowest_id = robot.teammate ? robot.purpose.player_id : 0;
             }
         }
 
@@ -132,9 +142,10 @@ namespace utility::strategy {
                         const Eigen::Isometry3d& Hrw,
                         double threshold,
                         double equidistant_threshold,
-                        unsigned int self_id) {
+                        unsigned int self_id,
+                        std::vector<unsigned int> const& ignore_ids) {
         // Function determines who has possession based on proximity and a threshold distance.
-        auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id);
+        auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, ignore_ids);
 
         // 'closest.second' is the distance to the ball
         // If the distance is greater than the threshold, then the robot is too far
@@ -163,10 +174,12 @@ namespace utility::strategy {
                                          const Eigen::Isometry3d& Hfw,
                                          const Eigen::Isometry3d& Hrw,
                                          double equidistant_threshold,
-                                         unsigned int self_id) {
+                                         unsigned int self_id,
+                                         std::vector<unsigned int> const& ignore_ids) {
         // Function determines who has possession based on proximity and a threshold distance.
         // Exclude opponents from the search
-        auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, false);
+        auto closest =
+            get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, ignore_ids, false);
 
         // Return true if the closest robot is us
         return closest.first;
@@ -186,7 +199,7 @@ namespace utility::strategy {
                        const Eigen::Isometry3d& Hrw,
                        double equidistant_threshold,
                        unsigned int self_id,
-                       std::vector<unsigned int> const& ignore_ids = {}) {
+                       std::vector<unsigned int> const& ignore_ids) {
         // Transform our position to field coordinates
         Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
         double furthest      = std::abs(rRFf.y());
@@ -194,8 +207,9 @@ namespace utility::strategy {
         // Look for any teammates that are further back than us
         for (const auto& robot : robots.robots) {
             // Only consider non penalised teammates
-            bool ignore_id = std::find(ignore_ids.begin(), ignore_ids.end(), robot.teammate_id) != ignore_ids.end();
-            if ((robot.teammate_id != 0 && !robot.penalised) && !ignore_id) {
+            bool ignore_id =
+                std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
+            if ((robot.teammate && robot.purpose.active) && !ignore_id) {
                 // Transform robot position to field coordinates
                 Eigen::Vector3d rRFf = Hfw * robot.rRWw;
 
@@ -204,7 +218,7 @@ namespace utility::strategy {
                 // If the robot is further back than us, or equidistant and has a higher ID, then we are not the
                 // furthest back
                 if ((!equidistant && (std::abs(rRFf.y()) > furthest))
-                    || (equidistant && (robot.teammate_id > self_id))) {
+                    || (equidistant && (robot.purpose.player_id > self_id))) {
                     return false;
                 }
             }
