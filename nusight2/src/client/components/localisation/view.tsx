@@ -398,19 +398,19 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           Hfd={robot.Hfd}
           Hfr={robot.Hfr}
           Hft={robot.Hft}
-          min_align_radius={robot.min_align_radius}
-          max_align_radius={robot.max_align_radius}
-          min_angle_error={robot.min_angle_error}
-          max_angle_error={robot.max_angle_error}
-          angle_to_final_heading={robot.angle_to_final_heading}
-          velocity_target={robot.velocity_target}
+          minAlignRadius={robot.minAlignRadius}
+          maxAlignRadius={robot.maxAlignRadius}
+          minAngleError={robot.minAngleError}
+          maxAngleError={robot.maxAngleError}
+          angleToFinalHeading={robot.angleToFinalHeading}
+          velocityTarget={robot.velocityTarget}
         />
       )}
 
       {robot.Hft && robot.purpose && (
         <PurposeLabel
           Hft={robot.Hft}
-          player_id={robot.player_id}
+          playerId={robot.playerId}
           backgroundColor={robot.color}
           purpose={robot.purpose}
           cameraPitch={model.camera.pitch}
@@ -420,15 +420,15 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
       {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
 
-      {robot.torso_trajectory && robot.swing_foot_trajectory && (
+      {robot.torsoTrajectory && robot.swingFootTrajectory && (
         <WalkTrajectory
-          torso_trajectory={robot.torso_trajectoryF}
-          swing_foot_trajectory={robot.swing_foot_trajectoryF}
+          torsoTrajectory={robot.torsoTrajectoryF}
+          swingFootTrajectory={robot.swingFootTrajectoryF}
           color={"#ffa500"}
         />
       )}
 
-      {robot.trajectory_history.length > 0 && <WalkTrajectoryHistory trajectories={robot.trajectory_history} />}
+      {robot.trajectoryHistory.length > 0 && <WalkTrajectoryHistory trajectories={robot.trajectoryHistory} />}
 
       {model.boundedBoxVisible && robot.boundingBox && (
         <BoundingBox

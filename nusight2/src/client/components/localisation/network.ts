@@ -72,17 +72,17 @@ export class LocalisationNetwork {
   };
 
   @action
-  private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
+  private onWalkToDebug = (robotModel: RobotModel, walkToDebug: message.planning.WalkToDebug) => {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
-    robot.max_align_radius = walk_to_debug.maxAlignRadius;
-    robot.min_align_radius = walk_to_debug.minAlignRadius;
-    robot.angle_to_final_heading = walk_to_debug.angleToFinalHeading;
-    robot.angle_to_target = walk_to_debug.angleToTarget;
-    robot.translational_error = walk_to_debug.translationalError;
-    robot.min_angle_error = walk_to_debug.minAngleError;
-    robot.max_angle_error = walk_to_debug.maxAngleError;
-    robot.velocity_target = Vector3.from(walk_to_debug.velocityTarget);
+    robot.Hrd = Matrix4.from(walkToDebug.Hrd);
+    robot.maxAlignRadius = walkToDebug.maxAlignRadius;
+    robot.minAlignRadius = walkToDebug.minAlignRadius;
+    robot.angleToFinalHeading = walkToDebug.angleToFinalHeading;
+    robot.angleToTarget = walkToDebug.angleToTarget;
+    robot.translationalError = walkToDebug.translationalError;
+    robot.minAngleError = walkToDebug.minAngleError;
+    robot.maxAngleError = walkToDebug.maxAngleError;
+    robot.velocityTarget = Vector3.from(walkToDebug.velocityTarget);
   };
 
   @action.bound
@@ -102,18 +102,18 @@ export class LocalisationNetwork {
     const position = purpose.purpose;
     robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
 
-    robot.player_id = purpose.playerId!;
+    robot.playerId = purpose.playerId!;
 
     // Update colour based on player id
-    if (robot.player_id === 1) {
+    if (robot.playerId === 1) {
       robot.color = "blue";
-    } else if (robot.player_id === 2) {
+    } else if (robot.playerId === 2) {
       robot.color = "purple";
-    } else if (robot.player_id === 3) {
+    } else if (robot.playerId === 3) {
       robot.color = "red";
-    } else if (robot.player_id === 4) {
+    } else if (robot.playerId === 4) {
       robot.color = "orange";
-    } else if (robot.player_id === 5) {
+    } else if (robot.playerId === 5) {
       robot.color = "yellow";
     } else {
       robot.color = "black";
@@ -219,15 +219,15 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
 
     // If phase changed, add current trajectories to history before updating
-    if (robot.walk_phase !== walk_state.phase && robot.torso_trajectory.length > 0) {
-      robot.addToTrajectoryHistory(robot.torso_trajectoryF, robot.swing_foot_trajectoryF);
+    if (robot.walkPhase !== walk_state.phase && robot.torsoTrajectory.length > 0) {
+      robot.addToTrajectoryHistory(robot.torsoTrajectoryF, robot.swingFootTrajectoryF);
     }
 
     // Update current state
-    robot.torso_trajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
-    robot.swing_foot_trajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
+    robot.torsoTrajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
+    robot.swingFootTrajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
     robot.Hwp = Matrix4.from(walk_state.Hwp);
-    robot.walk_phase = walk_state.phase;
+    robot.walkPhase = walk_state.phase;
   }
 
   @action
