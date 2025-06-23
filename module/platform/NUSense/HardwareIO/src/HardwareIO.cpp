@@ -30,6 +30,8 @@
 #include <fmt/format.h>
 #include <vector>
 
+#include "NUSenseParser.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoOffsets.hpp"
@@ -51,6 +53,7 @@ namespace module::platform::NUSense {
     using message::actuation::SubcontrollerServoTarget;
     using message::actuation::SubcontrollerServoTargets;
     using message::platform::NUSense;
+    using message::platform::NUSenseHandshake;
     using message::platform::RawSensors;
     using utility::support::Expression;
 
@@ -87,6 +90,44 @@ namespace module::platform::NUSense {
             emit(std::make_unique<ConnectSerial>(device, baud));
         });
 
+        on<PostConnect>().then("Sending handshake message to NUSense", [this] {
+            // Parse handshake packet
+            auto handshake = NUSenseHandshake();
+            handshake.msg  = "";
+
+            switch (service_state) {
+                case ServiceState::INIT:
+                    handshake.msg  = "NUC Handshake req";
+                    handshake.type = false;
+                    break;
+                case ServiceState::IN_SERVICE:
+                    handshake.msg  = "NUC Reconnect req";
+                    handshake.type = true;
+                    break;
+            }
+
+            for (size_t i = 0; i < cfg.servo_configurations.size(); ++i) {
+                handshake.servo_configs.emplace_back(cfg.servo_configurations[i].direction,
+                                                     cfg.servo_configurations[i].offset);
+            }
+
+            // Send to stream reactor
+            send_packet(handshake);
+            log<INFO>("Handshake message sent to NUSense, waiting for response...");
+            log<INFO>(fmt::format("Type, {}", handshake.type));
+        });
+
+        // If this triggers, then that means that NUSense has acknowledged the NUC's message and the watchdog can be
+        // unbound since it should not be needed after this point
+        on<Trigger<NUSenseHandshake>>().then([this](const NUSenseHandshake& handshake) {
+            // Unbind the handshake watchdog reaction here since it should not be needed anymore
+            servo_targets_catcher.enable();
+            service_state = ServiceState::IN_SERVICE;
+
+            log<INFO>("Processing of ServoTargets enabled.");
+            log<INFO>("ACK rx from NUSense: ", handshake.msg);
+        });
+
         // Emit any messages sent by the device to the rest of the system
         on<Trigger<NUSenseFrame>>().then("From NUSense", [this](const NUSenseFrame& packet) {
             message::reflection::from_hash<EmitReflector>(packet.hash)->emit(powerplant, packet);
@@ -105,7 +146,8 @@ namespace module::platform::NUSense {
             sensors->led_panel           = 0;  // TODO (NUSense people) not yet implemented
             sensors->head_led            = 0;  // TODO (NUSense people) not yet implemented
             sensors->eye_led             = 0;  // TODO (NUSense people) not yet implemented
-            sensors->buttons             = 0;  // TODO (NUSense people) not yet implemented
+            sensors->buttons.left        = data.buttons.left;
+            sensors->buttons.middle      = data.buttons.middle;
 
             // Set IMU
             sensors->accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
@@ -118,16 +160,16 @@ namespace module::platform::NUSense {
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
                 RawSensors::Servo& servo = utility::platform::get_raw_servo(val.id - 1, *sensors);
-                // fill all servo values from the reference
+                // Fill all servo values from the reference
                 servo.hardware_error        = val.hardware_error;
                 servo.torque_enabled        = val.torque_enabled;
-                servo.velocity_i_gain       = 0;  // not present in NUSense message
-                servo.velocity_p_gain       = 0;  // not present in NUSense message
-                servo.position_d_gain       = 0;  // not present in NUSense message
-                servo.position_i_gain       = 0;  // not present in NUSense message
-                servo.position_p_gain       = 0;  // not present in NUSense message
-                servo.feed_forward_1st_Gain = 0;  // not present in NUSense message
-                servo.feed_forward_2nd_Gain = 0;  // not present in NUSense message
+                servo.velocity_i_gain       = 0;  // Not present in NUSense message
+                servo.velocity_p_gain       = 0;  // Not present in NUSense message
+                servo.position_d_gain       = 0;  // Not present in NUSense message
+                servo.position_i_gain       = 0;  // Not present in NUSense message
+                servo.position_p_gain       = 0;  // Not present in NUSense message
+                servo.feed_forward_1st_Gain = 0;  // Not present in NUSense message
+                servo.feed_forward_2nd_Gain = 0;  // Not present in NUSense message
                 servo.present_PWM           = val.present_pwm;
                 servo.present_current       = val.present_current;
                 servo.present_velocity      = val.present_velocity;
@@ -138,8 +180,8 @@ namespace module::platform::NUSense {
                 servo.goal_position         = val.goal_position;
                 servo.voltage               = val.voltage;
                 servo.temperature           = val.temperature;
-                servo.profile_acceleration  = 0;  // not present in NUSense message
-                servo.profile_velocity      = 0;  // not present in NUSense message
+                servo.profile_acceleration  = 0;  // Not present in NUSense message
+                servo.profile_velocity      = 0;  // Not present in NUSense message
 
                 // Log any errors and timeouts from the servo.
                 if (val.packet_counts.packet_errors != 0) {
@@ -205,28 +247,6 @@ namespace module::platform::NUSense {
             emit(std::move(sensors));
         });
 
-
-        // Sync is used because uart write is a shared resource
-        on<Trigger<ServoTargets>, With<ServoOffsets>, Sync<HardwareIO>>().then(
-            [this](const ServoTargets& commands, const ServoOffsets& offsets) {
-                // Copy the data into a new message so we can use a duration instead of a timepoint
-                // and take the offsets and switch the direction.
-                auto servo_targets = SubcontrollerServoTargets();
-
-                // Change the timestamp in servo targets to the difference between the timestamp and now
-                // Take away the offset and switch the direction if needed
-                for (auto& target : commands.targets) {
-                    servo_targets.targets.emplace_back(
-                        target.time - NUClear::clock::now(),
-                        target.id,
-                        (target.position - offsets.offsets[target.id].offset) * offsets.offsets[target.id].direction,
-                        target.gain,
-                        target.torque);
-                }
-
-                send_packet(servo_targets);
-            });
-
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto command_list = std::make_unique<ServoTargets>();
             command_list->targets.push_back(command);
@@ -234,6 +254,30 @@ namespace module::platform::NUSense {
             // Emit it so it's captured by the reaction above
             emit<Scope::INLINE>(std::move(command_list));
         });
+
+        // Sync is used because uart write is a shared resource
+        servo_targets_catcher =
+            on<Trigger<ServoTargets>, With<ServoOffsets>, With<NUSense>, Sync<HardwareIO>>()
+                .then([this](const ServoTargets& commands, const ServoOffsets& offsets) {
+                    // Copy the data into a new message so we can use a duration instead of a timepoint
+                    // and take the offsets and switch the direction.
+                    auto servo_targets = SubcontrollerServoTargets();
+
+                    // Change the timestamp in servo targets to the difference between the timestamp and now
+                    // Take away the offset and switch the direction if needed
+                    for (auto& target : commands.targets) {
+                        servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
+                                                           target.id,
+                                                           (target.position - offsets.offsets[target.id].offset)
+                                                               * offsets.offsets[target.id].direction,
+                                                           target.gain,
+                                                           target.torque);
+                    }
+
+                    send_packet(servo_targets);
+                    log<DEBUG>("Sent a ServoTargets message to NUSense.");
+                })
+                .disable();
     }
 
 }  // namespace module::platform::NUSense

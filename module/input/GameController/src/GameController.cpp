@@ -31,7 +31,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
@@ -145,7 +144,9 @@ namespace module::input {
         packet->player  = PLAYER_ID;
         packet->message = message;
 
-        emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
+        if (BROADCAST_IP != "") {
+            emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
+        }
     }
 
     void GameController::reset_state() {

@@ -12,21 +12,21 @@ import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 import { LocalisationController } from "./controller";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
-import { AssociationLines } from "./r3f_components/association_lines/view";
-import { Ball } from "./r3f_components/ball/view";
+import { AssociationLines } from "./r3f_components/association_lines";
+import { Ball } from "./r3f_components/ball";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
-import { FieldIntersections } from "./r3f_components/field_intersections/view";
-import { FieldObjects } from "./r3f_components/field_objects/view";
-import { FieldPoints } from "./r3f_components/field_points/view";
-import { GridView } from "./r3f_components/grid/view";
-import { Nugus } from "./r3f_components/nugus/view";
-import { PurposeLabel } from "./r3f_components/purpose_label/view";
+import { FieldIntersections } from "./r3f_components/field_intersections";
+import { FieldObjects } from "./r3f_components/field_objects";
+import { FieldPoints } from "./r3f_components/field_points";
+import { GridView } from "./r3f_components/grid";
+import { Nugus } from "./r3f_components/nugus";
+import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
-import { WalkPathGoal } from "./r3f_components/walk_path_goal/view";
-import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser/view";
-import { WalkTrajectory } from "./r3f_components/walk_trajectory/view";
-import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history/view";
+import { WalkPathGoal } from "./r3f_components/walk_path_goal";
+import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
+import { WalkTrajectory } from "./r3f_components/walk_trajectory";
+import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history";
 import { LocalisationRobotModel } from "./robot_model";
 
 type LocalisationViewProps = {
@@ -355,12 +355,14 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       )}
 
       <FieldObjects
-        objects={robot.rRFf.map((r) => ({
-          position: r,
-        }))}
+        objects={robot.rRFf.map((r) => {
+          return {
+            position: r.position,
+            color: r.color,
+          };
+        })}
         defaultHeight={0.8}
         defaultRadius={0.1}
-        defaultColor="orange"
       />
 
       {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}

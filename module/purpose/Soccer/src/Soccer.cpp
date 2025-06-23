@@ -37,6 +37,7 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
+#include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
@@ -69,10 +70,13 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
+    using message::input::GameState;
     using message::input::RoboCup;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::FinishReset;
     using message::localisation::ResetFieldLocalisation;
+    using message::localisation::UncertaintyResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
     using message::purpose::AllRounder;
@@ -90,6 +94,8 @@ namespace module::purpose {
     using message::strategy::StartSafely;
     using message::support::GlobalConfig;
 
+    struct StartSoccer {};
+
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration, Trigger<GlobalConfig>>("Soccer.yaml")
@@ -102,6 +108,7 @@ namespace module::purpose {
                 cfg.position = Position(config["position"].as<std::string>());
 
                 cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
+                cfg.startup_delay      = config["startup_delay"].as<int>();
 
                 // Get the number of seconds until we assume a teammate is inactive
                 cfg.timeout = config["timeout"].as<int>();
@@ -143,13 +150,20 @@ namespace module::purpose {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Stand idle
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
-            // Idle look forward if the head isn't doing anything else
+            // Look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
-            // This emit starts the tree to play soccer
+            // After a startup delay, start the soccer scenario
+            emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
+        on<Trigger<StartSoccer>>().then([this] {
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
+
+        on<Trigger<FinishReset>>().then([this] { emit<Task>(std::make_unique<FindPurpose>(), 1); });
+        on<Trigger<UncertaintyResetFieldLocalisation>>().then(
+            [this] { emit<Task>(std::unique_ptr<FindPurpose>(nullptr)); });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
             // We are alive!
@@ -179,13 +193,17 @@ namespace module::purpose {
             }
         });
 
-        on<Every<5, Per<std::chrono::seconds>>>().then([this] {
-            // Emit the purpose
-            emit(std::make_unique<Purpose>(player_id,
-                                           SoccerPosition(int(robots[player_id - 1].position)),
-                                           robots[player_id - 1].dynamic,
-                                           robots[player_id - 1].active));
-        });
+        on<Every<5, Per<std::chrono::seconds>>, Optional<With<GameState>>>().then(
+            [this](const std::shared_ptr<const GameState>& game_state) {
+                // Emit the purpose
+                emit(std::make_unique<Purpose>(
+                    player_id,
+                    SoccerPosition(int(robots[player_id - 1].position)),
+                    robots[player_id - 1].dynamic,
+                    robots[player_id - 1].active,
+                    game_state ? game_state->team.team_colour
+                               : GameState::TeamColour(GameState::TeamColour::UNKNOWN_TEAM_COLOUR)));
+            });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still

@@ -28,6 +28,7 @@
 #include "PS3Walk.hpp"
 
 #include <nuclear>
+#include <unordered_map>
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -69,6 +70,12 @@ namespace module::purpose {
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.maximum_forward_velocity    = config["maximum_forward_velocity"].as<double>();
             cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<double>();
+            cfg.max_acceleration            = config["max_acceleration"].as<double>();
+
+            // Load button to script mappings
+            for (const auto& script : config["button_scripts"].as<std::map<std::string, std::string>>()) {
+                cfg.button_scripts[script.first] = script.second;
+            }
         });
 
 
@@ -78,6 +85,8 @@ namespace module::purpose {
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+            // Look forward
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
         });
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
@@ -112,9 +121,10 @@ namespace module::purpose {
                     switch (event.number) {
                         case BUTTON_START:
                             if (event.value > 0) {  // button down
+                                log<INFO>("Button START pressed");
                                 if (moving) {
                                     log<INFO>("Stop walking");
-                                    emit<Task>(std::unique_ptr<Walk>(nullptr));
+                                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                                 }
                                 else {
                                     log<INFO>("Start walking");
@@ -124,6 +134,7 @@ namespace module::purpose {
                             break;
                         case BUTTON_SELECT:
                             if (event.value > 0) {  // button down
+                                log<INFO>("Button SELECT pressed");
                                 if (head_locked) {
                                     log<INFO>("Head unlocked");
                                 }
@@ -134,69 +145,165 @@ namespace module::purpose {
                                 head_locked = !head_locked;
                             }
                             break;
-                            // dance moves here:
                         case BUTTON_DPAD_UP:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance move Dpad up");
-                                emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_UP pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_UP") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_UP");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_DPAD_DOWN:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance Dpad down");
-                                emit<Task>(load_script<LimbsSequence>("TheRobot.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_DOWN pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_DOWN") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_DOWN");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_DPAD_LEFT:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance Dpad left");
-                                emit<Task>(load_script<LimbsSequence>("Dab.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_LEFT pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_LEFT") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_LEFT");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_DPAD_RIGHT:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance Dpad right");
-                                emit<Task>(load_script<LimbsSequence>("ArmDangle.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button DPAD_RIGHT pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("DPAD_RIGHT") > 0) {
+                                    const auto& script = cfg.button_scripts.at("DPAD_RIGHT");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_TRIANGLE:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance triangle");
-                                emit<Task>(load_script<LimbsSequence>("Star.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button TRIANGLE pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("TRIANGLE") > 0) {
+                                    const auto& script = cfg.button_scripts.at("TRIANGLE");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_CIRCLE:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance circle");
-                                emit<Task>(load_script<LimbsSequence>("RaiseTheRoof.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button CIRCLE pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("CIRCLE") > 0) {
+                                    const auto& script = cfg.button_scripts.at("CIRCLE");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_CROSS:
-                            if (event.value > 0) {
-                                log<INFO>("Do a dance cross");
-                                emit<Task>(load_script<LimbsSequence>("Crouch.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button CROSS pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("CROSS") > 0) {
+                                    const auto& script = cfg.button_scripts.at("CROSS");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_SQUARE:
-                            if (event.value > 0) {
-                                log<INFO>("Do a wave");
-                                emit<Task>(load_script<LimbsSequence>("Wave.yaml"), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button SQUARE pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("SQUARE") > 0) {
+                                    const auto& script = cfg.button_scripts.at("SQUARE");
+                                    log<INFO>("Running script:", script);
+                                    emit<Task>(load_script<LimbsSequence>(script), 3);
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_L1:
-                            if (event.value > 0) {
-                                log<INFO>("Requesting Left Front Kick");
-                                emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button L1 pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("L1") > 0) {
+                                    const auto& action = cfg.button_scripts.at("L1");
+                                    if (action == "LEFT_LEG_KICK") {
+                                        log<INFO>("Requesting Left Front Kick");
+                                        emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
+                                    }
+                                    else {
+                                        log<INFO>("Running script:", action);
+                                        emit<Task>(load_script<LimbsSequence>(action), 3);
+                                    }
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
                         case BUTTON_R1:
-                            if (event.value > 0) {
-                                log<INFO>("Requesting Right Front Kick");
-                                emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
+                            if (event.value > 0) {  // button down
+                                log<INFO>("Button R1 pressed");
+                                if (scripts_enabled && cfg.button_scripts.count("R1") > 0) {
+                                    const auto& action = cfg.button_scripts.at("R1");
+                                    if (action == "RIGHT_LEG_KICK") {
+                                        log<INFO>("Requesting Right Front Kick");
+                                        emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
+                                    }
+                                    else {
+                                        log<INFO>("Running script:", action);
+                                        emit<Task>(load_script<LimbsSequence>(action), 3);
+                                    }
+                                }
+                                else if (!scripts_enabled) {
+                                    log<INFO>("Scripts are disabled. Enable with R2.");
+                                }
                             }
                             break;
-                        case BUTTON_L2: break;
-                        case BUTTON_R2: break;
+                        case BUTTON_L2:
+                            if (event.value > 0) {
+                                log<INFO>("Button L2 pressed");
+                            }
+                            break;
+                        case BUTTON_RIGHT_JOYSTICK:
+                            if (event.value > 0) {
+                                log<INFO>("Button BUTTON_RIGHT_JOYSTICK pressed");
+                                if (scripts_enabled) {
+                                    log<INFO>("Scripts disabled");
+                                }
+                                else {
+                                    log<INFO>("Scripts enabled");
+                                }
+                                scripts_enabled = !scripts_enabled;
+                            }
+                            break;
                     }
                 }
             }
@@ -207,7 +314,7 @@ namespace module::purpose {
         });
 
         // output walk command based on updated strafe and rotation speed from joystick
-        on<Every<20, Per<std::chrono::seconds>>>().then([this] {
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
             if (!head_locked) {
                 // Create a unit vector in the direction the head should be pointing
                 Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw, Eigen::Vector3d::UnitZ())
@@ -218,8 +325,38 @@ namespace module::purpose {
             }
 
             if (moving) {
-                // walk command is set in the joystick event if the event type is axis
-                emit<Task>(std::make_unique<Walk>(walk_command.cast<double>()), 2);
+                // Apply acceleration limiting
+                const double dt = 1.0 / UPDATE_FREQUENCY;
+
+                // Calculate maximum allowed change in velocity components
+                double max_delta = cfg.max_acceleration * dt;
+
+                // Create a limited walk command
+                Eigen::Vector3d limited_walk_command = walk_command;
+
+                // Limit each component's acceleration
+                for (int i = 0; i < 3; i++) {
+                    double delta = walk_command[i] - previous_walk_command[i];
+                    if (std::abs(delta) > max_delta) {
+                        limited_walk_command[i] = previous_walk_command[i] + (delta > 0 ? max_delta : -max_delta);
+                    }
+                }
+
+                // Store the new command for next cycle
+                previous_walk_command = limited_walk_command;
+
+                // Emit the limited walk command
+                log<DEBUG>("Walk command:",
+                           limited_walk_command.transpose(),
+                           " (limited from:",
+                           walk_command.transpose(),
+                           ")");
+                emit<Task>(std::make_unique<Walk>(limited_walk_command), 2);
+            }
+            else {
+                // When not moving, also update previous_walk_command to prevent
+                // large accelerations when starting to move again
+                previous_walk_command = Eigen::Vector3d::Zero();
             }
         });
     }

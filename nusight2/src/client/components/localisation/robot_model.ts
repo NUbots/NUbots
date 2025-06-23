@@ -162,7 +162,7 @@ export class LocalisationRobotModel {
   @observable rIWw?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
-  @observable robots: { id: number; rRWw: Vector3 }[];
+  @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
   @observable associationLines?: Line[];
   @observable max_align_radius: number;
@@ -175,6 +175,7 @@ export class LocalisationRobotModel {
   @observable velocity_target: Vector3;
   @observable boundingBox?: BoundingBox;
   @observable player_id: number;
+  @observable teamColour: "red" | "blue" = "blue";
   @observable torso_trajectory: Matrix4[];
   @observable swing_foot_trajectory: Matrix4[];
   @observable walk_phase: message.behaviour.state.WalkState.Phase;
@@ -215,6 +216,7 @@ export class LocalisationRobotModel {
     velocity_target,
     boundingBox,
     player_id,
+    teamColour,
     torso_trajectory,
     swing_foot_trajectory,
     walk_phase,
@@ -235,7 +237,7 @@ export class LocalisationRobotModel {
     ball?: { rBWw: Vector3 };
     rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
-    robots: { id: number; rRWw: Vector3 }[];
+    robots: { id: number; rRWw: Vector3; color: string }[];
     purpose: string;
     associationLines?: Line[];
     max_align_radius: number;
@@ -248,6 +250,7 @@ export class LocalisationRobotModel {
     velocity_target: Vector3;
     boundingBox?: BoundingBox;
     player_id: number;
+    teamColour?: "red" | "blue";
     torso_trajectory: Matrix4[];
     swing_foot_trajectory: Matrix4[];
     walk_phase: message.behaviour.state.WalkState.Phase;
@@ -276,6 +279,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.teamColour = teamColour || "blue";
     this.associationLines = associationLines;
     this.max_align_radius = max_align_radius;
     this.min_align_radius = min_align_radius;
@@ -319,6 +323,7 @@ export class LocalisationRobotModel {
       max_angle_error: 0,
       velocity_target: Vector3.of(),
       player_id: -1,
+      teamColour: "blue",
       torso_trajectory: [],
       swing_foot_trajectory: [],
       walk_phase: message.behaviour.state.WalkState.Phase.DOUBLE,
@@ -378,8 +383,11 @@ export class LocalisationRobotModel {
 
   /** Robot positions in field space */
   @computed
-  get rRFf(): Vector3[] {
-    return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
+  get rRFf(): { position: Vector3; color: string }[] {
+    return this.robots?.map((robot) => ({
+      position: robot.rRWw.applyMatrix4(this.Hfw),
+      color: robot.color,
+    }));
   }
 
   /** Field intersections in field space */

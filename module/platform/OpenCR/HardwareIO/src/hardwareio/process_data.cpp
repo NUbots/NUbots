@@ -83,6 +83,7 @@ namespace module::platform::OpenCR {
         opencr_state.gyro = Eigen::Vector3f(convert::gyro(data.gyro[0]),    // X
                                             -convert::gyro(data.gyro[1]),   // Y
                                             -convert::gyro(data.gyro[2]));  // Z
+        opencr_state.gyro += cfg.gyro_offset;                               // Add the offset to zero the gyro at rest
 
         opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),    // X
                                            -convert::acc(data.acc[1]),   // Y

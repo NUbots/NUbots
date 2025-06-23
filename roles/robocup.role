@@ -24,7 +24,7 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::BallDetector
+  # vision::BallDetector
   vision::FieldLineDetector
   vision::Yolo
   # Localisation
@@ -62,11 +62,13 @@ nuclear_role(
   strategy::DiveToBall
   strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::AllRounder
-  purpose::Striker
-  purpose::Defender
+  purpose::SoccerNew
+  purpose::Attack
+  purpose::ReadyAttack
+  purpose::Defend
+  purpose::FieldPlayer
+  # purpose::Support
   purpose::Goalie
-  purpose::Soccer
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
   # Datalogging support::logging::DataLogging
