@@ -1,7 +1,7 @@
 import { computed } from "mobx";
 import { observable } from "mobx";
 
-import { memoize } from "../../../base/memoize";
+import { memoize } from "../../../../base/memoize";
 import { DashboardRobotModel } from "../dashboard_robot/model";
 import { GroundModel } from "../ground/model";
 

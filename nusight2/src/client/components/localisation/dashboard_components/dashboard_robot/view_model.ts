@@ -1,23 +1,23 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Transform } from "../../../../shared/math/transform";
-import { Vector2 } from "../../../../shared/math/vector2";
-import { BasicAppearance } from "../../../render2d/appearance/basic_appearance";
-import { LineAppearance } from "../../../render2d/appearance/line_appearance";
-import { ArcGeometry } from "../../../render2d/geometry/arc_geometry";
-import { ArrowGeometry } from "../../../render2d/geometry/arrow_geometry";
-import { CircleGeometry } from "../../../render2d/geometry/circle_geometry";
-import { LineGeometry } from "../../../render2d/geometry/line_geometry";
-import { MarkerGeometry } from "../../../render2d/geometry/marker_geometry";
-import { TextGeometry } from "../../../render2d/geometry/text_geometry";
-import { Group } from "../../../render2d/object/group";
-import { Shape } from "../../../render2d/object/shape";
+import { Transform } from "../../../../../shared/math/transform";
+import { Vector2 } from "../../../../../shared/math/vector2";
+import { BasicAppearance } from "../../../../render2d/appearance/basic_appearance";
+import { LineAppearance } from "../../../../render2d/appearance/line_appearance";
+import { ArcGeometry } from "../../../../render2d/geometry/arc_geometry";
+import { ArrowGeometry } from "../../../../render2d/geometry/arrow_geometry";
+import { CircleGeometry } from "../../../../render2d/geometry/circle_geometry";
+import { LineGeometry } from "../../../../render2d/geometry/line_geometry";
+import { MarkerGeometry } from "../../../../render2d/geometry/marker_geometry";
+import { TextGeometry } from "../../../../render2d/geometry/text_geometry";
+import { Group } from "../../../../render2d/object/group";
+import { Shape } from "../../../../render2d/object/shape";
 
 import { DashboardRobotModel } from "./model";
 
 export class DashboardRobotViewModel {
-  constructor(private model: DashboardRobotModel) {}
+  constructor(private model: DashboardRobotModel) { }
 
   static of = createTransformer((model: DashboardRobotModel): DashboardRobotViewModel => {
     return new DashboardRobotViewModel(model);

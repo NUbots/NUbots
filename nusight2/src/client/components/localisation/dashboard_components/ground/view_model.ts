@@ -1,19 +1,19 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Vector2 } from "../../../../shared/math/vector2";
-import { BasicAppearance } from "../../../render2d/appearance/basic_appearance";
-import { LineAppearance } from "../../../render2d/appearance/line_appearance";
-import { CircleGeometry } from "../../../render2d/geometry/circle_geometry";
-import { LineGeometry } from "../../../render2d/geometry/line_geometry";
-import { PolygonGeometry } from "../../../render2d/geometry/polygon_geometry";
-import { Group } from "../../../render2d/object/group";
-import { Shape } from "../../../render2d/object/shape";
+import { Vector2 } from "../../../../../shared/math/vector2";
+import { BasicAppearance } from "../../../../render2d/appearance/basic_appearance";
+import { LineAppearance } from "../../../../render2d/appearance/line_appearance";
+import { CircleGeometry } from "../../../../render2d/geometry/circle_geometry";
+import { LineGeometry } from "../../../../render2d/geometry/line_geometry";
+import { PolygonGeometry } from "../../../../render2d/geometry/polygon_geometry";
+import { Group } from "../../../../render2d/object/group";
+import { Shape } from "../../../../render2d/object/shape";
 
 import { GroundModel } from "./model";
 
 export class GroundViewModel {
-  constructor(private model: GroundModel) {}
+  constructor(private model: GroundModel) { }
 
   static of = createTransformer((model: GroundModel): GroundViewModel => {
     return new GroundViewModel(model);

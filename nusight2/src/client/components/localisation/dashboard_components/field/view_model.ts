@@ -1,15 +1,15 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Transform } from "../../../../shared/math/transform";
-import { Group } from "../../../render2d/object/group";
+import { Transform } from "../../../../../shared/math/transform";
+import { Group } from "../../../../render2d/object/group";
 import { DashboardRobotViewModel } from "../dashboard_robot/view_model";
 import { GroundViewModel } from "../ground/view_model";
 
 import { DashboardFieldModel } from "./model";
 
 export class DashboardFieldViewModel {
-  constructor(private model: DashboardFieldModel) {}
+  constructor(private model: DashboardFieldModel) { }
 
   static of = createTransformer((model: DashboardFieldModel): DashboardFieldViewModel => {
     return new DashboardFieldViewModel(model);

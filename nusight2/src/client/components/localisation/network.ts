@@ -1,24 +1,23 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
+import { Matrix2 } from "../../../shared/math/matrix2";
+import { Matrix3 } from "../../../shared/math/matrix3";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
+import { TimestampObject } from "../../../shared/time/timestamp";
 
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
-
-import { DashboardRobotModel } from "./dashboard_robot/model";
-import { TimestampObject } from "../../../shared/time/timestamp";
-import { Vector2 } from "../../../shared/math/vector2";
-import { Matrix3 } from "../../../shared/math/matrix3";
-import { Matrix2 } from "../../../shared/math/matrix2";
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
 
 export class LocalisationNetwork {
   constructor(

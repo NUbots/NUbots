@@ -2,7 +2,7 @@ import React from "react";
 import { Component } from "react";
 import { observer } from "mobx-react";
 
-import { Renderer } from "../../../render2d/renderer";
+import { Renderer } from "../../../../render2d/renderer";
 
 import { DashboardFieldModel } from "./model";
 import { DashboardFieldViewModel } from "./view_model";

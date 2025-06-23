@@ -28,11 +28,10 @@ import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
 import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history";
 import { LocalisationRobotModel } from "./robot_model";
-
-import { RobotPanel } from "./robot_panel/view";
-import { RobotPanelViewModel } from "./robot_panel/view_model";
-import { DashboardRobotModel } from "./dashboard_robot/model";
-import { DashboardFieldView } from "./field/view";
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
+import { DashboardFieldView } from "./dashboard_components/field/view";
+import { DashboardRobotPanel } from "./dashboard_components/robot_panel/view";
+import { DashboardRobotPanelViewModel } from "./dashboard_components/robot_panel/view_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -281,13 +280,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
   return (
     <Menu>
-      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 px-4 py-4 w-full items-center">
-        <div className="flex gap-4 items-center w-fit">
+      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-[5rem] gap-y-4 px-3 py-3 w-full items-center">
+        <div className="flex gap-5 items-center w-fit">
           <Button onClick={props.onHawkEyeClick}>Hawk Eye</Button>
           <FieldDimensionSelector controller={controller} model={model} />
         </div>
 
-        <div className="flex flex-wrap justify-end gap-3">
+        <div className="flex flex-wrap w-fit gap-x-4 gap-y-4">
           {[
             ["Grid", model.gridVisible, props.toggleGridVisibility],
             ["Field", model.fieldVisible, props.toggleFieldVisibility],
@@ -301,7 +300,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             ["Bounded Box", model.boundedBoxVisible, props.toggleBoundedBoxVisibility],
             ["Dashboard", model.dashboard.visible, props.toggleDashboardVisibility],
           ].map(([label, isVisible, onClick]) => (
-            <div key={label as string} className="flex justify-end w-[200px]">
+            <div key={label as string} className="w-fit max-w-[13rem]">
               <MenuItem
                 label={label as string}
                 isVisible={isVisible as boolean}
@@ -311,9 +310,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           ))}
         </div>
       </div>
-
     </Menu>
-
   );
 });
 
@@ -486,11 +483,11 @@ export class Dashboard extends Component<DashboardProps> {
           {showPanels && (
             <div className="flex p-2">
               {robots.map((robot) => {
-                const model = RobotPanelViewModel.of(robot);
+                const model = DashboardRobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
                     <div className="rounded-sm shadow-md flex-1 ml-2 overflow-hidden first:ml-0" key={robot.id}>
-                      <RobotPanel
+                      <DashboardRobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}
                         lastCameraImage={model.lastCameraImage}

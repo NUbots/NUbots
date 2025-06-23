@@ -8,9 +8,8 @@ import { AppModel } from "../app/model";
 import { FieldModel } from "./r3f_components/field/model";
 import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
-
-import { DashboardRobotModel } from "./dashboard_robot/model";
-import { DashboardFieldModel } from "./field/model";
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
+import { DashboardFieldModel } from "./dashboard_components/field/model";
 
 export class TimeModel {
   @observable time: number; // seconds
