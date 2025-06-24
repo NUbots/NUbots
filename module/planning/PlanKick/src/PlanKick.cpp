@@ -117,13 +117,6 @@ namespace module::planning {
                     return;
                 }
 
-                // If the robot is not standing, make it stand before kicking
-                // if (stability != Stability::STANDING) {
-                //     log<DEBUG>("Standing to kick!");
-                //     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
-                //     return;
-                // }
-
                 // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
                 if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && rBRr.y() > 0.0)) {
