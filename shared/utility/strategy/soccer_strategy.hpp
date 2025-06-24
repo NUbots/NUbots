@@ -61,6 +61,7 @@ namespace utility::strategy {
      *  @param Hrw transformation of world to robot coordinates.
      *  @param equidistant_threshold maximum distance for two robots to be considered equidistant
      *  @param self_id the ID of the robot that is calling this function
+     *  @param ignore_ids a list of robot IDs to ignore when determining the closest robot
      *  @param include_opponents whether to include opponents in the search
      *
      *  @return A vector of pairs, these contain a Possession type and distance to the ball.
@@ -133,6 +134,7 @@ namespace utility::strategy {
      * @param threshold maximum distance to the ball to be considered in possession of the ball.
      * @param equidistant_threshold maximum distance for two robots to be considered equidistant
      * @param self_id the ID of the robot that is calling this function
+     * @param ignore_ids a list of robot IDs to ignore when determining possession
      *
      * @return A possession value which determines if any robot (or NONE) has the ball.
      */
@@ -166,6 +168,7 @@ namespace utility::strategy {
      * @param Hrw transformation of world to robot coordinates
      * @param equidistant_threshold maximum distance to the ball to be considered equidistant
      * @param self_id the ID of the robot that is calling this function
+     * @param ignore_ids a list of robot IDs to ignore when determining the closest robot
      *
      * @return true if we are the closest robot to the ball on our team, false otherwise
      */
@@ -191,6 +194,9 @@ namespace utility::strategy {
      * @param robots localisation of every known robot in the game
      * @param Hfw transformation of world to field coordinates
      * @param Hrw transformation of world to robot coordinates
+     * @param equidistant_threshold maximum distance to the ball to be considered equidistant
+     * @param self_id the ID of the robot that is calling this function
+     * @param ignore_ids a list of robot IDs to ignore when determining the robot that is furthest back
      *
      * @return true if we are the furthest back robot on our team, false otherwise
      */

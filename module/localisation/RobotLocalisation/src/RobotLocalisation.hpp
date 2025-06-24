@@ -89,6 +89,10 @@ namespace module::localisation {
             message::purpose::Purpose purpose = message::purpose::Purpose();
 
             /// @brief Constructor that sets the state for the UKF
+            /// @param initial_rRWw The initial position of the robot in world coordinates
+            /// @param cfg_ukf The UKF configuration to use for the robot
+            /// @param next_id The unique id to assign to this new robot
+            /// @param p An optional purpose message that can be used to associate the robot with a teammate
             TrackedRobot(const Eigen::Vector3d& initial_rRWw,
                          const Config::UKF& cfg_ukf,
                          const unsigned long next_id,
@@ -108,6 +112,7 @@ namespace module::localisation {
                 process_noise.vRw       = cfg_ukf.noise.process.velocity;
                 ukf.model.process_noise = process_noise;
 
+                // If a purpose is provided, set the teammate flag and purpose
                 if (p) {
                     teammate = true;
                     purpose  = *p;
@@ -137,8 +142,7 @@ namespace module::localisation {
         /// @brief Associate the given robot measurements with the tracked robots
         /// Creates a new tracked robot if the measurement is not associated with an existing robot
         /// @param robots_rRWw The new robot measurements in world coordinates
-        /// @param teammate_id The unique identifier of the robot if it is a teammate
-        /// @param penalised Whether the robot is penalised or not
+        /// @param purpose An optional purpose message that can be used to associate the robot with teammate
         void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
                               const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr);
 
