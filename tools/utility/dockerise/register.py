@@ -31,6 +31,7 @@ from . import defaults
 
 def register(func, image=None, **kwargs):
     image = defaults.image_name("selected") if image is None else image
+
     def _register(command):
 
         # Only if we are using the internal image does it make sense to provide things like rebuild and clean
