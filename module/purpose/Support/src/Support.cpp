@@ -38,12 +38,13 @@ namespace module::purpose {
 
                 // Keep in line with the ball on the x-axis, but stay on the other side of the field on the y-axis
                 Eigen::Vector3d position = rBFf;
-                position.y()             = rBFf.y() < 0 ? rBFf.y() + (fd.dimensions.field_width / 2)
-                                                        : rBFf.y() - (fd.dimensions.field_width / 2);
-
+                position.y()             = rBFf.y() < 0 ? rBFf.y() + (fd.dimensions.field_width / 4)
+                                                        : rBFf.y() - (fd.dimensions.field_width / 4);
+                // Bound x by the penalty areas
+                // Closest side, unless it wont fit
                 // Walk to the position
                 emit<Task>(
-                    std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, -M_PI)),
+                    std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, M_PI)),
                                                           true));
             });
     }
