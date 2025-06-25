@@ -37,6 +37,7 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
+#include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
@@ -44,9 +45,11 @@
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Player.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 namespace module::purpose {
 
@@ -62,15 +65,18 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
+    using message::input::GameState;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
     using message::purpose::FieldPlayer;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
+    using message::purpose::Purpose;
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
+    using message::support::GlobalConfig;
 
     struct StartSoccer {};
 
@@ -114,15 +120,23 @@ namespace module::purpose {
             }
         });
 
-        on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
-            // If the robot is penalised, it must stand still
-            if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
-                emit(std::make_unique<ResetWebotsServos>());
-                emit(std::make_unique<Stability>(Stability::UNKNOWN));
-                emit(std::make_unique<ResetFieldLocalisation>());
-                emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-            }
-        });
+        on<Trigger<Penalisation>, With<GlobalConfig>, With<GameState>>().then(
+            [this](const Penalisation& self_penalisation,
+                   const GlobalConfig& global_config,
+                   const GameState& game_state) {
+                // If the robot is penalised, it must stand still
+                if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   message::purpose::SoccerPosition::UNKNOWN,
+                                                   false,
+                                                   false,
+                                                   game_state.team.team_colour));
+                    emit(std::make_unique<ResetWebotsServos>());
+                    emit(std::make_unique<Stability>(Stability::UNKNOWN));
+                    emit(std::make_unique<ResetFieldLocalisation>());
+                    emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+                }
+            });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose

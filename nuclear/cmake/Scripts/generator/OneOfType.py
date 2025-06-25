@@ -26,7 +26,7 @@
 # SOFTWARE.
 #
 
-import stringcase
+import casefy
 from generator.Field import Field
 from generator.textutil import dedent, indent
 
@@ -35,7 +35,7 @@ class OneOfType:
     def __init__(self, name, fields, context):
 
         self.package = context.package
-        self.name = "OneOf{}".format(stringcase.pascalcase(name))
+        self.name = "OneOf{}".format(casefy.pascalcase(name))
         self.fqn = "{}.{}".format(context.fqn, self.name)
         self.include_path = context.include_path
 
