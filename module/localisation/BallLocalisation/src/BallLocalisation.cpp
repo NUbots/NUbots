@@ -28,6 +28,7 @@
 
 #include <Eigen/Geometry>
 #include <chrono>
+#include <numeric>
 
 #include "extension/Configuration.hpp"
 
@@ -214,7 +215,7 @@ namespace module::localisation {
             // If we have a valid guess, emit a new ball message
             last_time_update          = NUClear::clock::now();
             auto ball                 = std::make_unique<Ball>();
-            ball->rBWw                = field->Hfw.inverse() * get_average_team_rBFf().second;
+            ball->rBWw                = field.Hfw.inverse() * get_average_team_rBFf().second;
             ball->vBw                 = Eigen::Vector3d::Zero();
             ball->time_of_measurement = last_time_update;
             ball->Hcw                 = last_Hcw;
@@ -270,7 +271,7 @@ namespace module::localisation {
         }
 
         // Compute average
-        Eigen::Vector3d average = std::accumulate(to_check.begin(), to_check.end(), Eigen::Vector3d::Zero());
+        Eigen::Vector3d average = std::accumulate(to_check.begin(), to_check.end(), Eigen::Vector3d::Zero().eval());
         average /= static_cast<double>(to_check.size());
 
         // Compute mean absolute error from average
