@@ -33,6 +33,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 
+#include "utility/algorithm/assignment.hpp"
 #include "utility/math/euler.hpp"
 
 namespace module::localisation {
@@ -63,6 +64,7 @@ namespace module::localisation {
             cfg.start_time_delay              = std::chrono::seconds(config["start_time_delay"].as<int>());
             cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
+            cfg.use_hungarian                 = config["use_hungarian"].as<bool>();
             cfg.out_of_field_cost             = config["out_of_field_cost"].as<double>();
 
             // Uncertainty reset parameters
@@ -355,35 +357,80 @@ namespace module::localisation {
         std::vector<Eigen::Vector3d> occupied_landmarks{};
 
         // Check each field intersection measurement and find the closest landmark
-        for (const auto& intersection : field_intersections->intersections) {
-            double min_distance = std::numeric_limits<double>::max();
-            Eigen::Vector3d closest_landmark;
-            bool found_association = false;
+        if (cfg.use_hungarian) {
+            // Create cost matrix for the Hungarian algorithm
+            // Note that the assignment is intersection index to landmark index
+            Eigen::MatrixXd cost_matrix(field_intersections->intersections.size(), landmarks.size());
 
-            // Transform the detected intersection from world to field coordinates
-            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+            int intersection_idx = 0;
+            for (const auto& intersection : field_intersections->intersections) {
+                // Transform the detected intersection from world to field coordinates
+                Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
 
-            for (const auto& landmark : landmarks) {
-                // If the landmark is the same type as our measurement and we haven't already assigned it
-                if (landmark.type == intersection.type
-                    && std::find(occupied_landmarks.begin(), occupied_landmarks.end(), landmark.rLFf)
-                           == occupied_landmarks.end()) {
-                    // Calculate Euclidean distance between the detected intersection and the landmark
-                    double distance = (landmark.rLFf - rIFf).norm();
-
-                    // If this landmark is closer and within the maximum association distance, update the association
-                    if (distance < min_distance && distance <= cfg.max_association_distance) {
-                        min_distance      = distance;
-                        closest_landmark  = landmark.rLFf;
-                        found_association = true;
+                for (size_t i = 0; i < landmarks.size(); ++i) {
+                    const auto& landmark = landmarks[i];
+                    // If the landmark is the same type as our measurement, calculate the loss when associating
+                    // the intersection with the landmark
+                    if (landmark.type == intersection.type) {
+                        // Calculate Euclidean distance between the detected intersection and the landmark
+                        cost_matrix(intersection_idx, i) = (landmark.rLFf - rIFf).norm();
+                    }
+                    else {
+                        cost_matrix(intersection_idx, i) = std::numeric_limits<double>::max();
                     }
                 }
+                intersection_idx++;
             }
 
-            // Mark the closest landmark as occupied if within the distance threshold
-            if (found_association) {
-                occupied_landmarks.push_back(closest_landmark);
-                associations.emplace_back(closest_landmark, rIFf);
+            // Return the associations based on the assignment. There is no need to identify which landmarks are
+            // occupied as the Hungarian algorithm is proven to find the optimal assignment for cost matrices with
+            // square dimensions, i.e., one-to-one pairing. However, the occupied_landmarks vector will still be filled
+            // for debugging or if there is a niche case where the intersection-landmark association is not one-to-one.
+            auto assignment = utility::algorithm::determine_assignment(cost_matrix);
+            for (const auto& [intersection_index, landmark_index] : assignment) {
+                // Access the intersection and landmark using their indices because the result of determine_assignment()
+                // is index based
+                const auto& intersection = field_intersections->intersections.at(intersection_index);
+                const auto& landmark     = landmarks.at(landmark_index);
+
+                // Transform the detected intersection from world to field coordinates
+                occupied_landmarks.push_back(landmark.rLFf);
+                Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+                associations.emplace_back(landmark.rLFf, rIFf);
+            }
+        }
+        else {
+            for (const auto& intersection : field_intersections->intersections) {
+                double min_distance = std::numeric_limits<double>::max();
+                Eigen::Vector3d closest_landmark;
+                bool found_association = false;
+
+                // Transform the detected intersection from world to field coordinates
+                Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+
+                for (const auto& landmark : landmarks) {
+                    // If the landmark is the same type as our measurement and we haven't already assigned it
+                    if (landmark.type == intersection.type
+                        && std::find(occupied_landmarks.begin(), occupied_landmarks.end(), landmark.rLFf)
+                               == occupied_landmarks.end()) {
+                        // Calculate Euclidean distance between the detected intersection and the landmark
+                        double distance = (landmark.rLFf - rIFf).norm();
+
+                        // If this landmark is closer and within the maximum association distance, update the
+                        // association
+                        if (distance < min_distance && distance <= cfg.max_association_distance) {
+                            min_distance      = distance;
+                            closest_landmark  = landmark.rLFf;
+                            found_association = true;
+                        }
+                    }
+                }
+
+                // Mark the closest landmark as occupied if within the distance threshold
+                if (found_association) {
+                    occupied_landmarks.push_back(closest_landmark);
+                    associations.emplace_back(closest_landmark, rIFf);
+                }
             }
         }
 

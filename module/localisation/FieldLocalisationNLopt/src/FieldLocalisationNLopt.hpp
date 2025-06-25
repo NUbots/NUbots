@@ -206,6 +206,9 @@ namespace module::localisation {
             /// @brief Bool to enable/disable using ground truth for localisation
             bool use_ground_truth_localisation;
 
+            /// @brief Bool to enable the use of Hungarian algorithm for landmark association
+            bool use_hungarian = false;
+
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
 
