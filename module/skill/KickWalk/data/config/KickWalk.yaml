@@ -2,5 +2,5 @@
 log_level: INFO
 
 # Step kick parameters
-kick_approach_velocity_x: 0.01 # Approach kick velocity x (m/s)
+kick_approach_velocity_x: 0.03 # Approach kick velocity x (m/s)
 kick_approach_velocity_y: 0.0 # Approach kick velocity y (m/s)
