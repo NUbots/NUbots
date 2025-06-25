@@ -33,15 +33,15 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
-// todo remove after testing
-#include <nuclear>
 
 #include "message/localisation/Robot.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/strategy/Who.hpp"
 
 namespace utility::strategy {
 
     using message::localisation::Robots;
+    using message::purpose::SoccerPosition;
     using message::strategy::Who;
 
     /**
@@ -103,6 +103,12 @@ namespace utility::strategy {
             if (equidistant && !robot.teammate) {
                 closest   = {Who{Who::OPPONENT}, distance_to_ball};
                 lowest_id = 0;
+            }
+            // If it is equidistant and a teammate, is someone is already the attacker they win
+            // Otherwise lowest ID wins
+            else if (equidistant && robot.teammate && robot.purpose.purpose == SoccerPosition::ATTACK) {
+                closest   = {Who{Who::TEAMMATE}, distance_to_ball};
+                lowest_id = robot.purpose.player_id;
             }
             // Equidistant teammates with a lower ID win
             else if (equidistant && (robot.purpose.player_id < lowest_id)) {
@@ -221,9 +227,10 @@ namespace utility::strategy {
 
                 // Check if equidistant to us
                 bool equidistant = std::abs(std::abs(rRFf.y()) - furthest) < equidistant_threshold;
-                // If the robot is further back than us, or equidistant and has a higher ID, then we are not the
-                // furthest back
+                // If the robot is further back than us, or equidistant and DEFEND position, or equidistant and has a
+                // higher ID, then we are not the furthest back
                 if ((!equidistant && (std::abs(rRFf.y()) > furthest))
+                    || (equidistant && (robot.purpose.purpose == SoccerPosition::DEFEND))
                     || (equidistant && (robot.purpose.player_id > self_id))) {
                     return false;
                 }
