@@ -1,18 +1,29 @@
 #!/bin/bash
 
-ALLOWLIST_FILE="usb_allowlist"
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+ALLOWLIST_FILE="$SCRIPT_DIR/usb_allowlist"
 
 # Extract vendor:product pairs from allowlist, ignoring comments and blank lines, normalize to lowercase
 allowlist=$(grep -Eo '^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}' "$ALLOWLIST_FILE" | tr '[:upper:]' '[:lower:]')
 
-# Get vendor:product pairs from lsusb output, normalized to lowercase
-connected_devices=$(lsusb | awk '{print tolower($6)}')
+# Track unauthorized devices
+unauthorized=()
 
-# Check each connected device against the allowlist
-for device in $connected_devices; do
-    if ! grep -qx "$device" <<< "$allowlist"; then
-        exit 1
+# Loop over each line of lsusb
+while IFS= read -r line; do
+    id=$(awk '{print tolower($6)}' <<< "$line")
+    if ! grep -qx "$id" <<< "$allowlist"; then
+        desc=$(sed 's/.*\(ID [^ ]\+ [^ ]\+.*\)/\1/' <<< "$line")
+        unauthorized+=("$desc")
     fi
-done
+done <<< "$(lsusb)"
+
+# Log and exit if any unauthorized devices found
+if [ ${#unauthorized[@]} -ne 0 ]; then
+    for dev in "${unauthorized[@]}"; do
+        echo "Connected USB device not in allowlist: $dev" >&2
+    done
+    exit 1
+fi
 
 exit 0
