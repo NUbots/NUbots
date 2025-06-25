@@ -153,7 +153,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
-           Optional<With<GlobalConfig>>>()
+           With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
                          const std::shared_ptr<const Kick>& kick,
@@ -161,7 +161,7 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
-                         const std::shared_ptr<const GlobalConfig>& config) {
+                         const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
@@ -186,30 +186,30 @@ namespace module::network {
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
-                if (config) {
-                    msg->current_pose.player_id = config->player_id;
+                msg->current_pose.player_id = config.player_id;
 
-                    if (sensors) {
-                        // Get our world transform
-                        Eigen::Isometry3d Htw(sensors->Htw);
+                if (sensors) {
+                    // Get our world transform
+                    Eigen::Isometry3d Htw(sensors->Htw);
 
-                        // If we have field information
-                        if (field) {
-                            // Transform the field state into Hfw
-                            Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
+                    // If we have field information
+                    if (field) {
+                        // Transform the field state into Hfw
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
 
-                            // Get our torso in field space
-                            Eigen::Isometry3d Hft = Hfw * Htw.inverse();
-                            Eigen::Vector3d rTFf  = Hft.translation();
+                        // Get our torso in field space
+                        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
+                        Eigen::Vector3d rTFf  = Hft.translation();
 
-                            // Store our position from field to torso
-                            msg->current_pose.position     = rTFf.cast<float>();
-                            msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                        // Store our position from field to torso
+                        msg->current_pose.position     = rTFf.cast<float>();
+                        msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
-                            msg->current_pose.covariance = field->covariance.cast<float>();
-                        }
+                        msg->current_pose.covariance = field->covariance.cast<float>();
+                        msg->current_pose.cost       = field->cost;
                     }
                 }
+
 
                 // Walk command
                 if (walk_state != nullptr) {
@@ -248,6 +248,8 @@ namespace module::network {
                 if (purpose) {
                     msg->purpose = *purpose;
                 }
+                // Override the player ID in the purpose message to be consistent, and in case purpose is not set
+                msg->purpose.player_id = config.player_id;
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
