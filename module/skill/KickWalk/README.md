@@ -2,7 +2,7 @@
 
 ## Description
 
-Allows the robot to perform kicks while walking. This module uses the walk engine to make a single large step when a kick task is emitted. The kicks integrate seamlessly with the robot's regular walk.
+Allows the robot to perform kicks while walking. This module emits a modified walk command, making the walk engine take a single large step when a kick task is emitted. These kicks integrate seamlessly with the robot's regular walk.
 
 ## Usage
 
