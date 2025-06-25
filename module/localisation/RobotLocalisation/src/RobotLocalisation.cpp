@@ -191,7 +191,9 @@ namespace module::localisation {
                 teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                           cfg.ukf.noise.measurement.position,
                                           MeasurementType::ROBOT_POSITION());
-                teammate_itr->seen = true;
+                teammate_itr->seen    = true;
+                teammate_itr->purpose = *purpose;
+
                 continue;
             }
 
@@ -227,7 +229,7 @@ namespace module::localisation {
                                         const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
-        // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
+        // Sort tracked_robots so that robots that are teammates are at the front to prevent teammates being removed
         std::sort(tracked_robots.begin(), tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
             return a.purpose.player_id > b.purpose.player_id;
         });
@@ -284,6 +286,8 @@ namespace module::localisation {
                        tracked_robot.id,
                        ": ",
                        tracked_robot.teammate ? "Teammate" : "Opponent",
+                       "teammate ID: ",
+                       tracked_robot.purpose.player_id,
                        "position: ",
                        RobotModel<double>::StateVec(tracked_robot.ukf.get_state()).rRWw.transpose());
         }
