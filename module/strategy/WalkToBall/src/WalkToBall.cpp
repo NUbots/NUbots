@@ -198,7 +198,7 @@ namespace module::strategy {
                 Eigen::Vector3d rOBf = (field.Hfw * robots.robots[0].rRWw) - rBFf;
                 // Loop over all opponent robots and find the one closest to the ball
                 for (const auto& robot : robots.robots) {
-                    if (robot.teammate_id == 0) {
+                    if (!robot.teammate) {
                         // field.Hfw * robot.rRWw -> rRFf
                         Eigen::Vector3d candidate_rOBf = (field.Hfw * robot.rRWw) - rBFf;
                         if (candidate_rOBf.norm() < rOBf.norm()) {
