@@ -40,6 +40,7 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
+    using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -103,7 +104,7 @@ namespace module::purpose {
                 // Add inactive robots to the ignore list
                 if (robots) {
                     for (const auto& robot : robots->robots) {
-                        if (!robot.purpose.active) {
+                        if (robot.teammate && !robot.purpose.active) {
                             ignore_ids.push_back(robot.purpose.player_id);
                         }
                     }
