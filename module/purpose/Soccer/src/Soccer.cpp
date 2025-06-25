@@ -201,8 +201,7 @@ namespace module::purpose {
                     SoccerPosition(int(robots[player_id - 1].position)),
                     robots[player_id - 1].dynamic,
                     robots[player_id - 1].active,
-                    game_state ? game_state->team.team_colour
-                               : GameState::TeamColour(GameState::TeamColour::UNKNOWN_TEAM_COLOUR)));
+                    game_state ? game_state->team.team_colour : GameState::TeamColour(GameState::TeamColour::UNKNOWN)));
             });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
