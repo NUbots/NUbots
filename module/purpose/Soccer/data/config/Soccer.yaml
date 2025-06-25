@@ -2,7 +2,7 @@
 log_level: INFO
 
 # For the robot playing without listening to GameController
-force_playing: true
+force_playing: false
 
 # Delay in seconds before the robot starts playing after button press
 disable_idle_delay: 5
@@ -12,7 +12,7 @@ startup_delay: 3
 
 # The position of the robot
 # ALL_ROUNDER, GOALIE, STRIKER, DEFENDER, DYNAMIC
-position: ALL_ROUNDER
+position: DYNAMIC
 
 # The number of seconds to wait before assuming a teammate is inactive
 timeout: 4

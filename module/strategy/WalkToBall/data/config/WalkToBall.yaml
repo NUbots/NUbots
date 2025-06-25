@@ -11,7 +11,7 @@ ball_y_offset: 0.0
 goal_target_offset: 0.5
 
 # Distance from ball to walk to if approaching from a "bad" position
-ball_approach_distance: 0.3
+ball_approach_distance: 0.35
 
 # Distance from ball to walk to if approaching from a "good" position
 ball_kick_distance: 0.0
