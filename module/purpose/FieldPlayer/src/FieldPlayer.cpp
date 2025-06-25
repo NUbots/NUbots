@@ -65,13 +65,15 @@ namespace module::purpose {
            With<Field>,
            With<GameState>,
            With<GlobalConfig>,
+           With<FieldDescription>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
                          const Sensors& sensors,
                          const Field& field,
                          const GameState& game_state,
-                         const GlobalConfig& global_config) {
+                         const GlobalConfig& global_config,
+                         const FieldDescription& fd) {
                 // Todo determine if we have enough information to play
                 // Eg localisation confidence
 
@@ -90,17 +92,16 @@ namespace module::purpose {
                     return;
                 }
 
-                // If we have robots, determine if we are closest to the ball
-                // Otherwise assume we are alone and closest by default
-                const unsigned int closest_to_ball =
-                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
-                                                                        *robots,
-                                                                        field.Hfw,
-                                                                        sensors.Hrw,
-                                                                        cfg.equidistant_threshold,
-                                                                        global_config.player_id)
-                           : global_config.player_id;
-                bool is_closest = closest_to_ball == global_config.player_id;
+                // Make an ignore list with the goalie, if they exist
+                std::vector<unsigned int> ignore_ids{};
+                // Add inactive robots to the ignore list
+                if (robots) {
+                    for (const auto& robot : robots->robots) {
+                        if (!robot.purpose.active) {
+                            ignore_ids.push_back(robot.purpose.player_id);
+                        }
+                    }
+                }
 
                 // Find who has the ball, if any
                 // If there are no robots, use an empty vector
@@ -110,7 +111,33 @@ namespace module::purpose {
                                                                   sensors.Hrw,
                                                                   cfg.ball_threshold,
                                                                   cfg.equidistant_threshold,
-                                                                  global_config.player_id);
+                                                                  global_config.player_id,
+                                                                  ignore_ids);
+
+                // If we have robots, determine if we are closest to the ball
+                // Otherwise assume we are alone and closest by default
+                // Only consider the goalie if the ball is in the defending third
+                Eigen::Vector3d rBFf     = field.Hfw * ball->rBWw;
+                double defending_third_x = fd.dimensions.field_length / 3.0;
+                if (robots && rBFf.x() < defending_third_x) {
+                    for (const auto& robot : robots->robots) {
+                        if (robot.purpose.purpose == SoccerPosition::GOALIE) {
+                            log<DEBUG>("Ball not in defending third, ignoring goalie for closest to ball");
+                            ignore_ids.push_back(robot.purpose.player_id);
+                        }
+                    }
+                }
+                const unsigned int closest_to_ball =
+                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
+                                                                        *robots,
+                                                                        field.Hfw,
+                                                                        sensors.Hrw,
+                                                                        cfg.equidistant_threshold,
+                                                                        global_config.player_id,
+                                                                        ignore_ids)
+                           : global_config.player_id;
+                bool is_closest = closest_to_ball == global_config.player_id;
+
 
                 // Determine if the game is in a penalty situation
                 bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
@@ -162,14 +189,23 @@ namespace module::purpose {
                 // If we are closest to our goals (ignoring the attacking player), then stand back to defend.
                 // If there's no robots, assume we are alone and are the furthest back
                 // Shouldn't happen, as that should make us the attacker
-                bool furthest_back = robots
-                                         ? utility::strategy::furthest_back(*robots,
-                                                                            field.Hfw,
-                                                                            sensors.Hrw,
-                                                                            cfg.equidistant_threshold,
-                                                                            global_config.player_id,
-                                                                            std::vector<unsigned int>{closest_to_ball})
-                                         : true;
+                // Add closest_to_ball to the ignore list so we don't consider the attacker as the furthest back
+                ignore_ids.push_back(closest_to_ball);
+                // Add goalies to the ignore list so we don't consider them as the furthest back
+                if (robots) {
+                    for (const auto& robot : robots->robots) {
+                        if (robot.purpose.purpose == SoccerPosition::GOALIE) {
+                            ignore_ids.push_back(robot.purpose.player_id);
+                        }
+                    }
+                }
+                bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
+                                                                               field.Hfw,
+                                                                               sensors.Hrw,
+                                                                               cfg.equidistant_threshold,
+                                                                               global_config.player_id,
+                                                                               ignore_ids)
+                                            : true;
                 if (furthest_back) {
                     log<DEBUG>("Defend!");
                     emit(std::make_unique<Purpose>(global_config.player_id,
@@ -210,9 +246,9 @@ namespace module::purpose {
                 // Collect up teammates; empty if no one is around
                 std::vector<Eigen::Vector3d> teammates{};
                 if (robots) {
-                    // Collect all teammates in a vector
+                    // Collect all teammates in a vector, ignore the goalie
                     for (const auto& robot : robots->robots) {
-                        if (robot.teammate_id != 0) {
+                        if (robot.teammate && robot.purpose.purpose != SoccerPosition::GOALIE) {
                             teammates.push_back(field.Hfw * robot.rRWw);
                         }
                     }
