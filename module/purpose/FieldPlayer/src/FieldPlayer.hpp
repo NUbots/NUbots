@@ -20,6 +20,8 @@ namespace module::purpose {
             /// @brief The offset to the center circle for the ready position.
             /// Avoids being in the center circle during another team's kickoff
             double center_circle_offset = 0.0;
+            /// @brief The maximum cost for a localisation to be considered valid
+            double max_localisation_cost = 0.0;
         } cfg;
 
     public:
