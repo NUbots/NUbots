@@ -278,8 +278,8 @@ namespace module::localisation {
         for (const auto& tracked_robot : tracked_robots) {
             log<DEBUG>("\tID: ",
                        tracked_robot.id,
-                       ":",
-                       tracked_robot.teammate ? " Teammate" : " Opponent",
+                       ": ",
+                       tracked_robot.teammate ? "Teammate" : "Opponent",
                        "position: ",
                        RobotModel<double>::StateVec(tracked_robot.ukf.get_state()).rRWw.transpose());
         }
