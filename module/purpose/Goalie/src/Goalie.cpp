@@ -32,26 +32,25 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
-#include "message/strategy/DiveToBall.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
-    using message::input::GameState;
-    using Phase    = message::input::GameState::Phase;
-    using GameMode = message::input::GameState::Mode;
-    using message::planning::LookAround;
-    using message::strategy::DiveToBall;
-    using message::strategy::LookAtBall;
-    using message::strategy::StandStill;
+    using Phase      = message::input::GameState::Phase;
+    using GameMode   = message::input::GameState::Mode;
     using GoalieTask = message::purpose::Goalie;
+
+    using message::input::GameState;
+    using message::planning::LookAround;
     using message::purpose::CornerKickGoalie;
     using message::purpose::DirectFreeKickGoalie;
     using message::purpose::GoalKickGoalie;
@@ -59,11 +58,16 @@ namespace module::purpose {
     using message::purpose::NormalGoalie;
     using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::purpose::ThrowInGoalie;
     using message::strategy::FindBall;
+    using message::strategy::LookAtBall;
+    using message::strategy::StandStill;
     using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
+    using message::support::GlobalConfig;
 
     using extension::Configuration;
 
@@ -86,8 +90,18 @@ namespace module::purpose {
             cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
         });
 
-        on<Provide<GoalieTask>, Optional<Trigger<GameState>>>().then(
-            [this](const GoalieTask& goalie_task, const std::shared_ptr<const GameState>& game_state) {
+        on<Provide<GoalieTask>, Optional<Trigger<GameState>>, With<GlobalConfig>>().then(
+            [this](const GoalieTask& goalie_task,
+                   const std::shared_ptr<const GameState>& game_state,
+                   const GlobalConfig& global_config) {
+                // Send purpose information
+                emit(std::make_unique<Purpose>(
+                    global_config.player_id,
+                    SoccerPosition::GOALIE,
+                    false,  // Not dynamic
+                    true,   // Active
+                    game_state ? game_state->team.team_colour : GameState::TeamColour(GameState::TeamColour::UNKNOWN)));
+
                 // Do not use GameController information if force playing or force penalty shootout
                 if (goalie_task.force_playing) {
                     play();

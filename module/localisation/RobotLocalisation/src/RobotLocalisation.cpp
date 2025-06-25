@@ -53,6 +53,8 @@ namespace module::localisation {
     using message::input::GameState;
     using message::input::RoboCup;
     using message::localisation::Field;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::support::FieldDescription;
     using message::vision::GreenHorizon;
 
@@ -83,12 +85,8 @@ namespace module::localisation {
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
-           Optional<With<GameState>>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon,
-                         const Field& field,
-                         const FieldDescription& field_desc,
-                         const std::shared_ptr<const GameState>& game_state) {
+            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -106,13 +104,8 @@ namespace module::localisation {
                     localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
                     localisation_robot.time_of_measurement = tracked_robot.last_time_update;
 
-                    // Determine our team colour
-                    bool self_blue =
-                        game_state && game_state->team.team_colour == GameState::TeamColour::BLUE ? true : false;
-                    // If we are a blue robot and the tracked robot is a teammate, set the colour to blue
-                    localisation_robot.is_blue     = tracked_robot.teammate_id != 0 ? self_blue : !self_blue;
-                    localisation_robot.teammate_id = tracked_robot.teammate_id;
-                    localisation_robot.penalised   = tracked_robot.penalised;
+                    localisation_robot.teammate = tracked_robot.teammate;
+                    localisation_robot.purpose  = tracked_robot.purpose;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
@@ -129,8 +122,9 @@ namespace module::localisation {
                 // RoboCup messages come from teammates. Their position is in field space, so convert to world.
                 std::vector<Eigen::Vector3d> robots_rRWw{
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
+                auto purpose = std::make_unique<Purpose>(robocup.purpose);
                 // Run data association step
-                data_association(robots_rRWw, robocup.current_pose.player_id, robocup.state == PenaltyState::PENALISED);
+                data_association(robots_rRWw, purpose);
             });
 
         on<Trigger<VisionRobots>, Sync<RobotLocalisation>>().then([this](const VisionRobots& vision_robots) {
@@ -164,32 +158,26 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
-                                             uint teammate_id,
-                                             bool penalised) {
+                                             const std::unique_ptr<Purpose>& purpose) {
         for (const auto& rRWw : robots_rRWw) {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
-                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-                tracked_robots.back().seen        = true;
-                tracked_robots.back().teammate_id = teammate_id;
-                tracked_robots.back().penalised   = penalised;
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
                 continue;
             }
 
             // If this is a teammate, find it in the list of tracked robots
-            // If it doesn't exist, add it
-            if (teammate_id != 0) {
+            // If it doesn't exist, add it. Purpose is checked but should always be set for teammates.
+            if (purpose) {
                 // Check if the robot is already in the list of tracked robots
                 auto teammate_itr =
-                    std::find_if(tracked_robots.begin(),
-                                 tracked_robots.end(),
-                                 [teammate_id](const TrackedRobot& robot) { return robot.teammate_id == teammate_id; });
+                    std::find_if(tracked_robots.begin(), tracked_robots.end(), [&purpose](const TrackedRobot& robot) {
+                        return robot.purpose.player_id == purpose->player_id;
+                    });
 
                 // If the robot is not in the list, add it
                 if (teammate_itr == tracked_robots.end()) {
-                    tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-                    tracked_robots.back().seen        = true;
-                    tracked_robots.back().teammate_id = teammate_id;
+                    tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
                     continue;
                 }
                 // If the robot is in the list, update it with the new position
@@ -215,9 +203,7 @@ namespace module::localisation {
 
             // If the closest robot is far enough away, add this as a new robot
             if (closest_distance > cfg.association_distance) {
-                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++));
-                tracked_robots.back().seen        = true;
-                tracked_robots.back().teammate_id = teammate_id;
+                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
                 continue;
             }
 
@@ -236,7 +222,7 @@ namespace module::localisation {
 
         // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
         std::sort(tracked_robots.begin(), tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
-            return a.teammate_id > b.teammate_id;
+            return a.purpose.player_id > b.purpose.player_id;
         });
 
         for (auto& tracked_robot : tracked_robots) {
@@ -289,8 +275,8 @@ namespace module::localisation {
         for (const auto& tracked_robot : tracked_robots) {
             log<DEBUG>("\tID: ",
                        tracked_robot.id,
-                       ":",
-                       tracked_robot.teammate_id,
+                       ": ",
+                       tracked_robot.teammate ? "Teammate" : "Opponent",
                        "position: ",
                        RobotModel<double>::StateVec(tracked_robot.ukf.get_state()).rRWw.transpose());
         }
