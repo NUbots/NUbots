@@ -3,7 +3,7 @@ Description="Pre-robocup service check for USB devices"
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /etc/robocup.d/check_for_usb_devices.sh
+ExecStart=/bin/bash /etc/robocup.d/check-usb-devices.sh
 Restart=on-failure
 # This allows us to keep restarting as many times in a row as we want
 StartLimitBurst=0
