@@ -32,7 +32,6 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/planning/KickTo.hpp"
@@ -45,7 +44,6 @@
 namespace module::planning {
 
     using extension::Configuration;
-    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::planning::KickTo;
@@ -66,12 +64,8 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, Trigger<Stability>, With<Sensors>>().then(
-            [this](const KickTo& kick_to,
-                   const Uses<Kick>& kick,
-                   const Ball& ball,
-                   const Stability& stability,
-                   const Sensors& sensors) {
+        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>>().then(
+            [this](const KickTo& kick_to, const Uses<Kick>& kick, const Ball& ball, const Sensors& sensors) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == RunState::RUNNING && !kick.done) {
                     emit<Task>(std::make_unique<Continue>());
