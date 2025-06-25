@@ -139,9 +139,6 @@ namespace module::network {
                 }
             });
 
-<<<<<<< HEAD
-        on<Every<1, Per<std::chrono::seconds>>,
-=======
         on<Startup>().then([this] {
             // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
             emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
@@ -149,7 +146,6 @@ namespace module::network {
 
         on<Every<2, Per<std::chrono::seconds>>,
            With<StartupDelay>,
->>>>>>> origin
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
