@@ -79,6 +79,7 @@ namespace module::localisation {
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
+            cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -115,6 +116,12 @@ namespace module::localisation {
 
         on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
             [this](const RoboCup& robocup, const Field& field) {
+                // Do not consider a teammate's localisation if their cost is too high
+                if (robocup.current_pose.cost > cfg.max_localisation_cost) {
+                    log<DEBUG>("Teammate's localisation cost is too high, not processing.");
+                    return;
+                }
+
                 // **Run prediction step**
                 prediction();
 
