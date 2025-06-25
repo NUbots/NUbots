@@ -2,7 +2,7 @@
 
 ## Description
 
-A module that allows the robot to perform kicks while walking. This module integrates the walk engine with kicking capabilities to enable fluid transitions between walking and kicking motions without stopping the robot's forward momentum.
+Allows the robot to perform kicks while walking. This module uses the walk engine to make a single large step when a kick task is emitted. The kicks integrate seamlessly with the robot's regular walk.
 
 ## Usage
 
