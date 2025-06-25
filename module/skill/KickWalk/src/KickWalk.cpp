@@ -6,15 +6,12 @@
 #include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
 
-#include "utility/nusight/NUhelpers.hpp"
-
 namespace module::skill {
 
     using extension::Configuration;
 
     using message::skill::Kick;
     using message::skill::Walk;
-    using utility::nusight::graph;
 
     KickWalk::KickWalk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
         on<Configuration>("KickWalk.yaml").then([this](const Configuration& config) {
