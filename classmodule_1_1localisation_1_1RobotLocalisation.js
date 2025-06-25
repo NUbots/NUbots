@@ -3,7 +3,7 @@ var classmodule_1_1localisation_1_1RobotLocalisation =
     [ "Config", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config" ],
     [ "TrackedRobot", "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html", "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot" ],
     [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html#af046bea223f24f0d09055cc54bfd6d77", null ],
-    [ "data_association", "classmodule_1_1localisation_1_1RobotLocalisation.html#a4c747b78c5525de579a45f79b0fd6520", null ],
+    [ "data_association", "classmodule_1_1localisation_1_1RobotLocalisation.html#a8fd53b4b4783708c4c4b067a64603027", null ],
     [ "debug_info", "classmodule_1_1localisation_1_1RobotLocalisation.html#a071bc744ede53369f339230f8b68130e", null ],
     [ "maintenance", "classmodule_1_1localisation_1_1RobotLocalisation.html#a9bd170b4b4ef9c02219fdf4719527ab6", null ],
     [ "prediction", "classmodule_1_1localisation_1_1RobotLocalisation.html#a767cb02d9117e7d7c2c1080ba489a3a1", null ],

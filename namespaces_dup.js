@@ -1074,10 +1074,10 @@ var namespaces_dup =
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", "namespaceutility_1_1skill" ],
       [ "strategy", null, [
-        [ "ball_possession", "soccer__strategy_8hpp.html#a92eec2ceb810401fee4ed30e791cd618", null ],
-        [ "closest_to_ball_on_team", "soccer__strategy_8hpp.html#a2ea708074dae983211a7ba43f6aa4c3e", null ],
-        [ "furthest_back", "soccer__strategy_8hpp.html#ac101eaf553546211be64cdd1928b91a1", null ],
-        [ "get_closest_bot", "soccer__strategy_8hpp.html#a6faadf4ef9909194eb19926f8c1d2abf", null ],
+        [ "ball_possession", "soccer__strategy_8hpp.html#a89f10d8908e8a50c7d081a963220e84f", null ],
+        [ "closest_to_ball_on_team", "soccer__strategy_8hpp.html#a25e79f96d5e1343e70f14699f7b2385b", null ],
+        [ "furthest_back", "soccer__strategy_8hpp.html#a77769eb4228e67ce08a1b23e96338bae", null ],
+        [ "get_closest_bot", "soccer__strategy_8hpp.html#a1dd5cf76429f7fcbd2486709fef4f5f2", null ],
         [ "index_of", "positioning_8hpp.html#a9134cd33af38dc0fee8acf641ae7a52a", null ],
         [ "ready_position", "positioning_8hpp.html#af732bac7d6eec7b68cb796c8519c54a9", null ],
         [ "remove_robot", "positioning_8hpp.html#a6970097f650f7cf7670118fe2302d86e", null ]

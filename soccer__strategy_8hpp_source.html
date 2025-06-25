@@ -233,168 +233,188 @@ $(document).ready(function(){initNavTree('soccer__strategy_8hpp_source.html','')
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">     *  @param Hrw transformation of world to robot coordinates.</span></div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">     *  @param equidistant_threshold maximum distance for two robots to be considered equidistant</span></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">     *  @param self_id the ID of the robot that is calling this function</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">     *  @param include_opponents whether to include opponents in the search</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">     *  @return A vector of pairs, these contain a Possession type and distance to the ball.</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    std::pair&lt;unsigned int, double&gt; get_closest_bot(<span class="keyword">const</span> Eigen::Vector3d&amp; rBWw,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                                                    <span class="keyword">const</span> Robots&amp; robots,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                                                    <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                                                    <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                                                    <span class="keywordtype">double</span> equidistant_threshold,</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                                                    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id,</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                                                    <span class="keywordtype">bool</span> include_opponents = <span class="keyword">true</span>) {</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="comment">// Transform ball position to field coordinates</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        Eigen::Vector3d rBFf         = Hfw * rBWw;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        Eigen::Vector3d rRFf         = (Hfw * Hrw.inverse()).translation();</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        <span class="keywordtype">double</span> self_distance_to_ball = (rRFf - rBFf).head&lt;2&gt;().norm();</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="comment">// Initialise to self</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        std::pair&lt;Who, double&gt; closest = {Who{Who::SELF}, self_distance_to_ball};</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> lowest_id         = self_id;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="comment">// Loop through each robot</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; robot : robots.robots) {</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;            <span class="comment">// Skip if not a teammate and not including opponents</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;            <span class="keywordflow">if</span> (robot.teammate_id == 0 &amp;&amp; !include_opponents) {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;            }</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;            <span class="comment">// Skip penalised robots as they are not in play</span></div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;            <span class="keywordflow">if</span> (robot.penalised) {</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            }</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            <span class="comment">// Calculate distance to the ball</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordtype">double</span> distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head&lt;2&gt;().norm();</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            <span class="comment">// Check if close to the closest robot</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            <span class="keywordtype">bool</span> equidistant = std::abs(distance_to_ball - closest.second) &lt; equidistant_threshold;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            <span class="comment">// If it is close to the closest robot, lowest ID wins, in this case an opponent is in possession above us</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;            <span class="comment">// to trigger tackling. Otherwise it has to be closer to win</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            <span class="keywordflow">if</span> ((equidistant &amp;&amp; (robot.teammate_id &lt; lowest_id))</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                || (!equidistant &amp;&amp; (distance_to_ball &lt; closest.second))) {</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                closest   = {robot.teammate_id == 0 ? Who{Who::OPPONENT} : Who{Who::TEAMMATE}, distance_to_ball};</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                lowest_id = robot.teammate_id;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">     *  @param ignore_ids a list of robot IDs to ignore when determining the closest robot</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">     *  @param include_opponents whether to include opponents in the search</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">     *  @return A vector of pairs, these contain a Possession type and distance to the ball.</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    std::pair&lt;unsigned int, double&gt; get_closest_bot(<span class="keyword">const</span> Eigen::Vector3d&amp; rBWw,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                                                    <span class="keyword">const</span> Robots&amp; robots,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                                                    <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                                                    <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                                                    <span class="keywordtype">double</span> equidistant_threshold,</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                                                    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id,</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                                                    std::vector&lt;unsigned int&gt; <span class="keyword">const</span>&amp; ignore_ids,</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                                                    <span class="keywordtype">bool</span> include_opponents = <span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        <span class="comment">// Transform ball position to field coordinates</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        Eigen::Vector3d rBFf         = Hfw * rBWw;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        Eigen::Vector3d rRFf         = (Hfw * Hrw.inverse()).translation();</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="keywordtype">double</span> self_distance_to_ball = (rRFf - rBFf).head&lt;2&gt;().norm();</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="comment">// Initialise to self</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        std::pair&lt;Who, double&gt; closest = {Who{Who::SELF}, self_distance_to_ball};</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> lowest_id         = self_id;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <span class="comment">// Loop through each robot</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; robot : robots.robots) {</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            <span class="comment">// Skip if not a teammate and not including opponents</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;            <span class="keywordflow">if</span> (!robot.teammate &amp;&amp; !include_opponents) {</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;            }</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            <span class="comment">// Skip robots that are in the ignore list</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            <span class="keywordflow">if</span> (std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end()) {</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            }</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            <span class="comment">// Calculate distance to the ball</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            <span class="keywordtype">double</span> distance_to_ball = ((Hfw * robot.rRWw) - rBFf).head&lt;2&gt;().norm();</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            <span class="comment">// Check if close to the closest robot</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            <span class="keywordtype">bool</span> equidistant = std::abs(distance_to_ball - closest.second) &lt; equidistant_threshold;</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            <span class="comment">// Opponents that are equidistant win</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;            <span class="keywordflow">if</span> (equidistant &amp;&amp; !robot.teammate) {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                closest   = {Who{Who::OPPONENT}, distance_to_ball};</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                lowest_id = 0;</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;            }</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        }</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        <span class="keywordflow">return</span> {lowest_id, closest.second};</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    }</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="comment">    /**</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">     * @brief Establishes which robot is in possession of the ball.</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="comment">     * @details</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="comment">     * The robot closest to the ball (either SELF or TEAMMATE) within a given threshold has possession of the ball.</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="comment">     * If no robot is within the given threshold, NONE is returned.</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="comment">     * @param rBWw ball position in world coordinates.</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="comment">     * @param robots localisation of every known robot in the game.</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="comment">     * @param Hfw transformation of world to field coordinates.</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="comment">     * @param Hrw transformation of world to robot coordinates.</span></div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="comment">     * @param threshold maximum distance to the ball to be considered in possession of the ball.</span></div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="comment">     * @param equidistant_threshold maximum distance for two robots to be considered equidistant</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="comment">     * @param self_id the ID of the robot that is calling this function</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="comment">     * @return A possession value which determines if any robot (or NONE) has the ball.</span></div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    Who ball_possession(<span class="keyword">const</span> Eigen::Vector3d&amp; rBWw,</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                        <span class="keyword">const</span> Robots&amp; robots,</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                        <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                        <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                        <span class="keywordtype">double</span> threshold,</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                        <span class="keywordtype">double</span> equidistant_threshold,</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;                        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id) {</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        <span class="comment">// Function determines who has possession based on proximity and a threshold distance.</span></div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <span class="keyword">auto</span> closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id);</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        <span class="comment">// &#39;closest.second&#39; is the distance to the ball</span></div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;        <span class="comment">// If the distance is greater than the threshold, then the robot is too far</span></div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;        <span class="comment">// for possession.</span></div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">if</span> (closest.second &gt; threshold) {</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;            <span class="keywordflow">return</span> Who{Who::NONE};</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        }</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="comment">// If robot is close to ball, robot that is closest will possess the ball.</span></div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        <span class="keywordflow">return</span> (closest.first == self_id) ? Who::SELF : (closest.first == 0 ? Who::OPPONENT : Who::TEAMMATE);</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    }</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="comment">    /**</span></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;<span class="comment">     * @brief Determines if we are the closest robot to the ball on our team</span></div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="comment">     * @param rBWw ball position in world coordinates</span></div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;<span class="comment">     * @param robots localisation of every known robot in the game</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;<span class="comment">     * @param Hfw transformation of world to field coordinates</span></div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment">     * @param Hrw transformation of world to robot coordinates</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment">     * @param equidistant_threshold maximum distance to the ball to be considered equidistant</span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment">     * @param self_id the ID of the robot that is calling this function</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">     * @return true if we are the closest robot to the ball on our team, false otherwise</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> closest_to_ball_on_team(<span class="keyword">const</span> Eigen::Vector3d&amp; rBWw,</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                                         <span class="keyword">const</span> Robots&amp; robots,</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                                         <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                                         <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                                         <span class="keywordtype">double</span> equidistant_threshold,</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id) {</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="comment">// Function determines who has possession based on proximity and a threshold distance.</span></div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;        <span class="comment">// Exclude opponents from the search</span></div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;        <span class="keyword">auto</span> closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, <span class="keyword">false</span>);</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        <span class="comment">// Return true if the closest robot is us</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        <span class="keywordflow">return</span> closest.first;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    }</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">    /**</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="comment">     * @brief Determines if we are the furthest back robot on our team</span></div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment">     * @param robots localisation of every known robot in the game</span></div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="comment">     * @param Hfw transformation of world to field coordinates</span></div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="comment">     * @param Hrw transformation of world to robot coordinates</span></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="comment">     * @return true if we are the furthest back robot on our team, false otherwise</span></div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keywordtype">bool</span> furthest_back(<span class="keyword">const</span> Robots&amp; robots,</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;                       <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;                       <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                       <span class="keywordtype">double</span> equidistant_threshold,</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;                       <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id,</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;                       std::vector&lt;unsigned int&gt; <span class="keyword">const</span>&amp; ignore_ids = {}) {</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;        <span class="comment">// Transform our position to field coordinates</span></div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        <span class="keywordtype">double</span> furthest      = std::abs(rRFf.y());</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        <span class="comment">// Look for any teammates that are further back than us</span></div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; robot : robots.robots) {</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;            <span class="comment">// Only consider non penalised teammates</span></div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            <span class="keywordtype">bool</span> ignore_id = std::find(ignore_ids.begin(), ignore_ids.end(), robot.teammate_id) != ignore_ids.end();</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            <span class="keywordflow">if</span> ((robot.teammate_id != 0 &amp;&amp; !robot.penalised) &amp;&amp; !ignore_id) {</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                <span class="comment">// Transform robot position to field coordinates</span></div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;                Eigen::Vector3d rRFf = Hfw * robot.rRWw;</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                <span class="comment">// Check if equidistant to us</span></div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                <span class="keywordtype">bool</span> equidistant = std::abs(std::abs(rRFf.y()) - furthest) &lt; equidistant_threshold;</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                <span class="comment">// If the robot is further back than us, or equidistant and has a higher ID, then we are not the</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                <span class="comment">// furthest back</span></div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                <span class="keywordflow">if</span> ((!equidistant &amp;&amp; (std::abs(rRFf.y()) &gt; furthest))</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                    || (equidistant &amp;&amp; (robot.teammate_id &gt; self_id))) {</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;                }</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;            }</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        }</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;            <span class="comment">// Equidistant teammates with a lower ID win</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (equidistant &amp;&amp; (robot.purpose.player_id &lt; lowest_id)) {</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                <span class="comment">// If it is equidistant and a teammate, lowest ID wins</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                closest   = {Who{Who::TEAMMATE}, distance_to_ball};</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                lowest_id = robot.purpose.player_id;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            }</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;            <span class="comment">// Closer than equidistant wins</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!equidistant &amp;&amp; (distance_to_ball &lt; closest.second)) {</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                closest   = {robot.teammate ? Who{Who::TEAMMATE} : Who{Who::OPPONENT}, distance_to_ball};</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                lowest_id = robot.teammate ? robot.purpose.player_id : 0;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;            }</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        }</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        <span class="keywordflow">return</span> {lowest_id, closest.second};</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    }</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="comment">     * @brief Establishes which robot is in possession of the ball.</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="comment">     * @details</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="comment">     * The robot closest to the ball (either SELF or TEAMMATE) within a given threshold has possession of the ball.</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="comment">     * If no robot is within the given threshold, NONE is returned.</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="comment">     * @param rBWw ball position in world coordinates.</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="comment">     * @param robots localisation of every known robot in the game.</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="comment">     * @param Hfw transformation of world to field coordinates.</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="comment">     * @param Hrw transformation of world to robot coordinates.</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="comment">     * @param threshold maximum distance to the ball to be considered in possession of the ball.</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="comment">     * @param equidistant_threshold maximum distance for two robots to be considered equidistant</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="comment">     * @param self_id the ID of the robot that is calling this function</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="comment">     * @param ignore_ids a list of robot IDs to ignore when determining possession</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;<span class="comment">     * @return A possession value which determines if any robot (or NONE) has the ball.</span></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    Who ball_possession(<span class="keyword">const</span> Eigen::Vector3d&amp; rBWw,</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                        <span class="keyword">const</span> Robots&amp; robots,</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                        <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;                        <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                        <span class="keywordtype">double</span> threshold,</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                        <span class="keywordtype">double</span> equidistant_threshold,</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;                        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id,</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                        std::vector&lt;unsigned int&gt; <span class="keyword">const</span>&amp; ignore_ids) {</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        <span class="comment">// Function determines who has possession based on proximity and a threshold distance.</span></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        <span class="keyword">auto</span> closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, ignore_ids);</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160; </div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="comment">// &#39;closest.second&#39; is the distance to the ball</span></div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        <span class="comment">// If the distance is greater than the threshold, then the robot is too far</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        <span class="comment">// for possession.</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        <span class="keywordflow">if</span> (closest.second &gt; threshold) {</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;            <span class="keywordflow">return</span> Who{Who::NONE};</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        }</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        <span class="comment">// If robot is close to ball, robot that is closest will possess the ball.</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;        <span class="keywordflow">return</span> (closest.first == self_id) ? Who::SELF : (closest.first == 0 ? Who::OPPONENT : Who::TEAMMATE);</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    }</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="comment">     * @brief Determines if we are the closest robot to the ball on our team</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="comment">     * @param rBWw ball position in world coordinates</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="comment">     * @param robots localisation of every known robot in the game</span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="comment">     * @param Hfw transformation of world to field coordinates</span></div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment">     * @param Hrw transformation of world to robot coordinates</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;<span class="comment">     * @param equidistant_threshold maximum distance to the ball to be considered equidistant</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;<span class="comment">     * @param self_id the ID of the robot that is calling this function</span></div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="comment">     * @param ignore_ids a list of robot IDs to ignore when determining the closest robot</span></div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;<span class="comment">     * @return true if we are the closest robot to the ball on our team, false otherwise</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> closest_to_ball_on_team(<span class="keyword">const</span> Eigen::Vector3d&amp; rBWw,</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;                                         <span class="keyword">const</span> Robots&amp; robots,</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;                                         <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                                         <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;                                         <span class="keywordtype">double</span> equidistant_threshold,</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id,</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;                                         std::vector&lt;unsigned int&gt; <span class="keyword">const</span>&amp; ignore_ids) {</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        <span class="comment">// Function determines who has possession based on proximity and a threshold distance.</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        <span class="comment">// Exclude opponents from the search</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        <span class="keyword">auto</span> closest =</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;            get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, ignore_ids, <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160; </div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;        <span class="comment">// Return true if the closest robot is us</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;        <span class="keywordflow">return</span> closest.first;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    }</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="comment">     * @brief Determines if we are the furthest back robot on our team</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="comment">     * @param robots localisation of every known robot in the game</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="comment">     * @param Hfw transformation of world to field coordinates</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="comment">     * @param Hrw transformation of world to robot coordinates</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="comment">     * @param equidistant_threshold maximum distance to the ball to be considered equidistant</span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="comment">     * @param self_id the ID of the robot that is calling this function</span></div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="comment">     * @param ignore_ids a list of robot IDs to ignore when determining the robot that is furthest back</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="comment">     * @return true if we are the furthest back robot on our team, false otherwise</span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    <span class="keywordtype">bool</span> furthest_back(<span class="keyword">const</span> Robots&amp; robots,</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                       <span class="keyword">const</span> Eigen::Isometry3d&amp; Hfw,</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                       <span class="keyword">const</span> Eigen::Isometry3d&amp; Hrw,</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                       <span class="keywordtype">double</span> equidistant_threshold,</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                       <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> self_id,</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                       std::vector&lt;unsigned int&gt; <span class="keyword">const</span>&amp; ignore_ids) {</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="comment">// Transform our position to field coordinates</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keywordtype">double</span> furthest      = std::abs(rRFf.y());</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <span class="comment">// If we didn&#39;t find any teammates that are further back than us, then we are the furthest back</span></div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    }</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;}  <span class="comment">// namespace utility::strategy</span></div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160; </div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_STRATEGY_SOCCER_STRATEGY_HPP</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <span class="comment">// Look for any teammates that are further back than us</span></div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; robot : robots.robots) {</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;            <span class="comment">// Only consider non penalised teammates</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;            <span class="keywordtype">bool</span> ignore_id =</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;                std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;            <span class="keywordflow">if</span> ((robot.teammate &amp;&amp; robot.purpose.active) &amp;&amp; !ignore_id) {</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;                <span class="comment">// Transform robot position to field coordinates</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;                Eigen::Vector3d rRFf = Hfw * robot.rRWw;</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160; </div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;                <span class="comment">// Check if equidistant to us</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                <span class="keywordtype">bool</span> equidistant = std::abs(std::abs(rRFf.y()) - furthest) &lt; equidistant_threshold;</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                <span class="comment">// If the robot is further back than us, or equidistant and has a higher ID, then we are not the</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;                <span class="comment">// furthest back</span></div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                <span class="keywordflow">if</span> ((!equidistant &amp;&amp; (std::abs(rRFf.y()) &gt; furthest))</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                    || (equidistant &amp;&amp; (robot.purpose.player_id &gt; self_id))) {</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;                    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                }</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;            }</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        }</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160; </div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        <span class="comment">// If we didn&#39;t find any teammates that are further back than us, then we are the furthest back</span></div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;    }</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;}  <span class="comment">// namespace utility::strategy</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160; </div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_STRATEGY_SOCCER_STRATEGY_HPP</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_418e762bca5259bf768b127de8d191f5.html">strategy</a></li><li class="navelem"><b>soccer_strategy.hpp</b></li>
-    <li class="footer">Generated on Tue Jun 24 2025 11:17:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 25 2025 06:36:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
