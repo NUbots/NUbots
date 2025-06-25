@@ -42,12 +42,15 @@ message Ball {
     /// Covariance of state (rBWw, vBw)
     mat4 covariance = 3;
 
+    /// The ball's confidence in the measurement
+    double confidence = 4;
+
     /// Time the ball measurement was taken
-    google.protobuf.Timestamp time_of_measurement = 4;
+    google.protobuf.Timestamp time_of_measurement = 5;
 
     /// Homogeneous transformation matrix from world to camera space
-    iso3 Hcw = 5;
+    iso3 Hcw = 6;
 
     /// Average ball position collected from the team when using robot-to-robot communication
-    vec3 average_rBWw = 6;
+    vec3 average_rBWw = 7;
 }
