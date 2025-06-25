@@ -95,9 +95,11 @@ namespace module::purpose {
                 // Make an ignore list with the goalie, if they exist
                 std::vector<unsigned int> ignore_ids{};
                 // Add inactive robots to the ignore list
-                for (const auto& robot : (robots ? robots->robots : std::vector<message::localisation::Robot>{})) {
-                    if (!robot.purpose.active) {
-                        ignore_ids.push_back(robot.purpose.player_id);
+                if (robots) {
+                    for (const auto& robot : robots->robots) {
+                        if (!robot.purpose.active) {
+                            ignore_ids.push_back(robot.purpose.player_id);
+                        }
                     }
                 }
 
@@ -118,7 +120,7 @@ namespace module::purpose {
                 Eigen::Vector3d rBFf     = field.Hfw * ball->rBWw;
                 double defending_third_x = fd.dimensions.field_length / 3.0;
                 if (robots && rBFf.x() < defending_third_x) {
-                    for (const auto& robot : (robots ? robots->robots : std::vector<message::localisation::Robot>{})) {
+                    for (const auto& robot : robots->robots) {
                         if (robot.purpose.purpose == SoccerPosition::GOALIE) {
                             log<DEBUG>("Ball not in defending third, ignoring goalie for closest to ball");
                             ignore_ids.push_back(robot.purpose.player_id);
@@ -190,9 +192,11 @@ namespace module::purpose {
                 // Add closest_to_ball to the ignore list so we don't consider the attacker as the furthest back
                 ignore_ids.push_back(closest_to_ball);
                 // Add goalies to the ignore list so we don't consider them as the furthest back
-                for (const auto& robot : (robots ? robots->robots : std::vector<message::localisation::Robot>{})) {
-                    if (robot.purpose.purpose == SoccerPosition::GOALIE) {
-                        ignore_ids.push_back(robot.purpose.player_id);
+                if (robots) {
+                    for (const auto& robot : robots->robots) {
+                        if (robot.purpose.purpose == SoccerPosition::GOALIE) {
+                            ignore_ids.push_back(robot.purpose.player_id);
+                        }
                     }
                 }
                 bool furthest_back = robots ? utility::strategy::furthest_back(*robots,

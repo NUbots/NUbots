@@ -163,7 +163,6 @@ namespace module::localisation {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
-                tracked_robots.back().seen = true;
                 continue;
             }
 
@@ -179,7 +178,6 @@ namespace module::localisation {
                 // If the robot is not in the list, add it
                 if (teammate_itr == tracked_robots.end()) {
                     tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
-                    tracked_robots.back().seen = true;
                     continue;
                 }
                 // If the robot is in the list, update it with the new position
@@ -206,7 +204,6 @@ namespace module::localisation {
             // If the closest robot is far enough away, add this as a new robot
             if (closest_distance > cfg.association_distance) {
                 tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
-                tracked_robots.back().seen = true;
                 continue;
             }
 
