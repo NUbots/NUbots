@@ -39,6 +39,8 @@
 
 namespace module::localisation {
 
+    using VisionBalls = message::vision::Balls;
+
     class BallLocalisation : public NUClear::Reactor {
     private:
         struct Config {
@@ -80,16 +82,13 @@ namespace module::localisation {
             /// @brief Maximum number of detections of a ball not being accepted before it is accepted
             int max_rejections = 0;
 
-            uint player_id = 0;
-
+            /// @brief Whether or not to use teammate balls
             bool use_r2r_balls = false;
-
-            int max_robots = 0;
-
+            /// @brief Timeout on stale teammate ball guesses
             double team_ball_recency = 0.0;
-
+            /// @brief Max allowed std on teammate guesses
             double team_guess_error = 0.0;
-
+            /// @brief Timeout for switching from own balls to teammate balls
             double team_guess_default_timer = 0.0;
 
         } cfg;
@@ -106,16 +105,37 @@ namespace module::localisation {
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};
 
-        bool get_average_team_rBFf(Eigen::Vector3d& average_rBFf);
+        /// @brief Calculates ball position using robot to robot communication
+        /// @param average_rBFf The average position of the ball in field space
+        /// @return Whether the teammate ball is a valid guess and the average position of the ball in field space
+        std::pair<bool, Eigen::Vector3d> get_average_team_rBFf();
 
+        /// @brief Finds the closest ball in the given vision balls
+        /// @param balls The vision balls to search through
+        /// @param Hwc The camera to world transform
+        /// @param state_rBWw The current tracked ball position in world space
+        /// @return The closest ball in world space
+        Eigen::Vector3d closest_ball(const VisionBalls& balls,
+                                     const Eigen::Isometry3d& Hwc,
+                                     const Eigen::Vector2d& state_rBWw);
+
+        /// @brief Determines whether to should accept a ball measurement
+        /// @param lowest_distance The squared distance to the closest ball
+        /// @param low_confidence Whether or not the ball measurement is of low confidence
+        /// @param max_rejections The maximum number of rejections before accepting the ball
+        bool accept_ball(double lowest_distance, bool& low_confidence);
+
+        /// @brief A struct to hold the guess from a teammate
         struct TeamGuess {
+            /// @brief The time the guess was given
             NUClear::clock::time_point last_heard = NUClear::clock::now();
-
+            /// @brief The position of the ball in field space
             Eigen::Vector3d rBFf = Eigen::Vector3d::Zero();
         };
-
+        /// @brief A vector of guesses from teammates, where the index is the player ID - 1
         std::vector<TeamGuess> team_guesses{};
 
+        /// @brief The last Hcw from a ball measurement, to use with teammate balls
         Eigen::Isometry3d last_Hcw = Eigen::Isometry3d::Identity();
 
     public:
