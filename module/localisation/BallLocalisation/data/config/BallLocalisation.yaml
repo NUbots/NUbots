@@ -28,10 +28,10 @@ max_rejections: 25
 use_r2r_balls: true
 
 # Maximum time in seconds before a teammates ball is discarded
-team_ball_recency: 5.0
+team_ball_recency: 3.0
 
-# Maximum acceptable error in meters for the combined team ball
+# Maximum acceptable standard deviation in meters for the combined team ball
 team_guess_error: 0.5
 
-# Maxmimum time in seconds where we have not seen the ball before defaulting to team guesses
+# Maximimum time in seconds where we have not seen the ball before defaulting to team guesses
 team_guess_default_timer: 2.0
