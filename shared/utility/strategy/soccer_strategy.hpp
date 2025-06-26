@@ -31,18 +31,15 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <algorithm>
-#include <nuclear>
 #include <utility>
 #include <vector>
 
 #include "message/localisation/Robot.hpp"
-#include "message/purpose/Purpose.hpp"
 #include "message/strategy/Who.hpp"
 
 namespace utility::strategy {
 
     using message::localisation::Robots;
-    using message::purpose::SoccerPosition;
     using message::strategy::Who;
 
     /**

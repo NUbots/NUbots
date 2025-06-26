@@ -48,8 +48,7 @@ namespace module::purpose {
 
                 // Check which side we're closer to
                 bool prefer_left = std::abs(rRFf.y() - left_side_y) < std::abs(rRFf.y() - right_side_y);
-
-                position.y() = prefer_left ? left_side_y : right_side_y;
+                position.y()     = prefer_left ? left_side_y : right_side_y;
 
                 // If there isn't really space to walk to the preferred side, walk to the other side
                 if (position.y() > fd.dimensions.field_width / 2) {
