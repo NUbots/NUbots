@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 ALLOWLIST_FILE="$SCRIPT_DIR/usb_allowlist"
 
-# Extract vendor:product pairs from allowlist, ignoring comments and blank lines, normalize to lowercase
+# Extract vendor:product pairs from allowlist, ignoring comments and blank lines, normalise to lowercase
 allowlist=$(grep -Eo '^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}' "$ALLOWLIST_FILE" | tr '[:upper:]' '[:lower:]')
 
 # Track unauthorized devices
