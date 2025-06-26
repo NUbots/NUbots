@@ -10,3 +10,5 @@
 1e10:4000 # Point Grey Research, Inc. Blackfly S BFS-U3-13Y3C
 # OpenCR
 0403:6001 # Future Technology Devices International, Ltd FT232 Serial (UART) IC
+# NUSense
+0483:5740 # STMicroelectronics Virtual COM Port
