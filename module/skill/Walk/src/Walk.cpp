@@ -107,8 +107,9 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
-            cfg.kick_velocity_x = config["kick"]["kick_velocity_x"].as<double>();
-            cfg.kick_velocity_y = config["kick"]["kick_velocity_y"].as<double>();
+            cfg.kick_velocity_x    = config["kick"]["kick_velocity_x"].as<double>();
+            cfg.kick_velocity_y    = config["kick"]["kick_velocity_y"].as<double>();
+            cfg.kick_timing_offset = config["kick"]["kick_timing_offset"].as<double>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -160,7 +161,7 @@ namespace module::skill {
                     if (!kick_step_in_progress) {
                         // Check if the conditions allow for the kick to start
                         // Todo maybe set offset based on the frequency
-                        bool end_of = (current_time + 0.1) >= full_period;
+                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
 
                         // If the leg we want to kick with is planted, we can kick at the end of the step
                         bool other_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
@@ -174,7 +175,7 @@ namespace module::skill {
                     }
                     else {
                         // Check if the step can end
-                        bool end_of = (current_time + 0.1) >= full_period;
+                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
                         // On the correct support foot, so can't be the beginning of the kick
                         bool correct_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
                                                                                  : phase == WalkState::Phase::LEFT;
