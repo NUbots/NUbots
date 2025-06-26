@@ -204,7 +204,7 @@ namespace module::localisation {
             Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
 
             // Resize the vector of guesses if it is not large enough
-            if (team_guesses.size() < robocup.current_pose.player_id) {
+            if (team_guesses.capacity() < robocup.current_pose.player_id) {
                 team_guesses.resize(robocup.current_pose.player_id);
             }
 

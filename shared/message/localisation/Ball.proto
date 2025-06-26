@@ -42,7 +42,7 @@ message Ball {
     /// Covariance of state (rBWw, vBw)
     mat4 covariance = 3;
 
-    /// The ball's confidence in the measurement
+    /// Confidence in the ball measurement
     double confidence = 4;
 
     /// Time the ball measurement was taken

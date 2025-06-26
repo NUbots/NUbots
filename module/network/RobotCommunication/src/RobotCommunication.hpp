@@ -47,7 +47,7 @@ namespace module::network {
             /// @brief A delay before the first message is sent, to allow reasonable data to be collected
             int startup_delay = 0;
             /// @brief The timeout for the ball position to be used
-            std::chrono::seconds ball_timeout{0};
+            std::chrono::seconds ball_timeout = 0;
         } cfg;
 
         /// @brief ignore packets from these IP addresses
