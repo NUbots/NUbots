@@ -68,6 +68,8 @@ namespace module::network {
                 log_level = config["log_level"].as<NUClear::LogLevel>();
                 // Delay before sending messages
                 cfg.startup_delay = config["startup_delay"].as<int>();
+                // Ball timeout to use the ball position
+                cfg.ball_timeout = std::chrono::seconds(config["ball_timeout"].as<int>());
 
                 // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
@@ -225,9 +227,11 @@ namespace module::network {
                     msg->kick_target.y() = kick->target.y();
                 }
 
-                // Ball
-                if (loc_ball) {
-                    // convert position of ball from world to field space
+                // Ball information
+                // Check if the ball has been seen recently, if it hasn't the message fields will 0
+                // and the confidence will be 0
+                if (loc_ball && (NUClear::clock::now() - loc_ball->time_of_measurement < cfg.ball_timeout)) {
+                    // Convert position of ball from world to field space
                     if (field) {
                         Eigen::Vector3d rBWw = loc_ball->rBWw;
                         // Transform the field state into Hfw
@@ -236,7 +240,10 @@ namespace module::network {
                         // Store our position from field to ball
                         msg->ball.position = rBFf.cast<float>();
                     }
-
+                    // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
+                    // This it to prevent everyone echoing
+                    msg->ball.confidence = loc_ball->confidence;
+                    log<INFO>("Ball confidence: ", msg->ball.confidence, " from player: ", config.player_id);
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();

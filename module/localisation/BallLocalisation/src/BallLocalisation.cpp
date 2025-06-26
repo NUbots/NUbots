@@ -144,33 +144,35 @@ namespace module::localisation {
                 return;
             }
 
-            // Compute the time since the last update (in seconds)
-            const auto dt =
-                std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
-                    .count();
-            last_time_update = NUClear::clock::now();
-
-            // Time update
-            ukf.time(dt);
-
-            // Measurement update
-            ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
-                        cfg.ukf.noise.measurement.position,
-                        MeasurementType::BALL_POSITION());
-
-            // Get the new state, here we are assuming ball is on the ground
-            state = BallModel<double>::StateVec(ukf.get_state());
-
             // Generate and emit message
             auto ball = std::make_unique<Ball>();
 
-            if (low_confidence && accept_team_guess) {
-                ball->rBWw = field.Hfw.inverse() * average_rBFf;
-                ball->vBw  = Eigen::Vector3d::Zero();
+            // If not accepting the ball or low confidence, then use the average team guess
+            if (!accept || (low_confidence && accept_team_guess)) {
+                ball->rBWw       = field.Hfw.inverse() * average_rBFf;
+                ball->vBw        = Eigen::Vector3d::Zero();
+                ball->confidence = 0.0;  // No confidence in other teammates' guesses
             }
             else {
-                ball->rBWw = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
-                ball->vBw  = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+                // Compute the time since the last update (in seconds)
+                const auto dt =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
+                        .count();
+                last_time_update = NUClear::clock::now();
+
+                // Time update
+                ukf.time(dt);
+
+                // Measurement update
+                ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
+                            cfg.ukf.noise.measurement.position,
+                            MeasurementType::BALL_POSITION());
+
+                // Get the new state, here we are assuming ball is on the ground
+                state            = BallModel<double>::StateVec(ukf.get_state());
+                ball->rBWw       = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
+                ball->vBw        = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+                ball->confidence = 1.0;  // Full confidence in our own measurements
             }
 
             ball->time_of_measurement = last_time_update;
@@ -193,6 +195,16 @@ namespace module::localisation {
             if (!cfg.use_r2r_balls) {
                 return;
             }
+
+            // This occurs when the ball position is an echo - ignore echos
+            if (robocup.ball.confidence == 0.0) {
+                // If the ball has no confidence, then we don't care about it
+                return;
+            }
+            else {
+                log<INFO>("Received ball position from teammate: ", robocup.current_pose.player_id);
+            }
+
             Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
 
             // Resize the vector of guesses if it is not large enough
@@ -217,6 +229,7 @@ namespace module::localisation {
             auto ball                 = std::make_unique<Ball>();
             ball->rBWw                = field.Hfw.inverse() * get_average_team_rBFf().second;
             ball->vBw                 = Eigen::Vector3d::Zero();
+            ball->confidence          = 0.0;  // No confidence in other teammates' guesses
             ball->time_of_measurement = last_time_update;
             ball->Hcw                 = last_Hcw;
             emit(ball);
