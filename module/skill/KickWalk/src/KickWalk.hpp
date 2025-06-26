@@ -16,7 +16,7 @@ namespace module::skill {
         struct Config {
             double kick_approach_velocity_x = 0.0;  // Forward velocity during kick (m/s)
             double kick_approach_velocity_y = 0.0;  // Lateral velocity during kick (m/s)
-            double new_kick_wait_time       = 0.0;  // Time to wait before the next kick (in seconds)
+            long new_kick_wait_time         = 0.0;  // Time to wait before the next kick (in seconds)
 
         } cfg;
 
