@@ -37,14 +37,21 @@ namespace module::purpose {
             [this](const Ball& ball, const Sensors& sensors, const Field& field, const FieldDescription& fd) {
                 // Get ball in field coordinates
                 Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
-                Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+                Eigen::Vector3d rRFf = (field.Hfw * sensors.Hrw.inverse()).translation();
 
                 // Keep in line with the ball on the x-axis, but stay on the other side of the field on the y-axis
                 Eigen::Vector3d position = rBFf;
-                position.y()             = rBRr.y() < 0 ? rBFf.y() + (fd.dimensions.field_width / 4)
-                                                        : rBFf.y() - (fd.dimensions.field_width / 4);
 
-                // If there isn't really space to walk to the desired side, walk to the other side
+                // Choose the side closest to our current position
+                double left_side_y  = rBFf.y() - (fd.dimensions.field_width / 4);
+                double right_side_y = rBFf.y() + (fd.dimensions.field_width / 4);
+
+                // Check which side we're closer to
+                bool prefer_left = std::abs(rRFf.y() - left_side_y) < std::abs(rRFf.y() - right_side_y);
+
+                position.y() = prefer_left ? left_side_y : right_side_y;
+
+                // If there isn't really space to walk to the preferred side, walk to the other side
                 if (position.y() > fd.dimensions.field_width / 2) {
                     position.y() = rBFf.y() - (fd.dimensions.field_width / 4);
                 }

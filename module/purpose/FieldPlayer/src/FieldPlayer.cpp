@@ -68,6 +68,7 @@ namespace module::purpose {
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
+           Optional<With<Purpose>>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
@@ -75,7 +76,8 @@ namespace module::purpose {
                          const Field& field,
                          const GameState& game_state,
                          const GlobalConfig& global_config,
-                         const FieldDescription& fd) {
+                         const FieldDescription& fd,
+                         const std::shared_ptr<const Purpose>& purpose) {
                 // If the robot is uncertain about its position, it should not play
                 if (field.cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
@@ -112,14 +114,16 @@ namespace module::purpose {
 
                 // Find who has the ball, if any
                 // If there are no robots, use an empty vector
-                Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
-                                                                  (robots ? *robots : Robots{}),
-                                                                  field.Hfw,
-                                                                  sensors.Hrw,
-                                                                  cfg.ball_threshold,
-                                                                  cfg.equidistant_threshold,
-                                                                  global_config.player_id,
-                                                                  ignore_ids);
+                Who ball_pos = utility::strategy::ball_possession(
+                    ball->rBWw,
+                    (robots ? *robots : Robots{}),
+                    field.Hfw,
+                    sensors.Hrw,
+                    cfg.ball_threshold,
+                    cfg.equidistant_threshold,
+                    global_config.player_id,
+                    purpose ? purpose->purpose : SoccerPosition(SoccerPosition::UNKNOWN),
+                    ignore_ids);
 
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
@@ -135,13 +139,15 @@ namespace module::purpose {
                     }
                 }
                 const unsigned int closest_to_ball =
-                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
-                                                                        *robots,
-                                                                        field.Hfw,
-                                                                        sensors.Hrw,
-                                                                        cfg.equidistant_threshold,
-                                                                        global_config.player_id,
-                                                                        ignore_ids)
+                    robots ? utility::strategy::closest_to_ball_on_team(
+                        ball->rBWw,
+                        *robots,
+                        field.Hfw,
+                        sensors.Hrw,
+                        cfg.equidistant_threshold,
+                        global_config.player_id,
+                        purpose ? purpose->purpose : SoccerPosition(SoccerPosition::UNKNOWN),
+                        ignore_ids)
                            : global_config.player_id;
                 bool is_closest = closest_to_ball == global_config.player_id;
 
@@ -206,12 +212,14 @@ namespace module::purpose {
                         }
                     }
                 }
-                bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
-                                                                               field.Hfw,
-                                                                               sensors.Hrw,
-                                                                               cfg.equidistant_threshold,
-                                                                               global_config.player_id,
-                                                                               ignore_ids)
+                bool furthest_back = robots ? utility::strategy::furthest_back(
+                                         *robots,
+                                         field.Hfw,
+                                         sensors.Hrw,
+                                         cfg.equidistant_threshold,
+                                         global_config.player_id,
+                                         purpose ? purpose->purpose : SoccerPosition(SoccerPosition::UNKNOWN),
+                                         ignore_ids)
                                             : true;
                 if (furthest_back) {
                     log<DEBUG>("Defend!");

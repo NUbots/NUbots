@@ -31,6 +31,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <nuclear>
 #include <utility>
 #include <vector>
 
@@ -72,6 +73,7 @@ namespace utility::strategy {
                                                     const Eigen::Isometry3d& Hrw,
                                                     double equidistant_threshold,
                                                     unsigned int self_id,
+                                                    SoccerPosition purpose,
                                                     std::vector<unsigned int> const& ignore_ids,
                                                     bool include_opponents = true) {
         // Transform ball position to field coordinates
@@ -104,17 +106,29 @@ namespace utility::strategy {
                 closest   = {Who{Who::OPPONENT}, distance_to_ball};
                 lowest_id = 0;
             }
-            // If it is equidistant and a teammate, is someone is already the attacker they win
-            // Otherwise lowest ID wins
-            else if (equidistant && robot.teammate && robot.purpose.purpose == SoccerPosition::ATTACK) {
-                closest   = {Who{Who::TEAMMATE}, distance_to_ball};
-                lowest_id = robot.purpose.player_id;
-            }
-            // Equidistant teammates with a lower ID win
-            else if (equidistant && (robot.purpose.player_id < lowest_id)) {
-                // If it is equidistant and a teammate, lowest ID wins
-                closest   = {Who{Who::TEAMMATE}, distance_to_ball};
-                lowest_id = robot.purpose.player_id;
+            // Handle equidistant teammates with purpose-based priority
+            else if (equidistant && robot.teammate) {
+                bool should_replace = false;
+
+                // If the other robot has ATTACK purpose and we don't, they win
+                if (robot.purpose.purpose == SoccerPosition::ATTACK && purpose != SoccerPosition::ATTACK) {
+                    should_replace = true;
+                }
+                // If we both have ATTACK purpose, lower ID wins
+                else if (robot.purpose.purpose == SoccerPosition::ATTACK && purpose == SoccerPosition::ATTACK
+                         && robot.purpose.player_id < lowest_id) {
+                    should_replace = true;
+                }
+                // If neither has ATTACK purpose, lower ID wins
+                else if (robot.purpose.purpose != SoccerPosition::ATTACK && purpose != SoccerPosition::ATTACK
+                         && robot.purpose.player_id < lowest_id) {
+                    should_replace = true;
+                }
+
+                if (should_replace) {
+                    closest   = {Who{Who::TEAMMATE}, distance_to_ball};
+                    lowest_id = robot.purpose.player_id;
+                }
             }
             // Closer than equidistant wins
             else if (!equidistant && (distance_to_ball < closest.second)) {
@@ -151,9 +165,11 @@ namespace utility::strategy {
                         double threshold,
                         double equidistant_threshold,
                         unsigned int self_id,
+                        SoccerPosition purpose,
                         std::vector<unsigned int> const& ignore_ids) {
         // Function determines who has possession based on proximity and a threshold distance.
-        auto closest = get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, ignore_ids);
+        auto closest =
+            get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, purpose, ignore_ids);
 
         // 'closest.second' is the distance to the ball
         // If the distance is greater than the threshold, then the robot is too far
@@ -184,11 +200,12 @@ namespace utility::strategy {
                                          const Eigen::Isometry3d& Hrw,
                                          double equidistant_threshold,
                                          unsigned int self_id,
+                                         SoccerPosition purpose,
                                          std::vector<unsigned int> const& ignore_ids) {
         // Function determines who has possession based on proximity and a threshold distance.
         // Exclude opponents from the search
         auto closest =
-            get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, ignore_ids, false);
+            get_closest_bot(rBWw, robots.robots, Hfw, Hrw, equidistant_threshold, self_id, purpose, ignore_ids, false);
 
         // Return true if the closest robot is us
         return closest.first;
@@ -211,10 +228,11 @@ namespace utility::strategy {
                        const Eigen::Isometry3d& Hrw,
                        double equidistant_threshold,
                        unsigned int self_id,
+                       SoccerPosition purpose,
                        std::vector<unsigned int> const& ignore_ids) {
         // Transform our position to field coordinates
         Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
-        double furthest      = std::abs(rRFf.y());
+        double furthest      = rRFf.x();
 
         // Look for any teammates that are further back than us
         for (const auto& robot : robots.robots) {
@@ -223,16 +241,32 @@ namespace utility::strategy {
                 std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
             if ((robot.teammate && robot.purpose.active) && !ignore_id) {
                 // Transform robot position to field coordinates
-                Eigen::Vector3d rRFf = Hfw * robot.rRWw;
+                Eigen::Vector3d rRFf_robot = Hfw * robot.rRWw;
+                double robot_distance      = rRFf_robot.x();
 
                 // Check if equidistant to us
-                bool equidistant = std::abs(std::abs(rRFf.y()) - furthest) < equidistant_threshold;
-                // If the robot is further back than us, or equidistant and DEFEND position, or equidistant and has a
-                // higher ID, then we are not the furthest back
-                if ((!equidistant && (std::abs(rRFf.y()) > furthest))
-                    || (equidistant && (robot.purpose.purpose == SoccerPosition::DEFEND))
-                    || (equidistant && (robot.purpose.player_id > self_id))) {
+                bool equidistant = std::abs(robot_distance - furthest) < equidistant_threshold;
+                // If the robot is further back than us, we are not the furthest back
+                if (!equidistant && (robot_distance > furthest)) {
                     return false;
+                }
+
+                // If equidistant, DEFEND purpose wins, otherwise higher ID wins
+                if (equidistant) {
+                    // If the other robot has DEFEND purpose and we don't, they win
+                    if (robot.purpose.purpose == SoccerPosition::DEFEND && purpose != SoccerPosition::DEFEND) {
+                        return false;
+                    }
+                    // If we both have DEFEND purpose, higher ID wins
+                    else if (robot.purpose.purpose == SoccerPosition::DEFEND && purpose == SoccerPosition::DEFEND
+                             && robot.purpose.player_id > self_id) {
+                        return false;
+                    }
+                    // If neither has DEFEND purpose, higher ID wins
+                    else if (robot.purpose.purpose != SoccerPosition::DEFEND && purpose != SoccerPosition::DEFEND
+                             && robot.purpose.player_id > self_id) {
+                        return false;
+                    }
                 }
             }
         }
