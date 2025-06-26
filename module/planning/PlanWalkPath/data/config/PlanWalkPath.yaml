@@ -31,3 +31,12 @@ acceleration_multiplier: 0.3
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.6
+
+# Enhanced radius around obstacles to avoid when robot has the ball (more conservative)
+obstacle_radius_with_ball: 0.9
+
+# Distance threshold to consider robot has ball possession (meters)
+ball_possession_threshold: 0.3
+
+# Velocity scale factor when moving cautiously near obstacles with ball
+cautious_velocity_scale: 0.6

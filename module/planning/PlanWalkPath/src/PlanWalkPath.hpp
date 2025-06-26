@@ -89,6 +89,12 @@ namespace module::planning {
 
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
+            /// @brief Enhanced radius to avoid obstacles when robot has the ball
+            double obstacle_radius_with_ball = 0.0;
+            /// @brief Distance threshold to consider robot has ball possession
+            double ball_possession_threshold = 0.25;
+            /// @brief Velocity scale factor when moving cautiously near obstacles with ball
+            double cautious_velocity_scale = 0.6;
         } cfg;
 
         /// @brief Current magnitude of the translational velocity of the walk command
@@ -118,17 +124,20 @@ namespace module::planning {
         /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
         /// @param all_obstacles vector of all obstacles in the world
         /// @param rDRr vector from robot to final target
+        /// @param obstacle_radius radius around obstacles to avoid
         /// @return vector of closest obstacle in the path to avoid and its neighbours
         const std::vector<Eigen::Vector2d> get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                         const Eigen::Vector2d& rDRr);
+                                                         const Eigen::Vector2d& rDRr,
+                                                         double obstacle_radius);
 
         /// @brief Adjust the target direction to avoid obstacles
-        /// @param robots vector of all robots in the world
         /// @param rDRr vector from robot to final target
         /// @param obstacles vector of obstacles in the path to avoid
+        /// @param obstacle_radius radius around obstacles to avoid
         /// @return adjusted target direction
         Eigen::Vector2d adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
-                                                              const std::vector<Eigen::Vector2d>& obstacles);
+                                                              const std::vector<Eigen::Vector2d>& obstacles,
+                                                              double obstacle_radius);
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
