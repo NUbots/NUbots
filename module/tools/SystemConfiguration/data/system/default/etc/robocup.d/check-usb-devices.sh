@@ -18,7 +18,7 @@ while IFS= read -r line; do
     fi
 done <<< "$(lsusb)"
 
-# Log and exit if any unauthorized devices found
+# Log and exit if any unauthorised devices found
 if [ ${#unauthorized[@]} -ne 0 ]; then
     for dev in "${unauthorized[@]}"; do
         echo "Connected USB device not in allowlist: $dev" >&2
