@@ -240,8 +240,6 @@ namespace module::network {
                         // Store our position from field to ball
                         msg->ball.position = rBFf.cast<float>();
                     }
-
-
                     // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
                     // This it to prevent everyone echoing
                     msg->ball.confidence = loc_ball->confidence;
