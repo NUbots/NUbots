@@ -7,7 +7,7 @@ ALLOWLIST_FILE="$SCRIPT_DIR/usb_allowlist"
 allowlist=$(grep -Eo '^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}' "$ALLOWLIST_FILE" | tr '[:upper:]' '[:lower:]')
 
 # Track unauthorized devices
-unauthorized=()
+unauthorised=()
 
 # Loop over each line of lsusb
 while IFS= read -r line; do
