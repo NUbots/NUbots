@@ -201,9 +201,6 @@ namespace module::localisation {
                 // If the ball has no confidence, then we don't care about it
                 return;
             }
-            else {
-                log<INFO>("Received ball position from teammate: ", robocup.current_pose.player_id);
-            }
 
             Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
 
