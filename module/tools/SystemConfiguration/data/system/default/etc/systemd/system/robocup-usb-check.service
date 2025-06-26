@@ -1,3 +1,8 @@
+# This adds a condition to the robocup service to prevent it from starting if
+# any USB devices are connected that are not in the allowlist. This is useful
+# for preventing the service from restarting mid-competition while we are
+# fixing a robot - any keyboard, usb monitor, etc. will stop it.
+
 [Unit]
 Description="Pre-robocup service check for USB devices"
 
