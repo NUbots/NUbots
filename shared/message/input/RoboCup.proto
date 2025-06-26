@@ -55,6 +55,9 @@ message Robot {
 
     /// Robot team, if known
     Team team = 4;
+
+    // Cost of localisation
+    float cost = 5;
 }
 
 message Ball {
