@@ -19,14 +19,16 @@ namespace module::skill {
             this->log_level              = config["log_level"].as<NUClear::LogLevel>();
             cfg.kick_approach_velocity_x = config["kick_approach_velocity_x"].as<double>();
             cfg.kick_approach_velocity_y = config["kick_approach_velocity_y"].as<double>();
+            cfg.new_kick_wait_time       = config["new_kick_wait_time"].as<double>();
         });
 
         on<Provide<Kick>, Uses<Walk>>().then(
             [this](const Kick& kick, const RunReason& run_reason, const Uses<Walk>& walk) {
                 if (run_reason == RunReason::NEW_TASK) {
-                    if (NUClear::clock::now() - last_kick_end < std::chrono::seconds(2)) {
+                    if (NUClear::clock::now() - last_kick_end < std::chrono::seconds(cfg.new_kick_wait_time)) {
                         log<DEBUG>("KickWalk is waiting for cooldown after last kick.");
-                        NUClear::clock::time_point wait_until = last_kick_end + std::chrono::seconds(2);
+                        NUClear::clock::time_point wait_until =
+                            last_kick_end + std::chrono::seconds(cfg.new_kick_wait_time);
                         emit<Task>(std::make_unique<Wait>(wait_until));
                         return;
                     }

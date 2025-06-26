@@ -14,19 +14,13 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
-            double kick_step_length         = 0.15;  // Length of kick step (m)
-            double kick_step_height         = 0.08;  // Height of kick step (m)
-            double kick_approach_velocity_x = 0.0;   // Forward velocity during kick (m/s)
-            double kick_approach_velocity_y = 0.0;   // Lateral velocity during kick (m/s)
-            double normal_velocity_x        = 0.1;   // Normal forward walking velocity (m/s)
-            int kick_steps                  = 2;     // Number of steps to execute kick over
+            double kick_approach_velocity_x = 0.0;  // Forward velocity during kick (m/s)
+            double kick_approach_velocity_y = 0.0;  // Lateral velocity during kick (m/s)
+            double new_kick_wait_time       = 0.0;  // Time to wait before the next kick (in seconds)
 
-            // State tracking
-            utility::input::LimbID current_kick_leg = utility::input::LimbID::UNKNOWN;
-            int kick_step_count                     = 0;
-            bool is_kicking                         = false;
         } cfg;
 
+        /// @brief Time point when the last kick ended. Used to prevent kick spamming.
         NUClear::clock::time_point last_kick_end = NUClear::clock::now();
 
     public:
