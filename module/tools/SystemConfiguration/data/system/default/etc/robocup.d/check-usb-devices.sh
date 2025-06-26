@@ -20,7 +20,7 @@ done <<< "$(lsusb)"
 
 # Log and exit if any unauthorised devices found
 if [ ${#unauthorised[@]} -ne 0 ]; then
-    for dev in "${unauthorized[@]}"; do
+    for dev in "${unauthorised[@]}"; do
         echo "Connected USB device not in allowlist: $dev" >&2
     done
     exit 1
