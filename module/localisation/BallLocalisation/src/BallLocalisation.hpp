@@ -110,21 +110,6 @@ namespace module::localisation {
         /// @return Whether the teammate ball is a valid guess and the average position of the ball in field space
         std::pair<bool, Eigen::Vector3d> get_average_team_rBFf();
 
-        /// @brief Finds the closest ball in the given vision balls
-        /// @param balls The vision balls to search through
-        /// @param Hwc The camera to world transform
-        /// @param state_rBWw The current tracked ball position in world space
-        /// @return The closest ball in world space
-        Eigen::Vector3d closest_ball(const VisionBalls& balls,
-                                     const Eigen::Isometry3d& Hwc,
-                                     const Eigen::Vector2d& state_rBWw);
-
-        /// @brief Determines whether to should accept a ball measurement
-        /// @param lowest_distance The squared distance to the closest ball
-        /// @param low_confidence Whether or not the ball measurement is of low confidence
-        /// @param max_rejections The maximum number of rejections before accepting the ball
-        bool accept_ball(double lowest_distance, bool& low_confidence);
-
         /// @brief A struct to hold the guess from a teammate
         struct TeamGuess {
             /// @brief The time the guess was given

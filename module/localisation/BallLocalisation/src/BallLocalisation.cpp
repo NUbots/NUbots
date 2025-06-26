@@ -124,12 +124,37 @@ namespace module::localisation {
             last_Hcw              = balls.Hcw;
             auto state            = BallModel<double>::StateVec(ukf.get_state());
 
-            // The closest ball in the vision detections
-            Eigen::Vector3d rBWw = closest_ball(balls, Hwc, state.rBWw);
+            // Data association: find the ball closest to our current estimate
+            Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
+            double lowest_distance = std::numeric_limits<double>::max();
+            for (const auto& ball : balls.balls) {
+                Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+                double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+                if (current_distance < lowest_distance) {
+                    lowest_distance = current_distance;
+                    rBWw            = current_rBWw;
+                }
+            }
 
+            // Data association: ensure the ball is within the acceptance radius
             bool low_confidence = false;
-            bool accept         = accept_ball((rBWw.head<2>() - state.rBWw).squaredNorm(), low_confidence);
-            first_ball_seen     = accept ? true : first_ball_seen;
+            bool accept_ball    = true;
+            if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
+                low_confidence = true;
+                rejection_count++;
+            }
+            else {
+                first_ball_seen = true;
+                rejection_count = 0;
+            }
+            log<DEBUG>("Rejection count: ", rejection_count);
+            log<DEBUG>("Accept ball: ", accept_ball);
+
+            // Data association: if we have rejected too many balls, accept the closest one
+            if (rejection_count > cfg.max_rejections) {
+                accept_ball     = true;
+                rejection_count = 0;
+            }
 
             bool accept_team_guess       = false;
             Eigen::Vector3d average_rBFf = Eigen::Vector3d::Zero();
@@ -140,7 +165,7 @@ namespace module::localisation {
             }
 
             // Don't continue if we don't accept the ball or team guess
-            if (!(accept || accept_team_guess)) {
+            if (!(accept_ball || accept_team_guess)) {
                 return;
             }
 
@@ -148,7 +173,7 @@ namespace module::localisation {
             auto ball = std::make_unique<Ball>();
 
             // If not accepting the ball or low confidence, then use the average team guess
-            if (!accept || (low_confidence && accept_team_guess)) {
+            if (!accept_ball || (low_confidence && accept_team_guess)) {
                 ball->rBWw       = field.Hfw.inverse() * average_rBFf;
                 ball->vBw        = Eigen::Vector3d::Zero();
                 ball->confidence = 0.0;  // No confidence in other teammates' guesses
@@ -230,36 +255,6 @@ namespace module::localisation {
             ball->Hcw                 = last_Hcw;
             emit(ball);
         });
-    }
-
-    Eigen::Vector3d BallLocalisation::closest_ball(const VisionBalls& balls,
-                                                   const Eigen::Isometry3d& Hwc,
-                                                   const Eigen::Vector2d& state_rBWw) {
-        Eigen::Vector3d closest = Eigen::Vector3d::Zero();
-        double min_dist         = std::numeric_limits<double>::max();
-        for (const auto& ball : balls.balls) {
-            Eigen::Vector3d rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
-            double dist          = (rBWw.head<2>() - state_rBWw).squaredNorm();
-            if (dist < min_dist) {
-                min_dist = dist;
-                closest  = rBWw;
-            }
-        }
-        return closest;
-    }
-
-    bool BallLocalisation::accept_ball(double lowest_distance, bool& low_confidence) {
-        if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
-            rejection_count++;
-            if (rejection_count > cfg.max_rejections) {
-                rejection_count = 0;
-                low_confidence  = true;
-                return true;
-            }
-            return false;
-        }
-        rejection_count = 0;
-        return true;
     }
 
     std::pair<bool, Eigen::Vector3d> BallLocalisation::get_average_team_rBFf() {
