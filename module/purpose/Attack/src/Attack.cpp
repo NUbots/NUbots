@@ -31,6 +31,7 @@ namespace module::purpose {
             if (attack.ball_pos == message::strategy::Who::OPPONENT) {
                 log<DEBUG>("Opponent has the ball, tackle it!");
                 emit<Task>(std::make_unique<TackleBall>(), 3);  // Tackle the ball from the opponent
+                emit<Task>(std::make_unique<KickTo>(), 4);      // kick the ball towards the goal
                 return;
             }
             else {
