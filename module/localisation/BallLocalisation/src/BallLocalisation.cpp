@@ -184,7 +184,6 @@ namespace module::localisation {
                 log<DEBUG>("average rBWw: ", ball->average_rBWw.x(), ball->average_rBWw.y(), ball->average_rBWw.z());
                 emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
                 emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
-                log<DEBUG>("average_rBWw: ", ball->average_rBWw.x(), ball->average_rBWw.y(), ball->average_rBWw.z());
             }
 
             emit(ball);
