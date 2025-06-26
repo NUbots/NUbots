@@ -14,7 +14,7 @@ while IFS= read -r line; do
     id=$(awk '{print tolower($6)}' <<< "$line")
     if ! grep -qx "$id" <<< "$allowlist"; then
         desc=$(sed 's/.*\(ID [^ ]\+ [^ ]\+.*\)/\1/' <<< "$line")
-        unauthorized+=("$desc")
+        unauthorised+=("$desc")
     fi
 done <<< "$(lsusb)"
 
