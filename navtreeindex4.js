@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html":[3,0,3,8,1,6],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a28d80e07d1cac02aa2b2d2fb4dbfd260":[3,0,3,8,1,6,33],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c":[3,0,3,8,1,6,34],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2d3061ad470feecbfc120f044dd51f05":[3,0,3,8,1,6,15],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1purpose_1_1PS3Walk.html#ab97d2c0c5520fe0ab4e397f73dd45b4c":[3,0,3,9,11,8],
 "classmodule_1_1purpose_1_1PS3Walk.html#ac5c3d6c5825a6c26804afc15f582a6bd":[3,0,3,9,11,33],
 "classmodule_1_1purpose_1_1PS3Walk.html#ac777280d323c8dc07c835f1255e5e53b":[3,0,3,9,11,15],
-"classmodule_1_1purpose_1_1PS3Walk.html#ac8940ed5abece0a72de4fb48f7f6c74a":[3,0,3,9,11,2],
-"classmodule_1_1purpose_1_1PS3Walk.html#ace6f9cc3405c7fd38652ed930e8d5914":[3,0,3,9,11,27]
+"classmodule_1_1purpose_1_1PS3Walk.html#ac8940ed5abece0a72de4fb48f7f6c74a":[3,0,3,9,11,2]
 };

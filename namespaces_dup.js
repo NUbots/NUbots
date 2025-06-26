@@ -595,6 +595,7 @@ var namespaces_dup =
         [ "StartSoccer", "structmodule_1_1purpose_1_1StartSoccer.html", null ],
         [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
+        [ "Support", "classmodule_1_1purpose_1_1Support.html", "classmodule_1_1purpose_1_1Support" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ],
         [ "AllRounderTask", "AllRounder_8cpp.html#a5cefd3091055a376975cbd3e3ab4e2aa", null ],
         [ "AttackMsg", "Attack_8cpp.html#afc3f8ac01cb31889ffac1d49431a319d", null ],
@@ -610,6 +611,7 @@ var namespaces_dup =
         [ "SecondaryState", "Striker_8cpp.html#ad2c39718af9df6254dabd6e30cbe3de5", null ],
         [ "ServoID", "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
+        [ "SupportMsg", "Support_8cpp.html#ae74c7b77dd20c445cf5c3e01d36e54c7", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#a4fb0585bae3fea73b4cd3e2d716952c1", null ],
         [ "LogColours", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
           [ "TRACE_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a03edadf0bc773fb94b4f5301fb3586b6", null ],

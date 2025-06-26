@@ -78,9 +78,10 @@ var searchData=
   ['streamreactor_1877',['StreamReactor',['../classutility_1_1reactor_1_1StreamReactor.html',1,'utility::reactor']]],
   ['streamreactor_3c_20hardwareio_2c_20nusenseparser_2c_205_20_3e_1878',['StreamReactor&lt; HardwareIO, NUSenseParser, 5 &gt;',['../classutility_1_1reactor_1_1StreamReactor.html',1,'utility::reactor']]],
   ['striker_1879',['Striker',['../classmodule_1_1purpose_1_1Striker.html',1,'module::purpose']]],
-  ['syncreadcommand_1880',['SyncReadCommand',['../structdynamixel_1_1v2_1_1SyncReadCommand.html',1,'dynamixel::v2']]],
-  ['syncwritecommand_1881',['SyncWriteCommand',['../structdynamixel_1_1v2_1_1SyncWriteCommand.html',1,'dynamixel::v2']]],
-  ['syncwritedata_1882',['SyncWriteData',['../structdynamixel_1_1v2_1_1SyncWriteData.html',1,'dynamixel::v2']]],
-  ['systematic_1883',['Systematic',['../structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html',1,'utility::math::stats::resample']]],
-  ['systemconfiguration_1884',['SystemConfiguration',['../classmodule_1_1tools_1_1SystemConfiguration.html',1,'module::tools']]]
+  ['support_1880',['Support',['../classmodule_1_1purpose_1_1Support.html',1,'module::purpose']]],
+  ['syncreadcommand_1881',['SyncReadCommand',['../structdynamixel_1_1v2_1_1SyncReadCommand.html',1,'dynamixel::v2']]],
+  ['syncwritecommand_1882',['SyncWriteCommand',['../structdynamixel_1_1v2_1_1SyncWriteCommand.html',1,'dynamixel::v2']]],
+  ['syncwritedata_1883',['SyncWriteData',['../structdynamixel_1_1v2_1_1SyncWriteData.html',1,'dynamixel::v2']]],
+  ['systematic_1884',['Systematic',['../structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html',1,'utility::math::stats::resample']]],
+  ['systemconfiguration_1885',['SystemConfiguration',['../classmodule_1_1tools_1_1SystemConfiguration.html',1,'module::tools']]]
 ];

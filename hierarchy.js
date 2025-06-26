@@ -339,6 +339,7 @@ var hierarchy =
         [ "module::purpose::Soccer", "classmodule_1_1purpose_1_1Soccer.html", null ],
         [ "module::purpose::SoccerNew", "classmodule_1_1purpose_1_1SoccerNew.html", null ],
         [ "module::purpose::Striker", "classmodule_1_1purpose_1_1Striker.html", null ],
+        [ "module::purpose::Support", "classmodule_1_1purpose_1_1Support.html", null ],
         [ "module::purpose::Tester", "classmodule_1_1purpose_1_1Tester.html", null ],
         [ "module::skill::Dive", "classmodule_1_1skill_1_1Dive.html", null ],
         [ "module::skill::GPT", "classmodule_1_1skill_1_1GPT.html", null ],

@@ -1,5 +1,8 @@
 var NAVTREEINDEX12 =
 {
+"structextension_1_1behaviour_1_1Needs.html":[3,0,1,0,8],
+"structextension_1_1behaviour_1_1Needs.html#a52b6a9f257c60c96f2baea9e84bed77e":[3,0,1,0,8,0],
+"structextension_1_1behaviour_1_1Provide.html":[3,0,1,0,9],
 "structextension_1_1behaviour_1_1ProviderBase.html":[3,0,1,0,10],
 "structextension_1_1behaviour_1_1ProviderBase.html#a6e26a64213aa83e54bc8424a4663732b":[3,0,1,0,10,2],
 "structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc":[3,0,1,0,10,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1NatNet_1_1CameraModel.html#a973470d5a61011922c43df28884fe6d6":[3,0,3,2,7,0,1],
 "structmodule_1_1input_1_1NatNet_1_1Config.html":[3,0,3,2,7,1],
 "structmodule_1_1input_1_1NatNet_1_1Config.html#a595ccb81c4a21f33d4daadc75181ef88":[3,0,3,2,7,1,0],
-"structmodule_1_1input_1_1NatNet_1_1Config.html#a7003b75cf446f941d69763c35e821139":[3,0,3,2,7,1,4],
-"structmodule_1_1input_1_1NatNet_1_1Config.html#a8cfd52ced96bce107527a2e13c0090a9":[3,0,3,2,7,1,1],
-"structmodule_1_1input_1_1NatNet_1_1Config.html#aa6dba21a9f6c75d8ad82cf89d8463a6f":[3,0,3,2,7,1,3],
-"structmodule_1_1input_1_1NatNet_1_1Config.html#af43e11ca6a0feed135515342331aae93":[3,0,3,2,7,1,2]
+"structmodule_1_1input_1_1NatNet_1_1Config.html#a7003b75cf446f941d69763c35e821139":[3,0,3,2,7,1,4]
 };

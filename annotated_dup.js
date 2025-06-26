@@ -239,6 +239,7 @@ var annotated_dup =
         [ "StartSoccer", "structmodule_1_1purpose_1_1StartSoccer.html", null ],
         [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
+        [ "Support", "classmodule_1_1purpose_1_1Support.html", "classmodule_1_1purpose_1_1Support" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ]
       ] ],
       [ "skill", null, [
