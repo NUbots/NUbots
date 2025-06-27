@@ -31,8 +31,8 @@ import "message/input/GameState.proto";
 /// The detected purpose of the robot
 enum SoccerPosition {
     ALL_ROUNDER = 0;
-    GOALIE      = 2;
-    ATTACK      = 1;
+    GOALIE      = 1;
+    ATTACK      = 2;
     DEFEND      = 3;
     SUPPORT     = 4;
     UNKNOWN     = 5;
