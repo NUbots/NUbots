@@ -1,5 +1,16 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1purpose_1_1Defender_1_1Config.html":[3,0,3,9,4,0],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#a400303887fe079816c6e358c5e1f342f":[3,0,3,9,4,0,3],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#a5c1ccc883d9b2f653e0b598d98d4c107":[3,0,3,9,4,0,4],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#a7068d9443583c2b146dc8c1263debf46":[3,0,3,9,4,0,6],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#a72ffbbd37882571ac75e58da7d69f336":[3,0,3,9,4,0,2],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#a8e551e6b15600030fb6f8442b1f29432":[3,0,3,9,4,0,0],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#ab4241fe2ad381f18527232bfa57b2176":[3,0,3,9,4,0,1],
+"structmodule_1_1purpose_1_1Defender_1_1Config.html#ae28ebcaaf2ae49defc3b4c4ba6371fbd":[3,0,3,9,4,0,5],
+"structmodule_1_1purpose_1_1DisableIdle.html":[3,0,3,9,5],
+"structmodule_1_1purpose_1_1EnableIdle.html":[3,0,3,9,6],
+"structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html":[3,0,3,9,7,0],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a0a38aff93504373b82edecce4b51eaf9":[3,0,3,9,7,0,4],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a660965305a40284282f5066fdfa6e4c1":[3,0,3,9,7,0,1],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a8cd9a65008ae374a3691c46dd62cc3fa":[3,0,3,9,7,0,0],
@@ -238,16 +249,5 @@ var NAVTREEINDEX17 =
 "structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html":[3,0,3,12,2,12,0],
 "structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html#a0243517121b347d2ea565df50bdda7c7":[3,0,3,12,2,12,0,0],
 "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html":[3,0,3,13,0,0],
-"structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html#a9fcb28da4b35ef25ba3d8bac2944474b":[3,0,3,13,0,0,1],
-"structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html#aca948317e00e847612d1174fc3e68420":[3,0,3,13,0,0,0],
-"structmodule_1_1tools_1_1FlashCM730.html":[3,0,3,13,1],
-"structmodule_1_1tools_1_1FlashComplete.html":[3,0,3,13,2],
-"structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html":[3,0,3,13,5,0],
-"structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html#af2063989175cc12f6a2a54a80d902ff8":[3,0,3,13,5,0,1],
-"structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html#af68255ccdc4eef39cc96d3aff7c803cb":[3,0,3,13,5,0,0],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html":[3,0,3,13,6,0],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html#a6e3c7dca5e41427c5704deb927026d53":[3,0,3,13,6,0,1],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html#ad8e343647b92c0be4dc12688bb6a3bea":[3,0,3,13,6,0,0],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html":[3,0,3,13,6,1],
-"structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1e":[3,0,3,13,6,1,0]
+"structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html#a9fcb28da4b35ef25ba3d8bac2944474b":[3,0,3,13,0,0,1]
 };

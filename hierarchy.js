@@ -140,6 +140,7 @@ var hierarchy =
     [ "module::localisation::BallLocalisation::Config::UKF::Noise", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise.html", null ],
     [ "module::localisation::BallLocalisation::Config::UKF::Noise::Measurement", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html", null ],
     [ "module::localisation::BallLocalisation::Config::UKF::Noise::Process", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html", null ],
+    [ "module::localisation::BallLocalisation::TeamGuess", "structmodule_1_1localisation_1_1BallLocalisation_1_1TeamGuess.html", null ],
     [ "module::localisation::BallModel< Scalar >", "classmodule_1_1localisation_1_1BallModel.html", null ],
     [ "module::localisation::BallModel< Scalar >::StateVec", "structmodule_1_1localisation_1_1BallModel_1_1StateVec.html", null ],
     [ "module::localisation::FieldLocalisation::Config", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html", null ],

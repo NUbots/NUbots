@@ -1,5 +1,8 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a07cc49737c4046d6574234f7495d4224":[3,0,3,12,1,2,8],
+"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a12a4add3f435359cc3453f1554cc9c82":[3,0,3,12,1,2,10],
+"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a2669dd4649259409746e7333947a32f0":[3,0,3,12,1,2,5],
 "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a2b71d2c22b1a75b4e5695bbd017a16fd":[3,0,3,12,1,2,6],
 "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a315581fe1c78f26a8704dbf21b5837c5":[3,0,3,12,1,2,12],
 "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a3b42599b5ebada4a64c3d1b4ecfbf2e1":[3,0,3,12,1,2,3],
@@ -246,8 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#a2fba8682aa62f6793714a47a9f2520f7":[3,0,3,13,6,3],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#a4c1c6a09aff71ef7eaf295c895c982d8":[3,0,3,13,6,19],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#a53c034144dfee6e2ca4357cef51d9888":[3,0,3,13,6,11],
-"classmodule_1_1tools_1_1RoboCupConfiguration.html#a6754361cf74cdfbe85f3afbbcd3a1a90":[3,0,3,13,6,23],
-"classmodule_1_1tools_1_1RoboCupConfiguration.html#a68019c0085239577427d43bcdc106754":[3,0,3,13,6,16],
-"classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6":[3,0,3,13,6,7],
-"classmodule_1_1tools_1_1RoboCupConfiguration.html#a6e8476d897c104031dd930b2954bc8f0":[3,0,3,13,6,10]
+"classmodule_1_1tools_1_1RoboCupConfiguration.html#a6754361cf74cdfbe85f3afbbcd3a1a90":[3,0,3,13,6,23]
 };

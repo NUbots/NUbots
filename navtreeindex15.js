@@ -1,5 +1,16 @@
 var NAVTREEINDEX15 =
 {
+"structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html":[3,0,3,7,1,0],
+"structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a24b902fc8adda6ea6cb69494e0ae8541":[3,0,3,7,1,0,0],
+"structmodule_1_1planning_1_1PlanKick_1_1Config.html":[3,0,3,7,2,0],
+"structmodule_1_1planning_1_1PlanKick_1_1Config.html#a072dc6729a8ba24468186f6309558b73":[3,0,3,7,2,0,4],
+"structmodule_1_1planning_1_1PlanKick_1_1Config.html#a2a3731e480d14a48a19bf80e1368948d":[3,0,3,7,2,0,3],
+"structmodule_1_1planning_1_1PlanKick_1_1Config.html#a74b02b74db14b4ce0051781dd2a7644a":[3,0,3,7,2,0,1],
+"structmodule_1_1planning_1_1PlanKick_1_1Config.html#ad32c23d72ca5598bb994812d9aa2c74a":[3,0,3,7,2,0,2],
+"structmodule_1_1planning_1_1PlanKick_1_1Config.html#afdfac483fb02f6d2662b2a154fe8fc19":[3,0,3,7,2,0,0],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html":[3,0,3,7,3,0],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#a0626a27c9b8bf9cb87df28983ab4cfd4":[3,0,3,7,3,0,0],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#ac9c22d37fe3e89e25243ba6f1feb4b4d":[3,0,3,7,3,0,1],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html":[3,0,3,7,4,0],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a043d3ea874ed212ef1b3bdd1f71ecc0d":[3,0,3,7,4,0,20],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a10d2fbe7bdd1a17586a47311f6e9319a":[3,0,3,7,4,0,16],
@@ -238,16 +249,5 @@ var NAVTREEINDEX15 =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9531cf4ae1a99adf497e3ba1aa0f6f1c":[3,0,3,8,1,1,0,61],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da955b7016a5aecafe3da6cdf5a22a0974":[3,0,3,8,1,1,0,278],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9627fef257bf9f0b579536e8679bf8e3":[3,0,3,8,1,1,0,238],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9759681bd808f5f6a8b8c1f6f8a26cd3":[3,0,3,8,1,1,0,256],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97a9d5b486b6fcfffcf9947e65bc8781":[3,0,3,8,1,1,0,253],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97c8132ec550742c0e0369afc2605c72":[3,0,3,8,1,1,0,50],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da97e8fea5a480f4c0e34b5c3d5f63200c":[3,0,3,8,1,1,0,223],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da999657f701c18c08e27ff5cfa9fd8a6d":[3,0,3,8,1,1,0,20],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da99ac19fa571639297d784be64faffc67":[3,0,3,8,1,1,0,250],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9a6d8b5bf34e2777b3eb8b87581869be":[3,0,3,8,1,1,0,16],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9a82db1b9a287ffcc6f237de1142592a":[3,0,3,8,1,1,0,261],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9b9f19a9142c527f0bf8ac38676e1345":[3,0,3,8,1,1,0,203],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9bb7be4967d57b9308cee85fd237d47a":[3,0,3,8,1,1,0,264],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9c43c6157abd4f5fac8e7e79f639b24f":[3,0,3,8,1,1,0,204],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9c4d5bb2d3f444cca22d5f27c8bbc548":[3,0,3,8,1,1,0,38]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9759681bd808f5f6a8b8c1f6f8a26cd3":[3,0,3,8,1,1,0,256]
 };

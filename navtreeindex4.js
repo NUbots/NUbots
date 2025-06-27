@@ -1,5 +1,8 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a064b35ad9a703010b19fd15e46e93d6caef1cb6ab05e55af7f1e48b4a9a81df0f":[3,0,3,8,0,3,0,1],
+"classmodule_1_1platform_1_1NUSense_1_1NUgus.html#a27202e45542c015df225ee97238ed26b":[3,0,3,8,0,3,1],
+"classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html":[3,0,3,8,1,0],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html":[3,0,3,8,1,6],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a28d80e07d1cac02aa2b2d2fb4dbfd260":[3,0,3,8,1,6,33],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c":[3,0,3,8,1,6,34],
@@ -246,8 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1purpose_1_1PS3Walk.html#a9fca4d7cd9e7b68a6cc090b6dfb326ce":[3,0,3,9,11,35],
 "classmodule_1_1purpose_1_1PS3Walk.html#ab52e5fe52fa42c2db5014a26a7ce1614":[3,0,3,9,11,31],
 "classmodule_1_1purpose_1_1PS3Walk.html#ab8d2546a847245e1a331ada2b7d3d200":[3,0,3,9,11,11],
-"classmodule_1_1purpose_1_1PS3Walk.html#ab97d2c0c5520fe0ab4e397f73dd45b4c":[3,0,3,9,11,8],
-"classmodule_1_1purpose_1_1PS3Walk.html#ac5c3d6c5825a6c26804afc15f582a6bd":[3,0,3,9,11,33],
-"classmodule_1_1purpose_1_1PS3Walk.html#ac777280d323c8dc07c835f1255e5e53b":[3,0,3,9,11,15],
-"classmodule_1_1purpose_1_1PS3Walk.html#ac8940ed5abece0a72de4fb48f7f6c74a":[3,0,3,9,11,2]
+"classmodule_1_1purpose_1_1PS3Walk.html#ab97d2c0c5520fe0ab4e397f73dd45b4c":[3,0,3,9,11,8]
 };

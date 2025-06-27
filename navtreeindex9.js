@@ -1,5 +1,8 @@
 var NAVTREEINDEX9 =
 {
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#a754181619d38ebabe69a51cd29d694be":[3,0,7,8,0,11,26],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#a87d901636b95118214ec0f239c6961b0":[3,0,7,8,0,11,21],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#a8e0a3c461dafff1d5d233c398bcc11b1":[3,0,7,8,0,11,12],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#a946300ba5d7e4a6b913a5a42b9e78a49":[3,0,7,8,0,11,27],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#a990602571173118a1a69a9017ff1d135":[3,0,7,8,0,11,14],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#a9be5a89df64273e211412d2c5bc2bea5":[3,0,7,8,0,11,23],
@@ -246,8 +249,5 @@ var NAVTREEINDEX9 =
 "functions_vars_j.html":[3,3,2,9],
 "functions_vars_k.html":[3,3,2,10],
 "functions_vars_l.html":[3,3,2,11],
-"functions_vars_m.html":[3,3,2,12],
-"functions_vars_n.html":[3,3,2,13],
-"functions_vars_o.html":[3,3,2,14],
-"functions_vars_p.html":[3,3,2,15]
+"functions_vars_m.html":[3,3,2,12]
 };

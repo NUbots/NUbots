@@ -1,5 +1,8 @@
 var NAVTREEINDEX7 =
 {
+"classmodule_1_1tools_1_1RoboCupConfiguration.html#a68019c0085239577427d43bcdc106754":[3,0,3,13,6,16],
+"classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6":[3,0,3,13,6,7],
+"classmodule_1_1tools_1_1RoboCupConfiguration.html#a6e8476d897c104031dd930b2954bc8f0":[3,0,3,13,6,10],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#a858336b38e53e960c44d3aa115875c31":[3,0,3,13,6,12],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#a8a1406cc894564c08ba8b84b5197051d":[3,0,3,13,6,2],
 "classmodule_1_1tools_1_1RoboCupConfiguration.html#aa4b37ae9123408e3088ced66790621ca":[3,0,3,13,6,4],
@@ -246,8 +249,5 @@ var NAVTREEINDEX7 =
 "classutility_1_1localisation_1_1OccupancyMap.html#ac25080da4be5c7cca126e7bd1cbc5b75":[3,0,7,4,1,11],
 "classutility_1_1localisation_1_1OccupancyMap.html#ad0f91d163fbd85f7beeee3f8943e04bc":[3,0,7,4,1,12],
 "classutility_1_1localisation_1_1OccupancyMap.html#ae5078664fa9ff192ebcd1ae19179a3b9":[3,0,7,4,1,7],
-"classutility_1_1localisation_1_1OccupancyMap.html#aed9f6333ddddb2c14c2c6de925dbebfe":[3,0,7,4,1,3],
-"classutility_1_1localisation_1_1OccupancyMap.html#af91722d20cccd9d6ea3a38ac0df65183":[3,0,7,4,1,0],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html":[3,0,7,5,0,0],
-"classutility_1_1math_1_1filter_1_1KalmanFilter.html#a06169cf7118ac58ecb86caeb5944c279":[3,0,7,5,0,0,13]
+"classutility_1_1localisation_1_1OccupancyMap.html#aed9f6333ddddb2c14c2c6de925dbebfe":[3,0,7,4,1,3]
 };
