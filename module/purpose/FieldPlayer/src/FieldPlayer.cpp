@@ -40,6 +40,7 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
+    using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -55,6 +56,7 @@ namespace module::purpose {
             cfg.equidistant_threshold     = config["equidistant_threshold"].as<double>();
             cfg.ball_off_center_threshold = config["ball_off_center_threshold"].as<double>();
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
+            cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
         });
 
         // PLAYING state
@@ -66,6 +68,7 @@ namespace module::purpose {
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
+           Optional<With<Purpose>>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
@@ -74,21 +77,26 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
-                // Todo determine if we have enough information to play
-                // Eg localisation confidence
-
-                // General tasks
-                emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
-                emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
-
-                // If there's no ball message, only emit the tasks to find it
-                if (ball == nullptr) {
-                    // We don't know what we're doing and we're not active
+                // If the robot is uncertain about its position, it should not play
+                if (field.cost > cfg.max_localisation_cost) {
+                    log<DEBUG>("Field cost is too high, not playing.");
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::UNKNOWN,
                                                    true,
                                                    false,
                                                    game_state.team.team_colour));
+
+                    // Search for landmarks to localise
+                    emit<Task>(std::make_unique<Search>());
+                    return;
+                }
+
+                // General tasks
+                emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
+                emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
+
+                // If there's no ball message, we can't play, just look for the ball
+                if (ball == nullptr) {
                     return;
                 }
 
@@ -97,7 +105,7 @@ namespace module::purpose {
                 // Add inactive robots to the ignore list
                 if (robots) {
                     for (const auto& robot : robots->robots) {
-                        if (!robot.purpose.active) {
+                        if (robot.teammate && !robot.purpose.active) {
                             ignore_ids.push_back(robot.purpose.player_id);
                         }
                     }
