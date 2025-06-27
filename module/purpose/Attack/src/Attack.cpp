@@ -3,6 +3,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/planning/KickTo.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/Who.hpp"
@@ -12,6 +13,7 @@ namespace module::purpose {
     using extension::Configuration;
 
     using AttackMsg = message::purpose::Attack;
+    using message::planning::KickTo;
     using message::strategy::TackleBall;
     using message::strategy::WalkToKickBall;
     using message::strategy::Who;
@@ -29,12 +31,14 @@ namespace module::purpose {
             if (attack.ball_pos == message::strategy::Who::OPPONENT) {
                 log<DEBUG>("Opponent has the ball, tackle it!");
                 emit<Task>(std::make_unique<TackleBall>(), 3);  // Tackle the ball from the opponent
+                emit<Task>(std::make_unique<KickTo>(), 4);      // kick the ball towards the goal
                 return;
             }
             else {
                 log<DEBUG>("We have the ball or it is free, walk to the goal!");
                 // Try to walk to the ball and align towards opponents goal
                 emit<Task>(std::make_unique<WalkToKickBall>(), 3);
+                emit<Task>(std::make_unique<KickTo>(), 4);  // kick the ball towards the goal
             }
         });
     }
