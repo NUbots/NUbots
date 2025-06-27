@@ -50,9 +50,9 @@ namespace module::planning {
         });
 
         // Intercept Walk commands and apply smoothing
-        on<Task<WalkProposal>>().then([this](const Walk& walk_command) {
+        on<Provide<WalkProposal>>().then([this](const WalkProposal& walk) {
             // Apply acceleration limiting and velocity constraints
-            Eigen::Vector3d smoothed_command = apply_acceleration_limiting(walk_command.velocity_target);
+            Eigen::Vector3d smoothed_command = apply_acceleration_limiting(walk.velocity_target);
             smoothed_command                 = constrain_velocity(smoothed_command);
 
             // Create new smoothed walk command

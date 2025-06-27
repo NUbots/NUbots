@@ -52,8 +52,8 @@ namespace module::planning {
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
     using message::planning::WalkProposal;
+    using message::planning::WalkTo;
     using message::planning::WalkToDebug;
-    using message::skill::Walk;
     using message::strategy::StandStill;
 
     using message::strategy::StandStill;
