@@ -52,10 +52,10 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::planning::WalkTo;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
-    using message::skill::WalkPath::WalkTo;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
@@ -166,6 +166,7 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
+                         const std::shared_ptr<const WalkTo>& walk_to,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -237,10 +238,10 @@ namespace module::network {
                     // Store position
                     msg->target_pose.position = tFr.cast<float>();
                     // Extract yaw from roation matrix
-                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfr.rotation()).z();
                     // Copy team and player ID to target pose
                     msg->target_pose.team      = msg->current_pose.team;
-                    msg->target_pose.played_id = config.player_id;
+                    msg->target_pose.player_id = config.player_id;
                 }
 
                 // Kick target
@@ -276,40 +277,6 @@ namespace module::network {
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
-                // Get own robot pose transform (world to robot)
-                // my_pose_transform = Sensors.Hrw
-
-                // Get field transform
-                // field_transform = Field.Hfw
-
-                // Get detected robots (from vision system)
-                // detected_robots = getDetectedRobots()
-
-                // Convert detected robot positions
-                // other_robots_list = empty list
-                // for each detected_robot in detected_robots
-                // detected_robot.position is in sensor/camera coordinates
-
-                // Convert sensor coordinates to world coordinates
-                // world_position = my_pose_transform * detected_robot.position
-
-                // Convert world coordinates to field coordinates
-                // field_position = field_transform * world_position
-
-                // Create new robot message
-                // robot_msg = new Robot()
-
-                // Set detected robot ID or 0 if unknown
-                // robot_msg.player_id = detected_robot.id or 0
-
-                // Set position (x, y, theta) in field drame
-                // robot_msg.position = field_position
-
-                // Set team or UNKNOWN
-                // robot_msg.team = detected_robot.team or UNKNOWN
-
-                // Add robot message to list
-                // other_robots_list.append(robot_msg)
 
 
                 // Current purpose (soccer position) of the Robot
