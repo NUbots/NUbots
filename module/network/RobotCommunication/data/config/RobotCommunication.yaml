@@ -1,6 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 startup_delay: 3
+ball_timeout: 3
 
 send_port: 3737
 receive_port: 3737
