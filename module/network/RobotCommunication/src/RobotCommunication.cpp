@@ -222,7 +222,6 @@ namespace module::network {
                 }
 
                 // Target pose (Position and orientation of the players target on the field specified)
-                //
                 if (walk_to && sensors && field) {
                     // Get target pose relative to robot
                     Eigen::Isometry3d Hrd = walk_to->Hrd;
