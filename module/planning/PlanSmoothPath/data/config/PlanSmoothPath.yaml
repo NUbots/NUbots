@@ -2,16 +2,13 @@
 log_level: INFO
 
 # Maximum acceleration per update cycle (m/s per update)
-max_acceleration: 0.005
+max_acceleration: 0.25
 
 # Maximum translational velocity in x direction (m/s)
-max_translational_velocity_x: 0.2
+max_translational_velocity_x: 0.4
 
 # Maximum translational velocity in y direction (m/s)
-max_translational_velocity_y: 0.1
+max_translational_velocity_y: 0.2
 
 # Maximum angular velocity (rad/s)
 max_angular_velocity: 0.4
-
-# Update frequency for smoothing calculations (Hz)
-update_frequency: 30.0
