@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2025 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -208,7 +208,7 @@ namespace module::network {
                         msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
-                        msg->current_pose.cost       = field->cost;
+                        // msg->current_pose.cost       = field->cost;
                     }
                 }
 
@@ -218,7 +218,83 @@ namespace module::network {
                     msg->walk_command = walk_state->velocity_target.cast<float>();
                 }
 
-                // TODO: target pose (Position and orientation of the players target on the field specified)
+                // Target pose (Position and orientation of the players target on the field specified)
+                // Flag (true for using lab field, false for robocup field)
+                bool use_lab = false;
+
+                // Robocup field dimensions
+                const float robocup_field_length = 9.0f;
+                const float robocup_field_width  = 6.0f;
+
+                // Lab field dimensions
+                const float lab_field_length = 6.8f;
+                const float lab_field_width  = 5.0f;
+
+                // Pick field size to use
+                const float field_length = use_lab ? lab_field_length : robocup_field_length;
+                const float field_width  = use_lab ? lab_field_width : robocup_field_width;
+
+
+                // Goal positions x-axis (centered on y=0)
+                Eigen::Vector2f own_goal(-field_length / 2.0f, 0.0f);
+                Eigen::Vector2f opponent_goal(field_length / 2.0f, 0.0f);
+                // Extract the current robot and ball positions
+                Eigen::Vector2f robot_position(msg->current_pose.position.x(), msg->current_pose.position.y());
+                Eigen::Vector2f ball_position(msg->ball.position.x(), msg->ball.position.y());
+                // Initialize target position and angle
+                Eigen::Vector2f target_position = Eigen::Vector2f::Zero();
+                float target_theta              = 0.0f;
+
+                // Compute angle from point 'from' to point 'to'. Useful to set robot's orientation facing
+                // toward some position
+                auto calculate_angle = [](const Eigen::Vector2f& from, const Eigen::Vector2f& to) {
+                    return std::atan2(to.y() - from.y(), to.x() - from.x());
+                };
+
+                // Determines target position (where the robot should move) and target theta (what direction
+                // the robot should face) based on assigned role
+                if (purpose) {
+                    // Extract SoccerPosition enum value once
+                    SoccerPosition soccer_position = static_cast<SoccerPosition>(msg->purpose.purpose);
+
+                    switch (static_cast<int>(soccer_position)) {  // cast to int to avoid ambiguity
+                        case static_cast<int>(SoccerPosition::ATTACK):
+                            target_position = ball_position - Eigen::Vector2f(0.5f, 0.0f);
+                            target_theta    = calculate_angle(target_position, opponent_goal);
+                            break;
+
+                        case static_cast<int>(SoccerPosition::DEFEND):
+                            target_position = (ball_position + own_goal) / 2.0f;
+                            target_theta    = calculate_angle(target_position, ball_position);
+                            break;
+
+                        case static_cast<int>(SoccerPosition::GOALIE):
+                            target_position = own_goal + Eigen::Vector2f(0.0f, 0.5f * ball_position.y());
+                            target_theta    = calculate_angle(target_position, ball_position);
+                            break;
+
+                        case static_cast<int>(SoccerPosition::ALL_ROUNDER): {
+                            target_position     = ball_position - Eigen::Vector2f(0.3f, 0.0f);
+                            float distance_goal = (target_position - opponent_goal).norm();
+                            float distance_ball = (target_position - ball_position).norm();
+                            target_theta        = (distance_goal < distance_ball)
+                                                      ? calculate_angle(target_position, opponent_goal)
+                                                      : calculate_angle(target_position, ball_position);
+                            break;
+                        }
+
+                        default:
+                            target_position = robot_position;
+                            target_theta    = calculate_angle(robot_position, ball_position);
+                            break;
+                    }  // end switch
+                }
+                // Update message with target pose
+                msg->target_pose.player_id    = config.player_id;
+                msg->target_pose.position.x() = target_position.x();
+                msg->target_pose.position.y() = target_position.y();
+                msg->target_pose.position.z() = target_theta;
+                msg->target_pose.team         = msg->current_pose.team;
 
                 // Kick target
                 if (kick) {
@@ -242,13 +318,52 @@ namespace module::network {
                     }
                     // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
                     // This it to prevent everyone echoing
-                    msg->ball.confidence = loc_ball->confidence;
+
+
+                    // No confidence field. msg->ball.confidence = loc_ball->confidence;
+
+
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+                // Get own robot pose transform (world to robot)
+                // my_pose_transform = Sensors.Hrw
+
+                // Get field transform
+                // field_transform = Field.Hfw
+
+                // Get detected robots (from vision system)
+                // detected_robots = getDetectedRobots()
+
+                // Convert detected robot positions
+                // other_robots_list = empty list
+                // for each detected_robot in detected_robots
+                // detected_robot.position is in sensor/camera coordinates
+
+                // Convert sensor coordinates to world coordinates
+                // world_position = my_pose_transform * detected_robot.position
+
+                // Convert world coordinates to field coordinates
+                // field_position = field_transform * world_position
+
+                // Create new robot message
+                // robot_msg = new Robot()
+
+                // Set detected robot ID or 0 if unknown
+                // robot_msg.player_id = detected_robot.id or 0
+
+                // Set position (x, y, theta) in field drame
+                // robot_msg.position = field_position
+
+                // Set team or UNKNOWN
+                // robot_msg.team = detected_robot.team or UNKNOWN
+
+                // Add robot message to list
+                // other_robots_list.append(robot_msg)
+
 
                 // Current purpose (soccer position) of the Robot
                 if (purpose) {
