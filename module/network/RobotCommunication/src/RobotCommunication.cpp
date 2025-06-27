@@ -39,6 +39,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
+#include "message/skill/WalkPath.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
@@ -54,6 +55,7 @@ namespace module::network {
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
+    using message::skill::WalkPath::WalkTo;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
@@ -155,6 +157,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
+           Optional<With<WalkTo>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -219,82 +222,27 @@ namespace module::network {
                 }
 
                 // Target pose (Position and orientation of the players target on the field specified)
-                // Flag (true for using lab field, false for robocup field)
-                bool use_lab = false;
+                //
+                if (walk_to && sensors && field) {
+                    // Get target pose relative to robot
+                    Eigen::Isometry3d Hrd = walk_to->Hrd;
+                    // Current robot's torso pose in world coords
+                    Eigen::Isometry3d Htw = sensors->Htw;
+                    // Transform from field to world coords
+                    Eigen::Isometry3d Hfw = field->Hfw;
+                    // Convert target pose into field coords
+                    Eigen::Isometry3d Hfr = Hfw * Htw.inverse() * Hrd;
 
-                // Robocup field dimensions
-                const float robocup_field_length = 9.0f;
-                const float robocup_field_width  = 6.0f;
-
-                // Lab field dimensions
-                const float lab_field_length = 6.8f;
-                const float lab_field_width  = 5.0f;
-
-                // Pick field size to use
-                const float field_length = use_lab ? lab_field_length : robocup_field_length;
-                const float field_width  = use_lab ? lab_field_width : robocup_field_width;
-
-
-                // Goal positions x-axis (centered on y=0)
-                Eigen::Vector2f own_goal(-field_length / 2.0f, 0.0f);
-                Eigen::Vector2f opponent_goal(field_length / 2.0f, 0.0f);
-                // Extract the current robot and ball positions
-                Eigen::Vector2f robot_position(msg->current_pose.position.x(), msg->current_pose.position.y());
-                Eigen::Vector2f ball_position(msg->ball.position.x(), msg->ball.position.y());
-                // Initialize target position and angle
-                Eigen::Vector2f target_position = Eigen::Vector2f::Zero();
-                float target_theta              = 0.0f;
-
-                // Compute angle from point 'from' to point 'to'. Useful to set robot's orientation facing
-                // toward some position
-                auto calculate_angle = [](const Eigen::Vector2f& from, const Eigen::Vector2f& to) {
-                    return std::atan2(to.y() - from.y(), to.x() - from.x());
-                };
-
-                // Determines target position (where the robot should move) and target theta (what direction
-                // the robot should face) based on assigned role
-                if (purpose) {
-                    // Extract SoccerPosition enum value once
-                    SoccerPosition soccer_position = static_cast<SoccerPosition>(msg->purpose.purpose);
-
-                    switch (static_cast<int>(soccer_position)) {  // cast to int to avoid ambiguity
-                        case static_cast<int>(SoccerPosition::ATTACK):
-                            target_position = ball_position - Eigen::Vector2f(0.5f, 0.0f);
-                            target_theta    = calculate_angle(target_position, opponent_goal);
-                            break;
-
-                        case static_cast<int>(SoccerPosition::DEFEND):
-                            target_position = (ball_position + own_goal) / 2.0f;
-                            target_theta    = calculate_angle(target_position, ball_position);
-                            break;
-
-                        case static_cast<int>(SoccerPosition::GOALIE):
-                            target_position = own_goal + Eigen::Vector2f(0.0f, 0.5f * ball_position.y());
-                            target_theta    = calculate_angle(target_position, ball_position);
-                            break;
-
-                        case static_cast<int>(SoccerPosition::ALL_ROUNDER): {
-                            target_position     = ball_position - Eigen::Vector2f(0.3f, 0.0f);
-                            float distance_goal = (target_position - opponent_goal).norm();
-                            float distance_ball = (target_position - ball_position).norm();
-                            target_theta        = (distance_goal < distance_ball)
-                                                      ? calculate_angle(target_position, opponent_goal)
-                                                      : calculate_angle(target_position, ball_position);
-                            break;
-                        }
-
-                        default:
-                            target_position = robot_position;
-                            target_theta    = calculate_angle(robot_position, ball_position);
-                            break;
-                    }  // end switch
+                    // Extract 3d translation
+                    Eigen::Vector3d tFr = Hfr.translation();
+                    // Store position
+                    msg->target_pose.position = tFr.cast<float>();
+                    // Extract yaw from roation matrix
+                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                    // Copy team and player ID to target pose
+                    msg->target_pose.team      = msg->current_pose.team;
+                    msg->target_pose.played_id = config.player_id;
                 }
-                // Update message with target pose
-                msg->target_pose.player_id    = config.player_id;
-                msg->target_pose.position.x() = target_position.x();
-                msg->target_pose.position.y() = target_position.y();
-                msg->target_pose.position.z() = target_theta;
-                msg->target_pose.team         = msg->current_pose.team;
 
                 // Kick target
                 if (kick) {
