@@ -77,6 +77,18 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
+                // Determine if the game is in a penalty situation
+                // Do this first to ensure the robot freezes if necessary
+                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
+                               && game_state.mode.value <= GameState::Mode::THROW_IN;
+
+                // If sub_mode is 0, the robot must freeze for referee ball repositioning
+                // If sub_mode is 2, the robot must freeze until the referee calls execute
+                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
+                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
+                    return;
+                }
+
                 // If the robot is uncertain about its position, it should not play
                 if (field.cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
@@ -145,18 +157,6 @@ namespace module::purpose {
                                                                         ignore_ids)
                            : global_config.player_id;
                 bool is_closest = closest_to_ball == global_config.player_id;
-
-
-                // Determine if the game is in a penalty situation
-                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                               && game_state.mode.value <= GameState::Mode::THROW_IN;
-
-                // If sub_mode is 0, the robot must freeze for referee ball repositioning
-                // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
-                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
-                    return;
-                }
 
                 // Determine if we need to wait for the other team to kick off
                 // If the ball moves, it is in play
