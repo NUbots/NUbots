@@ -37,9 +37,9 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
-#include "message/skill/WalkPath.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
