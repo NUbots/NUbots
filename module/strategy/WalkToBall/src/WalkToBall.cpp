@@ -153,11 +153,15 @@ namespace module::strategy {
                 }
                 // If heading error is large, back off further to face goal first
                 else if (std::abs(angle_error) > cfg.max_angle_error) {
+                    // Debug log for large angle error
+                    log<DEBUG>(fmt::format("Large angle error: {} radians, backing off further", angle_error));
                     Eigen::Vector3d approach = kick_target - uGBf * cfg.ball_approach_distance;
                     Hfk                      = pos_rpy_to_transform(approach, Eigen::Vector3d(0, 0, desired_heading));
                 }
                 // Otherwise, walk directly to scaled approach position
                 else {
+                    // Debug log for small angle error
+                    log<DEBUG>(fmt::format("Small angle error: {} radians, walking to target", angle_error));
                     double angle_scale     = std::clamp(std::abs(angle_error) / cfg.max_angle_error, 0.0, 1.0);
                     Eigen::Vector3d target = kick_target - uGBf * cfg.ball_approach_distance * angle_scale;
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));

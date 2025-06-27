@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "FieldPlayer.hpp"
 
 #include "extension/Behaviour.hpp"
@@ -77,6 +103,18 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
+                // Determine if the game is in a penalty situation
+                // Do this first to ensure the robot freezes if necessary
+                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
+                               && game_state.mode.value <= GameState::Mode::THROW_IN;
+
+                // If sub_mode is 0, the robot must freeze for referee ball repositioning
+                // If sub_mode is 2, the robot must freeze until the referee calls execute
+                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
+                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
+                    return;
+                }
+
                 // If the robot is uncertain about its position, it should not play
                 if (field.cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
@@ -145,18 +183,6 @@ namespace module::purpose {
                                                                         ignore_ids)
                            : global_config.player_id;
                 bool is_closest = closest_to_ball == global_config.player_id;
-
-
-                // Determine if the game is in a penalty situation
-                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                               && game_state.mode.value <= GameState::Mode::THROW_IN;
-
-                // If sub_mode is 0, the robot must freeze for referee ball repositioning
-                // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
-                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
-                    return;
-                }
 
                 // Determine if we need to wait for the other team to kick off
                 // If the ball moves, it is in play

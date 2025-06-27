@@ -126,11 +126,13 @@ namespace module::tools {
                     configure_network();
                     break;
                 case 'S':  // starts the robocup service
-                    system("systemctl start robocup");
+                    system("systemctl enable robocup.service");
+                    system("systemctl start robocup.service");
                     display.log_message = "RoboCup service started!";
                     break;
                 case 'D':  // stops the robocup service
-                    system("systemctl stop robocup");
+                    system("systemctl stop robocup.service");
+                    system("systemctl disable robocup.service");
                     display.log_message = "RoboCup service stopped!";
                     break;
                 case 'E':  // enables wifi services
