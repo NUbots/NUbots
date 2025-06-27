@@ -51,6 +51,7 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
+    using message::vision::FieldLines;
     using message::vision::Goals;
 
     using utility::localisation::Landmark;
@@ -255,8 +256,25 @@ namespace module::localisation {
 
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
-        } cfg;
 
+            /// @brief Cost for a point being outside of the field
+            double out_of_field_cost = 0.0;
+
+            /// @brief When this is enabled, the field localisation will reset if the cost is too high
+            bool reset_on_cost = false;
+            /// @brief Cost threshold for resetting the filter
+            double cost_threshold = 0.0;
+            /// @brief Reset delay in seconds
+            int reset_delay = 0;
+            /// @brief Maximum number of times the cost can be over the threshold before resetting
+            int max_over_cost = 0;
+            /// @brief Step size for the grid search during uncertainty reset
+            double step_size = 0.0;
+            /// @brief The window size for the local search during uncertainty reset
+            double window_size = 0.0;
+            /// @brief Number of yaw angles to try during uncertainty reset
+            int num_angles = 0;
+        } cfg;
 
         // Kalman filter
         utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
@@ -280,9 +298,18 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
-    public:
-        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
-        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief The main field localisation loop
+        ReactionHandle main_loop;
+
+        /// @brief The last time the field localisation was reset
+        NUClear::clock::time_point last_reset = NUClear::clock::now();
+
+        /// @brief The last certain state of the robot (used for uncertainty reset)
+        Eigen::Vector3d last_certain_state = Eigen::Vector3d::Zero();
+
+        /// @brief Number of times the cost has been over the threshold
+        int num_over_cost = 0;
+
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
@@ -320,18 +347,6 @@ namespace module::localisation {
             const std::shared_ptr<const Goals>& goals);
 
         /**
-         * @brief Setup field line distance map
-         * @param fd The field dimensions
-         */
-        void setup_fieldline_distance_map(const FieldDescription& fd);
-
-        /**
-         * @brief Setup field landmarks
-         * @param fd The field dimensions
-         */
-        void setup_field_landmarks(const FieldDescription& fd);
-
-        /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
@@ -340,6 +355,28 @@ namespace module::localisation {
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief Determines a new state by running a grid search and checking the cost of each hypothesis.
+         * First, a local search is performed around the last certain state. If this does not find a low cost
+         * hypothesis, a global search is performed on the half of the field that the robot is currently on, to reduce
+         * computation and avoid the mirror field problem.
+         *
+         * @param fd The field description containing the field dimensions, in particular the field length and width.
+         * @param field_lines Field lines, used to find the cost of hypotheses.
+         * @param field_intersections Field intersections, used to find the cost of hypotheses.
+         * @param goals Goals, used to find the cost of hypotheses.
+         * @param Hrw The homogenous transformation from world {w} to robot {r} space.
+         */
+        void uncertainty_reset(const FieldDescription& fd,
+                               const FieldLines& field_lines,
+                               const std::shared_ptr<const FieldIntersections>& field_intersections,
+                               const std::shared_ptr<const Goals>& goals,
+                               const Eigen::Isometry3d& Hrw);
+
+    public:
+        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
+        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::localisation
 
