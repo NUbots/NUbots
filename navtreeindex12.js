@@ -1,5 +1,10 @@
 var NAVTREEINDEX12 =
 {
+"structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html#a62fe5c29a6f08224af5cd77e6f9f9626":[3,0,1,0,1,0,1],
+"structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html#aa47749c392a202a8f7f33fbcba14f166":[3,0,1,0,1,0,3],
+"structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html#ad2a535fcf3e3803ef7257ae55d738e57":[3,0,1,0,1,0,2],
+"structextension_1_1behaviour_1_1information_1_1RunReasonStore.html":[3,0,1,0,1,1],
+"structextension_1_1behaviour_1_1information_1_1RunReasonStore.html#a59ad6299403971c8ac52eecb1d65a0e6":[3,0,1,0,1,1,0],
 "structextension_1_1behaviour_1_1information_1_1RunReasonStore.html#a7c3e77e6e035960cf2ccb29a5228272f":[3,0,1,0,1,1,1],
 "structextension_1_1behaviour_1_1information_1_1RunReasonStore.html#ae0c3b1eb221d4bc9eff150b1fde64bbd":[3,0,1,0,1,1,2],
 "structextension_1_1behaviour_1_1information_1_1TaskDataStore.html":[3,0,1,0,1,2],
@@ -244,10 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1DeviceModel_01_4.html#a00dd07fe89586c816cfd469bf47ae46a":[3,0,3,2,15,0],
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1ForcePlateModel_01_4.html":[3,0,3,2,16],
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1ForcePlateModel_01_4.html#a67eff072dde0e6d663449bc688945907":[3,0,3,2,16,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html":[3,0,3,2,17],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html#af203d409bae21fb9dfb3d62916d291b9":[3,0,3,2,17,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html":[3,0,3,2,18],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html#a0e95cbf77069acf7271fcb4a236a2d88":[3,0,3,2,18,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1SkeletonModel_01_4.html":[3,0,3,2,19],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1SkeletonModel_01_4.html#a83a637aa02cd1c2e402e1368ad7331fe":[3,0,3,2,19,0]
+"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html":[3,0,3,2,17]
 };

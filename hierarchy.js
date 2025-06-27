@@ -245,6 +245,7 @@ var hierarchy =
     [ "module::skill::IKKick::Config", "structmodule_1_1skill_1_1IKKick_1_1Config.html", null ],
     [ "module::skill::KickBalancer::Config", "structmodule_1_1skill_1_1KickBalancer_1_1Config.html", null ],
     [ "module::skill::Kicker::Config", "structmodule_1_1skill_1_1Kicker_1_1Config.html", null ],
+    [ "module::skill::KickWalk::Config", "structmodule_1_1skill_1_1KickWalk_1_1Config.html", null ],
     [ "module::skill::Look::Config", "structmodule_1_1skill_1_1Look_1_1Config.html", null ],
     [ "module::skill::Say::Config", "structmodule_1_1skill_1_1Say_1_1Config.html", null ],
     [ "module::skill::SixDOFFootController", "classmodule_1_1skill_1_1SixDOFFootController.html", [
@@ -346,6 +347,7 @@ var hierarchy =
         [ "module::skill::GPT", "classmodule_1_1skill_1_1GPT.html", null ],
         [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
         [ "module::skill::IKKick", "classmodule_1_1skill_1_1IKKick.html", null ],
+        [ "module::skill::KickWalk", "classmodule_1_1skill_1_1KickWalk.html", null ],
         [ "module::skill::Look", "classmodule_1_1skill_1_1Look.html", null ],
         [ "module::skill::Say", "classmodule_1_1skill_1_1Say.html", null ],
         [ "module::skill::ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", null ],

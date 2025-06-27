@@ -1,14 +1,14 @@
 var searchData=
 [
-  ['emitreflector_1578',['EmitReflector',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html',1,'module::platform::NUSense']]],
-  ['emitreflector_3c_20void_20_3e_1579',['EmitReflector&lt; void &gt;',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html',1,'module::platform::NUSense']]],
-  ['emitstats_3c_20module_3a_3aextension_3a_3adirector_3a_3awaitfinished_20_3e_1580',['EmitStats&lt; module::extension::Director::WaitFinished &gt;',['../structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_01module_1_1extension_1_1Director_1_1WaitFinished_01_4.html',1,'NUClear::dsl::operation']]],
-  ['emitstats_3c_3a_3aextension_3a_3abehaviour_3a_3acommands_3a_3abehaviourtasks_20_3e_1581',['EmitStats&lt;::extension::behaviour::commands::BehaviourTasks &gt;',['../structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html',1,'NUClear::dsl::operation']]],
-  ['enableidle_1582',['EnableIdle',['../structmodule_1_1purpose_1_1EnableIdle.html',1,'module::purpose']]],
-  ['encoder_1583',['Encoder',['../classutility_1_1nbs_1_1Encoder.html',1,'utility::nbs']]],
-  ['enginecontext_1584',['EngineContext',['../structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html',1,'module::vision::VisualMesh']]],
-  ['enumerate_1585',['enumerate',['../structutility_1_1support_1_1enumerate.html',1,'utility::support']]],
-  ['evaluatortask_1586',['EvaluatorTask',['../classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html',1,'module::support::optimisation']]],
-  ['event_1587',['Event',['../structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1Event.html',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['expression_1588',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]]
+  ['emitreflector_1587',['EmitReflector',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html',1,'module::platform::NUSense']]],
+  ['emitreflector_3c_20void_20_3e_1588',['EmitReflector&lt; void &gt;',['../structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html',1,'module::platform::NUSense']]],
+  ['emitstats_3c_20module_3a_3aextension_3a_3adirector_3a_3awaitfinished_20_3e_1589',['EmitStats&lt; module::extension::Director::WaitFinished &gt;',['../structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_01module_1_1extension_1_1Director_1_1WaitFinished_01_4.html',1,'NUClear::dsl::operation']]],
+  ['emitstats_3c_3a_3aextension_3a_3abehaviour_3a_3acommands_3a_3abehaviourtasks_20_3e_1590',['EmitStats&lt;::extension::behaviour::commands::BehaviourTasks &gt;',['../structNUClear_1_1dsl_1_1operation_1_1EmitStats_3_1_1extension_1_1behaviour_1_1commands_1_1BehaviourTasks_01_4.html',1,'NUClear::dsl::operation']]],
+  ['enableidle_1591',['EnableIdle',['../structmodule_1_1purpose_1_1EnableIdle.html',1,'module::purpose']]],
+  ['encoder_1592',['Encoder',['../classutility_1_1nbs_1_1Encoder.html',1,'utility::nbs']]],
+  ['enginecontext_1593',['EngineContext',['../structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html',1,'module::vision::VisualMesh']]],
+  ['enumerate_1594',['enumerate',['../structutility_1_1support_1_1enumerate.html',1,'utility::support']]],
+  ['evaluatortask_1595',['EvaluatorTask',['../classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html',1,'module::support::optimisation']]],
+  ['event_1596',['Event',['../structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1Event.html',1,'module::support::optimisation::NSGA2Evaluator']]],
+  ['expression_1597',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]]
 ];

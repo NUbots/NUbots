@@ -1,5 +1,10 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae8b500b5770249d60c0ca8a01fdb76e7":[3,0,3,8,1,1,0,179],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae95cee293aaa06a4cd9102bc817e40f0":[3,0,3,8,1,1,0,183],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae992e66a1378e0386e0fc9c1c8a16fda":[3,0,3,8,1,1,0,248],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daeaa1e4cc4b2358ea917cb350122a84f3":[3,0,3,8,1,1,0,60],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daebb223ba5c0daa9ea36833ed4a9ca802":[3,0,3,8,1,1,0,80],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daebc0fd7e0078ba7bc0510cbda3ce1656":[3,0,3,8,1,1,0,117],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daef964b23eb494d63aa30776cf9f15b0d":[3,0,3,8,1,1,0,93],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daefa89f043412dbae466e5233581e3ba8":[3,0,3,8,1,1,0,163],
@@ -244,10 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Striker_1_1Config.html#ad6b34a367ae6cc15b0ea63b9fd1719ca":[3,0,3,9,19,0,5],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html":[3,0,3,9,21,0],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a028d65df5a6a554f5b9cdc02e2f9b878":[3,0,3,9,21,0,13],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a0becafb9079d019878ca3534043ec2a8":[3,0,3,9,21,0,3],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a10075b62d8b33a5d455b59dcf38a39c5":[3,0,3,9,21,0,9],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a17a77264f11814759527cf9b03667005":[3,0,3,9,21,0,15],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a2378b0a011e1b5c7569024e8987f221d":[3,0,3,9,21,0,6],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a270f3d284b16cf82dbb5fb00e59292aa":[3,0,3,9,21,0,16],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a2e1c331f5a6e557ba77ca856f7d24ff9":[3,0,3,9,21,0,22]
+"structmodule_1_1purpose_1_1Tester_1_1Config.html#a0becafb9079d019878ca3534043ec2a8":[3,0,3,9,21,0,3]
 };
