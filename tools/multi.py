@@ -38,7 +38,7 @@ from colorama import Fore, Style, init
 from termcolor import cprint
 
 # NUbots RoboCup team ID
-NUBOTS_TEAM_ID = 12
+NUBOTS_TEAM_ID = 1
 
 # Lock for printing
 print_lock = asyncio.Lock()
