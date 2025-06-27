@@ -14,10 +14,12 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
-            double kick_approach_velocity_x = 0.0;  // Forward velocity during kick (m/s)
-            double kick_approach_velocity_y = 0.0;  // Lateral velocity during kick (m/s)
-            long new_kick_wait_time         = 0.0;  // Time to wait before the next kick (in seconds)
-
+             /// @brief Forward velocity during kick (m/s)
+            double kick_approach_velocity_x = 0.0;
+             /// @brief Lateral velocity during kick (m/s)
+            double kick_approach_velocity_y = 0.0;
+            /// @brief Time to wait before the next kick (in seconds)
+            long new_kick_wait_time = 0.0; 
         } cfg;
 
         /// @brief Time point when the last kick ended. Used to prevent kick spamming.
