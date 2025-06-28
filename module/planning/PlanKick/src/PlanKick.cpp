@@ -32,7 +32,6 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/planning/KickTo.hpp"
@@ -45,7 +44,6 @@
 namespace module::planning {
 
     using extension::Configuration;
-    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::planning::KickTo;
@@ -66,15 +64,11 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, Trigger<Stability>, With<Sensors>>().then(
-            [this](const KickTo& kick_to,
-                   const Uses<Kick>& kick,
-                   const Ball& ball,
-                   const Stability& stability,
-                   const Sensors& sensors) {
+        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>>().then(
+            [this](const KickTo& kick_to, const Uses<Kick>& kick, const Ball& ball, const Sensors& sensors) {
                 // If the kick is running, don't interrupt or the robot may fall
-                if (kick.run_state == GroupInfo::RunState::RUNNING && !kick.done) {
-                    emit<Task>(std::make_unique<Idle>());
+                if (kick.run_state == RunState::RUNNING && !kick.done) {
+                    emit<Task>(std::make_unique<Continue>());
                     return;
                 }
 
@@ -94,9 +88,9 @@ namespace module::planning {
 
                 // Need to be near the ball to consider kicking it
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
-                    log<NUClear::DEBUG>(fmt::format("Ball not close enough, distance {}m and angle {} radians.",
-                                                    ball_distance,
-                                                    ball_angle));
+                    log<DEBUG>(fmt::format("Ball not close enough, distance {}m and angle {} radians.",
+                                           ball_distance,
+                                           ball_angle));
                     return;
                 }
 
@@ -105,33 +99,26 @@ namespace module::planning {
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
-                    log<NUClear::DEBUG>("Robot is not aligned to the kick target.");
+                    log<DEBUG>("Robot is not aligned to the kick target.");
                     return;
                 }
 
                 // If the kick conditions are not met, the function will have returned with no Tasks, ending the kick
                 // Otherwise, the kick conditions are met and we need to check if we are already kicking
                 // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
-                if (kick.run_state == GroupInfo::RunState::QUEUED) {
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
-                }
-
-                // If the robot is not standing, make it stand before kicking
-                if (stability != Stability::STANDING) {
-                    log<NUClear::DEBUG>("Standing to kick!");
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                if (kick.run_state == RunState::QUEUED) {
+                    emit<Task>(std::make_unique<Continue>());
                     return;
                 }
 
                 // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
                 if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && rBRr.y() > 0.0)) {
-                    log<NUClear::INFO>("LEFT KICK!");
+                    log<INFO>("LEFT KICK!");
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
                 else {  // kick leg is forced right or ball is more to the right and kick leg is auto
-                    log<NUClear::INFO>("RIGHT KICK!");
+                    log<INFO>("RIGHT KICK!");
                     emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG));
                 }
             });

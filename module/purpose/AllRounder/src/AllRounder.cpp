@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -33,7 +33,7 @@
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/AllRounder.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
-#include "message/strategy/FindFeature.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
@@ -47,8 +47,8 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase    = message::input::GameState::Data::Phase;
-    using GameMode = message::input::GameState::Data::Mode;
+    using Phase    = message::input::GameState::Phase;
+    using GameMode = message::input::GameState::Mode;
     using message::input::GameState;
     using message::planning::KickTo;
     using message::purpose::CornerKickAllRounder;
@@ -95,7 +95,7 @@ namespace module::purpose {
 
                 // Check if there is GameState information, and if so act based on the current mode
                 if (game_state) {
-                    switch (game_state->data.mode.value) {
+                    switch (game_state->mode.value) {
                         case GameMode::PENALTY_SHOOTOUT:
                             emit<Task>(std::make_unique<PenaltyShootoutAllRounder>());
                             break;
@@ -109,7 +109,7 @@ namespace module::purpose {
                         case GameMode::CORNER_KICK: emit<Task>(std::make_unique<CornerKickAllRounder>()); break;
                         case GameMode::GOAL_KICK: emit<Task>(std::make_unique<GoalKickAllRounder>()); break;
                         case GameMode::THROW_IN: emit<Task>(std::make_unique<ThrowInAllRounder>()); break;
-                        default: log<NUClear::WARN>("Game mode unknown.");
+                        default: log<WARN>("Game mode unknown.");
                     }
                 }
             });
@@ -125,7 +125,7 @@ namespace module::purpose {
 
         // Normal UNKNOWN state
         on<Provide<NormalAllRounder>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-            [this] { log<NUClear::WARN>("Unknown normal game phase."); });
+            [this] { log<WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
         on<Provide<NormalAllRounder>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
@@ -135,7 +135,7 @@ namespace module::purpose {
 
         // Penalty shootout UNKNOWN state
         on<Provide<PenaltyShootoutAllRounder>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-            [this] { log<NUClear::WARN>("Unknown penalty shootout game phase."); });
+            [this] { log<WARN>("Unknown penalty shootout game phase."); });
 
         // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
         on<Provide<PenaltyShootoutAllRounder>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
@@ -165,6 +165,7 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToKickBall>(), 3);  // try to walk to the ball and align towards opponents goal
+        emit<Task>(std::make_unique<KickTo>(), 4);          // kick the ball towards the goal
     }
 
 }  // namespace module::purpose

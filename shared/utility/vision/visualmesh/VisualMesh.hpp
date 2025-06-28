@@ -74,51 +74,77 @@ namespace utility::vision::visualmesh {
         });
     }
 
-
+    /**
+     * @brief Clusters connected mesh point indices using DFS.
+     *
+     * @tparam Iterator An iterator over integers representing point indices [0, N).
+     * @param first Iterator to the beginning of point indices.
+     * @param last Iterator to the end of point indices.
+     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
+     * @param min_cluster_size Minimum number of points for a cluster to be valid.
+     * @param clusters Output vector of clusters, each a vector of indices.
+     */
     template <typename Iterator>
     void cluster_points(Iterator first,
                         Iterator last,
                         const Eigen::MatrixXi& neighbours,
                         int min_cluster_size,
                         std::vector<std::vector<int>>& clusters) {
-
-        // TODO(VisionTeam):
-        // 1) Do a reverse lookup-style reduction
-        // 2) Convert to multi-partition and return a list of Iterators to each cluster
-
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
-        // Do a DFS over all valid points and their neighbours to make connected clusters
-        std::vector<bool> visited(std::distance(first, last), false);
-        for (Iterator it = first; it != last; it = std::next(it)) {
-            std::vector<Iterator> q;
-            std::vector<value_type> cluster;
+        const int N = std::distance(first, last);
+        // If there are no points, return immediately
+        if (N == 0) {
+            return;
+        }
 
-            // First element is always in the cluster
-            q.push_back(it);
+        // Copy values (point indices) for indexed access
+        std::vector<value_type> values(first, last);
 
-            while (!q.empty()) {
-                // Get the next element to check
-                Iterator current = q.back();
-                q.pop_back();
+        // Lookup table: which indices are in the input set
+        std::vector<bool> is_in_input(neighbours.cols(), false);
+        for (int idx : values) {
+            if (idx >= 0 && idx < int(is_in_input.size())) {
+                is_in_input[idx] = true;
+            }
+        }
 
-                // Make sure we haven't seen this point before
-                if (!visited[std::distance(first, current)]) {
-                    // Add new point to cluster and mark it as seen
-                    cluster.push_back(*current);
-                    visited[std::distance(first, current)] = true;
+        // Track visited status of all points
+        std::vector<bool> visited(neighbours.cols(), false);
 
-                    // Find the current points neighbours
-                    for (int n = 0; n < 6; ++n) {
-                        const value_type neighbour_idx = neighbours(n, *current);
-                        Iterator neighbour             = std::find(first, last, neighbour_idx);
-                        if ((neighbour != last) && (!visited[std::distance(first, neighbour)])) {
-                            q.push_back(neighbour);
-                        }
+        // Iterate through each index and form clusters via DFS
+        for (int i = 0; i < N; ++i) {
+            int seed = values[i];
+            if (visited[seed]) {
+                continue;
+            }
+
+            std::vector<int> cluster;
+            std::vector<int> stack;
+            stack.push_back(seed);
+
+            // Perform DFS to find all connected points in the cluster
+            while (!stack.empty()) {
+                int current = stack.back();
+                stack.pop_back();
+
+                // If already visited, skip
+                if (visited[current]) {
+                    continue;
+                }
+                visited[current] = true;
+                cluster.push_back(current);
+
+                // Push unvisited neighbours that are also in the input set
+                for (int n = 0; n < neighbours.rows(); ++n) {
+                    int neigh = neighbours(n, current);
+                    if (neigh >= 0 && neigh < int(visited.size()) && !visited[neigh] && is_in_input[neigh]) {
+                        stack.push_back(neigh);
                     }
                 }
             }
-            // Only add cluster to list if it meets minimum size requirment
+
+            // If the cluster is large enough, add it to the output
             if (int(cluster.size()) >= min_cluster_size) {
                 clusters.emplace_back(std::move(cluster));
             }
@@ -146,7 +172,8 @@ namespace utility::vision::visualmesh {
                 return intersect;
             }
             // Last option is it's neither in or out
-            NUClear::log<NUClear::ERROR>("Cluster is neither inside or outside the green horizon. This is bad.");
+            NUClear::log<NUClear::LogLevel::ERROR>(
+                "Cluster is neither inside or outside the green horizon. This is bad.");
             return false;
         };
 

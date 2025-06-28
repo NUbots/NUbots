@@ -29,18 +29,26 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/input/GameState.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/planning/WalkPath.hpp"
-#include "message/strategy/FindFeature.hpp"
+#include "message/purpose/Purpose.hpp"
+#include "message/strategy/FindBall.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 namespace module::strategy {
 
     using extension::Configuration;
+    using message::input::GameState;
     using message::localisation::Ball;
     using message::planning::LookAround;
     using message::planning::TurnOnSpot;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::strategy::FindBall;
+    using message::strategy::Search;
+    using message::support::GlobalConfig;
 
     FindObject::FindObject(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -52,12 +60,42 @@ namespace module::strategy {
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
         });
 
-        on<Provide<FindBall>, Optional<With<Ball>>>().then([this](const std::shared_ptr<const Ball>& ball) {
-            if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+        on<Provide<FindBall>, Optional<With<Ball>>, Optional<With<GlobalConfig>>, Optional<With<GameState>>>().then(
+            [this](const std::shared_ptr<const Ball>& ball,
+                   const std::shared_ptr<const GlobalConfig>& global_config,
+                   const std::shared_ptr<const GameState>& game_state) {
+                if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                    emit<Task>(std::make_unique<LookAround>());
+                    emit<Task>(std::make_unique<TurnOnSpot>());
+
+                    // Emit purpose information if we are searching for the ball
+                    if (global_config) {
+                        emit(std::make_unique<Purpose>(global_config->player_id,
+                                                       SoccerPosition::UNKNOWN,
+                                                       true,
+                                                       false,
+                                                       game_state
+                                                           ? game_state->team.team_colour
+                                                           : GameState::TeamColour(GameState::TeamColour::UNKNOWN)));
+                    }
+                }
+            });
+
+        on<Provide<Search>, Optional<With<GlobalConfig>>, Optional<With<GameState>>>().then(
+            [this](const std::shared_ptr<const GlobalConfig>& global_config,
+                   const std::shared_ptr<const GameState>& game_state) {
+                // General search functionality, to identify landmarks
                 emit<Task>(std::make_unique<LookAround>());
                 emit<Task>(std::make_unique<TurnOnSpot>());
-            }
-        });
+
+                // Emit purpose information if we are searching for the ball
+                emit(std::make_unique<Purpose>(
+                    global_config ? global_config->player_id : 1,
+                    SoccerPosition::UNKNOWN,
+                    true,
+                    false,
+                    game_state ? game_state->team.team_colour : GameState::TeamColour(GameState::TeamColour::UNKNOWN)));
+            });
     }
 
 }  // namespace module::strategy

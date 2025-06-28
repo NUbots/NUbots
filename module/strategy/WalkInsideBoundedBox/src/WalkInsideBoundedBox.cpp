@@ -70,12 +70,12 @@ namespace module::strategy {
                 emit(std::make_unique<WalkInsideBoundedBoxTask>(box));
 
                 if (ball == nullptr || NUClear::clock::now() - ball->time_of_measurement > cfg.ball_search_timeout) {
-                    log<NUClear::DEBUG>("Ball timeout. Returning to default position");
+                    log<DEBUG>("Ball timeout. Returning to default position");
                     emit<Task>(std::make_unique<WalkToFieldPosition>(box.Hfd, true));
                     return;
                 }
 
-                log<NUClear::DEBUG>("Recent ball measurement");
+                log<DEBUG>("Recent ball measurement");
                 // Get the current position of the ball on the field
                 Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
                 // Desired position of robot on field
@@ -83,10 +83,10 @@ namespace module::strategy {
                 // Check if the ball is in the bounding box
                 if (rBFf.x() > box.x_min && rBFf.x() < box.x_max && rBFf.y() > box.y_min && rBFf.y() < box.y_max) {
                     // Do nothing as ball is inside of defending region, play normally
-                    log<NUClear::DEBUG>("Ball is inside of bounding box");
+                    log<DEBUG>("Ball is inside of bounding box");
                 }
                 else {
-                    log<NUClear::DEBUG>("Ball is outside of bounding box");
+                    log<DEBUG>("Ball is outside of bounding box");
                     // Clamp desired position to bounding box
                     rDFf.x() = std::clamp(rBFf.x(), box.x_min, box.x_max);
                     rDFf.y() = std::clamp(rBFf.y(), box.y_min, box.y_max);
@@ -113,7 +113,7 @@ namespace module::strategy {
 
                         // Calculate the desired heading to face the ball
                         desired_heading = std::atan2(rBFf.y() - rDFf.y(), rBFf.x() - rDFf.x());
-                        log<NUClear::DEBUG>("Ball is in pass region. Adding y offset");
+                        log<DEBUG>("Ball is in pass region. Adding y offset");
                     }
                     else {
                         // If the ball is in a region inbetween the bounding box and opp goal, add an x offset to

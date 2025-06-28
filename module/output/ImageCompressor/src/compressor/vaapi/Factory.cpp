@@ -63,13 +63,13 @@ namespace module::output::compressor::vaapi {
         vaSetInfoCallback(
             cctx.va.dpy,
             [](void* /*user_data*/, const char* message) {
-                NUClear::log<NUClear::INFO>(std::string(message, message + std::strlen(message) - 1));
+                NUClear::log<NUClear::LogLevel::INFO>(std::string(message, message + std::strlen(message) - 1));
             },
             this);
         vaSetErrorCallback(
             cctx.va.dpy,
             [](void* /*user_data*/, const char* message) {
-                NUClear::log<NUClear::ERROR>(std::string(message, message + std::strlen(message) - 1));
+                NUClear::log<NUClear::LogLevel::ERROR>(std::string(message, message + std::strlen(message) - 1));
             },
             this);
 

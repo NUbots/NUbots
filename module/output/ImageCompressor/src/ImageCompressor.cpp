@@ -113,7 +113,7 @@ namespace module::output {
                 auto it = compressors.find(image.id);
                 if (it == compressors.end() || it->second->width != image.dimensions[0]
                     || it->second->height != image.dimensions[1] || it->second->format != image.format) {
-                    log<NUClear::INFO>("Rebuilding compressors for", image.name, "camera");
+                    log<INFO>("Rebuilding compressors for", image.name, "camera");
 
                     // Replace the existing one with a new one
                     it = compressors.insert(std::make_pair(image.id, std::make_shared<CompressorContext>())).first;
@@ -172,11 +172,11 @@ namespace module::output {
         });
 
         on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
-            log<NUClear::DEBUG>(fmt::format("Receiving {}/s, Compressing {}/s,  Dropping {}/s ({}%)",
-                                            compressed + dropped,
-                                            compressed,
-                                            dropped,
-                                            100 * double(compressed) / double(compressed + dropped)));
+            log<DEBUG>(fmt::format("Receiving {}/s, Compressing {}/s,  Dropping {}/s ({}%)",
+                                   compressed + dropped,
+                                   compressed,
+                                   dropped,
+                                   100 * double(compressed) / double(compressed + dropped)));
             compressed = 0;
             dropped    = 0;
         });

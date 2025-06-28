@@ -1,0 +1,14 @@
+# Known USB devices which are allowed to be connected to the robot without the
+# robocup service not restarting. In the form (vendor:product), like lsusb.
+
+# Internal USB hubs
+1d6b:0003 # Linux Foundation 3.0 root hub
+1d6b:0002 # Linux Foundation 2.0 root hub
+# WiFi/Bluetooth adapter
+8087:0033 # Intel Corp.
+# Camera
+1e10:4000 # Point Grey Research, Inc. Blackfly S BFS-U3-13Y3C
+# OpenCR
+0403:6001 # Future Technology Devices International, Ltd FT232 Serial (UART) IC
+# NUSense
+0483:5740 # STMicroelectronics Virtual COM Port

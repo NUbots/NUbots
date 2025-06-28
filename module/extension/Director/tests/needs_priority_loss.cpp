@@ -45,10 +45,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // First complex task needs both simple tasks
             on<Provide<ComplexTask<1>>, Needs<SimpleTask<1>>, Needs<SimpleTask<2>>>().then([this] {
@@ -87,10 +86,6 @@ namespace {
                 events.push_back("requesting complex task 2");
                 emit<Task>(std::make_unique<ComplexTask<2>>(), 100);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-            });
         }
     };
 
@@ -100,7 +95,7 @@ TEST_CASE("Tests that if a provider loses one of its dependent needs it stops ru
           "[director][priority][needs]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();
@@ -111,15 +106,15 @@ TEST_CASE("Tests that if a provider loses one of its dependent needs it stops ru
         "start complex 1",
         "emitting complex task 1",
         "start 1: complex 1",
-        "start 2: complex 1",
         "p1: complex 1",
+        "start 2: complex 1",
         "p2: complex 1",
         "requesting complex task 2",
         "start complex 2",
         "emitting complex task 2",
+        "p1: complex 2",
         "stop complex 1",
         "stop 2: complex 1",
-        "p1: complex 2",
     };
 
     // Make an info print the diff in an easy to read way if we fail

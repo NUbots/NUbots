@@ -28,6 +28,7 @@
 #define MODULE_PLATFORM_OPENCR_CONVERT_HPP
 
 #include <array>
+#include <cstdint>
 #include <stdexcept>
 
 #include "dynamixel/v2/OpenCR.hpp"

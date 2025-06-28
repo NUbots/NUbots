@@ -39,10 +39,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Start<SimpleTask>>().then([this] { events.push_back("start"); });
             on<Provide<SimpleTask>>().then([this] { events.push_back("provide"); });
@@ -61,10 +60,6 @@ namespace {
                 events.push_back("finishing");
                 emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-            });
         }
     };
 
@@ -74,7 +69,7 @@ TEST_CASE("Test that the start and stop events fire when a provider gains/loses 
           "[director][start][stop][root]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

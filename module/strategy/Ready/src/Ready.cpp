@@ -54,8 +54,8 @@ namespace module::strategy {
             cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<double>();
         });
 
-        on<Provide<ReadyTask>, With<Stability>>().then([this](const RunInfo& info, const Stability& stability) {
-            if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+        on<Provide<ReadyTask>, With<Stability>>().then([this](const RunReason& run_reason, const Stability& stability) {
+            if (run_reason == RunReason::NEW_TASK) {
                 // Set the timer and emit a walk Task
                 start_ready_time = NUClear::clock::now();
                 emit<Task>(std::make_unique<Walk>(
@@ -67,8 +67,8 @@ namespace module::strategy {
                      && stability != Stability::STANDING) {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             }
-            else {  // Otherwise, emit the idle task to keep walking or standing still
-                emit<Task>(std::make_unique<Idle>());
+            else {  // Otherwise, emit the Continue task to keep doing the same thing
+                emit<Task>(std::make_unique<Continue>());
             }
         });
     }

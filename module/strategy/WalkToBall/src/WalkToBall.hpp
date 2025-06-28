@@ -59,6 +59,16 @@ namespace module::strategy {
             /// @brief Offset from ball in field space to walk to when approaching the ball from in "front"
             Eigen::Vector3d avoid_ball_offset = Eigen::Vector3d::Zero();
 
+            /// @brief Offset during tackling to avoid the opponent
+            double avoid_opponent_offset = 0.0;
+            /// @brief Offset during tackling to ensure walking to the side of the ball
+            double approach_offset = 0.0;
+            /// @brief When the robot's angle error is above this, it will walk to an offset position next to the ball
+            double tackle_angle_offset = 0.0;
+
+            /// @brief Distance behind the ball to walk to when positioning
+            double distance_behind_ball = 0.0;
+
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space

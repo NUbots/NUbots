@@ -16,7 +16,7 @@ export class AppView extends Component<{ nav: NavigationConfiguration }> {
         <ContextMenuProvider>
           <div className="min-h-screen flex items-stretch bg-auto-surface-0 text-sm text-auto-primary">
             <NavigationView nav={this.props.nav} />
-            <div className="flex flex-grow flex-col">
+            <div className="flex flex-1 flex-col overflow-y-auto">
               <div className="flex flex-grow">
                 <Suspense fallback={<div>Loading...</div>}>
                   <Routes>

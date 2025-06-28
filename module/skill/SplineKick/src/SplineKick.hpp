@@ -35,12 +35,12 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
-#include "utility/motion/splines/Trajectory.hpp"
 #include "utility/skill/KickGenerator.hpp"
+#include "utility/skill/splines/Trajectory.hpp"
 
 namespace module::skill {
 
-    using utility::motion::splines::Waypoint;
+    using utility::skill::splines::Waypoint;
 
     class SplineKick : public ::extension::behaviour::BehaviourReactor {
     private:

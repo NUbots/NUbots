@@ -34,21 +34,10 @@
 #include <tinyrobotics/math.hpp>
 #include <tinyrobotics/parser.hpp>
 
-#include "message/actuation/KinematicsModel.hpp"
-#include "message/actuation/Limbs.hpp"
-#include "message/actuation/ServoCommand.hpp"
-
-#include "utility/input/ServoID.hpp"
-
 namespace module::actuation {
 
-    using tinyrobotics::InverseKinematicsMethod;
-
     class Kinematics : public ::extension::behaviour::BehaviourReactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the Kinematics reactor.
-        explicit Kinematics(std::unique_ptr<NUClear::Environment> environment);
-
+    private:
         /// @brief Number of actuatable joints in the NUgus robot
         static const int n_joints = 20;
 
@@ -61,29 +50,26 @@ namespace module::actuation {
         /// @brief tinyrobotics inverse kinematics options
         tinyrobotics::InverseKinematicsOptions<double, n_joints> options;
 
-        /**
-         * @brief Converts a string to an InverseKinematicsMethod
-         *
-         * @param method_string
-         * @return InverseKinematicsMethod
-         */
-        InverseKinematicsMethod ik_string_to_method(const std::string& method_string);
+        /// @brief Converts a string to a tinyrobotics InverseKinematicsMethod
+        /// @param method_string The string representation of the inverse kinematics method
+        /// @return A tinyrobotics inverse kinematics method from the given string
+        tinyrobotics::InverseKinematicsMethod ik_string_to_method(const std::string& method_string);
 
-    private:
         /// @brief Stores configuration values
         struct Config {
             /// @brief Path to the URDF file
             std::string urdf_path = "";
-
             /// @brief Name of torso link in tinyrobotics model
             std::string torso_name = "torso";
-
             /// @brief Name of left foot base link in tinyrobotics model
             std::string left_foot_name = "left_foot_base";
-
             /// @brief Name of right foot base link in tinyrobotics model
             std::string right_foot_name = "right_foot_base";
         } cfg;
+
+    public:
+        /// @brief Called by the powerplant to build and setup the Kinematics reactor.
+        explicit Kinematics(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::actuation

@@ -37,6 +37,7 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
+#include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
@@ -69,10 +70,13 @@ namespace module::purpose {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
+    using message::input::GameState;
     using message::input::RoboCup;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::FinishReset;
     using message::localisation::ResetFieldLocalisation;
+    using message::localisation::UncertaintyResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
     using message::purpose::AllRounder;
@@ -90,6 +94,8 @@ namespace module::purpose {
     using message::strategy::StartSafely;
     using message::support::GlobalConfig;
 
+    struct StartSoccer {};
+
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration, Trigger<GlobalConfig>>("Soccer.yaml")
@@ -102,6 +108,7 @@ namespace module::purpose {
                 cfg.position = Position(config["position"].as<std::string>());
 
                 cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
+                cfg.startup_delay      = config["startup_delay"].as<int>();
 
                 // Get the number of seconds until we assume a teammate is inactive
                 cfg.timeout = config["timeout"].as<int>();
@@ -112,7 +119,7 @@ namespace module::purpose {
 
                 // Decide which player we are
                 player_id = global_config.player_id;
-                log<NUClear::DEBUG>("Configure Player ID ", int(player_id));
+                log<DEBUG>("Configure Player ID ", int(player_id));
 
                 if (cfg.position == Position::DYNAMIC) {
                     robots[player_id - 1].dynamic = true;
@@ -143,13 +150,20 @@ namespace module::purpose {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Stand idle
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
-            // Idle look forward if the head isn't doing anything else
+            // Look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
-            // This emit starts the tree to play soccer
+            // After a startup delay, start the soccer scenario
+            emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
+        on<Trigger<StartSoccer>>().then([this] {
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
+
+        on<Trigger<FinishReset>>().then([this] { emit<Task>(std::make_unique<FindPurpose>(), 1); });
+        on<Trigger<UncertaintyResetFieldLocalisation>>().then(
+            [this] { emit<Task>(std::unique_ptr<FindPurpose>(nullptr)); });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this]() {
             // We are alive!
@@ -175,17 +189,20 @@ namespace module::purpose {
                     robots[player_id - 1].position = Position("DEFENDER");
                     break;
                 case Position::DYNAMIC: determine_purpose(); break;
-                default: log<NUClear::ERROR>("Invalid robot position");
+                default: log<ERROR>("Invalid robot position");
             }
         });
 
-        on<Every<5, Per<std::chrono::seconds>>>().then([this] {
-            // Emit the purpose
-            emit(std::make_unique<Purpose>(player_id,
-                                           SoccerPosition(int(robots[player_id - 1].position)),
-                                           robots[player_id - 1].dynamic,
-                                           robots[player_id - 1].active));
-        });
+        on<Every<5, Per<std::chrono::seconds>>, Optional<With<GameState>>>().then(
+            [this](const std::shared_ptr<const GameState>& game_state) {
+                // Emit the purpose
+                emit(std::make_unique<Purpose>(
+                    player_id,
+                    SoccerPosition(int(robots[player_id - 1].position)),
+                    robots[player_id - 1].dynamic,
+                    robots[player_id - 1].active,
+                    game_state ? game_state->team.team_colour : GameState::TeamColour(GameState::TeamColour::UNKNOWN)));
+            });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
@@ -215,39 +232,39 @@ namespace module::purpose {
 
         // Left button pauses the soccer scenario
         on<Trigger<ButtonLeftDown>>().then([this] {
-            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
-            emit<Scope::DIRECT>(std::make_unique<EnableIdle>());
-            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
+            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
+            emit<Scope::INLINE>(std::make_unique<EnableIdle>());
+            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
             idle = true;
         });
 
-        on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<EnableIdle>>().then([this] {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
             emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            log<NUClear::INFO>("Idle mode enabled");
+            log<INFO>("Idle mode enabled");
         });
 
         // Middle button resumes the soccer scenario
         on<Trigger<ButtonMiddleDown>>().then([this] {
-            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
+            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
             // Restart the Director graph for the soccer scenario after a delay
             emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
-            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
+            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
             idle = false;
         });
 
-        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
         on<Trigger<DisableIdle>>().then([this] {
             // If the robot is not idle, restart the Director graph for the soccer scenario!
             if (!idle) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 emit<Task>(std::make_unique<FallRecovery>(), 2);
-                log<NUClear::INFO>("Idle mode disabled");
+                log<INFO>("Idle mode disabled");
             }
         });
 
@@ -272,14 +289,14 @@ namespace module::purpose {
 
     void Soccer::determine_purpose() {
         // Print all robots if in debug
-        if (log_level <= NUClear::DEBUG) {
-            log<NUClear::DEBUG>("\nRobot positions:");
+        if (log_level <= DEBUG) {
+            log<DEBUG>("\nRobot positions:");
             for (size_t i = 0; i < robots.size(); i++) {
-                log<NUClear::DEBUG>(fmt::format("Robot {}\tPosition: {}\tActive: {}\tDynamic: {}",
-                                                i + 1,
-                                                std::string(robots[i].position),
-                                                robots[i].active ? "Yes" : "No",
-                                                robots[i].dynamic ? "Yes" : "No"));
+                log<DEBUG>(fmt::format("Robot {}\tPosition: {}\tActive: {}\tDynamic: {}",
+                                       i + 1,
+                                       std::string(robots[i].position),
+                                       robots[i].active ? "Yes" : "No",
+                                       robots[i].dynamic ? "Yes" : "No"));
             }
         }
 
@@ -352,7 +369,7 @@ namespace module::purpose {
                                                      cfg.goalie_bounding_box.x_max,
                                                      cfg.striker_bounding_box.y_min,
                                                      cfg.striker_bounding_box.y_max));
-            log<NUClear::DEBUG>("Full field player");
+            log<DEBUG>("Full field player");
             return;
         }
 
@@ -364,7 +381,7 @@ namespace module::purpose {
                                                      cfg.striker_bounding_box.x_max,
                                                      cfg.striker_bounding_box.y_min,
                                                      cfg.striker_bounding_box.y_max));
-            log<NUClear::DEBUG>("Default striker");
+            log<DEBUG>("Default striker");
             return;
         }
 
@@ -375,7 +392,7 @@ namespace module::purpose {
                                                      cfg.defender_bounding_box.x_max,
                                                      cfg.striker_bounding_box.y_min,
                                                      cfg.striker_bounding_box.y_max));
-            log<NUClear::DEBUG>("Extended striker");
+            log<DEBUG>("Extended striker");
             return;
         }
 
@@ -386,7 +403,7 @@ namespace module::purpose {
                                                      cfg.defender_bounding_box.x_max,
                                                      cfg.defender_bounding_box.y_min,
                                                      cfg.defender_bounding_box.y_max));
-            log<NUClear::DEBUG>("Default defender");
+            log<DEBUG>("Default defender");
             return;
         }
 
@@ -397,7 +414,7 @@ namespace module::purpose {
                                                      cfg.goalie_bounding_box.x_max,
                                                      cfg.defender_bounding_box.y_min,
                                                      cfg.defender_bounding_box.y_max));
-            log<NUClear::DEBUG>("Extended defender");
+            log<DEBUG>("Extended defender");
             return;
         }
     }

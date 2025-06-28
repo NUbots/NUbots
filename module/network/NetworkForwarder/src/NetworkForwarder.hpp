@@ -92,7 +92,7 @@ namespace module::network {
                                     || duration_cast<duration<double>>(now - h.last_message[id]).count() > h.period) {
                                     powerplant.emit_shared<Scope::NETWORK>(std::move(msg), target, false);
                                     h.last_message[id] = now;
-                                    log<NUClear::TRACE>("Forwarding", type, "to", target);
+                                    log<TRACE>("Forwarding", type, "to", target);
                                 }
                             }
                         })

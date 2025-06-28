@@ -29,7 +29,6 @@
 #define MODULE_EXTENSION_DIRECTOR_HPP
 
 #include <memory>
-#include <mutex>
 #include <nuclear>
 #include <typeindex>
 #include <vector>
@@ -41,17 +40,28 @@
 
 namespace module::extension {
 
-    class Director
-        : public NUClear::Reactor
-        , ::extension::behaviour::information::InformationSource {
+    class Director : public NUClear::Reactor {
     public:
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<component::DirectorTask>>;
+
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
-        using TaskPack = std::pair<std::shared_ptr<component::Provider>, TaskList>;
+        struct TaskPack {
+            /// The provider that emitted this task pack
+            std::shared_ptr<component::Provider> provider;
+            /// The tasks that were emitted by the provider
+            TaskList tasks;
+        };
+
+        // Only use a single thread at a time for the Director
+        static constexpr int concurrency = 1;
 
     private:
-        std::recursive_mutex director_mutex{};
+        /// A request to run the specified provider, after a `Wait` task's time has elapsed
+        struct WaitFinished {
+            /// The provider to run after the `Wait` task's time has elapsed
+            std::shared_ptr<component::Provider> provider;
+        };
 
         /**
          * Adds a Provider for a type
@@ -69,7 +79,7 @@ namespace module::extension {
          *
          * @throws std::runtime_error when the reaction does not provide anything
          */
-        void remove_provider(const uint64_t& id);
+        void remove_provider(const NUClear::id_t& id);
 
         /**
          * Finds or creates a root provider for a task and returns it
@@ -348,7 +358,7 @@ namespace module::extension {
          */
         void run_task_on_provider(const std::shared_ptr<component::DirectorTask>& task,
                                   const std::shared_ptr<component::Provider>& provider,
-                                  const ::extension::behaviour::RunInfo::RunReason& run_reason);
+                                  const ::extension::behaviour::RunReason& run_reason);
 
         /**
          * The level of solution that we can run at
@@ -407,83 +417,27 @@ namespace module::extension {
          */
         void run_task_pack(const TaskPack& pack);
 
-        /**
-         * A RunReasonLock instance will reset the current_run_reason back to OTHER_TRIGGER when it is destroyed.
-         *
-         * This is used so that the run reason can temporarily be set to something else, and then reset back to the
-         * default if there is an exception or other error.
-         */
-        using RunReasonLock = std::unique_ptr<void, std::function<void(void*)>>;
-
-        /**
-         * Holds a run reason as the current run reason for the current thread.
-         *
-         * It returns a lock object that acts as an RAII object that will reset the current run reason when it is
-         * destroyed.
-         *
-         * @param reason the reason to hold until the lock is destroyed
-         *
-         * @return a lock object that will reset `current_run_reason` to its default when destroyed
-         */
-        RunReasonLock hold_run_reason(const ::extension::behaviour::RunInfo::RunReason& reason);
-
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
-        virtual ~Director();
-
-        /**
-         * Provides the task data via the InformationSource interface so it can be accessed
-         *
-         * @param reaction_id the provider reaction that is requesting its information.
-         *
-         * @return the data that is stored in this reaction, or nullptr if it shouldn't be executing
-         */
-        std::shared_ptr<void> _get_task_data(const uint64_t& reaction_id) override;
-
-        /**
-         * Provides the RunInfo data via the InformationSource interface so it can be accessed
-         *
-         * @param reaction_id the provider reaction that is requesting its information.
-         *
-         * @return the information about why this task has been executed
-         */
-        ::extension::behaviour::RunInfo _get_run_info(const uint64_t& reaction_id) override;
-
-        /**
-         * Provides the ProviderGroup data via the InformationSource interface so it can be accessed
-         *
-         * @param reaction_id the provider reaction that is requesting its information.
-         * @param type        the type of provider group that is being requested
-         * @param root_type   the secondary type to use if this is a root task
-         *
-         * @return the information about the provider group that this task is running on
-         */
-        ::extension::behaviour::GroupInfo _get_group_info(const uint64_t& reaction_id,
-                                                          const std::type_index& type,
-                                                          const std::type_index& root_type) override;
 
     private:
         /// A list of Provider groups
         std::map<std::type_index, component::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
-        std::map<uint64_t, std::shared_ptr<component::Provider>> providers;
+        std::map<NUClear::id_t, std::shared_ptr<component::Provider>> providers;
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
-        uint64_t unique_id_source = 0;
-
-        /// The current run reason this thread is executing for. Defaults to OTHER_TRIGGER as that will be what it
-        /// is if a non Director execution occurs
-        thread_local static ::extension::behaviour::RunInfo::RunReason current_run_reason;
-
-        /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
-        /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<component::DirectorTask>> pack_builder;
-
-    public:
-        friend class InformationSource;
+        NUClear::id_t unique_id_source = 0;
     };
 
 }  // namespace module::extension
+
+// Director stats (eg trace) are turned off on normal BehaviourTasks, we do this to WaitFinished as well
+// This is due to computational issues when stats are on in the Director
+namespace NUClear::dsl::operation {
+    template <>
+    struct EmitStats<module::extension::Director::WaitFinished> : std::false_type {};
+}  // namespace NUClear::dsl::operation
 
 #endif  // MODULE_EXTENSION_DIRECTOR_HPP

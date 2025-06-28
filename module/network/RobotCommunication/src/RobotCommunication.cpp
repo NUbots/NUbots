@@ -42,11 +42,8 @@
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
-
-
 namespace module::network {
 
-    // add usings
     using extension::Configuration;
     using message::behaviour::state::WalkState;
     using message::input::GameState;
@@ -60,6 +57,8 @@ namespace module::network {
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
+    struct StartupDelay {};
+
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -67,6 +66,10 @@ namespace module::network {
             .then([this](const Configuration& config, const GlobalConfig& global_config) {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
+                // Delay before sending messages
+                cfg.startup_delay = config["startup_delay"].as<int>();
+                // Ball timeout to use the ball position
+                cfg.ball_timeout = std::chrono::seconds(config["ball_timeout"].as<int>());
 
                 // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
@@ -87,35 +90,64 @@ namespace module::network {
 
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
-                        on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
-                            std::string remote_addr = p.remote.address;
+                        on<UDP::Broadcast, Optional<With<GameState>>, Single>(cfg.receive_port)
+                            .then([this, &global_config](const UDP::Packet& p,
+                                                         const std::shared_ptr<const GameState>& game_state) {
+                                std::string remote_addr = p.remote.address;
 
-                            // Apply filtering of packets if udp_filter_address is set in config
-                            if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
-                                if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
-                                    == ignored_ip_addresses.end()) {
-                                    ignored_ip_addresses.insert(remote_addr);
-                                    log<NUClear::INFO>("Ignoring UDP packet from",
-                                                       remote_addr,
-                                                       "as it doesn't match configured filter address",
-                                                       cfg.udp_filter_address);
+                                // Apply filtering of packets if udp_filter_address is set in config
+                                if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
+                                    if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
+                                        == ignored_ip_addresses.end()) {
+                                        ignored_ip_addresses.insert(remote_addr);
+                                        log<INFO>("Ignoring UDP packet from",
+                                                  remote_addr,
+                                                  "as it doesn't match configured filter address",
+                                                  cfg.udp_filter_address);
+                                    }
+
+                                    return;
                                 }
 
-                                return;
-                            }
+                                // Deserialise the incoming RoboCup message
+                                const std::vector<unsigned char>& payload = p.payload;
+                                RoboCup incoming_msg =
+                                    NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
-                            const std::vector<unsigned char>& payload = p.payload;
-                            RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                                // Check if the incoming message is from the same player
+                                bool own_player_message =
+                                    global_config.player_id == incoming_msg.current_pose.player_id;
 
-                            // filter out own messages
-                            if (global_config.player_id != incoming_msg.current_pose.player_id) {
-                                emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
-                            }
-                        });
+                                // If there is game state information, get the colour
+                                message::input::Team team_colour = message::input::Team::UNKNOWN_TEAM;
+                                if (game_state) {
+                                    switch (int(game_state->team.team_colour)) {
+                                        case GameState::TeamColour::BLUE:
+                                            team_colour = message::input::Team::BLUE;
+                                            break;
+                                        case GameState::TeamColour::RED: team_colour = message::input::Team::RED; break;
+                                        default: team_colour = message::input::Team::UNKNOWN_TEAM;
+                                    }
+                                }
+
+                                // Check if the incoming message is from the same team
+                                bool own_team_message = team_colour == incoming_msg.current_pose.team;
+
+                                // Filter out messages from ourselves and from other teams
+                                if (!own_player_message && own_team_message) {
+                                    emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
+                                }
+                            });
                 }
             });
 
+        on<Startup>().then([this] {
+            // Delay the robot sending messages, to allow the robot to collect data and send reasonable information
+            emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
         on<Every<2, Per<std::chrono::seconds>>,
+           With<StartupDelay>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
            Optional<With<Kick>>,
@@ -123,7 +155,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
-           Optional<With<GlobalConfig>>>()
+           With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
                          const std::shared_ptr<const Kick>& kick,
@@ -131,7 +163,7 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
-                         const std::shared_ptr<const GlobalConfig>& config) {
+                         const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
@@ -140,41 +172,46 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->data.self.penalty_reason;
+                    int penalty_reason = game_state->self.penalty_reason;
                     switch (penalty_reason) {
                         case 0: msg->state = 0; break;
                         case 1: msg->state = 1; break;
                         default: msg->state = 2; break;
                     }
+
+                    // Team colour
+                    switch (int(game_state->team.team_colour)) {
+                        case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
+                        case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
+                        default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
+                    }
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
-                if (config) {
-                    msg->current_pose.player_id = config->player_id;
+                msg->current_pose.player_id = config.player_id;
 
-                    if (sensors) {
-                        // Get our world transform
-                        Eigen::Isometry3d Htw(sensors->Htw);
+                if (sensors) {
+                    // Get our world transform
+                    Eigen::Isometry3d Htw(sensors->Htw);
 
-                        // If we have field information
-                        if (field) {
-                            // Transform the field state into Hfw
-                            Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
+                    // If we have field information
+                    if (field) {
+                        // Transform the field state into Hfw
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
 
-                            // Get our torso in field space
-                            Eigen::Isometry3d Hft = Hfw * Htw.inverse();
-                            Eigen::Vector3d rTFf  = Hft.translation();
+                        // Get our torso in field space
+                        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
+                        Eigen::Vector3d rTFf  = Hft.translation();
 
-                            // Store our position from field to torso
-                            msg->current_pose.position     = rTFf.cast<float>();
-                            msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                        // Store our position from field to torso
+                        msg->current_pose.position     = rTFf.cast<float>();
+                        msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
-                            msg->current_pose.covariance = field->covariance.cast<float>();
-
-                            msg->current_pose.team = config->team_id;
-                        }
+                        msg->current_pose.covariance = field->covariance.cast<float>();
+                        msg->current_pose.cost       = field->cost;
                     }
                 }
+
 
                 // Walk command
                 if (walk_state != nullptr) {
@@ -190,9 +227,11 @@ namespace module::network {
                     msg->kick_target.y() = kick->target.y();
                 }
 
-                // Ball
-                if (loc_ball) {
-                    // convert position of ball from world to field space
+                // Ball information
+                // Check if the ball has been seen recently, if it hasn't the message fields will 0
+                // and the confidence will be 0
+                if (loc_ball && (NUClear::clock::now() - loc_ball->time_of_measurement < cfg.ball_timeout)) {
+                    // Convert position of ball from world to field space
                     if (field) {
                         Eigen::Vector3d rBWw = loc_ball->rBWw;
                         // Transform the field state into Hfw
@@ -201,7 +240,9 @@ namespace module::network {
                         // Store our position from field to ball
                         msg->ball.position = rBFf.cast<float>();
                     }
-
+                    // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
+                    // This it to prevent everyone echoing
+                    msg->ball.confidence = loc_ball->confidence;
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
@@ -213,6 +254,8 @@ namespace module::network {
                 if (purpose) {
                     msg->purpose = *purpose;
                 }
+                // Override the player ID in the purpose message to be consistent, and in case purpose is not set
+                msg->purpose.player_id = config.player_id;
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

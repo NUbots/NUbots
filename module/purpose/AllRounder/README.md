@@ -17,7 +17,7 @@ Add this module to play as a all rounder in soccer!
 ## Consumes
 
 - `message::input::GameState` to get information about the state of the game
-- `message::input::GameState::Data::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
+- `message::input::GameState::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
 - `message::strategy::AllRounder` a Task requesting to play as a AllRounder
 - `message::strategy::NormalAllRounder` a Test requesting to play as a AllRounder in the normal game state
 - `message::strategy::PenaltyShootoutAllRounder` a Task requesting to play as a AllRounder in the penalty shootout game state

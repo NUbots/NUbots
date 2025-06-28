@@ -47,10 +47,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SubTask>, Trigger<Finished>>().then([this](const SubTask& t, const Finished& f) {
                 events.push_back("subtask executed by " + t.msg);
@@ -92,12 +91,6 @@ namespace {
                 events.push_back("emitting finished with true");
                 emit(std::make_unique<Finished>(true));
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-            });
         }
 
         bool executed = false;
@@ -107,7 +100,7 @@ namespace {
 TEST_CASE("Test that a done task removes a root task if it was the next in the chain", "[director][done]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

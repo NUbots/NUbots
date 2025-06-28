@@ -91,6 +91,11 @@ message IMU {
     uint32 temperature = 3;
 }
 
+message Buttons {
+    bool left   = 1;
+    bool middle = 2;
+}
+
 message NUSense {
     /* INDEX MAPPING
      *  0  : r_shoulder_pitch
@@ -116,4 +121,19 @@ message NUSense {
      */
     map<uint32, Servo> servo_map = 1;
     IMU                imu       = 2;
+    Buttons            buttons   = 3;
+}
+
+message ServoConfiguration {
+    int32  direction = 1;
+    double offset    = 2;
+}
+
+message NUSenseHandshake {
+    /// The type of the message. 0 for init and 1 for during_service
+    bool type = 1;
+    /// The message to be sent to the NUSense
+    string msg = 2;
+    /// The servo configurations to be sent to the NUSense
+    repeated ServoConfiguration servo_configs = 3;
 }

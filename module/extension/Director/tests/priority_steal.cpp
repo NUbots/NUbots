@@ -48,10 +48,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 4> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // Store the tasks we are given to run
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) { events.push_back(t.msg); });
@@ -97,12 +96,6 @@ namespace {
                 events.push_back("Starting very high priority provider");
                 emit<Task>(std::make_unique<UniqueProvider<4>>("very high"), 200);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-            });
         }
     };
 
@@ -112,7 +105,7 @@ TEST_CASE("Test that when a higher priority task is emitted it overwrites lower 
           "[director][priority][steal]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

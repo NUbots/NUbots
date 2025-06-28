@@ -100,9 +100,10 @@ message PauseRequest {
 }
 
 enum PlaybackMode {
-    FAST       = 0;  /// Playback as fast as possible
-    REALTIME   = 1;  /// Playback as fast as the messages were recorded
-    SEQUENTIAL = 2;  /// Playback one message at a time, waits for all message sub tasks to complete before continuing
+    UNKNOWN    = 0;  /// Unknown playback mode
+    FAST       = 1;  /// Playback as fast as possible
+    REALTIME   = 2;  /// Playback as fast as the messages were recorded
+    SEQUENTIAL = 3;  /// Playback one message at a time, waits for all message sub tasks to complete before continuing
 }
 
 message SetModeRequest {
@@ -119,7 +120,7 @@ message SetModeRequest {
     PlaybackMode mode = 3;
 }
 
-message Finished {}
+message PlaybackFinished {}
 
 message SetPlaybackSpeedRequest {
     message Response {
