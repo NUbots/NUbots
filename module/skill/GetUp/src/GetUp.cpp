@@ -55,8 +55,6 @@ namespace module::skill {
             cfg.delay_time        = config["delay_time"].as<int>();
             cfg.getup_front       = config["scripts"]["getup_front"].as<std::vector<std::string>>();
             cfg.getup_back        = config["scripts"]["getup_back"].as<std::vector<std::string>>();
-            cfg.getup_right       = config["scripts"]["getup_right"].as<std::vector<std::string>>();
-            cfg.getup_left        = config["scripts"]["getup_left"].as<std::vector<std::string>>();
             cfg.getup_upright     = config["scripts"]["getup_upright"].as<std::vector<std::string>>();
             cfg.getup_upside_down = config["scripts"]["getup_upside_down"].as<std::vector<std::string>>();
         });
