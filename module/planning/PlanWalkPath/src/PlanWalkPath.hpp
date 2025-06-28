@@ -123,6 +123,21 @@ namespace module::planning {
         Eigen::Vector2d adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
                                                               const std::vector<Eigen::Vector2d>& obstacles);
 
+        /**
+         * @brief Computes a target position to dribble around an obstacle by getting behind the ball and curving around the obstacle.
+         * @param robot_pos Position of the robot (usually Eigen::Vector2d::Zero() in robot frame)
+         * @param ball_pos Position of the ball relative to the robot
+         * @param obstacle_pos Position of the obstacle relative to the robot
+         * @param approach_distance Distance to stay behind the ball
+         * @param obstacle_radius Radius of the obstacle for clearance
+         * @return Target position to move to for dribbling
+         */
+        Eigen::Vector2d dribble_around_obstacle(const Eigen::Vector2d& robot_pos,
+                                                const Eigen::Vector2d& ball_pos,
+                                                const Eigen::Vector2d& obstacle_pos,
+                                                double approach_distance,
+                                                double obstacle_radius);
+
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
         explicit PlanWalkPath(std::unique_ptr<NUClear::Environment> environment);

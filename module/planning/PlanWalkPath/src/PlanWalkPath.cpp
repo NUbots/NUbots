@@ -137,12 +137,16 @@ namespace module::planning {
                         // Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
-                    // If there are obstacles to pivot around (not closer), pivot around the point
+                    // If there are obstacles to pivot around (not closer), dribble around the point
                     else if (!obstacles.second.empty()) {
-                        log<DEBUG>("Pivoting: Pivoting around", obstacles.second.size(), "obstacles.");
-                        // You may want to emit a PivotAroundPoint task or adjust your logic here
-                        // Example: emit<Task>(std::make_unique<PivotAroundPoint>(...));
-                        // For now, just log and continue
+                        // TODO: Wait until the robot is close enough to the obstacle, and to the ball
+                        log<DEBUG>("Dribbling: Planning to dribble around", obstacles.second.size(), "obstacles.");
+                        // Use the closest pivot obstacle
+                        const Eigen::Vector2d& obstacle = obstacles.second.front();
+                        // Robot is at origin in its own frame
+                        Eigen::Vector2d dribble_target = dribble_around_obstacle(Eigen::Vector2d::Zero(), rDRr, obstacle, 0.25, cfg.obstacle_radius);
+                        rDRr = dribble_target;
+                        angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
                     }
                 }
 
@@ -263,6 +267,7 @@ namespace module::planning {
         is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
 
         // Step backwards while keeping the forward direction
+        // TODO: Replace all this slowing down nonsense with a buffer class between path planning and walking
         log<DEBUG>("Slowing down before changing direction. Velocity magnitude:", velocity_magnitude);
         return cfg.backwards_vector;
     }
@@ -323,6 +328,26 @@ namespace module::planning {
         // Ensure the angular velocity is within the limits
         double angular_velocity = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
         return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
+    }
+
+    Eigen::Vector2d PlanWalkPath::dribble_around_obstacle(const Eigen::Vector2d& robot_pos,
+                                                         const Eigen::Vector2d& ball_pos,
+                                                         const Eigen::Vector2d& obstacle_pos,
+                                                         double approach_distance,
+                                                         double obstacle_radius) {
+        Eigen::Vector2d obs_to_ball = ball_pos - obstacle_pos;
+        Eigen::Vector2d obs_to_robot = robot_pos - obstacle_pos;
+        Eigen::Vector2d approach_dir = obs_to_ball.normalized();
+        Eigen::Vector2d perp_dir(-approach_dir.y(), approach_dir.x());
+        Eigen::Vector2d behind_ball = ball_pos + (-approach_dir * approach_distance);
+        double sign = (obs_to_robot.dot(perp_dir) > 0) ? 1.0 : -1.0;
+        Eigen::Vector2d curve_offset = perp_dir * sign * (obstacle_radius + 0.15); // 0.15m extra clearance
+        Eigen::Vector2d dribble_target = behind_ball + curve_offset;
+        log<DEBUG>("Dribble planning: robot", robot_pos.transpose(),
+                   "ball", ball_pos.transpose(),
+                   "obstacle", obstacle_pos.transpose(),
+                   "dribble_target", dribble_target.transpose());
+        return dribble_target;
     }
 
 }  // namespace module::planning
