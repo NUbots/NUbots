@@ -127,26 +127,23 @@ namespace module::planning {
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
 
                     // Get the obstacles in the way of the current path
-                    const auto obstacles = utility::behaviour::get_obstacles(all_obstacles, rDRr, cfg.obstacle_radius, true);
+                    const auto [behind_target, obstacles] = utility::behaviour::get_obstacles(all_obstacles, rDRr, cfg.obstacle_radius, true);
 
-                    // If there are obstacles in the way (closer), walk around them
-                    if (!obstacles.first.empty()) {
-                        log<DEBUG>("Obstacle avoidance: Adjusting path to avoid", obstacles.first.size(), "obstacles.");
-                        // Adjust the target direction to avoid obstacles
-                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles.first);
-                        // Override the heading when walking around obstacles
-                        angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
-                    }
-                    // If there are obstacles to pivot around (not closer), dribble around the point
-                    else if (!obstacles.second.empty()) {
-                        // TODO: Wait until the robot is close enough to the obstacle, and to the ball
-                        log<DEBUG>("Dribbling: Planning to dribble around", obstacles.second.size(), "obstacles.");
-                        // Use the closest pivot obstacle
-                        const Eigen::Vector2d& obstacle = obstacles.second.front();
-                        // Robot is at origin in its own frame
-                        Eigen::Vector2d dribble_target = dribble_around_obstacle(Eigen::Vector2d::Zero(), rDRr, obstacle, 0.25, cfg.obstacle_radius);
-                        rDRr = dribble_target;
-                        angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
+                    // If there is a closest obstacle, handle accordingly
+                    if (!obstacles.empty()) {
+                        // If the obstacle is behind the ball, we will dribble around it
+                        if (behind_target) {
+                            log<DEBUG>("Dribbling: Planning to dribble around", obstacles.size(), "obstacles.");
+                            const Eigen::Vector2d& obstacle = obstacles.front();
+                            Eigen::Vector2d dribble_target = dribble_around_obstacle(Eigen::Vector2d::Zero(), rDRr, obstacle, 0.25, cfg.obstacle_radius);
+                            rDRr = dribble_target;
+                            angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
+                        } else {
+                            log<DEBUG>("Obstacle avoidance: Adjusting path to avoid", obstacles.size(), "obstacles.");
+                            rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
+                            // Override the heading when walking around obstacles
+                            angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
+                        }
                     }
                 }
 
@@ -330,6 +327,7 @@ namespace module::planning {
         return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
     }
 
+    // TODO: This is gross
     Eigen::Vector2d PlanWalkPath::dribble_around_obstacle(const Eigen::Vector2d& robot_pos,
                                                          const Eigen::Vector2d& ball_pos,
                                                          const Eigen::Vector2d& obstacle_pos,

@@ -41,58 +41,50 @@ namespace utility::behaviour {
     using utility::math::geometry::intersection_line_and_circle;
 
 /**
- * @brief Detects obstacles between the robot and the target.
+ * @brief Finds the closest obstacle intersecting the path and groups nearby obstacles.
  *
  * @param all_obstacles All obstacles in the world (positions relative to robot).
  * @param rDRr Vector from robot to target.
  * @param obstacle_radius The radius to use for obstacle avoidance.
  * @param debug If true, print debug logs.
- * @return Pair of vectors: first = obstacles in the way (closer), second = obstacles to pivot around (not closer).
+ * @return Pair: (bool behind_target, vector of grouped obstacles)
  */
-inline std::pair<std::vector<Eigen::Vector2d>, std::vector<Eigen::Vector2d>> get_obstacles(
+inline std::pair<bool, std::vector<Eigen::Vector2d>> get_obstacles(
     const std::vector<Eigen::Vector2d>& all_obstacles,
     const Eigen::Vector2d& rDRr,
     double obstacle_radius,
     bool debug = false) {
-    std::vector<Eigen::Vector2d> avoid_obstacles{};
-    std::vector<Eigen::Vector2d> pivot_obstacles{};
+    // Find the closest obstacle that intersects the path
+    double min_dist = std::numeric_limits<double>::max();
+    std::optional<Eigen::Vector2d> closest_obstacle;
     for (const auto& obstacle : all_obstacles) {
-        Eigen::Vector2d rORr = obstacle;
-        double proj = rORr.dot(rDRr.normalized());
-        bool between = (proj > 0) && (proj < rDRr.norm());
         const bool in_front = rDRr.normalized().dot(obstacle.normalized()) > 0.0;
-        const bool closer = obstacle.norm() < rDRr.norm();
         const bool intersects = intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, obstacle_radius);
+        double dist = obstacle.norm();
         if (debug) {
-            NUClear::log<NUClear::LogLevel::DEBUG>("Obstacle check:", obstacle.transpose(), "proj:", proj, "between:", between, "in_front:", in_front, "closer:", closer, "intersects:", intersects);
+            NUClear::log<NUClear::LogLevel::DEBUG>("Obstacle check:", obstacle.transpose(), "in_front:", in_front, "intersects:", intersects, "dist:", dist);
         }
-        if (in_front && intersects) {
-            if (closer) {
-                if (debug) NUClear::log<NUClear::LogLevel::DEBUG>("Adding to avoid_obstacles:", obstacle.transpose());
-                avoid_obstacles.push_back(obstacle);
-            } else {
-                if (debug) NUClear::log<NUClear::LogLevel::DEBUG>("Adding to pivot_obstacles:", obstacle.transpose());
-                pivot_obstacles.push_back(obstacle);
-            }
+        if (in_front && intersects && dist < min_dist) {
+            min_dist = dist;
+            closest_obstacle = obstacle;
         }
     }
-    // Group close obstacles for both lists
-    auto group_close = [&](std::vector<Eigen::Vector2d>& group) {
+    std::vector<Eigen::Vector2d> grouped_obstacles;
+    bool behind_target = false;
+    if (closest_obstacle) {
+        // Group close obstacles for clearance
         for (const auto& obstacle : all_obstacles) {
-            for (const auto& grouped : group) {
-                NUClear::log<NUClear::LogLevel::DEBUG>("Obstacle radius", obstacle_radius);
-                if ((obstacle - grouped).norm() < obstacle_radius * 3) {
-                    if (std::find(group.begin(), group.end(), obstacle) == group.end()) {
-                        group.push_back(obstacle);
-                    }
-                    break;
-                }
+            if ((obstacle - *closest_obstacle).norm() < obstacle_radius * 3) {
+                grouped_obstacles.push_back(obstacle);
             }
         }
-    };
-    if (!avoid_obstacles.empty()) group_close(avoid_obstacles);
-    if (!pivot_obstacles.empty()) group_close(pivot_obstacles);
-    return { avoid_obstacles, pivot_obstacles };
+        // Determine if the closest obstacle is behind the target
+        behind_target = (closest_obstacle->norm() >= rDRr.norm());
+        if (debug) {
+            NUClear::log<NUClear::LogLevel::DEBUG>("Closest obstacle:", closest_obstacle->transpose(), "behind_target:", behind_target);
+        }
+    }
+    return {behind_target, grouped_obstacles};
 }
 
 } // namespace utility::behaviour
