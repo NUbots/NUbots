@@ -115,13 +115,6 @@ namespace module::planning {
         /// @return desired velocity magnitude
         double accelerate_to_target(double desired_heading);
 
-        /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
-        /// @param all_obstacles vector of all obstacles in the world
-        /// @param rDRr vector from robot to final target
-        /// @return vector of closest obstacle in the path to avoid and its neighbours
-        const std::vector<Eigen::Vector2d> get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                         const Eigen::Vector2d& rDRr);
-
         /// @brief Adjust the target direction to avoid obstacles
         /// @param robots vector of all robots in the world
         /// @param rDRr vector from robot to final target

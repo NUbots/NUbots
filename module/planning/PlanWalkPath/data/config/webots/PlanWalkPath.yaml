@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # General playing tuning values for walking
 max_translational_velocity_x: 0.175
@@ -28,3 +28,6 @@ max_aligned_angle: 100 * pi / 180 # Maximum angle to be considered aligned
 backward_buffer: 10 * pi / 180 # Buffer angle to keep direction of strafe
 backwards_vector: [-1.0, 0.001] # Vector to walk backwards
 acceleration_multiplier: 0.5
+
+# Radius around obstacles to avoid
+obstacle_radius: 1.5

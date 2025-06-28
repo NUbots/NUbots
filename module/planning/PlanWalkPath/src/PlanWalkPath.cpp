@@ -35,6 +35,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
 
+#include "utility/behaviour/obstacle_detection.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/geometry/intersection.hpp"
@@ -56,6 +57,7 @@ namespace module::planning {
 
     using message::strategy::StandStill;
 
+    using utility::behaviour::get_obstacles;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::math::geometry::intersection_line_and_circle;
     using utility::nusight::graph;
@@ -125,15 +127,22 @@ namespace module::planning {
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
 
                     // Get the obstacles in the way of the current path
-                    const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
+                    const auto obstacles = utility::behaviour::get_obstacles(all_obstacles, rDRr, cfg.obstacle_radius, true);
 
-                    // If there are obstacles in the way, walk around them
-                    if (!obstacles.empty()) {
+                    // If there are obstacles in the way (closer), walk around them
+                    if (!obstacles.first.empty()) {
+                        log<DEBUG>("Obstacle avoidance: Adjusting path to avoid", obstacles.first.size(), "obstacles.");
                         // Adjust the target direction to avoid obstacles
-                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
-
+                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles.first);
                         // Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
+                    }
+                    // If there are obstacles to pivot around (not closer), pivot around the point
+                    else if (!obstacles.second.empty()) {
+                        log<DEBUG>("Pivoting: Pivoting around", obstacles.second.size(), "obstacles.");
+                        // You may want to emit a PivotAroundPoint task or adjust your logic here
+                        // Example: emit<Task>(std::make_unique<PivotAroundPoint>(...));
+                        // For now, just log and continue
                     }
                 }
 
@@ -230,6 +239,7 @@ namespace module::planning {
         // "Accelerate", assuring velocity is always positive
         velocity_magnitude = std::max(velocity_magnitude, cfg.starting_velocity);
         // "Proportional control" to strafe towards the target inside align radius
+        log<DEBUG>("Strafing to target. Error:", error, "Velocity magnitude:", velocity_magnitude);
         return cfg.strafe_gain * error;
     }
 
@@ -244,6 +254,7 @@ namespace module::planning {
                 std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
 
             // Step backwards while keeping the forward direction
+            log<DEBUG>("Initiating walk backwards. Velocity magnitude:", velocity_magnitude);
             return cfg.backwards_vector;
         }
 
@@ -252,6 +263,7 @@ namespace module::planning {
         is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
 
         // Step backwards while keeping the forward direction
+        log<DEBUG>("Slowing down before changing direction. Velocity magnitude:", velocity_magnitude);
         return cfg.backwards_vector;
     }
 
@@ -266,6 +278,7 @@ namespace module::planning {
             std::clamp((cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
                        0.0,
                        1.0);
+        log<DEBUG>("Accelerating to target. Heading:", desired_heading, "Velocity magnitude:", velocity_magnitude);
         return angle_error_gain * velocity_magnitude;
     }
 
@@ -310,55 +323,6 @@ namespace module::planning {
         // Ensure the angular velocity is within the limits
         double angular_velocity = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
         return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
-    }
-
-    const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                   const Eigen::Vector2d& rDRr) {
-        // If there are no obstacles, return an empty group
-        if (all_obstacles.empty()) {
-            return {};
-        }
-
-        // The obstacles in the way of our current path
-        std::vector<Eigen::Vector2d> avoid_obstacles{};
-
-        // Find the first obstacle in the way
-        for (const auto& obstacle : all_obstacles) {
-            // Check if the obstacle is in front of the robot
-            const bool in_front = rDRr.normalized().dot(obstacle.normalized()) > 0.0;
-            // Check if the obstacle is closer than the target point
-            const bool closer = obstacle.norm() < rDRr.norm();
-            // Check if the obstacle intersects with the path
-            const bool intersects =
-                intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
-            // Check if the obstacle is close to the target position
-            const bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
-
-            // Check if obstacle intersects with the path
-            if (in_front && closer && intersects && !close_to_target) {
-                avoid_obstacles.push_back(obstacle);
-                break;
-            }
-        }
-
-        // If no obstacles are in the way, return the empty group
-        if (avoid_obstacles.empty()) {
-            return avoid_obstacles;
-        }
-
-        // Find any obstacles close to our first obstacle, as the robot needs to go around the whole group
-        for (const auto& obstacle : all_obstacles) {
-            // If the obstacle is close to the group, add it to the group
-            // 3 represents two obstacles and the robot
-            for (const auto& avoid_obstacle : avoid_obstacles) {
-                if ((obstacle - avoid_obstacle).norm() < cfg.obstacle_radius * 3) {
-                    avoid_obstacles.push_back(obstacle);
-                    break;
-                }
-            }
-        }
-
-        return avoid_obstacles;
     }
 
 }  // namespace module::planning
