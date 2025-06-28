@@ -377,6 +377,31 @@ namespace module::localisation {
                                const std::shared_ptr<const Goals>& goals,
                                const Eigen::Isometry3d& Hrw);
 
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using the Hungarian algorithm
+         *
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
+         * and landmarks
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> hungarian_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using nearest neighbour
+         *
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
+         * and landmarks
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
+
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
         explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);

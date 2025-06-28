@@ -28,7 +28,7 @@ start_time_delay: 1
 use_ground_truth_localisation: false
 
 # Bool to use the Hungarian algorithm for data association
-use_hungarian: false
+use_hungarian: true
 
 # Cost for a point outside the field
 out_of_field_cost: 3.0
