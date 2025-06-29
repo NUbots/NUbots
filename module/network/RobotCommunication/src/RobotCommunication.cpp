@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2025 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -37,6 +37,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -51,6 +52,7 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::planning::WalkTo;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
@@ -155,6 +157,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
+           Optional<With<WalkTo>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -163,6 +166,7 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
+                         const std::shared_ptr<const WalkTo>& walk_to,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -208,7 +212,7 @@ namespace module::network {
                         msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
-                        msg->current_pose.cost       = field->cost;
+                        // msg->current_pose.cost       = field->cost;
                     }
                 }
 
@@ -218,7 +222,27 @@ namespace module::network {
                     msg->walk_command = walk_state->velocity_target.cast<float>();
                 }
 
-                // TODO: target pose (Position and orientation of the players target on the field specified)
+                // Target pose (Position and orientation of the players target on the field specified)
+                if (walk_to && sensors && field) {
+                    // Get target pose relative to robot
+                    Eigen::Isometry3d Hrd = walk_to->Hrd;
+                    // Current robot's torso pose in world coords
+                    Eigen::Isometry3d Htw = sensors->Htw;
+                    // Transform from field to world coords
+                    Eigen::Isometry3d Hfw = field->Hfw;
+                    // Convert target pose into field coords
+                    Eigen::Isometry3d Hfr = Hfw * Htw.inverse() * Hrd;
+
+                    // Extract 3d translation
+                    Eigen::Vector3d tFr = Hfr.translation();
+                    // Store position
+                    msg->target_pose.position = tFr.cast<float>();
+                    // Extract yaw from roation matrix
+                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfr.rotation()).z();
+                    // Copy team and player ID to target pose
+                    msg->target_pose.team      = msg->current_pose.team;
+                    msg->target_pose.player_id = config.player_id;
+                }
 
                 // Kick target
                 if (kick) {
@@ -242,13 +266,18 @@ namespace module::network {
                     }
                     // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
                     // This it to prevent everyone echoing
-                    msg->ball.confidence = loc_ball->confidence;
+
+
+                    // No confidence field. msg->ball.confidence = loc_ball->confidence;
+
+
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+
 
                 // Current purpose (soccer position) of the Robot
                 if (purpose) {
