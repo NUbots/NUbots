@@ -33,6 +33,7 @@
 #include "RobotModel.hpp"
 
 #include "message/localisation/Field.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
@@ -61,12 +62,12 @@ namespace module::localisation {
 
             /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
             double association_distance = 0.0;
-
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
-
             /// @brief The maximum distance a robot can be outside the field before it is ignored
             double max_distance_from_field = 0.0;
+            /// @brief The maximum cost for a localisation to be considered valid
+            double max_localisation_cost = 0.0;
 
         } cfg;
 
@@ -81,15 +82,21 @@ namespace module::localisation {
             long missed_count = 0;
             /// @brief A unique identifier for the robot
             unsigned long id;
+
             /// @brief The unique identifier of the robot if it is a teammate
             /// If it is not a teammate, this will be 0
-            unsigned long teammate_id = 0;
-            /// @brief Penalisation state for teammate
-            /// This allows behaviour systems to ignore teammates that are not in the game, but keep tracking them
-            bool penalised = false;
+            bool teammate                     = false;
+            message::purpose::Purpose purpose = message::purpose::Purpose();
 
             /// @brief Constructor that sets the state for the UKF
-            TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
+            /// @param initial_rRWw The initial position of the robot in world coordinates
+            /// @param cfg_ukf The UKF configuration to use for the robot
+            /// @param next_id The unique id to assign to this new robot
+            /// @param p An optional purpose message that can be used to associate the robot with a teammate
+            TrackedRobot(const Eigen::Vector3d& initial_rRWw,
+                         const Config::UKF& cfg_ukf,
+                         const unsigned long next_id,
+                         const std::unique_ptr<message::purpose::Purpose>& p = nullptr)
                 : id(next_id) {
                 NUClear::log<NUClear::LogLevel::DEBUG>("Making robot with id: ", id);
                 RobotModel<double>::StateVec initial_state;
@@ -104,6 +111,12 @@ namespace module::localisation {
                 process_noise.rRWw      = cfg_ukf.noise.process.position;
                 process_noise.vRw       = cfg_ukf.noise.process.velocity;
                 ukf.model.process_noise = process_noise;
+
+                // If a purpose is provided, set the teammate flag and purpose
+                if (p) {
+                    teammate = true;
+                    purpose  = *p;
+                }
             }
 
             // Get the robot's position in world space
@@ -129,11 +142,9 @@ namespace module::localisation {
         /// @brief Associate the given robot measurements with the tracked robots
         /// Creates a new tracked robot if the measurement is not associated with an existing robot
         /// @param robots_rRWw The new robot measurements in world coordinates
-        /// @param teammate_id The unique identifier of the robot if it is a teammate
-        /// @param penalised Whether the robot is penalised or not
+        /// @param purpose An optional purpose message that can be used to associate the robot with teammate
         void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
-                              uint teammate_id = 0,
-                              bool penalised   = false);
+                              const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr);
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot

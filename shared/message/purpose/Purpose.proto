@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2024 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -26,13 +26,16 @@ syntax = "proto3";
 
 package message.purpose;
 
+import "message/input/GameState.proto";
+
 /// The detected purpose of the robot
 enum SoccerPosition {
     ALL_ROUNDER = 0;
-    STRIKER     = 1;
-    GOALIE      = 2;
-    DEFENDER    = 3;
-    DYNAMIC     = 4;
+    GOALIE      = 1;
+    ATTACK      = 2;
+    DEFEND      = 3;
+    SUPPORT     = 4;
+    UNKNOWN     = 5;
 }
 
 /// The robot's current purpose configuration
@@ -45,4 +48,6 @@ message Purpose {
     bool dynamic = 3;
     /// Whether we are actively in the game
     bool active = 4;
+    /// Team colour
+    input.GameState.TeamColour team_colour = 5;
 }

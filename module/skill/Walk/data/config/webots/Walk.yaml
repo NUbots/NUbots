@@ -43,3 +43,9 @@ arms:
   left_shoulder_roll: 0.35
   right_elbow: -0.7
   left_elbow: -0.7
+
+kick:
+  # Step kick parameters
+  kick_velocity_x: 0.5 # Forward velocity during kick (m/s)
+  kick_velocity_y: 0.05 # Lateral velocity during kick (m/s)
+  kick_timing_offset: 0.1 # Buffer time before the kick starts (in seconds)

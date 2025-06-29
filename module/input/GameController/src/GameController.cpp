@@ -31,7 +31,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
@@ -201,9 +200,9 @@ namespace module::input {
         initial_state->our_kick_off     = false;
 
         initial_state->team.team_id         = TEAM_ID;
-        initial_state->team.team_colour     = TeamColour::UNKNOWN_TEAM_COLOUR;
+        initial_state->team.team_colour     = TeamColour::UNKNOWN;
         initial_state->opponent.team_id     = 0;
-        initial_state->opponent.team_colour = TeamColour::UNKNOWN_TEAM_COLOUR;
+        initial_state->opponent.team_colour = TeamColour::UNKNOWN;
 
         emit(std::move(initial_state));
         emit(std::make_unique<GameState::Phase>(GameState::Phase::INITIAL));

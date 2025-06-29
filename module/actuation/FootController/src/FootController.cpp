@@ -28,10 +28,17 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/LimbsIK.hpp"
+#include "message/skill/ControlFoot.hpp"
+
 namespace module::actuation {
 
     using extension::Configuration;
 
+    using message::actuation::LeftLegIK;
+    using message::actuation::RightLegIK;
+    using message::skill::ControlLeftFoot;
+    using message::skill::ControlRightFoot;
 
     FootController::FootController(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
