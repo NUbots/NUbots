@@ -77,12 +77,12 @@ namespace module::vision {
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
             log_level                       = config["log_level"].as<NUClear::LogLevel>();
-            objects[4].confidence_threshold = config["ball_confidence_threshold"].as<double>();
-            objects[5].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
-            objects[0].confidence_threshold = config["robot_confidence_threshold"].as<double>();
-            objects[1].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[2].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[0].confidence_threshold = config["ball_confidence_threshold"].as<double>();
+            objects[1].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
+            objects[2].confidence_threshold = config["robot_confidence_threshold"].as<double>();
             objects[3].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[4].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[5].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
             cfg.nms_threshold               = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
