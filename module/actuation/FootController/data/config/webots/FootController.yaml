@@ -30,9 +30,3 @@ roll_d_gain: 0.02
 pitch_d_gain: 0.01
 
 max_i_error: 0.1
-
-# Hack to account for a strange pitch when enabling the foot controller
-support_foot_offset:
-  x: 0
-  y: 0
-  z: 0

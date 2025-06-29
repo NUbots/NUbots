@@ -105,22 +105,16 @@ namespace module::actuation {
             double roll_d_gain = 0.0;
             /// @brief Derivative gain for torso orientation pitch correction
             double pitch_d_gain = 0.0;
-            /// @brief offsets for support foot when kicking
-            double support_foot_offset_x = 0.0;
-            double support_foot_offset_y = 0.0;
-            double support_foot_offset_z = 0.0;
         } cfg;
 
-        // *************** //
-        // *** Legs *** //
-        // *************** //
-        double prev_roll_error      = 0;
-        double prev_pitch_error     = 0;
-        double integral_roll_error  = 0;
+        /// @brief Accumulates the integral of the roll error over time for use in PID control.
+        double integral_roll_error = 0;
+        /// @brief Accumulates the integral of the pitch error over time for use in PID control.
         double integral_pitch_error = 0;
-        /// @brief Last time we updated
-        NUClear::clock::time_point last_update_time{};
 
+        /// @brief Stores the timestamp of the last PID control update, used to compute time deltas for integral and
+        /// derivative calculations.
+        NUClear::clock::time_point last_update_time{};
 
     public:
         /// @brief Called by the powerplant to build and setup the FootController reactor.
@@ -136,6 +130,7 @@ namespace module::actuation {
             ik_task->time = foot_control_task.time;
             ik_task->Htf  = foot_control_task.Htf;
 
+            // Add correction to the torso orientation if enabled
             if (foot_control_task.correction_enabled && cfg.correction_enabled) {
                 // Hwt quaternion
                 Eigen::Quaterniond Hwt_quat(sensors.Htw.inverse().linear());
@@ -155,14 +150,6 @@ namespace module::actuation {
                     emit(graph("Balance/Actual_Roll", fused_roll));
                     emit(graph("Balance/Actual_Pitch", fused_pitch));
                 }
-
-                // Add offset from the config.
-                // NOTE: This is a hack to counter a backwards tilt
-                // that i don't know where it comes from.
-                // Update: It was coming from the uninitialised Hft Quaternion.
-                // TODO: Test if this occurs with the balancer disabled
-                fused_pitch += cfg.support_foot_offset_x;
-                fused_roll += cfg.support_foot_offset_y;
 
                 // Get the desired roll and pitch
                 Eigen::Quaterniond Hft_quat;
@@ -228,24 +215,11 @@ namespace module::actuation {
                 desired_roll += cfg.roll_i_gain * integral_roll_error;
                 desired_pitch += cfg.pitch_i_gain * integral_pitch_error;
 
-                // D control
-                // NOTE: Can get the values from the gyroscope
-                // *****Original implementation****
-                // auto roll_error_rate  = (roll_error - prev_roll_error) / dt;
-                // auto pitch_error_rate = (pitch_error - prev_pitch_error) / dt;
-                // prev_roll_error       = roll_error;
-                // prev_pitch_error      = pitch_error;
-
-                // desired_roll += cfg.roll_d_gain * roll_error_rate;
-                // desired_pitch += cfg.pitch_d_gain * pitch_error_rate;
-                // ********************************
-
-                // *****Using gyroscope values*****
+                // D control using gyroscope values
                 auto roll_rate  = sensors.gyroscope.x();
                 auto pitch_rate = sensors.gyroscope.y();
                 desired_roll -= cfg.roll_d_gain * roll_rate;
                 desired_pitch -= cfg.pitch_d_gain * pitch_rate;
-                // ********************************
 
                 if (log_level <= DEBUG) {
                     // Graph D corrections and rates
@@ -274,7 +248,6 @@ namespace module::actuation {
 
                 ik_task->Htf = Htf_corrected;
             }
-
             else {
                 ik_task->Htf = foot_control_task.Htf;
             }
