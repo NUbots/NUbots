@@ -27,6 +27,7 @@
 #include "Yolo.hpp"
 
 #include <chrono>
+#include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <vector>
@@ -76,19 +77,64 @@ namespace module::vision {
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
             log_level                       = config["log_level"].as<NUClear::LogLevel>();
-            objects[0].confidence_threshold = config["ball_confidence_threshold"].as<double>();
-            objects[1].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
-            objects[2].confidence_threshold = config["robot_confidence_threshold"].as<double>();
+            objects[4].confidence_threshold = config["ball_confidence_threshold"].as<double>();
+            objects[5].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
+            objects[0].confidence_threshold = config["robot_confidence_threshold"].as<double>();
+            objects[1].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[2].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
             objects[3].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[4].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[5].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
             cfg.nms_threshold               = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
             // Compile the model and create inference request object
-            compiled_model =
-                ov::Core().compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
-            infer_request = compiled_model.create_infer_request();
+            try {
+                std::string model_path = config["model_path"].as<std::string>();
+                std::string device     = config["device"].as<std::string>();
+
+                log<INFO>("Loading YOLO model from: ", model_path);
+                log<INFO>("Using device: ", device);
+
+                ov::Core core;
+
+                // Try to fallback to CPU if GPU fails
+                try {
+                    compiled_model = core.compile_model(model_path, device);
+                }
+                catch (const std::exception& e) {
+                    if (device == "GPU") {
+                        log<WARN>("Failed to compile model on GPU, falling back to CPU: ", e.what());
+                        compiled_model = core.compile_model(model_path, "CPU");
+                    }
+                    else {
+                        throw;
+                    }
+                }
+
+                infer_request = compiled_model.create_infer_request();
+                log<INFO>("Model loaded successfully");
+
+                // Log input and output info for debugging
+                auto inputs  = compiled_model.inputs();
+                auto outputs = compiled_model.outputs();
+                log<DEBUG>("Model has ", inputs.size(), " inputs and ", outputs.size(), " outputs");
+
+                if (!inputs.empty()) {
+                    auto input_shape = inputs[0].get_shape();
+                    log<DEBUG>("Input shape: [",
+                               input_shape[0],
+                               ", ",
+                               input_shape[1],
+                               ", ",
+                               input_shape[2],
+                               ", ",
+                               input_shape[3],
+                               "]");
+                }
+            }
+            catch (const std::exception& e) {
+                log<ERROR>("Failed to load YOLO model: ", e.what());
+                throw;
+            }
         });
 
         on<Trigger<Image>, Optional<With<GreenHorizon>>, Single>().then(
@@ -120,19 +166,48 @@ namespace module::vision {
                 int max               = MAX(width, height);
                 cv::Mat letterbox_img = cv::Mat::zeros(max, max, CV_8UC3);
                 img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
-                cv::Mat blob =
-                    cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
+
+                // Get input port for model with one input and check expected dimensions
+                auto input_port  = compiled_model.input();
+                auto input_shape = input_port.get_shape();
+
+                // Log input shape for debugging
+                if (log_level <= DEBUG) {
+                    log<DEBUG>("Model input shape: [",
+                               input_shape[0],
+                               ", ",
+                               input_shape[1],
+                               ", ",
+                               input_shape[2],
+                               ", ",
+                               input_shape[3],
+                               "]");
+                }
+
+                // Use the model's expected input size instead of hardcoded 620
+                int model_input_size = static_cast<int>(input_shape[2]);  // Assuming NCHW format
+                cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
+                                                      1.0 / 255.0,
+                                                      cv::Size(model_input_size, model_input_size),
+                                                      cv::Scalar(),
+                                                      true);
 
                 // -------- Feed the blob into the input node of the Model -------
-                // Get input port for model with one input
-                auto input_port = compiled_model.input();
-                // Create tensor from external memory
-                ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape(), blob.ptr(0));
+                // Create tensor and copy data instead of using external memory pointer
+                ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape());
+                std::memcpy(input_tensor.data<float>(), blob.ptr<float>(), input_tensor.get_byte_size());
+
                 // Set input tensor for model with one input
                 infer_request.set_input_tensor(input_tensor);
 
                 // -------- Perform Inference --------
-                infer_request.infer();
+                try {
+                    infer_request.infer();
+                }
+                catch (const std::exception& e) {
+                    log<ERROR>("Inference failed: ", e.what());
+                    return;
+                }
                 auto output = infer_request.get_output_tensor(0);
 
                 // -------- Postprocess the result --------
@@ -142,7 +217,9 @@ namespace module::vision {
                 std::vector<int> class_ids;
                 std::vector<float> class_confidences;
                 std::vector<cv::Rect> boxes;
-                float scale = letterbox_img.size[0] / 640.0;
+
+                // Calculate scale factor based on the actual model input size (using already declared variables)
+                float scale = static_cast<float>(letterbox_img.size[0]) / static_cast<float>(model_input_size);
 
                 // Figure out the bbox, class_id and class_score
                 for (int i = 0; i < output_buffer.rows; i++) {
@@ -253,7 +330,7 @@ namespace module::vision {
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "goal post") {
+                    if (objects[class_id].name == "goalpost") {
                         Goal g;
                         g.measurements.emplace_back();
                         g.measurements.back().type = Goal::MeasurementType::CENTRE;
