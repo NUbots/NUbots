@@ -1,0 +1,17 @@
+# This adds a condition to the robocup service to prevent it from starting if
+# any USB devices are connected that are not in the allowlist. This is useful
+# for preventing the service from restarting mid-competition while we are
+# fixing a robot - any keyboard, usb monitor, etc. will stop it.
+
+[Unit]
+Description="Pre-robocup service check for USB devices"
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /etc/robocup.d/check-usb-devices.sh
+Restart=on-failure
+# This allows us to keep restarting as many times in a row as we want
+StartLimitBurst=0
+# When check passes, start robocup.service if not running already
+# Workaround because robocup.service doesn't restart if the usb check fails the first time around
+ExecStartPost=/bin/systemd-run --no-block /bin/bash -c 'systemctl is-active --quiet robocup.service || systemctl start robocup.service'

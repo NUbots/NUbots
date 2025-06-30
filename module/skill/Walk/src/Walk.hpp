@@ -33,6 +33,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoCommand.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkGenerator.hpp"
@@ -58,6 +59,13 @@ namespace module::skill {
 
             /// @brief Walk engine parameters
             utility::skill::WalkGenerator<double>::WalkParameters walk_generator_parameters{};
+
+            /// @brief The velocity to kick the ball with (x direction)
+            double kick_velocity_x = 0.0;
+            /// @brief The velocity to kick the ball with (y direction)
+            double kick_velocity_y = 0.0;
+            /// @brief Buffer time before the kick starts
+            double kick_timing_offset = 0.0;
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -65,6 +73,9 @@ namespace module::skill {
 
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
         utility::skill::WalkGenerator<double> walk_generator{};
+
+        /// @brief Used to track the step phase for the step kick
+        bool kick_step_in_progress = false;
     };
 }  // namespace module::skill
 

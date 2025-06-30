@@ -107,6 +107,9 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+            cfg.kick_velocity_x    = config["kick"]["kick_velocity_x"].as<double>();
+            cfg.kick_velocity_y    = config["kick"]["kick_velocity_y"].as<double>();
+            cfg.kick_timing_offset = config["kick"]["kick_timing_offset"].as<double>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -143,11 +146,54 @@ namespace module::skill {
                         .count();
                 last_update_time = NUClear::clock::now();
 
+                // Set the velocity target locally so the kick can modify it if needed
+                Eigen::Vector3d velocity_target = walk_task.velocity_target;
+
+                // Always enter the kick if its a new kick, otherwise only enter if we're not done yet
+                if (walk_task.kick) {
+                    double current_time    = walk_generator.get_time();
+                    double full_period     = walk_generator.get_step_period();
+                    WalkState::Phase phase = walk_generator.get_phase();
+
+                    // If the current time in the walk generator phase is either the end of the other leg or the start
+                    // of the desired leg, start the kick step and increase the velocity of the walk generator when it
+                    // is currently executing a kick step and it is at the end of the desired leg, stop.
+                    if (!kick_step_in_progress) {
+                        // Check if the conditions allow for the kick to start
+                        // Todo maybe set offset based on the frequency
+                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
+
+                        // If the leg we want to kick with is planted, we can kick at the end of the step
+                        bool other_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
+                                                                               : phase == WalkState::Phase::RIGHT;
+                        // If its the end of the kick foot's support, we can kick
+                        if (end_of && other_support) {
+                            log<INFO>("Kick step started");
+                            kick_step_in_progress = true;
+                            velocity_target       = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
+                        }
+                    }
+                    else {
+                        // Check if the step can end
+                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
+                        // On the correct support foot, so can't be the beginning of the kick
+                        bool correct_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
+                                                                                 : phase == WalkState::Phase::LEFT;
+                        // If its not the end of the kick and we're not on the right support, we shouldn't be kicking
+                        if ((end_of && correct_support) || (!end_of && !correct_support)) {
+                            kick_step_in_progress = false;
+                            emit<Task>(std::make_unique<Done>());
+                            log<INFO>("Kick step ended");
+                            return;
+                        }
+                        // Otherwise continue to kick
+                        velocity_target = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
+                    }
+                }
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability >= Stability::DYNAMIC) {
-                    switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
-                                .value) {
+                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase).value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
@@ -185,7 +231,7 @@ namespace module::skill {
 
                 // Emit the walk state
                 auto walk_state = std::make_unique<WalkState>(walk_generator.get_state(),
-                                                              walk_task.velocity_target,
+                                                              velocity_target,
                                                               walk_generator.get_phase());
 
                 // Debugging
@@ -204,12 +250,10 @@ namespace module::skill {
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
                     emit(graph("Walk state", int(walk_state->state)));
-                    emit(graph("Walk velocity target",
-                               walk_task.velocity_target.x(),
-                               walk_task.velocity_target.y(),
-                               walk_task.velocity_target.z()));
+                    emit(graph("Walk velocity target", velocity_target.x(), velocity_target.y(), velocity_target.z()));
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
+                    emit(graph("Kick step in progress", kick_step_in_progress ? 1 : 0));
 
                     // Sample trajectory points
                     const int num_samples = 10;

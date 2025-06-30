@@ -965,12 +965,23 @@ html.dark-mode div.contents table iframe {
 h2.groupheader {
   border-bottom: 0px;
   color: var(--page-foreground-color);
-  box-shadow: 100px 0 var(--page-background-color), -100px 0 var(--page-background-color),
-    100px 0.75px var(--separator-color), -100px 0.75px var(--separator-color), 500px 0 var(--page-background-color),
-    -500px 0 var(--page-background-color), 500px 0.75px var(--separator-color), -500px 0.75px var(--separator-color),
-    1500px 0 var(--page-background-color), -1500px 0 var(--page-background-color), 1500px 0.75px var(--separator-color),
-    -1500px 0.75px var(--separator-color), 2000px 0 var(--page-background-color), -2000px 0 var(--page-background-color),
-    2000px 0.75px var(--separator-color), -2000px 0.75px var(--separator-color);
+  box-shadow:
+    100px 0 var(--page-background-color),
+    -100px 0 var(--page-background-color),
+    100px 0.75px var(--separator-color),
+    -100px 0.75px var(--separator-color),
+    500px 0 var(--page-background-color),
+    -500px 0 var(--page-background-color),
+    500px 0.75px var(--separator-color),
+    -500px 0.75px var(--separator-color),
+    1500px 0 var(--page-background-color),
+    -1500px 0 var(--page-background-color),
+    1500px 0.75px var(--separator-color),
+    -1500px 0.75px var(--separator-color),
+    2000px 0 var(--page-background-color),
+    -2000px 0 var(--page-background-color),
+    2000px 0.75px var(--separator-color),
+    -2000px 0.75px var(--separator-color);
 }
 
 blockquote {
@@ -1228,7 +1239,8 @@ div.fragment span.lineno a {
 }
 
 div.fragment .line:first-child .lineno {
-  box-shadow: -999999px 0px 0 999999px var(--fragment-linenumber-background),
+  box-shadow:
+    -999999px 0px 0 999999px var(--fragment-linenumber-background),
     -999998px 0px 0 999999px var(--fragment-linenumber-border);
 }
 
@@ -1364,7 +1376,9 @@ div.memitem {
 }
 
 h2.memtitle {
-  box-shadow: 0px var(--spacing-medium) 0 -1px var(--fragment-background), var(--box-shadow);
+  box-shadow:
+    0px var(--spacing-medium) 0 -1px var(--fragment-background),
+    var(--box-shadow);
 }
 
 div.memitem {
@@ -1798,9 +1812,15 @@ hr {
 }
 
 .contents hr {
-  box-shadow: 100px 0 0 var(--separator-color), -100px 0 0 var(--separator-color), 500px 0 0 var(--separator-color),
-    -500px 0 0 var(--separator-color), 1500px 0 0 var(--separator-color), -1500px 0 0 var(--separator-color),
-    2000px 0 0 var(--separator-color), -2000px 0 0 var(--separator-color);
+  box-shadow:
+    100px 0 0 var(--separator-color),
+    -100px 0 0 var(--separator-color),
+    500px 0 0 var(--separator-color),
+    -500px 0 0 var(--separator-color),
+    1500px 0 0 var(--separator-color),
+    -1500px 0 0 var(--separator-color),
+    2000px 0 0 var(--separator-color),
+    -2000px 0 0 var(--separator-color);
 }
 
 .contents img,
@@ -2209,7 +2229,9 @@ a.anchorlink {
   text-decoration: none;
   opacity: 0.15;
   display: none;
-  transition: opacity 0.1s ease-in-out, color 0.1s ease-in-out;
+  transition:
+    opacity 0.1s ease-in-out,
+    color 0.1s ease-in-out;
 }
 
 a.anchorlink svg {
