@@ -406,8 +406,6 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
-    arm-none-eabi-gcc \
-    arm-none-eabi-newlib \
     doxygen \
     gcc13
 
