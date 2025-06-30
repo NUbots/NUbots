@@ -1,4 +1,4 @@
-log_level: DEBUG
+log_level: INFO
 
 mode: IK # Options: IK
 
@@ -22,15 +22,15 @@ servo_gains:
   R_ANKLE_PITCH: 8
   R_ANKLE_ROLL: 8
 
-correction_enabled: false
+balance:
+  enabled: false
+  roll_p_gain: 0.9
+  pitch_p_gain: 0.925
 
-roll_p_gain: 0.9
-pitch_p_gain: 0.925
+  roll_i_gain: 0.0
+  pitch_i_gain: 0.0
 
-roll_i_gain: 0.0
-pitch_i_gain: 0.0
+  roll_d_gain: 0.01
+  pitch_d_gain: 0.08
 
-roll_d_gain: 0.01
-pitch_d_gain: 0.08
-
-max_i_error: 0.1
+  max_i_error: 0.1
