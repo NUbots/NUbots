@@ -39,4 +39,4 @@ arms:
   left_elbow: -0.7
 
 # Use balance control. NOTE: correction_enabled must be true in FootController config
-use_balance_control: true
+use_balance_control: false
