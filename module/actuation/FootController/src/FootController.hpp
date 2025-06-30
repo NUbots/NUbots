@@ -134,11 +134,6 @@ namespace module::actuation {
             if (foot_control_task.correction_enabled && cfg.correction_enabled) {
                 // Hwt quaternion
                 Eigen::Quaterniond Hwt_quat(sensors.Htw.inverse().linear());
-                // Test before use
-                // emit(graph("Debug/Hwt_quat_w_before_use", Hwt_quat.w()));
-                // emit(graph("Debug/Hwt_quat_x_before_use", Hwt_quat.x()));
-                // emit(graph("Debug/Hwt_quat_y_before_use", Hwt_quat.y()));
-                // emit(graph("Debug/Hwt_quat_z_before_use", Hwt_quat.z()));
 
                 // Get fused roll and pitch
                 double fused_roll;
@@ -152,15 +147,7 @@ namespace module::actuation {
                 }
 
                 // Get the desired roll and pitch
-                Eigen::Quaterniond Hft_quat;
-                Hft_quat = ik_task->Htf.inverse().linear();
-
-                // Eigen::Quaterniond Hft_quat(ik_task->Htf.inverse().linear());
-                // Debug quat before use
-                // emit(graph("Debug/Hft_quat_w_before_use", Hft_quat.w()));
-                // emit(graph("Debug/Hft_quat_x_before_use", Hft_quat.x()));
-                // emit(graph("Debug/Hft_quat_y_before_use", Hft_quat.y()));
-                // emit(graph("Debug/Hft_quat_z_before_use", Hft_quat.z()));
+                Eigen::Quaterniond Hft_quat(ik_task->Htf.inverse().linear());
 
                 double desired_roll;
                 double desired_pitch;
@@ -231,11 +218,6 @@ namespace module::actuation {
                     // Graph final corrected desired values
                     emit(graph("Balance/Desired_Roll_Final", desired_roll));
                     emit(graph("Balance/Desired_Pitch_Final", desired_pitch));
-
-                    // Graph the raw sensor values
-                    emit(graph("Debug/Raw_Accel_X", sensors.accelerometer.x()));
-                    emit(graph("Debug/Raw_Accel_Y", sensors.accelerometer.y()));
-                    emit(graph("Debug/Raw_Accel_Z", sensors.accelerometer.z()));
                 }
 
                 double desired_yaw = mat_to_rpy_intrinsic(Hft_quat.toRotationMatrix()).z();
