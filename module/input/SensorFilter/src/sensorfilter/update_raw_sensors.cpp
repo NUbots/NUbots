@@ -91,11 +91,46 @@ namespace module::input {
         // **************** Accelerometer and Gyroscope ****************
         // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
         // accelerometer
-        sensors->accelerometer =
+        Eigen::Vector3d raw_accel =
             subcontroller_packet_error ? previous_sensors->accelerometer : raw_sensors.accelerometer.cast<double>();
-        sensors->gyroscope =
+        Eigen::Vector3d raw_gyro =
             subcontroller_packet_error ? previous_sensors->gyroscope : raw_sensors.gyroscope.cast<double>();
 
+        // Apply spike detection and smoothing
+        if (previous_sensors != nullptr) {
+            // Calculate change in sensor readings
+            Eigen::Vector3d accel_change = (raw_accel - prev_smoothed_accel).cwiseAbs();
+            Eigen::Vector3d gyro_change  = (raw_gyro - prev_smoothed_gyro).cwiseAbs();
+
+            // Check for spikes in accelerometer
+            if (accel_change.maxCoeff() > accel_spike_threshold) {
+                log<WARN>("Accelerometer spike detected, change: ", accel_change.maxCoeff(), " m/s²");
+                raw_accel = prev_smoothed_accel;  // Use previous smoothed value
+            }
+
+            // Check for spikes in gyroscope
+            if (gyro_change.maxCoeff() > gyro_spike_threshold) {
+                log<WARN>("Gyroscope spike detected, change: ", gyro_change.maxCoeff(), " rad/s");
+                raw_gyro = prev_smoothed_gyro;  // Use previous smoothed value
+            }
+
+            // Apply low-pass smoothing filter to reduce noise
+            sensors->accelerometer =
+                sensor_smoothing_factor * prev_smoothed_accel + (1.0 - sensor_smoothing_factor) * raw_accel;
+            sensors->gyroscope =
+                sensor_smoothing_factor * prev_smoothed_gyro + (1.0 - sensor_smoothing_factor) * raw_gyro;
+        }
+        else {
+            // No previous data, use raw values
+            sensors->accelerometer = raw_accel;
+            sensors->gyroscope     = raw_gyro;
+        }
+
+        // Store smoothed values for next iteration
+        prev_smoothed_accel = sensors->accelerometer;
+        prev_smoothed_gyro  = sensors->gyroscope;
+
+        // **************** Legacy gyroscope spike detection ****************
         // If we have a previous Sensors message AND (our platform has errors OR the gyro is spinning too fast) then
         // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
         // throw massive numbers without an error flag and if our hardware is working as intended, it should never

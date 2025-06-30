@@ -29,3 +29,65 @@ use_ground_truth: false
 
 # Path to URDF file
 urdf_path: "models/robot.urdf"
+
+# Madgwick filter for orientation estimation
+madgwick:
+  # Beta gain for Madgwick filter
+  correction_gain: 0.05  # Reduced from 0.1 for better stability
+  bias_gain: 0.01        # Reduced from 0.1 for better stability
+
+# Sensor smoothing and adaptive bias learning
+sensor_smoothing:
+  # Smoothing factor for low-pass filtering (0-1, higher = more smoothing)
+  smoothing_factor: 0.85
+  # Threshold for accelerometer spike detection (m/s²)
+  accel_spike_threshold: 5.0
+  # Threshold for gyroscope spike detection (rad/s)
+  gyro_spike_threshold: 2.0
+  # Learning rate for adaptive bias estimation (very slow)
+  bias_learning_rate: 0.0001
+  # Delay before bias learning starts (seconds)
+  bias_learning_delay: 10.0
+  # Maximum orientation change rate before stability correction (rad/s)
+  max_orientation_change_rate: 1.0
+
+# Learned gyro bias (automatically updated, can be manually set)
+# Format: [x, y, z] in rad/s
+# learned_gyro_bias: [0.0, 0.0, 0.0]
+  Kp: 0.2
+  # Integral gain
+  Ki: 0.1
+  # Initial bias
+  initial_bias: [0, 0, 0]
+  # Initial orientation (roll, pitch, yaw)
+  initial_rpy: [0, 0.178, 0]
+
+# Cut off frequency for low-pass filter on torso velocity
+velocity_low_pass:
+  y_cut_off_frequency: 0.01
+  x_cut_off_frequency: 0.05
+
+# Specify whether or not to use ground truth odometry from simulator
+use_ground_truth: false
+
+# Path to URDF file
+urdf_path: "models/robot.urdf"
+
+# Madgwick filter for orientation estimation
+madgwick:
+  # Beta gain for Madgwick filter
+  correction_gain: 0.05 # Reduced from 0.1 for better stability
+  bias_gain: 0.01 # Reduced from 0.1 for better stability
+
+# Sensor smoothing and spike detection
+sensor_smoothing:
+  # Smoothing factor for low-pass filtering (0-1, higher = more smoothing)
+  smoothing_factor: 0.85
+  # Threshold for accelerometer spike detection (m/s²)
+  accel_spike_threshold: 5.0
+  # Threshold for gyroscope spike detection (rad/s)
+  gyro_spike_threshold: 2.0
+  # Time interval for periodic filter bias reset (seconds)
+  filter_reset_interval: 300.0 # 5 minutes
+  # Maximum allowed gyro bias before forced reset (rad/s)
+  max_gyro_bias: 0.5

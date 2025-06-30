@@ -30,6 +30,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <chrono>
 #include <nuclear>
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
@@ -39,10 +40,12 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/math/filter/MadgwickFilter.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
 
 namespace module::input {
 
+    using utility::math::filter::MadgwickFilter;
     using utility::math::filter::MahonyFilter;
 
     using message::behaviour::state::Stability;
@@ -86,10 +89,34 @@ namespace module::input {
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
-        MahonyFilter<double> mahony_filter{};
+        MadgwickFilter<double> madgwick_filter{};
 
         /// @brief Bias used in the mahony filter, updates with each mahony update
-        Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
+        Eigen::Vector3d bias = Eigen::Vector3d::Zero();
+
+        /// @brief Previous smoothed accelerometer reading for spike detection
+        Eigen::Vector3d prev_smoothed_accel = Eigen::Vector3d::Zero();
+        /// @brief Previous smoothed gyroscope reading for spike detection
+        Eigen::Vector3d prev_smoothed_gyro = Eigen::Vector3d::Zero();
+
+        /// @brief Learned gyro bias that persists across filter operations
+        Eigen::Vector3d learned_gyro_bias = Eigen::Vector3d::Zero();
+        /// @brief Learning rate for adaptive bias estimation
+        double bias_learning_rate = 0.0001;  // Very slow learning
+        /// @brief Time when filter was last initialized
+        std::chrono::steady_clock::time_point filter_start_time = std::chrono::steady_clock::now();
+        /// @brief Minimum time before bias learning starts (seconds)
+        double bias_learning_delay = 10.0;
+        /// @brief Maximum acceleration change threshold for spike detection
+        double accel_spike_threshold = 5.0;  // m/s²
+        /// @brief Maximum gyroscope change threshold for spike detection
+        double gyro_spike_threshold = 2.0;  // rad/s
+        /// @brief Smoothing factor for sensor low-pass filtering (0-1, higher = more smoothing)
+        double sensor_smoothing_factor = 0.85;
+        /// @brief Previous orientation for stability checking
+        Eigen::Quaterniond prev_orientation = Eigen::Quaterniond::Identity();
+        /// @brief Maximum orientation change per second (rad/s) before considering it unstable
+        double max_orientation_change_rate = 1.0;
 
         /// @brief Current state of the left button
         bool left_down = false;
@@ -128,6 +155,9 @@ namespace module::input {
         /// @param sensors The sensors message to update
         /// @param raw_sensors The raw sensor data
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
+
+        /// @brief Save learned bias to a file for persistence across restarts
+        void save_learned_bias();
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

@@ -42,6 +42,7 @@ namespace module::input {
     using message::localisation::ResetFieldLocalisation;
 
     using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::math::filter::MadgwickFilter;
     using utility::math::filter::MahonyFilter;
     using utility::support::Expression;
 
@@ -61,11 +62,21 @@ namespace module::input {
             nugus_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
 
             // Configure the Mahony filter
-            mahony_filter = MahonyFilter<double>(
-                config["mahony"]["Kp"].as<Expression>(),
-                config["mahony"]["Ki"].as<Expression>(),
-                Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>()),
-                rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>())));
+            // mahony_filter = MahonyFilter<double>(
+            //     config["mahony"]["Kp"].as<Expression>(),
+            //     config["mahony"]["Ki"].as<Expression>(),
+            //     Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>()),
+            //     rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>())));
+            madgwick_filter = MadgwickFilter<double>(config["madgwick"]["correction_gain"].as<double>(),
+                                                     config["madgwick"]["bias_gain"].as<double>());
+
+            // Sensor smoothing and spike detection config
+            sensor_smoothing_factor     = config["sensor_smoothing"]["smoothing_factor"].as<double>();
+            accel_spike_threshold       = config["sensor_smoothing"]["accel_spike_threshold"].as<double>();
+            gyro_spike_threshold        = config["sensor_smoothing"]["gyro_spike_threshold"].as<double>();
+            bias_learning_rate          = config["sensor_smoothing"]["bias_learning_rate"].as<double>();
+            bias_learning_delay         = config["sensor_smoothing"]["bias_learning_delay"].as<double>();
+            max_orientation_change_rate = config["sensor_smoothing"]["max_orientation_change_rate"].as<double>();
 
             // Velocity filter config
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();

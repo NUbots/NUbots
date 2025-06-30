@@ -19,3 +19,9 @@ mahony:
 velocity_low_pass:
   x_cut_off_frequency: 0.015
   y_cut_off_frequency: 0.01
+
+# Madgwick filter for orientation estimation
+madgwick:
+  # Beta gain for Madgwick filter
+  correction_gain: 0.01
+  bias_gain: 0.01
