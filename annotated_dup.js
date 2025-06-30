@@ -309,9 +309,6 @@ var annotated_dup =
         [ "SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", "classmodule_1_1support_1_1SignalCatcher" ]
       ] ],
       [ "tools", null, [
-        [ "FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", "classmodule_1_1tools_1_1FirmwareInstaller" ],
-        [ "FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
-        [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
         [ "LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", "classmodule_1_1tools_1_1LocalisationBenchmark" ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
         [ "OdometryBenchmark", "classmodule_1_1tools_1_1OdometryBenchmark.html", "classmodule_1_1tools_1_1OdometryBenchmark" ],
