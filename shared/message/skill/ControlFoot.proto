@@ -37,8 +37,6 @@ message ControlLeftFoot {
     google.protobuf.Timestamp time = 2;
     // Bool to indicate whether or not to attempt to correct orientation with IMU
     bool correction_enabled = 3;
-    // Bool to indicate whether or not to keep the foot orientated with ground
-    bool keep_foot_orientated = 4;
 }
 
 message ControlRightFoot {
@@ -48,6 +46,4 @@ message ControlRightFoot {
     google.protobuf.Timestamp time = 2;
     // Bool to indicate whether or not to attempt to correct orientation with IMU
     bool correction_enabled = 3;
-    // Bool to indicate whether or not to keep the foot orientated with ground
-    bool keep_foot_orientated = 4;
 }

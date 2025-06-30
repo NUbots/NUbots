@@ -215,12 +215,10 @@ namespace module::skill {
                 // Construct ControlFoot tasks
                 emit<Task>(std::make_unique<ControlLeftFoot>(Htl,
                                                              goal_time,
-                                                             cfg.walk_generator_parameters.use_balance_control,
-                                                             false));
+                                                             cfg.walk_generator_parameters.use_balance_control));
                 emit<Task>(std::make_unique<ControlRightFoot>(Htr,
                                                               goal_time,
-                                                              cfg.walk_generator_parameters.use_balance_control,
-                                                              false));
+                                                              cfg.walk_generator_parameters.use_balance_control));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
