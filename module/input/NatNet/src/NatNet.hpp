@@ -62,6 +62,7 @@ namespace module::input {
         ///@brief Flag indicating if clock offset has been initialized
         bool clock_offset_initialized = false;
 
+        ///@brief Estimate the network delay between the local and NatNet clock
         void estimate_network_delay(std::chrono::steady_clock::time_point receive_time, double natnet_timestamp);
 
     public:
