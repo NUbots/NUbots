@@ -98,6 +98,8 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
+            // Configure balance control
+            cfg.use_balance_control = config["use_balance_control"].as<bool>();
         });
 
         // Start - Runs every time the Kick provider starts (wasn't running)
@@ -139,8 +141,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = kick_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, true, false));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, true, false));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, cfg.use_balance_control));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, cfg.use_balance_control));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
