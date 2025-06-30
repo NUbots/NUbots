@@ -88,6 +88,10 @@ namespace module::purpose {
             cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
             cfg.is_goalie          = config["is_goalie"].as<bool>();
             cfg.startup_delay      = config["startup_delay"].as<int>();
+
+            if (cfg.force_playing) {
+                emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+            }
         });
 
         // Start the Director graph for the soccer scenario!
