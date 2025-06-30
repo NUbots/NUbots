@@ -263,6 +263,8 @@ namespace module::platform::OpenCR {
 
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Offset for the gyroscope to zero it at rest
+            Eigen::Vector3f gyro_offset = Eigen::Vector3f::Zero();
             struct {
                 struct {
                     /// @brief Container for the max tolerable temp for all servos

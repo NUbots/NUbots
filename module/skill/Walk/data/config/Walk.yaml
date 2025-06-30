@@ -11,7 +11,7 @@ walk:
     # Step height (in meters)
     height: 0.085
     # Lateral distance in meters between feet (how spread apart the feet should be)
-    width: 0.225
+    width: 0.255
     # Ratio of the step_period where the foot should be at its highest point, between [0 1].
     apex_ratio: 0.4
   torso:
@@ -41,3 +41,8 @@ arms:
   left_shoulder_roll: 0.35
   right_elbow: -0.7
   left_elbow: -0.7
+
+kick:
+  # Step kick parameters
+  kick_velocity_x: 0.35 # Forward velocity during kick (m/s)
+  kick_velocity_y: 0.001 # Lateral velocity during kick (m/s)

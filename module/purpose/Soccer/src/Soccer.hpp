@@ -60,7 +60,7 @@ namespace module::purpose {
 
         /// @brief Smart enum for the robot's position
         struct Position {
-            enum Value { ALL_ROUNDER, STRIKER, GOALIE, DEFENDER, DYNAMIC };
+            enum Value { ALL_ROUNDER, GOALIE, STRIKER, DEFENDER, SUPPORT, DYNAMIC };
             Value value = Value::ALL_ROUNDER;
 
             Position() = default;

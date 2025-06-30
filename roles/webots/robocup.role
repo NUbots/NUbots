@@ -40,7 +40,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::SplineKick
+  skill::KickWalk
   skill::GetUp
   skill::Look
   skill::Dive
@@ -63,9 +63,11 @@ nuclear_role(
   strategy::AlignBallToGoal
   strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::AllRounder
-  purpose::Striker
-  purpose::Defender
-  purpose::Soccer
+  purpose::SoccerNew
+  purpose::Attack
+  purpose::ReadyAttack
+  purpose::Defend
+  purpose::FieldPlayer
+  purpose::Support
   purpose::Goalie
 )

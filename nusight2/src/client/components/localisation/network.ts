@@ -50,7 +50,13 @@ export class LocalisationNetwork {
   @action
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hfw = Matrix4.from(field.Hfw);
+
+    // Flip the field if the robot is on the red team
+    robot.Hfw =
+      robot.teamColour === "red"
+        ? (robot.Hfw = Matrix4.fromRotationZ(Math.PI).multiply(Matrix4.from(field.Hfw)))
+        : Matrix4.from(field.Hfw);
+
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
     robot.associationLines = field.associationLines.map((line) => ({
       start: Vector3.from(line.start),
@@ -105,6 +111,8 @@ export class LocalisationNetwork {
     } else {
       robot.color = "black";
     }
+
+    robot.teamColour = purpose.teamColour == message.input.GameState.TeamColour.RED ? "red" : "blue";
   }
 
   @action.bound
@@ -126,7 +134,7 @@ export class LocalisationNetwork {
       return {
         id: localisation_robot.id!,
         rRWw: Vector3.from(localisation_robot.rRWw),
-        color: localisation_robot.isBlue ? "blue" : "red",
+        color: localisation_robot.teammate ? robot.teamColour : robot.teamColour === "red" ? "blue" : "red",
       };
     });
   }
