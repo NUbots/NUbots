@@ -58,7 +58,7 @@ namespace module::actuation {
             }
 
             // Balance config
-            cfg.correction_enabled = config["balance"]["correction_enabled"].as<bool>();
+            cfg.correction_enabled = config["balance"]["enabled"].as<bool>();
             cfg.roll_p_gain        = config["balance"]["roll_p_gain"].as<double>();
             cfg.pitch_p_gain       = config["balance"]["pitch_p_gain"].as<double>();
             cfg.roll_i_gain        = config["balance"]["roll_i_gain"].as<double>();
