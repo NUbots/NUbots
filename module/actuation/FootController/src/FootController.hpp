@@ -180,7 +180,6 @@ namespace module::actuation {
 
                 // Graph P Correction
                 if (log_level <= DEBUG) {
-                    // Graph the desired roll and pitch after P control
                     emit(graph("Balance/P_Roll_Correction", cfg.roll_p_gain * roll_error));
                     emit(graph("Balance/P_Pitch_Correction", cfg.pitch_p_gain * pitch_error));
                 }
@@ -231,6 +230,7 @@ namespace module::actuation {
                 ik_task->Htf = Htf_corrected;
             }
             else {
+                // Correction is not enabled, use the original task
                 ik_task->Htf = foot_control_task.Htf;
             }
 
