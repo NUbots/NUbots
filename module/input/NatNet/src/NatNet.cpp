@@ -97,7 +97,8 @@ namespace module::input {
                         }
                     });
             }
-            cfg.dump_packets = config["dump_packets"].as<bool>();
+            cfg.dump_packets      = config["dump_packets"].as<bool>();
+            cfg.MAX_DELAY_SAMPLES = config["max_delay_samples"].as<size_t>();
         });
     }
 
@@ -378,7 +379,7 @@ namespace module::input {
             delay_samples.push_back(delay);
 
             // Keep only the most recent samples
-            if (delay_samples.size() > MAX_DELAY_SAMPLES) {
+            if (delay_samples.size() > cfg.MAX_DELAY_SAMPLES) {
                 delay_samples.erase(delay_samples.begin());
             }
 
@@ -413,8 +414,7 @@ namespace module::input {
 
         if (time_diff > 0 && timestamp_diff > 0) {
             double instantaneous_offset = receive_time_seconds - natnet_timestamp;
-            // Use exponential moving average with alpha = 0.01 for slow adaptation
-            estimated_clock_offset = 0.99 * estimated_clock_offset + 0.01 * instantaneous_offset;
+            estimated_clock_offset      = 0.99 * estimated_clock_offset + 0.01 * instantaneous_offset;
         }
 
         last_frame_receive_time = receive_time;

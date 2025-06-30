@@ -47,6 +47,9 @@ namespace module::input {
             uint32_t data_port = 0;
             /// @brief Allows motive packets to be dumped to file
             bool dump_packets = false;
+
+            ///@brief Maximum number of delay samples to store
+            size_t MAX_DELAY_SAMPLES = 100;
         } cfg;
 
         ///@brief Time point when the last frame was received
@@ -55,8 +58,6 @@ namespace module::input {
         double last_natnet_timestamp = 0.0;
         ///@brief Vector storing recent network delay samples
         std::vector<double> delay_samples;
-        ///@brief Maximum number of delay samples to store
-        static constexpr size_t MAX_DELAY_SAMPLES = 100;
         ///@brief Estimated offset between local and NatNet clock
         double estimated_clock_offset = 0.0;
         ///@brief Flag indicating if clock offset has been initialized
