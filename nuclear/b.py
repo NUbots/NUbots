@@ -138,8 +138,28 @@ async def main():
     useable = [c for c in candidates if sys.argv[1 : len(c) + 1] == c]
     useable.sort(key=lambda x: len(x), reverse=True)
 
+    # If we can't find a match, try subsequence matching the input arguments to find a command
+    if not useable:
+        # Matching first letter, and then the rest of the letters in order
+        substring_candidates = [
+            c
+            for c in candidates
+            if all(
+                r.fullmatch(c)
+                for r, c in zip(
+                    (re.compile(".*".join(map(re.escape, a)) + ".*") for a in sys.argv[1 : len(c) + 1]),
+                    c,
+                )
+            )
+        ]
+        # Only allow if the fuzzy match is unique
+        if len(substring_candidates) == 1:
+            useable = substring_candidates
+            # Replace the fuzzy arguments with the matched command
+            cmd = useable[0]
+            sys.argv[1 : len(cmd) + 1] = cmd
+
     for components in useable:
-        if sys.argv[1 : len(components) + 1] == components:
             module_name = ".".join(components)
             if spec := importlib.util.find_spec(module_name):
                 module = importlib.util.module_from_spec(spec)
