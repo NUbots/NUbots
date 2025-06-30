@@ -24,6 +24,7 @@ servo_gains:
 
 balance:
   enabled: false
+
   roll_p_gain: 0.9
   pitch_p_gain: 0.925
 
