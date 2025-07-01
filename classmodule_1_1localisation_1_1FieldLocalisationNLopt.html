@@ -225,6 +225,12 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a4789012e8f2095752dccabd58e17a8cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4789012e8f2095752dccabd58e17a8cd">debug_field_localisation</a> (Eigen::Isometry3d Hfw, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a4789012e8f2095752dccabd58e17a8cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find error between computed Hfw and ground truth if available.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4789012e8f2095752dccabd58e17a8cd">More...</a><br /></td></tr>
 <tr class="separator:a4789012e8f2095752dccabd58e17a8cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a682c5f136956d8b117ce2fd2fd27964a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a">greedy_association</a> (const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const Eigen::Isometry3d &amp;Hfw)</td></tr>
+<tr class="memdesc:a682c5f136956d8b117ce2fd2fd27964a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform data association between intersection observations and landmarks using nearest neighbour.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a">More...</a><br /></td></tr>
+<tr class="separator:a682c5f136956d8b117ce2fd2fd27964a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fe31b774192866e5aae3636ce42c1bd"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1fe31b774192866e5aae3636ce42c1bd">hungarian_association</a> (const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const Eigen::Isometry3d &amp;Hfw)</td></tr>
+<tr class="memdesc:a1fe31b774192866e5aae3636ce42c1bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform data association between intersection observations and landmarks using the Hungarian algorithm.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1fe31b774192866e5aae3636ce42c1bd">More...</a><br /></td></tr>
+<tr class="separator:a1fe31b774192866e5aae3636ce42c1bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc1160c4cb18d64161bfafd169bfade"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4fc1160c4cb18d64161bfafd169bfade">position_in_map</a> (const Eigen::Vector3d &amp;particle, const Eigen::Vector3d &amp;rPWw)</td></tr>
 <tr class="memdesc:a4fc1160c4cb18d64161bfafd169bfade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a field line point from world {w} to position in the distance map {m}.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4fc1160c4cb18d64161bfafd169bfade">More...</a><br /></td></tr>
 <tr class="separator:a4fc1160c4cb18d64161bfafd169bfade"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -426,6 +432,98 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 </div>
 </div>
+<a id="a682c5f136956d8b117ce2fd2fd27964a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a682c5f136956d8b117ce2fd2fd27964a">&#9670;&nbsp;</a></span>greedy_association()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt; module::localisation::FieldLocalisationNLopt::greedy_association </td>
+          <td>(</td>
+          <td class="paramtype">const std::shared_ptr&lt; const FieldIntersections &gt; &amp;&#160;</td>
+          <td class="paramname"><em>field_intersections</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Hfw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Perform data association between intersection observations and landmarks using nearest neighbour. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field_intersections</td><td>The field intersections </td></tr>
+    <tr><td class="paramname">Hfw</td><td>The homogenous transformation matrix from world {w} to field {f} space </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>std::vector&lt;std::pair&lt;Eigen::Vector3d, Eigen::Vector3d&gt;&gt; The associated pairs of field intersections and landmarks </dd></dl>
+
+</div>
+</div>
+<a id="a1fe31b774192866e5aae3636ce42c1bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fe31b774192866e5aae3636ce42c1bd">&#9670;&nbsp;</a></span>hungarian_association()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt; module::localisation::FieldLocalisationNLopt::hungarian_association </td>
+          <td>(</td>
+          <td class="paramtype">const std::shared_ptr&lt; const FieldIntersections &gt; &amp;&#160;</td>
+          <td class="paramname"><em>field_intersections</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Hfw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Perform data association between intersection observations and landmarks using the Hungarian algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field_intersections</td><td>The field intersections </td></tr>
+    <tr><td class="paramname">Hfw</td><td>The homogenous transformation matrix from world {w} to field {f} space </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>std::vector&lt;std::pair&lt;Eigen::Vector3d, Eigen::Vector3d&gt;&gt; The associated pairs of field intersections and landmarks </dd></dl>
+
+</div>
+</div>
 <a id="a4fc1160c4cb18d64161bfafd169bfade"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4fc1160c4cb18d64161bfafd169bfade">&#9670;&nbsp;</a></span>position_in_map()</h2>
 
@@ -601,6 +699,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/localisation/FieldLocalisationNLopt/src/<a class="el" href="FieldLocalisationNLopt_8hpp_source.html">FieldLocalisationNLopt.hpp</a></li>
 <li>module/localisation/FieldLocalisationNLopt/src/FieldLocalisationNLopt.cpp</li>
+<li>module/localisation/FieldLocalisationNLopt/src/localisation/association.cpp</li>
 <li>module/localisation/FieldLocalisationNLopt/src/localisation/reset.cpp</li>
 </ul>
 </div><!-- contents -->
@@ -609,7 +708,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li>
-    <li class="footer">Generated on Mon Jun 30 2025 23:19:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jul 1 2025 00:19:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

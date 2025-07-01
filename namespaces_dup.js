@@ -855,6 +855,9 @@ var namespaces_dup =
         [ "ServoMap< RightShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
         [ "ServoMap< RightShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4" ]
       ] ],
+      [ "algorithm", null, [
+        [ "determine_assignment", "assignment_8hpp.html#aa9e1a3a19a13a65053a0b9a886227654", null ]
+      ] ],
       [ "file", "namespaceutility_1_1file.html", "namespaceutility_1_1file" ],
       [ "input", null, [
         [ "FrameID", "structutility_1_1input_1_1FrameID.html", "structutility_1_1input_1_1FrameID" ],

@@ -5,6 +5,8 @@ var classmodule_1_1localisation_1_1FieldLocalisationNLopt =
     [ "compute_Hfw", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3ceee27c66409dabd78ec22957d8bfc3", null ],
     [ "data_association", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9a989fd8ce7e309f7002bd0ca7d7ba2e", null ],
     [ "debug_field_localisation", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4789012e8f2095752dccabd58e17a8cd", null ],
+    [ "greedy_association", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a", null ],
+    [ "hungarian_association", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1fe31b774192866e5aae3636ce42c1bd", null ],
     [ "position_in_map", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4fc1160c4cb18d64161bfafd169bfade", null ],
     [ "run_field_line_optimisation", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c", null ],
     [ "uncertainty_reset", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9fa30b90f7d6d279e4b1312a1192dd8c", null ],

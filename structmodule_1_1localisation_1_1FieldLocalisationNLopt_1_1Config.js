@@ -31,6 +31,7 @@ var structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config =
     [ "state_change_weight", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a4d73dc8e649957dd7b55bc39d4f997d1", null ],
     [ "step_size", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aab913d6391edc0f63d1f78919843a117", null ],
     [ "use_ground_truth_localisation", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af48eb9b6efb78db5298c78077c79e712", null ],
+    [ "use_hungarian", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ad6bc0647ba9100dd90f488f3186bb88a", null ],
     [ "window_size", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a3000b4348c1c4df7135398c0925f4c28", null ],
     [ "xtol_rel", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a7a15457bdf13245bd8f816e5a80e836a", null ]
 ];

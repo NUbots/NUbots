@@ -68,13 +68,14 @@ var searchData=
   ['goalie_5fbounding_5fbox_509',['goalie_bounding_box',['../structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3c3e573498c06480c2a5f56601f7c355',1,'module::purpose::Soccer::Config']]],
   ['goalpost_510',['GoalPost',['../structmodule_1_1localisation_1_1GoalPost.html',1,'module::localisation']]],
   ['gpt_511',['GPT',['../classmodule_1_1skill_1_1GPT.html#a15878f31c7fb475556893de2f86c164c',1,'module::skill::GPT::GPT()'],['../classmodule_1_1skill_1_1GPT.html',1,'module::skill::GPT']]],
-  ['greenhorizondetector_512',['GreenHorizonDetector',['../classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64',1,'module::vision::GreenHorizonDetector::GreenHorizonDetector()'],['../classmodule_1_1vision_1_1GreenHorizonDetector.html',1,'module::vision::GreenHorizonDetector']]],
-  ['grid_5fsize_513',['grid_size',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ae24e91c5a8c1fc476e5287039c79f7e7',1,'module::localisation::FieldLocalisation::Config::grid_size()'],['../structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a02b425390e48493f42e672eba70fbee7',1,'module::localisation::FieldLocalisationNLopt::Config::grid_size()']]],
-  ['group_514',['group',['../structmodule_1_1extension_1_1component_1_1Provider.html#a7d170dc5268b9ff31ef13af2f48f17ac',1,'module::extension::component::Provider']]],
-  ['groupinfo_515',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]],
-  ['groupinfostore_516',['GroupInfoStore',['../structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html',1,'extension::behaviour::information']]],
-  ['groups_517',['groups',['../classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d',1,'module::extension::Director']]],
-  ['gyro_518',['gyro',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]],
-  ['gyro_5fmag_519',['gyro_mag',['../structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a4b4e3ff14513a5753b536ae878021e1f',1,'module::planning::FallingRelaxPlanner::Config::gyro_mag()'],['../classmodule_1_1planning_1_1FallingRelaxPlanner.html#a98b0b5fe4b5aa1a13158a108ded3314a',1,'module::planning::FallingRelaxPlanner::gyro_mag()']]],
-  ['gyro_5foffset_520',['gyro_offset',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a23244b3976c1c0f6dcaaebb8264fc39a',1,'module::platform::OpenCR::HardwareIO::Config']]]
+  ['greedy_5fassociation_512',['greedy_association',['../classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a',1,'module::localisation::FieldLocalisationNLopt']]],
+  ['greenhorizondetector_513',['GreenHorizonDetector',['../classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64',1,'module::vision::GreenHorizonDetector::GreenHorizonDetector()'],['../classmodule_1_1vision_1_1GreenHorizonDetector.html',1,'module::vision::GreenHorizonDetector']]],
+  ['grid_5fsize_514',['grid_size',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ae24e91c5a8c1fc476e5287039c79f7e7',1,'module::localisation::FieldLocalisation::Config::grid_size()'],['../structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a02b425390e48493f42e672eba70fbee7',1,'module::localisation::FieldLocalisationNLopt::Config::grid_size()']]],
+  ['group_515',['group',['../structmodule_1_1extension_1_1component_1_1Provider.html#a7d170dc5268b9ff31ef13af2f48f17ac',1,'module::extension::component::Provider']]],
+  ['groupinfo_516',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]],
+  ['groupinfostore_517',['GroupInfoStore',['../structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html',1,'extension::behaviour::information']]],
+  ['groups_518',['groups',['../classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d',1,'module::extension::Director']]],
+  ['gyro_519',['gyro',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]],
+  ['gyro_5fmag_520',['gyro_mag',['../structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a4b4e3ff14513a5753b536ae878021e1f',1,'module::planning::FallingRelaxPlanner::Config::gyro_mag()'],['../classmodule_1_1planning_1_1FallingRelaxPlanner.html#a98b0b5fe4b5aa1a13158a108ded3314a',1,'module::planning::FallingRelaxPlanner::gyro_mag()']]],
+  ['gyro_5foffset_521',['gyro_offset',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a23244b3976c1c0f6dcaaebb8264fc39a',1,'module::platform::OpenCR::HardwareIO::Config']]]
 ];
