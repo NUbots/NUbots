@@ -409,10 +409,6 @@ namespace module::localisation {
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
-
-    public:
-        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
-        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::localisation
 
