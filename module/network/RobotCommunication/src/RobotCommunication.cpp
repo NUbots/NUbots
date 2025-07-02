@@ -170,7 +170,7 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkTo>& walk_to,
-                         const std::shared_ptr<const message::localisation::Robots>& robot_localisation,
+                         const std::shared_ptr<const Robots>& robot_localisation,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
