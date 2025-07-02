@@ -32,11 +32,14 @@
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 
+#include "utility/nusight/NUhelpers.hpp"
+
 namespace module::planning {
 
     using extension::Configuration;
     using message::planning::WalkProposal;
     using message::skill::Walk;
+    using utility::nusight::graph;
 
     PlanSmoothPath::PlanSmoothPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -54,6 +57,13 @@ namespace module::planning {
             // Apply acceleration limiting and velocity constraints
             Eigen::Vector3d smoothed_command = apply_acceleration_limiting(walk.velocity_target);
             smoothed_command                 = constrain_velocity(smoothed_command);
+
+            // Visualise the walk path in NUsight
+            emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
+
+            Eigen::Vector3d smooth_diff = smoothed_command - walk.velocity_target;
+            // Log the smoothing difference
+            emit(graph("Walk Smoothing Difference", smooth_diff.x(), smooth_diff.y(), smooth_diff.z()));
 
             // Create new smoothed walk command
             auto smoothed_walk = std::make_unique<Walk>(smoothed_command);
