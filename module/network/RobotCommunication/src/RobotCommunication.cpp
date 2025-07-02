@@ -288,22 +288,16 @@ namespace module::network {
                         // Convert world to field coords
                         Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
 
-                        // Store position in message
-                        rc_robot.position = static_cast<float>(field_position);
-                        // Extract and store robot orientation from world to camera transform
-                        rc_robot.position.z() = mat_to_rpy_intrinsic(local_bot.Hcw.rotation()).z();
+                        // Store 2D position (x, y) and set (z) to 0
+                        rc_robot.position     = rRFf.cast<float>();
+                        rc_robot.position.z() = 0.0f;
 
                         // Check if covariance matrix is valid
-                        if (local_bot.covariance.rows() >= 3 && local_bot.covariance.cols() >= 3) {
-                            // Copy block and cast to float
-                            rc_robot.covariance = local_bot.covariance.block(0, 0, 3, 3).cast<float>();
-                            // Calculate cost as the trace of block
-                            rc_robot.cost = static_cast<float>(local_bot.covariance.block(0, 0, 3, 3).trace());
-                        }
-                        else {
-                            // Use zero covariance and zero cost if matrix is invalid
-                            rc_robot.covariance = Eigen::Matrix3f::Zero();
-                            rc_robot.cost       = 0.0f;
+                        // Initialize with zeros
+                        rc_robot.covariance = Eigen::Matrix3f::Zero();
+                        if (local_bot.covariance.rows() >= 2 && local_bot.covariance.cols() >= 2) {
+                            rc_robot.covariance.block<2, 2>(0, 0) =
+                                local_bot.covariance.block<2, 2>(0, 0).cast<float>();
                         }
 
                         if (local_bot.teammate) {
