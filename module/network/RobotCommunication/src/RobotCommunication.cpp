@@ -37,6 +37,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
@@ -52,6 +53,7 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::localisation::Robots;
     using message::planning::WalkTo;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
@@ -158,6 +160,7 @@ namespace module::network {
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
            Optional<With<WalkTo>>,
+           Optional<With<message::localisation::Robots>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -167,6 +170,7 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkTo>& walk_to,
+                         const std::shared_ptr<const message::localisation::Robots>& robot_localisation,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -212,7 +216,7 @@ namespace module::network {
                         msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
-                        // msg->current_pose.cost       = field->cost;
+                        msg->current_pose.cost       = field->cost;
                     }
                 }
 
@@ -277,6 +281,63 @@ namespace module::network {
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+                if (robot_localisation && field) {
+                    // Get field to world transformation
+                    Eigen::Isometry3d Hfw(field->Hfw);
+
+                    // Iterate through robots detected by localisation
+                    for (const auto& local_bot : robot_localisation->robots) {
+                        // Create new robot message
+                        message::input::Robot rc_robot;
+
+                        // Assign player ID from purpose (if avaliable) else use robot self ID
+                        if (local_bot.purpose.player_id != 0) {
+                            rc_robot.player_id = local_bot.purpose.player_id;
+                        }
+                        else {
+                            rc_robot.player_id = local_bot.id;
+                        }
+
+                        // Extract robot position in world
+                        Eigen::Vector3d world_position(local_bot.rRWw.x(), local_bot.rRWw.y(), local_bot.rRWw.z());
+                        // Convert world to field coords
+                        Eigen::Vector3d field_position = Hfw * world_position;
+
+                        // Store position in message
+                        rc_robot.position.x() = static_cast<float>(field_position.x());
+                        rc_robot.position.y() = static_cast<float>(field_position.y());
+                        // Extract and store robot orientation from world to camera transform
+                        rc_robot.position.z() = mat_to_rpy_intrinsic(local_bot.Hcw.rotation()).z();
+
+                        // Check if covariance matrix is valid
+                        if (local_bot.covariance.rows() >= 3 && local_bot.covariance.cols() >= 3) {
+                            // Copy block and cast to float
+                            rc_robot.covariance = local_bot.covariance.block(0, 0, 3, 3).cast<float>();
+                            // Calculate cost as the trace of block
+                            rc_robot.cost = static_cast<float>(local_bot.covariance.block(0, 0, 3, 3).trace());
+                        }
+                        else {
+                            // Use zero covariance and zero cost if matrix is invalid
+                            rc_robot.covariance = Eigen::Matrix3f::Zero();
+                            rc_robot.cost       = 0.0f;
+                        }
+
+                        if (local_bot.teammate) {
+                            rc_robot.team = msg->current_pose.team;
+                        }
+                        else {
+                            if (msg->current_pose.team == message::input::Team::BLUE) {
+                                rc_robot.team = message::input::Team::RED;
+                            }
+                            else {
+                                rc_robot.team = message::input::Team::BLUE;
+                            }
+                        }
+
+                        // Add robot information to list of other robots in message
+                        msg->others.push_back(std::move(rc_robot));
+                    }
+                }
 
 
                 // Current purpose (soccer position) of the Robot
