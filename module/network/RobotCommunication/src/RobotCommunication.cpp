@@ -313,12 +313,7 @@ namespace module::network {
                             rc_robot.team = msg->current_pose.team;
                         }
                         else {
-                            if (msg->current_pose.team == message::input::Team::BLUE) {
-                                rc_robot.team = message::input::Team::RED;
-                            }
-                            else {
-                                rc_robot.team = message::input::Team::BLUE;
-                            }
+                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE ? message::input::Team::RED : message::input::Team::BLUE;
                         }
 
                         // Add robot information to list of other robots in message
