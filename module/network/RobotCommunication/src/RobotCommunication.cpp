@@ -232,7 +232,7 @@ namespace module::network {
                     Eigen::Isometry3d Hfd = (field->Hfw * sensors->Hrw.inverse()) * walk_to->Hrd;
 
                     // Extract 3d translation
-                    Eigen::Vector3d tFr = Hfr.translation();
+                    Eigen::Vector3d rDFf = Hfd.translation();
                     // Store position
                     msg->target_pose.position = tFr.cast<float>();
                     // Extract yaw from roation matrix
