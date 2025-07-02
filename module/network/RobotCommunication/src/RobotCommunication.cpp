@@ -292,8 +292,7 @@ namespace module::network {
                         Eigen::Vector3d rRFf = Hfw * local_bot.rRWw;
 
                         // Store position in message
-                        rc_robot.position.x() = static_cast<float>(field_position.x());
-                        rc_robot.position.y() = static_cast<float>(field_position.y());
+                        rc_robot.position = static_cast<float>(field_position);
                         // Extract and store robot orientation from world to camera transform
                         rc_robot.position.z() = mat_to_rpy_intrinsic(local_bot.Hcw.rotation()).z();
 
