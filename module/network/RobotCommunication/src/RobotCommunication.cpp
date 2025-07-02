@@ -234,9 +234,9 @@ namespace module::network {
                     // Extract 3d translation
                     Eigen::Vector3d rDFf = Hfd.translation();
                     // Store position
-                    msg->target_pose.position = tFr.cast<float>();
-                    // Extract yaw from roation matrix
-                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfr.rotation()).z();
+                    msg->target_pose.position = rDFf.cast<float>();
+                    // Extract yaw from rotation matrix
+                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfd.rotation()).z();
                     // Copy team and player ID to target pose
                     msg->target_pose.team      = msg->current_pose.team;
                     msg->target_pose.player_id = config.player_id;
