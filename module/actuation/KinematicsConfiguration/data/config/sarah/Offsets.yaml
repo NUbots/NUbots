@@ -57,15 +57,15 @@ servos:
     simulated: false
   - # [14] R_ANKLE_PITCH
     direction: -1
-    offset: 0.0
+    offset: -0.01
     simulated: false
   - # [15] L_ANKLE_PITCH
     direction: 1
-    offset: 0.0
+    offset: -0.01
     simulated: false
   - # [16] R_ANKLE_ROLL
     direction: -1
-    offset: -0.214
+    offset: -0.200
     simulated: false
   - # [17] L_ANKLE_ROLL
     direction: -1
