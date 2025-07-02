@@ -228,14 +228,8 @@ namespace module::network {
 
                 // Target pose (Position and orientation of the players target on the field specified)
                 if (walk_to && sensors && field) {
-                    // Get target pose relative to robot
-                    Eigen::Isometry3d Hrd = walk_to->Hrd;
-                    // Current robot's torso pose in world coords
-                    Eigen::Isometry3d Htw = sensors->Htw;
-                    // Transform from field to world coords
-                    Eigen::Isometry3d Hfw = field->Hfw;
-                    // Convert target pose into field coords
-                    Eigen::Isometry3d Hfr = Hfw * Htw.inverse() * Hrd;
+                    // Get target pose in field coords (Hfr * Hrd = Hfd)
+                    Eigen::Isometry3d Hfd = (field->Hfw * sensors->Hrw.inverse()) * walk_to->Hrd;
 
                     // Extract 3d translation
                     Eigen::Vector3d tFr = Hfr.translation();
