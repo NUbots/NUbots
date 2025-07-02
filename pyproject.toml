@@ -53,4 +53,5 @@ dependencies = [
     # Optimisation
     "optuna==4.3.0",
     "plotly>=6.1.2",
+    "licenseheaders>=0.8.8",
 ]
