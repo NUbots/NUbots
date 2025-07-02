@@ -61,14 +61,12 @@ namespace module::vision {
         };
 
         /// @brief The objects that the Yolo model can detect
-        std::vector<Object> objects = {
-            {"ball", Eigen::Vector4d(0, 1, 0, 1), 0.0},
-            {"goalpost", Eigen::Vector4d(0, 0, 1, 1), 0.0},
-            {"robot", Eigen::Vector4d(1, 1, 1, 1), 0.0},
-            {"L-intersection", Eigen::Vector4d(1, 0, 1, 1), 0.0},
-            {"T-intersection", Eigen::Vector4d(1, 0, 0, 1), 0.0},
-            {"X-intersection", Eigen::Vector4d(1, 0.5, 0, 1), 0.0},
-        };
+        std::vector<Object> objects = {{"ball", Eigen::Vector4d(1, 1, 1, 1), 0.0},
+                                       {"goal post", Eigen::Vector4d(1, 0, 1, 1), 0.0},
+                                       {"robot", Eigen::Vector4d(1, 0.5, 0, 1), 0.0},
+                                       {"L-intersection", Eigen::Vector4d(1, 0, 0, 1), 0.0},
+                                       {"T-intersection", Eigen::Vector4d(0, 1, 0, 1), 0.0},
+                                       {"X-intersection", Eigen::Vector4d(0, 0, 1, 1), 0.0}};
 
 
     public:

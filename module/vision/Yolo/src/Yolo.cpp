@@ -27,7 +27,6 @@
 #include "Yolo.hpp"
 
 #include <chrono>
-#include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <vector>
@@ -94,7 +93,7 @@ namespace module::vision {
                 log<INFO>("Loading YOLO model from: ", model_path);
                 log<INFO>("Using device: ", device);
 
-                ov::Core core;
+                ov::Core core{};
 
                 // Try to fallback to CPU if GPU fails
                 try {
@@ -112,24 +111,6 @@ namespace module::vision {
 
                 infer_request = compiled_model.create_infer_request();
                 log<INFO>("Model loaded successfully");
-
-                // Log input and output info for debugging
-                auto inputs  = compiled_model.inputs();
-                auto outputs = compiled_model.outputs();
-                log<DEBUG>("Model has ", inputs.size(), " inputs and ", outputs.size(), " outputs");
-
-                if (!inputs.empty()) {
-                    auto input_shape = inputs[0].get_shape();
-                    log<DEBUG>("Input shape: [",
-                               input_shape[0],
-                               ", ",
-                               input_shape[1],
-                               ", ",
-                               input_shape[2],
-                               ", ",
-                               input_shape[3],
-                               "]");
-                }
             }
             catch (const std::exception& e) {
                 log<ERROR>("Failed to load YOLO model: ", e.what());
@@ -171,20 +152,7 @@ namespace module::vision {
                 auto input_port  = compiled_model.input();
                 auto input_shape = input_port.get_shape();
 
-                // Log input shape for debugging
-                if (log_level <= DEBUG) {
-                    log<DEBUG>("Model input shape: [",
-                               input_shape[0],
-                               ", ",
-                               input_shape[1],
-                               ", ",
-                               input_shape[2],
-                               ", ",
-                               input_shape[3],
-                               "]");
-                }
-
-                // Use the model's expected input size instead of hardcoded 620
+                // Use the model's expected input size
                 int model_input_size = static_cast<int>(input_shape[2]);  // Assuming NCHW format
                 cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
                                                       1.0 / 255.0,
@@ -218,7 +186,7 @@ namespace module::vision {
                 std::vector<float> class_confidences;
                 std::vector<cv::Rect> boxes;
 
-                // Calculate scale factor based on the actual model input size (using already declared variables)
+                // Calculate scale factor based on the model's input size
                 float scale = static_cast<float>(letterbox_img.size[0]) / static_cast<float>(model_input_size);
 
                 // Figure out the bbox, class_id and class_score
@@ -330,7 +298,7 @@ namespace module::vision {
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "goalpost") {
+                    if (objects[class_id].name == "goal post") {
                         Goal g;
                         g.measurements.emplace_back();
                         g.measurements.back().type = Goal::MeasurementType::CENTRE;
