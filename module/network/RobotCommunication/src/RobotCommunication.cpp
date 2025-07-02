@@ -288,10 +288,8 @@ namespace module::network {
                         rc_robot.player_id = local_bot.purpose.player_id;
 
 
-                        // Extract robot position in world
-                        Eigen::Vector3d world_position(local_bot.rRWw.x(), local_bot.rRWw.y(), local_bot.rRWw.z());
                         // Convert world to field coords
-                        Eigen::Vector3d field_position = Hfw * world_position;
+                        Eigen::Vector3d rRFf = Hfw * local_bot.rRWw;
 
                         // Store position in message
                         rc_robot.position.x() = static_cast<float>(field_position.x());
