@@ -265,8 +265,7 @@ namespace module::network {
                     // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
                     // This it to prevent everyone echoing
 
-
-                    // No confidence field. msg->ball.confidence = loc_ball->confidence;
+                    msg->ball.confidence = loc_ball->confidence;
 
 
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
@@ -274,10 +273,8 @@ namespace module::network {
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
-                // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+                // Where the robot thinks the other robots are.
                 if (robot_localisation && field) {
-                    // Get field to world transformation
-                    Eigen::Isometry3d Hfw(field->Hfw);
 
                     // Iterate through robots detected by localisation
                     for (const auto& local_bot : robot_localisation->robots) {
@@ -289,7 +286,7 @@ namespace module::network {
 
 
                         // Convert world to field coords
-                        Eigen::Vector3d rRFf = Hfw * local_bot.rRWw;
+                        Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
 
                         // Store position in message
                         rc_robot.position = static_cast<float>(field_position);
@@ -313,7 +310,9 @@ namespace module::network {
                             rc_robot.team = msg->current_pose.team;
                         }
                         else {
-                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE ? message::input::Team::RED : message::input::Team::BLUE;
+                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
+                                                ? message::input::Team::RED
+                                                : message::input::Team::BLUE;
                         }
 
                         // Add robot information to list of other robots in message
