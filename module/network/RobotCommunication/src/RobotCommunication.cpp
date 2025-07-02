@@ -160,7 +160,7 @@ namespace module::network {
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
            Optional<With<WalkTo>>,
-           Optional<With<message::localisation::Robots>>,
+           Optional<With<Robots>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
