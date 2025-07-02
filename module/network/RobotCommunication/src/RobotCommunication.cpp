@@ -284,13 +284,9 @@ namespace module::network {
                         // Create new robot message
                         message::input::Robot rc_robot;
 
-                        // Assign player ID from purpose (if avaliable) else use robot self ID
-                        if (local_bot.purpose.player_id != 0) {
-                            rc_robot.player_id = local_bot.purpose.player_id;
-                        }
-                        else {
-                            rc_robot.player_id = local_bot.id;
-                        }
+                        // Assign player ID from purpose
+                        rc_robot.player_id = local_bot.purpose.player_id;
+
 
                         // Extract robot position in world
                         Eigen::Vector3d world_position(local_bot.rRWw.x(), local_bot.rRWw.y(), local_bot.rRWw.z());
