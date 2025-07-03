@@ -86,9 +86,36 @@ namespace module::vision {
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
             // Compile the model and create inference request object
-            compiled_model =
-                ov::Core().compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
-            infer_request = compiled_model.create_infer_request();
+            try {
+                std::string model_path = config["model_path"].as<std::string>();
+                std::string device     = config["device"].as<std::string>();
+
+                log<INFO>("Loading YOLO model from: ", model_path);
+                log<INFO>("Using device: ", device);
+
+                ov::Core core{};
+
+                // Try to fallback to CPU if GPU fails
+                try {
+                    compiled_model = core.compile_model(model_path, device);
+                }
+                catch (const std::exception& e) {
+                    if (device == "GPU") {
+                        log<WARN>("Failed to compile model on GPU, falling back to CPU: ", e.what());
+                        compiled_model = core.compile_model(model_path, "CPU");
+                    }
+                    else {
+                        throw;
+                    }
+                }
+
+                infer_request = compiled_model.create_infer_request();
+                log<INFO>("Model loaded successfully");
+            }
+            catch (const std::exception& e) {
+                log<ERROR>("Failed to load YOLO model: ", e.what());
+                throw;
+            }
         });
 
         on<Trigger<Image>, Optional<With<GreenHorizon>>, Single>().then(
@@ -120,19 +147,35 @@ namespace module::vision {
                 int max               = MAX(width, height);
                 cv::Mat letterbox_img = cv::Mat::zeros(max, max, CV_8UC3);
                 img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
-                cv::Mat blob =
-                    cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
+
+                // Get input port for model with one input and check expected dimensions
+                auto input_port  = compiled_model.input();
+                auto input_shape = input_port.get_shape();
+
+                // Use the model's expected input size
+                int model_input_size = static_cast<int>(input_shape[2]);  // Assuming NCHW format
+                cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
+                                                      1.0 / 255.0,
+                                                      cv::Size(model_input_size, model_input_size),
+                                                      cv::Scalar(),
+                                                      true);
 
                 // -------- Feed the blob into the input node of the Model -------
-                // Get input port for model with one input
-                auto input_port = compiled_model.input();
-                // Create tensor from external memory
-                ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape(), blob.ptr(0));
+                // Create tensor and copy data instead of using external memory pointer
+                ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape());
+                std::memcpy(input_tensor.data<float>(), blob.ptr<float>(), input_tensor.get_byte_size());
+
                 // Set input tensor for model with one input
                 infer_request.set_input_tensor(input_tensor);
 
                 // -------- Perform Inference --------
-                infer_request.infer();
+                try {
+                    infer_request.infer();
+                }
+                catch (const std::exception& e) {
+                    log<ERROR>("Inference failed: ", e.what());
+                    return;
+                }
                 auto output = infer_request.get_output_tensor(0);
 
                 // -------- Postprocess the result --------
@@ -142,7 +185,9 @@ namespace module::vision {
                 std::vector<int> class_ids;
                 std::vector<float> class_confidences;
                 std::vector<cv::Rect> boxes;
-                float scale = letterbox_img.size[0] / 640.0;
+
+                // Calculate scale factor based on the model's input size
+                float scale = static_cast<float>(letterbox_img.size[0]) / static_cast<float>(model_input_size);
 
                 // Figure out the bbox, class_id and class_score
                 for (int i = 0; i < output_buffer.rows; i++) {
