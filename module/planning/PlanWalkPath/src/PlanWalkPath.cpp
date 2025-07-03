@@ -225,9 +225,6 @@ namespace module::planning {
                 // Limit the velocity to the maximum translational and angular velocity
                 velocity_target = constrain_velocity(velocity_target);
 
-                // Visualise the walk path in NUsight
-                emit(graph("Walk Proposal", velocity_target.x(), velocity_target.y(), velocity_target.z()));
-
                 // Emit the walk task with the calculated velocities
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
 

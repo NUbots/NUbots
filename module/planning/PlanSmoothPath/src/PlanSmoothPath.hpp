@@ -47,6 +47,11 @@ namespace module::planning {
             double max_translational_velocity_y = 0.1;
             /// @brief Maximum angular velocity
             double max_angular_velocity = 0.4;
+            /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
+            Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);
+            /// @brief Exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d alpha           = Eigen::Vector3d(1, 1, 1);
+            Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
         } cfg;
 
         /// @brief Previous walk command for smoothing
@@ -55,17 +60,9 @@ namespace module::planning {
         /// @brief Last update time for calculating dt
         NUClear::clock::time_point last_update_time = NUClear::clock::now();
 
-        /// @brief Apply acceleration limiting to walk command
-        /// @param target_command The desired walk command
-        /// @return Smoothed walk command
-        Eigen::Vector3d apply_acceleration_limiting(const Eigen::Vector3d& target_command);
-
-        /// @brief Constrain velocity components to maximum limits
-        /// @param velocity_command The velocity command to constrain
-        /// @return Constrained velocity command
-        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& velocity_command);
-
     public:
+        /// @brief Frequency of walk engine updates
+        static constexpr int UPDATE_FREQUENCY = 10;
         /// @brief Called by the powerplant to build and setup the PlanSmoothPath reactor.
         explicit PlanSmoothPath(std::unique_ptr<NUClear::Environment> environment);
     };

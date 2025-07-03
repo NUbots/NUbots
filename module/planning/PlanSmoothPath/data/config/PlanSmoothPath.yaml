@@ -12,3 +12,8 @@ max_translational_velocity_y: 0.2
 
 # Maximum angular velocity (rad/s)
 max_angular_velocity: 0.4
+
+# Exponential smoothing time constant for the [x,y,theta]-velocity
+tau: [1, 1, 1]
+# tau: [0.1, 0.1, 1]
+# tau: [0, 0, 0]

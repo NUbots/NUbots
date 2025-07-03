@@ -33,6 +33,8 @@
 #include "message/skill/Walk.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
+
 
 namespace module::planning {
 
@@ -40,6 +42,7 @@ namespace module::planning {
     using message::planning::WalkProposal;
     using message::skill::Walk;
     using utility::nusight::graph;
+    using utility::support::Expression;
 
     PlanSmoothPath::PlanSmoothPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -50,13 +53,36 @@ namespace module::planning {
             cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
             cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
             cfg.max_angular_velocity         = config["max_angular_velocity"].as<double>();
+            cfg.tau                          = config["tau"].as<Expression>();
+            // Ensure safety for division by zero if tau is zero
+            cfg.alpha = (cfg.tau.array() > 0.01)
+                            .select((1.0 - (-1.0 / (UPDATE_FREQUENCY * cfg.tau.array())).exp()).matrix(),
+                                    Eigen::Vector3d::Ones());
+            cfg.one_minus_alpha = Eigen::Vector3d::Ones() - cfg.alpha;
+            log<INFO>("Smoothing walk with time constant tau: (",
+                      cfg.tau.x(),
+                      ", ",
+                      cfg.tau.y(),
+                      ", ",
+                      cfg.tau.z(),
+                      ") corresponding to alpha: (",
+                      cfg.alpha.x(),
+                      ", ",
+                      cfg.alpha.y(),
+                      ", ",
+                      cfg.alpha.z(),
+                      ")");
         });
 
         // Intercept Walk commands and apply smoothing
-        on<Provide<WalkProposal>>().then([this](const WalkProposal& walk) {
-            // Apply acceleration limiting and velocity constraints
-            Eigen::Vector3d smoothed_command = apply_acceleration_limiting(walk.velocity_target);
-            smoothed_command                 = constrain_velocity(smoothed_command);
+        on<Provide<WalkProposal>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this](const WalkProposal&
+                                                                                                        walk) {
+            // Visualise the walk path in NUsight
+            emit(graph("Walk Proposal", walk.velocity_target.x(), walk.velocity_target.y(), walk.velocity_target.z()));
+
+            // Apply exponential smoothing to the walk command
+            Eigen::Vector3d smoothed_command =
+                walk.velocity_target.cwiseProduct(cfg.alpha) + previous_walk_command.cwiseProduct(cfg.one_minus_alpha);
 
             // Visualise the walk path in NUsight
             emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
@@ -75,47 +101,6 @@ namespace module::planning {
             // Forward the smoothed command to the actual Walk skill
             emit<Task>(std::move(smoothed_walk));
         });
-    }
-
-    Eigen::Vector3d PlanSmoothPath::apply_acceleration_limiting(const Eigen::Vector3d& target_command) {
-        auto current_time = NUClear::clock::now();
-        double dt         = std::chrono::duration<double>(current_time - last_update_time).count();
-
-        // Calculate maximum allowed change in velocity components
-        double max_delta = cfg.max_acceleration * dt;
-
-        Eigen::Vector3d limited_command = target_command;
-
-        // Limit each component's acceleration
-        for (int i = 0; i < 3; i++) {
-            double delta = target_command[i] - previous_walk_command[i];
-            if (std::abs(delta) > max_delta) {
-                limited_command[i] = previous_walk_command[i] + (delta > 0 ? max_delta : -max_delta);
-            }
-        }
-
-        return limited_command;
-    }
-
-    Eigen::Vector3d PlanSmoothPath::constrain_velocity(const Eigen::Vector3d& velocity_command) {
-        Eigen::Vector2d translational_velocity = velocity_command.head<2>();
-
-        // If either translational component exceeds the limit, scale the vector to fit within the limits
-        if (std::abs(velocity_command.x()) >= cfg.max_translational_velocity_x
-            || std::abs(velocity_command.y()) >= cfg.max_translational_velocity_y) {
-            double sx =
-                velocity_command.x() != 0.0 ? cfg.max_translational_velocity_x / std::abs(velocity_command.x()) : 0.0;
-            double sy =
-                velocity_command.y() != 0.0 ? cfg.max_translational_velocity_y / std::abs(velocity_command.y()) : 0.0;
-            // Select the minimum scale factor to ensure neither limit is exceeded but direction is maintained
-            double s               = std::min(sx, sy);
-            translational_velocity = velocity_command.head<2>() * s;
-        }
-
-        // Ensure the angular velocity is within the limits
-        double angular_velocity = std::clamp(velocity_command.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
-
-        return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
     }
 
 }  // namespace module::planning
