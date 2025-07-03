@@ -1,7 +1,8 @@
+# Configuration for RobotLocalisation in Webots simulation with ground truth
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
-# UKF config
+# UKF config (not used when ground truth is enabled)
 ukf:
   noise:
     measurement:
@@ -22,4 +23,5 @@ max_distance_from_field: 1.0
 
 max_localisation_cost: 2.0
 
-use_ground_truth: true # Use ground truth robot data from Webots when available (for testing/simulation)
+# Use ground truth robot data from Webots when available (for testing/simulation)
+use_ground_truth: true

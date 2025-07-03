@@ -2,4 +2,4 @@ log_level: INFO
 
 receive_port: 3838
 send_port: 3939
-udp_filter_address: "" # If set, will only accept GameController packets from this IP address
+udp_filter_address: "10.1.120.40" # If set, will only accept GameController packets from this IP address
