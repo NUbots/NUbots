@@ -277,7 +277,7 @@ namespace module::platform::NUSense {
             }
 
             // Emit the raw sensor data
-            emit(std::move(sensors));
+            emit(sensors);
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
