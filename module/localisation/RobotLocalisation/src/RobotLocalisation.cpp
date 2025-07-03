@@ -80,6 +80,7 @@ namespace module::localisation {
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
             cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
+            cfg.use_ground_truth                = config["use_ground_truth"].as<bool>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -96,19 +97,43 @@ namespace module::localisation {
 
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
-                for (const auto& tracked_robot : tracked_robots) {
-                    auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
-                    LocalisationRobot localisation_robot;
-                    localisation_robot.id                  = tracked_robot.id;
-                    localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
-                    localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
-                    localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
-                    localisation_robot.time_of_measurement = tracked_robot.last_time_update;
 
-                    localisation_robot.teammate = tracked_robot.teammate;
-                    localisation_robot.purpose  = tracked_robot.purpose;
+                // Check if we have ground truth robot data from Webots
+                if (cfg.use_ground_truth && horizon.vision_ground_truth.exists && !horizon.vision_ground_truth.robots.empty()) {
+                    // Use ground truth data from Webots
+                    for (const auto& gt_robot : horizon.vision_ground_truth.robots) {
+                        LocalisationRobot localisation_robot;
+                        localisation_robot.id = std::stoi(gt_robot.robot_id.substr(gt_robot.robot_id.find_last_of('_') + 1)); // Extract number from "RED_1"
+                        localisation_robot.rRWw = Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
+                        localisation_robot.vRw = Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
+                        localisation_robot.covariance = Eigen::Matrix4d::Zero(); // Ground truth has no uncertainty
+                        localisation_robot.time_of_measurement = horizon.timestamp;
 
-                    localisation_robots->robots.push_back(localisation_robot);
+                        // Determine if teammate based on team color
+                        localisation_robot.teammate = (gt_robot.team == "BLUE"); // Assume we're blue team
+
+                        // Set purpose information
+                        localisation_robot.purpose.player_id = gt_robot.player_number;
+                        // Could set other purpose fields if needed
+
+                        localisation_robots->robots.push_back(localisation_robot);
+                    }
+                } else {
+                    // Fall back to UKF-based tracking
+                    for (const auto& tracked_robot : tracked_robots) {
+                        auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+                        LocalisationRobot localisation_robot;
+                        localisation_robot.id                  = tracked_robot.id;
+                        localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+                        localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
+                        localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
+                        localisation_robot.time_of_measurement = tracked_robot.last_time_update;
+
+                        localisation_robot.teammate = tracked_robot.teammate;
+                        localisation_robot.purpose  = tracked_robot.purpose;
+
+                        localisation_robots->robots.push_back(localisation_robot);
+                    }
                 }
 
                 emit(std::move(localisation_robots));

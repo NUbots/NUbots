@@ -106,11 +106,28 @@ message RobotPoseGroundTruth {
     vec3 vTf = 3;
 }
 
+message RobotGroundTruth {
+    /// Robot identifier (e.g., "RED_1", "BLUE_2")
+    string robot_id = 1;
+    /// Team color ("RED" or "BLUE")
+    string team = 2;
+    /// Player number within team
+    int32 player_number = 3;
+    /// Position of robot in world space
+    fvec3 rRWw = 4;
+    /// Velocity of robot in world space
+    fvec3 vRw = 5;
+    /// Rotation of robot (yaw angle in radians)
+    float yaw = 6;
+}
+
 message VisionGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
     /// Vector from the world to the ball in world space.
     fvec3 rBWw = 2;
+    /// Robot ground truth data
+    repeated RobotGroundTruth robots = 3;
 }
 
 message SensorMeasurements {
