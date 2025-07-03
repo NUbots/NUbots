@@ -138,7 +138,7 @@ namespace module::purpose {
                     return;
                 }
 
-                // Make an ignore list with the goalie, if they exist
+                // Make an ignore list with inactive teammates
                 std::vector<unsigned int> ignore_ids{};
                 // Add inactive robots to the ignore list
                 if (robots) {

@@ -34,6 +34,7 @@
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
+#include "message/planning/LookAround.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/strategy/FindBall.hpp"
@@ -57,6 +58,7 @@ namespace module::purpose {
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::Robots;
+    using message::planning::LookAround;
     using message::purpose::Attack;
     using message::purpose::Defend;
     using message::purpose::Purpose;
@@ -77,7 +79,9 @@ namespace module::purpose {
 
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
+            cfg.equidistant_threshold = config["equidistant_threshold"].as<double>();
+            cfg.ball_threshold        = config["ball_threshold"].as<double>();
         });
 
         on<Provide<GoalieTask>,
@@ -115,7 +119,7 @@ namespace module::purpose {
 
                 // If there's no ball message, we can't play, just look for the ball
                 if (ball == nullptr) {
-                    Eigen::Vector2d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
+                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("No ball message, waiting in middle of goals.");
@@ -127,11 +131,22 @@ namespace module::purpose {
                 double defending_third_x = fd.dimensions.field_length / 3.0;
                 if (rBFf.x() < defending_third_x) {
                     // Not in defending third, just stay in spot and keep looking
-                    Eigen::Vector2d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
+                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("Ball not in defending third, waiting in middle of goals.");
                     return;
+                }
+
+                // Make an ignore list with inactive teammates
+                std::vector<unsigned int> ignore_ids{};
+                // Add inactive robots to the ignore list
+                if (robots) {
+                    for (const auto& robot : robots->robots) {
+                        if (robot.teammate && !robot.purpose.active) {
+                            ignore_ids.push_back(robot.purpose.player_id);
+                        }
+                    }
                 }
 
                 // The ball is in the defending third, so we can play
@@ -173,7 +188,7 @@ namespace module::purpose {
                 double y_position = rBFf.y();
                 // Clamp the y position to the goal line
                 y_position = std::clamp(y_position, -fd.dimensions.goal_width / 2.0, fd.dimensions.goal_width / 2.0);
-                Eigen::Vector2d rPFf(fd.dimensions.field_length / 2.0, y_position, 0.0);
+                Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, y_position, 0.0);
                 Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
             });
@@ -185,7 +200,7 @@ namespace module::purpose {
            When<Phase, std::equal_to, Phase::READY>>()
             .then([this](const FieldDescription& fd, const GameState& game_state, const GlobalConfig& global_config) {
                 // Walk to middle of goals
-                Eigen::Vector2d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
+                Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
                 Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
 
@@ -206,5 +221,6 @@ namespace module::purpose {
                                                true,
                                                game_state.team.team_colour));
             });
+    }
 
-    }  // namespace module::purpose
+}  // namespace module::purpose

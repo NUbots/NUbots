@@ -36,6 +36,15 @@
 namespace module::purpose {
 
     class Goalie : public ::extension::behaviour::BehaviourReactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief The distance from a robot to consider it equidistant, to consider error
+            double equidistant_threshold = 0.0;
+            /// @brief The distance from the ball to consider it in possession
+            double ball_threshold = 0.0;
+        } cfg;
+
     public:
         /// @brief Called by the powerplant to build and setup the Goalie reactor.
         explicit Goalie(std::unique_ptr<NUClear::Environment> environment);
