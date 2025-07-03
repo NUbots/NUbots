@@ -155,10 +155,7 @@ namespace module::planning {
 
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
-                    // If we are walking backwards, change direction
-                    rDRr = is_walking_backwards ? walk_backwards(false) : rDRr;
-                    desired_velocity_magnitude =
-                        is_walking_backwards ? velocity_magnitude : accelerate_to_target(desired_heading);
+                    desired_velocity_magnitude = accelerate_to_target(desired_heading);
                 }
                 else {
                     // Normalise error between [0, 1] inside align radius
@@ -171,12 +168,14 @@ namespace module::planning {
 
                     bool aligned_large_angle = std::abs(angle_to_final_heading) < cfg.max_aligned_angle
                                                && std::abs(angle_to_target) > max_strafe_angle;
-                    rDRr            = aligned_large_angle    ? walk_backwards(true)
-                                      : is_walking_backwards ? walk_backwards(false)
-                                                             : rDRr;
+
+                    if (aligned_large_angle) {
+                        // If we are aligned with the final heading and the angle to the target is large, walk backwards
+                        // to align ourselves with the target
+                        rDRr = walk_backwards();
+                    }
                     desired_heading = aligned_large_angle ? 0.0 : desired_heading;
-                    desired_velocity_magnitude =
-                        aligned_large_angle || is_walking_backwards ? velocity_magnitude : strafe_to_target(error);
+                    desired_velocity_magnitude = aligned_large_angle ? velocity_magnitude : strafe_to_target(error);
                 }
 
                 // Calculate the target velocity
@@ -227,35 +226,32 @@ namespace module::planning {
     }
 
     double PlanWalkPath::strafe_to_target(const double error) {
+        // If we are walking backwards, change direction
+        is_walking_backwards = false;
+        log<DEBUG>("[PlanWalkPath::strafe_to_target] is_walking_backwards set to false, velocity_magnitude = ", velocity_magnitude);
         // "Accelerate", assuring velocity is always positive
         velocity_magnitude = std::max(velocity_magnitude, cfg.starting_velocity);
         // "Proportional control" to strafe towards the target inside align radius
         return cfg.strafe_gain * error;
     }
 
-    Eigen::Vector2d PlanWalkPath::walk_backwards(bool desired_direction) {
-        if (desired_direction) {
-            // Start walking backwards slowly if not already walking backwards
-            velocity_magnitude   = !is_walking_backwards ? cfg.starting_velocity : velocity_magnitude;
-            is_walking_backwards = true;
+    Eigen::Vector2d PlanWalkPath::walk_backwards() {
+        // Set flag so that we have a backwards buffer
+        is_walking_backwards = true;
+        log<DEBUG>("[PlanWalkPath::walk_backwards] is_walking_backwards set to true, velocity_magnitude = ", velocity_magnitude);
 
-            // Walk on spot, then walk backwards
-            velocity_magnitude +=
-                std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
-
-            // Step backwards while keeping the forward direction
-            return cfg.backwards_vector;
-        }
-
-        // Slow down before changing direction
-        velocity_magnitude   = std::max(velocity_magnitude * cfg.acceleration_multiplier, cfg.starting_velocity);
-        is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
+        // Walk on spot, then walk backwards
+        velocity_magnitude +=
+            std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
 
         // Step backwards while keeping the forward direction
         return cfg.backwards_vector;
     }
 
     double PlanWalkPath::accelerate_to_target(double desired_heading) {
+        // If we are walking backwards, change direction
+        is_walking_backwards = false;
+        log<DEBUG>("[PlanWalkPath::accelerate_to_target] is_walking_backwards set to false, velocity_magnitude = ", velocity_magnitude);
         // "Accelerate", assuring velocity is always positive
         velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
         // Limit the velocity magnitude to the maximum velocity
