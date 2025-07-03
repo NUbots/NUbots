@@ -171,6 +171,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1input_1_1NatNet.html','
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1input_1_1NatNet-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -287,11 +288,38 @@ std::map&lt; uint32_t, <a class="el" href="structmodule_1_1input_1_1NatNet_1_1Sk
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>version</b> = 0</td></tr>
 <tr class="separator:aae4553bb114c1aa6f31497fa9d95fd98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a091971661bf863623c012563ea02dbce"><td class="memItemLeft" align="right" valign="top"><a id="a091971661bf863623c012563ea02dbce"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1NatNet.html#a091971661bf863623c012563ea02dbce">estimate_network_delay</a> (std::chrono::steady_clock::time_point receive_time, double natnet_timestamp)</td></tr>
+<tr class="memdesc:a091971661bf863623c012563ea02dbce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimate the network delay between the local and <a class="el" href="classmodule_1_1input_1_1NatNet.html">NatNet</a> clock. <br /></td></tr>
+<tr class="separator:a091971661bf863623c012563ea02dbce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a5cf8c24049a1910af299feae305fd6ad"><td class="memItemLeft" align="right" valign="top"><a id="a5cf8c24049a1910af299feae305fd6ad"></a>
 struct <a class="el" href="structmodule_1_1input_1_1NatNet_1_1Config.html">module::input::NatNet::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a5cf8c24049a1910af299feae305fd6ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87f7b6ff9d78b5d7cdb31fb00b3e9a88"><td class="memItemLeft" align="right" valign="top"><a id="a87f7b6ff9d78b5d7cdb31fb00b3e9a88"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1NatNet.html#a87f7b6ff9d78b5d7cdb31fb00b3e9a88">clock_offset_initialized</a> = false</td></tr>
+<tr class="memdesc:a87f7b6ff9d78b5d7cdb31fb00b3e9a88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag indicating if clock offset has been initialized. <br /></td></tr>
+<tr class="separator:a87f7b6ff9d78b5d7cdb31fb00b3e9a88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a619d97a41124b2be5feb3530aa4cfdc7"><td class="memItemLeft" align="right" valign="top"><a id="a619d97a41124b2be5feb3530aa4cfdc7"></a>
+std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1NatNet.html#a619d97a41124b2be5feb3530aa4cfdc7">delay_samples</a></td></tr>
+<tr class="memdesc:a619d97a41124b2be5feb3530aa4cfdc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vector storing recent network delay samples. <br /></td></tr>
+<tr class="separator:a619d97a41124b2be5feb3530aa4cfdc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ccc42add4b9ead44b2be2ddc6ab8643"><td class="memItemLeft" align="right" valign="top"><a id="a1ccc42add4b9ead44b2be2ddc6ab8643"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1NatNet.html#a1ccc42add4b9ead44b2be2ddc6ab8643">estimated_clock_offset</a> = 0.0</td></tr>
+<tr class="memdesc:a1ccc42add4b9ead44b2be2ddc6ab8643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimated offset between local and <a class="el" href="classmodule_1_1input_1_1NatNet.html">NatNet</a> clock. <br /></td></tr>
+<tr class="separator:a1ccc42add4b9ead44b2be2ddc6ab8643"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f35ca23ba9288dee96b47bc32a8305a"><td class="memItemLeft" align="right" valign="top"><a id="a1f35ca23ba9288dee96b47bc32a8305a"></a>
+std::chrono::steady_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1NatNet.html#a1f35ca23ba9288dee96b47bc32a8305a">last_frame_receive_time</a></td></tr>
+<tr class="memdesc:a1f35ca23ba9288dee96b47bc32a8305a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time point when the last frame was received. <br /></td></tr>
+<tr class="separator:a1f35ca23ba9288dee96b47bc32a8305a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45cb690013b0ee1d17a3e8fe41c4a2a6"><td class="memItemLeft" align="right" valign="top"><a id="a45cb690013b0ee1d17a3e8fe41c4a2a6"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1NatNet.html#a45cb690013b0ee1d17a3e8fe41c4a2a6">last_natnet_timestamp</a> = 0.0</td></tr>
+<tr class="memdesc:a45cb690013b0ee1d17a3e8fe41c4a2a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timestamp from the last <a class="el" href="classmodule_1_1input_1_1NatNet.html">NatNet</a> frame. <br /></td></tr>
+<tr class="separator:a45cb690013b0ee1d17a3e8fe41c4a2a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/input/NatNet/src/<a class="el" href="NatNet_8hpp_source.html">NatNet.hpp</a></li>
@@ -303,7 +331,7 @@ struct <a class="el" href="structmodule_1_1input_1_1NatNet_1_1Config.html">modul
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1NatNet.html">NatNet</a></li>
-    <li class="footer">Generated on Wed Jul 2 2025 04:54:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jul 3 2025 11:56:51 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

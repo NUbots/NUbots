@@ -216,9 +216,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a78b0225cda7e145d91d5f83ae48271a5"><td class="memItemLeft" align="right" valign="top">Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a78b0225cda7e145d91d5f83ae48271a5">compute_Hfw</a> (const Eigen::Vector3d &amp;particle)</td></tr>
 <tr class="memdesc:a78b0225cda7e145d91d5f83ae48271a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a78b0225cda7e145d91d5f83ae48271a5">More...</a><br /></td></tr>
 <tr class="separator:a78b0225cda7e145d91d5f83ae48271a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd6ee8f1d58c59665920bdd99312cd23"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#abd6ee8f1d58c59665920bdd99312cd23">debug_field_localisation</a> (Eigen::Isometry3d Hfw, const RawSensors &amp;raw_sensors)</td></tr>
-<tr class="memdesc:abd6ee8f1d58c59665920bdd99312cd23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find error between computed Hfw and ground truth if available.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#abd6ee8f1d58c59665920bdd99312cd23">More...</a><br /></td></tr>
-<tr class="separator:abd6ee8f1d58c59665920bdd99312cd23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab01f47b31c135e0eebabd39a04d15916"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ab01f47b31c135e0eebabd39a04d15916">debug_field_localisation</a> (Eigen::Isometry3d Hfw)</td></tr>
+<tr class="memdesc:ab01f47b31c135e0eebabd39a04d15916"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find error between computed Hfw and ground truth if available.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#ab01f47b31c135e0eebabd39a04d15916">More...</a><br /></td></tr>
+<tr class="separator:ab01f47b31c135e0eebabd39a04d15916"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a356274a0a3eee7cdbd9705948f39ea33"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a356274a0a3eee7cdbd9705948f39ea33">position_in_map</a> (const Eigen::Vector3d &amp;particle, const Eigen::Vector3d &amp;rPWw)</td></tr>
 <tr class="memdesc:a356274a0a3eee7cdbd9705948f39ea33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a field line point from world {w} to position in the distance map {m}.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a356274a0a3eee7cdbd9705948f39ea33">More...</a><br /></td></tr>
 <tr class="separator:a356274a0a3eee7cdbd9705948f39ea33"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -239,6 +239,14 @@ struct <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1
 <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html">utility::math::filter::ParticleFilter</a>&lt; double, <a class="el" href="classmodule_1_1localisation_1_1FieldModel.html">FieldModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#abebd3a63aac67d9ac2e272a08e544fef">filter</a></td></tr>
 <tr class="memdesc:abebd3a63aac67d9ac2e272a08e544fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle filter class. <br /></td></tr>
 <tr class="separator:abebd3a63aac67d9ac2e272a08e544fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b00722f2b9a549452b4dd416c7d748e"><td class="memItemLeft" align="right" valign="top"><a id="a3b00722f2b9a549452b4dd416c7d748e"></a>
+Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a3b00722f2b9a549452b4dd416c7d748e">ground_truth_Hfw</a> = Eigen::Isometry3d::Identity()</td></tr>
+<tr class="memdesc:a3b00722f2b9a549452b4dd416c7d748e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ground truth Hfw. <br /></td></tr>
+<tr class="separator:a3b00722f2b9a549452b4dd416c7d748e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0ffc52f22d772289e69b6de84bc8160"><td class="memItemLeft" align="right" valign="top"><a id="ac0ffc52f22d772289e69b6de84bc8160"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ac0ffc52f22d772289e69b6de84bc8160">ground_truth_initialised</a> = false</td></tr>
+<tr class="memdesc:ac0ffc52f22d772289e69b6de84bc8160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool indicating ground truth localisation (Hfw) computed. <br /></td></tr>
+<tr class="separator:ac0ffc52f22d772289e69b6de84bc8160"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9088430d15da9aa140452f3ae2ff35ba"><td class="memItemLeft" align="right" valign="top"><a id="a9088430d15da9aa140452f3ae2ff35ba"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9088430d15da9aa140452f3ae2ff35ba">last_time_update_time</a></td></tr>
 <tr class="memdesc:a9088430d15da9aa140452f3ae2ff35ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last time filter was updated. <br /></td></tr>
@@ -314,8 +322,8 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a
 
 </div>
 </div>
-<a id="abd6ee8f1d58c59665920bdd99312cd23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd6ee8f1d58c59665920bdd99312cd23">&#9670;&nbsp;</a></span>debug_field_localisation()</h2>
+<a id="ab01f47b31c135e0eebabd39a04d15916"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab01f47b31c135e0eebabd39a04d15916">&#9670;&nbsp;</a></span>debug_field_localisation()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -324,18 +332,8 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a
           <td class="memname">void module::localisation::FieldLocalisation::debug_field_localisation </td>
           <td>(</td>
           <td class="paramtype">Eigen::Isometry3d&#160;</td>
-          <td class="paramname"><em>Hfw</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>Hfw</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">const RawSensors &amp;&#160;</td>
-          <td class="paramname"><em>raw_sensors</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -344,7 +342,6 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">Hfw</td><td>Computed Hfw to be compared against ground truth </td></tr>
-    <tr><td class="paramname">raw_sensors</td><td>The raw sensor data </td></tr>
   </table>
   </dd>
 </dl>
@@ -425,7 +422,7 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html">FieldLocalisation</a></li>
-    <li class="footer">Generated on Wed Jul 2 2025 04:54:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jul 3 2025 11:56:51 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -135,6 +135,7 @@ var annotated_dup =
         [ "FieldLocalisationNLopt", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html", "classmodule_1_1localisation_1_1FieldLocalisationNLopt" ],
         [ "FieldModel", "classmodule_1_1localisation_1_1FieldModel.html", "classmodule_1_1localisation_1_1FieldModel" ],
         [ "GoalPost", "structmodule_1_1localisation_1_1GoalPost.html", "structmodule_1_1localisation_1_1GoalPost" ],
+        [ "Mocap", "classmodule_1_1localisation_1_1Mocap.html", "classmodule_1_1localisation_1_1Mocap" ],
         [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ]

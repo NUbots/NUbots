@@ -4,6 +4,8 @@ var classmodule_1_1tools_1_1OdometryBenchmark =
     [ "OdometryBenchmark", "classmodule_1_1tools_1_1OdometryBenchmark.html#ad099dfeecf38ad7bdbaafd62d4245085", null ],
     [ "config", "classmodule_1_1tools_1_1OdometryBenchmark.html#aad356754393fb332300711e72eb2c9df", null ],
     [ "count", "classmodule_1_1tools_1_1OdometryBenchmark.html#a75ff5526f8ca356f01227a66a373887f", null ],
+    [ "ground_truth_Hfw", "classmodule_1_1tools_1_1OdometryBenchmark.html#aa7d80e460b8c3dc3725314791903d10a", null ],
+    [ "ground_truth_initialised", "classmodule_1_1tools_1_1OdometryBenchmark.html#a5d2917da057ebfca459831fcff57646c", null ],
     [ "total_error_pitch", "group__ErrorAccumulations.html#ga872d7b5ae62c4d59e9f5e187a601bee7", null ],
     [ "total_error_roll", "group__ErrorAccumulations.html#ga1c3db757eee61bcb8ce53f8791306f7d", null ],
     [ "total_error_x", "group__ErrorAccumulations.html#ga829497d40f7b1b4053e244fd60840954", null ],
