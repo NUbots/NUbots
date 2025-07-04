@@ -266,8 +266,6 @@ namespace module::network {
                     // This it to prevent everyone echoing
 
                     msg->ball.confidence = loc_ball->confidence;
-
-
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
