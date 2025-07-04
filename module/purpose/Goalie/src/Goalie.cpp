@@ -113,6 +113,18 @@ namespace module::purpose {
                     return;
                 }
 
+                bool teammates_exist = std::find_if(robots->robots.begin(),
+                                                    robots->robots.end(),
+                                                    [](const auto& robot) { return robot.teammate; })
+                                       != robots->robots.end();
+
+                // Act like a field player
+                if (!teammates_exist) {
+                    log<DEBUG>("No teammates, act as field player.");
+                    emit<Task>(std::make_unique<FieldPlayer>());
+                    return;
+                }
+
                 // General tasks
                 emit<Task>(std::make_unique<LookAround>(), 1);  // Look around if can't see the ball
                 emit<Task>(std::make_unique<LookAtBall>(), 2);  // Track the ball
