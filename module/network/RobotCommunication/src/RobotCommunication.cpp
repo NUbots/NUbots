@@ -290,7 +290,7 @@ namespace module::network {
                         rc_robot.position.z() = 0.0f;
 
                         // Check if covariance matrix is valid
-                        // Initialize with zeros
+                        // Initialise with zeros
                         rc_robot.covariance = Eigen::Matrix3f::Zero();
                         if (local_bot.covariance.rows() >= 2 && local_bot.covariance.cols() >= 2) {
                             rc_robot.covariance.block<2, 2>(0, 0) =
