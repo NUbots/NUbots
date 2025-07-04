@@ -42,7 +42,6 @@ nuclear_role(
   skill::GPT
   # Planners
   planning::PlanWalkPath
-  planning::PlanSmoothPath
   planning::PlanLook
   planning::PlanKick
   planning::GetUpPlanner

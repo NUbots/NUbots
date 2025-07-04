@@ -95,7 +95,18 @@ namespace module::planning {
             double ball_possession_threshold = 0.25;
             /// @brief Velocity scale factor when moving cautiously near obstacles with ball
             double cautious_velocity_scale = 0.6;
+
+            /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
+            /// @note  Set to [0, 0, 0] to functionally disable smoothing
+            Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);
+            /// @brief Exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d alpha = Eigen::Vector3d(1, 1, 1);
+            /// @brief Complementary exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
         } cfg;
+
+        /// @brief Previous walk command for smoothing
+        Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
@@ -142,6 +153,8 @@ namespace module::planning {
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
         explicit PlanWalkPath(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Frequency of walk engine updates
+        static constexpr int UPDATE_FREQUENCY = 10;
     };
 
 }  // namespace module::planning

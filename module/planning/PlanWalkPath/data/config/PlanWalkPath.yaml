@@ -40,3 +40,8 @@ ball_possession_threshold: 0.3
 
 # Velocity scale factor when moving cautiously near obstacles with ball
 cautious_velocity_scale: 0.6
+
+# Exponential smoothing time constant for the [x,y,theta]-velocity (set to [0,0,0] to disable smoothing)
+tau: [1, 1, 1]
+# tau: [0.1, 0.1, 1]
+# tau: [0, 0, 0]
