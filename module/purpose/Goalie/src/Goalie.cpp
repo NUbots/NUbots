@@ -60,12 +60,10 @@ namespace module::purpose {
     using message::localisation::Robots;
     using message::planning::LookAround;
     using message::purpose::Attack;
-    using message::purpose::Defend;
+    using message::purpose::FieldPlayer;
     using message::purpose::Purpose;
     using message::purpose::ReadyAttack;
     using message::purpose::SoccerPosition;
-    using message::purpose::Support;
-    using message::strategy::FindBall;
     using message::strategy::LookAtBall;
     using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
@@ -92,7 +90,6 @@ namespace module::purpose {
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
-           Optional<With<Purpose>>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
@@ -158,6 +155,7 @@ namespace module::purpose {
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("Ball not in defending third, waiting in middle of goals.");
+
                     return;
                 }
 
