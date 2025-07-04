@@ -47,7 +47,6 @@
 #include "message/purpose/AllRounder.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
-#include "message/purpose/Goalie.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/purpose/UpdateBoundingBox.hpp"
