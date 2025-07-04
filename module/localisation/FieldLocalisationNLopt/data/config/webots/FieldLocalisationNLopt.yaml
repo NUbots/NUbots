@@ -29,7 +29,7 @@ use_ground_truth_localisation: false
 use_hungarian: true
 
 # Cost for a point outside the field
-out_of_field_cost: 0.0
+out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
 reset_on_cost: false
