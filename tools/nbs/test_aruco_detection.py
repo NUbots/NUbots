@@ -36,6 +36,35 @@ from utility.nbs import LinearDecoder
 
 from .images import decode_image, fourcc
 
+# Hardcoded camera calibration parameters
+# RMS error: 0.8892583692230335
+CAMERA_MATRIX = np.array([
+    [4.43617837e+02, -7.74973607e-02, 6.30864741e+02],
+    [0.00000000e+00, 4.42779739e+02, 4.86466115e+02],
+    [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+], dtype=np.float64)
+
+DISTORTION_COEFFICIENTS = np.array([
+    [-0.0467533],
+    [0.0013722],
+    [-0.00462182],
+    [0.00085256]
+], dtype=np.float64)
+
+# Normalized parameters
+FOCAL_LENGTH_NORMALIZED = 0.3465764353790301
+CENTRE_OFFSET_NORMALIZED = np.array([-0.00713692086609552, -0.11994834773548346])
+
+# Coordinate system transformation matrix
+# OpenCV convention: x right, y down, z forward
+# Desired convention: x forward, y left, z up
+# This transforms from OpenCV to desired convention
+COORDINATE_TRANSFORM = np.array([
+    [0, 0, 1],   # x_opencv = z_desired
+    [-1, 0, 0],  # y_opencv = -x_desired
+    [0, -1, 0]   # z_opencv = -y_desired
+], dtype=np.float64)
+
 
 def register(command):
     command.description = "Test ArUco marker detection and pose estimation from NBS files"
@@ -49,43 +78,36 @@ def register(command):
     command.add_argument("--aruco-size", type=float, required=True, help="Size of ArUco marker in meters")
     command.add_argument("--camera-name", required=True, help="Name of camera to process")
     command.add_argument("--max-images", type=int, default=50, help="Maximum number of images to process")
-    command.add_argument("--display-time", type=int, default=1000, help="Display time per image in milliseconds (0 = wait for keypress)")
+    command.add_argument("--output-dir", default="aruco_detection_output", help="Output directory for saved images")
 
 
-def create_fisheye_camera_matrix(lens, image_width, image_height):
-    """Create camera matrix and distortion coefficients for fisheye lens"""
-    # Focal length in pixels
-    fx = fy = lens.focal_length * image_width
+def transform_coordinate_system(translation, rotation_matrix):
+    """
+    Transform pose from OpenCV coordinate system to desired convention
+    OpenCV: x right, y down, z forward
+    Desired: x forward, y left, z up
+    """
+    # Transform translation vector
+    transformed_translation = COORDINATE_TRANSFORM @ translation
 
-    # Principal point
-    cx = lens.centre.x * image_width
-    cy = lens.centre.y * image_height
+    # Transform rotation matrix
+    transformed_rotation = COORDINATE_TRANSFORM @ rotation_matrix @ COORDINATE_TRANSFORM.T
 
-    camera_matrix = np.array([
-        [fx, 0, cx],
-        [0, fy, cy],
-        [0, 0, 1]
-    ], dtype=np.float64)
-
-    # Fisheye distortion coefficients [k1, k2, k3, k4]
-    k1, k2 = lens.k.x, lens.k.y
-    dist_coeffs = np.array([k1, k2, 0.0, 0.0], dtype=np.float64)
-
-    return camera_matrix, dist_coeffs
+    return transformed_translation, transformed_rotation
 
 
-def undistort_fisheye_image(img, camera_matrix, dist_coeffs):
-    """Undistort fisheye image for ArUco detection"""
+def undistort_image(img):
+    """Undistort image using hardcoded camera parameters"""
     h, w = img.shape[:2]
 
     # Create new camera matrix for undistorted image
-    new_camera_matrix = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(
-        camera_matrix, dist_coeffs, (w, h), np.eye(3), balance=0.0
-    )
+    new_camera_matrix = cv2.getOptimalNewCameraMatrix(
+        CAMERA_MATRIX, DISTORTION_COEFFICIENTS, (w, h), 1, (w, h)
+    )[0]
 
     # Create undistortion maps
-    map1, map2 = cv2.fisheye.initUndistortRectifyMap(
-        camera_matrix, dist_coeffs, np.eye(3), new_camera_matrix, (w, h), cv2.CV_16SC2
+    map1, map2 = cv2.initUndistortRectifyMap(
+        CAMERA_MATRIX, DISTORTION_COEFFICIENTS, None, new_camera_matrix, (w, h), cv2.CV_16SC2
     )
 
     # Undistort image
@@ -108,13 +130,10 @@ def get_aruco_detector_params():
     return params
 
 
-def detect_and_draw_aruco_markers(image, aruco_dict, lens, image_width, image_height, marker_size, target_id=None):
+def detect_and_draw_aruco_markers(image, aruco_dict, marker_size, target_id=None):
     """Detect ArUco markers and draw them with pose axes"""
-    # Create fisheye camera parameters
-    camera_matrix, dist_coeffs = create_fisheye_camera_matrix(lens, image_width, image_height)
-
     # Undistort image for better ArUco detection
-    undistorted_img, undistorted_camera_matrix = undistort_fisheye_image(image, camera_matrix, dist_coeffs)
+    undistorted_img, undistorted_camera_matrix = undistort_image(image)
 
     # Detect markers in undistorted image
     detector = cv2.aruco.ArucoDetector(aruco_dict, get_aruco_detector_params())
@@ -141,7 +160,7 @@ def detect_and_draw_aruco_markers(image, aruco_dict, lens, image_width, image_he
             rvec = rvecs[i]
             tvec = tvecs[i]
 
-            # Draw pose axes
+            # Draw pose axes (using original OpenCV coordinates for visualization)
             cv2.drawFrameAxes(output_img, undistorted_camera_matrix, np.zeros(4),
                             rvec, tvec, marker_size * 0.5)
 
@@ -151,29 +170,35 @@ def detect_and_draw_aruco_markers(image, aruco_dict, lens, image_width, image_he
             H_marker[:3, :3] = R
             H_marker[:3, 3] = tvec.flatten()
 
-            # Store detection info
+            # Transform to desired coordinate system
+            transformed_translation, transformed_rotation = transform_coordinate_system(
+                tvec.flatten(), R
+            )
+
+            # Store detection info with transformed coordinates
             detection = {
                 'id': int(marker_id),
                 'pose_matrix': H_marker,
-                'translation': tvec.flatten(),
-                'rotation_vector': rvec.flatten(),
+                'translation': transformed_translation,  # Transformed coordinates
+                'rotation_matrix': transformed_rotation,  # Transformed rotation
+                'rotation_vector': rvec.flatten(),  # Original OpenCV rotation vector
                 'corners': corners[i]
             }
             detections.append(detection)
 
-            # Add text with pose info
+            # Add text with transformed pose info
             text_pos = tuple(map(int, corners[i][0][0]))
             cv2.putText(output_img, f"ID:{marker_id}",
                        (text_pos[0], text_pos[1] - 10),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.putText(output_img, f"T:[{tvec[0][0]:.2f},{tvec[0][1]:.2f},{tvec[0][2]:.2f}]",
+            cv2.putText(output_img, f"T:[{transformed_translation[0]:.2f},{transformed_translation[1]:.2f},{transformed_translation[2]:.2f}]",
                        (text_pos[0], text_pos[1] + 20),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
 
     return output_img, detections, undistorted_img
 
 
-def run(files, aruco_dict, aruco_id, aruco_size, camera_name, max_images, display_time, **kwargs):
+def run(files, aruco_dict, aruco_id, aruco_size, camera_name, max_images, output_dir, **kwargs):
     # Get ArUco dictionary
     aruco_dict_id = getattr(cv2.aruco, aruco_dict)
     aruco_dict = cv2.aruco.getPredefinedDictionary(aruco_dict_id)
@@ -184,12 +209,12 @@ def run(files, aruco_dict, aruco_id, aruco_size, camera_name, max_images, displa
     print(f"  Marker size: {aruco_size}m")
     print(f"  Camera: {camera_name}")
     print(f"  Max images: {max_images}")
-    print(f"  Display time: {display_time}ms per image")
-    print(f"\nControls:")
-    print(f"  - Press 'q' to quit")
-    print(f"  - Press 's' to skip to next image")
-    print(f"  - Press SPACE to pause/continue")
-    print(f"  - Press 'r' to restart from beginning")
+    print(f"  Output directory: {output_dir}")
+    print(f"  Using hardcoded camera calibration parameters")
+    print(f"  Coordinate system: x forward, y left, z up")
+
+    # Create output directory
+    os.makedirs(output_dir, exist_ok=True)
 
     # Collect images
     print("\nLoading images from NBS files...")
@@ -208,138 +233,92 @@ def run(files, aruco_dict, aruco_id, aruco_size, camera_name, max_images, displa
         print(f"No images found for camera '{camera_name}'")
         return
 
-    # Create windows
-    cv2.namedWindow("ArUco Detection", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("Original (Undistorted)", cv2.WINDOW_NORMAL)
-
     # Process images
     total_detections = 0
     target_detections = 0
-    current_image = 0
-    paused = False
 
     print("\nProcessing images and detecting ArUco markers...")
-    print("Starting display loop...")
 
-    try:
-        while current_image < len(images):
-            img_packet = images[current_image]
+    for i, img_packet in enumerate(tqdm(images, desc="Processing images")):
+        try:
+            # Decode image
+            image_data = decode_image(img_packet.msg.data, img_packet.msg.format)
+            img = image_data[0]["image"].numpy()
+            fmt = image_data[0]["fourcc"]
 
-            try:
-                # Decode image
-                image_data = decode_image(img_packet.msg.data, img_packet.msg.format)
-                img = image_data[0]["image"].numpy()
-                fmt = image_data[0]["fourcc"]
+            # Debayer if needed
+            if fmt == fourcc("BGGR"):
+                img = cv2.cvtColor(img, cv2.COLOR_BayerBG2RGB_VNG)
+            elif fmt == fourcc("RGGB"):
+                img = cv2.cvtColor(img, cv2.COLOR_BayerRG2RGB_VNG)
+            elif fmt == fourcc("GRBG"):
+                img = cv2.cvtColor(img, cv2.COLOR_BayerGR2RGB_VNG)
+            elif fmt == fourcc("GBRG"):
+                img = cv2.cvtColor(img, cv2.COLOR_BayerGB2RGB_VNG)
 
-                # Debayer if needed
-                if fmt == fourcc("BGGR"):
-                    img = cv2.cvtColor(img, cv2.COLOR_BayerBG2RGB_VNG)
-                elif fmt == fourcc("RGGB"):
-                    img = cv2.cvtColor(img, cv2.COLOR_BayerRG2RGB_VNG)
-                elif fmt == fourcc("GRBG"):
-                    img = cv2.cvtColor(img, cv2.COLOR_BayerGR2RGB_VNG)
-                elif fmt == fourcc("GBRG"):
-                    img = cv2.cvtColor(img, cv2.COLOR_BayerGB2RGB_VNG)
+            # Convert to BGR for OpenCV
+            if fmt == fourcc("RGB8") or fmt == fourcc("RGB3"):
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-                # Convert to BGR for OpenCV
-                if fmt == fourcc("RGB8") or fmt == fourcc("RGB3"):
-                    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            # Detect ArUco markers
+            output_img, detections, undistorted_img = detect_and_draw_aruco_markers(
+                img, aruco_dict, aruco_size, None  # Detect all markers
+            )
 
-                # Detect ArUco markers
-                output_img, detections, undistorted_img = detect_and_draw_aruco_markers(
-                    img, aruco_dict, img_packet.msg.lens,
-                    img_packet.msg.dimensions.x, img_packet.msg.dimensions.y,
-                    aruco_size, None  # Detect all markers
-                )
+            # Count detections
+            total_detections += len(detections)
+            target_found = any(d['id'] == aruco_id for d in detections)
+            if target_found:
+                target_detections += 1
 
-                # Count detections
-                total_detections += len(detections)
-                target_found = any(d['id'] == aruco_id for d in detections)
-                if target_found:
-                    target_detections += 1
+            # Add image info overlay
+            info_text = f"Image {i+1}/{len(images)}"
+            if detections:
+                info_text += f" | Found {len(detections)} markers"
+                for det in detections:
+                    if det['id'] == aruco_id:
+                        info_text += f" | TARGET ID {aruco_id} FOUND!"
+                        break
+            else:
+                info_text += " | No markers detected"
 
-                # Add image info overlay
-                info_text = f"Image {current_image+1}/{len(images)}"
-                if detections:
-                    info_text += f" | Found {len(detections)} markers"
-                    for det in detections:
-                        if det['id'] == aruco_id:
-                            info_text += f" | TARGET ID {aruco_id} FOUND!"
-                            break
-                else:
-                    info_text += " | No markers detected"
+            # Add status overlay
+            status_img = output_img.copy()
+            cv2.rectangle(status_img, (10, 10), (min(800, status_img.shape[1]-10), 60), (0, 0, 0), -1)
+            cv2.putText(status_img, info_text, (15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-                # Add status overlay
-                status_img = output_img.copy()
-                cv2.rectangle(status_img, (10, 10), (min(800, status_img.shape[1]-10), 60), (0, 0, 0), -1)
-                cv2.putText(status_img, info_text, (15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-                cv2.putText(status_img, "Press 'q' to quit, 's' to skip, SPACE to pause",
-                           (15, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            # Save images
+            output_filename = os.path.join(output_dir, f"aruco_detection_{i:04d}.jpg")
+            undistorted_filename = os.path.join(output_dir, f"undistorted_{i:04d}.jpg")
 
-                # Display images
-                cv2.imshow("ArUco Detection", status_img)
-                cv2.imshow("Original (Undistorted)", undistorted_img)
+            cv2.imwrite(output_filename, status_img)
+            cv2.imwrite(undistorted_filename, undistorted_img)
 
-                # Print detection info to console
-                if detections:
-                    print(f"\nImage {current_image+1}: Found {len(detections)} markers")
-                    for det in detections:
-                        distance = np.linalg.norm(det['translation'])
-                        print(f"  ID {det['id']}: T=[{det['translation'][0]:.2f}, {det['translation'][1]:.2f}, {det['translation'][2]:.2f}] (dist: {distance:.2f}m)")
-                        if det['id'] == aruco_id:
-                            print(f"    *** TARGET MARKER FOUND ***")
+            # Print detection info to console
+            if detections:
+                print(f"\nImage {i+1}: Found {len(detections)} markers")
+                for det in detections:
+                    distance = np.linalg.norm(det['translation'])
+                    print(f"  ID {det['id']}: T=[{det['translation'][0]:.2f}, {det['translation'][1]:.2f}, {det['translation'][2]:.2f}] (dist: {distance:.2f}m)")
+                    if det['id'] == aruco_id:
+                        print(f"    *** TARGET MARKER FOUND ***")
 
-                # Handle key input
-                if not paused:
-                    key = cv2.waitKey(display_time) & 0xFF
-                else:
-                    key = cv2.waitKey(0) & 0xFF  # Wait indefinitely when paused
+        except Exception as e:
+            print(f"Failed to process image {i}: {e}")
 
-                if key == ord('q'):
-                    print("\nQuitting...")
-                    break
-                elif key == ord('s'):
-                    print(f"Skipping to next image...")
-                    current_image += 1
-                elif key == ord(' '):
-                    paused = not paused
-                    print(f"{'Paused' if paused else 'Resumed'}")
-                elif key == ord('r'):
-                    print("Restarting from beginning...")
-                    current_image = 0
-                    total_detections = 0
-                    target_detections = 0
-                    continue
-                elif key == 27:  # ESC key
-                    print("\nQuitting...")
-                    break
-                else:
-                    if not paused:
-                        current_image += 1
+    # Summary
+    print(f"\n=== DETECTION SUMMARY ===")
+    print(f"Total images processed: {len(images)}")
+    print(f"Images with target ID {aruco_id}: {target_detections}")
+    print(f"Total marker detections: {total_detections}")
+    print(f"Images saved to: {output_dir}")
 
-            except Exception as e:
-                print(f"Failed to process image {current_image}: {e}")
-                current_image += 1
-
-    except KeyboardInterrupt:
-        print("\nInterrupted by user")
-
-    finally:
-        # Clean up
-        cv2.destroyAllWindows()
-
-        # Summary
-        print(f"\n=== DETECTION SUMMARY ===")
-        print(f"Total images processed: {current_image}")
-        print(f"Images with target ID {aruco_id}: {target_detections}")
-        print(f"Total marker detections: {total_detections}")
-
-        if target_detections == 0:
-            print(f"\n⚠ WARNING: Target marker ID {aruco_id} was never detected!")
-            print("Check:")
-            print("- Marker is visible in camera view")
-            print("- Marker ID matches what you generated")
-            print("- Marker size parameter is correct")
-            print("- ArUco dictionary matches")
-        else:
-            print(f"\n✓ Success: Target marker ID {aruco_id} detected in {target_detections} images")
+    if target_detections == 0:
+        print(f"\n⚠ WARNING: Target marker ID {aruco_id} was never detected!")
+        print("Check:")
+        print("- Marker is visible in camera view")
+        print("- Marker ID matches what you generated")
+        print("- Marker size parameter is correct")
+        print("- ArUco dictionary matches")
+    else:
+        print(f"\n✓ Success: Target marker ID {aruco_id} detected in {target_detections} images")
