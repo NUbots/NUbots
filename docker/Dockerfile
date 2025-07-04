@@ -425,6 +425,7 @@ RUN pip install uv==0.7.2
 # When in the docker image uv will use the build directory for storage
 ENV UV_CACHE_DIR=/home/nubots/build/uv-cache
 ENV UV_PROJECT_ENVIRONMENT=/home/nubots/build/.venv
+ENV UV_LINK_MODE=copy
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -473,6 +474,7 @@ COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots \
     && install -d -m 0777 /home/nubots/build \
+    && install -d -m 0777 /home/nubots/build/uv-cache \
     && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
 
 # Configure the cache directories
