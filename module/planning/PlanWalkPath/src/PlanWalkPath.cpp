@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
@@ -46,12 +47,13 @@ namespace module::planning {
     using extension::Configuration;
 
     using message::input::Sensors;
+    using message::localisation::Ball;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
+    using message::planning::WalkProposal;
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
-    using message::skill::Walk;
     using message::strategy::StandStill;
 
     using message::strategy::StandStill;
@@ -99,11 +101,18 @@ namespace module::planning {
             cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
 
-            cfg.obstacle_radius = config["obstacle_radius"].as<double>();
+            // Enhanced obstacle avoidance
+            cfg.obstacle_radius           = config["obstacle_radius"].as<double>();
+            cfg.obstacle_radius_with_ball = config["obstacle_radius_with_ball"].as<double>();
+            cfg.ball_possession_threshold = config["ball_possession_threshold"].as<double>();
+            cfg.cautious_velocity_scale   = config["cautious_velocity_scale"].as<double>();
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        on<Provide<WalkTo>, Optional<With<Robots>>, Optional<With<Ball>>, With<Sensors>>().then(
+            [this](const WalkTo& walk_to,
+                   const std::shared_ptr<const Robots>& robots,
+                   const std::shared_ptr<const Ball>& ball,
+                   const Sensors& sensors) {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
@@ -111,6 +120,13 @@ namespace module::planning {
                 // Calculate the angle between the robot and the final desired heading
                 double angle_to_final_heading =
                     std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+
+                // Determine if we have the ball (for more aggressive obstacle avoidance)
+                bool has_ball = false;
+                if (ball != nullptr) {
+                    Eigen::Vector3d rBRr = sensors.Hrw * ball->rBWw;
+                    has_ball             = rBRr.norm() < cfg.ball_possession_threshold;
+                }
 
                 // If there are robots, check if there are obstacles in the way
                 if (robots != nullptr) {
@@ -124,13 +140,17 @@ namespace module::planning {
                               all_obstacles.end(),
                               [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
 
+                    // Use enhanced obstacle radius when we have the ball
+                    double effective_obstacle_radius = has_ball ? cfg.obstacle_radius_with_ball : cfg.obstacle_radius;
+
                     // Get the obstacles in the way of the current path
-                    const std::vector<Eigen::Vector2d> obstacles = get_obstacles(all_obstacles, rDRr);
+                    const std::vector<Eigen::Vector2d> obstacles =
+                        get_obstacles(all_obstacles, rDRr, effective_obstacle_radius);
 
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
                         // Adjust the target direction to avoid obstacles
-                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
+                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles, effective_obstacle_radius);
 
                         // Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
@@ -183,11 +203,29 @@ namespace module::planning {
                 Eigen::Vector3d velocity_target;
                 velocity_target << desired_translational_velocity, desired_heading;
 
+                // Scale velocity when we have the ball and there are nearby obstacles
+                if (has_ball && robots != nullptr && !robots->robots.empty()) {
+                    // Check if there are any robots very close to us
+                    bool close_obstacles = false;
+                    for (const auto& robot : robots->robots) {
+                        Eigen::Vector2d robot_pos = (sensors.Hrw * robot.rRWw).head(2);
+                        if (robot_pos.norm() < cfg.obstacle_radius_with_ball * 1.5) {
+                            close_obstacles = true;
+                            break;
+                        }
+                    }
+
+                    if (close_obstacles) {
+                        velocity_target.head<2>() *= cfg.cautious_velocity_scale;
+                        log<DEBUG>("Scaling velocity due to close obstacles while having ball");
+                    }
+                }
+
                 // Limit the velocity to the maximum translational and angular velocity
                 velocity_target = constrain_velocity(velocity_target);
 
                 // Emit the walk task with the calculated velocities
-                emit<Task>(std::make_unique<Walk>(velocity_target));
+                emit<Task>(std::make_unique<WalkProposal>(velocity_target));
 
                 // Emit debugging information for visualization and monitoring
                 auto debug_information              = std::make_unique<WalkToDebug>();
@@ -211,7 +249,7 @@ namespace module::planning {
             int sign = turn_on_spot.clockwise ? -1 : 1;
 
             // Turn on the spot
-            emit<Task>(std::make_unique<Walk>(
+            emit<Task>(std::make_unique<WalkProposal>(
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
         });
 
@@ -219,9 +257,9 @@ namespace module::planning {
             // Determine the direction of rotation
             int sign = pivot_around_point.clockwise ? -1 : 1;
             // Turn around the ball
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
-                                                              sign * cfg.pivot_ball_velocity_y,
-                                                              sign * cfg.pivot_ball_velocity)));
+            emit<Task>(std::make_unique<WalkProposal>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
+                                                                      sign * cfg.pivot_ball_velocity_y,
+                                                                      sign * cfg.pivot_ball_velocity)));
         });
     }
 
@@ -266,7 +304,8 @@ namespace module::planning {
     }
 
     Eigen::Vector2d PlanWalkPath::adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
-                                                                        const std::vector<Eigen::Vector2d>& obstacles) {
+                                                                        const std::vector<Eigen::Vector2d>& obstacles,
+                                                                        double obstacle_radius) {
         log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
 
         // Calculate a perpendicular vector to the direction of the target point
@@ -281,8 +320,8 @@ namespace module::planning {
         }
 
         // Add on the obstacle radius
-        leftmost  = leftmost - perp_direction * cfg.obstacle_radius;
-        rightmost = rightmost + perp_direction * cfg.obstacle_radius;
+        leftmost  = leftmost - perp_direction * obstacle_radius;
+        rightmost = rightmost + perp_direction * obstacle_radius;
 
         // Determine if leftmost or rightmost position has a quicker path
         const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
@@ -309,7 +348,8 @@ namespace module::planning {
     }
 
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                   const Eigen::Vector2d& rDRr) {
+                                                                   const Eigen::Vector2d& rDRr,
+                                                                   double obstacle_radius) {
         // If there are no obstacles, return an empty group
         if (all_obstacles.empty()) {
             return {};
@@ -326,9 +366,9 @@ namespace module::planning {
             const bool closer = obstacle.norm() < rDRr.norm();
             // Check if the obstacle intersects with the path
             const bool intersects =
-                intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
+                intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, obstacle_radius);
             // Check if the obstacle is close to the target position
-            const bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
+            const bool close_to_target = (obstacle - rDRr).norm() < obstacle_radius;
 
             // Check if obstacle intersects with the path
             if (in_front && closer && intersects && !close_to_target) {
@@ -347,7 +387,7 @@ namespace module::planning {
             // If the obstacle is close to the group, add it to the group
             // 3 represents two obstacles and the robot
             for (const auto& avoid_obstacle : avoid_obstacles) {
-                if ((obstacle - avoid_obstacle).norm() < cfg.obstacle_radius * 3) {
+                if ((obstacle - avoid_obstacle).norm() < obstacle_radius * 3) {
                     avoid_obstacles.push_back(obstacle);
                     break;
                 }
