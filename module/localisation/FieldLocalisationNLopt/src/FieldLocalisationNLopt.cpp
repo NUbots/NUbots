@@ -46,10 +46,13 @@ namespace module::localisation {
     using message::localisation::FinishReset;
     using message::localisation::Line;
     using message::localisation::ResetFieldLocalisation;
+    using message::localisation::RobotPoseGroundTruth;
     using message::localisation::UncertaintyResetFieldLocalisation;
+    using message::vision::FieldLines;
 
     using utility::localisation::OccupancyMap;
     using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -191,7 +194,7 @@ namespace module::localisation {
            Optional<With<FieldIntersections>>,
            Optional<With<Goals>>,
            With<Stability>,
-           With<RawSensors>,
+           Optional<With<RobotPoseGroundTruth>>,
            With<FieldDescription>,
            With<Sensors>,
            Single>()
@@ -201,13 +204,24 @@ namespace module::localisation {
                        const std::shared_ptr<const FieldIntersections>& field_intersections,
                        const std::shared_ptr<const Goals>& goals,
                        const Stability& stability,
-                       const RawSensors& raw_sensors,
+                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
                        const FieldDescription& fd,
                        const Sensors& sensors) {
                     // Emit field message using ground truth if available
-                    if (cfg.use_ground_truth_localisation) {
+                    if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
                         auto field(std::make_unique<Field>());
-                        field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+                        // Odometry ground truth should be field {f} to torso {t} space, so we can assume the identity
+                        // transform
+
+                        if (!ground_truth_initialised) {
+                            Eigen::Isometry3d Hft                    = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+                            ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+                            ground_truth_Hfw.translation()[2]        = 0;
+                            double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                            ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+                            ground_truth_initialised                 = true;
+                        }
+                        field->Hfw = ground_truth_Hfw;
                         emit(field);
                         return;
                     }
@@ -284,8 +298,8 @@ namespace module::localisation {
                     field->Hfw = compute_Hfw(kf.get_state());
 
                     // Debugging
-                    if (log_level <= DEBUG && raw_sensors.localisation_ground_truth.exists) {
-                        debug_field_localisation(field->Hfw, raw_sensors);
+                    if (log_level <= DEBUG) {
+                        debug_field_localisation(field->Hfw);
                     }
                     // Association (run once for debugging in NUsight)
                     auto associations = data_association(field_intersections, field->Hfw);
@@ -302,20 +316,18 @@ namespace module::localisation {
                 });
     }
 
-    void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
+    void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw) {
         emit(graph("opt state", state.x(), state.y(), state.z()));
         emit(graph("kf state", kf.get_state().x(), kf.get_state().y(), kf.get_state().z()));
-
-        const Eigen::Isometry3d true_Hfw = Eigen::Isometry3d(raw_sensors.localisation_ground_truth.Hfw);
         // Determine translational distance error
-        Eigen::Vector3d true_rFWw  = true_Hfw.translation();
+        Eigen::Vector3d true_rFWw  = ground_truth_Hfw.translation();
         Eigen::Vector3d rFWw       = (Hfw.translation());
         Eigen::Vector3d error_rFWw = (true_rFWw - rFWw).cwiseAbs();
         // Determine yaw, pitch, and roll error
-        Eigen::Vector3d true_Rfw  = mat_to_rpy_intrinsic(true_Hfw.rotation());
+        Eigen::Vector3d true_Rfw  = mat_to_rpy_intrinsic(ground_truth_Hfw.rotation());
         Eigen::Vector3d Rfw       = mat_to_rpy_intrinsic(Hfw.rotation());
         Eigen::Vector3d error_Rfw = (true_Rfw - Rfw).cwiseAbs();
-        double quat_rot_error     = Eigen::Quaterniond(true_Hfw.linear() * Hfw.inverse().linear()).w();
+        double quat_rot_error     = Eigen::Quaterniond(ground_truth_Hfw.linear() * Hfw.inverse().linear()).w();
 
         // Graph translation and error from ground truth
         emit(graph("Hfw true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));

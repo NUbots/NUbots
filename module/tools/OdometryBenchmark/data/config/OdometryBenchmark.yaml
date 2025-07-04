@@ -11,3 +11,4 @@ playback_mode: FAST
 messages:
   # Input
   message.platform.RawSensors: true
+  message.localisation.RobotPoseGroundTruth: true
