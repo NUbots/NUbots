@@ -281,7 +281,6 @@ namespace module::network {
                         // Assign player ID from purpose
                         rc_robot.player_id = local_bot.purpose.player_id;
 
-
                         // Convert world to field coords
                         Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
 
