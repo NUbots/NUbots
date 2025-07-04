@@ -47,6 +47,7 @@
 #include "message/purpose/AllRounder.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
+#include "message/purpose/Player.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/purpose/UpdateBoundingBox.hpp"
@@ -180,7 +181,7 @@ namespace module::purpose {
                     robots[player_id - 1].position = Position("STRIKER");
                     break;
                 case Position::GOALIE:
-                    emit<Task>(std::make_unique<Goalie>(cfg.force_playing));
+                    emit<Task>(std::make_unique<Goalie>());
                     robots[player_id - 1].position = Position("GOALIE");
                     break;
                 case Position::DEFENDER:
