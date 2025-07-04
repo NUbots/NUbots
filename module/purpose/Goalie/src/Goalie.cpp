@@ -135,8 +135,19 @@ namespace module::purpose {
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("No ball message, waiting in middle of goals.");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::GOALIE,
+                                                   true,
+                                                   false,
+                                                   game_state.team.team_colour));
                     return;
                 }
+
+                emit(std::make_unique<Purpose>(global_config.player_id,
+                                               SoccerPosition::GOALIE,
+                                               true,
+                                               true,
+                                               game_state.team.team_colour));
 
                 // If the ball is in the defending third, play
                 Eigen::Vector3d rBFf     = field.Hfw * ball->rBWw;
