@@ -264,7 +264,6 @@ namespace module::network {
                     }
                     // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
                     // This it to prevent everyone echoing
-
                     msg->ball.confidence = loc_ball->confidence;
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
