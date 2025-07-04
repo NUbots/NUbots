@@ -47,13 +47,13 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 1
+field_line_distance_weight: 10
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 1
+field_line_intersection_weight: 10
 
 # Weighting associated with change between last solution result
-state_change_weight: 0.1
+state_change_weight: 0.0
 
 # Weighting associated with goal post distance error
 goal_post_distance_weight: 1
@@ -92,15 +92,15 @@ kalman:
 
   # Process model noise
   Q:
-    - - 0.0029527627707046774
+    - - 1e-2
       - 0
       - 0
     - - 0
-      - 1.5106536134854267e-06
+      - 1e-2
       - 0
     - - 0
       - 0
-      - 0.0017559165899632613
+      - 1e-3
   R:
     - - 5.7015410799196165
       - 0
