@@ -83,6 +83,7 @@ namespace module::purpose {
             cfg.ball_off_center_threshold = config["ball_off_center_threshold"].as<double>();
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
             cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
+            cfg.search_when_lost          = config["search_when_lost"].as<bool>();
         });
 
         // PLAYING state
@@ -94,7 +95,6 @@ namespace module::purpose {
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
-           Optional<With<Purpose>>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
@@ -116,7 +116,7 @@ namespace module::purpose {
                 }
 
                 // If the robot is uncertain about its position, it should not play
-                if (field.cost > cfg.max_localisation_cost) {
+                if (cfg.search_when_lost && field.cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::UNKNOWN,
