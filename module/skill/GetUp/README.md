@@ -2,7 +2,7 @@
 
 ## Description
 
-A Behaviour module that will run the appropriate getup script for the robot. It is first delayed so that the robot can settle into it's final position to improve side detection accuracy.
+A Behaviour module that will run the appropriate getup script for the robot. First a StandStill task is emitted, then the getup task is delayed so that the robot can settle into it's final position to improve side detection accuracy. Additionally, if after the delay the robot detects that it is on its side, another delay will be emitted.
 
 ## Usage
 
