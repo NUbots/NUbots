@@ -17,7 +17,7 @@ save_map: false
 min_field_line_points: 50
 
 # Minimum number of field line intersections for an update
-min_field_line_intersections: 3
+min_field_line_intersections: 0
 
 # Delay before the filter starts (allows odometry to settle)
 start_time_delay: 1
@@ -25,11 +25,14 @@ start_time_delay: 1
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
 
+# Bool to use the Hungarian algorithm for data association
+use_hungarian: true
+
 # Cost for a point outside the field
-out_of_field_cost: 3.0
+out_of_field_cost: 0.0
 
 # Reset localisation if the cost is above a threshold
-reset_on_cost: true
+reset_on_cost: false
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
@@ -44,23 +47,23 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 0.9439527458126644
+field_line_distance_weight: 1
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 7.631548579411429
+field_line_intersection_weight: 1
 
 # Weighting associated with change between last solution result
-state_change_weight: 0.02480121910085493
+state_change_weight: 0.1
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 4.494546379185571
+goal_post_distance_weight: 1
 
 # Box constraints on change in state (x, y, theta)
 change_limit:
-  - 0.03379241736537422
-  - 0.9101752727583227
-  - 0.010117827606743983
-max_association_distance: 5.241746373959887
+  - 0.5
+  - 0.5
+  - 0.5
+max_association_distance: 2.5
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5

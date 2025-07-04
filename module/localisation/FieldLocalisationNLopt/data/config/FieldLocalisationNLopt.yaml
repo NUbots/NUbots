@@ -34,7 +34,7 @@ use_hungarian: true
 out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
-reset_on_cost: true
+reset_on_cost: false
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
@@ -80,9 +80,9 @@ opt:
 kalman:
   # Continuous time process model:
   A:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
+    - [0, 0, 0]
+    - [0, 0, 0]
+    - [0, 0, 0]
   # Continuous time input model: No inputs
   B: []
   # Continuous time measurement model:
@@ -93,11 +93,22 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-1, 0, 0]
-    - [0, 1e-1, 0]
-    - [0, 0, 1e-1]
-  # Measurement model noise
+    - - 0.0029527627707046774
+      - 0
+      - 0
+    - - 0
+      - 1.5106536134854267e-06
+      - 0
+    - - 0
+      - 0
+      - 0.0017559165899632613
   R:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
+    - - 5.7015410799196165
+      - 0
+      - 0
+    - - 0
+      - 3.123101158544384
+      - 0
+    - - 0
+      - 0
+      - 4.37215045186137
