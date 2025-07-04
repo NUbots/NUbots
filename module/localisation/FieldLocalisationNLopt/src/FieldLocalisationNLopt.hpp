@@ -301,6 +301,15 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
+        /// @brief Bool indicating ground truth localisation (Hfw) computed
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
+    public:
+        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
+        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
         /// @brief The main field localisation loop
         ReactionHandle main_loop;
 
@@ -324,9 +333,8 @@ namespace module::localisation {
         /**
          * @brief Find error between computed Hfw and ground truth if available
          * @param Hfw Computed Hfw to be compared against ground truth
-         * @param raw_sensors The raw sensor data
          */
-        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
+        void debug_field_localisation(Eigen::Isometry3d Hfw);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
@@ -401,10 +409,6 @@ namespace module::localisation {
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
-
-    public:
-        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
-        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::localisation
 
