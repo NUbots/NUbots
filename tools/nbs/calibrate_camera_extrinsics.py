@@ -32,11 +32,12 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
 import cv2
-import cv2.fisheye as fisheye
 import numpy as np
 import yaml
 from scipy.optimize import minimize
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from utility.nbs import LinearDecoder
 
@@ -61,34 +62,19 @@ DISTORTION_COEFFICIENTS = np.array([
 FOCAL_LENGTH_NORMALIZED = 0.3465764353790301
 CENTRE_OFFSET_NORMALIZED = np.array([-0.00713692086609552, -0.11994834773548346])
 
-# Coordinate system transformation matrix
-# OpenCV convention: x right, y down, z forward
-# Desired convention: x forward, y left, z up
-# This transforms from OpenCV to desired convention
-COORDINATE_TRANSFORM = np.array([
-    [0, 0, 1],   # x_opencv = z_desired
-    [-1, 0, 0],  # y_opencv = -x_desired
-    [0, -1, 0]   # z_opencv = -y_desired
-], dtype=np.float64)
+# Expected ArUco rotation in world frame (flat on ground)
+# Identity rotation means the ArUco tag is flat on the ground
+ARUCO_WORLD_ROTATION = np.eye(3)  # Identity rotation (flat on ground)
 
-# ArUco coordinate system correction
-# When looking directly at an ArUco tag:
-# - ArUco: Z out of tag, Y down, X left
-# - Desired: X forward, Y left, Z up
-# To transform: rotate 180° around Y, then 180° around Z
-ARUCO_TO_DESIRED_ROTATION = np.array([
-    [-1, 0, 0],   # X_aruco = -X_desired (180° around Y, then 180° around Z)
-    [0, -1, 0],   # Y_aruco = -Y_desired
-    [0, 0, 1]    # Z_aruco = -Z_desired
-], dtype=np.float64)
-
-# Hardcoded ArUco marker ground truth pose in torso space
-# TODO: Update these values to match your actual ArUco marker placement
-ARUCO_GROUND_TRUTH = {
-    'translation': [0.44, 0.0, 0.21],  # x, y, z in meters (torso space)
-    'quaternion': [0.0, 0.0, 0.0, 1.0]  # x, y, z, w (identity rotation)
-}
-
+# OpenCV camera coordinate system to NUbots coordinate system
+# OpenCV: x right, y down, z forward
+# NUbots: x forward, y left, z up
+OPEN_CV_TO_NU_ROTATION = np.array([
+    [0, 0, 1, 0],   # x_nu = z_opencv (forward)
+    [-1, 0, 0, 0],  # y_nu = -x_opencv (left)
+    [0, -1, 0, 0],  # z_nu = -y_opencv (up)
+    [0, 0, 0, 1]
+])
 
 def register(command):
     command.description = "Calibrate fisheye camera extrinsic parameters using ArUco markers"
@@ -104,21 +90,6 @@ def register(command):
     command.add_argument("--camera-name", required=True, help="Name of camera to calibrate")
     command.add_argument("--max-time-diff", type=float, default=0.01,
                         help="Maximum time difference for sensor-image synchronization (seconds)")
-
-
-def transform_coordinate_system(translation, rotation_matrix):
-    """
-    Transform pose from OpenCV coordinate system to desired convention
-    OpenCV: x right, y down, z forward
-    Desired: x forward, y left, z up
-    """
-    # Transform translation vector
-    transformed_translation = COORDINATE_TRANSFORM @ translation
-
-    # Transform rotation matrix
-    transformed_rotation = COORDINATE_TRANSFORM @ rotation_matrix @ COORDINATE_TRANSFORM.T
-
-    return transformed_translation, transformed_rotation
 
 
 def quaternion_to_rotation_matrix(q):
@@ -160,7 +131,6 @@ def rotation_matrix_to_quaternion(R):
             y = (R[1, 2] + R[2, 1]) / s
             z = 0.25 * s
     return np.array([x, y, z, w])
-
 
 
 def extract_transform_matrix(iso3_msg):
@@ -233,37 +203,29 @@ def detect_aruco_marker(image, aruco_dict, aruco_id, marker_size):
         H_marker[:3, :3] = R
         H_marker[:3, 3] = tvec[0]
 
-        # Transform to desired coordinate system
-        transformed_translation, transformed_rotation = transform_coordinate_system(
-            tvec[0].flatten(), R
-        )
+        # Convert to NUbots coordinate system
+        H_marker = OPEN_CV_TO_NU_ROTATION @ H_marker
 
-        # Create transformed transform matrix
-        H_marker_transformed = np.eye(4)
-        H_marker_transformed[:3, :3] = transformed_rotation
-        H_marker_transformed[:3, 3] = transformed_translation
-
-        return H_marker_transformed, marker_corners[0], undistorted_img
+        return H_marker, marker_corners[0], undistorted_img
 
     return None, None, undistorted_img
 
 
 class CalibrationData:
     def __init__(self):
-        self.observations = []  # List of (H_detected, H_expected, image_info)
+        self.observations = []  # List of (Hcw, Hca_detected, image_info)
 
-    def add_observation(self, H_tc, Hca_detected, Hta_expected, image_info):
+    def add_observation(self, Hcw, Hca_detected, image_info):
         """Add a calibration observation"""
         self.observations.append({
-            'H_tc': H_tc,
-            'Hca_detected': Hca_detected,
-            'Hta_expected': Hta_expected,
+            'Hcw': Hcw,  # Camera to world transform
+            'Hca_detected': Hca_detected,  # Detected ArUco pose in camera space
             'image_info': image_info
         })
 
 
 def objective_function(offsets, calib_data):
-    """Objective function for optimization - minimizes only rotation error"""
+    """Objective function for optimization - minimizes rotation error in world space"""
     roll_offset, pitch_offset = offsets
 
     # Use only the first observation (single image)
@@ -282,31 +244,140 @@ def objective_function(offsets, calib_data):
         [-np.sin(roll_offset), 0, np.cos(roll_offset)]
     ])
 
-    # Apply offsets: R_pitch * R_roll * R_base (following Camera.cpp order)
-    R_correction = R_roll  @ R_pitch @ obs['H_tc'][:3, :3]
-    H_tc_corrected = np.eye(4)
-    H_tc_corrected[:3, :3] = R_correction
-    H_tc_corrected[:3, 3] = obs['H_tc'][:3, 3]
-
-    # Transform detected ArUco pose to torso space using corrected transform
-    Hta_corrected = H_tc_corrected @ obs['Hca_detected']
-
-    # Compare with expected pose
-    Hta_expected = obs['Hta_expected']
+    # Apply offsets to camera rotation: R_roll * R_pitch * R_camera_base
+    Hwc = np.linalg.inv(obs['Hcw'])
+    Hwa = Hwc @ obs['Hca_detected']
+    Rwa_corrected = R_roll @ R_pitch @ Hwa[:3, :3]
+    Rwa_expected = ARUCO_WORLD_ROTATION
 
     # Compute rotation error using quaternion difference
-    q_detected = rotation_matrix_to_quaternion(Hta_corrected[:3, :3])
-    q_expected = rotation_matrix_to_quaternion(Hta_expected[:3, :3])
+    q_detected = rotation_matrix_to_quaternion(Rwa_corrected)
+    q_expected = rotation_matrix_to_quaternion(Rwa_expected)
 
     # Normalize quaternions
-    q_detected = q_detected / np.linalg.norm(q_detected)
-    q_expected = q_expected / np.linalg.norm(q_expected)
+    q_detected_norm = np.linalg.norm(q_detected)
+    q_expected_norm = np.linalg.norm(q_expected)
 
-    # Use angle between quaternions as error metric (more sensitive)
+    if q_detected_norm < 1e-10 or q_expected_norm < 1e-10:
+        return np.pi  # Return maximum error if quaternions are invalid
+
+    q_detected = q_detected / q_detected_norm
+    q_expected = q_expected / q_expected_norm
+
+    # Use angle between quaternions as error metric
     dot_product = np.clip(np.dot(q_detected, q_expected), -1.0, 1.0)
     angle_error = 2.0 * np.arccos(np.abs(dot_product))  # Angle in radians
 
     return angle_error
+
+
+def plot_3d_coordinate_frames(obs, optimal_roll, optimal_pitch, output_dir, camera_name):
+    """Create 3D plot showing world frame, camera frame, and ArUco tag frames"""
+
+    # Create figure and 3D axis
+    fig = plt.figure(figsize=(12, 10))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Define frame size for visualization
+    frame_size = 0.1  # 10cm
+
+    def plot_frame(ax, transform_matrix, color, label, alpha=1.0):
+        """Plot a coordinate frame given a 4x4 transformation matrix"""
+        origin = transform_matrix[:3, 3]
+        R = transform_matrix[:3, :3]
+
+        # Create unit vectors
+        x_axis = R @ np.array([frame_size, 0, 0])
+        y_axis = R @ np.array([0, frame_size, 0])
+        z_axis = R @ np.array([0, 0, frame_size])
+
+        # Plot axes
+        ax.quiver(origin[0], origin[1], origin[2],
+                 x_axis[0], x_axis[1], x_axis[2],
+                 color='red', alpha=alpha, arrow_length_ratio=0.2)
+        ax.quiver(origin[0], origin[1], origin[2],
+                 y_axis[0], y_axis[1], y_axis[2],
+                 color='green', alpha=alpha, arrow_length_ratio=0.2)
+        ax.quiver(origin[0], origin[1], origin[2],
+                 z_axis[0], z_axis[1], z_axis[2],
+                 color='blue', alpha=alpha, arrow_length_ratio=0.2)
+
+        # Add label
+        ax.text(origin[0], origin[1], origin[2], label, fontsize=10, color=color)
+
+    # World frame (origin)
+    world_frame = np.eye(4)
+    plot_frame(ax, world_frame, 'black', 'World', alpha=0.8)
+
+    # Camera frame
+    camera_frame = np.linalg.inv(obs['Hcw'])  # Camera to world transform
+    plot_frame(ax, camera_frame, 'purple', 'Camera', alpha=0.8)
+
+    # Detected ArUco frame (in world coordinates)
+    Hwa_detected = np.linalg.inv(obs['Hcw']) @ obs['Hca_detected']
+    # plot_frame(ax, Hwa_detected, 'orange', 'ArUco (Detected)', alpha=0.6)
+
+    # Corrected ArUco frame (in world coordinates)
+    R_pitch = np.array([
+        [np.cos(optimal_pitch), -np.sin(optimal_pitch), 0],
+        [np.sin(optimal_pitch), np.cos(optimal_pitch), 0],
+        [0, 0, 1]
+    ])
+    R_roll = np.array([
+        [np.cos(optimal_roll), 0, np.sin(optimal_roll)],
+        [0, 1, 0],
+        [-np.sin(optimal_roll), 0, np.cos(optimal_roll)]
+    ])
+
+    # Apply corrections to the detected ArUco pose
+    Hwa_corrected = Hwa_detected.copy()
+    Hwa_corrected[:3, :3] = R_roll @ R_pitch @ Hwa_detected[:3, :3]
+    plot_frame(ax, Hwa_corrected, 'cyan', 'ArUco (Corrected)', alpha=0.8)
+
+    # Expected ArUco frame (should be at origin with identity rotation)
+    expected_aruco_frame = np.eye(4)
+    plot_frame(ax, expected_aruco_frame, 'red', 'ArUco (Expected)', alpha=0.8)
+
+    # Set axis labels and limits
+    ax.set_xlabel('X (m)')
+    ax.set_ylabel('Y (m)')
+    ax.set_zlabel('Z (m)')
+    ax.set_title(f'3D Coordinate Frames - {camera_name}\nRoll: {np.degrees(optimal_roll):.2f}°, Pitch: {np.degrees(optimal_pitch):.2f}°')
+
+    # Set equal aspect ratio
+    max_range = np.array([
+        ax.get_xlim()[1] - ax.get_xlim()[0],
+        ax.get_ylim()[1] - ax.get_ylim()[0],
+        ax.get_zlim()[1] - ax.get_zlim()[0]
+    ]).max() / 2.0
+
+    mid_x = (ax.get_xlim()[1] + ax.get_xlim()[0]) * 0.5
+    mid_y = (ax.get_ylim()[1] + ax.get_ylim()[0]) * 0.5
+    mid_z = (ax.get_zlim()[1] + ax.get_zlim()[0]) * 0.5
+
+    ax.set_xlim(mid_x - max_range, mid_x + max_range)
+    ax.set_ylim(mid_y - max_range, mid_y + max_range)
+    ax.set_zlim(mid_z - max_range, mid_z + max_range)
+
+    # Add legend
+    legend_elements = [
+        plt.Line2D([0], [0], color='black', label='World Frame'),
+        plt.Line2D([0], [0], color='purple', label='Camera Frame'),
+        plt.Line2D([0], [0], color='orange', label='ArUco (Detected)'),
+        plt.Line2D([0], [0], color='cyan', label='ArUco (Corrected)'),
+        plt.Line2D([0], [0], color='red', label='ArUco (Expected)')
+    ]
+    ax.legend(handles=legend_elements, loc='upper right')
+
+    # Save plot
+    plot_file = os.path.join(output_dir, f"{camera_name}_coordinate_frames_3d.png")
+    plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+    print(f"3D coordinate frame plot saved to: {plot_file}")
+
+    # Show plot
+    plt.show()
+
+    return plot_file
 
 
 def synchronize_messages(images, sensors, max_time_diff):
@@ -337,19 +408,9 @@ def synchronize_messages(images, sensors, max_time_diff):
 def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_diff, **kwargs):
     os.makedirs(output, exist_ok=True)
 
-    # Use hardcoded ArUco ground truth pose
-    aruco_translation = np.array(ARUCO_GROUND_TRUTH['translation'])
-    aruco_quaternion = np.array(ARUCO_GROUND_TRUTH['quaternion'])  # [x, y, z, w]
-
-    # Create expected pose with ArUco coordinate system correction
-    Hta_expected = np.eye(4)
-    Hta_expected[:3, :3] = quaternion_to_rotation_matrix(aruco_quaternion) @ ARUCO_TO_DESIRED_ROTATION
-    Hta_expected[:3, 3] = aruco_translation
-
-    print(f"Using hardcoded ArUco ground truth pose:")
-    print(f"  Translation: {aruco_translation}")
-    print(f"  Quaternion: {aruco_quaternion}")
-    print(f"  ArUco coordinate correction applied")
+    print(f"Using world space calibration with ArUco tag flat on ground:")
+    print(f"  Expected ArUco rotation: Identity (flat on ground)")
+    print(f"  Expected ArUco translation: [0.0, 0.0, 0.0] (world origin)")
     print(f"  Coordinate system: x forward, y left, z up")
 
     # Get ArUco dictionary - FIXED: Create the actual dictionary object
@@ -383,7 +444,7 @@ def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_d
     calib_data = CalibrationData()
     successful_detection = None
 
-    print("Processing images and detecting ArUco markers (using first successful detection)...")
+    print("Processing images and detecting ArUco markers (using last successful detection)...")
     for img_packet, sensor_packet in tqdm(synchronized):
         # Decode image
         try:
@@ -415,21 +476,30 @@ def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_d
         )
 
         if H_marker is not None:
-            # Compute Htc transform
+            # Extract camera to world transform
             Hcw = extract_transform_matrix(img_packet.msg.Hcw)
-            Htw = extract_transform_matrix(sensor_packet.msg.Htw)
-            Htc = Htw @ np.linalg.inv(Hcw)  # torso to camera
 
-            # Add observation (only the first one)
-            calib_data.add_observation(Htc, H_marker, Hta_expected, {
-                'timestamp': img_packet.msg.timestamp.seconds + img_packet.msg.timestamp.nanos * 1e-9,
-                'image_size': (img_packet.msg.dimensions.x, img_packet.msg.dimensions.y)
-            })
+            # Store the successful detection (will keep overwriting to get the last one)
+            successful_detection = {
+                'Hcw': Hcw,
+                'H_marker': H_marker,
+                'metadata': {
+                    'timestamp': img_packet.msg.timestamp.seconds + img_packet.msg.timestamp.nanos * 1e-9,
+                    'image_size': (img_packet.msg.dimensions.x, img_packet.msg.dimensions.y)
+                }
+            }
 
-            print(f"Found first successful ArUco detection!")
-            print(f"  Image timestamp: {img_packet.msg.timestamp.seconds + img_packet.msg.timestamp.nanos * 1e-9}")
-            print(f"  Image size: {img_packet.msg.dimensions.x} x {img_packet.msg.dimensions.y}")
-            break  # Use only the first successful detection
+    # Add the last successful detection to calibration data
+    if successful_detection is not None:
+        calib_data.add_observation(
+            successful_detection['Hcw'],
+            successful_detection['H_marker'],
+            successful_detection['metadata']
+        )
+
+        print(f"Found last successful ArUco detection!")
+        print(f"  Image timestamp: {successful_detection['metadata']['timestamp']}")
+        print(f"  Image size: {successful_detection['metadata']['image_size'][0]} x {successful_detection['metadata']['image_size'][1]}")
 
     if len(calib_data.observations) == 0:
         print("No ArUco markers detected. Check your marker ID and dictionary.")
@@ -445,7 +515,7 @@ def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_d
     print(f"Initial rotation error: {initial_error:.6f} radians ({np.degrees(initial_error):.3f} degrees)")
 
     # Optimize roll and pitch offsets with better options
-    print("\nOptimizing roll and pitch offsets (rotation error only)...")
+    print("\nOptimizing roll and pitch offsets (minimizing rotation error in world space)...")
     initial_guess = [0.0, 0.0]  # [roll_offset, pitch_offset]
 
     result = minimize(
@@ -498,7 +568,11 @@ def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_d
         'camera_name': camera_name,
         'aruco_id': aruco_id,
         'aruco_size': aruco_size,
-        'aruco_ground_truth': ARUCO_GROUND_TRUTH,
+        'calibration_method': 'world_space_aruco_flat_ground',
+        'aruco_ground_truth': {
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': 'identity_flat_on_ground'
+        },
         'coordinate_system': 'x forward, y left, z up',
         'num_observations': 1,  # Single image
         'optimization': {
@@ -519,9 +593,10 @@ def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_d
     print(f"\nResults saved to: {results_file}")
 
     print(f"\nDebug information:")
-    print(f"Expected ArUco pose (torso space):")
-    print(obs['Hta_expected'])
-    print(f"Detected ArUco pose (torso space):")
+    print(f"Expected ArUco pose (world space):")
+    print(f"  Rotation: Identity (flat on ground)")
+    print(f"  Translation: [0.0, 0.0, 0.0]")
+    print(f"Detected ArUco pose (world space):")
     # Apply roll and pitch corrections to detected pose
     R_pitch = np.array([
         [np.cos(optimal_pitch), -np.sin(optimal_pitch), 0],
@@ -533,7 +608,16 @@ def run(files, output, aruco_dict, aruco_id, aruco_size, camera_name, max_time_d
         [0, 1, 0],
         [-np.sin(optimal_roll), 0, np.cos(optimal_roll)]
     ])
-    H_tc_corrected = np.eye(4)
-    H_tc_corrected[:3, :3] = R_roll @ R_pitch @ obs['H_tc'][:3, :3]
-    H_tc_corrected[:3, 3] = obs['H_tc'][:3, 3]
-    print(H_tc_corrected @ obs['Hca_detected'])
+    Hwa = np.linalg.inv(obs['Hcw']) @ obs['Hca_detected']
+    Rwa_corrected = R_roll @ R_pitch @ Hwa[:3, :3]
+    print("Original Rotation:")
+    print(Hwa[:3, :3])
+
+    print(f"  Corrected Rotation:")
+    print(Rwa_corrected)
+
+    print(" Expected Rotation:")
+    print(ARUCO_WORLD_ROTATION)
+
+    # Plot 3D coordinate frames
+    plot_file = plot_3d_coordinate_frames(obs, optimal_roll, optimal_pitch, output, camera_name)
