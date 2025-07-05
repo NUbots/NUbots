@@ -121,69 +121,15 @@ namespace module::actuation {
         add_group_provider<Head, HeadYaw, HeadPitch>();
 
         // Create providers for each limb/head grouping
-        add_group_provider<Body,
-                           LeftHipYaw,
-                           LeftHipRoll,
-                           LeftHipPitch,
-                           LeftKnee,
-                           LeftAnklePitch,
-                           LeftAnkleRoll,
-                           RightHipYaw,
-                           RightHipRoll,
-                           RightHipPitch,
-                           RightKnee,
-                           RightAnklePitch,
-                           RightAnkleRoll,
-                           RightShoulderPitch,
-                           RightShoulderRoll,
-                           RightElbow,
-                           LeftShoulderPitch,
-                           LeftShoulderRoll,
-                           LeftElbow,
-                           HeadYaw,
-                           HeadPitch>();
-        add_group_provider<Limbs,
-                           LeftHipYaw,
-                           LeftHipRoll,
-                           LeftHipPitch,
-                           LeftKnee,
-                           LeftAnklePitch,
-                           LeftAnkleRoll,
-                           RightHipYaw,
-                           RightHipRoll,
-                           RightHipPitch,
-                           RightKnee,
-                           RightAnklePitch,
-                           RightAnkleRoll,
-                           RightShoulderPitch,
-                           RightShoulderRoll,
-                           RightElbow,
-                           LeftShoulderPitch,
-                           LeftShoulderRoll,
-                           LeftElbow>();
-        add_group_provider<Legs,
-                           LeftHipYaw,
-                           LeftHipRoll,
-                           LeftHipPitch,
-                           LeftKnee,
-                           LeftAnklePitch,
-                           LeftAnkleRoll,
-                           RightHipYaw,
-                           RightHipRoll,
-                           RightHipPitch,
-                           RightKnee,
-                           RightAnklePitch,
-                           RightAnkleRoll>();
-        add_group_provider<Arms,
-                           RightShoulderPitch,
-                           RightShoulderRoll,
-                           RightElbow,
-                           LeftShoulderPitch,
-                           LeftShoulderRoll,
-                           LeftElbow>();
+        add_group_provider<Body, LeftLeg, RightLeg, LeftArm, Head>();
+        add_group_provider<UpperBody, RightArm, LeftArm, Head>();
+        add_group_provider<Limbs, RightLeg, LeftLeg, RightArm, LeftArm>();
+        add_group_provider<Legs, LeftLeg, RightLeg>();
+        add_group_provider<Arms, RightArm, LeftArm>();
 
         // Sequences of servos
         add_sequence_provider<BodySequence, Body>();
+        add_sequence_provider<UpperBodySequence, UpperBody>();
         add_sequence_provider<LimbsSequence, Limbs>();
         add_sequence_provider<RightLegSequence, RightLeg>();
         add_sequence_provider<LeftLegSequence, LeftLeg>();
