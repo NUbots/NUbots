@@ -24,11 +24,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "Soccer.hpp"
+
 #include <fmt/format.h>
 #include <string>
 #include <vector>
-
-#include "Soccer.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
