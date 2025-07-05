@@ -57,6 +57,10 @@ namespace module::actuation {
     struct SetGains {};
 
     class FootController : public ::extension::behaviour::BehaviourReactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the FootController reactor.
+        explicit FootController(std::unique_ptr<NUClear::Environment> environment);
+
     private:
         /// @brief Stores configuration values
         struct Config {
@@ -125,10 +129,6 @@ namespace module::actuation {
         /// @param fusedRoll The fused roll angle in radians.
         /// @return An Eigen::Quaterniond representing the orientation corresponding to the fused angles.
         Eigen::Quaterniond QuatFromFused(double fusedPitch, double fusedRoll);
-
-    public:
-        /// @brief Called by the powerplant to build and setup the FootController reactor.
-        explicit FootController(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Foot controller logic
         template <typename FootControlTask, typename IKTask>
