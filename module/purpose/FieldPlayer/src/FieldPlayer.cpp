@@ -52,6 +52,7 @@ namespace module::purpose {
 
     using FieldPlayerMsg = message::purpose::FieldPlayer;
     using Phase          = message::input::GameState::Phase;
+    using SubMode        = message::input::GameState::SubMode;
 
     using message::input::GameState;
     using message::input::Sensors;
@@ -110,7 +111,9 @@ namespace module::purpose {
 
                 // If sub_mode is 0, the robot must freeze for referee ball repositioning
                 // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
+                if (penalty
+                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
+                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }

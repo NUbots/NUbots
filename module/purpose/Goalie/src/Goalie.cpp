@@ -51,6 +51,7 @@ namespace module::purpose {
     using extension::Configuration;
 
     using Phase      = message::input::GameState::Phase;
+    using SubMode    = message::input::GameState::SubMode;
     using GoalieTask = message::purpose::Goalie;
 
     using message::input::GameState;
@@ -105,7 +106,9 @@ namespace module::purpose {
 
                 // If sub_mode is 0, the robot must freeze for referee ball repositioning
                 // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
+                if (penalty
+                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
+                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }
@@ -207,7 +210,8 @@ namespace module::purpose {
                 // We are not the closest, but the ball is in the defending third, so we should defend the goals.
                 // To do this we stay within the goals on the goal line, but in the spot closest to the ball
                 // Clamp the y position to the goal line
-                double y_position = std::clamp(rBFf.y(), -fd.dimensions.goal_width / 2.0, fd.dimensions.goal_width / 2.0);
+                double y_position =
+                    std::clamp(rBFf.y(), -fd.dimensions.goal_width / 2.0, fd.dimensions.goal_width / 2.0);
                 Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, y_position, 0.0);
                 Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
