@@ -9,7 +9,7 @@ import { GroundViewModel } from "../ground/view_model";
 import { DashboardFieldModel } from "./model";
 
 export class DashboardFieldViewModel {
-  constructor(private model: DashboardFieldModel) { }
+  constructor(private model: DashboardFieldModel) {}
 
   static of = createTransformer((model: DashboardFieldModel): DashboardFieldViewModel => {
     return new DashboardFieldViewModel(model);

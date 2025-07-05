@@ -13,7 +13,7 @@ import { Shape } from "../../../../render2d/object/shape";
 import { GroundModel } from "./model";
 
 export class GroundViewModel {
-  constructor(private model: GroundModel) { }
+  constructor(private model: GroundModel) {}
 
   static of = createTransformer((model: GroundModel): GroundViewModel => {
     return new GroundViewModel(model);

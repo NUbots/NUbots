@@ -10,6 +10,10 @@ import { Icon } from "../icon/view";
 import { PerspectiveCamera, ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
+import { DashboardFieldView } from "./dashboard_components/field/view";
+import { DashboardRobotPanel } from "./dashboard_components/robot_panel/view";
+import { DashboardRobotPanelViewModel } from "./dashboard_components/robot_panel/view_model";
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { AssociationLines } from "./r3f_components/association_lines";
@@ -28,10 +32,6 @@ import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
 import { WalkTrajectoryHistory } from "./r3f_components/walk_trajectory_history";
 import { LocalisationRobotModel } from "./robot_model";
-import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
-import { DashboardFieldView } from "./dashboard_components/field/view";
-import { DashboardRobotPanel } from "./dashboard_components/robot_panel/view";
-import { DashboardRobotPanelViewModel } from "./dashboard_components/robot_panel/view_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -301,11 +301,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             ["Dashboard", model.dashboard.visible, props.toggleDashboardVisibility],
           ].map(([label, isVisible, onClick]) => (
             <div key={label as string} className="w-fit max-w-[13rem]">
-              <MenuItem
-                label={label as string}
-                isVisible={isVisible as boolean}
-                onClick={onClick as () => void}
-              />
+              <MenuItem label={label as string} isVisible={isVisible as boolean} onClick={onClick as () => void} />
             </div>
           ))}
         </div>
@@ -477,7 +473,9 @@ export class Dashboard extends Component<DashboardProps> {
       <div className="flex flex-col w-full h-full">
         <div className="flex flex-col flex-1 bg-auto-surface-0 border-t border-auto h-full">
           <div className="flex-1 relative h-full">
-            <Button className="mt-5 ml-5 z-10 relative" onClick={this.onToggleOrientationClick}>Flip Orientation</Button>
+            <Button className="mt-5 ml-5 z-10 relative" onClick={this.onToggleOrientationClick}>
+              Flip Orientation
+            </Button>
             <Field />
           </div>
           {showPanels && (

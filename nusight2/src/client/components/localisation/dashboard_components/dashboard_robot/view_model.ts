@@ -17,7 +17,7 @@ import { Shape } from "../../../../render2d/object/shape";
 import { DashboardRobotModel } from "./model";
 
 export class DashboardRobotViewModel {
-  constructor(private model: DashboardRobotModel) { }
+  constructor(private model: DashboardRobotModel) {}
 
   static of = createTransformer((model: DashboardRobotModel): DashboardRobotViewModel => {
     return new DashboardRobotViewModel(model);

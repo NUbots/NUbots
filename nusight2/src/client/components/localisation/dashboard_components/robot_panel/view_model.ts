@@ -12,7 +12,7 @@ const PenaltyReason = message.input.GameState.PenaltyReason;
 const Phase = message.input.GameState.Phase;
 
 export class DashboardRobotPanelViewModel {
-  constructor(private model: DashboardRobotModel) { }
+  constructor(private model: DashboardRobotModel) {}
 
   static of = createTransformer((model: DashboardRobotModel): DashboardRobotPanelViewModel => {
     return new DashboardRobotPanelViewModel(model);

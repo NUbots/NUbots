@@ -5,11 +5,11 @@ import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
+import { DashboardFieldModel } from "./dashboard_components/field/model";
 import { FieldModel } from "./r3f_components/field/model";
 import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
-import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
-import { DashboardFieldModel } from "./dashboard_components/field/model";
 
 export class TimeModel {
   @observable time: number; // seconds
@@ -99,7 +99,7 @@ export class ControlsModel {
 export class DashboardModel {
   @observable visible = false;
 
-  constructor() { }
+  constructor() {}
 
   static of(): DashboardModel {
     return new DashboardModel();

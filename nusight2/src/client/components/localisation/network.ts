@@ -9,15 +9,15 @@ import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
-import { TimestampObject } from "../../../shared/time/timestamp";
 
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
-import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
 
 export class LocalisationNetwork {
   constructor(
