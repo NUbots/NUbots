@@ -1,2 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+scripts:
+  getup_back:
+    - "StandUpBack.yaml"
+    - "Stand.yaml"

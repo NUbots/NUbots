@@ -35,6 +35,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
+#include "message/skill/SemiDynamicGetup.hpp"
 
 #include "utility/skill/Script.hpp"
 
@@ -46,6 +47,7 @@ namespace module::skill {
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
     using utility::skill::load_script;
+    using message::skill::SemiDynamicGetup;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -101,7 +103,8 @@ namespace module::skill {
                 }
                 else if (on_back) {
                     log<INFO>("Getting up from back");
-                    emit<Task>(load_script<BodySequence>(cfg.getup_back));
+                    // emit<Task>(load_script<BodySequence>(cfg.getup_back));
+                    emit<Task>(std::make_unique<SemiDynamicGetup>());
                 }
                 else if (on_right || on_left) {
                     log<INFO>("Landed on side, delaying...");

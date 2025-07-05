@@ -2,14 +2,19 @@
 #define MODULE_SKILL_SEMIDYNAMICGETUP_HPP
 
 #include <nuclear>
+#include <string>
+#include <vector>
+
+#include "extension/Behaviour.hpp"
 
 namespace module::skill {
 
-class SemiDynamicGetup : public NUClear::Reactor {
+class SemiDynamicGetup : public ::extension::behaviour::BehaviourReactor {
 private:
     /// @brief Stores configuration values
     struct Config {
-
+        /// @brief Script sequence to run when getting from lying on the back to standing
+        std::vector<std::string> getup_back;
     } cfg;
 
     enum class Phase {
