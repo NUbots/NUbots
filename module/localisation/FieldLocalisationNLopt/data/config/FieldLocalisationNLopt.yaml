@@ -25,7 +25,7 @@ min_field_line_intersections: 3
 start_time_delay: 1
 
 # Bool to use ground truth for localisation
-use_ground_truth_localisation: false
+use_ground_truth_localisation: true
 
 # Cost for a point outside the field
 out_of_field_cost: 3.0

@@ -100,6 +100,7 @@ namespace module::localisation {
 
                 // Check if we have ground truth robot data from Webots
                 if (cfg.use_ground_truth && horizon.vision_ground_truth.exists && !horizon.vision_ground_truth.robots.empty()) {
+                    log<DEBUG>("Localisation: UsingGround truth data from Webots for robots");
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : horizon.vision_ground_truth.robots) {
                         LocalisationRobot localisation_robot;
@@ -119,6 +120,7 @@ namespace module::localisation {
                         localisation_robots->robots.push_back(localisation_robot);
                     }
                 } else {
+                    log<DEBUG>("Localisation: Using UKF-based tracking for robots");
                     // Fall back to UKF-based tracking
                     for (const auto& tracked_robot : tracked_robots) {
                         auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
