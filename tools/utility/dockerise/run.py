@@ -91,7 +91,7 @@ def _setup_volume(volume_name, clean_volume):
     return volume
 
 
-def _setup_internal_image(image, rebuild, clean_volume, clean_uv_cache=False):
+def _setup_internal_image(image, rebuild, clean_volume, clean_uv_cache):
     # Extract the repository and platform
     repository, target = image.split(":")
     _, repository = repository.split("/")
