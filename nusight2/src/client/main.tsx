@@ -10,7 +10,6 @@ import { AppModel } from "./components/app/model";
 import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
-import { installDashboard } from "./components/dashboard/install";
 import { installKinematics } from "./components/kinematics/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
@@ -34,7 +33,6 @@ const appController = AppController.of();
 AppNetwork.of(nusightNetwork, appModel);
 const Menu = withRobotSelectorMenuBar(appModel, appController.toggleRobotEnabled);
 
-installDashboard({ nav, appModel, nusightNetwork, Menu });
 installLocalisation({ nav, appModel, nusightNetwork, Menu });
 installOdometry({ nav, appModel, nusightNetwork, Menu });
 installChart({ nav, appModel, nusightNetwork, Menu });

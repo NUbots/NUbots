@@ -37,7 +37,7 @@ export const MenuBar = ({
 }) => {
   return (
     <div className="flex flex-col bg-auto-surface-1">
-      <div className="flex h-[60px]">
+      <div className="flex min-h-[60px] h-auto flex-wrap items-center">
         <div className="flex-1 pr-4">{children}</div>
         <div className="px-2">
           <RobotSelector />

@@ -1,8 +1,8 @@
 import React from "react";
 import classNames from "classnames";
 
-import { Vector3 } from "../../../../shared/math/vector3";
-import { Icon } from "../../icon/view";
+import { Vector3 } from "../../../../../shared/math/vector3";
+import { Icon } from "../../../icon/view";
 
 import GoalIcon from "./icon/goal";
 
@@ -22,7 +22,7 @@ export type RobotPanelProps = {
   walkCommand: Vector3;
 };
 
-export const RobotPanel = (props: RobotPanelProps) => {
+export const DashboardRobotPanel = (props: RobotPanelProps) => {
   const connectionStatusClassName = classNames("w-3 h-3 rounded-full border mr-2", {
     "bg-green-500 border-green-800": props.connected,
     "bg-red-500 border-red-800": !props.connected,

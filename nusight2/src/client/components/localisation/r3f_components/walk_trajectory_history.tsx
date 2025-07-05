@@ -7,7 +7,7 @@ import { TrajectoryLine } from "./walk_trajectory";
 interface WalkTrajectoryHistoryProps {
   trajectories: {
     torso: Matrix4[];
-    swing_foot: Matrix4[];
+    swingFoot: Matrix4[];
     color: string;
     timestamp: number;
   }[];
@@ -25,7 +25,7 @@ export const WalkTrajectoryHistory: React.FC<WalkTrajectoryHistoryProps> = ({ tr
           <group key={trajectory.timestamp}>
             <TrajectoryLine poses={trajectory.torso} color={trajectory.color} lineWidth={lineWidth} opacity={opacity} />
             <TrajectoryLine
-              poses={trajectory.swing_foot}
+              poses={trajectory.swingFoot}
               color={trajectory.color}
               lineWidth={lineWidth}
               opacity={opacity}

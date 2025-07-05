@@ -1,14 +1,14 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Vector2 } from "../../../../shared/math/vector2";
-import { BasicAppearance } from "../../../render2d/appearance/basic_appearance";
-import { LineAppearance } from "../../../render2d/appearance/line_appearance";
-import { CircleGeometry } from "../../../render2d/geometry/circle_geometry";
-import { LineGeometry } from "../../../render2d/geometry/line_geometry";
-import { PolygonGeometry } from "../../../render2d/geometry/polygon_geometry";
-import { Group } from "../../../render2d/object/group";
-import { Shape } from "../../../render2d/object/shape";
+import { Vector2 } from "../../../../../shared/math/vector2";
+import { BasicAppearance } from "../../../../render2d/appearance/basic_appearance";
+import { LineAppearance } from "../../../../render2d/appearance/line_appearance";
+import { CircleGeometry } from "../../../../render2d/geometry/circle_geometry";
+import { LineGeometry } from "../../../../render2d/geometry/line_geometry";
+import { PolygonGeometry } from "../../../../render2d/geometry/polygon_geometry";
+import { Group } from "../../../../render2d/object/group";
+import { Shape } from "../../../../render2d/object/shape";
 
 import { GroundModel } from "./model";
 

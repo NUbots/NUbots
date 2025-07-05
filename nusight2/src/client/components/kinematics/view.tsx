@@ -19,7 +19,7 @@ const JointDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
         <h3 className="text-xl font-semibold">Joint Angles</h3>
         <button
           onClick={() => setUnit(unit === "rad" ? "deg" : "rad")}
-          className="text-sm px-2 py-1 border rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+          className="text-sm px-2 py-1 border rounded hover:bg-gray-300 dark:hover:bg-gray-600 border-black dark:border-white"
         >
           Show in {unit === "rad" ? "Degrees" : "Radians"}
         </button>
