@@ -38,7 +38,7 @@ nuclear_role(
   skill::KickWalk
   skill::GetUp
   skill::Look
-  # skill::Say
+  skill::Say
   skill::GPT
   # Planners
   planning::PlanWalkPath
