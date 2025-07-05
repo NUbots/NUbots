@@ -89,7 +89,6 @@ namespace module::skill {
             walk_generator.set_parameters(cfg.walk_generator_parameters);
             cfg.walk_generator_parameters.only_switch_when_planted =
                 config["walk"]["only_switch_when_planted"].as<bool>();
-            cfg.walk_generator_parameters.use_balance_control = config["walk"]["use_balance_control"].as<bool>();
 
             // Reset the walk engine and last update time
             walk_generator.reset();
@@ -108,9 +107,10 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
-            cfg.kick_velocity_x    = config["kick"]["kick_velocity_x"].as<double>();
-            cfg.kick_velocity_y    = config["kick"]["kick_velocity_y"].as<double>();
-            cfg.kick_timing_offset = config["kick"]["kick_timing_offset"].as<double>();
+            cfg.kick_velocity_x     = config["kick"]["kick_velocity_x"].as<double>();
+            cfg.kick_velocity_y     = config["kick"]["kick_velocity_y"].as<double>();
+            cfg.kick_timing_offset  = config["kick"]["kick_timing_offset"].as<double>();
+            cfg.use_balance_control = config["walk"]["use_balance_control"].as<bool>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -213,12 +213,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl,
-                                                             goal_time,
-                                                             cfg.walk_generator_parameters.use_balance_control));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr,
-                                                              goal_time,
-                                                              cfg.walk_generator_parameters.use_balance_control));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, cfg.use_balance_control));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, cfg.use_balance_control));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();

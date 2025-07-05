@@ -66,6 +66,8 @@ namespace module::skill {
             double kick_velocity_y = 0.0;
             /// @brief Buffer time before the kick starts
             double kick_timing_offset = 0.0;
+            /// @brief Option to use balance control when walking
+            bool use_balance_control = false;
         } cfg;
 
         /// @brief Last time we updated the walk engine

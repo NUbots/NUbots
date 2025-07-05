@@ -85,8 +85,6 @@ namespace module::actuation {
             /// @brief Desired gains for each servo
             std::map<std::string, double> desired_gains{};
 
-            /// @brief Whether or not to use orientation correction
-            bool correction_enabled = false;
             /// @brief Proportional gain for torso orientation roll correction
             double roll_p_gain = 0.0;
             /// @brief Proportional gain for torso orientation pitch correction
@@ -143,7 +141,7 @@ namespace module::actuation {
             ik_task->Htf  = foot_control_task.Htf;
 
             // Add correction to the torso orientation if enabled
-            if (foot_control_task.correction_enabled && cfg.correction_enabled) {
+            if (foot_control_task.correction_enabled) {
                 // Hwt quaternion
                 Eigen::Quaterniond Hwt_quat(sensors.Htw.inverse().linear());
 

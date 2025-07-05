@@ -23,8 +23,6 @@ servo_gains:
   R_ANKLE_ROLL: 8
 
 balance:
-  enabled: false
-
   roll_p_gain: 0.9
   pitch_p_gain: 0.925
 
