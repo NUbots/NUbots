@@ -86,8 +86,8 @@ namespace module::planning {
             cfg.fall_script         = config["fall_script"].as<std::string>();
         });
 
-        on<Provide<RelaxWhenFalling>, Uses<UpperBodySequence>, Trigger<Sensors>>().then(
-            [this](const RunReason& run_reason, const Uses<UpperBodySequence>& body, const Sensors& sensors) {
+        on<Provide<RelaxWhenFalling>, Trigger<Sensors>>().then(
+            [this](const RunReason& run_reason, const Sensors& sensors) {
                 // OTHER_TRIGGER means we ran because of a sensors update
                 if (run_reason == RunReason::OTHER_TRIGGER) {
                     auto& a = sensors.accelerometer;
@@ -151,12 +151,7 @@ namespace module::planning {
                                                                         : "STABLE");
 
                         emit(std::make_unique<Stability>(Stability::FALLING));
-                        if (body.run_state == RunState::NO_TASK) {
-                            emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
-                        }
-                        else {
-                            emit<Task>(std::make_unique<Continue>());
-                        }
+                        emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
                     }
                 }
                 else {

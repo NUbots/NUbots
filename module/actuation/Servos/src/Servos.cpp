@@ -76,6 +76,8 @@ namespace module::actuation {
     using message::actuation::RightLegSequence;
     using message::actuation::RightShoulderPitch;
     using message::actuation::RightShoulderRoll;
+    using message::actuation::UpperBody;
+    using message::actuation::UpperBodySequence;
     using utility::input::ServoID;
 
     Servos::Servos(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -121,11 +123,75 @@ namespace module::actuation {
         add_group_provider<Head, HeadYaw, HeadPitch>();
 
         // Create providers for each limb/head grouping
-        add_group_provider<Body, LeftLeg, RightLeg, LeftArm, Head>();
-        add_group_provider<UpperBody, RightArm, LeftArm, Head>();
-        add_group_provider<Limbs, RightLeg, LeftLeg, RightArm, LeftArm>();
-        add_group_provider<Legs, LeftLeg, RightLeg>();
-        add_group_provider<Arms, RightArm, LeftArm>();
+        add_group_provider<Body,
+                           LeftHipYaw,
+                           LeftHipRoll,
+                           LeftHipPitch,
+                           LeftKnee,
+                           LeftAnklePitch,
+                           LeftAnkleRoll,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow,
+                           HeadYaw,
+                           HeadPitch>();
+        add_group_provider<UpperBody,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow,
+                           HeadYaw,
+                           HeadPitch>();
+        add_group_provider<Limbs,
+                           LeftHipYaw,
+                           LeftHipRoll,
+                           LeftHipPitch,
+                           LeftKnee,
+                           LeftAnklePitch,
+                           LeftAnkleRoll,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow>();
+        add_group_provider<Legs,
+                           LeftHipYaw,
+                           LeftHipRoll,
+                           LeftHipPitch,
+                           LeftKnee,
+                           LeftAnklePitch,
+                           LeftAnkleRoll,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll>();
+        add_group_provider<Arms,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow>();
 
         // Sequences of servos
         add_sequence_provider<BodySequence, Body>();

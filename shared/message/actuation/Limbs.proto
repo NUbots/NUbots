@@ -107,7 +107,7 @@ message UpperBody {
     map<uint32, ServoCommand> servos = 1;
 }
 message UpperBodySequence {
-    repeated Body frames = 1;
+    repeated UpperBody frames = 1;
 }
 
 /// Arms, legs and head servo command information including time, gain, torque, position
