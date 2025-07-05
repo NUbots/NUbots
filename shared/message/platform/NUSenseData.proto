@@ -137,3 +137,16 @@ message NUSenseHandshake {
     /// The servo configurations to be sent to the NUSense
     repeated ServoConfiguration servo_configs = 3;
 }
+
+message ServoIDStates {
+    enum IDState {
+        MISSING   = 0;
+        PRESENT   = 1;
+        DUPLICATE = 2;
+    }
+    message ServoIDState {
+        uint32  id    = 1;
+        IDState state = 2;
+    }
+    repeated ServoIDState servo_id_states = 1;
+}

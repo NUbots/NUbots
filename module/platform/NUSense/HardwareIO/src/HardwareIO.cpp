@@ -55,6 +55,7 @@ namespace module::platform::NUSense {
     using message::platform::NUSense;
     using message::platform::NUSenseHandshake;
     using message::platform::RawSensors;
+    using message::platform::ServoIDStates;
     using utility::support::Expression;
 
 
@@ -126,6 +127,38 @@ namespace module::platform::NUSense {
 
             log<INFO>("Processing of ServoTargets enabled.");
             log<INFO>("ACK rx from NUSense: ", handshake.msg);
+        });
+
+        // Log Servo ID states
+        on<Trigger<ServoIDStates>>().then("Servo ID states from NUSense", [this](const ServoIDStates& states) {
+            log<INFO>("Received ServoIDStates from NUSense:");
+            bool id_fault_detected = false;
+            for (const auto& state : states.servo_id_states) {
+                std::string state_str;
+                switch (state.state.value) {
+                    case ServoIDStates::IDState::PRESENT: state_str = "PRESENT"; break;
+                    case ServoIDStates::IDState::MISSING:
+                        state_str = "MISSING";
+                        // Exclude ID 0 since it corresponds to NO_ID
+                        id_fault_detected = state.id > 0 ? true : false;
+                        break;
+                    case ServoIDStates::IDState::DUPLICATE:
+                        state_str = "DUPLICATE";
+                        // Exclude ID 0 since it corresponds to NO_ID
+                        id_fault_detected = state.id > 0 ? true : false;
+                        break;
+                }
+
+                log<INFO>(fmt::format("Servo ID: {} {} State: {}",
+                                      state.id,
+                                      nugus.device_name(static_cast<NUgus::ID>(state.id)),
+                                      state_str));
+            }
+
+            if (id_fault_detected) {
+                log<ERROR>("Duplicate or missing servo IDs detected! (Excluding NO_ID)");
+                exit(1);
+            }
         });
 
         // Emit any messages sent by the device to the rest of the system
@@ -244,7 +277,7 @@ namespace module::platform::NUSense {
             }
 
             // Emit the raw sensor data
-            emit(std::move(sensors));
+            emit(sensors);
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
