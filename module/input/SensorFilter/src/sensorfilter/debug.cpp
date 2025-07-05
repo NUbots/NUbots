@@ -31,6 +31,7 @@
 
 #include "message/actuation/BodySide.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/input/FrameID.hpp"
@@ -41,13 +42,15 @@ namespace module::input {
 
     using message::actuation::BodySide;
     using message::input::Sensors;
+    using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
     using utility::input::FrameID;
 
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
 
-    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
+    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                           const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
         // Raw accelerometer and gyroscope information
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
         emit(
@@ -60,12 +63,6 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
         emit(graph("Foot down phase", int(sensors->planted_foot_phase)));
         emit(graph("Anchor foot", int(planted_anchor_foot)));
-
-        // z-height of the foot
-        const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_FOOT_BASE]);
-        const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_FOOT_BASE]);
-        const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
-        emit(graph("rRLl_z", Hlr.translation().z()));
 
         // Odometry estimates
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
@@ -84,8 +81,8 @@ namespace module::input {
         emit(graph("vTw (estimate)", vTw.x(), vTw.y(), vTw.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
-        if (raw_sensors.odometry_ground_truth.exists) {
-            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
+        if (robot_pose_ground_truth) {
+            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(ground_truth_Hfw.inverse() * robot_pose_ground_truth->Hft);
 
             // Determine translation and orientation error
             Eigen::Vector3d true_rTWw  = true_Hwt.translation();
@@ -93,7 +90,7 @@ namespace module::input {
             Eigen::Vector3d true_Rwt   = mat_to_rpy_intrinsic(true_Hwt.rotation());
             Eigen::Vector3d error_Rwt  = (true_Rwt - est_Rwt).cwiseAbs();
             double quat_rot_error      = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
-            Eigen::Vector3d true_vTw   = Eigen::Vector3d(raw_sensors.odometry_ground_truth.vTw);
+            Eigen::Vector3d true_vTw   = Eigen::Vector3d(robot_pose_ground_truth->vTf);
             Eigen::Vector3d error_vTw  = (true_vTw - sensors->vTw).cwiseAbs();
 
             // Graph translation, angles and error
