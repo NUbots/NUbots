@@ -43,7 +43,6 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
-  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   # Purpose

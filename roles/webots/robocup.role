@@ -51,7 +51,6 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
-  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   strategy::StrategiseLook
@@ -59,11 +58,8 @@ nuclear_role(
   strategy::WalkToFieldPosition
   strategy::FindObject
   strategy::DiveToBall
-  strategy::KickToGoal
-  strategy::AlignBallToGoal
-  strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::SoccerNew
+  purpose::Soccer
   purpose::Attack
   purpose::ReadyAttack
   purpose::Defend

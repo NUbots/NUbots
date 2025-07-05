@@ -42,7 +42,6 @@ nuclear_role(
   skill::KickWalk
   skill::GetUp
   skill::Look
-  skill::Dive
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
@@ -51,24 +50,19 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
-  strategy::StartSafely
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
-  strategy::KickToGoal
-  strategy::AlignBallToGoal
-  strategy::DiveToBall
-  strategy::WalkInsideBoundedBox
   # Purposes
-  purpose::SoccerNew
+  purpose::Soccer
+  purpose::FieldPlayer
+  purpose::Goalie
   purpose::Attack
   purpose::ReadyAttack
   purpose::Defend
-  purpose::FieldPlayer
   purpose::Support
-  purpose::Goalie
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
   # Datalogging support::logging::DataLogging
