@@ -93,13 +93,13 @@ message GameState {
     }
 
     enum SubMode {
-        REF_PLACE = 0;
+        REF_PLACE      = 0;
         ROBOT_POSITION = 1;
-        PRE_EXECUTE = 2;
+        PRE_EXECUTE    = 2;
     }
 
     message SecondaryState {
-        uint32 team_performing = 1;
+        uint32  team_performing = 1;
         SubMode sub_mode        = 2;
     }
 
