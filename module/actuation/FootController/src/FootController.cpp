@@ -66,6 +66,8 @@ namespace module::actuation {
             cfg.max_i_error        = config["balance"]["max_i_error"].as<double>();
             cfg.roll_d_gain        = config["balance"]["roll_d_gain"].as<double>();
             cfg.pitch_d_gain       = config["balance"]["pitch_d_gain"].as<double>();
+            cfg.max_pitch_error    = config["balance"]["max_pitch_error"].as<double>();
+            cfg.max_roll_error     = config["balance"]["max_roll_error"].as<double>();
 
             // Emit request to set desired gains after a delay
             emit<Scope::DELAY>(std::make_unique<SetGains>(),

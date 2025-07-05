@@ -101,6 +101,10 @@ namespace module::actuation {
             double roll_d_gain = 0.0;
             /// @brief Derivative gain for torso orientation pitch correction
             double pitch_d_gain = 0.0;
+            /// @brief Maximum allowed pitch error before disabling correction
+            double max_pitch_error = 0.0;
+            /// @brief Maximum allowed roll error before disabling correction
+            double max_roll_error = 0.0;
         } cfg;
 
         /// @brief Accumulates the integral of the roll error over time for use in PID control.
@@ -171,6 +175,16 @@ namespace module::actuation {
                 auto roll_error  = desired_roll - fused_roll;
                 auto pitch_error = desired_pitch - fused_pitch;
 
+                // If the error is too large, we are probably falling over and should pause applying control.
+                if (std::abs(roll_error) > cfg.max_roll_error || std::abs(pitch_error) > cfg.max_pitch_error) {
+                    if (log_level <= DEBUG) {
+                        log<DEBUG>("Balance correction disabled due to large error: roll_error = {}, pitch_error = {}",
+                                   roll_error,
+                                   pitch_error);
+                    }
+                    return;  // Do not apply control if the error is too large
+                }
+
                 if (log_level <= DEBUG) {
                     // Graph the errors
                     emit(graph("Balance/Roll_Error", roll_error));
@@ -236,10 +250,6 @@ namespace module::actuation {
                 Htf_corrected.linear()          = desired_Rft.transpose();
 
                 ik_task->Htf = Htf_corrected;
-            }
-            else {
-                // Correction is not enabled, use the original task
-                ik_task->Htf = foot_control_task.Htf;
             }
 
             if (cfg.mode == "IK") {
