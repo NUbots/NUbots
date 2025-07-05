@@ -46,10 +46,6 @@ namespace module::skill {
             std::vector<std::string> getup_front;
             /// @brief Script sequence to run when getting from lying on the back to standing
             std::vector<std::string> getup_back;
-            /// @brief Script sequence to run when getting from lying on the right to standing
-            std::vector<std::string> getup_right;
-            /// @brief Script sequence to run when getting from lying on the left to standing
-            std::vector<std::string> getup_left;
             /// @brief Script sequence to run when already upright
             std::vector<std::string> getup_upright;
             /// @brief Script sequence to run when told to get up while upside down

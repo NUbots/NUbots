@@ -69,10 +69,12 @@ jobs:
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
-          # Remove unneeded tools to free up more space
+          tool-cache: true
           android: true
           dotnet: true
           haskell: true
+          large-packages: true
+          swap-storage: true
 
       # Figure out the tag to use for the Docker image
       - name: Set Docker tag

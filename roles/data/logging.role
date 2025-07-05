@@ -19,7 +19,9 @@ nuclear_role(
   output::ImageCompressor
   # Input
   input::Camera
+  input::NatNet
   input::SensorFilter
+  localisation::Mocap
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
@@ -38,7 +40,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::SplineKick
+  skill::KickWalk
   skill::GetUp
   skill::Look
   # Planners

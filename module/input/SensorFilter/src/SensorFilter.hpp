@@ -34,35 +34,22 @@
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
 
-#include "MotionModel.hpp"
-
-#include "extension/Configuration.hpp"
-
-#include "message/actuation/BodySide.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
-#include "message/input/Buttons.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
-#include "utility/actuation/tinyrobotics.hpp"
-#include "utility/input/FrameID.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
-#include "utility/math/euler.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
-#include "utility/nusight/NUhelpers.hpp"
-#include "utility/platform/RawSensors.hpp"
-#include "utility/support/yaml_expression.hpp"
 
 namespace module::input {
 
-
     using utility::math::filter::MahonyFilter;
 
+    using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
 
     class SensorFilter : public NUClear::Reactor {
@@ -80,13 +67,10 @@ namespace module::input {
 
             /// @brief The number of times a button must be pressed before it is considered pressed
             int button_debounce_threshold = 0;
-
             /// @brief Cutoff frequency for the low pass filter of torso x velocity
             double x_cut_off_frequency = 0.0;
-
             /// @brief Cutoff frequency for the low pass filter of torso y velocity
             double y_cut_off_frequency = 0.0;
-
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
         } cfg;
@@ -111,9 +95,14 @@ namespace module::input {
 
         /// @brief Current state of the left button
         bool left_down = false;
-
         /// @brief Current state of the middle button
         bool middle_down = false;
+
+        /// @brief Bool indicating if the ground truth is initialised
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
@@ -138,15 +127,18 @@ namespace module::input {
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
         /// @param raw_sensors The raw sensor data
+        /// @param robot_pose_ground_truth The ground truth robot pose
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
-                             const message::behaviour::state::Stability& stability);
+                             const message::behaviour::state::Stability& stability,
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
-        /// @param raw_sensors The raw sensor data
-        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
+        /// @param robot_pose_ground_truth The ground truth robot pose
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                 const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

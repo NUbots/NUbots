@@ -148,7 +148,7 @@ namespace module::platform::OpenCR {
             angle += servo_offset[id];
 
             // Normalise the angle to (-pi, pi] for internal use
-            return utility::math::angle::normalizeAngle(angle);
+            return utility::math::angle::normalise_angle(angle);
         }
 
         uint32_t position(uint8_t id,
@@ -163,7 +163,7 @@ namespace module::platform::OpenCR {
             angle *= servo_direction[id];
 
             // Normalise the angle to (-pi, pi] in case the offset changed this
-            angle = utility::math::angle::normalizeAngle(angle);
+            angle = utility::math::angle::normalise_angle(angle);
 
             // Do the actual conversion to the control table data and apply the correction as per the block comment in
             // the function above.
