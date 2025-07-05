@@ -56,10 +56,6 @@ namespace module::actuation {
 
     struct SetGains {};
 
-    // Function declarations
-    void FusedFromQuat(const Eigen::Quaterniond& q, double& fusedPitch, double& fusedRoll);
-    Eigen::Quaterniond QuatFromFused(double fusedPitch, double fusedRoll);
-
     class FootController : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
@@ -115,6 +111,18 @@ namespace module::actuation {
         /// @brief Stores the timestamp of the last PID control update, used to compute time deltas for integral and
         /// derivative calculations.
         NUClear::clock::time_point last_update_time{};
+
+        /// @brief Converts a quaternion to fused roll and pitch angles.
+        /// @param q The quaternion to convert.
+        /// @param fusedPitch The output fused pitch angle in radians.
+        /// @param fusedRoll The output fused roll angle in radians.
+
+        void FusedFromQuat(const Eigen::Quaterniond& q, double& fusedPitch, double& fusedRoll);
+        /// @brief Converts fused roll and pitch angles to a quaternion.
+        /// @param fusedPitch The fused pitch angle in radians.
+        /// @param fusedRoll The fused roll angle in radians.
+        /// @return An Eigen::Quaterniond representing the orientation corresponding to the fused angles.
+        Eigen::Quaterniond QuatFromFused(double fusedPitch, double fusedRoll);
 
     public:
         /// @brief Called by the powerplant to build and setup the FootController reactor.
@@ -255,42 +263,6 @@ namespace module::actuation {
             }
         }
     };
-
-    // Conversion: Quaternion --> Fused angles (2D)
-    void FusedFromQuat(const Eigen::Quaterniond& q, double& fusedPitch, double& fusedRoll) {
-        // Calculate the fused pitch and roll
-        double stheta = 2.0 * (q.y() * q.w() - q.x() * q.z());
-        double sphi   = 2.0 * (q.y() * q.z() + q.x() * q.w());
-        stheta        = (stheta >= 1.0 ? 1.0 : (stheta <= -1.0 ? -1.0 : stheta));  // Coerce stheta to [-1,1]
-        sphi          = (sphi >= 1.0 ? 1.0 : (sphi <= -1.0 ? -1.0 : sphi));        // Coerce sphi   to [-1,1]
-        fusedPitch    = asin(stheta);
-        fusedRoll     = asin(sphi);
-    }
-
-    Eigen::Quaterniond QuatFromFused(double fusedPitch, double fusedRoll)  // Assume: fusedYaw = 0, hemi = true
-    {
-        // Precalculate the sine values
-        double sth  = sin(fusedPitch);
-        double sphi = sin(fusedRoll);
-
-        // Calculate the sine sum criterion
-        double crit = sth * sth + sphi * sphi;
-
-        // Calculate the tilt angle alpha
-        double alpha   = (crit >= 1.0 ? M_PI_2 : acos(sqrt(1.0 - crit)));
-        double halpha  = 0.5 * alpha;
-        double chalpha = cos(halpha);
-        double shalpha = sin(halpha);
-
-        // Calculate the tilt axis angle gamma
-        double gamma  = atan2(sth, sphi);
-        double cgamma = cos(gamma);
-        double sgamma = sin(gamma);
-
-        // Return the required quaternion orientation (a rotation about (cgamma, sgamma, 0) by angle alpha)
-        Eigen::Quaterniond result = Eigen::Quaterniond(chalpha, cgamma * shalpha, sgamma * shalpha, 0.0);
-        return result;  // Order: (w,x,y,z)
-    }
 
 
 }  // namespace module::actuation
