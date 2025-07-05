@@ -41,6 +41,7 @@ namespace module::input {
     using message::behaviour::state::Stability;
     using message::localisation::ResetFieldLocalisation;
     using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::math::filter::ComplementaryFilter;
     using utility::math::filter::MahonyFilter;
     using utility::support::Expression;
 
@@ -65,6 +66,14 @@ namespace module::input {
                 config["mahony"]["Ki"].as<Expression>(),
                 Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>()),
                 rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>())));
+
+            // Configure the yaw complementary filter
+            yaw_filter = ComplementaryFilter<double>(config["yaw_filter"]["alpha"].as<Expression>(),
+                                                     config["yaw_filter"]["beta"].as<Expression>());
+
+            // Configure stationary detection parameters
+            yaw_filter.set_stationary_threshold(config["yaw_filter"]["stationary_threshold"].as<Expression>());
+            yaw_filter.set_min_stationary_count(config["yaw_filter"]["min_stationary_count"].as<int>());
 
             // Velocity filter config
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();
@@ -132,6 +141,9 @@ namespace module::input {
                                                                                        std::string("left_foot_base"))
                                         .translation()
                                         .y();
+
+            // Reset yaw filter
+            yaw_filter.reset();
         });
     }
 

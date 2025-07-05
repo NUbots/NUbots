@@ -80,6 +80,22 @@ namespace module::input {
         emit(graph("Rrw rpy (estimate)", est_Rrw.x(), est_Rrw.y(), est_Rrw.z()));
         emit(graph("vTw (estimate)", vTw.x(), vTw.y(), vTw.z()));
 
+        // Yaw filter debug information
+        emit(graph("Yaw Filter/Fused Yaw", yaw_filter.get_yaw()));
+        emit(graph("Yaw Filter/Alpha", yaw_filter.get_alpha()));
+        emit(graph("Yaw Filter/Bias", yaw_filter.get_bias()));
+        emit(graph("Yaw Filter/Beta", yaw_filter.get_beta()));
+        emit(graph("Yaw Filter/Stationary Count", yaw_filter.get_stationary_count()));
+        emit(graph("Yaw Filter/Is Stationary", yaw_filter.is_stationary()));
+        emit(graph("Yaw Filter/Stationary Threshold", yaw_filter.get_stationary_threshold()));
+
+        // Individual yaw estimates for comparison
+        emit(graph("Yaw Estimates/Mahony Yaw", est_Rwt.z()));
+        // Note: Kinematic yaw is extracted from Hwt_anchor in update_odometry,
+        // but we can approximate it from the current Htw for debugging
+        emit(graph("Yaw Estimates/Kinematic Yaw (approx)", est_Rwt.z()));
+        emit(graph("Yaw Estimates/Fused Yaw", yaw_filter.get_yaw()));
+
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (robot_pose_ground_truth) {
             Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(ground_truth_Hfw.inverse() * robot_pose_ground_truth->Hft);

@@ -40,10 +40,12 @@
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/math/filter/ComplementaryFilter.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
 
 namespace module::input {
 
+    using utility::math::filter::ComplementaryFilter;
     using utility::math::filter::MahonyFilter;
 
     using message::behaviour::state::Stability;
@@ -89,6 +91,9 @@ namespace module::input {
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
+
+        /// @brief Complementary filter for yaw fusion (gyroscope + kinematics)
+        ComplementaryFilter<double> yaw_filter{};
 
         /// @brief Bias used in the mahony filter, updates with each mahony update
         Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
