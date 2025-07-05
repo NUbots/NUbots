@@ -26,6 +26,8 @@
  */
 #include "PlanWalkPath.hpp"
 
+#include <ranges>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -36,6 +38,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
 
+#include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/geometry/intersection.hpp"
@@ -59,6 +62,7 @@ namespace module::planning {
 
     using message::strategy::StandStill;
 
+    using utility::math::angle::vectorToBearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::math::geometry::intersection_line_and_circle;
     using utility::nusight::graph;
@@ -135,113 +139,105 @@ namespace module::planning {
                    const std::shared_ptr<const Robots>& robots,
                    const std::shared_ptr<const Ball>& ball,
                    const Sensors& sensors) {
+                // Get all the parameters we need to calculate the walk path
+                const auto& Hrd  = walk_to.Hrd;
+                const auto& Hrw  = sensors.Hrw;
+                const auto& rBWw = ball ? ball->rBWw : Eigen::Vector3d::Zero();
+
                 // Decompose the target pose into position and orientation
-                Eigen::Vector2d rDRr = walk_to.Hrd.translation().head(2);
+                Eigen::Vector2d rDRr = Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
-                const double angle_to_target = std::atan2(rDRr.y(), rDRr.x());
+                double angle_to_target = vectorToBearing(rDRr);
                 // Calculate the angle between the robot and the final desired heading
-                double angle_to_final_heading =
-                    std::atan2(walk_to.Hrd.linear().col(0).y(), walk_to.Hrd.linear().col(0).x());
+                double angle_to_final_heading = vectorToBearing(Hrd.linear().col(0).head(2));
 
                 // Determine if we have the ball (for more aggressive obstacle avoidance)
-                bool has_ball = false;
-                if (ball != nullptr) {
-                    Eigen::Vector3d rBRr = sensors.Hrw * ball->rBWw;
-                    has_ball             = rBRr.norm() < cfg.ball_possession_threshold;
-                }
+                const bool have_ball     = ball ? (Hrw * rBWw).norm() < cfg.ball_possession_threshold : false;
+                bool other_robots_nearby = false;
 
-                // If there are robots, check if there are obstacles in the way
-                if (robots != nullptr) {
-                    // Get the positions of all robots in the world
+                // If we can see any robots, check if they are in the way
+                if (robots) {
                     std::vector<Eigen::Vector2d> all_obstacles{};
-                    for (const auto& robot : robots->robots) {
-                        all_obstacles.emplace_back((sensors.Hrw * robot.rRWw).head(2));
-                    }
+                    std::transform(robots->robots.begin(),
+                                   robots->robots.end(),
+                                   std::back_inserter(all_obstacles),
+                                   [&](const auto& robot) { return (Hrw * robot.rRWw).head(2); });
+
                     // Sort obstacles based on distance from the robot
-                    std::sort(all_obstacles.begin(),
-                              all_obstacles.end(),
-                              [](const Eigen::Vector2d& a, const Eigen::Vector2d& b) { return a.norm() < b.norm(); });
+                    std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
 
                     // Use enhanced obstacle radius when we have the ball
-                    double effective_obstacle_radius = has_ball ? cfg.obstacle_radius_with_ball : cfg.obstacle_radius;
+                    const double obstacle_radius = have_ball ? cfg.obstacle_radius_with_ball : cfg.obstacle_radius;
 
                     // Get the obstacles in the way of the current path
-                    const std::vector<Eigen::Vector2d> obstacles =
-                        get_obstacles(all_obstacles, rDRr, effective_obstacle_radius);
+                    const auto obstacles = get_obstacles(all_obstacles, rDRr, obstacle_radius);
 
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
                         // Adjust the target direction to avoid obstacles
-                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles, effective_obstacle_radius);
-
-                        // Override the heading when walking around obstacles
-                        angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
+                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles, obstacle_radius);
+                        // Angle to the target point may have changed after adjusting for obstacles
+                        angle_to_target = vectorToBearing(rDRr);
+                        // Final heading should now point toward the original target point from the adjusted target
+                        angle_to_final_heading = vectorToBearing(Hrd.translation().head(2) - rDRr);
                     }
+
+                    // Finally, record if a robot is very close to us so we can later scale the velocity
+                    other_robots_nearby =
+                        !all_obstacles.empty() && all_obstacles.front().norm() < obstacle_radius * 1.5;
                 }
+
+                // Desired velocity magnitude and heading
+                double desired_magnitude, desired_heading = angle_to_target;
 
                 // Calculate the translational error between the robot and the target point (x, y)
                 const double translational_error = rDRr.norm();
 
-                // Linearly interpolate between angle to the target and desired heading when inside the align radius
-                // region
-                const double translation_progress = std::clamp(
-                    (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
-                    0.0,
-                    1.0);
-
-                // Calculate the desired angle to go towards the target point
-                double desired_heading =
-                    (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
-
-                double desired_velocity_magnitude = 0.0;
-
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
-                    desired_velocity_magnitude = accelerate_to_target(desired_heading);
+                    desired_magnitude = accelerate_to_target(desired_heading);
                 }
                 else {
-                    // Normalise error between [0, 1] inside align radius
-                    const double error = translational_error / cfg.max_align_radius;
-
                     // Add a buffer to prevent oscillation between forwards and backwards movement
-                    const double max_strafe_angle = is_walking_backwards == true
-                                                        ? cfg.max_strafe_angle - cfg.backward_buffer
-                                                        : cfg.max_strafe_angle;
+                    const double max_strafe_angle =
+                        is_walking_backwards ? cfg.max_strafe_angle - cfg.backward_buffer : cfg.max_strafe_angle;
 
-                    bool aligned_large_angle = std::abs(angle_to_final_heading) < cfg.max_aligned_angle
-                                               && std::abs(angle_to_target) > max_strafe_angle;
+                    const bool heading_aligned    = std::abs(angle_to_final_heading) < cfg.max_aligned_angle;
+                    const bool large_strafe_angle = std::abs(angle_to_target) > max_strafe_angle;
 
-                    if (aligned_large_angle) {
-                        // If we are aligned with the final heading and the angle to the target is large, walk backwards
-                        // to align ourselves with the target
-                        rDRr = walk_backwards();
+                    // If we're aligned with the final heading, but the target angle is larger than we can strafe, then
+                    // walk backwards first
+                    if (heading_aligned && large_strafe_angle) {
+                        rDRr              = walk_backwards();
+                        desired_magnitude = velocity_magnitude;
+                        desired_heading   = 0.0;
                     }
-                    desired_heading = aligned_large_angle ? 0.0 : desired_heading;
-                    desired_velocity_magnitude = aligned_large_angle ? velocity_magnitude : strafe_to_target(error);
+                    // Otherwise align ourselves with the target
+                    else {
+                        // What fraction through the alignment region we are
+                        const double align_progress = std::clamp((cfg.max_align_radius - translational_error)
+                                                                     / (cfg.max_align_radius - cfg.min_align_radius),
+                                                                 0.0,
+                                                                 1.0);
+                        // What fraction to the target we are
+                        const double strafe_error = translational_error / cfg.max_align_radius;
+                        desired_magnitude         = strafe_to_target(strafe_error);
+                        // Interpolate between angle to the target and desired heading when inside the alignment region
+                        desired_heading =
+                            (1.0 - align_progress) * angle_to_target + align_progress * angle_to_final_heading;
+                    }
+                }
+
+                // Scale velocity when we have the ball and there are nearby obstacles
+                if (have_ball && other_robots_nearby) {
+                    desired_magnitude *= cfg.cautious_velocity_scale;
                 }
 
                 // Calculate the target velocity
-                const Eigen::Vector2d desired_translational_velocity = desired_velocity_magnitude * rDRr.normalized();
-                Eigen::Vector3d velocity_target;
-                velocity_target << desired_translational_velocity, desired_heading;
-
-                // Scale velocity when we have the ball and there are nearby obstacles
-                if (has_ball && robots != nullptr && !robots->robots.empty()) {
-                    // Check if there are any robots very close to us
-                    bool close_obstacles = false;
-                    for (const auto& robot : robots->robots) {
-                        Eigen::Vector2d robot_pos = (sensors.Hrw * robot.rRWw).head(2);
-                        if (robot_pos.norm() < cfg.obstacle_radius_with_ball * 1.5) {
-                            close_obstacles = true;
-                            break;
-                        }
-                    }
-
-                    if (close_obstacles) {
-                        velocity_target.head<2>() *= cfg.cautious_velocity_scale;
-                        log<DEBUG>("Scaling velocity due to close obstacles while having ball");
-                    }
-                }
+                const Eigen::Vector2d desired_translational_velocity = desired_magnitude * rDRr.normalized();
+                Eigen::Vector3d velocity_target(desired_translational_velocity.x(),
+                                                desired_translational_velocity.y(),
+                                                desired_heading);
 
                 // Limit the velocity to the maximum translational and angular velocity
                 velocity_target = constrain_velocity(velocity_target);
@@ -251,10 +247,10 @@ namespace module::planning {
 
                 // Emit debugging information for visualization and monitoring
                 auto debug_information              = std::make_unique<WalkToDebug>();
-                Eigen::Isometry3d Hrd               = Eigen::Isometry3d::Identity();
-                Hrd.translation().head(2)           = rDRr;
-                Hrd.linear()                        = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
-                debug_information->Hrd              = Hrd;
+                Eigen::Isometry3d _Hrd              = Eigen::Isometry3d::Identity();
+                _Hrd.translation().head(2)          = rDRr;
+                _Hrd.linear()                       = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
+                debug_information->Hrd              = _Hrd;
                 debug_information->min_align_radius = cfg.min_align_radius;
                 debug_information->max_align_radius = cfg.max_align_radius;
                 debug_information->min_angle_error  = cfg.min_angle_error;
@@ -309,7 +305,8 @@ namespace module::planning {
     double PlanWalkPath::strafe_to_target(const double error) {
         // If we are walking backwards, change direction
         is_walking_backwards = false;
-        log<DEBUG>("[PlanWalkPath::strafe_to_target] is_walking_backwards set to false, velocity_magnitude = ", velocity_magnitude);
+        log<DEBUG>("[PlanWalkPath::strafe_to_target] is_walking_backwards set to false, velocity_magnitude = ",
+                   velocity_magnitude);
         // "Accelerate", assuring velocity is always positive
         velocity_magnitude = std::max(velocity_magnitude, cfg.starting_velocity);
         // "Proportional control" to strafe towards the target inside align radius
@@ -319,11 +316,11 @@ namespace module::planning {
     Eigen::Vector2d PlanWalkPath::walk_backwards() {
         // Set flag so that we have a backwards buffer
         is_walking_backwards = true;
-        log<DEBUG>("[PlanWalkPath::walk_backwards] is_walking_backwards set to true, velocity_magnitude = ", velocity_magnitude);
+        log<DEBUG>("[PlanWalkPath::walk_backwards] is_walking_backwards set to true, velocity_magnitude = ",
+                   velocity_magnitude);
 
         // Walk on spot, then walk backwards
-        velocity_magnitude +=
-            std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
+        velocity_magnitude += std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
 
         // Step backwards while keeping the forward direction
         return cfg.backwards_vector;
@@ -332,7 +329,8 @@ namespace module::planning {
     double PlanWalkPath::accelerate_to_target(double desired_heading) {
         // If we are walking backwards, change direction
         is_walking_backwards = false;
-        log<DEBUG>("[PlanWalkPath::accelerate_to_target] is_walking_backwards set to false, velocity_magnitude = ", velocity_magnitude);
+        log<DEBUG>("[PlanWalkPath::accelerate_to_target] is_walking_backwards set to false, velocity_magnitude = ",
+                   velocity_magnitude);
         // "Accelerate", assuring velocity is always positive
         velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
         // Limit the velocity magnitude to the maximum velocity
@@ -394,46 +392,34 @@ namespace module::planning {
                                                                    const Eigen::Vector2d& rDRr,
                                                                    double obstacle_radius) {
         // If there are no obstacles, return an empty group
-        if (all_obstacles.empty()) {
+        if (all_obstacles.empty())
             return {};
-        }
-
-        // The obstacles in the way of our current path
-        std::vector<Eigen::Vector2d> avoid_obstacles{};
 
         // Find the first obstacle in the way
-        for (const auto& obstacle : all_obstacles) {
-            // Check if the obstacle is in front of the robot
-            const bool in_front = rDRr.normalized().dot(obstacle.normalized()) > 0.0;
-            // Check if the obstacle is closer than the target point
-            const bool closer = obstacle.norm() < rDRr.norm();
-            // Check if the obstacle intersects with the path
+        auto it = std::ranges::find_if(all_obstacles, [&](const Eigen::Vector2d& obstacle) {
+            const bool in_front        = rDRr.normalized().dot(obstacle.normalized()) > 0.0;
+            const bool before_target   = obstacle.norm() < rDRr.norm();
+            const bool close_to_target = (obstacle - rDRr).norm() < obstacle_radius;
             const bool intersects =
                 intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, obstacle_radius);
-            // Check if the obstacle is close to the target position
-            const bool close_to_target = (obstacle - rDRr).norm() < obstacle_radius;
 
-            // Check if obstacle intersects with the path
-            if (in_front && closer && intersects && !close_to_target) {
-                avoid_obstacles.push_back(obstacle);
-                break;
-            }
-        }
+            return in_front && before_target && intersects && !close_to_target;
+        });
 
-        // If no obstacles are in the way, return the empty group
-        if (avoid_obstacles.empty()) {
-            return avoid_obstacles;
-        }
+        // No obstacles in the way
+        if (it == all_obstacles.end())
+            return {};
+
+        std::vector<Eigen::Vector2d> avoid_obstacles{*it};
 
         // Find any obstacles close to our first obstacle, as the robot needs to go around the whole group
-        for (const auto& obstacle : all_obstacles) {
+        for (const Eigen::Vector2d& obstacle : all_obstacles) {
             // If the obstacle is close to the group, add it to the group
-            // 3 represents two obstacles and the robot
-            for (const auto& avoid_obstacle : avoid_obstacles) {
-                if ((obstacle - avoid_obstacle).norm() < obstacle_radius * 3) {
-                    avoid_obstacles.push_back(obstacle);
-                    break;
-                }
+            if (std::ranges::any_of(avoid_obstacles, [&](const Eigen::Vector2d& ao) {
+                    // 3 represents two obstacles and the robot
+                    return (obstacle - ao).norm() < obstacle_radius * 3;
+                })) {
+                avoid_obstacles.push_back(obstacle);
             }
         }
 
