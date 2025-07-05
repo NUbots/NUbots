@@ -29,6 +29,10 @@
 import multiprocessing
 import os
 
+# Tell tensorflow to shut up
+if "TF_CPP_MIN_LOG_LEVEL" not in os.environ:
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm

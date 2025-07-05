@@ -26,7 +26,7 @@
 # SOFTWARE.
 #
 
-import stringcase
+import casefy
 from generator.Field import Field
 
 
@@ -36,7 +36,7 @@ class OneOfField:
 
         # Some booleans to describe the type
         self.one_of = True
-        self.type = "OneOf{}".format(stringcase.pascalcase(self.name))
+        self.type = "OneOf{}".format(casefy.pascalcase(self.name))
         self.fqn = "{}.{}".format(context.fqn, self.type)
         self.default_value = "{}()".format(self.type)
         self.trivially_copyable = False

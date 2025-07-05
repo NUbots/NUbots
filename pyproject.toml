@@ -37,7 +37,7 @@ dependencies = [
     # Protobuf/Neutron/NBS
     "protoc-exe==22.0rc1",
     "xxhash==3.5.0",
-    "stringcase==1.2.0",
+    "casefy==1.1.0",
     "protoc-wheel==21.1",
     #"protobuf==4.21.12", # Use this for NUSense nanopb message generation
     "protobuf==5.27.0",
@@ -53,4 +53,5 @@ dependencies = [
     # Optimisation
     "optuna==4.3.0",
     "plotly>=6.1.2",
+    "licenseheaders>=0.8.8",
 ]
