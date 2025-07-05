@@ -68,6 +68,8 @@ namespace module::network {
                 log_level = config["log_level"].as<NUClear::LogLevel>();
                 // Delay before sending messages
                 cfg.startup_delay = config["startup_delay"].as<int>();
+                // Ball timeout to use the ball position
+                cfg.ball_timeout = std::chrono::seconds(config["ball_timeout"].as<int>());
 
                 // Need to determine send and receive ports
                 cfg.send_port = config["send_port"].as<uint>();
@@ -153,7 +155,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
-           Optional<With<GlobalConfig>>>()
+           With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
                          const std::shared_ptr<const Kick>& kick,
@@ -161,7 +163,7 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
-                         const std::shared_ptr<const GlobalConfig>& config) {
+                         const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
@@ -186,30 +188,30 @@ namespace module::network {
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
-                if (config) {
-                    msg->current_pose.player_id = config->player_id;
+                msg->current_pose.player_id = config.player_id;
 
-                    if (sensors) {
-                        // Get our world transform
-                        Eigen::Isometry3d Htw(sensors->Htw);
+                if (sensors) {
+                    // Get our world transform
+                    Eigen::Isometry3d Htw(sensors->Htw);
 
-                        // If we have field information
-                        if (field) {
-                            // Transform the field state into Hfw
-                            Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
+                    // If we have field information
+                    if (field) {
+                        // Transform the field state into Hfw
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
 
-                            // Get our torso in field space
-                            Eigen::Isometry3d Hft = Hfw * Htw.inverse();
-                            Eigen::Vector3d rTFf  = Hft.translation();
+                        // Get our torso in field space
+                        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
+                        Eigen::Vector3d rTFf  = Hft.translation();
 
-                            // Store our position from field to torso
-                            msg->current_pose.position     = rTFf.cast<float>();
-                            msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                        // Store our position from field to torso
+                        msg->current_pose.position     = rTFf.cast<float>();
+                        msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
-                            msg->current_pose.covariance = field->covariance.cast<float>();
-                        }
+                        msg->current_pose.covariance = field->covariance.cast<float>();
+                        msg->current_pose.cost       = field->cost;
                     }
                 }
+
 
                 // Walk command
                 if (walk_state != nullptr) {
@@ -225,9 +227,11 @@ namespace module::network {
                     msg->kick_target.y() = kick->target.y();
                 }
 
-                // Ball
-                if (loc_ball) {
-                    // convert position of ball from world to field space
+                // Ball information
+                // Check if the ball has been seen recently, if it hasn't the message fields will 0
+                // and the confidence will be 0
+                if (loc_ball && (NUClear::clock::now() - loc_ball->time_of_measurement < cfg.ball_timeout)) {
+                    // Convert position of ball from world to field space
                     if (field) {
                         Eigen::Vector3d rBWw = loc_ball->rBWw;
                         // Transform the field state into Hfw
@@ -236,7 +240,9 @@ namespace module::network {
                         // Store our position from field to ball
                         msg->ball.position = rBFf.cast<float>();
                     }
-
+                    // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
+                    // This it to prevent everyone echoing
+                    msg->ball.confidence = loc_ball->confidence;
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
@@ -248,6 +254,8 @@ namespace module::network {
                 if (purpose) {
                     msg->purpose = *purpose;
                 }
+                // Override the player ID in the purpose message to be consistent, and in case purpose is not set
+                msg->purpose.player_id = config.player_id;
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

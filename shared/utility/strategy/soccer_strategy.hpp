@@ -33,8 +33,6 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
-// todo remove after testing
-#include <nuclear>
 
 #include "message/localisation/Robot.hpp"
 #include "message/strategy/Who.hpp"
@@ -104,9 +102,8 @@ namespace utility::strategy {
                 closest   = {Who{Who::OPPONENT}, distance_to_ball};
                 lowest_id = 0;
             }
-            // Equidistant teammates with a lower ID win
-            else if (equidistant && (robot.purpose.player_id < lowest_id)) {
-                // If it is equidistant and a teammate, lowest ID wins
+            // Handle equidistant teammates - lower ID wins
+            else if (equidistant && robot.teammate && robot.purpose.player_id < lowest_id) {
                 closest   = {Who{Who::TEAMMATE}, distance_to_ball};
                 lowest_id = robot.purpose.player_id;
             }
@@ -208,7 +205,7 @@ namespace utility::strategy {
                        std::vector<unsigned int> const& ignore_ids) {
         // Transform our position to field coordinates
         Eigen::Vector3d rRFf = (Hfw * Hrw.inverse()).translation();
-        double furthest      = std::abs(rRFf.y());
+        double furthest      = rRFf.x();
 
         // Look for any teammates that are further back than us
         for (const auto& robot : robots.robots) {
@@ -217,14 +214,18 @@ namespace utility::strategy {
                 std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
             if ((robot.teammate && robot.purpose.active) && !ignore_id) {
                 // Transform robot position to field coordinates
-                Eigen::Vector3d rRFf = Hfw * robot.rRWw;
+                Eigen::Vector3d rRFf_robot = Hfw * robot.rRWw;
+                double robot_distance      = rRFf_robot.x();
 
                 // Check if equidistant to us
-                bool equidistant = std::abs(std::abs(rRFf.y()) - furthest) < equidistant_threshold;
-                // If the robot is further back than us, or equidistant and has a higher ID, then we are not the
-                // furthest back
-                if ((!equidistant && (std::abs(rRFf.y()) > furthest))
-                    || (equidistant && (robot.purpose.player_id > self_id))) {
+                bool equidistant = std::abs(robot_distance - furthest) < equidistant_threshold;
+                // If the robot is further back than us, we are not the furthest back
+                if (!equidistant && (robot_distance > furthest)) {
+                    return false;
+                }
+
+                // If equidistant, higher ID wins
+                if (equidistant && robot.purpose.player_id > self_id) {
                     return false;
                 }
             }

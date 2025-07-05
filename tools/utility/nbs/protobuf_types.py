@@ -66,7 +66,7 @@ with tempfile.TemporaryDirectory() as protobuf_path:
     # Build the protocol buffers
     if (
         os.system(
-            "protoc --python_out={protobuf_path} -I{nuclear_dir} -I{user_dir} {proto_files}".format(
+            "protoc --python_out={protobuf_path} -I{nuclear_dir} -I{user_dir} -I/usr/include {proto_files}".format(
                 protobuf_path=protobuf_path,
                 nuclear_dir=nuclear_proto_dir,
                 user_dir=user_proto_dir,

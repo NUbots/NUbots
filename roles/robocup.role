@@ -39,7 +39,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::SplineKick
+  skill::KickWalk
   skill::GetUp
   skill::Look
   skill::Dive
@@ -67,7 +67,7 @@ nuclear_role(
   purpose::ReadyAttack
   purpose::Defend
   purpose::FieldPlayer
-  # purpose::Support
+  purpose::Support
   purpose::Goalie
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
