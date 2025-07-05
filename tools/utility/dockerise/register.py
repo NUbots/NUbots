@@ -39,6 +39,12 @@ def register(func, image=None, **kwargs):
             command.add_argument(
                 "--clean", action="store_true", help="delete and recreate all docker volumes (build directories)"
             )
+            command.add_argument(
+                "--clean-uv-cache",
+                default=False,
+                action="store_true",
+                help="delete and recreate the uv cache volume (forces re-download of Python packages)",
+            )
 
         command.add_argument("--rebuild", action="store_true", help="rebuild the docker image checking for updates")
         command.add_argument(
