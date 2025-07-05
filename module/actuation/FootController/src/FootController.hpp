@@ -54,6 +54,7 @@ namespace module::actuation {
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
 
+    /// @brief Empty struct used to trigger the setting of servo gains.
     struct SetGains {};
 
     class FootController : public ::extension::behaviour::BehaviourReactor {
