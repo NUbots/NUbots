@@ -48,6 +48,8 @@ namespace module::purpose {
             double center_circle_offset = 0.0;
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
+            /// @brief Whether to search around the field if the robot's localisation cost is high
+            bool search_when_lost = false;
         } cfg;
 
     public:
