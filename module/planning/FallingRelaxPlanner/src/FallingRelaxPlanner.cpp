@@ -88,79 +88,87 @@ namespace module::planning {
 
         on<Provide<RelaxWhenFalling>, Uses<UpperBodySequence>, Trigger<Sensors>>().then(
             [this](const RunReason& run_reason, const Uses<UpperBodySequence>& upper_body, const Sensors& sensors) {
-                // OTHER_TRIGGER means we ran because of a sensors update
-                if (run_reason == RunReason::OTHER_TRIGGER) {
-                    auto& a = sensors.accelerometer;
-                    auto& g = sensors.gyroscope;
+                // If this isn't a sensors update, keep doing what we were doing
+                if (run_reason != RunReason::OTHER_TRIGGER) {
+                    emit<Task>(std::make_unique<Continue>());
+                    return;
+                }
 
-                    // Smooth the values we use to determine if we are falling
-                    gyro_mag  = smooth(gyro_mag,
-                                      std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
-                                      cfg.gyro_mag.smoothing);
-                    acc_mag   = smooth(acc_mag,  //
-                                     std::abs(a.norm()),
-                                     cfg.acc_mag.smoothing);
-                    acc_angle = smooth(acc_angle,
-                                       std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
-                                       cfg.acc_angle.smoothing);
+                auto& a = sensors.accelerometer;
+                auto& g = sensors.gyroscope;
+
+                // Smooth the values we use to determine if we are falling
+                gyro_mag  = smooth(gyro_mag,
+                                  std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
+                                  cfg.gyro_mag.smoothing);
+                acc_mag   = smooth(acc_mag,  //
+                                 std::abs(a.norm()),
+                                 cfg.acc_mag.smoothing);
+                acc_angle = smooth(acc_angle,
+                                   std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
+                                   cfg.acc_angle.smoothing);
 
 
-                    // Check if we are stable according to each sensor
-                    State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
-                                            : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
-                                                                              : State::FALLING;
-                    State acc_mag_state   = acc_mag > cfg.acc_mag.unstable  ? State::STABLE
-                                            : acc_mag > cfg.acc_mag.falling ? State::UNSTABLE
+                // Check if we are stable according to each sensor
+                State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
+                                        : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
+                                                                          : State::FALLING;
+                State acc_mag_state   = acc_mag > cfg.acc_mag.unstable  ? State::STABLE
+                                        : acc_mag > cfg.acc_mag.falling ? State::UNSTABLE
+                                                                        : State::FALLING;
+                State acc_angle_state = acc_angle < cfg.acc_angle.unstable  ? State::STABLE
+                                        : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
                                                                             : State::FALLING;
-                    State acc_angle_state = acc_angle < cfg.acc_angle.unstable  ? State::STABLE
-                                            : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
-                                                                                : State::FALLING;
 
-                    // Falling if any 2 of 3 sensors report falling or the angle reports falling
-                    bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING)
-                                   || (gyro_mag_state == State::FALLING && acc_angle_state == State::FALLING)
-                                   || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING)
-                                   || (acc_angle_state == State::FALLING);
+                // Falling if any 2 of 3 sensors report falling or the angle reports falling
+                bool falling = (gyro_mag_state == State::FALLING && acc_mag_state == State::FALLING)
+                               || (gyro_mag_state == State::FALLING && acc_angle_state == State::FALLING)
+                               || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING)
+                               || (acc_angle_state == State::FALLING);
 
-                    emit(graph("Falling sensor: x:gyro, y:acc, z:angle",
+                emit(graph("Falling sensor: x:gyro, y:acc, z:angle",
+                           gyro_mag,
+                           acc_mag,
+                           acc_angle * 180 / 3.14159265358979));
+                emit(graph("Falling", falling));
+
+                if (falling) {
+                    log<DEBUG>("Falling:",
+                               "Gyroscope Magnitude:",
                                gyro_mag,
+                               gyro_mag_state == State::FALLING    ? "FALLING"
+                               : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                   : "STABLE",
+                               "Accelerometer Magnitude:",
                                acc_mag,
-                               acc_angle * 180 / 3.14159265358979));
-                    emit(graph("Falling", falling));
+                               acc_mag_state == State::FALLING    ? "FALLING"
+                               : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                  : "STABLE",
+                               "Accelerometer Angle:",
+                               acc_angle,
+                               acc_angle_state == State::FALLING    ? "FALLING"
+                               : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
+                                                                    : "STABLE");
 
-                    if (falling) {
-                        log<DEBUG>("Falling:",
-                                   "Gyroscope Magnitude:",
-                                   gyro_mag,
-                                   gyro_mag_state == State::FALLING    ? "FALLING"
-                                   : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                       : "STABLE",
-                                   "Accelerometer Magnitude:",
-                                   acc_mag,
-                                   acc_mag_state == State::FALLING    ? "FALLING"
-                                   : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                      : "STABLE",
-                                   "Accelerometer Angle:",
-                                   acc_angle,
-                                   acc_angle_state == State::FALLING    ? "FALLING"
-                                   : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
-                                                                        : "STABLE");
+                    emit(std::make_unique<Stability>(Stability::FALLING));
 
-                        // We are falling but not running relax yet, run relax
-                        emit(std::make_unique<Stability>(Stability::FALLING));
-
-                        if (upper_body.run_state == RunState::NO_TASK) {
-                            emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
-                        }
+                    // We are falling but not running relax yet, run relax
+                    if (upper_body.run_state == RunState::NO_TASK) {
+                        log<INFO>("Falling!");
+                        emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
                     }
-                    // Not falling, but still running, set stability to standing
-                    else if (!falling && upper_body.run_state == RunState::RUNNING) {
-                        emit(std::make_unique<Stability>(Stability::STANDING));
+                    // Falling and already relaxing, continue relaxing
+                    else {
+                        emit<Task>(std::make_unique<Continue>());
                     }
                 }
+                // Not falling, but still running, set stability to standing
+                else if (!falling && upper_body.run_state == RunState::RUNNING) {
+                    log<INFO>("Unfalling!");
+                    emit(std::make_unique<Stability>(Stability::STANDING));
+                }
                 else {
-                    // Emit an idle task for every other reason
-                    emit(std::make_unique<Continue>());
+                    log<INFO>("No task");
                 }
             });
     }
