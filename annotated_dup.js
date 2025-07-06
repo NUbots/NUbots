@@ -131,9 +131,7 @@ var annotated_dup =
         ] ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
-        [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "FieldLocalisationNLopt", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html", "classmodule_1_1localisation_1_1FieldLocalisationNLopt" ],
-        [ "FieldModel", "classmodule_1_1localisation_1_1FieldModel.html", "classmodule_1_1localisation_1_1FieldModel" ],
         [ "GoalPost", "structmodule_1_1localisation_1_1GoalPost.html", "structmodule_1_1localisation_1_1GoalPost" ],
         [ "Mocap", "classmodule_1_1localisation_1_1Mocap.html", "classmodule_1_1localisation_1_1Mocap" ],
         [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
@@ -220,11 +218,8 @@ var annotated_dup =
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],
       [ "purpose", null, [
-        [ "AllRounder", "classmodule_1_1purpose_1_1AllRounder.html", "classmodule_1_1purpose_1_1AllRounder" ],
         [ "Attack", "classmodule_1_1purpose_1_1Attack.html", "classmodule_1_1purpose_1_1Attack" ],
-        [ "BoundingBox", "structmodule_1_1purpose_1_1BoundingBox.html", "structmodule_1_1purpose_1_1BoundingBox" ],
         [ "Defend", "classmodule_1_1purpose_1_1Defend.html", "classmodule_1_1purpose_1_1Defend" ],
-        [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
         [ "DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
         [ "EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],
         [ "FieldPlayer", "classmodule_1_1purpose_1_1FieldPlayer.html", "classmodule_1_1purpose_1_1FieldPlayer" ],
@@ -236,10 +231,8 @@ var annotated_dup =
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
-        [ "SoccerNew", "classmodule_1_1purpose_1_1SoccerNew.html", "classmodule_1_1purpose_1_1SoccerNew" ],
         [ "StartSoccer", "structmodule_1_1purpose_1_1StartSoccer.html", null ],
         [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
-        [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "Support", "classmodule_1_1purpose_1_1Support.html", "classmodule_1_1purpose_1_1Support" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ]
       ] ],
@@ -261,16 +254,12 @@ var annotated_dup =
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ]
       ] ],
       [ "strategy", null, [
-        [ "AlignBallToGoal", "classmodule_1_1strategy_1_1AlignBallToGoal.html", "classmodule_1_1strategy_1_1AlignBallToGoal" ],
         [ "DiveToBall", "classmodule_1_1strategy_1_1DiveToBall.html", "classmodule_1_1strategy_1_1DiveToBall" ],
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
         [ "FindObject", "classmodule_1_1strategy_1_1FindObject.html", "classmodule_1_1strategy_1_1FindObject" ],
-        [ "KickToGoal", "classmodule_1_1strategy_1_1KickToGoal.html", "classmodule_1_1strategy_1_1KickToGoal" ],
-        [ "Ready", "classmodule_1_1strategy_1_1Ready.html", "classmodule_1_1strategy_1_1Ready" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
         [ "StartSafely", "classmodule_1_1strategy_1_1StartSafely.html", "classmodule_1_1strategy_1_1StartSafely" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
-        [ "WalkInsideBoundedBox", "classmodule_1_1strategy_1_1WalkInsideBoundedBox.html", "classmodule_1_1strategy_1_1WalkInsideBoundedBox" ],
         [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],
         [ "WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", "classmodule_1_1strategy_1_1WalkToFieldPosition" ]
       ] ],

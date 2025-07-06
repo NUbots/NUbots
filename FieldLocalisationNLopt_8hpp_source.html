@@ -229,15 +229,15 @@ $(document).ready(function(){initNavTree('FieldLocalisationNLopt_8hpp_source.htm
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1localisation_1_1Landmark.html">utility::localisation::Landmark</a>;</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">using</span> <a class="code" href="classutility_1_1localisation_1_1OccupancyMap.html">utility::localisation::OccupancyMap</a>;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">struct </span>StartingSide {</div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1StartingSide.html">   60</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a> {</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keyword">enum</span> Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        Value value = Value::UNKNOWN;</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="comment">// Constructors</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        StartingSide() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        StartingSide(<span class="keywordtype">int</span> <span class="keyword">const</span>&amp; v) : value(static_cast&lt;Value&gt;(v)) {}</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        StartingSide(Value <span class="keyword">const</span>&amp; v) : value(v) {}</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        StartingSide(std::string <span class="keyword">const</span>&amp; str) {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <a class="code" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <a class="code" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a>(<span class="keywordtype">int</span> <span class="keyword">const</span>&amp; v) : value(<span class="keyword">static_cast&lt;</span>Value<span class="keyword">&gt;</span>(v)) {}</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <a class="code" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a>(Value <span class="keyword">const</span>&amp; v) : value(v) {}</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <a class="code" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a>(std::string <span class="keyword">const</span>&amp; str) {</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;            <span class="comment">// clang-format off</span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;            <span class="keywordflow">if</span>      (str == <span class="stringliteral">&quot;LEFT&quot;</span>) { value = Value::LEFT; }</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;RIGHT&quot;</span>) { value = Value::RIGHT; }</div>
@@ -645,7 +645,7 @@ $(document).ready(function(){initNavTree('FieldLocalisationNLopt_8hpp_source.htm
 <div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config_html_af49a556ddbcb861d7c72f80da2caca4c"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af49a556ddbcb861d7c72f80da2caca4c">module::localisation::FieldLocalisationNLopt::Config::R</a></div><div class="ttdeci">Eigen::Matrix3d R</div><div class="ttdoc">Measurement noise covariance.</div><div class="ttdef"><b>Definition:</b> FieldLocalisationNLopt.hpp:252</div></div>
 <div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config_html_afa77b1afb2752b935715221cd3a7b2b9"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#afa77b1afb2752b935715221cd3a7b2b9">module::localisation::FieldLocalisationNLopt::Config::out_of_field_cost</a></div><div class="ttdeci">double out_of_field_cost</div><div class="ttdoc">Cost for a point being outside of the field.</div><div class="ttdef"><b>Definition:</b> FieldLocalisationNLopt.hpp:264</div></div>
 <div class="ttc" id="astructmodule_1_1localisation_1_1GoalPost_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1GoalPost.html">module::localisation::GoalPost</a></div><div class="ttdef"><b>Definition:</b> FieldLocalisationNLopt.hpp:171</div></div>
-<div class="ttc" id="astructmodule_1_1localisation_1_1StartingSide_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1StartingSide.html">module::localisation::StartingSide</a></div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:54</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1StartingSide_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1StartingSide.html">module::localisation::StartingSide</a></div><div class="ttdef"><b>Definition:</b> FieldLocalisationNLopt.hpp:60</div></div>
 <div class="ttc" id="astructutility_1_1localisation_1_1Landmark_html"><div class="ttname"><a href="structutility_1_1localisation_1_1Landmark.html">utility::localisation::Landmark</a></div><div class="ttdoc">Landmark struct.</div><div class="ttdef"><b>Definition:</b> FieldLineOccupanyMap.hpp:40</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -653,7 +653,7 @@ $(document).ready(function(){initNavTree('FieldLocalisationNLopt_8hpp_source.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_033e104c2ead1f4a62ad583bb66b5a18.html">localisation</a></li><li class="navelem"><a class="el" href="dir_de2dd9f2c482eeb0d8dab1591fbfb090.html">FieldLocalisationNLopt</a></li><li class="navelem"><a class="el" href="dir_7d53588a5dcaff24a19ebfbafe66ea2b.html">src</a></li><li class="navelem"><b>FieldLocalisationNLopt.hpp</b></li>
-    <li class="footer">Generated on Sun Jul 6 2025 10:22:49 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jul 6 2025 10:24:26 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
