@@ -35,11 +35,11 @@ namespace module::localisation {
 
     using message::vision::FieldIntersections;
 
-    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::hungarian_association(
+    std::vector<FieldIntersectionAssociation> FieldLocalisationNLopt::hungarian_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
 
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+        std::vector<FieldIntersectionAssociation> associations;
 
         // Create cost matrix for the Hungarian algorithm
         // Note that the assignment is intersection index to landmark index
@@ -78,19 +78,24 @@ namespace module::localisation {
 
             // Transform the detected intersection from world to field coordinates
             Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
-            associations.emplace_back(landmark.rLFf, rIFf);
+
+            FieldIntersectionAssociation association;
+            association.landmark     = landmark.rLFf;
+            association.intersection = rIFf;
+            association.confidence   = intersection.confidence;
+            associations.push_back(association);
         }
 
         return associations;
     }
 
 
-    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::greedy_association(
+    std::vector<FieldIntersectionAssociation> FieldLocalisationNLopt::greedy_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
 
         std::vector<Eigen::Vector3d> occupied_landmarks{};
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
+        std::vector<FieldIntersectionAssociation> associations;
 
         // Greedily associate each intersection with the closest landmark
         for (const auto& intersection : field_intersections->intersections) {
@@ -122,7 +127,12 @@ namespace module::localisation {
             // Mark the closest landmark as occupied if within the distance threshold
             if (found_association) {
                 occupied_landmarks.push_back(closest_landmark);
-                associations.emplace_back(closest_landmark, rIFf);
+
+                FieldIntersectionAssociation association;
+                association.landmark     = closest_landmark;
+                association.intersection = rIFf;
+                association.confidence   = intersection.confidence;
+                associations.push_back(association);
             }
         }
 

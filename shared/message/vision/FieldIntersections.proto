@@ -43,6 +43,8 @@ message FieldIntersection {
     IntersectionType type = 1;
     /// Position of the intersection in world space
     vec3 rIWw = 2;
+    /// Confidence of the intersection
+    double confidence = 3;
 }
 
 message FieldIntersections {

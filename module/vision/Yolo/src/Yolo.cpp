@@ -341,7 +341,8 @@ namespace module::vision {
                             continue;  // skip this run of the loop and continue the for loop
                         }
 
-                        i.rIWw = rIWw;
+                        i.rIWw       = rIWw;
+                        i.confidence = class_confidences[idx];
                         if (objects[class_id].name == "L-intersection") {
                             i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
                             bbox->colour = objects[class_id].colour;
