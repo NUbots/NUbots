@@ -65,7 +65,6 @@ namespace module::planning {
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("PlanWalkPath.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // WalkTo tuning
@@ -153,8 +152,7 @@ namespace module::planning {
                 // Calculate the translational error between the robot and the target point (x, y)
                 const double translational_error = rDRr.norm();
 
-                // Linearly interpolate between angle to the target and desired heading when inside the align radius
-                // region
+                // Linearly interpolate between angle to the target and desired heading when inside the align region
                 const double translation_progress = std::clamp(
                     (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
                     0.0,
@@ -164,10 +162,8 @@ namespace module::planning {
 
                 double desired_velocity_magnitude = 0.0;
                 if (translational_error > cfg.max_align_radius) {
-                    // "Accelerate"
-                    velocity_magnitude += cfg.acceleration;
-                    // Limit the velocity magnitude to the maximum velocity
-                    velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
+                    // Increase velocity magnitude and limit to maximum velocity
+                    velocity_magnitude = std::min(velocity_magnitude + cfg.acceleration, cfg.max_velocity_magnitude);
                     // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
                     // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
                     const double angle_error_gain = std::clamp(
@@ -177,10 +173,8 @@ namespace module::planning {
                     desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
                 }
                 else {
-                    // "Decelerate"
-                    velocity_magnitude -= cfg.acceleration;
-                    // Limit the velocity to zero
-                    velocity_magnitude = std::max(velocity_magnitude, 0.0);
+                    // Decrease velocity magnitude and limit to zero
+                    velocity_magnitude = std::max(velocity_magnitude - cfg.acceleration, 0.0);
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
                     // "Proportional control" to strafe towards the target inside align radius
