@@ -142,6 +142,26 @@ namespace module::actuation {
             ik_task->time = foot_control_task.time;
             ik_task->Htf  = foot_control_task.Htf;
 
+            if (cfg.mode == "IK") {
+                for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
+                    ik_task->servos[id] = ServoState(cfg.servo_states[id].gain, TORQUE_ENABLED);
+                    // Get servo from sensors for graphing information
+                    auto it          = std::find_if(sensors.servo.begin(),
+                                           sensors.servo.end(),
+                                           [id](const message::input::Sensors::Servo& servo) {
+                                               return servo.id == static_cast<uint32_t>(id);
+                                           });
+                    auto servo       = *it;
+                    std::string name = static_cast<std::string>(id);
+                    emit(graph("Servo Present Position/" + name, servo.present_position));
+                    emit(graph("Servo Goal Position/" + name, servo.goal_position));
+                    emit(graph("Servo Error/" + name, servo.present_position - servo.goal_position));
+                }
+            }
+            else {
+                throw std::runtime_error("Invalid mode");
+            }
+
             // Add correction to the torso orientation if enabled
             if (foot_control_task.correction_enabled) {
                 // Hwt quaternion
@@ -251,26 +271,6 @@ namespace module::actuation {
                 Htf_corrected.linear()          = desired_Rft.transpose();
 
                 ik_task->Htf = Htf_corrected;
-            }
-
-            if (cfg.mode == "IK") {
-                for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
-                    ik_task->servos[id] = ServoState(cfg.servo_states[id].gain, TORQUE_ENABLED);
-                    // Get servo from sensors for graphing information
-                    auto it          = std::find_if(sensors.servo.begin(),
-                                           sensors.servo.end(),
-                                           [id](const message::input::Sensors::Servo& servo) {
-                                               return servo.id == static_cast<uint32_t>(id);
-                                           });
-                    auto servo       = *it;
-                    std::string name = static_cast<std::string>(id);
-                    emit(graph("Servo Present Position/" + name, servo.present_position));
-                    emit(graph("Servo Goal Position/" + name, servo.goal_position));
-                    emit(graph("Servo Error/" + name, servo.present_position - servo.goal_position));
-                }
-            }
-            else {
-                throw std::runtime_error("Invalid mode");
             }
         }
     };
