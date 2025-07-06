@@ -526,6 +526,7 @@ var hierarchy =
     [ "utility::math::filter::MahonyFilter< Scalar >", "classutility_1_1math_1_1filter_1_1MahonyFilter.html", null ],
     [ "utility::math::filter::ParticleFilter< Scalar, FilterModel >", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", null ],
     [ "utility::math::filter::UKF< Scalar, FilterModel >", "classutility_1_1math_1_1filter_1_1UKF.html", null ],
+    [ "utility::math::filter::YawFilter< Scalar >", "classutility_1_1math_1_1filter_1_1YawFilter.html", null ],
     [ "utility::math::geometry::Quad< Scalar, R, C >", "classutility_1_1math_1_1geometry_1_1Quad.html", null ],
     [ "utility::math::ransac::NPartiteRansac< Model >", "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html", null ],
     [ "utility::math::ransac::Ransac< Model >", "structutility_1_1math_1_1ransac_1_1Ransac.html", null ],
@@ -591,5 +592,6 @@ var hierarchy =
     [ "YAML::convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", null ],
     [ "YAML::convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", null ],
     [ "YAML::convert<::utility::skill::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html", null ],
-    [ "YAML::convert<::utility::skill::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html", null ]
+    [ "YAML::convert<::utility::skill::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html", null ],
+    [ "utility::math::filter::YawFilter< double >", "classutility_1_1math_1_1filter_1_1YawFilter.html", null ]
 ];

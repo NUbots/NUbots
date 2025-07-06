@@ -17,5 +17,6 @@ var classmodule_1_1input_1_1SensorFilter =
     [ "middle_down", "classmodule_1_1input_1_1SensorFilter.html#ac4f3de7645c8e092e0ee35cea26b9ad4", null ],
     [ "n_servos", "classmodule_1_1input_1_1SensorFilter.html#a56e438e8e53843877894c7cc307e4ef9", null ],
     [ "nugus_model", "classmodule_1_1input_1_1SensorFilter.html#a0003de7deb61302020101e9b6e569f84", null ],
-    [ "planted_anchor_foot", "classmodule_1_1input_1_1SensorFilter.html#a16728965d9c0ed68f27be6cb766613ee", null ]
+    [ "planted_anchor_foot", "classmodule_1_1input_1_1SensorFilter.html#a16728965d9c0ed68f27be6cb766613ee", null ],
+    [ "yaw_filter", "classmodule_1_1input_1_1SensorFilter.html#a300bed1220253c99f25499534d9d7985", null ]
 ];

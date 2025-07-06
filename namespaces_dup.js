@@ -902,7 +902,8 @@ var namespaces_dup =
           [ "KalmanFilter", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", "classutility_1_1math_1_1filter_1_1KalmanFilter" ],
           [ "MahonyFilter", "classutility_1_1math_1_1filter_1_1MahonyFilter.html", "classutility_1_1math_1_1filter_1_1MahonyFilter" ],
           [ "ParticleFilter", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", "classutility_1_1math_1_1filter_1_1ParticleFilter" ],
-          [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ]
+          [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ],
+          [ "YawFilter", "classutility_1_1math_1_1filter_1_1YawFilter.html", "classutility_1_1math_1_1filter_1_1YawFilter" ]
         ] ],
         [ "geometry", null, [
           [ "Quad", "classutility_1_1math_1_1geometry_1_1Quad.html", "classutility_1_1math_1_1geometry_1_1Quad" ],

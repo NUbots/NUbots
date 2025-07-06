@@ -192,6 +192,7 @@ var NAVTREEINDEX2 =
 "classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc":[3,0,3,2,25,4],
 "classmodule_1_1input_1_1SensorFilter.html#a16728965d9c0ed68f27be6cb766613ee":[3,0,3,2,25,17],
 "classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba":[3,0,3,2,25,6],
+"classmodule_1_1input_1_1SensorFilter.html#a300bed1220253c99f25499534d9d7985":[3,0,3,2,25,18],
 "classmodule_1_1input_1_1SensorFilter.html#a40d778195ecb3ad9ea971332caaef6f0":[3,0,3,2,25,7],
 "classmodule_1_1input_1_1SensorFilter.html#a56e438e8e53843877894c7cc307e4ef9":[3,0,3,2,25,15],
 "classmodule_1_1input_1_1SensorFilter.html#a68bddeeee068531497a2290d8cac8beb":[3,0,3,2,25,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1BallModel.html#a9d1e2a3577c4936762aafde10aaa9870":[3,0,3,3,2,2],
 "classmodule_1_1localisation_1_1BallModel.html#abcde4d2070a49eaac2748d33689f9ffd":[3,0,3,3,2,1],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html":[3,0,3,3,3],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145":[3,0,3,3,3,25],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1a6706c7b7ada33db9fe0c3e016aea5a":[3,0,3,3,3,4]
+"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145":[3,0,3,3,3,25]
 };

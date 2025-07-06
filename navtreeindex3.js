@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1a6706c7b7ada33db9fe0c3e016aea5a":[3,0,3,3,3,4],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1c69156bf32af42aa9f6d01088fc98c2":[3,0,3,3,3,23],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1fe31b774192866e5aae3636ce42c1bd":[3,0,3,3,3,6],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c":[3,0,3,3,3,8],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a70d30843b39895654a1c4246b7865324":[3,0,3,8,1,6,14],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a7e620f883e4f08dd9a3c1a6a1c0f84eb":[3,0,3,8,1,6,29],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a80be5675965277ccb3d6a20811fc3487":[3,0,3,8,1,6,19],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a862aebba2af2a4c3964f7c5dfc60fc1f":[3,0,3,8,1,6,16],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8672cf92d6e9ee88186ac42699bf3a46":[3,0,3,8,1,6,23]
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a862aebba2af2a4c3964f7c5dfc60fc1f":[3,0,3,8,1,6,16]
 };
