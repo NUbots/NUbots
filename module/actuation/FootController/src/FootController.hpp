@@ -53,6 +53,7 @@ namespace module::actuation {
 
     using utility::input::LimbID;
     using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
 
     /// @brief Empty struct used to trigger the setting of servo gains.
@@ -120,18 +121,6 @@ namespace module::actuation {
         /// derivative calculations.
         NUClear::clock::time_point last_update_time{};
 
-        /// @brief Converts a quaternion to fused roll and pitch angles.
-        /// @param q The quaternion to convert.
-        /// @param fusedPitch The output fused pitch angle in radians.
-        /// @param fusedRoll The output fused roll angle in radians.
-        void FusedFromQuat(const Eigen::Quaterniond& q, double& fusedPitch, double& fusedRoll);
-
-        /// @brief Converts fused roll and pitch angles to a quaternion.
-        /// @param fusedPitch The fused pitch angle in radians.
-        /// @param fusedRoll The fused roll angle in radians.
-        /// @return An Eigen::Quaterniond representing the orientation corresponding to the fused angles.
-        Eigen::Quaterniond QuatFromFused(double fusedPitch, double fusedRoll);
-
         /// @brief Foot controller logic
         template <typename FootControlTask, typename IKTask>
         void control_foot(const FootControlTask& foot_control_task,
@@ -168,9 +157,9 @@ namespace module::actuation {
                 Eigen::Quaterniond Hwt_quat(sensors.Htw.inverse().linear());
 
                 // Get fused roll and pitch
-                double fused_roll;
-                double fused_pitch;
-                FusedFromQuat(Hwt_quat, fused_pitch, fused_roll);
+                Eigen::Vector3d rpy = mat_to_rpy_intrinsic(Hwt_quat.toRotationMatrix());
+                double fused_roll   = rpy.x();
+                double fused_pitch  = rpy.y();
 
                 if (log_level <= DEBUG) {
                     // graph the correction being applied
@@ -180,10 +169,9 @@ namespace module::actuation {
 
                 // Get the desired roll and pitch
                 Eigen::Quaterniond Hft_quat(ik_task->Htf.inverse().linear());
-
-                double desired_roll;
-                double desired_pitch;
-                FusedFromQuat(Hft_quat, desired_pitch, desired_roll);
+                rpy                  = mat_to_rpy_intrinsic(Hft_quat.toRotationMatrix());
+                double desired_roll  = rpy.x();
+                double desired_pitch = rpy.y();
 
                 if (log_level <= DEBUG) {
                     // Graph desired orientation (before PID correction)
@@ -266,7 +254,7 @@ namespace module::actuation {
 
                 // Compute desired orientation: yaw * fused_roll_pitch
                 Eigen::Matrix3d desired_Rft = Eigen::AngleAxisd(desired_yaw, Eigen::Vector3d::UnitZ())
-                                              * QuatFromFused(desired_pitch, desired_roll).toRotationMatrix();
+                                              * rpy_intrinsic_to_mat(Eigen::Vector3d(desired_roll, desired_pitch, 0.0));
                 Eigen::Isometry3d Htf_corrected = foot_control_task.Htf;
                 Htf_corrected.linear()          = desired_Rft.transpose();
 
