@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <fmt/format.h>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -123,8 +124,8 @@ namespace module::actuation {
         /// @param q The quaternion to convert.
         /// @param fusedPitch The output fused pitch angle in radians.
         /// @param fusedRoll The output fused roll angle in radians.
-
         void FusedFromQuat(const Eigen::Quaterniond& q, double& fusedPitch, double& fusedRoll);
+
         /// @brief Converts fused roll and pitch angles to a quaternion.
         /// @param fusedPitch The fused pitch angle in radians.
         /// @param fusedRoll The fused roll angle in radians.
@@ -177,9 +178,10 @@ namespace module::actuation {
                 // If the error is too large, we are probably falling over and should pause applying control.
                 if (std::abs(roll_error) > cfg.max_roll_error || std::abs(pitch_error) > cfg.max_pitch_error) {
                     if (log_level <= DEBUG) {
-                        log<DEBUG>("Balance correction disabled due to large error: roll_error = {}, pitch_error = {}",
-                                   roll_error,
-                                   pitch_error);
+                        log<DEBUG>(fmt::format(
+                            "Balance correction disabled due to large error: roll_error = {}, pitch_error = {}",
+                            roll_error,
+                            pitch_error));
                     }
                     return;  // Do not apply control if the error is too large
                 }
