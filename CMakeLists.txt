@@ -78,7 +78,7 @@ endif()
 if(NOT SUBCONTROLLER)
   message(STATUS "Setting subcontroller to 'NUSense' as none was specified.")
   set(SUBCONTROLLER
-      NUsense
+      NUSense
       CACHE STRING "Choose the subcontroller to build for." FORCE
   )
   # Set the possible values of subcontroller for cmake-gui
