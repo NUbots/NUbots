@@ -54,11 +54,8 @@ namespace module::purpose {
     using message::skill::GPTChatRequest;
     using message::skill::Say;
     using message::strategy::FindBall;
-    using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
-    using message::strategy::Ready;
     using message::strategy::StandStill;
-    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
