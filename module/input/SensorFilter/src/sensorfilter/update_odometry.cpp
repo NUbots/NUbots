@@ -139,9 +139,7 @@ namespace module::input {
         emit(graph("Kinematic Yaw", kinematic_yaw));
 
         // Fuse yaw estimates using yaw filter
-        double gyro_with_added_bias = sensors->gyroscope.z() + 0.1;
-        const double fused_yaw      = yaw_filter.update(gyro_with_added_bias, kinematic_yaw, dt);
-
+        const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
 
         // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, anchor translation)
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
