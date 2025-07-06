@@ -62,12 +62,12 @@ namespace module::localisation {
 
             /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
             double association_distance = 0.0;
-
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
-
             /// @brief The maximum distance a robot can be outside the field before it is ignored
             double max_distance_from_field = 0.0;
+            /// @brief The maximum cost for a localisation to be considered valid
+            double max_localisation_cost = 0.0;
 
         } cfg;
 

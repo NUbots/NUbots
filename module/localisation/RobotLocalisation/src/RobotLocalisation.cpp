@@ -79,6 +79,7 @@ namespace module::localisation {
             cfg.association_distance            = config["association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
+            cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -115,6 +116,12 @@ namespace module::localisation {
 
         on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
             [this](const RoboCup& robocup, const Field& field) {
+                // Do not consider a teammate's localisation if their cost is too high
+                if (robocup.current_pose.cost > cfg.max_localisation_cost) {
+                    log<DEBUG>("Teammate's localisation cost is too high, not processing.");
+                    return;
+                }
+
                 // **Run prediction step**
                 prediction();
 
@@ -184,7 +191,9 @@ namespace module::localisation {
                 teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                           cfg.ukf.noise.measurement.position,
                                           MeasurementType::ROBOT_POSITION());
-                teammate_itr->seen = true;
+                teammate_itr->seen    = true;
+                teammate_itr->purpose = *purpose;
+
                 continue;
             }
 
@@ -220,7 +229,7 @@ namespace module::localisation {
                                         const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
-        // Sort tracked_robots so that robots that are teammates are at the front to prevent team mates being removed
+        // Sort tracked_robots so that robots that are teammates are at the front to prevent teammates being removed
         std::sort(tracked_robots.begin(), tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
             return a.purpose.player_id > b.purpose.player_id;
         });
@@ -277,6 +286,8 @@ namespace module::localisation {
                        tracked_robot.id,
                        ": ",
                        tracked_robot.teammate ? "Teammate" : "Opponent",
+                       "teammate ID: ",
+                       tracked_robot.purpose.player_id,
                        "position: ",
                        RobotModel<double>::StateVec(tracked_robot.ukf.get_state()).rRWw.transpose());
         }

@@ -35,6 +35,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
+#include "message/strategy/StandStill.hpp"
 
 #include "utility/skill/Script.hpp"
 
@@ -45,6 +46,7 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
+    using message::strategy::StandStill;
     using utility::skill::load_script;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -55,8 +57,6 @@ namespace module::skill {
             cfg.delay_time        = config["delay_time"].as<int>();
             cfg.getup_front       = config["scripts"]["getup_front"].as<std::vector<std::string>>();
             cfg.getup_back        = config["scripts"]["getup_back"].as<std::vector<std::string>>();
-            cfg.getup_right       = config["scripts"]["getup_right"].as<std::vector<std::string>>();
-            cfg.getup_left        = config["scripts"]["getup_left"].as<std::vector<std::string>>();
             cfg.getup_upright     = config["scripts"]["getup_upright"].as<std::vector<std::string>>();
             cfg.getup_upside_down = config["scripts"]["getup_upside_down"].as<std::vector<std::string>>();
         });
@@ -65,6 +65,9 @@ namespace module::skill {
                                                                                  const Uses<BodySequence>& body,
                                                                                  const Sensors& sensors) {
             if (run_reason == RunReason::NEW_TASK) {
+                // Stand still
+                log<INFO>("Standing still...");
+                emit<Task>(std::make_unique<StandStill>());
                 // Wait so that sensors have time to settle
                 log<INFO>("Delaying getup...");
                 emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));

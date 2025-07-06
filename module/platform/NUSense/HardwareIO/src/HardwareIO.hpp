@@ -73,7 +73,6 @@ namespace module::platform::NUSense {
         };
         ServiceState service_state = ServiceState::INIT;
 
-
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
         /// NUSense.
