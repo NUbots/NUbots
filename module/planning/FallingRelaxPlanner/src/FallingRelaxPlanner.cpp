@@ -122,36 +122,36 @@ namespace module::planning {
                                    || (acc_mag_state == State::FALLING && acc_angle_state == State::FALLING)
                                    || (acc_angle_state == State::FALLING);
 
-                    //////    Plots    //////
                     emit(graph("Falling sensor: x:gyro, y:acc, z:angle",
                                gyro_mag,
                                acc_mag,
                                acc_angle * 180 / 3.14159265358979));
                     emit(graph("Falling", falling));
-                    //////    End plots    //////
 
-                    log<DEBUG>("Falling:",
-                               "Gyroscope Magnitude:",
-                               gyro_mag,
-                               gyro_mag_state == State::FALLING    ? "FALLING"
-                               : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                   : "STABLE",
-                               "Accelerometer Magnitude:",
-                               acc_mag,
-                               acc_mag_state == State::FALLING    ? "FALLING"
-                               : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                  : "STABLE",
-                               "Accelerometer Angle:",
-                               acc_angle,
-                               acc_angle_state == State::FALLING    ? "FALLING"
-                               : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
-                                                                    : "STABLE");
+                    if (falling) {
+                        log<DEBUG>("Falling:",
+                                   "Gyroscope Magnitude:",
+                                   gyro_mag,
+                                   gyro_mag_state == State::FALLING    ? "FALLING"
+                                   : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                       : "STABLE",
+                                   "Accelerometer Magnitude:",
+                                   acc_mag,
+                                   acc_mag_state == State::FALLING    ? "FALLING"
+                                   : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                      : "STABLE",
+                                   "Accelerometer Angle:",
+                                   acc_angle,
+                                   acc_angle_state == State::FALLING    ? "FALLING"
+                                   : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
+                                                                        : "STABLE");
 
-                    emit(std::make_unique<Stability>(Stability::FALLING));
+                        // We are falling but not running relax yet, run relax
+                        emit(std::make_unique<Stability>(Stability::FALLING));
 
-                    // We are falling but not running relax yet, run relax
-                    if (falling && upper_body.run_state == RunState::NO_TASK) {
-                        emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
+                        if (upper_body.run_state == RunState::NO_TASK) {
+                            emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
+                        }
                     }
                     // Not falling, but still running, set stability to standing
                     else if (!falling && upper_body.run_state == RunState::RUNNING) {
