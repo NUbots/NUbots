@@ -25,19 +25,20 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_MATH_FILTER_COMPLEMENTARYFILTER_HPP
-#define UTILITY_MATH_FILTER_COMPLEMENTARYFILTER_HPP
+#ifndef UTILITY_MATH_FILTER_YAWFILTER_HPP
+#define UTILITY_MATH_FILTER_YAWFILTER_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <cmath>
 
 namespace utility {
     namespace math {
         namespace filter {
 
             template <typename Scalar>
-            class ComplementaryFilter {
+            class YawFilter {
             private:
                 /// @brief Complementary filter coefficient (0-1)
                 /// Higher values give more weight to the measurement, lower values to the prediction
@@ -56,22 +57,12 @@ namespace utility {
                 /// @brief Whether the filter has been initialized
                 bool initialized = false;
 
-                /// @brief Previous gyroscope measurement for detecting stationary periods
-                Scalar prev_gyro = 0.0;
-
-                /// @brief Stationary detection threshold
-                Scalar stationary_threshold = 0.01;
-
-                /// @brief Counter for stationary measurements
-                int stationary_count = 0;
-
-                /// @brief Required consecutive stationary measurements for bias update
-                int min_stationary_count = 10;
+                /// @brief Previous kinematic yaw for bias estimation
+                Scalar previous_kinematic_yaw = 0.0;
 
             public:
-                // Constructor
-                ComplementaryFilter(const Scalar alpha = 0.1, const Scalar beta = 0.01) : alpha(alpha), beta(beta) {}
-
+                /// @brief Constructor
+                YawFilter(const Scalar alpha = 0.1, const Scalar beta = 0.01) : alpha(alpha), beta(beta) {}
                 /// @brief Update the filter with gyroscope measurement and kinematic measurement
                 /// @param gyro_z Z-axis gyroscope measurement (yaw rate)
                 /// @param kinematic_yaw Yaw measurement from kinematics
@@ -79,22 +70,20 @@ namespace utility {
                 /// @return Fused yaw estimate
                 Scalar update(const Scalar gyro_z, const Scalar kinematic_yaw, const Scalar dt) {
                     if (!initialized) {
-                        yaw         = kinematic_yaw;
-                        bias        = 0.0;
-                        prev_gyro   = gyro_z;
-                        initialized = true;
+                        yaw                    = kinematic_yaw;
+                        bias                   = 0.0;
+                        previous_kinematic_yaw = kinematic_yaw;
+                        initialized            = true;
                         return yaw;
                     }
 
-                    // Detect if robot is stationary (gyroscope reading is close to zero)
-                    bool is_stationary = std::abs(gyro_z) < stationary_threshold;
+                    // Calculate actual kinematic rate (change in kinematic yaw)
+                    Scalar kinematic_rate = normalize_angle(kinematic_yaw - previous_kinematic_yaw) / dt;
 
-                    if (is_stationary) {
-                        stationary_count++;
-                    }
-                    else {
-                        stationary_count = 0;
-                    }
+                    // Update bias estimate: gyro should match kinematic rate when both are accurate
+                    // The bias is the persistent error between gyro and actual rate
+                    Scalar rate_error = (gyro_z - bias) - kinematic_rate;
+                    bias += beta * rate_error;
 
                     // Remove bias from gyroscope measurement
                     Scalar corrected_gyro = gyro_z - bias;
@@ -106,41 +95,23 @@ namespace utility {
                     predicted_yaw                   = normalize_angle(predicted_yaw);
                     Scalar normalized_kinematic_yaw = normalize_angle(kinematic_yaw);
 
-                    // Handle angle wrapping for the difference
-                    Scalar angle_diff = normalize_angle(normalized_kinematic_yaw - predicted_yaw);
-
                     // Complementary filter update
-                    yaw = predicted_yaw + alpha * angle_diff;
+                    yaw = alpha * normalized_kinematic_yaw + (1 - alpha) * predicted_yaw;
                     yaw = normalize_angle(yaw);
 
-                    // Update bias estimate only when robot is stationary for sufficient time
-                    // and the kinematic measurement is stable
-                    if (stationary_count >= min_stationary_count && std::abs(angle_diff) < 0.05) {
-                        // When stationary, any persistent gyroscope reading is likely bias
-                        bias += beta * gyro_z;
-                    }
+                    // Store current kinematic yaw for next iteration
+                    previous_kinematic_yaw = kinematic_yaw;
 
-                    prev_gyro = gyro_z;
                     return yaw;
                 }
 
-                /// @brief Update the filter with only gyroscope measurement (no kinematic measurement available)
+                /// @brief Update the filter with only gyroscope measurement
                 /// @param gyro_z Z-axis gyroscope measurement (yaw rate)
                 /// @param dt Time step
                 /// @return Predicted yaw estimate
                 Scalar update_gyro_only(const Scalar gyro_z, const Scalar dt) {
                     if (!initialized) {
                         return 0.0;
-                    }
-
-                    // Detect if robot is stationary (gyroscope reading is close to zero)
-                    bool is_stationary = std::abs(gyro_z) < stationary_threshold;
-
-                    if (is_stationary) {
-                        stationary_count++;
-                    }
-                    else {
-                        stationary_count = 0;
                     }
 
                     // Remove bias from gyroscope measurement
@@ -150,13 +121,6 @@ namespace utility {
                     yaw = yaw + corrected_gyro * dt;
                     yaw = normalize_angle(yaw);
 
-                    // Update bias estimate when stationary (no kinematic measurement available)
-                    if (stationary_count >= min_stationary_count) {
-                        // When stationary, any persistent gyroscope reading is likely bias
-                        bias += beta * gyro_z;
-                    }
-
-                    prev_gyro = gyro_z;
                     return yaw;
                 }
 
@@ -201,55 +165,19 @@ namespace utility {
                     return beta;
                 }
 
-                /// @brief Set the stationary detection threshold
-                void set_stationary_threshold(const Scalar threshold) {
-                    stationary_threshold = threshold;
-                }
-
-                /// @brief Get the stationary detection threshold
-                Scalar get_stationary_threshold() const {
-                    return stationary_threshold;
-                }
-
-                /// @brief Set the minimum stationary count for bias updates
-                void set_min_stationary_count(const int count) {
-                    min_stationary_count = count;
-                }
-
-                /// @brief Get the minimum stationary count for bias updates
-                int get_min_stationary_count() const {
-                    return min_stationary_count;
-                }
-
-                /// @brief Get the current stationary count
-                int get_stationary_count() const {
-                    return stationary_count;
-                }
-
-                /// @brief Check if the robot is currently considered stationary
-                bool is_stationary() const {
-                    return stationary_count >= min_stationary_count;
-                }
-
                 /// @brief Reset the filter
                 void reset() {
-                    yaw              = 0.0;
-                    bias             = 0.0;
-                    prev_gyro        = 0.0;
-                    stationary_count = 0;
-                    initialized      = false;
+                    yaw                    = 0.0;
+                    bias                   = 0.0;
+                    previous_kinematic_yaw = 0.0;
+                    initialized            = false;
                 }
 
             private:
-                /// @brief Normalize angle to [-pi, pi]
+                /// @brief Efficient angle normalization to [-pi, pi]
                 static Scalar normalize_angle(Scalar angle) {
-                    while (angle > M_PI) {
-                        angle -= 2 * M_PI;
-                    }
-                    while (angle < -M_PI) {
-                        angle += 2 * M_PI;
-                    }
-                    return angle;
+                    angle = std::fmod(angle + M_PI, 2 * M_PI);
+                    return angle < 0 ? angle + M_PI : angle - M_PI;
                 }
             };
 
@@ -257,4 +185,4 @@ namespace utility {
     }      // namespace math
 }  // namespace utility
 
-#endif  // UTILITY_MATH_FILTER_COMPLEMENTARYFILTER_HPP
+#endif  // UTILITY_MATH_FILTER_YAWFILTER_HPP

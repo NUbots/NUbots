@@ -28,6 +28,7 @@
 
 #include "utility/input/FrameID.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::input {
 
@@ -39,6 +40,7 @@ namespace module::input {
     using utility::input::FrameID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::nusight::graph;
 
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
@@ -82,6 +84,8 @@ namespace module::input {
         // Perform Mahony update
         const auto Rwt_mahony      = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
         Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
+
+        emit(graph("Mahony Yaw", rpy_mahony.z()));
 
         // If fallen, keep position still
         if (stability <= Stability::FALLING) {
@@ -132,9 +136,12 @@ namespace module::input {
 
         // Extract yaw from kinematic estimate
         const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_anchor.linear()).z();
+        emit(graph("Kinematic Yaw", kinematic_yaw));
 
-        // Fuse yaw estimates using complementary filter
-        const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
+        // Fuse yaw estimates using yaw filter
+        double gyro_with_added_bias = sensors->gyroscope.z() + 0.1;
+        const double fused_yaw      = yaw_filter.update(gyro_with_added_bias, kinematic_yaw, dt);
+
 
         // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, anchor translation)
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();

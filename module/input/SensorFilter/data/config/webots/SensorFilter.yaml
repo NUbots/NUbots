@@ -19,16 +19,11 @@ mahony:
 yaw_filter:
   # Complementary filter coefficient (0-1)
   # Higher values give more weight to kinematic measurement, lower values to gyroscope prediction
-  alpha: 0.1
+  alpha: 0.01
   # Bias learning rate (0-1)
   # Higher values allow faster bias adaptation, lower values provide more stability
   # The filter automatically estimates and corrects for gyroscope bias drift
-  beta: 0.01
-  # Stationary detection threshold (rad/s)
-  # Gyroscope readings below this threshold are considered stationary
-  stationary_threshold: 0.01
-  # Minimum consecutive stationary measurements required for bias updates
-  min_stationary_count: 10
+  beta: 0.005
 
 # Cut off frequency for low-pass filter on torso velocity
 velocity_low_pass:

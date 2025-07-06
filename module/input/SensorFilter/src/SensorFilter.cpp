@@ -41,8 +41,8 @@ namespace module::input {
     using message::behaviour::state::Stability;
     using message::localisation::ResetFieldLocalisation;
     using utility::math::euler::rpy_intrinsic_to_mat;
-    using utility::math::filter::ComplementaryFilter;
     using utility::math::filter::MahonyFilter;
+    using utility::math::filter::YawFilter;
     using utility::support::Expression;
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -67,13 +67,9 @@ namespace module::input {
                 Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>()),
                 rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>())));
 
-            // Configure the yaw complementary filter
-            yaw_filter = ComplementaryFilter<double>(config["yaw_filter"]["alpha"].as<Expression>(),
-                                                     config["yaw_filter"]["beta"].as<Expression>());
-
-            // Configure stationary detection parameters
-            yaw_filter.set_stationary_threshold(config["yaw_filter"]["stationary_threshold"].as<Expression>());
-            yaw_filter.set_min_stationary_count(config["yaw_filter"]["min_stationary_count"].as<int>());
+            // Configure the yaw filter
+            yaw_filter = YawFilter<double>(config["yaw_filter"]["alpha"].as<Expression>(),
+                                           config["yaw_filter"]["beta"].as<Expression>());
 
             // Velocity filter config
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();
