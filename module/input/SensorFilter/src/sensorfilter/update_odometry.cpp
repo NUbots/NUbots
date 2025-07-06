@@ -28,6 +28,7 @@
 
 #include "utility/input/FrameID.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::input {
 
@@ -39,6 +40,7 @@ namespace module::input {
     using utility::input::FrameID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::nusight::graph;
 
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
@@ -83,12 +85,19 @@ namespace module::input {
         const auto Rwt_mahony      = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
         Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
 
+        emit(graph("Mahony Yaw", rpy_mahony.z()));
+
         // If fallen, keep position still
         if (stability <= Stability::FALLING) {
             Eigen::Isometry3d Hwt =
                 previous_sensors == nullptr ? Eigen::Isometry3d::Identity() : previous_sensors->Htw.inverse();
-            // Htw rotation is combination of Mahony pitch and roll and existing yaw
-            Hwt.linear() = Rwt_mahony;
+
+            // Update yaw filter with gyroscope only (no kinematic measurement available when fallen)
+            const double fallen_yaw = yaw_filter.update_gyro_only(sensors->gyroscope.z(), dt);
+
+            // Htw rotation is combination of Mahony pitch and roll and filtered yaw
+            Eigen::Vector3d rpy_fallen(rpy_mahony.x(), rpy_mahony.y(), fallen_yaw);
+            Hwt.linear() = rpy_intrinsic_to_mat(rpy_fallen);
             sensors->Htw = Hwt.inverse();
 
             // Get robot to world
@@ -125,15 +134,25 @@ namespace module::input {
                                                  : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
         const Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
 
-        // Construct world {w} to torso {t} space transform (mahony orientation, anchor translation)
+        // Extract yaw from kinematic estimate
+        const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_anchor.linear()).z();
+        emit(graph("Kinematic Yaw", kinematic_yaw));
+
+        // Fuse yaw estimates using yaw filter
+        const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
+
+        // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, anchor translation)
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
         Hwt.translation()     = Hwt_anchor.translation();
-        Hwt.linear()          = Rwt_mahony;
-        sensors->Htw          = Hwt.inverse();
 
-        // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
+        // Combine Mahony roll/pitch with fused yaw
+        Eigen::Vector3d rpy_fused(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
+        Hwt.linear() = rpy_intrinsic_to_mat(rpy_fused);
+        sensors->Htw = Hwt.inverse();
+
+        // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(rpy_mahony.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
         sensors->Hrw          = Hwr.inverse();
 
