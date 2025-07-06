@@ -86,8 +86,8 @@ namespace module::planning {
             cfg.fall_script         = config["fall_script"].as<std::string>();
         });
 
-        on<Provide<RelaxWhenFalling>, Trigger<Sensors>>().then(
-            [this](const RunReason& run_reason, const Sensors& sensors) {
+        on<Provide<RelaxWhenFalling>, Uses<UpperBodySequence>, Trigger<Sensors>>().then(
+            [this](const RunReason& run_reason, const Uses<UpperBodySequence>& upper_body, const Sensors& sensors) {
                 // OTHER_TRIGGER means we ran because of a sensors update
                 if (run_reason == RunReason::OTHER_TRIGGER) {
                     auto& a = sensors.accelerometer;
@@ -130,28 +130,32 @@ namespace module::planning {
                     emit(graph("Falling", falling));
                     //////    End plots    //////
 
-                    // We are falling
-                    if (falling) {
-                        // We are falling! Relax the limbs!
-                        log<DEBUG>("Falling:",
-                                   "Gyroscope Magnitude:",
-                                   gyro_mag,
-                                   gyro_mag_state == State::FALLING    ? "FALLING"
-                                   : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                       : "STABLE",
-                                   "Accelerometer Magnitude:",
-                                   acc_mag,
-                                   acc_mag_state == State::FALLING    ? "FALLING"
-                                   : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                      : "STABLE",
-                                   "Accelerometer Angle:",
-                                   acc_angle,
-                                   acc_angle_state == State::FALLING    ? "FALLING"
-                                   : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
-                                                                        : "STABLE");
+                    log<DEBUG>("Falling:",
+                               "Gyroscope Magnitude:",
+                               gyro_mag,
+                               gyro_mag_state == State::FALLING    ? "FALLING"
+                               : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                   : "STABLE",
+                               "Accelerometer Magnitude:",
+                               acc_mag,
+                               acc_mag_state == State::FALLING    ? "FALLING"
+                               : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                  : "STABLE",
+                               "Accelerometer Angle:",
+                               acc_angle,
+                               acc_angle_state == State::FALLING    ? "FALLING"
+                               : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
+                                                                    : "STABLE");
 
-                        emit(std::make_unique<Stability>(Stability::FALLING));
+                    emit(std::make_unique<Stability>(Stability::FALLING));
+
+                    // We are falling but not running relax yet, run relax
+                    if (falling && upper_body.run_state == RunState::NO_TASK) {
                         emit<Task>(load_script<UpperBodySequence>(cfg.fall_script));
+                    }
+                    // Not falling, but still running, set stability to standing
+                    else if (!falling && upper_body.run_state == RunState::RUNNING) {
+                        emit(std::make_unique<Stability>(Stability::STANDING));
                     }
                 }
                 else {
