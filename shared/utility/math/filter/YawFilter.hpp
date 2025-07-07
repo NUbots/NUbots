@@ -61,11 +61,13 @@ namespace utility {
                 Scalar previous_kinematic_yaw = 0.0;
 
                 /// @brief Maximum allowed bias
-                Scalar max_bias = 0.1;
+                Scalar max_bias = std::numeric_limits<Scalar>::infinity();
 
             public:
                 /// @brief Constructor
-                YawFilter(const Scalar alpha = 0.1, const Scalar beta = 0.01, const Scalar max_bias = 0.1)
+                YawFilter(const Scalar alpha    = 0.0,
+                          const Scalar beta     = 0.0,
+                          const Scalar max_bias = std::numeric_limits<Scalar>::infinity())
                     : alpha(alpha), beta(beta), max_bias(max_bias) {}
 
                 /// @brief Update the filter with gyroscope measurement and kinematic measurement
@@ -101,11 +103,11 @@ namespace utility {
                     Scalar predicted_kinematic_yaw = yaw + (kinematic_yaw - previous_kinematic_yaw);
 
                     // Normalize angles to [-pi, pi]
-                    Scalar normalized_predicted_gyro_yaw      = normalise_angle(predicted_gyro_yaw);
-                    Scalar normalized_predicted_kinematic_yaw = normalise_angle(predicted_kinematic_yaw);
+                    Scalar normalised_predicted_gyro_yaw      = normalise_angle(predicted_gyro_yaw);
+                    Scalar normalised_predicted_kinematic_yaw = normalise_angle(predicted_kinematic_yaw);
 
                     // Complementary filter update with proper angular interpolation
-                    yaw = interpolate_angles(normalized_predicted_kinematic_yaw, normalized_predicted_gyro_yaw, alpha);
+                    yaw = interpolate_angles(normalised_predicted_kinematic_yaw, normalised_predicted_gyro_yaw, alpha);
                     yaw = normalise_angle(yaw);
 
                     // Store current kinematic yaw for next iteration
@@ -141,42 +143,6 @@ namespace utility {
                 /// @brief Get the current bias estimate
                 Scalar get_bias() const {
                     return bias;
-                }
-
-                /// @brief Set the current yaw estimate
-                void set_yaw(const Scalar new_yaw) {
-                    yaw         = normalise_angle(new_yaw);
-                    initialised = true;
-                }
-
-                /// @brief Set the current bias estimate
-                void set_bias(const Scalar new_bias) {
-                    bias = new_bias;
-                }
-
-                /// @brief Set the complementary filter coefficient
-                void set_alpha(const Scalar new_alpha) {
-                    alpha = std::clamp(new_alpha, Scalar(0.0), Scalar(1.0));
-                }
-
-                /// @brief Set the bias learning rate
-                void set_beta(const Scalar new_beta) {
-                    beta = std::clamp(new_beta, Scalar(0.0), Scalar(1.0));
-                }
-
-                /// @brief Set the maximum allowed bias
-                void set_max_bias(const Scalar new_max_bias) {
-                    max_bias = new_max_bias;
-                }
-
-                /// @brief Get the complementary filter coefficient
-                Scalar get_alpha() const {
-                    return alpha;
-                }
-
-                /// @brief Get the bias learning rate
-                Scalar get_beta() const {
-                    return beta;
                 }
 
                 /// @brief Reset the filter
