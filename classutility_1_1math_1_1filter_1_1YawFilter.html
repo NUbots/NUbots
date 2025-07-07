@@ -227,6 +227,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
+<tr class="memitem:a3349b3d13a6ff722b0e6f5bd90fc8084"><td class="memItemLeft" align="right" valign="top">static Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1YawFilter.html#a3349b3d13a6ff722b0e6f5bd90fc8084">interpolate_angles</a> (Scalar angle1, Scalar angle2, Scalar weight)</td></tr>
+<tr class="memdesc:a3349b3d13a6ff722b0e6f5bd90fc8084"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate between two angles handling wrapping correctly.  <a href="classutility_1_1math_1_1filter_1_1YawFilter.html#a3349b3d13a6ff722b0e6f5bd90fc8084">More...</a><br /></td></tr>
+<tr class="separator:a3349b3d13a6ff722b0e6f5bd90fc8084"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecb07959dcbc1a5e8fe696273b531342"><td class="memItemLeft" align="right" valign="top"><a id="aecb07959dcbc1a5e8fe696273b531342"></a>
 static Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1YawFilter.html#aecb07959dcbc1a5e8fe696273b531342">normalise_angle</a> (Scalar angle)</td></tr>
 <tr class="memdesc:aecb07959dcbc1a5e8fe696273b531342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Efficient angle normalization to [-pi, pi]. <br /></td></tr>
@@ -260,6 +263,61 @@ Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 <tr class="separator:a11132b2576976c8dfd81af7b97b21e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a3349b3d13a6ff722b0e6f5bd90fc8084"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3349b3d13a6ff722b0e6f5bd90fc8084">&#9670;&nbsp;</a></span>interpolate_angles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static Scalar <a class="el" href="classutility_1_1math_1_1filter_1_1YawFilter.html">utility::math::filter::YawFilter</a>&lt; Scalar &gt;::interpolate_angles </td>
+          <td>(</td>
+          <td class="paramtype">Scalar&#160;</td>
+          <td class="paramname"><em>angle1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Scalar&#160;</td>
+          <td class="paramname"><em>angle2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Scalar&#160;</td>
+          <td class="paramname"><em>weight</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interpolate between two angles handling wrapping correctly. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">angle1</td><td>First angle </td></tr>
+    <tr><td class="paramname">angle2</td><td>Second angle </td></tr>
+    <tr><td class="paramname">weight</td><td>Weight for angle1 (0-1) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Interpolated angle </dd></dl>
+
+</div>
+</div>
 <a id="a492172f50cc6b74ef17081a5ae62bc48"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a492172f50cc6b74ef17081a5ae62bc48">&#9670;&nbsp;</a></span>update()</h2>
 
@@ -372,7 +430,7 @@ template&lt;typename Scalar &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><b>filter</b></li><li class="navelem"><a class="el" href="classutility_1_1math_1_1filter_1_1YawFilter.html">YawFilter</a></li>
-    <li class="footer">Generated on Mon Jul 7 2025 07:28:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jul 7 2025 07:28:52 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

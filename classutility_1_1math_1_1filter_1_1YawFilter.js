@@ -5,6 +5,7 @@ var classutility_1_1math_1_1filter_1_1YawFilter =
     [ "get_beta", "classutility_1_1math_1_1filter_1_1YawFilter.html#a73a8903de86138fbe21181323609bacf", null ],
     [ "get_bias", "classutility_1_1math_1_1filter_1_1YawFilter.html#a447ea025aa375c6cbe8849e8247cefcc", null ],
     [ "get_yaw", "classutility_1_1math_1_1filter_1_1YawFilter.html#a8b04986a8275ab36ae3ecd2cc0dba276", null ],
+    [ "interpolate_angles", "classutility_1_1math_1_1filter_1_1YawFilter.html#a3349b3d13a6ff722b0e6f5bd90fc8084", null ],
     [ "normalise_angle", "classutility_1_1math_1_1filter_1_1YawFilter.html#aecb07959dcbc1a5e8fe696273b531342", null ],
     [ "reset", "classutility_1_1math_1_1filter_1_1YawFilter.html#a1ed783c3c0343769cabb7ebc03e8a0f3", null ],
     [ "set_alpha", "classutility_1_1math_1_1filter_1_1YawFilter.html#ae40b6a6cfad5c2fa85ad63d997579e74", null ],

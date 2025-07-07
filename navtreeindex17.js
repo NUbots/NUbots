@@ -1,5 +1,6 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05":[3,0,3,12,2,10,0,0],
 "structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html":[3,0,3,12,2,12,0],
 "structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html#a0243517121b347d2ea565df50bdda7c7":[3,0,3,12,2,12,0,0],
 "structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html":[3,0,3,13,2,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1input_1_1LimbID.html#afc7d69eaf9e751008379b9d8371f2df6":[3,0,7,2,1,11],
 "structutility_1_1input_1_1LimbID.html#afd8f97218aa8df4f7c682a6bd59b67c4":[3,0,7,2,1,27],
 "structutility_1_1input_1_1ServoID.html":[3,0,7,2,2],
-"structutility_1_1input_1_1ServoID.html#a099d66316df7ca2bd3256dd435a3b272":[3,0,7,2,2,6],
-"structutility_1_1input_1_1ServoID.html#a0ab4348dd30622d26a46182ffc3ed17e":[3,0,7,2,2,25]
+"structutility_1_1input_1_1ServoID.html#a099d66316df7ca2bd3256dd435a3b272":[3,0,7,2,2,6]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a130a00f4058b3cf38ce164c6fc14aa9c":[3,0,3,8,1,6,3,3],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a160a09890d34b9ba8b8ecc9166c996d7":[3,0,3,8,1,6,3,8],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419":[3,0,3,8,1,6,3,5],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a43238189263de8350aa91aa3e93dff09":[3,0,3,8,1,6,3,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html#a9f7c6420ec1355736c9f5935d7f5ae76":[3,0,3,12,2,6,0,0],
 "structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html":[3,0,3,12,2,8,0],
 "structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html#a361f49fefa3bbe79eb792a36a1608e44":[3,0,3,12,2,8,0,0],
-"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html":[3,0,3,12,2,10,0],
-"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05":[3,0,3,12,2,10,0,0]
+"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html":[3,0,3,12,2,10,0]
 };
