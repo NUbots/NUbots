@@ -24,7 +24,7 @@ max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turnin
 min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
 strafe_gain: 1
 max_strafe_angle: 65 * pi / 180 # Maximum angle to strafe at
-max_aligned_angle: 100 * pi / 180 # Maximum angle to be considered aligned
+max_aligned_angle: 30 * pi / 180 # Maximum angle to be considered aligned
 backward_buffer: 10 * pi / 180 # Buffer angle to keep direction of strafe
 backwards_vector: [-1.0, 0.001] # Vector to walk backwards
 acceleration_multiplier: 0.3
