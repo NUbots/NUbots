@@ -80,6 +80,12 @@ namespace module::input {
         emit(graph("Rrw rpy (estimate)", est_Rrw.x(), est_Rrw.y(), est_Rrw.z()));
         emit(graph("vTw (estimate)", vTw.x(), vTw.y(), vTw.z()));
 
+        // Yaw filter debug information
+        emit(graph("Yaw Filter/Fused Yaw", yaw_filter.get_yaw()));
+        emit(graph("Yaw Filter/Alpha", yaw_filter.get_alpha()));
+        emit(graph("Yaw Filter/Bias", yaw_filter.get_bias()));
+        emit(graph("Yaw Filter/Beta", yaw_filter.get_beta()));
+
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (robot_pose_ground_truth) {
             Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(ground_truth_Hfw.inverse() * robot_pose_ground_truth->Hft);
