@@ -115,7 +115,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>, Every<1, Per<std::chrono::seconds>>>().then([this] {
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
             if (cfg.is_goalie) {
                 emit<Task>(std::make_unique<Goalie>());
             }

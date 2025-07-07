@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # General playing tuning values for walking
 max_translational_velocity_x: 0.175
@@ -25,3 +25,7 @@ strafe_gain: 0.4
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.5
+
+tau: [1, 1, 1]
+
+starting_velocity: [0.05, 0, 0]

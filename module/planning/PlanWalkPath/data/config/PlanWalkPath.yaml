@@ -27,3 +27,7 @@ strafe_gain: 1
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.6
+
+tau: [1, 1, 1]
+
+starting_velocity: [0.05, 0, 0]

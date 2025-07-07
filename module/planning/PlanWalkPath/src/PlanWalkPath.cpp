@@ -45,6 +45,7 @@ namespace module::planning {
 
     using extension::Configuration;
 
+    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
@@ -54,12 +55,14 @@ namespace module::planning {
     using message::skill::Walk;
     using message::strategy::StandStill;
 
-    using message::strategy::StandStill;
-
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::math::geometry::intersection_line_and_circle;
     using utility::nusight::graph;
     using utility::support::Expression;
+
+    struct WalkProposal {
+        Eigen::Vector3d velocity_target;
+    };
 
     PlanWalkPath::PlanWalkPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -91,6 +94,27 @@ namespace module::planning {
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
 
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
+
+            // Exponential smoothing configuration
+            cfg.tau = config["tau"].as<Expression>();
+            // Ensure safety for division by zero if tau is zero
+            cfg.alpha = (cfg.tau.array() > 0.01)
+                            .select((1.0 - (-1.0 / (UPDATE_FREQUENCY * cfg.tau.array())).exp()).matrix(),
+                                    Eigen::Vector3d::Ones());
+            cfg.one_minus_alpha = Eigen::Vector3d::Ones() - cfg.alpha;
+
+            // Starting velocity
+            cfg.starting_velocity = config["starting_velocity"].as<Expression>();
+        });
+
+        on<Trigger<Stability>>().then([this](const Stability& new_stability) {
+            // If transitioning from non-DYNAMIC to DYNAMIC stability state, reset smoothed walk command
+            if (stability != Stability::DYNAMIC && new_stability == Stability::DYNAMIC) {
+                previous_walk_command = cfg.starting_velocity;
+                log<DEBUG>("Resetting walk command to starting velocity");
+            }
+
+            stability = new_stability;
         });
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
@@ -190,7 +214,7 @@ namespace module::planning {
                 velocity_target = constrain_velocity(velocity_target);
 
                 // Emit the walk task with the calculated velocities
-                emit<Task>(std::make_unique<Walk>(velocity_target));
+                emit<Task>(std::make_unique<WalkProposal>(velocity_target));
 
                 // Emit debugging information for visualization and monitoring
                 auto debug_information              = std::make_unique<WalkToDebug>();
@@ -214,7 +238,7 @@ namespace module::planning {
             int sign = turn_on_spot.clockwise ? -1 : 1;
 
             // Turn on the spot
-            emit<Task>(std::make_unique<Walk>(
+            emit<Task>(std::make_unique<WalkProposal>(
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
         });
 
@@ -222,9 +246,30 @@ namespace module::planning {
             // Determine the direction of rotation
             int sign = pivot_around_point.clockwise ? -1 : 1;
             // Turn around the ball
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
-                                                              sign * cfg.pivot_ball_velocity_y,
-                                                              sign * cfg.pivot_ball_velocity)));
+            emit<Task>(std::make_unique<WalkProposal>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
+                                                                      sign * cfg.pivot_ball_velocity_y,
+                                                                      sign * cfg.pivot_ball_velocity)));
+        });
+
+        // Intercept Walk commands and apply smoothing
+        on<Provide<WalkProposal>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this](const WalkProposal&
+                                                                                                        walk) {
+            // Apply exponential smoothing to the walk command
+            Eigen::Vector3d smoothed_command =
+                walk.velocity_target.cwiseProduct(cfg.alpha) + previous_walk_command.cwiseProduct(cfg.one_minus_alpha);
+
+            Eigen::Vector3d smooth_diff = smoothed_command - walk.velocity_target;
+
+            // Visualise the walk path in NUsight
+            emit(graph("Walk Proposal", walk.velocity_target.x(), walk.velocity_target.y(), walk.velocity_target.z()));
+            emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
+            emit(graph("Walk Smoothing Difference", smooth_diff.x(), smooth_diff.y(), smooth_diff.z()));
+
+            // Forward the smoothed command to the actual Walk skill
+            emit<Task>(std::make_unique<Walk>(smoothed_command));
+
+            // Store for next iteration
+            previous_walk_command = smoothed_command;
         });
     }
 

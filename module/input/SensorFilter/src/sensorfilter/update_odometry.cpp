@@ -137,7 +137,6 @@ namespace module::input {
 
         // Extract yaw from kinematic estimate
         const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_anchor.linear()).z();
-        emit(graph("Kinematic Yaw", kinematic_yaw));
 
         // Fuse yaw estimates using yaw filter
         const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);

@@ -54,8 +54,8 @@ namespace utility {
                 /// @brief Estimated gyroscope bias
                 Scalar bias = 0.0;
 
-                /// @brief Whether the filter has been initialized
-                bool initialized = false;
+                /// @brief Whether the filter has been initialised
+                bool initialised = false;
 
                 /// @brief Previous kinematic yaw for bias estimation
                 Scalar previous_kinematic_yaw = 0.0;
@@ -69,16 +69,16 @@ namespace utility {
                 /// @param dt Time step
                 /// @return Fused yaw estimate
                 Scalar update(const Scalar gyro_z, const Scalar kinematic_yaw, const Scalar dt) {
-                    if (!initialized) {
+                    if (!initialised) {
                         yaw                    = kinematic_yaw;
                         bias                   = 0.0;
                         previous_kinematic_yaw = kinematic_yaw;
-                        initialized            = true;
+                        initialised            = true;
                         return yaw;
                     }
 
                     // Calculate actual kinematic rate (change in kinematic yaw)
-                    Scalar kinematic_rate = normalize_angle(kinematic_yaw - previous_kinematic_yaw) / dt;
+                    Scalar kinematic_rate = normalise_angle(kinematic_yaw - previous_kinematic_yaw) / dt;
 
                     // Update bias estimate: gyro should match kinematic rate when both are accurate
                     // The bias is the persistent error between gyro and actual rate
@@ -92,12 +92,12 @@ namespace utility {
                     Scalar predicted_yaw = yaw + corrected_gyro * dt;
 
                     // Normalize angles to [-pi, pi]
-                    predicted_yaw                   = normalize_angle(predicted_yaw);
-                    Scalar normalized_kinematic_yaw = normalize_angle(kinematic_yaw);
+                    predicted_yaw                   = normalise_angle(predicted_yaw);
+                    Scalar normalized_kinematic_yaw = normalise_angle(kinematic_yaw);
 
                     // Complementary filter update
                     yaw = alpha * normalized_kinematic_yaw + (1 - alpha) * predicted_yaw;
-                    yaw = normalize_angle(yaw);
+                    yaw = normalise_angle(yaw);
 
                     // Store current kinematic yaw for next iteration
                     previous_kinematic_yaw = kinematic_yaw;
@@ -110,7 +110,7 @@ namespace utility {
                 /// @param dt Time step
                 /// @return Predicted yaw estimate
                 Scalar update_gyro_only(const Scalar gyro_z, const Scalar dt) {
-                    if (!initialized) {
+                    if (!initialised) {
                         return 0.0;
                     }
 
@@ -119,7 +119,7 @@ namespace utility {
 
                     // Predict yaw using bias-corrected gyroscope integration only
                     yaw = yaw + corrected_gyro * dt;
-                    yaw = normalize_angle(yaw);
+                    yaw = normalise_angle(yaw);
 
                     return yaw;
                 }
@@ -136,8 +136,8 @@ namespace utility {
 
                 /// @brief Set the current yaw estimate
                 void set_yaw(const Scalar new_yaw) {
-                    yaw         = normalize_angle(new_yaw);
-                    initialized = true;
+                    yaw         = normalise_angle(new_yaw);
+                    initialised = true;
                 }
 
                 /// @brief Set the current bias estimate
@@ -170,12 +170,12 @@ namespace utility {
                     yaw                    = 0.0;
                     bias                   = 0.0;
                     previous_kinematic_yaw = 0.0;
-                    initialized            = false;
+                    initialised            = false;
                 }
 
             private:
                 /// @brief Efficient angle normalization to [-pi, pi]
-                static Scalar normalize_angle(Scalar angle) {
+                static Scalar normalise_angle(Scalar angle) {
                     angle = std::fmod(angle + M_PI, 2 * M_PI);
                     return angle < 0 ? angle + M_PI : angle - M_PI;
                 }
