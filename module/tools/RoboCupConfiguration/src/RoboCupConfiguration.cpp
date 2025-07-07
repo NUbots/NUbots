@@ -166,7 +166,7 @@ namespace module::tools {
         player_id                = global_config["player_id"].as<int>();
 
         // Robot position
-        YAML::Node soccer_config = Configuration("SoccerNew.yaml", hostname, binary, platform).config;
+        YAML::Node soccer_config = Configuration("Soccer.yaml", hostname, binary, platform).config;
         is_goalie                = soccer_config["is_goalie"].as<bool>();
 
         // Network info
@@ -217,7 +217,7 @@ namespace module::tools {
     void RoboCupConfiguration::set_config_values() {
         /* GAME CONFIG */
         {  // Write the robot's position to the soccer file
-            std::string soccer_file = get_config_file("SoccerNew.yaml");
+            std::string soccer_file = get_config_file("Soccer.yaml");
             // Write to the yaml file
             YAML::Node config   = YAML::LoadFile(soccer_file);
             config["is_goalie"] = is_goalie;

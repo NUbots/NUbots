@@ -36,6 +36,7 @@
 #include "message/actuation/ServoTarget.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
@@ -78,7 +79,6 @@ namespace module::platform {
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
     using message::platform::webots::MotorVelocity;
-    using message::platform::webots::OdometryGroundTruth;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
@@ -826,14 +826,11 @@ namespace module::platform {
             log<TRACE>("      value:", sensor.value);
         }
 
-        if (sensor_measurements.odometry_ground_truth.exists) {
-            log<TRACE>("  sm.odometry_ground_truth:");
-            log<TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
-        }
-
-        if (sensor_measurements.localisation_ground_truth.exists) {
-            log<TRACE>("  sm.localisation_ground_truth:");
-            log<TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth.Hfw);
+        if (sensor_measurements.robot_pose_ground_truth.exists) {
+            auto robot_pose_ground_truth = std::make_unique<message::localisation::RobotPoseGroundTruth>();
+            robot_pose_ground_truth->Hft = sensor_measurements.robot_pose_ground_truth.Hft;
+            robot_pose_ground_truth->vTf = sensor_measurements.robot_pose_ground_truth.vTf;
+            emit(robot_pose_ground_truth);
         }
 
         // Parse the errors and warnings from Webots and log them.
@@ -912,17 +909,6 @@ namespace module::platform {
                 else if (bumper.name == "left_touch_sensor_fr") {
                     sensor_data->fsr.left.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
-            }
-
-            // If we got ground truth data, send it through with the sensors
-            if (sensor_measurements.odometry_ground_truth.exists) {
-                sensor_data->odometry_ground_truth.exists = true;
-                sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
-                sensor_data->odometry_ground_truth.vTw    = sensor_measurements.odometry_ground_truth.vTw;
-            }
-            if (sensor_measurements.localisation_ground_truth.exists) {
-                sensor_data->localisation_ground_truth.exists = true;
-                sensor_data->localisation_ground_truth.Hfw    = sensor_measurements.localisation_ground_truth.Hfw;
             }
 
             emit(sensor_data);

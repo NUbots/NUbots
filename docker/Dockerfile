@@ -406,8 +406,6 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
-    arm-none-eabi-gcc \
-    arm-none-eabi-newlib \
     doxygen \
     gcc13
 
@@ -424,9 +422,10 @@ RUN npm install -g \
 # Install uv for python package management and set it to use the build directory for storage
 RUN pip install uv==0.7.2
 
-# When in the docker image uv will use the build directory for storage
-ENV UV_CACHE_DIR=/home/nubots/build/uv-cache
-ENV UV_PROJECT_ENVIRONMENT=/home/nubots/build/.venv
+# When in the docker image uv will use a separate volume for the cache and venv
+# Virtual environments are on the same volume as the uv cache to allow hard linking for ~speed~
+ENV UV_CACHE_DIR=/home/nubots/python/uv-cache
+ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -475,6 +474,7 @@ COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots \
     && install -d -m 0777 /home/nubots/build \
+    && install -d -m 0777 /home/nubots/python \
     && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
 
 # Configure the cache directories
