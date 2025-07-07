@@ -67,10 +67,12 @@ namespace module::extension {
 
         // The incumbent's provider has disappeared
         if (providers.at(incumbent->requester_id) == nullptr) {
+            log<INFO>("Where is the provider?", NUClear::util::demangle(incumbent->type.name()));
             return true;
         }
         // The challenger's provider has disappeared
         if (providers.at(challenger->requester_id) == nullptr) {
+            log<INFO>("Where is the provider?", NUClear::util::demangle(challenger->type.name()));
             return false;
         }
 
