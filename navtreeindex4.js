@@ -157,8 +157,7 @@ var NAVTREEINDEX4 =
 "classmodule_1_1purpose_1_1FieldPlayer.html#a94040b0b689ee91dbaf6a03fffb25e51":[3,0,3,9,4,2],
 "classmodule_1_1purpose_1_1Goalie.html":[3,0,3,9,5],
 "classmodule_1_1purpose_1_1Goalie.html#a77494629dfed2db5048dd044503277af":[3,0,3,9,5,1],
-"classmodule_1_1purpose_1_1Goalie.html#a9c2a18984ce2cd2234a2f8aae8d2d061":[3,0,3,9,5,3],
-"classmodule_1_1purpose_1_1Goalie.html#ab2e697f2cb955aa49511afaace75ae90":[3,0,3,9,5,2],
+"classmodule_1_1purpose_1_1Goalie.html#a9c2a18984ce2cd2234a2f8aae8d2d061":[3,0,3,9,5,2],
 "classmodule_1_1purpose_1_1KeyboardWalk.html":[3,0,3,9,6],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a02cbec0396b1c4f5450291b2137d4056":[3,0,3,9,6,27],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a0fb72688886d8030ddeaa63d68e128be":[3,0,3,9,6,12],
@@ -249,5 +248,6 @@ var NAVTREEINDEX4 =
 "classmodule_1_1purpose_1_1ScriptTuner.html#a5f93eb9452bd3a9178d6b85942d5e162":[3,0,3,9,11,19],
 "classmodule_1_1purpose_1_1ScriptTuner.html#a6239ff1d8acdcb2d1b0b23b8551b2589":[3,0,3,9,11,8],
 "classmodule_1_1purpose_1_1ScriptTuner.html#a664f11ed4d234f95b91ffa3e00308f08":[3,0,3,9,11,5],
-"classmodule_1_1purpose_1_1ScriptTuner.html#a6ac81e9ce39c48560a918f1f6cff716e":[3,0,3,9,11,20]
+"classmodule_1_1purpose_1_1ScriptTuner.html#a6ac81e9ce39c48560a918f1f6cff716e":[3,0,3,9,11,20],
+"classmodule_1_1purpose_1_1ScriptTuner.html#a7453a29d722accd8356c8e54c27287ba":[3,0,3,9,11,13]
 };

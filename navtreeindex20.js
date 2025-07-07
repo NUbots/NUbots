@@ -1,10 +1,5 @@
 var NAVTREEINDEX20 =
 {
-"structutility_1_1vision_1_1Pixel.html#a47ded1626d20115fd84cc0e8c26f464a":[3,0,7,15,2,6],
-"structutility_1_1vision_1_1Pixel.html#a482cbfd99aa3c624779193986206f3f9":[3,0,7,15,2,8],
-"structutility_1_1vision_1_1Pixel.html#a6b840eaabf7745f91041534d7ccc5d02":[3,0,7,15,2,4],
-"structutility_1_1vision_1_1Pixel.html#a6f193b1a98dc1ddc4b64a01e7377060d":[3,0,7,15,2,5],
-"structutility_1_1vision_1_1Pixel.html#a7a0bb203b3197818bb4a55b7c512b988":[3,0,7,15,2,11],
 "structutility_1_1vision_1_1Pixel.html#a9e14d9bbdb4ccfa3b936087c5844963f":[3,0,7,15,2,2],
 "structutility_1_1vision_1_1Pixel.html#abbf51df29d7b615d15eec3f0f2cefb33":[3,0,7,15,2,14],
 "structutility_1_1vision_1_1Pixel.html#ac94ea8ed585663c1850829865832fed6":[3,0,7,15,2,9],

@@ -1,6 +1,5 @@
 var NAVTREEINDEX11 =
 {
-"soccer__strategy_8hpp.html#a89f10d8908e8a50c7d081a963220e84f":[2,0,7,17,0],
 "stratified_8hpp.html#ac3a5aceffa3ee091279b5cf5c25d82df":[2,0,7,6,7,0,6],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html":[3,0,5,0,0,0],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a910803ed58bd048a1e9d4328d0df9e57":[3,0,5,0,0,0,0],
@@ -249,5 +248,6 @@ var NAVTREEINDEX11 =
 "structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a4520280d2358c47ef92a8fdcffc5c07e":[3,0,1,0,0,1,0],
 "structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a4521af43a4f06308a877690598f6ba0b":[3,0,1,0,0,1,4],
 "structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a956e35e656e322be60a492a9d6f31988":[3,0,1,0,0,1,5],
-"structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a9dc3000930b8545a6a8beb8cd819020b":[3,0,1,0,0,1,2]
+"structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#a9dc3000930b8545a6a8beb8cd819020b":[3,0,1,0,0,1,2],
+"structextension_1_1behaviour_1_1commands_1_1BehaviourTasks.html#ab696f4adf00c7ab4dd84c74d1999fca1":[3,0,1,0,0,1,3]
 };

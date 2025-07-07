@@ -1,6 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1input_1_1NatNet_1_1RigidBodyMarker.html#ab079c39198713d16c6fe1d8bb05ebf09":[3,0,3,2,7,6,2],
 "structmodule_1_1input_1_1NatNet_1_1RigidBodyModel.html":[3,0,3,2,7,7],
 "structmodule_1_1input_1_1NatNet_1_1RigidBodyModel.html#a16ff7022a0493df62a9d6c0d9b6787a6":[3,0,3,2,7,7,3],
 "structmodule_1_1input_1_1NatNet_1_1RigidBodyModel.html#a1cd5ed4a1a94060f57934ab765c591ba":[3,0,3,2,7,7,0],
@@ -249,5 +248,6 @@ var NAVTREEINDEX13 =
 "structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#a99b29e69fd7787fcaac24e7c0b37da5a":[3,0,3,3,7,0,6],
 "structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#aace5944a426c9da0a446bb59288c94ea":[3,0,3,3,7,0,1],
 "structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#ae5c466d03a1c855bfcbadaeb04f0f3ed":[3,0,3,3,7,0,4],
-"structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#ae7ad9720be2dc9915403c277ff1bfdc9":[3,0,3,3,7,0,7]
+"structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#ae7ad9720be2dc9915403c277ff1bfdc9":[3,0,3,3,7,0,7],
+"structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#af895f0e3a85cf68d9fd7f31b0ee3f6dc":[3,0,3,3,7,0,0]
 };

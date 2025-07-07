@@ -1,6 +1,5 @@
 var NAVTREEINDEX10 =
 {
-"jpeg__constants_8hpp.html#a4cb99ace7bd755ffbd669eef8abe0d88":[2,0,3,6,0,1,1,16],
 "jpeg__constants_8hpp.html#a69e9150e29bfc6e0acdfb260c63d89b5":[2,0,3,6,0,1,1,15],
 "jpeg__constants_8hpp.html#a87fa99a49ede22903771cd30f885141e":[2,0,3,6,0,1,1,19],
 "jpeg__constants_8hpp.html#aa9b4b3f9bd09f712a2eec10ce6dc314a":[2,0,3,6,0,1,1,13],
@@ -249,5 +248,6 @@ var NAVTREEINDEX10 =
 "slice__parameter_8cpp.html#a13548fcaa95135e5f5e7d3d720cc6c19":[2,0,3,6,0,1,1,8],
 "soccer__strategy_8hpp.html#a1dd5cf76429f7fcbd2486709fef4f5f2":[2,0,7,17,3],
 "soccer__strategy_8hpp.html#a25e79f96d5e1343e70f14699f7b2385b":[2,0,7,17,1],
-"soccer__strategy_8hpp.html#a77769eb4228e67ce08a1b23e96338bae":[2,0,7,17,2]
+"soccer__strategy_8hpp.html#a77769eb4228e67ce08a1b23e96338bae":[2,0,7,17,2],
+"soccer__strategy_8hpp.html#a89f10d8908e8a50c7d081a963220e84f":[2,0,7,17,0]
 };

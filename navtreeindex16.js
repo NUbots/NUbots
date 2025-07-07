@@ -1,6 +1,5 @@
 var NAVTREEINDEX16 =
 {
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae7786f54d3639d26bf8e1967270f2a66":[3,0,3,8,1,1,0,157],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae7ec2df7db5932b2dd90bab5c4d83bf8":[3,0,3,8,1,1,0,139],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae8b500b5770249d60c0ca8a01fdb76e7":[3,0,3,8,1,1,0,179],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae95cee293aaa06a4cd9102bc817e40f0":[3,0,3,8,1,1,0,183],
@@ -168,17 +167,13 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html":[3,0,3,9,4,0],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a0a38aff93504373b82edecce4b51eaf9":[3,0,3,9,4,0,4],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a660965305a40284282f5066fdfa6e4c1":[3,0,3,9,4,0,1],
+"structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a6ed9ce1824911e0a0f7a5f8452f7ac61":[3,0,3,9,4,0,5],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a8cd9a65008ae374a3691c46dd62cc3fa":[3,0,3,9,4,0,0],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a90b3e4c59c9ce6270bfffd88e752275e":[3,0,3,9,4,0,3],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#abb84a2c2722be30e059a2788d2cc8a5d":[3,0,3,9,4,0,2],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html":[3,0,3,9,5,0],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a06da364becece8c798be6ab27caea6a3":[3,0,3,9,5,0,5],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a29ddc74e53077bfa902238edf8c46381":[3,0,3,9,5,0,3],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a2d057bfbad78f3b195297ed571a41dd6":[3,0,3,9,5,0,1],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a5e43eb9277fa5d4a2d86619c64992fe0":[3,0,3,9,5,0,6],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#a9c0f6ec31ad09bffbff0340d646bdb20":[3,0,3,9,5,0,4],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#ab6fb3fe4b3fdd735c70be7ae559e5113":[3,0,3,9,5,0,2],
-"structmodule_1_1purpose_1_1Goalie_1_1Config.html#abe33008a0e413b9c81d5bc8a738fe786":[3,0,3,9,5,0,0],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#ad7ac71f0374a7aa2c35c50d7e9ad7330":[3,0,3,9,5,0,0],
+"structmodule_1_1purpose_1_1Goalie_1_1Config.html#adf93fa48288f8f3b0de80419b7c3ebb3":[3,0,3,9,5,0,1],
 "structmodule_1_1purpose_1_1LockServo.html":[3,0,3,9,7],
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html":[3,0,3,9,8,0],
 "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html#a033860e0019e22b3473990451ae1cd3c":[3,0,3,9,8,0,2],
@@ -249,5 +244,10 @@ var NAVTREEINDEX16 =
 "structmodule_1_1skill_1_1Say_1_1Config.html":[3,0,3,10,9,0],
 "structmodule_1_1skill_1_1Say_1_1Config.html#a09584485648c860af66fab30075d7927":[3,0,3,10,9,0,2],
 "structmodule_1_1skill_1_1Say_1_1Config.html#aa09089b09d518621e02011e648efdae6":[3,0,3,10,9,0,0],
-"structmodule_1_1skill_1_1Say_1_1Config.html#adc2ef9a30368b30476d16f5dbfa4f595":[3,0,3,10,9,0,1]
+"structmodule_1_1skill_1_1Say_1_1Config.html#adc2ef9a30368b30476d16f5dbfa4f595":[3,0,3,10,9,0,1],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html":[3,0,3,10,11,0],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#a20664031fff3e7548c667abfc82cc4d2":[3,0,3,10,11,0,2],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aa792ec536bd87cc3d67b0f76d2fae25d":[3,0,3,10,11,0,0],
+"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aadf7006a3d0ed60282a4ac26df744753":[3,0,3,10,11,0,1],
+"structmodule_1_1skill_1_1SplineKick_1_1Config.html":[3,0,3,10,13,0]
 };

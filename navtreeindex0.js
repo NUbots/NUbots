@@ -182,8 +182,9 @@ var NAVTREEINDEX0 =
 "FieldLocalisationNLopt_8hpp.html#a8afa1eb801f638e4c890f687a71f0c32":[2,0,3,3,19],
 "FieldLocalisationNLopt_8hpp.html#abbd4794b915645a76862b28d102ce9ba":[2,0,3,3,18],
 "FieldLocalisationNLopt_8hpp.html#ad86283b67507ebac4528671874b068eb":[2,0,3,3,20],
+"FieldPlayer_8cpp.html#a1addfb2876a6e437319760e80f805e1a":[2,0,3,9,26],
 "FieldPlayer_8cpp.html#a211bea12b54a10d2aa549d137f24d783":[2,0,3,9,19],
-"FieldPlayer_8cpp.html#ae0412f9163805a4502651d331d8c43ce":[2,0,3,9,24],
+"FieldPlayer_8cpp.html#ae0412f9163805a4502651d331d8c43ce":[2,0,3,9,23],
 "FileWatcher_8cpp.html#abc6681062c35cce47c1670ba56e7cf40":[2,0,3,1,6],
 "FileWatcher_8cpp.html#af5efef03ebdaa88f546fdbf12430aba9":[2,0,3,1,5],
 "ForwardKinematics_8hpp.html#a68be5789fb33da4e7d44df7f9b79cfb3":[2,0,7,0,0,11],
@@ -248,6 +249,5 @@ var NAVTREEINDEX0 =
 "GameControllerData_8hpp.html#ac739fd672d5d657249250d153cf30761":[2,0,3,2,2,16],
 "GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675":[2,0,3,2,2,8],
 "GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675a2baa69eafc7204f3bd8648eba580c489":[2,0,3,2,2,8,1],
-"GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675a2c616b2713e2e0aed04b4c4752c88133":[2,0,3,2,2,8,4],
-"GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675a50366a49630a416ab3ccaa004196027e":[2,0,3,2,2,8,3]
+"GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675a2c616b2713e2e0aed04b4c4752c88133":[2,0,3,2,2,8,4]
 };

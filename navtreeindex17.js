@@ -1,10 +1,5 @@
 var NAVTREEINDEX17 =
 {
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html":[3,0,3,10,11,0],
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#a20664031fff3e7548c667abfc82cc4d2":[3,0,3,10,11,0,2],
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aa792ec536bd87cc3d67b0f76d2fae25d":[3,0,3,10,11,0,0],
-"structmodule_1_1skill_1_1SixDOFFootController_1_1Config.html#aadf7006a3d0ed60282a4ac26df744753":[3,0,3,10,11,0,1],
-"structmodule_1_1skill_1_1SplineKick_1_1Config.html":[3,0,3,10,13,0],
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html#a694f1827ae796ad5c6a94c3c4dd9d94e":[3,0,3,10,13,0,1],
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289":[3,0,3,10,13,0,0],
 "structmodule_1_1skill_1_1Walk_1_1Config.html":[3,0,3,10,14,0],
@@ -249,5 +244,10 @@ var NAVTREEINDEX17 =
 "structutility_1_1input_1_1FrameID.html":[3,0,7,2,0],
 "structutility_1_1input_1_1FrameID.html#a196b471d35e8ba171b01624fb44b6ad9":[3,0,7,2,0,14],
 "structutility_1_1input_1_1FrameID.html#a2bfcb31660e171771c9892247b47f6d3":[3,0,7,2,0,25],
-"structutility_1_1input_1_1FrameID.html#a33d69b6086d4742ac1d76f58e55b3d54":[3,0,7,2,0,10]
+"structutility_1_1input_1_1FrameID.html#a33d69b6086d4742ac1d76f58e55b3d54":[3,0,7,2,0,10],
+"structutility_1_1input_1_1FrameID.html#a33f519e44f04fa5f648abe59804c8220":[3,0,7,2,0,18],
+"structutility_1_1input_1_1FrameID.html#a39cdda6f425ce281391ab4e743b3712e":[3,0,7,2,0,13],
+"structutility_1_1input_1_1FrameID.html#a3c3ad8bbf5656f2fdd0f4f87dadd1a3b":[3,0,7,2,0,23],
+"structutility_1_1input_1_1FrameID.html#a41738b1fd3548b3e5a22066aed328679":[3,0,7,2,0,9],
+"structutility_1_1input_1_1FrameID.html#a4ec9632c8a2f5c41c0a9caf143d59005":[3,0,7,2,0,24]
 };
