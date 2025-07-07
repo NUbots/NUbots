@@ -195,7 +195,7 @@ namespace module::purpose {
                                                                   cfg.equidistant_threshold,
                                                                   global_config.player_id,
                                                                   ignore_ids);
-                // We it's in the defending third, and we are closest to the ball, defend the goals!
+                // The ball is in the defending third, and we are closest to the ball, defend the goals!
                 if (is_closest && !penalty) {
                     log<DEBUG>("Goalie is attacking.");
                     emit<Task>(std::make_unique<Attack>(ball_pos));

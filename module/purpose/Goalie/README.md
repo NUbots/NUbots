@@ -6,7 +6,7 @@ Play soccer in the goalie position.
 
 In the ready state, walks to the goals.
 
-In the playing state, the goalie will typically stay within the goals unless the ball enters the defending third. In this case, it will either kick it back out (if the closest player) or it will stay between the ball and goals if another played is closer. In penalty states, it will freeze when appropriate and position for attacking if the ball is in the defending third and it is the closest to the ball.
+In the playing state, the goalie will typically stay within the goals unless the ball enters the defending third. In this case, it will either kick it back out (if the closest player) or it will stay between the ball and goals if another player is closer. In penalty states, it will freeze when appropriate and position for attacking if the ball is in the defending third and it is the closest to the ball.
 
 If there are no teammates, it will act as a normal FieldPlayer.
 
