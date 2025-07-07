@@ -65,6 +65,15 @@ namespace module::extension {
             return false;
         }
 
+        // The incumbent's provider has disappeared
+        if (providers.at(incumbent->requester_id) == nullptr) {
+            return true;
+        }
+        // The challenger's provider has disappeared
+        if (providers.at(challenger->requester_id) == nullptr) {
+            return false;
+        }
+
         // A provider of the same group can always replace its own task with a new challenger
         if (providers.at(incumbent->requester_id)->type == providers.at(challenger->requester_id)->type) {
             return true;
