@@ -10,9 +10,9 @@ playback_mode: FAST
 # The below ones are just the most common and here as an example
 messages:
   # Sensors
-  message.platform.RawSensors: true
-  message.output.CompressedImage: false
-  message.input.Image: true
+  message.platform.RawSensors: false
+  message.output.CompressedImage: true
+  message.input.Image: false
   # Vision
   message.vision.Balls: false
   message.vision.Goals: false
