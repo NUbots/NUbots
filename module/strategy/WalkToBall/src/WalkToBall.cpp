@@ -89,26 +89,18 @@ namespace module::strategy {
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
         on<Provide<WalkToBallTask>, With<Ball>, With<Sensors>>().then([this](const Ball& ball, const Sensors& sensors) {
-            // If we have a ball, walk to it
-            if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
-                // Add an offset to account for walking with the foot in front of the ball
-                rBRr.y() += cfg.ball_y_offset;
-                const double heading = std::atan2(rBRr.y(), rBRr.x());
-                auto Hrb             = pos_rpy_to_transform(rBRr, Eigen::Vector3d(0, 0, heading));
-                emit<Task>(std::make_unique<WalkTo>(Hrb));
-            }
+            Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+            // Add an offset to account for walking with the foot in front of the ball
+            rBRr.y() += cfg.ball_y_offset;
+            const double heading = std::atan2(rBRr.y(), rBRr.x());
+            auto Hrb             = pos_rpy_to_transform(rBRr, Eigen::Vector3d(0, 0, heading));
+            emit<Task>(std::make_unique<WalkTo>(Hrb));
         });
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
         on<Provide<WalkToKickBall>, With<Ball>, With<Sensors>, With<Field>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field) {
-                // Skip execution if the ball hasn't been seen recently
-                if (NUClear::clock::now() - ball.time_of_measurement > cfg.ball_search_timeout) {
-                    return;
-                }
-
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -176,11 +168,6 @@ namespace module::strategy {
         // Otherwise it will emit a Task to walk to the ball
         on<Provide<TackleBall>, With<Ball>, With<Sensors>, With<Field>, With<Robots>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field, const Robots& robots) {
-                // Do nothing if we can't see the ball
-                if (NUClear::clock::now() - ball.time_of_measurement > cfg.ball_search_timeout) {
-                    return;
-                }
-
                 // Position of the ball relative to the robot in the robot space
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 // Add an offset to account for walking with the foot in front of the ball
@@ -247,11 +234,6 @@ namespace module::strategy {
         // Walk and stop behind the ball, facing the goal. Avoids walking into the ball.
         on<Provide<PositionBehindBall>, With<Ball>, With<Sensors>, With<Field>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field) {
-                // Skip execution if the ball hasn't been seen recently
-                if (NUClear::clock::now() - ball.time_of_measurement > cfg.ball_search_timeout) {
-                    return;
-                }
-
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
