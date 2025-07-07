@@ -350,26 +350,22 @@ namespace module::planning {
         log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
 
         // Calculate a perpendicular vector to the direction of the target point
-        const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
+        const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
 
-        // Find leftmost and rightmost and see which is a better path
-        Eigen::Vector2d leftmost  = obstacles[0];
-        Eigen::Vector2d rightmost = obstacles[0];
-        for (const auto& pos : obstacles) {
-            leftmost  = pos.dot(perp_direction) < leftmost.dot(perp_direction) ? pos : leftmost;
-            rightmost = pos.dot(perp_direction) > rightmost.dot(perp_direction) ? pos : rightmost;
-        }
+        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
+        auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
 
-        // Add on the obstacle radius
-        leftmost  = leftmost - perp_direction * obstacle_radius;
-        rightmost = rightmost + perp_direction * obstacle_radius;
+        // Most positive and negative projections of the obstacles to find the two candidate target paths.
+        // Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note this can cause us to
+        // slightly clip into the obstacle radius, especially if the obstacle is very close to the target
+        const Eigen::Vector2d left  = *std::ranges::min_element(obstacles, {}, proj) - perp * obstacle_radius;
+        const Eigen::Vector2d right = *std::ranges::max_element(obstacles, {}, proj) + perp * obstacle_radius;
 
-        // Determine if leftmost or rightmost position has a quicker path
-        const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
-        const double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
+        // Total path length by traversing the triangle from the robot->obstacle->original target
+        auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
 
-        // Scale the perpendicular vector by obstacle_radius to ensure clearance
-        return left_distance < right_distance ? leftmost : rightmost;
+        // Take the shorter path
+        return path(left) < path(right) ? left : right;
     }
 
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
