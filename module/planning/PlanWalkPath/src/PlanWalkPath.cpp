@@ -331,10 +331,13 @@ namespace module::planning {
         is_walking_backwards = false;
         log<DEBUG>("[PlanWalkPath::accelerate_to_target] is_walking_backwards set to false, velocity_magnitude = ",
                    velocity_magnitude);
+
         // "Accelerate", assuring velocity is always positive
-        velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
+        velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, cfg.starting_velocity);
+
         // Limit the velocity magnitude to the maximum velocity
         velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
+
         // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
         // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
         const double angle_error_gain =
