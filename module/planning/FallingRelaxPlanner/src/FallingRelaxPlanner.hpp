@@ -180,9 +180,7 @@ namespace module::planning {
                         log<INFO>("Unfalling!");
                         emit(std::make_unique<Stability>(Stability::STANDING));
                     }
-                    else {
-                        log<INFO>("No task");
-                    }
+                    // Else no task emitted
                 });
         }
 
