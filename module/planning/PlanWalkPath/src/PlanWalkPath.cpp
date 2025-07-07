@@ -267,17 +267,20 @@ namespace module::planning {
             int sign = turn_on_spot.clockwise ? -1 : 1;
 
             // Turn on the spot
-            emit<Task>(std::make_unique<WalkProposal>(
-                Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
+            const Eigen::Vector3d turn_vector(cfg.rotate_velocity_x,
+                                              sign * cfg.rotate_velocity_y,
+                                              sign * cfg.rotate_velocity);
+            emit<Task>(std::make_unique<WalkProposal>(turn_vector));
         });
 
         on<Provide<PivotAroundPoint>>().then([this](const PivotAroundPoint& pivot_around_point) {
             // Determine the direction of rotation
             int sign = pivot_around_point.clockwise ? -1 : 1;
             // Turn around the ball
-            emit<Task>(std::make_unique<WalkProposal>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
-                                                                      sign * cfg.pivot_ball_velocity_y,
-                                                                      sign * cfg.pivot_ball_velocity)));
+            const Eigen::Vector3d pivot_vector(cfg.pivot_ball_velocity_x,
+                                               sign * cfg.pivot_ball_velocity_y,
+                                               sign * cfg.pivot_ball_velocity);
+            emit<Task>(std::make_unique<WalkProposal>(pivot_vector));
         });
 
         // Intercept Walk commands and apply smoothing
@@ -294,11 +297,11 @@ namespace module::planning {
             emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
             emit(graph("Walk Smoothing Difference", smooth_diff.x(), smooth_diff.y(), smooth_diff.z()));
 
-            // Forward the smoothed command to the actual Walk skill
-            emit<Task>(std::make_unique<Walk>(smoothed_command));
-
             // Store for next iteration
             previous_walk_command = smoothed_command;
+
+            // Forward the smoothed command to the actual Walk skill
+            emit<Task>(std::make_unique<Walk>(smoothed_command));
         });
     }
 
@@ -388,7 +391,6 @@ namespace module::planning {
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                                    const Eigen::Vector2d& rDRr,
                                                                    double obstacle_radius) {
-        // If there are no obstacles, return an empty group
         if (all_obstacles.empty())
             return {};
 
@@ -413,8 +415,7 @@ namespace module::planning {
         for (const Eigen::Vector2d& obstacle : all_obstacles) {
             // If the obstacle is close to the group, add it to the group
             if (std::ranges::any_of(avoid_obstacles, [&](const Eigen::Vector2d& ao) {
-                    // 3 represents two obstacles and the robot
-                    return (obstacle - ao).norm() < obstacle_radius * 3;
+                    return (obstacle - ao).norm() < obstacle_radius * 3;  // 3 represents two obstacles and the robot
                 })) {
                 avoid_obstacles.push_back(obstacle);
             }
