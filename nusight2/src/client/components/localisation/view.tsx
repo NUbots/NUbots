@@ -132,21 +132,25 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleDashboardVisibility={this.toggleDashboardVisibility}
           ></LocalisationMenuBar>
         </div>
-        <div className="flex-grow relative border-t border-auto">
+
+        <div
+          className={`flex-grow relative border-t border-auto${this.props.model.dashboard.visible ? " hidden" : ""}`}
+        >
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
+          <StatusBar model={this.props.model} />
         </div>
-        <StatusBar model={this.props.model} />
 
         {this.props.model.dashboard.visible && (
-          <Dashboard
+          <DashboardField
             controller={this.props.controller}
             Field={() => <DashboardFieldView model={this.props.model.dashboardField} />}
             model={this.props.model}
-            robots={this.props.model.dashboardRobots}
           />
         )}
+
+        <DashboardPanel model={this.props.model} robots={this.props.model.dashboardRobots} />
       </div>
     );
   }
@@ -456,18 +460,15 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
   </object3D>
 ));
 
-type DashboardProps = {
+type DashboardFieldProps = {
   controller: LocalisationController;
   Field: ComponentType;
   model: LocalisationModel;
-  robots: DashboardRobotModel[];
 };
 
 @observer
-export class Dashboard extends Component<DashboardProps> {
+export class DashboardField extends Component<DashboardFieldProps> {
   render() {
-    const { robots } = this.props;
-    const showPanels = robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
       <div className="flex flex-col w-full h-full">
@@ -478,6 +479,30 @@ export class Dashboard extends Component<DashboardProps> {
             </Button>
             <Field />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  private onToggleOrientationClick = () => {
+    const { controller, model } = this.props;
+    controller.toggleOrientation(model);
+  };
+}
+
+type DashboardPanelProps = {
+  model: LocalisationModel;
+  robots: DashboardRobotModel[];
+};
+
+@observer
+export class DashboardPanel extends Component<DashboardPanelProps> {
+  render() {
+    const { robots } = this.props;
+    const showPanels = robots.some((robot) => robot.enabled);
+    return (
+      <div className="flex flex-col w-full">
+        <div className="flex flex-col flex-1 bg-auto-surface-0 border-t border-auto">
           {showPanels && (
             <div className="flex p-2">
               {robots.map((robot) => {
@@ -508,11 +533,6 @@ export class Dashboard extends Component<DashboardProps> {
       </div>
     );
   }
-
-  private onToggleOrientationClick = () => {
-    const { controller, model } = this.props;
-    controller.toggleOrientation(model);
-  };
 }
 
 export default LocalisationView;
