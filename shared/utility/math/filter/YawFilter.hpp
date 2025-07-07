@@ -95,8 +95,8 @@ namespace utility {
                     predicted_yaw                   = normalise_angle(predicted_yaw);
                     Scalar normalized_kinematic_yaw = normalise_angle(kinematic_yaw);
 
-                    // Complementary filter update
-                    yaw = alpha * normalized_kinematic_yaw + (1 - alpha) * predicted_yaw;
+                    // Complementary filter update with proper angular interpolation
+                    yaw = interpolate_angles(normalized_kinematic_yaw, predicted_yaw, alpha);
                     yaw = normalise_angle(yaw);
 
                     // Store current kinematic yaw for next iteration
@@ -178,6 +178,18 @@ namespace utility {
                 static Scalar normalise_angle(Scalar angle) {
                     angle = std::fmod(angle + M_PI, 2 * M_PI);
                     return angle < 0 ? angle + M_PI : angle - M_PI;
+                }
+
+                /// @brief Interpolate between two angles handling wrapping correctly
+                /// @param angle1 First angle
+                /// @param angle2 Second angle
+                /// @param weight Weight for angle1 (0-1)
+                /// @return Interpolated angle
+                static Scalar interpolate_angles(Scalar angle1, Scalar angle2, Scalar weight) {
+                    // Calculate the angular difference, accounting for wrapping
+                    Scalar diff = normalise_angle(angle1 - angle2);
+                    // Interpolate the difference and add to angle2
+                    return normalise_angle(angle2 + weight * diff);
                 }
             };
 
