@@ -66,9 +66,7 @@ namespace module::strategy {
 
         on<Configuration>("WalkToBall.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToBall.yaml
-            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
-                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
+            this->log_level            = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_y_offset          = config["ball_y_offset"].as<double>();
             cfg.ball_kick_distance     = config["ball_kick_distance"].as<double>();
             cfg.ball_approach_distance = config["ball_approach_distance"].as<double>();
