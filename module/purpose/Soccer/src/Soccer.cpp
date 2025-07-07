@@ -43,7 +43,6 @@
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/FindPurpose.hpp"
-#include "message/purpose/Goalie.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Look.hpp"

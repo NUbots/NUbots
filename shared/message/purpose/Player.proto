@@ -30,6 +30,8 @@ import "message/strategy/Who.proto";
 
 message FieldPlayer {}
 
+message Goalie {}
+
 message Attack {
     strategy.Who ball_pos = 1;
 }
