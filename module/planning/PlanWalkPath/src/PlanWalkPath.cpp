@@ -76,9 +76,9 @@ namespace module::planning {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // WalkTo tuning
-            cfg.max_translational_velocity_x = config["max_translational_velocity_x"].as<double>();
-            cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
-            cfg.max_velocity_magnitude = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
+            cfg.max_x_velocity         = config["max_x_velocity"].as<double>();
+            cfg.max_y_velocity         = config["max_y_velocity"].as<double>();
+            cfg.max_velocity_magnitude = std::max(cfg.max_x_velocity, cfg.max_y_velocity);
             cfg.max_angular_velocity   = config["max_angular_velocity"].as<double>();
             cfg.starting_velocity      = config["starting_velocity"].as<double>();
             cfg.acceleration           = config["acceleration"].as<double>();
@@ -369,19 +369,17 @@ namespace module::planning {
     }
 
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
-        Eigen::Vector2d translational_velocity = v.head<2>();
-        // If either translational component exceeds the limit, scale the vector to fit within the limits
-        if (std::abs(v.x()) >= cfg.max_translational_velocity_x
-            || std::abs(v.y()) >= cfg.max_translational_velocity_y) {
-            double sx = v.x() != 0.0 ? cfg.max_translational_velocity_x / std::abs(v.x()) : 0.0;
-            double sy = v.y() != 0.0 ? cfg.max_translational_velocity_y / std::abs(v.y()) : 0.0;
-            // Select the minimum scale factor to ensure neither limit is exceeded but direction is maintained
-            double s               = std::min(sx, sy);
-            translational_velocity = v.head<2>() * s;
-        }
-        // Ensure the angular velocity is within the limits
-        double angular_velocity = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
-        return Eigen::Vector3d(translational_velocity.x(), translational_velocity.y(), angular_velocity);
+        // Scale factors in each translational axis (∞ if the component is 0)
+        const auto inf = std::numeric_limits<double>::infinity();
+        const auto sx  = v.x() ? cfg.max_x_velocity / std::abs(v.x()) : inf;
+        const auto sy  = v.y() ? cfg.max_y_velocity / std::abs(v.y()) : inf;
+
+        // no scaling (s=1) unless either axis exceeds the limit
+        const auto s = std::min({1.0, sx, sy});
+
+        const auto angular = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
+
+        return {v.x() * s, v.y() * s, angular};
     }
 
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,

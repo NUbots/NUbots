@@ -40,9 +40,9 @@ namespace module::planning {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Maximum walk command velocity x for walking
-            double max_translational_velocity_x = 0.0;
+            double max_x_velocity = 0.0;
             /// @brief Maximum walk command velocity y for walking
-            double max_translational_velocity_y = 0.0;
+            double max_y_velocity = 0.0;
             /// @brief Maximum angular velocity command for walking
             double max_angular_velocity = 0.0;
             /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
