@@ -14,7 +14,7 @@ export const Ball: React.FC<BallProps> = ({ position, scale }) => {
   const ballGeometry = useMemo(() => new THREE.SphereGeometry(1, 32, 32), []);
   const ballMaterial = useMemo(() => new THREE.MeshStandardMaterial({ map: soccerBallTexture }), []);
 
-  return <mesh position={position} scale={[scale, scale, scale]} geometry={ballGeometry} material={ballMaterial} />;
+  return <mesh position={position} scale={[scale, scale, scale]} geometry={ballGeometry} material={ballMaterial} castShadow receiveShadow />;
 };
 
 export default Ball;
