@@ -1,5 +1,6 @@
 var NAVTREEINDEX15 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da543b92e34c15572c974e8ad192da01a2":[3,0,3,8,1,1,0,184],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da54a8c6ae27d2fdc1f27c81ef7b40e023":[3,0,3,8,1,1,0,258],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da5523d309ee6f4029c6316ee67b23b06f":[3,0,3,8,1,1,0,11],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da55b9de5fd215900cfa6d69aec510500d":[3,0,3,8,1,1,0,58],
@@ -248,6 +249,5 @@ var NAVTREEINDEX15 =
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a23244b3976c1c0f6dcaaebb8264fc39a":[3,0,3,8,1,6,1,2],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#acc680091ac55fe93f70a054818767681":[3,0,3,8,1,6,1,4],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#aeb93cb3790ddcfacc3b309d24c9f23d2":[3,0,3,8,1,6,1,0],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html":[3,0,3,8,1,6,2],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html":[3,0,3,8,1,6,3]
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html":[3,0,3,8,1,6,2]
 };

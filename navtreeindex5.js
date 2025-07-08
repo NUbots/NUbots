@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1skill_1_1Look.html#ad4815382bc207e78a06eb1da9a7f1d2a":[3,0,3,10,8,1],
 "classmodule_1_1skill_1_1Look.html#ae4507c170bfa83268598c76bce704b02":[3,0,3,10,8,4],
 "classmodule_1_1skill_1_1Say.html":[3,0,3,10,9],
 "classmodule_1_1skill_1_1Say.html#ab0f9672bb099203f7c78c8edd0641f2f":[3,0,3,10,9,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#a984963856ec7d62600d00a348b58097b":[3,0,3,12,2,9,4],
 "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#aa5b7b219efed0dceb3ed0c3bc1b1fe6e":[3,0,3,12,2,9,1],
 "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#af998e496a01901b0347eb931f18daccd":[3,0,3,12,2,9,2],
-"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html":[3,0,3,12,2,10],
-"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a21f80ee0e7cf6ab05a3551657ad372c3":[3,0,3,12,2,10,11]
+"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html":[3,0,3,12,2,10]
 };

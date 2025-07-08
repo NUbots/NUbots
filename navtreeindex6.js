@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a21f80ee0e7cf6ab05a3551657ad372c3":[3,0,3,12,2,10,11],
 "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2202786952a4b96d2cbf830c80a41cd4":[3,0,3,12,2,10,12],
 "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2c658dd02e8fdbe0447462776a220f7d":[3,0,3,12,2,10,6],
 "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a41eb007734155bf4f77c73442909c8d3":[3,0,3,12,2,10,8],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "classnsga2_1_1NSGA2.html#ac6454d37d2dd3da167072bca1c627cbb":[3,0,4,2,71],
 "classnsga2_1_1NSGA2.html#ac70f0fb651b024d47c2d4ac575bf1c05":[3,0,4,2,28],
 "classnsga2_1_1NSGA2.html#ad16ceb6a3a224c066576b04c453e64ee":[3,0,4,2,65],
-"classnsga2_1_1NSGA2.html#ad2a346fc789da675db87b5dfee401645":[3,0,4,2,47],
-"classnsga2_1_1NSGA2.html#ad4fe63a0e1d1d57518972953ab8f7cd6":[3,0,4,2,10]
+"classnsga2_1_1NSGA2.html#ad2a346fc789da675db87b5dfee401645":[3,0,4,2,47]
 };

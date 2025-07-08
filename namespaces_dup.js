@@ -484,13 +484,7 @@ var namespaces_dup =
         [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ],
         [ "PlanKick", "classmodule_1_1planning_1_1PlanKick.html", "classmodule_1_1planning_1_1PlanKick" ],
         [ "PlanLook", "classmodule_1_1planning_1_1PlanLook.html", "classmodule_1_1planning_1_1PlanLook" ],
-        [ "PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", "classmodule_1_1planning_1_1PlanWalkPath" ],
-        [ "State", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164", [
-          [ "STABLE", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164a32987cdf8a725702042ab18f5c700905", null ],
-          [ "UNSTABLE", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164ad3582680e9ce6bdf2e9791926bd99d5f", null ],
-          [ "FALLING", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164a4f9d4539ac1e11a251e2afe022eba4e6", null ]
-        ] ],
-        [ "smooth", "FallingRelaxPlanner_8cpp.html#a4c6f0a0466f10006eeb81ee3a9759002", null ]
+        [ "PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", "classmodule_1_1planning_1_1PlanWalkPath" ]
       ] ],
       [ "platform", null, [
         [ "NUSense", null, [
