@@ -12,24 +12,18 @@ using Scalar = double;
 namespace utility::vision {
 
     struct Lens {
-        Eigen::Vector4d k;
-        Scalar focal_length;
-        Eigen::Vector2d centre;
+        Eigen::Vector4d k;       // Distortion coefficients
+        Scalar fx;               // Focal length in x
+        Scalar fy;               // Focal length in y
+        Eigen::Vector2d centre;  // Principal point (cx, cy)
     };
 
     Eigen::Vector2d project(const Eigen::Vector3d& ray, const Lens& lens) {
         std::vector<cv::Point3d> objectPoints = {cv::Point3d(ray(0), ray(1), ray(2))};
         std::vector<cv::Point2d> imagePoints;
 
-        cv::Mat K = (cv::Mat_<double>(3, 3) << lens.focal_length,
-                     0,
-                     lens.centre.x(),
-                     0,
-                     lens.focal_length,
-                     lens.centre.y(),
-                     0,
-                     0,
-                     1);
+        cv::Mat K = (cv::Mat_<double>(3, 3) << lens.fx, 0, lens.centre.x(), 0, lens.fy, lens.centre.y(), 0, 0, 1);
+
         cv::Mat D = (cv::Mat_<double>(4, 1) << lens.k(0), lens.k(1), lens.k(2), lens.k(3));
 
         cv::fisheye::projectPoints(objectPoints, imagePoints, cv::Vec3d(0, 0, 0), cv::Vec3d(0, 0, 0), K, D);
@@ -41,15 +35,8 @@ namespace utility::vision {
         std::vector<cv::Point2d> distortedPoints = {cv::Point2d(px(0), px(1))};
         std::vector<cv::Point2d> undistorted;
 
-        cv::Mat K = (cv::Mat_<double>(3, 3) << lens.focal_length,
-                     0,
-                     lens.centre.x(),
-                     0,
-                     lens.focal_length,
-                     lens.centre.y(),
-                     0,
-                     0,
-                     1);
+        cv::Mat K = (cv::Mat_<double>(3, 3) << lens.fx, 0, lens.centre.x(), 0, lens.fy, lens.centre.y(), 0, 0, 1);
+
         cv::Mat D = (cv::Mat_<double>(4, 1) << lens.k(0), lens.k(1), lens.k(2), lens.k(3));
 
         cv::fisheye::undistortPoints(distortedPoints, undistorted, K, D);
@@ -57,6 +44,7 @@ namespace utility::vision {
         Eigen::Vector3d ray(undistorted[0].x, undistorted[0].y, 1.0);
         return ray.normalized();
     }
+
 }  // namespace utility::vision
 
 using utility::vision::Lens;
@@ -99,9 +87,11 @@ SCENARIO("OpenCV fisheye projection is consistent", "[opencv][fisheye][projectio
     WHEN("a 3D ray is projected and unprojected") {
         Lens lens;
         lens.k << -0.04247437, -0.0076668, 0.00308963, -0.00099647;
-        lens.focal_length = 0.3446512345140941 * 1280;  // pixels
-        lens.centre =
-            Eigen::Vector2d(1280 * 0.5 + 0.005418370784106563 * 1280, 1024 * 0.5 - 0.08661520006894258 * 1280);
+        lens.fx     = 0.3446512345140941 * 1280;  // e.g., fx = normalized * width
+        lens.fy     = 0.430567319 * 1024;         // e.g., fy = normalized * height
+        lens.centre = Eigen::Vector2d(1280 * 0.5 + 0.005418370784106563 * 1280,
+                                      1024 * 0.5 - 0.08661520006894258 * 1280);  // keep X offset scaling with width
+
         THEN("the round-trip error is small") {
             run_round_trip<Scalar>(lens);
         }
