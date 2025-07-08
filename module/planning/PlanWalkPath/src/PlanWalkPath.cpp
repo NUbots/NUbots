@@ -195,28 +195,28 @@ namespace module::planning {
                 // Calculate the translational error between the robot and the target point (x, y)
                 const double translational_error = rDRr.norm();
 
+                // Computes a clamped progress [0,1] based on an error value and its min/max thresholds
+                auto prog = [&](auto error, auto lo, auto hi) {
+                    return std::clamp((hi - std::abs(error)) / (hi - lo), 0.0, 1.0);
+                };
+
+                // Linearly interpolates between start and end by t ∈ [0,1]
+                auto lerp = [&](auto start, auto end, auto t) { return start + (end - start) * t; };
+
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
                     // Scale by angle error so we rotate on the spot when far away and not facing target
-                    // [0 at max_angle_error, 1 at min_angle_error]
-                    const double angle_error_gain = std::clamp(
-                        (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
-                        0.0,
-                        1.0);
+                    const double angle_error_gain = prog(desired_heading, cfg.min_angle_error, cfg.max_angle_error);
                     desired_magnitude *= angle_error_gain;
                 }
                 else {
                     // Interpolate between the full velocity and the strafe velocity based on the translational error
-                    // [0 at max_align_radius, 1 at target]
-                    const double approach_progress = 1.0 - (translational_error / cfg.max_align_radius);
-                    desired_magnitude *= ((1.0 - approach_progress) * 1.0) + (approach_progress * cfg.strafe_gain);
+                    const double approach_progress = prog(translational_error, 0.0, cfg.max_align_radius);
+                    desired_magnitude *= lerp(1.0, cfg.strafe_gain, approach_progress);
 
                     // Interpolate between angle to the target and desired heading when inside the alignment region
-                    // [0 at max_align_radius, 1 at min_align_radius]
-                    const double align_progress =
-                        (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius);
-                    desired_heading =
-                        ((1.0 - align_progress) * angle_to_target) + (align_progress * angle_to_final_heading);
+                    const double align_progress = prog(translational_error, cfg.min_align_radius, cfg.max_align_radius);
+                    desired_heading             = lerp(angle_to_target, angle_to_final_heading, align_progress);
                 }
 
                 // Scale velocity when we have the ball and there are nearby obstacles
