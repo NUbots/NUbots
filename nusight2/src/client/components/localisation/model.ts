@@ -125,7 +125,7 @@ export class LocalisationModel {
   @observable particlesVisible = true;
   @observable goalsVisible = true;
   @observable fieldLinePointsVisible = true;
-  @observable fieldIntersectionsVisible = true;
+  @observable fieldIntersectionsVisible = false;
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
 
