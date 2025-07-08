@@ -33,9 +33,9 @@
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Robot.hpp"
-#include "message/vision/Robot.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
+#include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -50,7 +50,7 @@ namespace module::localisation {
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
     using PenaltyState       = message::input::State;
-    using GroundTruthRobots   = message::platform::webots::RobotsGroundTruth;
+    using GroundTruthRobots  = message::platform::webots::RobotsGroundTruth;
 
     using message::eye::DataPoint;
     using message::input::GameState;
@@ -71,23 +71,24 @@ namespace module::localisation {
 
         on<Configuration, Trigger<GlobalConfig>>("RobotLocalisation.yaml")
             .then([this](const Configuration& config, const GlobalConfig& global_config) {
-            // Use configuration here from file RobotLocalisation.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+                // Use configuration here from file RobotLocalisation.yaml
+                this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Set our UKF filter parameters
-            cfg.ukf.noise.measurement.position =
-                Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["robot_position"].as<Expression>()).asDiagonal();
-            cfg.ukf.noise.process.position      = config["ukf"]["noise"]["process"]["position"].as<Expression>();
-            cfg.ukf.noise.process.velocity      = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
-            cfg.ukf.initial_covariance.position = config["ukf"]["initial_covariance"]["position"].as<Expression>();
-            cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
-            cfg.association_distance            = config["association_distance"].as<double>();
-            cfg.max_missed_count                = config["max_missed_count"].as<int>();
-            cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
-            cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
-            cfg.use_ground_truth                = config["use_ground_truth"].as<bool>();
-            cfg.player_id                       = global_config.player_id;
-        });
+                // Set our UKF filter parameters
+                cfg.ukf.noise.measurement.position =
+                    Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["robot_position"].as<Expression>())
+                        .asDiagonal();
+                cfg.ukf.noise.process.position      = config["ukf"]["noise"]["process"]["position"].as<Expression>();
+                cfg.ukf.noise.process.velocity      = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
+                cfg.ukf.initial_covariance.position = config["ukf"]["initial_covariance"]["position"].as<Expression>();
+                cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
+                cfg.association_distance            = config["association_distance"].as<double>();
+                cfg.max_missed_count                = config["max_missed_count"].as<int>();
+                cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
+                cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
+                cfg.use_ground_truth                = config["use_ground_truth"].as<bool>();
+                cfg.player_id                       = global_config.player_id;
+            });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
            With<GreenHorizon>,
@@ -96,7 +97,11 @@ namespace module::localisation {
            Optional<With<GroundTruthRobots>>,
            With<GlobalConfig>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc, const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth, const GlobalConfig& global_config) {
+            .then([this](const GreenHorizon& horizon,
+                         const Field& field,
+                         const FieldDescription& field_desc,
+                         const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth,
+                         const GlobalConfig& global_config) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -106,20 +111,24 @@ namespace module::localisation {
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
 
-                    // Check if we have ground truth robot data from Webots
-                    if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
+                // Check if we have ground truth robot data from Webots
+                if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
                     log<DEBUG>("Using ground truth for localisation.");
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : robots_ground_truth->robots) {
                         // Skip our own robot using GlobalConfig player_id
                         // TODO: I don't think we should be hardcoding the team lol
-                        if (!(gt_robot.player_number == static_cast<int32_t>(cfg.player_id)) || gt_robot.team != "BLUE") {
+                        if (!(gt_robot.player_number == static_cast<int32_t>(cfg.player_id))
+                            || gt_robot.team != "BLUE") {
                             log<DEBUG>("Ground truth robot: ", gt_robot.robot_id, " at position: ", gt_robot.rRWw);
                             LocalisationRobot localisation_robot;
-                            localisation_robot.id = std::stoi(gt_robot.robot_id.substr(gt_robot.robot_id.find_last_of('_') + 1)); // Extract number from "RED_1"
-                            localisation_robot.rRWw = Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
-                            localisation_robot.vRw = Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
-                            localisation_robot.covariance = Eigen::Matrix4d::Zero(); // Ground truth has no uncertainty
+                            localisation_robot.id = std::stoi(gt_robot.robot_id.substr(
+                                gt_robot.robot_id.find_last_of('_') + 1));  // Extract number from "RED_1"
+                            localisation_robot.rRWw =
+                                Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
+                            localisation_robot.vRw =
+                                Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
+                            localisation_robot.covariance = Eigen::Matrix4d::Zero();  // Ground truth has no uncertainty
                             localisation_robot.time_of_measurement = horizon.timestamp;
 
                             // Set purpose information
@@ -128,7 +137,8 @@ namespace module::localisation {
                             localisation_robots->robots.push_back(localisation_robot);
                         }
                     }
-                } else {
+                }
+                else {
                     log<DEBUG>("Using UKF-based tracking for localisation.");
                     // Fall back to UKF-based tracking
                     for (const auto& tracked_robot : tracked_robots) {
