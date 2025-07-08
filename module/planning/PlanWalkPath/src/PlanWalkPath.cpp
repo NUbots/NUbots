@@ -187,45 +187,36 @@ namespace module::planning {
                         !all_obstacles.empty() && all_obstacles.front().norm() < obstacle_radius * 1.5;
                 }
 
-                // Desired velocity magnitude and heading
-                double desired_magnitude, desired_heading = angle_to_target;
+                // Straight to max magnitude, smoother handles ramping up
+                double desired_magnitude = cfg.max_velocity_magnitude;
+                // Face toward the target by default
+                double desired_heading = angle_to_target;
 
                 // Calculate the translational error between the robot and the target point (x, y)
                 const double translational_error = rDRr.norm();
 
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
-                    desired_magnitude = accelerate_to_target(desired_heading);
+                    // Scale by angle error so we rotate on the spot when far away and not facing target
+                    // [0 at max_angle_error, 1 at min_angle_error]
+                    const double angle_error_gain = std::clamp(
+                        (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
+                        0.0,
+                        1.0);
+                    desired_magnitude *= angle_error_gain;
                 }
                 else {
-                    // Add a buffer to prevent oscillation between forwards and backwards movement
-                    const double max_strafe_angle =
-                        is_walking_backwards ? cfg.max_strafe_angle - cfg.backward_buffer : cfg.max_strafe_angle;
+                    // Interpolate between the full velocity and the strafe velocity based on the translational error
+                    // [0 at max_align_radius, 1 at target]
+                    const double approach_progress = 1.0 - (translational_error / cfg.max_align_radius);
+                    desired_magnitude *= ((1.0 - approach_progress) * 1.0) + (approach_progress * cfg.strafe_gain);
 
-                    const bool heading_aligned    = std::abs(angle_to_final_heading) < cfg.max_aligned_angle;
-                    const bool large_strafe_angle = std::abs(angle_to_target) > max_strafe_angle;
-
-                    // If we're aligned with the final heading, but the target angle is larger than we can strafe, then
-                    // walk backwards first
-                    if (heading_aligned && large_strafe_angle) {
-                        rDRr              = walk_backwards();
-                        desired_magnitude = velocity_magnitude;
-                        desired_heading   = 0.0;
-                    }
-                    // Otherwise align ourselves with the target
-                    else {
-                        // What fraction through the alignment region we are
-                        const double align_progress = std::clamp((cfg.max_align_radius - translational_error)
-                                                                     / (cfg.max_align_radius - cfg.min_align_radius),
-                                                                 0.0,
-                                                                 1.0);
-                        // What fraction to the target we are
-                        const double strafe_error = translational_error / cfg.max_align_radius;
-                        desired_magnitude         = strafe_to_target(strafe_error);
-                        // Interpolate between angle to the target and desired heading when inside the alignment region
-                        desired_heading =
-                            (1.0 - align_progress) * angle_to_target + align_progress * angle_to_final_heading;
-                    }
+                    // Interpolate between angle to the target and desired heading when inside the alignment region
+                    // [0 at max_align_radius, 1 at min_align_radius]
+                    const double align_progress =
+                        (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius);
+                    desired_heading =
+                        ((1.0 - align_progress) * angle_to_target) + (align_progress * angle_to_final_heading);
                 }
 
                 // Scale velocity when we have the ball and there are nearby obstacles
@@ -303,51 +294,6 @@ namespace module::planning {
             // Forward the smoothed command to the actual Walk skill
             emit<Task>(std::make_unique<Walk>(smoothed_command));
         });
-    }
-
-    double PlanWalkPath::strafe_to_target(const double error) {
-        // If we are walking backwards, change direction
-        is_walking_backwards = false;
-        log<DEBUG>("[PlanWalkPath::strafe_to_target] is_walking_backwards set to false, velocity_magnitude = ",
-                   velocity_magnitude);
-        // "Accelerate", assuring velocity is always positive
-        velocity_magnitude = std::max(velocity_magnitude, cfg.starting_velocity);
-        // "Proportional control" to strafe towards the target inside align radius
-        return cfg.strafe_gain * error;
-    }
-
-    Eigen::Vector2d PlanWalkPath::walk_backwards() {
-        // Set flag so that we have a backwards buffer
-        is_walking_backwards = true;
-        log<DEBUG>("[PlanWalkPath::walk_backwards] is_walking_backwards set to true, velocity_magnitude = ",
-                   velocity_magnitude);
-
-        // Walk on spot, then walk backwards
-        velocity_magnitude += std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
-
-        // Step backwards while keeping the forward direction
-        return cfg.backwards_vector;
-    }
-
-    double PlanWalkPath::accelerate_to_target(double desired_heading) {
-        // If we are walking backwards, change direction
-        is_walking_backwards = false;
-        log<DEBUG>("[PlanWalkPath::accelerate_to_target] is_walking_backwards set to false, velocity_magnitude = ",
-                   velocity_magnitude);
-
-        // "Accelerate", assuring velocity is always positive
-        velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, cfg.starting_velocity);
-
-        // Limit the velocity magnitude to the maximum velocity
-        velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
-
-        // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
-        // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
-        const double angle_error_gain =
-            std::clamp((cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
-                       0.0,
-                       1.0);
-        return angle_error_gain * velocity_magnitude;
     }
 
     Eigen::Vector2d PlanWalkPath::adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
