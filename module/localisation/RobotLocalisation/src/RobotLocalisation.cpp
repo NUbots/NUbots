@@ -35,6 +35,7 @@
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 #include "message/platform/webots/messages.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -58,6 +59,7 @@ namespace module::localisation {
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::support::FieldDescription;
+    using message::support::GlobalConfig;
     using message::vision::GreenHorizon;
 
     using utility::math::geometry::point_in_convex_hull;
@@ -67,7 +69,8 @@ namespace module::localisation {
     RobotLocalisation::RobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("RobotLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration, Trigger<GlobalConfig>>("RobotLocalisation.yaml")
+            .then([this](const Configuration& config, const GlobalConfig& global_config) {
             // Use configuration here from file RobotLocalisation.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -83,6 +86,7 @@ namespace module::localisation {
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
             cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
             cfg.use_ground_truth                = config["use_ground_truth"].as<bool>();
+            cfg.player_id                       = global_config.player_id;
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -90,8 +94,9 @@ namespace module::localisation {
            With<Field>,
            With<FieldDescription>,
            Optional<With<GroundTruthRobots>>,
+           With<GlobalConfig>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc, const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth) {
+            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc, const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth, const GlobalConfig& global_config) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -101,26 +106,27 @@ namespace module::localisation {
                 // **Emit the localisation of the robots**
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
 
-                // Check if we have ground truth robot data from Webots
-                if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
+                    // Check if we have ground truth robot data from Webots
+                    if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
                     log<DEBUG>("Using ground truth for localisation.");
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : robots_ground_truth->robots) {
-                        LocalisationRobot localisation_robot;
-                        localisation_robot.id = std::stoi(gt_robot.robot_id.substr(gt_robot.robot_id.find_last_of('_') + 1)); // Extract number from "RED_1"
-                        localisation_robot.rRWw = Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
-                        localisation_robot.vRw = Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
-                        localisation_robot.covariance = Eigen::Matrix4d::Zero(); // Ground truth has no uncertainty
-                        localisation_robot.time_of_measurement = horizon.timestamp;
+                        // Skip our own robot using GlobalConfig player_id
+                        // TODO: I don't think we should be hardcoding the team lol
+                        if (!(gt_robot.player_number == static_cast<int32_t>(cfg.player_id)) || gt_robot.team != "BLUE") {
+                            log<DEBUG>("Ground truth robot: ", gt_robot.robot_id, " at position: ", gt_robot.rRWw);
+                            LocalisationRobot localisation_robot;
+                            localisation_robot.id = std::stoi(gt_robot.robot_id.substr(gt_robot.robot_id.find_last_of('_') + 1)); // Extract number from "RED_1"
+                            localisation_robot.rRWw = Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
+                            localisation_robot.vRw = Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
+                            localisation_robot.covariance = Eigen::Matrix4d::Zero(); // Ground truth has no uncertainty
+                            localisation_robot.time_of_measurement = horizon.timestamp;
 
-                        // Determine if teammate based on team color
-                        // TODO: no.
-                        localisation_robot.teammate = (gt_robot.team == "BLUE"); // Assume we're blue team
-
-                        // Set purpose information
-                        localisation_robot.purpose.player_id = gt_robot.player_number;
-                        // Could set other purpose fields if needed
-                        localisation_robots->robots.push_back(localisation_robot);
+                            // Set purpose information
+                            localisation_robot.purpose.player_id = gt_robot.player_number;
+                            // Could set other purpose fields if needed
+                            localisation_robots->robots.push_back(localisation_robot);
+                        }
                     }
                 } else {
                     log<DEBUG>("Using UKF-based tracking for localisation.");
