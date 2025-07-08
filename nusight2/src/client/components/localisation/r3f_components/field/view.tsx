@@ -19,7 +19,7 @@ export class FieldView extends React.Component<{
     const dim = this.model.dimensions;
     return (
       <object3D>
-        <mesh>
+        <mesh receiveShadow>
           <planeGeometry
             args={[
               dim.fieldLength + dim.goalDepth * 2 + dim.borderStripMinWidth * 2,

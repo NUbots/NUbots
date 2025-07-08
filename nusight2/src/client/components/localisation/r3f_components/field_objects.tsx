@@ -37,6 +37,8 @@ export const FieldObjects: React.FC<FieldObjectProps> = ({
             position={position.toArray()}
             rotation={[Math.PI / 2, 0, 0]}
             scale={[radius, height, radius]}
+            castShadow
+            receiveShadow
           >
             <primitive object={geometry} />
             <meshStandardMaterial color={color} />

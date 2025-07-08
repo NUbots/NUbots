@@ -448,10 +448,44 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
       rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
       up={[0, 0, 1]}
     >
-      <pointLight color="white" />
+      {/* Removed the pointLight that was causing the flashlight effect */}
     </PerspectiveCamera>
     <SkyboxView model={model.skybox} />
-    <hemisphereLight args={["#fff", "#fff", 0.6]} />
+
+    {/* Main directional light matching the skybox sun position */}
+    <directionalLight
+      position={[
+        model.skybox.inclination * 10 - 5,
+        model.skybox.azimuth * 10 - 5,
+        Math.max(2, model.skybox.inclination * 8)
+      ]}
+      intensity={1.2}
+      color="#ffffff"
+      castShadow
+      shadow-mapSize-width={2048}
+      shadow-mapSize-height={2048}
+      shadow-camera-far={20}
+      shadow-camera-left={-10}
+      shadow-camera-right={10}
+      shadow-camera-top={10}
+      shadow-camera-bottom={-10}
+    />
+
+    {/* Hemisphere light for ambient lighting */}
+    <hemisphereLight
+      args={["#87CEEB", "#DEB887", 0.7]}
+      position={[0, 0, 10]}
+    />
+
+    {/* Increased ambient light to ensure consistent illumination throughout the scene */}
+    <ambientLight intensity={0.7} color="#ffffff" />
+
+    {/* Fill light from the opposite direction for better depth */}
+    <directionalLight
+      position={[5, 5, 3]}
+      intensity={0.4}
+      color="#ffffff"
+    />
 
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
