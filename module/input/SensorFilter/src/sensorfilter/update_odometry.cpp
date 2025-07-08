@@ -63,9 +63,10 @@ namespace module::input {
             sensors->Htw = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
             // Construct robot {r} to world {w} space transform from ground truth
             Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-            Hwr.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(sensors->Htw.linear()).z(), Eigen::Vector3d::UnitZ())
-                               .toRotationMatrix();
-            Hwr.translation() = Eigen::Vector3d(sensors->Htw.translation().x(), sensors->Htw.translation().y(), 0.0);
+            auto Hwt              = sensors->Htw.inverse();
+            Hwr.linear() =
+                Eigen::AngleAxisd(mat_to_rpy_intrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            Hwr.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
             sensors->Hrw      = Hwr.inverse();
             sensors->vTw      = Eigen::Vector3d(robot_pose_ground_truth->vTf);
             return;
@@ -136,7 +137,6 @@ namespace module::input {
 
         // Extract yaw from kinematic estimate
         const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_anchor.linear()).z();
-        emit(graph("Kinematic Yaw", kinematic_yaw));
 
         // Fuse yaw estimates using yaw filter
         const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);

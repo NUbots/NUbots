@@ -10,12 +10,12 @@ interface WalkPathVisualiserProps {
   Hfd: Matrix4;
   Hfr: Matrix4;
   Hft: Matrix4;
-  min_align_radius: number;
-  max_align_radius: number;
-  min_angle_error: number;
-  max_angle_error: number;
-  angle_to_final_heading: number;
-  velocity_target: Vector3;
+  minAlignRadius: number;
+  maxAlignRadius: number;
+  minAngleError: number;
+  maxAngleError: number;
+  angleToFinalHeading: number;
+  velocityTarget: Vector3;
 }
 
 export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
@@ -23,12 +23,12 @@ export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
     Hfd: hfd,
     Hfr: hfr,
     Hft: hft,
-    min_align_radius,
-    max_align_radius,
-    min_angle_error,
-    max_angle_error,
-    angle_to_final_heading,
-    velocity_target,
+    minAlignRadius,
+    maxAlignRadius,
+    minAngleError,
+    maxAngleError,
+    angleToFinalHeading,
+    velocityTarget,
   } = props;
 
   if (!hfd || !hfr) {
@@ -46,7 +46,7 @@ export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
     hfr.decompose().rotation.z,
     hfr.decompose().rotation.w,
   );
-  const vRf = velocity_target.toThree().applyQuaternion(Rfr);
+  const vRf = velocityTarget.toThree().applyQuaternion(Rfr);
 
   const velocity_direction = Math.atan2(vRf.y, vRf.x);
   const speed = Math.sqrt(vRf.x ** 2 + vRf.y ** 2) * 1.5;
@@ -54,23 +54,23 @@ export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
   return (
     <object3D>
       <mesh position={[rDFf?.x, rDFf?.y, 0.005]}>
-        <circleGeometry args={[min_align_radius, 40]} />
+        <circleGeometry args={[minAlignRadius, 40]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rDFf?.x, rDFf?.y, 0.006]}>
-        <circleGeometry args={[max_align_radius, 40]} />
+        <circleGeometry args={[maxAlignRadius, 40]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
-      <mesh position={[rTFf?.x, rTFf?.y, 0.007]} rotation={[0, 0, target_rotation.z - 0.5 * min_angle_error]}>
-        <circleGeometry args={[max_align_radius, 40, 0, min_angle_error]} />
+      <mesh position={[rTFf?.x, rTFf?.y, 0.007]} rotation={[0, 0, target_rotation.z - 0.5 * minAngleError]}>
+        <circleGeometry args={[maxAlignRadius, 40, 0, minAngleError]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
-      <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * max_angle_error]}>
-        <circleGeometry args={[max_align_radius, 40, 0, max_angle_error]} />
+      <mesh position={[rTFf?.x, rTFf?.y, 0.008]} rotation={[0, 0, target_rotation.z - 0.5 * maxAngleError]}>
+        <circleGeometry args={[maxAlignRadius, 40, 0, maxAngleError]} />
         <meshBasicMaterial color="rgb(0, 100, 100)" opacity={0.25} transparent={true} />
       </mesh>
       <mesh position={[rTFf?.x, rTFf?.y, 0.009]}>
-        <mesh geometry={ArrowGeometry(max_align_radius)} rotation={[0, 0, robot_rotation.z]}>
+        <mesh geometry={ArrowGeometry(maxAlignRadius)} rotation={[0, 0, robot_rotation.z]}>
           <meshBasicMaterial color="rgb(255, 255, 255)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>
@@ -80,7 +80,7 @@ export const WalkPathVisualiser = (props: WalkPathVisualiserProps) => {
         </mesh>
       </mesh>
       <mesh position={[rDFf?.x, rDFf?.y, 0.011]}>
-        <mesh geometry={ArrowGeometry(min_align_radius)} rotation={[0, 0, robot_rotation.z + angle_to_final_heading]}>
+        <mesh geometry={ArrowGeometry(minAlignRadius)} rotation={[0, 0, robot_rotation.z + angleToFinalHeading]}>
           <meshBasicMaterial color="rgb(255, 0, 0)" opacity={0.5} transparent={true} />
         </mesh>
       </mesh>

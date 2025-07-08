@@ -54,50 +54,61 @@ namespace utility {
                 /// @brief Estimated gyroscope bias
                 Scalar bias = 0.0;
 
-                /// @brief Whether the filter has been initialized
-                bool initialized = false;
+                /// @brief Whether the filter has been initialised
+                bool initialised = false;
 
                 /// @brief Previous kinematic yaw for bias estimation
                 Scalar previous_kinematic_yaw = 0.0;
 
+                /// @brief Maximum allowed bias
+                Scalar max_bias = std::numeric_limits<Scalar>::infinity();
+
             public:
                 /// @brief Constructor
-                YawFilter(const Scalar alpha = 0.1, const Scalar beta = 0.01) : alpha(alpha), beta(beta) {}
+                YawFilter(const Scalar alpha    = 0.0,
+                          const Scalar beta     = 0.0,
+                          const Scalar max_bias = std::numeric_limits<Scalar>::infinity())
+                    : alpha(alpha), beta(beta), max_bias(max_bias) {}
+
                 /// @brief Update the filter with gyroscope measurement and kinematic measurement
                 /// @param gyro_z Z-axis gyroscope measurement (yaw rate)
                 /// @param kinematic_yaw Yaw measurement from kinematics
                 /// @param dt Time step
                 /// @return Fused yaw estimate
                 Scalar update(const Scalar gyro_z, const Scalar kinematic_yaw, const Scalar dt) {
-                    if (!initialized) {
+                    if (!initialised) {
                         yaw                    = kinematic_yaw;
                         bias                   = 0.0;
                         previous_kinematic_yaw = kinematic_yaw;
-                        initialized            = true;
+                        initialised            = true;
                         return yaw;
                     }
 
                     // Calculate actual kinematic rate (change in kinematic yaw)
-                    Scalar kinematic_rate = normalize_angle(kinematic_yaw - previous_kinematic_yaw) / dt;
+                    Scalar kinematic_rate = normalise_angle(kinematic_yaw - previous_kinematic_yaw) / dt;
 
                     // Update bias estimate: gyro should match kinematic rate when both are accurate
                     // The bias is the persistent error between gyro and actual rate
                     Scalar rate_error = (gyro_z - bias) - kinematic_rate;
                     bias += beta * rate_error;
+                    bias = std::clamp(bias, -max_bias, max_bias);
 
                     // Remove bias from gyroscope measurement
                     Scalar corrected_gyro = gyro_z - bias;
 
                     // Predict yaw using bias-corrected gyroscope integration
-                    Scalar predicted_yaw = yaw + corrected_gyro * dt;
+                    Scalar predicted_gyro_yaw = yaw + corrected_gyro * dt;
+
+                    // Predict kinematic yaw using difference
+                    Scalar predicted_kinematic_yaw = yaw + (kinematic_yaw - previous_kinematic_yaw);
 
                     // Normalize angles to [-pi, pi]
-                    predicted_yaw                   = normalize_angle(predicted_yaw);
-                    Scalar normalized_kinematic_yaw = normalize_angle(kinematic_yaw);
+                    Scalar normalised_predicted_gyro_yaw      = normalise_angle(predicted_gyro_yaw);
+                    Scalar normalised_predicted_kinematic_yaw = normalise_angle(predicted_kinematic_yaw);
 
-                    // Complementary filter update
-                    yaw = alpha * normalized_kinematic_yaw + (1 - alpha) * predicted_yaw;
-                    yaw = normalize_angle(yaw);
+                    // Complementary filter update with proper angular interpolation
+                    yaw = interpolate_angles(normalised_predicted_kinematic_yaw, normalised_predicted_gyro_yaw, alpha);
+                    yaw = normalise_angle(yaw);
 
                     // Store current kinematic yaw for next iteration
                     previous_kinematic_yaw = kinematic_yaw;
@@ -110,7 +121,7 @@ namespace utility {
                 /// @param dt Time step
                 /// @return Predicted yaw estimate
                 Scalar update_gyro_only(const Scalar gyro_z, const Scalar dt) {
-                    if (!initialized) {
+                    if (!initialised) {
                         return 0.0;
                     }
 
@@ -119,7 +130,7 @@ namespace utility {
 
                     // Predict yaw using bias-corrected gyroscope integration only
                     yaw = yaw + corrected_gyro * dt;
-                    yaw = normalize_angle(yaw);
+                    yaw = normalise_angle(yaw);
 
                     return yaw;
                 }
@@ -134,50 +145,31 @@ namespace utility {
                     return bias;
                 }
 
-                /// @brief Set the current yaw estimate
-                void set_yaw(const Scalar new_yaw) {
-                    yaw         = normalize_angle(new_yaw);
-                    initialized = true;
-                }
-
-                /// @brief Set the current bias estimate
-                void set_bias(const Scalar new_bias) {
-                    bias = new_bias;
-                }
-
-                /// @brief Set the complementary filter coefficient
-                void set_alpha(const Scalar new_alpha) {
-                    alpha = std::clamp(new_alpha, Scalar(0.0), Scalar(1.0));
-                }
-
-                /// @brief Set the bias learning rate
-                void set_beta(const Scalar new_beta) {
-                    beta = std::clamp(new_beta, Scalar(0.0), Scalar(1.0));
-                }
-
-                /// @brief Get the complementary filter coefficient
-                Scalar get_alpha() const {
-                    return alpha;
-                }
-
-                /// @brief Get the bias learning rate
-                Scalar get_beta() const {
-                    return beta;
-                }
-
                 /// @brief Reset the filter
                 void reset() {
                     yaw                    = 0.0;
                     bias                   = 0.0;
                     previous_kinematic_yaw = 0.0;
-                    initialized            = false;
+                    initialised            = false;
                 }
 
             private:
                 /// @brief Efficient angle normalization to [-pi, pi]
-                static Scalar normalize_angle(Scalar angle) {
+                static Scalar normalise_angle(Scalar angle) {
                     angle = std::fmod(angle + M_PI, 2 * M_PI);
                     return angle < 0 ? angle + M_PI : angle - M_PI;
+                }
+
+                /// @brief Interpolate between two angles handling wrapping correctly
+                /// @param angle1 First angle
+                /// @param angle2 Second angle
+                /// @param weight Weight for angle1 (0-1)
+                /// @return Interpolated angle
+                static Scalar interpolate_angles(Scalar angle1, Scalar angle2, Scalar weight) {
+                    // Calculate the angular difference, accounting for wrapping
+                    Scalar diff = normalise_angle(angle1 - angle2);
+                    // Interpolate the difference and add to angle2
+                    return normalise_angle(angle2 + weight * diff);
                 }
             };
 
