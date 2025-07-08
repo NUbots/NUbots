@@ -69,7 +69,8 @@ namespace module::input {
 
             // Configure the yaw filter
             yaw_filter = YawFilter<double>(config["yaw_filter"]["alpha"].as<Expression>(),
-                                           config["yaw_filter"]["beta"].as<Expression>());
+                                           config["yaw_filter"]["beta"].as<Expression>(),
+                                           config["yaw_filter"]["max_bias"].as<Expression>());
 
             // Velocity filter config
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();

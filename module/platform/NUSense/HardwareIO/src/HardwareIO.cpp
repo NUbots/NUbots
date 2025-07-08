@@ -289,28 +289,32 @@ namespace module::platform::NUSense {
         });
 
         // Sync is used because uart write is a shared resource
-        servo_targets_catcher =
-            on<Trigger<ServoTargets>, With<ServoOffsets>, With<NUSense>, Sync<HardwareIO>>()
-                .then([this](const ServoTargets& commands, const ServoOffsets& offsets) {
-                    // Copy the data into a new message so we can use a duration instead of a timepoint
-                    // and take the offsets and switch the direction.
-                    auto servo_targets = SubcontrollerServoTargets();
+        servo_targets_catcher = on<Trigger<ServoTargets>, With<ServoOffsets>, With<NUSense>, Sync<HardwareIO>>()
+                                    .then([this](const ServoTargets& commands, const ServoOffsets& offsets) {
+                                        // Copy the data into a new message so we can use a duration instead of a
+                                        // timepoint and take the offsets and switch the direction.
+                                        auto servo_targets = SubcontrollerServoTargets();
 
-                    // Change the timestamp in servo targets to the difference between the timestamp and now
-                    // Take away the offset and switch the direction if needed
-                    for (auto& target : commands.targets) {
-                        servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
-                                                           target.id,
-                                                           (target.position - offsets.offsets[target.id].offset)
-                                                               * offsets.offsets[target.id].direction,
-                                                           target.gain,
-                                                           target.torque);
-                    }
+                                        // Change the timestamp in servo targets to the difference between the timestamp
+                                        // and now Take away the offset and switch the direction if needed
+                                        for (auto& target : commands.targets) {
+                                            bool is_nan = std::isnan(target.position) || std::isnan(target.gain)
+                                                          || std::isnan(target.torque);
 
-                    send_packet(servo_targets);
-                    log<DEBUG>("Sent a ServoTargets message to NUSense.");
-                })
-                .disable();
+                                            servo_targets.targets.emplace_back(
+                                                target.time - NUClear::clock::now(),
+                                                target.id,
+                                                is_nan ? 0.0
+                                                       : (target.position - offsets.offsets[target.id].offset)
+                                                             * offsets.offsets[target.id].direction,
+                                                is_nan ? 0.0 : target.gain,
+                                                is_nan ? 0 : target.torque);
+                                        }
+
+                                        send_packet(servo_targets);
+                                        log<DEBUG>("Sent a ServoTargets message to NUSense.");
+                                    })
+                                    .disable();
     }
 
 }  // namespace module::platform::NUSense
