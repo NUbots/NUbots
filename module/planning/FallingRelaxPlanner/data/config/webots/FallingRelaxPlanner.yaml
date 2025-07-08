@@ -33,4 +33,4 @@ accelerometer_angle:
   # The angle of the accelerometer (from upright 0) at which the robot is considered falling
   falling: 45 * pi / 180.0
 
-fall_script: Relax.yaml
+fall_script: Stand.yaml

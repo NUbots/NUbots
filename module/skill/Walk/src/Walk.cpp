@@ -132,10 +132,10 @@ namespace module::skill {
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
-           Needs<ControlLeftFoot>,
-           Needs<ControlRightFoot>,
            With<Sensors>,
            With<Stability>,
+           Needs<LeftLegIK>,
+           Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
            Priority::HIGH>()
@@ -192,7 +192,7 @@ namespace module::skill {
                 }
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
-                if (stability != Stability::FALLEN) {
+                if (stability >= Stability::DYNAMIC) {
                     switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase).value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:

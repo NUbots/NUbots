@@ -76,8 +76,6 @@ namespace module::actuation {
     using message::actuation::RightLegSequence;
     using message::actuation::RightShoulderPitch;
     using message::actuation::RightShoulderRoll;
-    using message::actuation::UpperBody;
-    using message::actuation::UpperBodySequence;
     using utility::input::ServoID;
 
     Servos::Servos(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -144,15 +142,6 @@ namespace module::actuation {
                            LeftElbow,
                            HeadYaw,
                            HeadPitch>();
-        add_group_provider<UpperBody,
-                           RightShoulderPitch,
-                           RightShoulderRoll,
-                           RightElbow,
-                           LeftShoulderPitch,
-                           LeftShoulderRoll,
-                           LeftElbow,
-                           HeadYaw,
-                           HeadPitch>();
         add_group_provider<Limbs,
                            LeftHipYaw,
                            LeftHipRoll,
@@ -195,7 +184,6 @@ namespace module::actuation {
 
         // Sequences of servos
         add_sequence_provider<BodySequence, Body>();
-        add_sequence_provider<UpperBodySequence, UpperBody>();
         add_sequence_provider<LimbsSequence, Limbs>();
         add_sequence_provider<RightLegSequence, RightLeg>();
         add_sequence_provider<LeftLegSequence, LeftLeg>();

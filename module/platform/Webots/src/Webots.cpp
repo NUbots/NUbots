@@ -415,9 +415,7 @@ namespace module::platform {
                     servo_state[target.id].id         = target.id;
                     servo_state[target.id].servo_name = id_to_joint_name[target.id];
 
-                    // If gain is NaN, set it to 0
-                    servo_state[target.id].p_gain = std::isnan(target.gain) ? 0.0 : target.gain;
-
+                    servo_state[target.id].p_gain = target.gain;
                     // `i` and `d` gains are always 0
                     // servo_state[target.id].i_gain        = target.gain * 0.0;
                     // servo_state[target.id].d_gain        = target.gain * 0.0;
