@@ -5,7 +5,6 @@ var structmodule_1_1strategy_1_1WalkToBall_1_1Config =
     [ "avoid_opponent_offset", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#aa6911ba8b1b2d062a672c52f9e25d893", null ],
     [ "ball_approach_distance", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a8c1f65493a26e6dc05d1ca9393386fa6", null ],
     [ "ball_kick_distance", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#abb8208e99cfc7559c5f74c275fb08c46", null ],
-    [ "ball_search_timeout", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb", null ],
     [ "ball_y_offset", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a958bcdb230880540d2662b7bd4f33779", null ],
     [ "distance_behind_ball", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a0daf377729af79ce5322fb33d19ca066", null ],
     [ "goal_target_offset", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#ae78d1a0a643cad341f63f9104243d32e", null ],
