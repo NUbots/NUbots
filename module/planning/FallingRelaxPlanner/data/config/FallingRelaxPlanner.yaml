@@ -8,9 +8,9 @@ gyroscope_magnitude:
   # The mean value to subtract from the raw reading
   mean: 0.0
   # The value in radians/second to consider the robot unstable
-  unstable: 3.0
+  unstable: 2
   # The value in radians/second to consider the robot falling
-  falling: 4.0
+  falling: 2.0
 
 # Checks based on the magnitude of the acceleration
 accelerometer_magnitude:
@@ -20,17 +20,18 @@ accelerometer_magnitude:
   # Use g to make it the value of acceleration due to gravity
   mean: 9.8
   # The magnitude of the accelerometer at which the robot is considered unstable
-  unstable: 4.0
+  unstable: 7.0
   # The magnitude of the accelerometer at which the robot is considered falling
-  falling: 6.0
+  falling: 5.0
 accelerometer_angle:
   # The smoothing factor for the exponential filter
   smoothing: 0.9
   # The mean value to subtract from the raw reading
   mean: 0.0
   # The angle of the accelerometer (from upright 0) at which the robot is considered unstable
-  unstable: 45 * pi / 180.0
+  unstable: 35 * pi / 180.0
   # The angle of the accelerometer (from upright 0) at which the robot is considered falling
   falling: 45 * pi / 180.0
 
-fall_script: Relax.yaml
+# Choose from "Body", "UpperBody", "Arms", "Head"
+relax: "UpperBody"
