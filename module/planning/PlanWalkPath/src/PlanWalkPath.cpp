@@ -125,8 +125,10 @@ namespace module::planning {
         });
 
         on<Trigger<Stability>>().then([this](const Stability& new_stability) {
-            // If transitioning from non-DYNAMIC to DYNAMIC stability state, reset smoothed walk command
-            if (stability != Stability::DYNAMIC && new_stability == Stability::DYNAMIC) {
+            // If transitioning from FALLEN to DYNAMIC stability state, reset smoothed walk command
+            log<DEBUG>("Stability :", new_stability);
+            if ((stability == Stability::FALLEN && new_stability == Stability::DYNAMIC)
+                || (stability == Stability::STANDING && new_stability == Stability::DYNAMIC)) {
                 previous_walk_command = cfg.starting_velocity;
                 log<DEBUG>("Resetting walk command to starting velocity");
             }
