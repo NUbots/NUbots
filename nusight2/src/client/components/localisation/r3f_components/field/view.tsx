@@ -115,12 +115,19 @@ export class FieldView extends React.Component<{
     const halfLength = this.model.dimensions.fieldLength * 0.5;
     const halfGoalWidth = this.model.dimensions.goalWidth * 0.5;
 
-    const blueHalfGoal = this.buildRectangle(-halfLength - goalDepth, -halfGoalWidth, goalDepth - lineWidth, goalWidth, lineWidth, {
-      top: true,
-      bottom: true,
-      left: true,
-      right: false,
-    });
+    const blueHalfGoal = this.buildRectangle(
+      -halfLength - goalDepth,
+      -halfGoalWidth,
+      goalDepth - lineWidth,
+      goalWidth,
+      lineWidth,
+      {
+        top: true,
+        bottom: true,
+        left: true,
+        right: false,
+      },
+    );
 
     return BufferGeometryUtils.mergeGeometries([blueHalfGoal]);
   }
@@ -134,12 +141,19 @@ export class FieldView extends React.Component<{
     const halfLength = this.model.dimensions.fieldLength * 0.5;
     const halfGoalWidth = this.model.dimensions.goalWidth * 0.5;
 
-    const yellowHalfGoal = this.buildRectangle(halfLength + lineWidth, -halfGoalWidth, goalDepth - lineWidth, goalWidth, lineWidth, {
-      top: true,
-      bottom: true,
-      left: false,
-      right: true,
-    });
+    const yellowHalfGoal = this.buildRectangle(
+      halfLength + lineWidth,
+      -halfGoalWidth,
+      goalDepth - lineWidth,
+      goalWidth,
+      lineWidth,
+      {
+        top: true,
+        bottom: true,
+        left: false,
+        right: true,
+      },
+    );
 
     return BufferGeometryUtils.mergeGeometries([yellowHalfGoal]);
   }
@@ -164,7 +178,7 @@ export class FieldView extends React.Component<{
       bottom: true,
       left: true,
       right: true,
-    }
+    },
   ) {
     const x1 = x - lw * 0.5;
     const x2 = x + w + lw * 0.5;
