@@ -235,13 +235,11 @@ namespace module::vision {
 
                 // Helper function to simplify unprojection calls
                 auto pix_to_ray = [&](double x, double y) {
-                    // No normalisation required here, as OpenCV assumes
-                    return utility::vision::unproject(
-                        Eigen::Vector2d(x, y),  // Use raw pixel coordinates
-                        img.lens,               // Lens parameters using 4 OpenCV fisheye coeffs
-                        Eigen::Vector2d(img.dimensions.x(), img.dimensions.y())  // Actual image dimensions
+                    return utility::vision::unproject(Eigen::Vector2d(x, y),  // Pixel coordinates
+                                                      img.lens                // Lens with fx, fy, centre, k
                     );
                 };
+
 
                 // Helper function to simplify projecting rays onto the field plane then transforming into camera space
                 auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {

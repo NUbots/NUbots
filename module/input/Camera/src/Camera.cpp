@@ -208,8 +208,9 @@ namespace module::input {
             int height   = config["settings"]["Height"].as<Expression>();
 
             // Renormalise the focal length
-            float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
-            float fov          = config["lens"]["fov"].as<Expression>();
+            float fx  = config["lens"]["fx"].as<Expression>();
+            float fy  = config["lens"]["fx"].as<Expression>();
+            float fov = config["lens"]["fov"].as<Expression>();
 
             // Recentre/renormalise the centre
             Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width;
@@ -219,14 +220,13 @@ namespace module::input {
             centre /= width;
 
             // Adjust the distortion parameters for the new width units
-            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
-            k[0]              = k[0] * std::pow(width / full_height, 2);
-            k[1]              = k[1] * std::pow(width / full_height, 4);
+            Eigen::Vector4f k = config["lens"]["k"].as<Expression>();
 
             // Set the lens parameters from configuration
             context.lens = Image::Lens{
                 config["lens"]["projection"].as<std::string>(),
-                focal_length,
+                fx,
+                fy,
                 fov,
                 centre,
                 k,
@@ -235,12 +235,12 @@ namespace module::input {
             // If the lens fov was auto we need to correct it
             if (!std::isfinite(context.lens.fov)) {
                 double a = height / width;
-                std::array<double, 4> options{
-                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
-                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
+                log<DEBUG>("IM IN THIS LOOP!");
+                // std::array<double, 4> options{utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens),
+                //                               utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens),
+                //                               utility::vision::unproject(Eigen::Vector2f(0, a), context.lens),
+                //                               utility::vision::unproject(Eigen::Vector2f(1, a), context.lens)};
+                // context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
             }
 
             // Apply the region to the camera

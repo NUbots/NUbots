@@ -4,9 +4,11 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/input/Image.hpp"
 #include "message/output/CompressedImage.hpp"
 
 #include "utility/vision/projection.hpp"
+
 
 namespace module::vision {
 
@@ -24,14 +26,14 @@ namespace module::vision {
             Eigen::Vector2d dims(1280.0, 1024.0);  // width, height
 
             // Build lens intrinsics from YAML-normalised values
-            utility::vision::Lens lens;
+            message::input::Image::Lens lens;
             lens.k << -0.04247437, -0.0076668, 0.00308963, -0.00099647;
             lens.fx = 0.3446512345140941 * dims.x();
-            lens.fy = 0.345921671 * dims.x();
+            lens.fy = 0.430567319 * dims.y();
 
             Eigen::Vector2d image_center  = dims * 0.5;
             Eigen::Vector2d centre_offset = Eigen::Vector2d(0.005418370784106563, -0.08661520006894258) * dims.x();
-            lens.centre                   = image_center + centre_offset;
+            lens.centre                   = (image_center + centre_offset).cast<float>();
 
             // Set of rays to test
             std::vector<Eigen::Vector3d> test_rays = {
