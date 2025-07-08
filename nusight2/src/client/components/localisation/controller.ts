@@ -375,4 +375,14 @@ export class LocalisationController {
   toggleBoundedBoxVisibility = (model: LocalisationModel) => {
     model.boundedBoxVisible = !model.boundedBoxVisible;
   };
+
+  @action
+  toggleOrientation(model: LocalisationModel) {
+    model.dashboardField.orientation = model.dashboardField.orientation === "left" ? "right" : "left";
+  }
+
+  @action
+  toggleDashboardVisibility(model: LocalisationModel) {
+    model.dashboard.visible = !model.dashboard.visible;
+  }
 }

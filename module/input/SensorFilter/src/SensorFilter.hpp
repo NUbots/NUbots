@@ -37,17 +37,21 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/filter/MahonyFilter.hpp"
+#include "utility/math/filter/YawFilter.hpp"
 
 namespace module::input {
 
     using utility::math::filter::MahonyFilter;
+    using utility::math::filter::YawFilter;
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
 
     class SensorFilter : public NUClear::Reactor {
@@ -88,6 +92,9 @@ namespace module::input {
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
 
+        /// @brief Yaw filter for fusing gyroscope and kinematic estimates
+        YawFilter<double> yaw_filter{};
+
         /// @brief Bias used in the mahony filter, updates with each mahony update
         Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
 
@@ -95,6 +102,12 @@ namespace module::input {
         bool left_down = false;
         /// @brief Current state of the middle button
         bool middle_down = false;
+
+        /// @brief Bool indicating if the ground truth is initialised
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
@@ -119,15 +132,18 @@ namespace module::input {
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
         /// @param raw_sensors The raw sensor data
+        /// @param robot_pose_ground_truth The ground truth robot pose
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
-                             const Stability& stability);
+                             const message::behaviour::state::Stability& stability,
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
-        /// @param raw_sensors The raw sensor data
-        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
+        /// @param robot_pose_ground_truth The ground truth robot pose
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                 const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

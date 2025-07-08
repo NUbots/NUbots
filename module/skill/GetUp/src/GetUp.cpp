@@ -35,6 +35,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
+#include "message/strategy/StandStill.hpp"
 
 #include "utility/skill/Script.hpp"
 
@@ -45,6 +46,7 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
+    using message::strategy::StandStill;
     using utility::skill::load_script;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -63,6 +65,9 @@ namespace module::skill {
                                                                                  const Uses<BodySequence>& body,
                                                                                  const Sensors& sensors) {
             if (run_reason == RunReason::NEW_TASK) {
+                // Stand still
+                log<INFO>("Standing still...");
+                emit<Task>(std::make_unique<StandStill>());
                 // Wait so that sensors have time to settle
                 log<INFO>("Delaying getup...");
                 emit<Task>(std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
@@ -92,6 +97,8 @@ namespace module::skill {
                 bool upright = (uZTw.z() >= uZTw.x() && uZTw.z() >= uZTw.y());
                 // torso z is mostly world -z
                 bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
+
+                emit(std::make_unique<Stability>(Stability::FALLEN));
 
                 if (on_front) {
                     log<INFO>("Getting up from front");

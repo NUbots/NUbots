@@ -28,7 +28,7 @@ lens:
   # The polynomial distortion coefficients for the lens
   k: [-0.04247437, -0.0076668, 0.00308963, -0.00099647]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
-  fov: 180 * pi / 180
+  fov: auto
 
 # Camera kinematics
 urdf_path: "models/robot.urdf"

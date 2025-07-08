@@ -55,6 +55,7 @@ namespace module::platform::NUSense {
     using message::platform::NUSense;
     using message::platform::NUSenseHandshake;
     using message::platform::RawSensors;
+    using message::platform::ServoIDStates;
     using utility::support::Expression;
 
 
@@ -126,6 +127,38 @@ namespace module::platform::NUSense {
 
             log<INFO>("Processing of ServoTargets enabled.");
             log<INFO>("ACK rx from NUSense: ", handshake.msg);
+        });
+
+        // Log Servo ID states
+        on<Trigger<ServoIDStates>>().then("Servo ID states from NUSense", [this](const ServoIDStates& states) {
+            log<INFO>("Received ServoIDStates from NUSense:");
+            bool id_fault_detected = false;
+            for (const auto& state : states.servo_id_states) {
+                std::string state_str;
+                switch (state.state.value) {
+                    case ServoIDStates::IDState::PRESENT: state_str = "PRESENT"; break;
+                    case ServoIDStates::IDState::MISSING:
+                        state_str = "MISSING";
+                        // Exclude ID 0 since it corresponds to NO_ID
+                        id_fault_detected = state.id > 0 ? true : false;
+                        break;
+                    case ServoIDStates::IDState::DUPLICATE:
+                        state_str = "DUPLICATE";
+                        // Exclude ID 0 since it corresponds to NO_ID
+                        id_fault_detected = state.id > 0 ? true : false;
+                        break;
+                }
+
+                log<INFO>(fmt::format("Servo ID: {} {} State: {}",
+                                      state.id,
+                                      nugus.device_name(static_cast<NUgus::ID>(state.id)),
+                                      state_str));
+            }
+
+            if (id_fault_detected) {
+                log<ERROR>("Duplicate or missing servo IDs detected! (Excluding NO_ID)");
+                exit(1);
+            }
         });
 
         // Emit any messages sent by the device to the rest of the system
@@ -244,7 +277,7 @@ namespace module::platform::NUSense {
             }
 
             // Emit the raw sensor data
-            emit(std::move(sensors));
+            emit(sensors);
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
@@ -256,28 +289,32 @@ namespace module::platform::NUSense {
         });
 
         // Sync is used because uart write is a shared resource
-        servo_targets_catcher =
-            on<Trigger<ServoTargets>, With<ServoOffsets>, With<NUSense>, Sync<HardwareIO>>()
-                .then([this](const ServoTargets& commands, const ServoOffsets& offsets) {
-                    // Copy the data into a new message so we can use a duration instead of a timepoint
-                    // and take the offsets and switch the direction.
-                    auto servo_targets = SubcontrollerServoTargets();
+        servo_targets_catcher = on<Trigger<ServoTargets>, With<ServoOffsets>, With<NUSense>, Sync<HardwareIO>>()
+                                    .then([this](const ServoTargets& commands, const ServoOffsets& offsets) {
+                                        // Copy the data into a new message so we can use a duration instead of a
+                                        // timepoint and take the offsets and switch the direction.
+                                        auto servo_targets = SubcontrollerServoTargets();
 
-                    // Change the timestamp in servo targets to the difference between the timestamp and now
-                    // Take away the offset and switch the direction if needed
-                    for (auto& target : commands.targets) {
-                        servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
-                                                           target.id,
-                                                           (target.position - offsets.offsets[target.id].offset)
-                                                               * offsets.offsets[target.id].direction,
-                                                           target.gain,
-                                                           target.torque);
-                    }
+                                        // Change the timestamp in servo targets to the difference between the timestamp
+                                        // and now Take away the offset and switch the direction if needed
+                                        for (auto& target : commands.targets) {
+                                            bool is_nan = std::isnan(target.position) || std::isnan(target.gain)
+                                                          || std::isnan(target.torque);
 
-                    send_packet(servo_targets);
-                    log<DEBUG>("Sent a ServoTargets message to NUSense.");
-                })
-                .disable();
+                                            servo_targets.targets.emplace_back(
+                                                target.time - NUClear::clock::now(),
+                                                target.id,
+                                                is_nan ? 0.0
+                                                       : (target.position - offsets.offsets[target.id].offset)
+                                                             * offsets.offsets[target.id].direction,
+                                                is_nan ? 0.0 : target.gain,
+                                                is_nan ? 0 : target.torque);
+                                        }
+
+                                        send_packet(servo_targets);
+                                        log<DEBUG>("Sent a ServoTargets message to NUSense.");
+                                    })
+                                    .disable();
     }
 
 }  // namespace module::platform::NUSense
