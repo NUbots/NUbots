@@ -98,6 +98,8 @@ namespace module::skill {
                 // torso z is mostly world -z
                 bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
 
+                emit(std::make_unique<Stability>(Stability::FALLEN));
+
                 if (on_front) {
                     log<INFO>("Getting up from front");
                     emit<Task>(load_script<BodySequence>(cfg.getup_front));
