@@ -15,8 +15,6 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   output::ImageCompressor
-  support::logging::MessageLogHandler # Used to send log messages and reaction statistics to NUsight
-  network::PlotJuggler
   # Sensors and network input
   input::GameController
   network::RobotCommunication
