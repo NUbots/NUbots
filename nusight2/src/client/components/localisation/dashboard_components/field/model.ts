@@ -1,7 +1,7 @@
 import { computed } from "mobx";
 import { observable } from "mobx";
 
-import { memoize } from "../../../base/memoize";
+import { memoize } from "../../../../base/memoize";
 import { DashboardRobotModel } from "../dashboard_robot/model";
 import { GroundModel } from "../ground/model";
 
@@ -11,7 +11,7 @@ export type FieldModelOpts = {
   robots: DashboardRobotModel[];
 };
 
-export class FieldModel {
+export class DashboardFieldModel {
   @observable orientation: "left" | "right";
   @observable ground: GroundModel;
   @observable robots: DashboardRobotModel[];
@@ -22,8 +22,8 @@ export class FieldModel {
     this.robots = opts.robots;
   }
 
-  static of = memoize((robots: DashboardRobotModel[]): FieldModel => {
-    return new FieldModel({
+  static of = memoize((robots: DashboardRobotModel[]): DashboardFieldModel => {
+    return new DashboardFieldModel({
       orientation: "right",
       ground: GroundModel.of(),
       robots,

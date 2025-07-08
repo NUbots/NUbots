@@ -19,7 +19,7 @@ export class FieldView extends React.Component<{
     const dim = this.model.dimensions;
     return (
       <object3D>
-        <mesh>
+        <mesh receiveShadow>
           <planeGeometry
             args={[
               dim.fieldLength + dim.goalDepth * 2 + dim.borderStripMinWidth * 2,
@@ -30,6 +30,12 @@ export class FieldView extends React.Component<{
         </mesh>
         <mesh geometry={this.fieldLinesGeometry} position={[0, 0, 0.001]}>
           <meshBasicMaterial color={this.model.lineColor} />
+        </mesh>
+        <mesh geometry={this.blueHalfGoal} position={[0, 0, 0.002]}>
+          <meshBasicMaterial color={this.model.blueGoalColor} />
+        </mesh>
+        <mesh geometry={this.yellowHalfGoal} position={[0, 0, 0.002]}>
+          <meshBasicMaterial color={this.model.yellowGoalColor} />
         </mesh>
       </object3D>
     );
@@ -46,15 +52,12 @@ export class FieldView extends React.Component<{
     const goalAreaLength = this.model.dimensions.goalAreaLength;
     const penaltyAreaWidth = this.model.dimensions.penaltyAreaWidth;
     const penaltyAreaLength = this.model.dimensions.penaltyAreaLength;
-    const goalDepth = this.model.dimensions.goalDepth;
-    const goalWidth = this.model.dimensions.goalWidth;
     const penaltyMarkDistance = this.model.dimensions.penaltyMarkDistance;
 
     const halfLength = fieldLength * 0.5;
     const halfWidth = fieldWidth * 0.5;
     const halfGoalAreaWidth = goalAreaWidth * 0.5;
     const halfPenaltyAreaWidth = penaltyAreaWidth * 0.5;
-    const halfGoalWidth = goalWidth * 0.5;
 
     const blueHalf = this.buildRectangle(-halfLength, -halfWidth, halfLength, fieldWidth, lineWidth);
     const blueHalfPenaltyArea = this.buildRectangle(
@@ -71,7 +74,6 @@ export class FieldView extends React.Component<{
       goalAreaWidth,
       lineWidth,
     );
-    const blueHalfGoal = this.buildRectangle(-halfLength - goalDepth, -halfGoalWidth, goalDepth, goalWidth, lineWidth);
     const blueHalfPenaltyMark = this.buildRectangle(-halfLength + penaltyMarkDistance, 0, 0, 0, lineWidth);
 
     const yellowHalf = this.buildRectangle(0, -halfWidth, halfLength, fieldWidth, lineWidth);
@@ -89,7 +91,6 @@ export class FieldView extends React.Component<{
       goalAreaWidth,
       lineWidth,
     );
-    const yellowHalfGoal = this.buildRectangle(halfLength, -halfGoalWidth, goalDepth, goalWidth, lineWidth);
     const yellowHalfPenaltyMark = this.buildRectangle(halfLength - penaltyMarkDistance, 0, 0, 0, lineWidth);
 
     return BufferGeometryUtils.mergeGeometries([
@@ -97,14 +98,64 @@ export class FieldView extends React.Component<{
       blueHalf,
       blueHalfPenaltyArea,
       blueHalfGoalArea,
-      blueHalfGoal,
       blueHalfPenaltyMark,
       yellowHalf,
       yellowHalfPenaltyArea,
       yellowHalfGoalArea,
-      yellowHalfGoal,
       yellowHalfPenaltyMark,
     ]);
+  }
+
+  @computed
+  private get blueHalfGoal() {
+    const lineWidth = this.model.dimensions.lineWidth;
+    const goalWidth = this.model.dimensions.goalWidth;
+    const goalDepth = this.model.dimensions.goalDepth;
+
+    const halfLength = this.model.dimensions.fieldLength * 0.5;
+    const halfGoalWidth = this.model.dimensions.goalWidth * 0.5;
+
+    const blueHalfGoal = this.buildRectangle(
+      -halfLength - goalDepth,
+      -halfGoalWidth,
+      goalDepth - lineWidth,
+      goalWidth,
+      lineWidth,
+      {
+        top: true,
+        bottom: true,
+        left: true,
+        right: false,
+      },
+    );
+
+    return BufferGeometryUtils.mergeGeometries([blueHalfGoal]);
+  }
+
+  @computed
+  private get yellowHalfGoal() {
+    const lineWidth = this.model.dimensions.lineWidth;
+    const goalWidth = this.model.dimensions.goalWidth;
+    const goalDepth = this.model.dimensions.goalDepth;
+
+    const halfLength = this.model.dimensions.fieldLength * 0.5;
+    const halfGoalWidth = this.model.dimensions.goalWidth * 0.5;
+
+    const yellowHalfGoal = this.buildRectangle(
+      halfLength + lineWidth,
+      -halfGoalWidth,
+      goalDepth - lineWidth,
+      goalWidth,
+      lineWidth,
+      {
+        top: true,
+        bottom: true,
+        left: false,
+        right: true,
+      },
+    );
+
+    return BufferGeometryUtils.mergeGeometries([yellowHalfGoal]);
   }
 
   @computed
@@ -116,17 +167,38 @@ export class FieldView extends React.Component<{
     );
   }
 
-  private buildRectangle(x: number, y: number, w: number, h: number, lw: number) {
+  private buildRectangle(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    lw: number,
+    edges: { top?: boolean; bottom?: boolean; left?: boolean; right?: boolean } = {
+      top: true,
+      bottom: true,
+      left: true,
+      right: true,
+    },
+  ) {
     const x1 = x - lw * 0.5;
     const x2 = x + w + lw * 0.5;
 
-    const topLine = this.buildHorizontalLine(x1, x2, y, lw);
-    const bottomLine = this.buildHorizontalLine(x1, x2, y + h, lw);
+    const geometries = [];
 
-    const leftLine = this.buildVerticalLine(y, y + h, x, lw);
-    const rightLine = this.buildVerticalLine(y, y + h, x + w, lw);
+    if (edges.top) {
+      geometries.push(this.buildHorizontalLine(x1, x2, y, lw));
+    }
+    if (edges.bottom) {
+      geometries.push(this.buildHorizontalLine(x1, x2, y + h, lw));
+    }
+    if (edges.left) {
+      geometries.push(this.buildVerticalLine(y, y + h, x, lw));
+    }
+    if (edges.right) {
+      geometries.push(this.buildVerticalLine(y, y + h, x + w, lw));
+    }
 
-    return BufferGeometryUtils.mergeGeometries([topLine, bottomLine, leftLine, rightLine]);
+    return BufferGeometryUtils.mergeGeometries(geometries);
   }
 
   private buildHorizontalLine(x1: number, x2: number, y: number, width: number) {
