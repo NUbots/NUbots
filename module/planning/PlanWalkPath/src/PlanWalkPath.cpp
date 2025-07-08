@@ -31,8 +31,8 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/localisation/Ball.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
@@ -49,8 +49,8 @@ namespace module::planning {
 
     using extension::Configuration;
 
+    using message::behaviour::state::Stability;
     using message::input::Sensors;
-    using message::localisation::Ball;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
@@ -72,7 +72,6 @@ namespace module::planning {
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("PlanWalkPath.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // WalkTo tuning
@@ -80,7 +79,6 @@ namespace module::planning {
             cfg.max_y_velocity         = config["max_y_velocity"].as<double>();
             cfg.max_velocity_magnitude = std::max(cfg.max_x_velocity, cfg.max_y_velocity);
             cfg.max_angular_velocity   = config["max_angular_velocity"].as<double>();
-            cfg.starting_velocity      = config["starting_velocity"].as<double>();
             cfg.acceleration           = config["acceleration"].as<double>();
 
             cfg.max_align_radius = config["max_align_radius"].as<double>();
@@ -88,13 +86,6 @@ namespace module::planning {
             cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
             cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
             cfg.strafe_gain      = config["strafe_gain"].as<double>();
-
-            // Backwards tuning
-            cfg.max_strafe_angle        = config["max_strafe_angle"].as<Expression>();
-            cfg.backward_buffer         = config["backward_buffer"].as<Expression>();
-            cfg.max_aligned_angle       = config["max_aligned_angle"].as<Expression>();
-            cfg.acceleration_multiplier = config["acceleration_multiplier"].as<double>();
-            cfg.backwards_vector        = config["backwards_vector"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -106,11 +97,7 @@ namespace module::planning {
             cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
 
-            // Enhanced obstacle avoidance
-            cfg.obstacle_radius           = config["obstacle_radius"].as<double>();
-            cfg.obstacle_radius_with_ball = config["obstacle_radius_with_ball"].as<double>();
-            cfg.ball_possession_threshold = config["ball_possession_threshold"].as<double>();
-            cfg.cautious_velocity_scale   = config["cautious_velocity_scale"].as<double>();
+            cfg.obstacle_radius = config["obstacle_radius"].as<double>();
 
             // Exponential smoothing configuration
             cfg.tau = config["tau"].as<Expression>();
@@ -132,17 +119,26 @@ namespace module::planning {
                       ", ",
                       cfg.alpha.z(),
                       ")");
+
+            // Starting velocity
+            cfg.starting_velocity = config["starting_velocity"].as<Expression>();
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, Optional<With<Ball>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to,
-                   const std::shared_ptr<const Robots>& robots,
-                   const std::shared_ptr<const Ball>& ball,
-                   const Sensors& sensors) {
+        on<Trigger<Stability>>().then([this](const Stability& new_stability) {
+            // If transitioning from non-DYNAMIC to DYNAMIC stability state, reset smoothed walk command
+            if (stability != Stability::DYNAMIC && new_stability == Stability::DYNAMIC) {
+                previous_walk_command = cfg.starting_velocity;
+                log<DEBUG>("Resetting walk command to starting velocity");
+            }
+
+            stability = new_stability;
+        });
+
+        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
+            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
                 // Get all the parameters we need to calculate the walk path
-                const auto& Hrd  = walk_to.Hrd;
-                const auto& Hrw  = sensors.Hrw;
-                const auto& rBWw = ball ? ball->rBWw : Eigen::Vector3d::Zero();
+                const auto& Hrd = walk_to.Hrd;
+                const auto& Hrw = sensors.Hrw;
 
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = Hrd.translation().head(2);
@@ -151,40 +147,48 @@ namespace module::planning {
                 // Calculate the angle between the robot and the final desired heading
                 double angle_to_final_heading = vectorToBearing(Hrd.linear().col(0).head(2));
 
-                // Determine if we have the ball (for more aggressive obstacle avoidance)
-                const bool have_ball     = ball ? (Hrw * rBWw).norm() < cfg.ball_possession_threshold : false;
-                bool other_robots_nearby = false;
-
-                // If we can see any robots, check if they are in the way
+                // If there are robots, check if they're in the way
                 if (robots) {
+                    // Get the positions of all robots in the world
                     std::vector<Eigen::Vector2d> all_obstacles{};
-                    std::transform(robots->robots.begin(),
-                                   robots->robots.end(),
-                                   std::back_inserter(all_obstacles),
-                                   [&](const auto& robot) { return (Hrw * robot.rRWw).head(2); });
-
+                    for (const auto& robot : robots->robots) {
+                        all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
+                    }
                     // Sort obstacles based on distance from the robot
                     std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
-
-                    // Use enhanced obstacle radius when we have the ball
-                    const double obstacle_radius = have_ball ? cfg.obstacle_radius_with_ball : cfg.obstacle_radius;
-
                     // Get the obstacles in the way of the current path
-                    const auto obstacles = get_obstacles(all_obstacles, rDRr, obstacle_radius);
+                    const auto obstacles = get_obstacles(all_obstacles, rDRr);
 
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
-                        // Adjust the target direction to avoid obstacles
-                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles, obstacle_radius);
+                        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+
+                        // Calculate a perpendicular vector to the direction of the target point
+                        const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
+
+                        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
+                        auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
+
+                        // Most positive and negative projections of the obstacles to find the two candidate target
+                        // paths. Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note
+                        // this can cause us to slightly clip into the obstacle radius, especially if the obstacle is
+                        // very close to the target
+                        const Eigen::Vector2d left =
+                            *std::ranges::min_element(obstacles, {}, proj) - perp * cfg.obstacle_radius;
+                        const Eigen::Vector2d right =
+                            *std::ranges::max_element(obstacles, {}, proj) + perp * cfg.obstacle_radius;
+
+                        // Total path length by traversing the triangle from the robot->obstacle->original target
+                        auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
+
+                        // Take the shorter path
+                        rDRr = path(left) < path(right) ? left : right;
+
                         // Angle to the target point may have changed after adjusting for obstacles
                         angle_to_target = vectorToBearing(rDRr);
                         // Final heading should now point toward the original target point from the adjusted target
                         angle_to_final_heading = vectorToBearing(Hrd.translation().head(2) - rDRr);
                     }
-
-                    // Finally, record if a robot is very close to us so we can later scale the velocity
-                    other_robots_nearby =
-                        !all_obstacles.empty() && all_obstacles.front().norm() < obstacle_radius * 1.5;
                 }
 
                 // Straight to max magnitude, smoother handles ramping up
@@ -212,17 +216,13 @@ namespace module::planning {
                 else {
                     // Interpolate between the full velocity and the strafe velocity based on the translational error
                     const double approach_progress = prog(translational_error, 0.0, cfg.max_align_radius);
-                    desired_magnitude *= lerp(1.0, cfg.strafe_gain, approach_progress);
+                    desired_magnitude *= lerp(1.0, 0.0, approach_progress * cfg.strafe_gain);
 
                     // Interpolate between angle to the target and desired heading when inside the alignment region
                     const double align_progress = prog(translational_error, cfg.min_align_radius, cfg.max_align_radius);
                     desired_heading             = lerp(angle_to_target, angle_to_final_heading, align_progress);
                 }
 
-                // Scale velocity when we have the ball and there are nearby obstacles
-                if (have_ball && other_robots_nearby) {
-                    desired_magnitude *= cfg.cautious_velocity_scale;
-                }
 
                 // Calculate the target velocity
                 const Eigen::Vector2d desired_translational_velocity = desired_magnitude * rDRr.normalized();
@@ -296,30 +296,6 @@ namespace module::planning {
         });
     }
 
-    Eigen::Vector2d PlanWalkPath::adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
-                                                                        const std::vector<Eigen::Vector2d>& obstacles,
-                                                                        double obstacle_radius) {
-        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
-
-        // Calculate a perpendicular vector to the direction of the target point
-        const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
-
-        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
-        auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
-
-        // Most positive and negative projections of the obstacles to find the two candidate target paths.
-        // Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note this can cause us to
-        // slightly clip into the obstacle radius, especially if the obstacle is very close to the target
-        const Eigen::Vector2d left  = *std::ranges::min_element(obstacles, {}, proj) - perp * obstacle_radius;
-        const Eigen::Vector2d right = *std::ranges::max_element(obstacles, {}, proj) + perp * obstacle_radius;
-
-        // Total path length by traversing the triangle from the robot->obstacle->original target
-        auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
-
-        // Take the shorter path
-        return path(left) < path(right) ? left : right;
-    }
-
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
         // Scale factors in each translational axis (∞ if the component is 0)
         const auto inf = std::numeric_limits<double>::infinity();
@@ -335,23 +311,24 @@ namespace module::planning {
     }
 
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                   const Eigen::Vector2d& rDRr,
-                                                                   double obstacle_radius) {
-        if (all_obstacles.empty())
+                                                                   const Eigen::Vector2d& rDRr) {
+        // If there are no obstacles, return an empty group
+        if (all_obstacles.empty()) {
             return {};
+        }
 
         // Find the first obstacle in the way
         auto it = std::ranges::find_if(all_obstacles, [&](const Eigen::Vector2d& obstacle) {
             const bool in_front        = rDRr.normalized().dot(obstacle.normalized()) > 0.0;
             const bool before_target   = obstacle.norm() < rDRr.norm();
-            const bool close_to_target = (obstacle - rDRr).norm() < obstacle_radius;
+            const bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
             const bool intersects =
-                intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, obstacle_radius);
+                intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
 
             return in_front && before_target && intersects && !close_to_target;
         });
 
-        // No obstacles in the way
+        // If no obstacles are in the way, return the empty group
         if (it == all_obstacles.end())
             return {};
 
@@ -361,7 +338,8 @@ namespace module::planning {
         for (const Eigen::Vector2d& obstacle : all_obstacles) {
             // If the obstacle is close to the group, add it to the group
             if (std::ranges::any_of(avoid_obstacles, [&](const Eigen::Vector2d& ao) {
-                    return (obstacle - ao).norm() < obstacle_radius * 3;  // 3 represents two obstacles and the robot
+                    return (obstacle - ao).norm()
+                           < cfg.obstacle_radius * 3;  // 3 represents two obstacles and the robot
                 })) {
                 avoid_obstacles.push_back(obstacle);
             }
