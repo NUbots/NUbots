@@ -324,12 +324,11 @@ const StatusBar = observer((props: StatusBarProps) => {
   return (
     <div
       className={
-        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"
+        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 text-lg font-bold flex flex-col gap-2 w-fit"
       }
     >
-      <span className="text-left w-1/3">&#160;</span>
-      <span className="w-1/3">{target}</span>
-      <span className="text-right w-1/3">{viewModeString(props.model.viewMode)}</span>
+      <span>{target}</span>
+      <span>{viewModeString(props.model.viewMode)}</span>
     </div>
   );
 });
