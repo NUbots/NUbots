@@ -86,8 +86,6 @@ namespace module::input {
         const auto Rwt_mahony      = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
         Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
 
-        emit(graph("Mahony Yaw", rpy_mahony.z()));
-
         // If fallen, keep position still
         if (stability <= Stability::FALLING) {
             Eigen::Isometry3d Hwt =
