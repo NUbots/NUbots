@@ -54,8 +54,8 @@ class CameraModel {
   static of() {
     return new CameraModel({
       position: new Vector3(0, 0, 5), // Hawk-eye view: center field, 5 units high
-      yaw: Math.PI / 2,               // Hawk-eye view yaw
-      pitch: -Math.PI / 2,            // Hawk-eye view: looking straight down
+      yaw: Math.PI / 2, // Hawk-eye view yaw
+      pitch: -Math.PI / 2, // Hawk-eye view: looking straight down
       distance: 0.5,
     });
   }
@@ -90,8 +90,8 @@ export class ControlsModel {
       back: false,
       up: false,
       down: false,
-      pitch: -Math.PI / 2,  // Hawk-eye view: looking straight down
-      yaw: Math.PI / 2,     // Hawk-eye view yaw
+      pitch: -Math.PI / 2, // Hawk-eye view: looking straight down
+      yaw: Math.PI / 2, // Hawk-eye view yaw
     });
   }
 }

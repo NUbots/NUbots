@@ -456,7 +456,7 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
       position={[
         model.skybox.inclination * 10 - 5,
         model.skybox.azimuth * 10 - 5,
-        Math.max(2, model.skybox.inclination * 8)
+        Math.max(2, model.skybox.inclination * 8),
       ]}
       intensity={1.2}
       color="#ffffff"
@@ -471,20 +471,13 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     />
 
     {/* Hemisphere light for ambient lighting */}
-    <hemisphereLight
-      args={["#87CEEB", "#DEB887", 0.7]}
-      position={[0, 0, 10]}
-    />
+    <hemisphereLight args={["#87CEEB", "#DEB887", 0.7]} position={[0, 0, 10]} />
 
     {/* Increased ambient light to ensure consistent illumination throughout the scene */}
     <ambientLight intensity={0.7} color="#ffffff" />
 
     {/* Fill light from the opposite direction for better depth */}
-    <directionalLight
-      position={[5, 5, 3]}
-      intensity={0.4}
-      color="#ffffff"
-    />
+    <directionalLight position={[5, 5, 3]} intensity={0.4} color="#ffffff" />
 
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
