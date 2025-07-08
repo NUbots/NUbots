@@ -34,6 +34,7 @@
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
+#include "message/platform/webots/messages.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -48,6 +49,7 @@ namespace module::localisation {
     using VisionRobot        = message::vision::Robot;
     using VisionRobots       = message::vision::Robots;
     using PenaltyState       = message::input::State;
+    using GroundTruthRobots   = message::platform::webots::RobotsGroundTruth;
 
     using message::eye::DataPoint;
     using message::input::GameState;
@@ -87,8 +89,9 @@ namespace module::localisation {
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
+           Optional<With<GroundTruthRobots>>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
+            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc, const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -99,9 +102,10 @@ namespace module::localisation {
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
 
                 // Check if we have ground truth robot data from Webots
-                if (cfg.use_ground_truth && horizon.vision_ground_truth.exists && !horizon.vision_ground_truth.robots.empty()) {
+                if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
+                    log<DEBUG>("Using ground truth for localisation.");
                     // Use ground truth data from Webots
-                    for (const auto& gt_robot : horizon.vision_ground_truth.robots) {
+                    for (const auto& gt_robot : robots_ground_truth->robots) {
                         LocalisationRobot localisation_robot;
                         localisation_robot.id = std::stoi(gt_robot.robot_id.substr(gt_robot.robot_id.find_last_of('_') + 1)); // Extract number from "RED_1"
                         localisation_robot.rRWw = Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
@@ -110,15 +114,16 @@ namespace module::localisation {
                         localisation_robot.time_of_measurement = horizon.timestamp;
 
                         // Determine if teammate based on team color
+                        // TODO: no.
                         localisation_robot.teammate = (gt_robot.team == "BLUE"); // Assume we're blue team
 
                         // Set purpose information
                         localisation_robot.purpose.player_id = gt_robot.player_number;
                         // Could set other purpose fields if needed
-
                         localisation_robots->robots.push_back(localisation_robot);
                     }
                 } else {
+                    log<DEBUG>("Using UKF-based tracking for localisation.");
                     // Fall back to UKF-based tracking
                     for (const auto& tracked_robot : tracked_robots) {
                         auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
