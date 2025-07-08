@@ -62,7 +62,7 @@ namespace module::planning {
 
     using message::strategy::StandStill;
 
-    using utility::math::angle::vectorToBearing;
+    using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::math::geometry::intersection_line_and_circle;
     using utility::nusight::graph;
@@ -132,9 +132,9 @@ namespace module::planning {
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = Hrd.translation().head(2);
                 // Calculate the angle between the robot and the target point (x, y)
-                double angle_to_target = vectorToBearing(rDRr);
+                double angle_to_target = vector_to_bearing(rDRr);
                 // Calculate the angle between the robot and the final desired heading
-                double angle_to_final_heading = vectorToBearing(Hrd.linear().col(0).head(2));
+                double angle_to_final_heading = vector_to_bearing(Hrd.linear().col(0).head(2));
 
                 // If there are robots, check if they're in the way
                 if (robots) {
@@ -174,9 +174,9 @@ namespace module::planning {
                         rDRr = path(left) < path(right) ? left : right;
 
                         // Angle to the target point may have changed after adjusting for obstacles
-                        angle_to_target = vectorToBearing(rDRr);
+                        angle_to_target = vector_to_bearing(rDRr);
                         // Final heading should now point toward the original target point from the adjusted target
-                        angle_to_final_heading = vectorToBearing(Hrd.translation().head(2) - rDRr);
+                        angle_to_final_heading = vector_to_bearing(Hrd.translation().head(2) - rDRr);
                     }
                 }
 
