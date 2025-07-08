@@ -52,6 +52,7 @@ namespace module::purpose {
 
     using FieldPlayerMsg = message::purpose::FieldPlayer;
     using Phase          = message::input::GameState::Phase;
+    using SubMode        = message::input::GameState::SubMode;
 
     using message::input::GameState;
     using message::input::Sensors;
@@ -83,6 +84,7 @@ namespace module::purpose {
             cfg.ball_off_center_threshold = config["ball_off_center_threshold"].as<double>();
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
             cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
+            cfg.search_when_lost          = config["search_when_lost"].as<bool>();
         });
 
         // PLAYING state
@@ -94,7 +96,6 @@ namespace module::purpose {
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
-           Optional<With<Purpose>>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
@@ -110,13 +111,15 @@ namespace module::purpose {
 
                 // If sub_mode is 0, the robot must freeze for referee ball repositioning
                 // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty && (game_state.secondary_state.sub_mode == 0 || game_state.secondary_state.sub_mode == 2)) {
+                if (penalty
+                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
+                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }
 
                 // If the robot is uncertain about its position, it should not play
-                if (field.cost > cfg.max_localisation_cost) {
+                if (cfg.search_when_lost && field.cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::UNKNOWN,
@@ -138,7 +141,7 @@ namespace module::purpose {
                     return;
                 }
 
-                // Make an ignore list with the goalie, if they exist
+                // Make an ignore list with inactive teammates
                 std::vector<unsigned int> ignore_ids{};
                 // Add inactive robots to the ignore list
                 if (robots) {
