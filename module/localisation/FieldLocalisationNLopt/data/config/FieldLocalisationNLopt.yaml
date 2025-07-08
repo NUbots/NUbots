@@ -47,7 +47,7 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 10
+field_line_distance_weight: 0.1
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 10
@@ -56,7 +56,7 @@ field_line_intersection_weight: 10
 state_change_weight: 0.0
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 1
+goal_post_distance_weight: 0
 
 # Box constraints on change in state (x, y, theta)
 change_limit:
@@ -92,22 +92,22 @@ kalman:
 
   # Process model noise
   Q:
-    - - 1e-2
+    - - 1e-1
       - 0
       - 0
     - - 0
-      - 1e-2
+      - 1e-1
       - 0
     - - 0
       - 0
-      - 1e-3
+      - 1e-1
   R:
-    - - 5.7015410799196165
+    - - 1
       - 0
       - 0
     - - 0
-      - 3.123101158544384
+      - 1
       - 0
     - - 0
       - 0
-      - 4.37215045186137
+      - 1
