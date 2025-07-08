@@ -29,11 +29,6 @@ obstacle_radius: 0.8
 
 # Exponential smoothing time constant for the [x,y,theta]-velocity (set to [0,0,0] to disable smoothing)
 tau: [1.0, 1.0, 1.0]
-# tau: [0.1, 0.1, 1]
-# tau: [0, 0, 0]
 
 # Initial velocity to use when resetting the smoothed walk command
-starting_velocity:
-  - 0.05
-  - 0.0
-  - 0.0
+starting_velocity: [0.05, 0.0, 0.0]

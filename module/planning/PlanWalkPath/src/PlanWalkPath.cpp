@@ -106,19 +106,6 @@ namespace module::planning {
                             .select((1.0 - (-1.0 / (UPDATE_FREQUENCY * cfg.tau.array())).exp()).matrix(),
                                     Eigen::Vector3d::Ones());
             cfg.one_minus_alpha = Eigen::Vector3d::Ones() - cfg.alpha;
-            log<INFO>("Smoothing walk with time constant tau: (",
-                      cfg.tau.x(),
-                      ", ",
-                      cfg.tau.y(),
-                      ", ",
-                      cfg.tau.z(),
-                      ") corresponding to alpha: (",
-                      cfg.alpha.x(),
-                      ", ",
-                      cfg.alpha.y(),
-                      ", ",
-                      cfg.alpha.z(),
-                      ")");
 
             // Starting velocity
             cfg.starting_velocity = config["starting_velocity"].as<Expression>();
