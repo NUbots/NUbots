@@ -113,7 +113,6 @@ namespace module::planning {
 
         on<Trigger<Stability>>().then([this](const Stability& new_stability) {
             // If transitioning from FALLEN to DYNAMIC stability state, reset smoothed walk command
-            log<DEBUG>("Stability :", new_stability);
             if ((stability == Stability::FALLEN && new_stability == Stability::DYNAMIC)
                 || (stability == Stability::STANDING && new_stability == Stability::DYNAMIC)) {
                 previous_walk_command = cfg.starting_velocity;
@@ -226,11 +225,9 @@ namespace module::planning {
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
 
                 // Emit debugging information for visualization and monitoring
-                auto debug_information              = std::make_unique<WalkToDebug>();
-                Eigen::Isometry3d _Hrd              = Eigen::Isometry3d::Identity();
-                _Hrd.translation().head(2)          = rDRr;
-                _Hrd.linear()                       = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
-                debug_information->Hrd              = _Hrd;
+                auto debug_information                       = std::make_unique<WalkToDebug>();
+                debug_information->Hrd.translation().head(2) = rDRr;
+                debug_information->Hrd.linear()     = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
                 debug_information->min_align_radius = cfg.min_align_radius;
                 debug_information->max_align_radius = cfg.max_align_radius;
                 debug_information->min_angle_error  = cfg.min_angle_error;
