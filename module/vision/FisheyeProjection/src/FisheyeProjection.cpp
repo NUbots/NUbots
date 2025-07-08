@@ -21,27 +21,41 @@ namespace module::vision {
         });
 
         on<Trigger<CompressedImage>>().then("Fisheye Projection Test", [this](const CompressedImage& image) {
-            struct LocalLens {
-                Eigen::Matrix<double, 4, 1> k;
-                double focal_length;
-                Eigen::Vector2d centre;
-            };
-
-            // Kevin's camera intrinsics (hardcoded for now)
-            LocalLens lens;
-            lens.k << -0.04247437, -0.0076668, 0.00308963, -0.00099647;
-            lens.focal_length = 0.3446512345140941;
-            lens.centre       = Eigen::Vector2d(0.005418370784106563, -0.08661520006894258);
-
-            // Known image dimensions from Kevin's camera
             Eigen::Vector2d dims(1280.0, 1024.0);  // width, height
 
-            // Project a ray and test
-            Eigen::Vector3d ray(0.1, 0.7, 0.7);
-            Eigen::Vector2d px = utility::vision::project(ray.normalized(), lens, dims);
-            log<INFO>("Projected ray ", ray.transpose(), " to pixel ", px.transpose());
-            Eigen::Vector3d back = utility::vision::unproject(px, lens, dims);
-            log<INFO>("Unprojected back to ", back.transpose());
+            // Build lens intrinsics from YAML-normalised values
+            utility::vision::Lens lens;
+            lens.k << -0.04247437, -0.0076668, 0.00308963, -0.00099647;
+            lens.focal_length = 0.3446512345140941 * dims.x();
+
+            Eigen::Vector2d image_center  = dims * 0.5;
+            Eigen::Vector2d centre_offset = Eigen::Vector2d(0.005418370784106563, -0.08661520006894258) * dims.x();
+            lens.centre                   = image_center + centre_offset;
+
+            // Set of rays to test
+            std::vector<Eigen::Vector3d> test_rays = {
+                {0.0, 0.0, 1.0},
+                {0.1, 0.7, 0.7},
+                {0.0, 1.0, 1.0},
+                {1.0, 0.0, 1.0},
+                {-1.0, 0.0, 1.0},
+                {0.5, -0.5, 1.0},
+                {-0.5, 0.5, 1.0},
+                {0.0, -1.0, 1.0},
+            };
+
+            for (const auto& ray : test_rays) {
+                Eigen::Vector3d ray_n = ray.normalized();
+                Eigen::Vector2d px    = utility::vision::project(ray_n, lens);
+                Eigen::Vector3d back  = utility::vision::unproject(px, lens);
+
+                double err = (ray_n - back.normalized()).norm();
+
+                log<INFO>("Ray:     ", ray_n.transpose());
+                log<INFO>("→ Pixel: ", px.transpose());
+                log<INFO>("→ Back:  ", back.transpose());
+                log<INFO>("→ Error: ", err);
+            }
         });
     }
 

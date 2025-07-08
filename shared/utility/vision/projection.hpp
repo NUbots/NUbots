@@ -2,105 +2,66 @@
 #define UTILITY_VISION_PROJECTION_OPENCV_FISHEYE_HPP
 
 #include <Eigen/Core>
-#include <cmath>
-#include <stdexcept>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/core.hpp>
 
 namespace utility::vision {
 
-    /**
-     * @brief Applies OpenCV fisheye distortion model to an angle θ
-     *
-     * @tparam T the scalar type
-     * @param theta  the angle from the optical axis
-     * @param lens   the lens struct containing k[0..3] coefficients
-     * @return distorted angle θ_d
-     */
-    template <typename T, typename Lens>
-    inline T distort(const T& theta, const Lens& lens) {
-        const auto& k  = lens.k;
-        const T theta2 = theta * theta;
-        const T theta4 = theta2 * theta2;
-        const T theta6 = theta4 * theta2;
-        const T theta8 = theta4 * theta4;
-        return theta * (T(1) + k[0] * theta2 + k[1] * theta4 + k[2] * theta6 + k[3] * theta8);
-    }
-
-    /**
-     * @brief Inverts OpenCV fisheye distortion model via Newton-Raphson
-     *
-     * @tparam T the scalar type
-     * @param theta_d  distorted angle
-     * @param lens     lens with k[0..3]
-     * @return undistorted angle θ
-     */
-    template <typename T, typename Lens>
-    T undistort(const T& theta_d, const Lens& lens) {
-        T theta = theta_d;  // initial guess
-        for (int i = 0; i < 5; ++i) {
-            T theta2 = theta * theta;
-            T theta4 = theta2 * theta2;
-            T theta6 = theta4 * theta2;
-            T theta8 = theta4 * theta4;
-            T f = theta * (T(1) + lens.k[0] * theta2 + lens.k[1] * theta4 + lens.k[2] * theta6 + lens.k[3] * theta8)
-                  - theta_d;
-            T df  = (T(1) + 3 * lens.k[0] * theta2 + 5 * lens.k[1] * theta4 + 7 * lens.k[2] * theta6
-                    + 9 * lens.k[3] * theta8);
-            theta = theta - f / df;
-        }
-        return theta;
-    }
+    struct Lens {
+        Eigen::Vector4d k;       // Distortion coefficients: [k1, k2, k3, k4]
+        double focal_length;     // Shared focal length (fx = fy = f)
+        Eigen::Vector2d centre;  // Principal point: [cx, cy]
+    };
 
     /**
      * @brief Projects a 3D unit ray into pixel coordinates using OpenCV fisheye model
-     *
-     * @tparam T scalar type
-     * @param ray       unit vector in camera space
-     * @param lens      lens parameters with k[0..3], focal_length, and centre
-     * @param dimensions image resolution
-     * @return pixel coordinate
+     *        via cv::fisheye::projectPoints
      */
-    template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time, typename Lens>
-    Eigen::Matrix<T, 2, 1> project(
-        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray,
-        const Lens& lens,
-        const Eigen::Matrix<T, 2, 1>& dimensions) {
+    inline Eigen::Vector2d project(const Eigen::Vector3d& ray, const Lens& lens) {
+        // Convert ray to OpenCV format
+        std::vector<cv::Point3d> objectPoints = {cv::Point3d(ray(0), ray(1), ray(2))};
+        std::vector<cv::Point2d> imagePoints;
 
-        const T theta     = std::acos(ray.x());
-        const T theta_d   = distort(theta, lens);
-        const T sin_theta = std::sqrt(1 - ray.x() * ray.x());
+        cv::Mat K = (cv::Mat_<double>(3, 3) << lens.focal_length,
+                     0,
+                     lens.centre.x(),
+                     0,
+                     lens.focal_length,
+                     lens.centre.y(),
+                     0,
+                     0,
+                     1);
+        cv::Mat D = (cv::Mat_<double>(4, 1) << lens.k(0), lens.k(1), lens.k(2), lens.k(3));
 
-        Eigen::Matrix<T, 2, 1> screen =
-            ray.x() >= T(1) ? Eigen::Matrix<T, 2, 1>::Zero()
-                            : Eigen::Matrix<T, 2, 1>(theta_d * ray.y() / sin_theta, theta_d * ray.z() / sin_theta);
+        cv::fisheye::projectPoints(objectPoints, imagePoints, cv::Vec3d(0, 0, 0), cv::Vec3d(0, 0, 0), K, D);
 
-        return (dimensions * T(0.5)) - screen - lens.centre.template cast<T>();
+        return Eigen::Vector2d(imagePoints[0].x, imagePoints[0].y);
     }
 
     /**
-     * @brief Unprojects a 2D pixel into a 3D unit vector using OpenCV fisheye model
-     *
-     * @tparam T scalar type
-     * @param px         pixel coordinate
-     * @param lens       lens parameters with k[0..3], focal_length, and centre
-     * @param dimensions image resolution
-     * @return unit vector in camera space
+     * @brief Unprojects a 2D pixel coordinate to a 3D unit vector using OpenCV fisheye model
+     *        via cv::fisheye::undistortPoints
      */
-    template <typename T, typename Lens>
-    Eigen::Matrix<T, 3, 1> unproject(const Eigen::Matrix<T, 2, 1>& px,
-                                     const Lens& lens,
-                                     const Eigen::Matrix<T, 2, 1>& dimensions) {
+    inline Eigen::Vector3d unproject(const Eigen::Vector2d& px, const Lens& lens) {
+        std::vector<cv::Point2d> distortedPoints = {cv::Point2d(px(0), px(1))};
+        std::vector<cv::Point2d> undistorted;
 
-        Eigen::Matrix<T, 2, 1> screen = (dimensions * T(0.5)) - px - lens.centre.template cast<T>();
+        cv::Mat K = (cv::Mat_<double>(3, 3) << lens.focal_length,
+                     0,
+                     lens.centre.x(),
+                     0,
+                     lens.focal_length,
+                     lens.centre.y(),
+                     0,
+                     0,
+                     1);
+        cv::Mat D = (cv::Mat_<double>(4, 1) << lens.k(0), lens.k(1), lens.k(2), lens.k(3));
 
-        const T r_d = screen.norm();
-        if (r_d == T(0)) {
-            return Eigen::Matrix<T, 3, 1>::UnitX();
-        }
+        cv::fisheye::undistortPoints(distortedPoints, undistorted, K, D);
 
-        const T theta     = undistort(r_d, lens);
-        const T sin_theta = std::sin(theta);
-
-        return Eigen::Matrix<T, 3, 1>(std::cos(theta), sin_theta * screen.x() / r_d, sin_theta * screen.y() / r_d);
+        // Convert to 3D direction vector (z=1, then normalize)
+        Eigen::Vector3d ray(undistorted[0].x, undistorted[0].y, 1.0);
+        return ray.normalized();
     }
 
 }  // namespace utility::vision

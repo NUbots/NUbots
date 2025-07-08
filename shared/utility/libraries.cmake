@@ -37,6 +37,9 @@ target_link_libraries(nuclear_utility PUBLIC ALSA::ALSA)
 find_package(Lame REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
 
+find_package(OpenCV REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ${OpenCV_LIBS})
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
