@@ -106,6 +106,30 @@ message RobotPoseGroundTruth {
     vec3 vTf = 3;
 }
 
+/// Ground truth for a single robot
+message RobotGroundTruth {
+    /// Robot identifier (e.g., "RED_1", "BLUE_2")
+    string robot_id = 1;
+    /// Team color ("RED" or "BLUE")
+    string team = 2;
+    /// Player number within team
+    int32 player_number = 3;
+    /// Position of robot in world space
+    fvec3 rRWw = 4;
+    /// Velocity of robot in world space
+    fvec3 vRw = 5;
+    /// Rotation of robot (yaw angle in radians)
+    float yaw = 6;
+}
+
+/// Message containing ground truth data for all robots (opponents and teammates)
+message RobotsGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// Robot ground truth data
+    repeated RobotGroundTruth robots = 2;
+}
+
 message VisionGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
@@ -131,9 +155,10 @@ message SensorMeasurements {
     // Ground truth data
     RobotPoseGroundTruth robot_pose_ground_truth = 100;
     VisionGroundTruth    vision_ground_truth     = 101;
+    RobotsGroundTruth    robots_ground_truth     = 102;
     // Walk optimisation data
-    support.optimisation.OptimisationRobotPosition robot_position = 102;
-    bool                                           reset_done     = 103;
+    support.optimisation.OptimisationRobotPosition robot_position = 103;
+    bool                                           reset_done     = 104;
 }
 
 message MotorPosition {
