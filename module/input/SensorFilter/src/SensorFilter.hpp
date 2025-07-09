@@ -81,6 +81,26 @@ namespace module::input {
             double x_cut_off_frequency = 0.0;
             /// @brief Cutoff frequency for the low pass filter of torso y velocity
             double y_cut_off_frequency = 0.0;
+
+            /// @brief Threshold angle for executing getup, between torso z axis and world z axis
+            double fallen_angle = 0.0;
+            struct Levels {
+                /// @brief The mean value of this sensor to subtract
+                double mean = 0.0;
+                /// @brief The threshold for this sensor to be considered unstable
+                double unstable = 0.0;
+                /// @brief The threshold for this sensor to be considered falling
+                double falling = 0.0;
+                /// @brief The smoothing factor for this sensor
+                double smoothing = 0.0;
+            };
+            /// @brief The configuration for the gyroscope magnitude check
+            Levels gyro_mag{};
+            /// @brief The configuration for the accelerometer magnitude check
+            Levels acc_mag{};
+            /// @brief The configuration for the accelerometer angle check
+            Levels acc_angle{};
+
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
         } cfg;
@@ -146,6 +166,11 @@ namespace module::input {
                              const RawSensors& raw_sensors,
                              const message::behaviour::state::Stability& stability,
                              const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
+
+        /// @brief Update the stability state of the robot based on sensors data
+        /// @param sensors The sensors message to use for stability update
+        /// @param walk_state The current walk state of the robot to know if its walking
+        void update_stability(std::unique_ptr<Sensors>& sensors, WalkState::State walk_state);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

@@ -85,6 +85,20 @@ namespace module::input {
                                         .translation()
                                         .y();
 
+            cfg.fallen_angle        = config["fallen_angle"].as<float>();
+            cfg.gyro_mag.mean       = config["gyroscope_magnitude"]["mean"].as<Expression>();
+            cfg.gyro_mag.unstable   = config["gyroscope_magnitude"]["unstable"].as<Expression>();
+            cfg.gyro_mag.falling    = config["gyroscope_magnitude"]["falling"].as<Expression>();
+            cfg.gyro_mag.smoothing  = config["gyroscope_magnitude"]["smoothing"].as<Expression>();
+            cfg.acc_mag.mean        = config["accelerometer_magnitude"]["mean"].as<Expression>();
+            cfg.acc_mag.unstable    = config["accelerometer_magnitude"]["unstable"].as<Expression>();
+            cfg.acc_mag.falling     = config["accelerometer_magnitude"]["falling"].as<Expression>();
+            cfg.acc_mag.smoothing   = config["accelerometer_magnitude"]["smoothing"].as<Expression>();
+            cfg.acc_angle.mean      = config["accelerometer_angle"]["mean"].as<Expression>();
+            cfg.acc_angle.unstable  = config["accelerometer_angle"]["unstable"].as<Expression>();
+            cfg.acc_angle.falling   = config["accelerometer_angle"]["falling"].as<Expression>();
+            cfg.acc_angle.smoothing = config["accelerometer_angle"]["smoothing"].as<Expression>();
+
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
         });
 
@@ -99,6 +113,7 @@ namespace module::input {
         on<Trigger<RawSensors>,
            Optional<With<Sensors>>,
            With<Stability>,
+           Optional<With<WalkState>>,
            Optional<With<RobotPoseGroundTruth>>,
            Single,
            Priority::HIGH>()
@@ -106,6 +121,7 @@ namespace module::input {
                   [this](const RawSensors& raw_sensors,
                          const std::shared_ptr<const Sensors>& previous_sensors,
                          const Stability& stability,
+                         const std::shared_ptr<const WalkState>& walk_state,
                          const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
                       auto sensors = std::make_unique<Sensors>();
 
@@ -117,6 +133,9 @@ namespace module::input {
 
                       // Odometry (Htw and Hrw)
                       update_odometry(sensors, previous_sensors, raw_sensors, stability, robot_pose_ground_truth);
+
+                      // Stability state - falling, fallen, standing, static/dynamic
+                      update_stability(sensors, (walk_state ? walk_state.state : WalkState::State::UNKNOWN));
 
                       // Graph debug information
                       if (log_level <= DEBUG) {

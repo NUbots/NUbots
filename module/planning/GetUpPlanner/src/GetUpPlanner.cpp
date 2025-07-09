@@ -47,29 +47,19 @@ namespace module::planning {
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("GetUpPlanner.yaml").then([this](const Configuration& config) {
-            this->log_level  = config["log_level"].as<NUClear::LogLevel>();
-            cfg.fallen_angle = config["fallen_angle"].as<float>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
-            [this](const Uses<GetUp>& getup, const Sensors& sensors) {
+        on<Provide<GetUpWhenFallen>, Uses<GetUp>, When<Stability, std::equal_to, Stability::FALLEN>>().then(
+            [this](const Uses<GetUp>& getup) {
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
                     log<DEBUG>("Idle");
                     return;
                 }
-                // Transform to torso{t} from world{w} space
-                Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-                // Basis Z vector of torso {t} in world {w} space
-                Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
-                // Get the angle of the robot with the world z axis
-                double angle = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
-                log<DEBUG>("Angle: ", angle);
-
-                // // Check if angle between torso z axis and world z axis is greater than config value
                 // Only emit if we're not already requesting a getup
-                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
+                if (getup.run_state == RunState::NO_TASK) {
                     emit<Task>(std::make_unique<GetUp>());
                     log<DEBUG>("Execute getup");
                 }

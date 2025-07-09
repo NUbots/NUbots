@@ -46,21 +46,7 @@ namespace module::planning {
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("FallingRelaxPlanner.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            cfg.gyro_mag.mean       = config["gyroscope_magnitude"]["mean"].as<Expression>();
-            cfg.gyro_mag.unstable   = config["gyroscope_magnitude"]["unstable"].as<Expression>();
-            cfg.gyro_mag.falling    = config["gyroscope_magnitude"]["falling"].as<Expression>();
-            cfg.gyro_mag.smoothing  = config["gyroscope_magnitude"]["smoothing"].as<Expression>();
-            cfg.acc_mag.mean        = config["accelerometer_magnitude"]["mean"].as<Expression>();
-            cfg.acc_mag.unstable    = config["accelerometer_magnitude"]["unstable"].as<Expression>();
-            cfg.acc_mag.falling     = config["accelerometer_magnitude"]["falling"].as<Expression>();
-            cfg.acc_mag.smoothing   = config["accelerometer_magnitude"]["smoothing"].as<Expression>();
-            cfg.acc_angle.mean      = config["accelerometer_angle"]["mean"].as<Expression>();
-            cfg.acc_angle.unstable  = config["accelerometer_angle"]["unstable"].as<Expression>();
-            cfg.acc_angle.falling   = config["accelerometer_angle"]["falling"].as<Expression>();
-            cfg.acc_angle.smoothing = config["accelerometer_angle"]["smoothing"].as<Expression>();
-
+            this->log_level        = config["log_level"].as<NUClear::LogLevel>();
             std::string relax_part = config["relax"].as<std::string>();
 
             if (relax_part == "Body") {
