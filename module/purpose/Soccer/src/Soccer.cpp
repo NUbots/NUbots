@@ -143,7 +143,7 @@ namespace module::purpose {
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
-            if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
+            if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
