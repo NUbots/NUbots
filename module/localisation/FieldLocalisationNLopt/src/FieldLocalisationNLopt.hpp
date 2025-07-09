@@ -173,6 +173,16 @@ namespace module::localisation {
         Eigen::Vector3d right;
     };
 
+    /// @brief Struct to hold field intersection association with confidence
+    struct FieldIntersectionAssociation {
+        /// @brief Known landmark position in field space
+        Eigen::Vector3d landmark;
+        /// @brief Detected intersection position in field space
+        Eigen::Vector3d intersection;
+        /// @brief Confidence of the intersection detection
+        double confidence;
+    };
+
     class FieldLocalisationNLopt : public NUClear::Reactor {
     private:
         // Define the model dimensions
@@ -361,9 +371,9 @@ namespace module::localisation {
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
-         * @return Pairs of landmarks and corresponding field intersections (known landmark, intersection
+         * @return Vector of field intersection associations with confidence information
          */
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
+        std::vector<FieldIntersectionAssociation> data_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
 
@@ -391,10 +401,10 @@ namespace module::localisation {
          *
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
-         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
-         * and landmarks
+         * @return std::vector<FieldIntersectionAssociation> The associated pairs of field intersections
+         * and landmarks with confidence information
          */
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> hungarian_association(
+        std::vector<FieldIntersectionAssociation> hungarian_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
 
@@ -403,10 +413,10 @@ namespace module::localisation {
          *
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
-         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
-         * and landmarks
+         * @return std::vector<FieldIntersectionAssociation> The associated pairs of field intersections
+         * and landmarks with confidence information
          */
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
+        std::vector<FieldIntersectionAssociation> greedy_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
     };
