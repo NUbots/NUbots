@@ -42,6 +42,8 @@
 namespace module::localisation {
     class RobotLocalisation : public NUClear::Reactor {
     private:
+        uint PLAYER_ID;
+
         struct Config {
             /// @brief UKF config
             struct UKF {
@@ -70,8 +72,6 @@ namespace module::localisation {
             double max_localisation_cost = 0.0;
             /// @brief Whether to use ground truth robot data from Webots when available
             bool use_ground_truth = false;
-            /// @brief Our player ID to filter out our own robot from ground truth
-            uint32_t player_id = 0;
 
         } cfg;
 
