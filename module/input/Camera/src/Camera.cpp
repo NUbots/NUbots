@@ -209,7 +209,7 @@ namespace module::input {
 
             // Renormalise the focal length
             float fx  = config["lens"]["fx"].as<Expression>();
-            float fy  = config["lens"]["fx"].as<Expression>();
+            float fy  = config["lens"]["fy"].as<Expression>();
             float fov = config["lens"]["fov"].as<Expression>();
 
             // Recentre/renormalise the centre

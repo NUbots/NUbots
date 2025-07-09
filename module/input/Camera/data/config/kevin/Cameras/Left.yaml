@@ -21,10 +21,10 @@ lens:
   # centre: [-0.008429632815260277, 0.003767345048721181]
   # # The polynomial distortion coefficients for the lens
   # k: [0.4718296027381958, 0.22726744036437643]
-  fx: 0.3446512345140941
-  fy: 0.430567319
+  fx: 441.15
+  fy: 440.01
   # Normalised image centre offset: pixels from centre to optical axis / image width
-  centre: [0.005418370784106563, -0.08661520006894258]
+  centre: [646.93, 423.30]
   # The polynomial distortion coefficients for the lens
   k: [-0.04247437, -0.0076668, 0.00308963, -0.00099647]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor

@@ -31,9 +31,10 @@ namespace module::vision {
             lens.fx = 0.3446512345140941 * dims.x();
             lens.fy = 0.430567319 * dims.y();
 
-            Eigen::Vector2d image_center  = dims * 0.5;
-            Eigen::Vector2d centre_offset = Eigen::Vector2d(0.005418370784106563, -0.08661520006894258) * dims.x();
-            lens.centre                   = (image_center + centre_offset).cast<float>();
+            Eigen::Vector2d image_center = dims * 0.5;
+            Eigen::Vector2d norm_offset(0.00541837, -0.0866152);
+            Eigen::Vector2d pixel_offset(norm_offset.x() * dims.x(), norm_offset.y() * dims.y());
+            lens.centre = (image_center + pixel_offset).cast<float>();
 
             // Set of rays to test
             std::vector<Eigen::Vector3d> test_rays = {

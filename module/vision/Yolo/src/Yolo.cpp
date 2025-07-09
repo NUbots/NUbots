@@ -123,10 +123,10 @@ namespace module::vision {
             [this](const Image& img, const std::shared_ptr<const GreenHorizon>& horizon) {
                 // Start timer for benchmarking
                 auto start = std::chrono::high_resolution_clock::now();
-
                 // -------- Convert image to cv::Mat -------
                 const int width  = img.dimensions.x();
                 const int height = img.dimensions.y();
+
                 cv::Mat img_cv;
                 switch (img.format) {
                     case utility::vision::fourcc("BGR3"):  // BGR3 not available in utility::vision::FOURCC.
@@ -239,7 +239,6 @@ namespace module::vision {
                                                       img.lens                // Lens with fx, fy, centre, k
                     );
                 };
-
 
                 // Helper function to simplify projecting rays onto the field plane then transforming into camera space
                 auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {
