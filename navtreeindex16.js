@@ -1,5 +1,13 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a23244b3976c1c0f6dcaaebb8264fc39a":[3,0,3,8,1,6,1,2],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#acc680091ac55fe93f70a054818767681":[3,0,3,8,1,6,1,4],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#aeb93cb3790ddcfacc3b309d24c9f23d2":[3,0,3,8,1,6,1,0],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html":[3,0,3,8,1,6,2],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html":[3,0,3,8,1,6,3],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a130a00f4058b3cf38ce164c6fc14aa9c":[3,0,3,8,1,6,3,3],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a160a09890d34b9ba8b8ecc9166c996d7":[3,0,3,8,1,6,3,8],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419":[3,0,3,8,1,6,3,5],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a43238189263de8350aa91aa3e93dff09":[3,0,3,8,1,6,3,2],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4b42a8eb2680c64e2729a511ea5d0af8":[3,0,3,8,1,6,3,7],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a5dfea7221a92d6c2520899a6e6b0b034":[3,0,3,8,1,6,3,6],
@@ -241,13 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation_1_1Config.html":[3,0,3,12,2,4,0],
 "structmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation_1_1Config.html#ad3b23ad3c63c0774260524329570f3e0":[3,0,3,12,2,4,0,1],
 "structmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation_1_1Config.html#afaaa1541391d9b69c238f1018370e080":[3,0,3,12,2,4,0,0],
-"structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html":[3,0,3,12,2,6,0],
-"structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html#a9f7c6420ec1355736c9f5935d7f5ae76":[3,0,3,12,2,6,0,0],
-"structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html":[3,0,3,12,2,8,0],
-"structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html#a361f49fefa3bbe79eb792a36a1608e44":[3,0,3,12,2,8,0,0],
-"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html":[3,0,3,12,2,10,0],
-"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05":[3,0,3,12,2,10,0,0],
-"structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html":[3,0,3,12,2,12,0],
-"structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html#a0243517121b347d2ea565df50bdda7c7":[3,0,3,12,2,12,0,0],
-"structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html":[3,0,3,13,2,0]
+"structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html":[3,0,3,12,2,6,0]
 };

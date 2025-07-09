@@ -1,8 +1,9 @@
 <map id="module::input::SensorFilter" name="module::input::SensorFilter">
-<area shape="rect" id="node1" title=" " alt="" coords="664,97,861,124"/>
-<area shape="rect" id="node2" title=" " alt="" coords="355,5,490,32"/>
-<area shape="rect" id="node3" href="$structmodule_1_1input_1_1SensorFilter_1_1Config.html" title=" " alt="" coords="324,57,521,98"/>
-<area shape="rect" id="node4" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html" title="Config for the foot down detector." alt="" coords="5,57,203,98"/>
-<area shape="rect" id="node5" href="$classutility_1_1math_1_1filter_1_1YawFilter.html" title=" " alt="" coords="341,122,504,163"/>
-<area shape="rect" id="node6" href="$classutility_1_1math_1_1filter_1_1MahonyFilter.html" title=" " alt="" coords="328,187,517,229"/>
+<area shape="rect" id="node1" title=" " alt="" coords="695,97,892,124"/>
+<area shape="rect" id="node2" title=" " alt="" coords="386,5,521,32"/>
+<area shape="rect" id="node3" href="$structmodule_1_1input_1_1SensorFilter_1_1Config.html" title=" " alt="" coords="355,57,552,98"/>
+<area shape="rect" id="node4" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1AdaptiveGains.html" title="Adaptive Mahony filter gains based on stability state." alt="" coords="5,25,203,66"/>
+<area shape="rect" id="node5" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html" title="Config for the foot down detector." alt="" coords="5,90,203,131"/>
+<area shape="rect" id="node6" href="$classutility_1_1math_1_1filter_1_1YawFilter.html" title=" " alt="" coords="372,122,535,163"/>
+<area shape="rect" id="node7" href="$classutility_1_1math_1_1filter_1_1MahonyFilter.html" title=" " alt="" coords="359,187,548,229"/>
 </map>

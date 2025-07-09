@@ -1,6 +1,8 @@
 var structmodule_1_1input_1_1SensorFilter_1_1Config =
 [
+    [ "AdaptiveGains", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1AdaptiveGains.html", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1AdaptiveGains" ],
     [ "FootDown", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown" ],
+    [ "adaptive_gains", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a0a0368317ed0d3b64933263c512c664f", null ],
     [ "button_debounce_threshold", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a14275a86aa7b9833dbea68601c36001d", null ],
     [ "foot_down", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a13704141326f24afe498531ee621b4bf", null ],
     [ "use_ground_truth", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#ad4963d41519183a4ce47a32cebdbe06f", null ],

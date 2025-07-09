@@ -126,6 +126,7 @@ var hierarchy =
     [ "module::input::ReadData< std::vector< Marker > >", "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01Marker_01_4_01_4.html", null ],
     [ "module::input::ReadData< std::vector< T > >", "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01T_01_4_01_4.html", null ],
     [ "module::input::SensorFilter::Config", "structmodule_1_1input_1_1SensorFilter_1_1Config.html", null ],
+    [ "module::input::SensorFilter::Config::AdaptiveGains", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1AdaptiveGains.html", null ],
     [ "module::input::SensorFilter::Config::FootDown", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html", null ],
     [ "module::input::SettingsFunctions< T >", "structmodule_1_1input_1_1SettingsFunctions.html", null ],
     [ "module::input::SettingsFunctions< ArvGcBoolean >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html", null ],

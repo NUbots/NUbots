@@ -1,5 +1,13 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html#a9f7c6420ec1355736c9f5935d7f5ae76":[3,0,3,12,2,6,0,0],
+"structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html":[3,0,3,12,2,8,0],
+"structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html#a361f49fefa3bbe79eb792a36a1608e44":[3,0,3,12,2,8,0,0],
+"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html":[3,0,3,12,2,10,0],
+"structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05":[3,0,3,12,2,10,0,0],
+"structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html":[3,0,3,12,2,12,0],
+"structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html#a0243517121b347d2ea565df50bdda7c7":[3,0,3,12,2,12,0,0],
+"structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html":[3,0,3,13,2,0],
 "structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html#af2063989175cc12f6a2a54a80d902ff8":[3,0,3,13,2,0,1],
 "structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html#af68255ccdc4eef39cc96d3aff7c803cb":[3,0,3,13,2,0,0],
 "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html":[3,0,3,13,3,0],
@@ -241,13 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1input_1_1LimbID.html#ae5568d4b15ba66df7afba073030aa91faf0ff2b6428c5bc7a5a972fa970713cd9":[3,0,7,2,1,0,3],
 "structutility_1_1input_1_1LimbID.html#ae75bb7701b23692899641d01edc33f66":[3,0,7,2,1,30],
 "structutility_1_1input_1_1LimbID.html#af0316af242cb432e6738eb0fa2bdda6f":[3,0,7,2,1,17],
-"structutility_1_1input_1_1LimbID.html#af112b2b27f4997918d1a55f1eebdde70":[3,0,7,2,1,21],
-"structutility_1_1input_1_1LimbID.html#afc7d69eaf9e751008379b9d8371f2df6":[3,0,7,2,1,11],
-"structutility_1_1input_1_1LimbID.html#afd8f97218aa8df4f7c682a6bd59b67c4":[3,0,7,2,1,27],
-"structutility_1_1input_1_1ServoID.html":[3,0,7,2,2],
-"structutility_1_1input_1_1ServoID.html#a099d66316df7ca2bd3256dd435a3b272":[3,0,7,2,2,6],
-"structutility_1_1input_1_1ServoID.html#a0ab4348dd30622d26a46182ffc3ed17e":[3,0,7,2,2,25],
-"structutility_1_1input_1_1ServoID.html#a0dccc3c86509d39bc8451a53270806c8":[3,0,7,2,2,1],
-"structutility_1_1input_1_1ServoID.html#a189321f62d9ea01eab6e0163ccefd4d0":[3,0,7,2,2,2],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026da":[3,0,7,2,2,0]
+"structutility_1_1input_1_1LimbID.html#af112b2b27f4997918d1a55f1eebdde70":[3,0,7,2,1,21]
 };

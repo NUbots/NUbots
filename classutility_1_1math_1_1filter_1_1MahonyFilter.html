@@ -181,10 +181,26 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a21f9a92f67dd88ea850e5c5341f3970c"><td class="memItemLeft" align="right" valign="top"><a id="a21f9a92f67dd88ea850e5c5341f3970c"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MahonyFilter</b> (const Scalar <a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#ab671e2f66e1c55771ac4c51c75debcb5">Kp</a>=0, const Scalar <a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a64b523d9056b0d9224f781a34ce98474">Ki</a>=0, const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;<a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a29b26f043c744cf7e1b45db500116da1">bias</a>=Eigen::Matrix&lt; Scalar, 3, 1 &gt;::Zero(), const Eigen::Matrix&lt; Scalar, 3, 3 &gt; &amp;<a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8fea4c5a6e7d496517218e571a5d1983">Rwb</a>=Eigen::Matrix&lt; Scalar, 3, 3 &gt;::Identity())</td></tr>
 <tr class="separator:a21f9a92f67dd88ea850e5c5341f3970c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae55775b3de104f7f090eb6633385f02d"><td class="memItemLeft" align="right" valign="top"><a id="ae55775b3de104f7f090eb6633385f02d"></a>
+Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#ae55775b3de104f7f090eb6633385f02d">get_Ki</a> () const</td></tr>
+<tr class="memdesc:ae55775b3de104f7f090eb6633385f02d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current integral gain. <br /></td></tr>
+<tr class="separator:ae55775b3de104f7f090eb6633385f02d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38843fb5d1bb3dd76f4751299ec01399"><td class="memItemLeft" align="right" valign="top"><a id="a38843fb5d1bb3dd76f4751299ec01399"></a>
+Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a38843fb5d1bb3dd76f4751299ec01399">get_Kp</a> () const</td></tr>
+<tr class="memdesc:a38843fb5d1bb3dd76f4751299ec01399"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current proportional gain. <br /></td></tr>
+<tr class="separator:a38843fb5d1bb3dd76f4751299ec01399"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa632e1f6df3cb5545769050af80236ae"><td class="memItemLeft" align="right" valign="top"><a id="aa632e1f6df3cb5545769050af80236ae"></a>
 Eigen::Matrix&lt; Scalar, 3, 3 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#aa632e1f6df3cb5545769050af80236ae">get_state</a> () const</td></tr>
 <tr class="memdesc:aa632e1f6df3cb5545769050af80236ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the rotation matrix. <br /></td></tr>
 <tr class="separator:aa632e1f6df3cb5545769050af80236ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01d4230ad186a8e861956a7845878ce8"><td class="memItemLeft" align="right" valign="top"><a id="a01d4230ad186a8e861956a7845878ce8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a01d4230ad186a8e861956a7845878ce8">set_Ki</a> (const Scalar new_Ki)</td></tr>
+<tr class="memdesc:a01d4230ad186a8e861956a7845878ce8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the integral gain. <br /></td></tr>
+<tr class="separator:a01d4230ad186a8e861956a7845878ce8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad010d5390ab3d65f9d13531ea98469cd"><td class="memItemLeft" align="right" valign="top"><a id="ad010d5390ab3d65f9d13531ea98469cd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#ad010d5390ab3d65f9d13531ea98469cd">set_Kp</a> (const Scalar new_Kp)</td></tr>
+<tr class="memdesc:ad010d5390ab3d65f9d13531ea98469cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the proportional gain. <br /></td></tr>
+<tr class="separator:ad010d5390ab3d65f9d13531ea98469cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2097e7413690f39f6ee619cbe971d44"><td class="memItemLeft" align="right" valign="top"><a id="af2097e7413690f39f6ee619cbe971d44"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#af2097e7413690f39f6ee619cbe971d44">set_state</a> (const Eigen::Matrix&lt; Scalar, 3, 3 &gt; &amp;<a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8fea4c5a6e7d496517218e571a5d1983">Rwb</a>)</td></tr>
 <tr class="memdesc:af2097e7413690f39f6ee619cbe971d44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the rotation matrix. <br /></td></tr>
@@ -229,7 +245,7 @@ Eigen::Matrix&lt; Scalar, 3, 3 &gt;&#160;</td><td class="memItemRight" valign="b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><b>filter</b></li><li class="navelem"><a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html">MahonyFilter</a></li>
-    <li class="footer">Generated on Tue Jul 8 2025 22:46:29 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jul 9 2025 01:26:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
