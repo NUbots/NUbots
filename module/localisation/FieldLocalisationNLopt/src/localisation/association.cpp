@@ -45,7 +45,8 @@ namespace module::localisation {
         // Note that the assignment is intersection index to landmark index
         Eigen::MatrixXd cost_matrix(field_intersections->intersections.size(), landmarks.size());
 
-        int intersection_idx = 0;
+        constexpr double max_cost = 1e9;
+        int intersection_idx      = 0;
         for (const auto& intersection : field_intersections->intersections) {
             // Transform the detected intersection from world to field coordinates
             Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
@@ -53,8 +54,8 @@ namespace module::localisation {
             for (size_t i = 0; i < landmarks.size(); ++i) {
                 const auto& landmark = landmarks[i];
 
-                // Default cost is infinite (invalid)
-                double cost = std::numeric_limits<double>::max();
+                // Default cost is max_cost variable
+                double cost = max_cost;
 
                 // If the types match, check the distance
                 if (landmark.type == intersection.type) {
@@ -78,7 +79,7 @@ namespace module::localisation {
         for (const auto& [intersection_index, landmark_index] : assignment) {
             double cost = cost_matrix(intersection_index, landmark_index);
 
-            if (cost < std::numeric_limits<double>::max()) {
+            if (cost < max_cost) {
                 const auto& intersection = field_intersections->intersections.at(intersection_index);
                 const auto& landmark     = landmarks.at(landmark_index);
 
