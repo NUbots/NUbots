@@ -101,6 +101,15 @@ message HeadSequence {
     repeated Head frames = 1;
 }
 
+/// Arms and head servo command information including time, gain, torque, position
+message UpperBody {
+    /// Information for each servo in the body, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message UpperBodySequence {
+    repeated UpperBody frames = 1;
+}
+
 /// Arms, legs and head servo command information including time, gain, torque, position
 message Body {
     /// Information for each servo in the body, with the key corresponding to ServoID

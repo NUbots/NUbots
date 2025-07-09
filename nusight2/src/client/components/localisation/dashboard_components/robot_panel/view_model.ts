@@ -1,8 +1,8 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Vector3 } from "../../../../shared/math/vector3";
-import { message } from "../../../../shared/messages";
+import { Vector3 } from "../../../../../shared/math/vector3";
+import { message } from "../../../../../shared/messages";
 import { DashboardRobotModel } from "../dashboard_robot/model";
 
 import { LastStatus } from "./view";
@@ -11,11 +11,11 @@ const Mode = message.input.GameState.Mode;
 const PenaltyReason = message.input.GameState.PenaltyReason;
 const Phase = message.input.GameState.Phase;
 
-export class RobotPanelViewModel {
+export class DashboardRobotPanelViewModel {
   constructor(private model: DashboardRobotModel) {}
 
-  static of = createTransformer((model: DashboardRobotModel): RobotPanelViewModel => {
-    return new RobotPanelViewModel(model);
+  static of = createTransformer((model: DashboardRobotModel): DashboardRobotPanelViewModel => {
+    return new DashboardRobotPanelViewModel(model);
   });
 
   @computed get connected(): boolean {

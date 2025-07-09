@@ -53,6 +53,9 @@ namespace module::purpose {
         /// @brief Idle state of the robot
         bool idle = false;
 
+        /// @brief A high-level update rate for the director tree
+        static constexpr size_t BEHAVIOUR_UPDATE_RATE = 25;
+
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
         explicit Soccer(std::unique_ptr<NUClear::Environment> environment);
