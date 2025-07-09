@@ -211,7 +211,6 @@ namespace module::planning {
                     desired_heading             = lerp(angle_to_target, angle_to_final_heading, align_progress);
                 }
 
-
                 // Calculate the target velocity
                 const Eigen::Vector2d desired_translational_velocity = desired_magnitude * rDRr.normalized();
                 Eigen::Vector3d velocity_target(desired_translational_velocity.x(),
