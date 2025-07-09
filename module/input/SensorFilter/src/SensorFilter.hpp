@@ -67,6 +67,14 @@ namespace module::input {
                 double threshold   = 0.0;
             } foot_down;
 
+            /// @brief Adaptive Mahony filter gains based on stability state
+            struct AdaptiveGains {
+                /// @brief Kp gain for standing state
+                double standing_Kp = 0.0;
+                /// @brief Kp gain for dynamic states
+                double dynamic_Kp = 0.0;
+            } adaptive_gains;
+
             /// @brief The number of times a button must be pressed before it is considered pressed
             int button_debounce_threshold = 0;
             /// @brief Cutoff frequency for the low pass filter of torso x velocity

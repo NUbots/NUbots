@@ -61,8 +61,10 @@ namespace module::input {
             nugus_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
 
             // Configure the Mahony filter
-            mahony_filter = MahonyFilter<double>(
-                config["mahony"]["Kp"].as<Expression>(),
+            cfg.adaptive_gains.standing_Kp = config["mahony"]["adaptive_gains"]["standing"]["Kp"].as<double>();
+            cfg.adaptive_gains.dynamic_Kp  = config["mahony"]["adaptive_gains"]["dynamic"]["Kp"].as<double>();
+            mahony_filter                  = MahonyFilter<double>(
+                cfg.adaptive_gains.standing_Kp,
                 config["mahony"]["Ki"].as<Expression>(),
                 Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>()),
                 rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>())));
