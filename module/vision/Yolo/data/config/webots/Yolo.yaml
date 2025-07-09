@@ -8,7 +8,7 @@ model_path: "yolo.onnx"
 ball_confidence_threshold: 0.3
 
 # Minimum confidence required for a goal detection to be accepted
-goalpost_confidence_threshold: 0.6
+goalpost_confidence_threshold: 0.3
 
 # Minimum confidence required for a robot detection to be accepted
 robot_confidence_threshold: 0.5
