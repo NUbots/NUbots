@@ -361,7 +361,7 @@ $(document).ready(function(){initNavTree('math_2matrix_2transform_8hpp_source.ht
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="keyword">inline</span> Eigen::Isometry2d lookAt(<span class="keyword">const</span> Eigen::Vector2d&amp; from, <span class="keyword">const</span> Eigen::Vector2d&amp; to) {</div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;        Eigen::Isometry2d result;</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        result.translation() = from;</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        result.linear()      = Eigen::Rotation2Dd(utility::math::angle::vectorToBearing(to - from)).toRotationMatrix();</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        result.linear() = Eigen::Rotation2Dd(utility::math::angle::vector_to_bearing(to - from)).toRotationMatrix();</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        <span class="keywordflow">return</span> result;</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    }</div>
 <div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;}  <span class="comment">// namespace utility::math::transform</span></div>
@@ -373,7 +373,7 @@ $(document).ready(function(){initNavTree('math_2matrix_2transform_8hpp_source.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_5224ab8e38918af5170b4d41508acb75.html">math</a></li><li class="navelem"><a class="el" href="dir_8f94afcc4b2eab3b6add9fa8e571920f.html">matrix</a></li><li class="navelem"><b>transform.hpp</b></li>
-    <li class="footer">Generated on Wed Jul 9 2025 03:25:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jul 9 2025 05:45:03 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

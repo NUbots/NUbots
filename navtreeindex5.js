@@ -1,7 +1,5 @@
 var NAVTREEINDEX5 =
 {
-"classmodule_1_1skill_1_1Look.html#a9a18c367bd8fa8a76a7dc227d47b2373":[3,0,3,10,8,2],
-"classmodule_1_1skill_1_1Look.html#aab0a3bf4b133df9f44c1fdc44c28a1a8":[3,0,3,10,8,3],
 "classmodule_1_1skill_1_1Look.html#ad4815382bc207e78a06eb1da9a7f1d2a":[3,0,3,10,8,1],
 "classmodule_1_1skill_1_1Look.html#ae4507c170bfa83268598c76bce704b02":[3,0,3,10,8,4],
 "classmodule_1_1skill_1_1Say.html":[3,0,3,10,9],
@@ -249,5 +247,7 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#a3e9799646ab252d037972a2358ebeab7":[3,0,3,12,2,9,3],
 "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#a9251a0b072cf7eb2207f39125b72c8d2":[3,0,3,12,2,9,0],
 "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#a984963856ec7d62600d00a348b58097b":[3,0,3,12,2,9,4],
-"classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#aa5b7b219efed0dceb3ed0c3bc1b1fe6e":[3,0,3,12,2,9,1]
+"classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#aa5b7b219efed0dceb3ed0c3bc1b1fe6e":[3,0,3,12,2,9,1],
+"classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html#af998e496a01901b0347eb931f18daccd":[3,0,3,12,2,9,2],
+"classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html":[3,0,3,12,2,10]
 };

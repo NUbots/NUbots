@@ -868,7 +868,7 @@ var namespaces_dup =
           [ "normalise_angle", "namespaceutility_1_1math_1_1angle.html#a681ab160d054924fd5d62d318fe8af3b", null ],
           [ "signedDifference", "namespaceutility_1_1math_1_1angle.html#a2172e5d7bac696b4ddb6dd02cecc7f61", null ],
           [ "solveLinearTrigEquation", "namespaceutility_1_1math_1_1angle.html#ad768a98e6ebcc91ecf92252e8bdd7340", null ],
-          [ "vectorToBearing", "namespaceutility_1_1math_1_1angle.html#a3711ea87a2dc9adfb4ddfea0d65d42d6", null ]
+          [ "vector_to_bearing", "namespaceutility_1_1math_1_1angle.html#a87a6636d544b01b5e7cc7d01e7c6f65c", null ]
         ] ],
         [ "coordinates", "namespaceutility_1_1math_1_1coordinates.html", [
           [ "cartesianToReciprocalSpherical", "namespaceutility_1_1math_1_1coordinates.html#af411658f783b5709d8a8c4c56fd82218", null ],

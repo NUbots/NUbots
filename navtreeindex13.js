@@ -1,7 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a180afaa98321f36dc22ce3f8d6b5a73c":[3,0,3,2,1,0,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a29d5536a8dd324998eba2c932e69c033":[3,0,3,2,1,0,6],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a2e2933f82fa1cafa336fae56e54f7112":[3,0,3,2,1,0,7],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4a7b4602069a952638f10c112dccce27":[3,0,3,2,1,0,8],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a5f5f56d45df44dec37672148e530d40a":[3,0,3,2,1,0,3],
@@ -249,5 +247,7 @@ var NAVTREEINDEX13 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#afff9419f5bddf0f9149882646944c657":[3,0,3,6,0,1,3,17],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html":[3,0,3,6,0,1,0,1],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html#a2ea2bafd41ce27979ed3cec08cd85f24":[3,0,3,6,0,1,0,1,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html#ad8add0fb973dacb28b138ed539d58c2b":[3,0,3,6,0,1,0,1,0]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html#ad8add0fb973dacb28b138ed539d58c2b":[3,0,3,6,0,1,0,1,0],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html":[3,0,3,6,0,1,1,0,0],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html#a067531f68af2df6d1c7ab370c38e0ce1":[3,0,3,6,0,1,1,0,0,0]
 };
