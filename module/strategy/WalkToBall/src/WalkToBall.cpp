@@ -171,7 +171,8 @@ namespace module::strategy {
                     for (const auto& robot : robots->robots) {
                         all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
                     }
-                    auto robot_infront = robot_infront_of_ball(all_obstacles, rBFf.head(2));
+
+                    auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2));
                     if (robot_infront.has_value()) {
                         log<DEBUG>("Found robot in front of ball at", robot_infront.value());
                         // Use 3D field-frame positions
@@ -335,19 +336,22 @@ namespace module::strategy {
             });
     }
 
-    std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_ball(const std::vector<Eigen::Vector2d>& all_obstacles,
+    std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                                      const Eigen::Vector2d& rBFf) {
         // Normalized direction from robot to ball
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front    = dir_to_ball.dot(obstacle.normalized()) > 0.0;
-            const bool behind_ball = obstacle.norm() > rBFf.norm();
-            const Eigen::Vector2d limited_rBFf = rBFf.normalized() * cfg.infront_check_distance;
-
+            const bool in_front    = obstacle.x() < rBFf.x();
+            log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
+            const bool past_ball = obstacle.norm() > rBFf.norm();
+            log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
+            const bool within_range =
+                obstacle.norm() < cfg.infront_check_distance;
+            log<DEBUG>("within_range:", obstacle.norm(), "cfg.infront_check_distance:", cfg.infront_check_distance);
             const bool intersects_path =
                 utility::math::geometry::intersection_line_and_circle(Eigen::Vector2d::Zero(),
-                                                                      limited_rBFf,
+                                                                      rBFf,
                                                                       obstacle,
                                                                       cfg.infront_of_ball_radius);
 
@@ -355,16 +359,17 @@ namespace module::strategy {
                        obstacle.transpose(),
                        " | in_front:",
                        in_front,
-                       " | behind_ball:",
-                       behind_ball,
+                       " | past_ball:",
+                       past_ball,
+                       " | within_range:",
+                        within_range,
                        " | intersects:",
                        intersects_path);
 
-            if (in_front && behind_ball && intersects_path) {
+            if (in_front && past_ball && within_range && intersects_path) {
                 return obstacle;
             }
         }
-
         return std::nullopt;
     }
 

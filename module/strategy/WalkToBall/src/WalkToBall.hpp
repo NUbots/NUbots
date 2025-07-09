@@ -73,7 +73,7 @@ namespace module::strategy {
 
         } cfg;
 
-        std::optional<Eigen::Vector2d> robot_infront_of_ball(const std::vector<Eigen::Vector2d>& all_obstacles,
+        std::optional<Eigen::Vector2d> robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                              const Eigen::Vector2d& rBFf);
 
 
