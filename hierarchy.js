@@ -144,7 +144,6 @@ var hierarchy =
     [ "module::localisation::BallLocalisation::TeamGuess", "structmodule_1_1localisation_1_1BallLocalisation_1_1TeamGuess.html", null ],
     [ "module::localisation::BallModel< Scalar >", "classmodule_1_1localisation_1_1BallModel.html", null ],
     [ "module::localisation::BallModel< Scalar >::StateVec", "structmodule_1_1localisation_1_1BallModel_1_1StateVec.html", null ],
-    [ "module::localisation::FieldIntersectionAssociation", "structmodule_1_1localisation_1_1FieldIntersectionAssociation.html", null ],
     [ "module::localisation::FieldLocalisationNLopt::Config", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html", null ],
     [ "module::localisation::GoalPost", "structmodule_1_1localisation_1_1GoalPost.html", null ],
     [ "module::localisation::MeasurementType::BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ],
