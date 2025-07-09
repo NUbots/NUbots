@@ -145,6 +145,7 @@ namespace module::purpose {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                emit<Task>(std::make_unique<FallRecovery>(), 2);
             }
         });
 
