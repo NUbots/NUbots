@@ -395,7 +395,7 @@ namespace module::localisation {
             auto Hfw = compute_Hfw(x);
 
             // --- Field line intersection cost ---
-            if (field_intersections) {
+            if (field_intersections && cfg.field_line_intersection_weight != 0.0) {
                 auto associations          = data_association(field_intersections, Hfw);
                 double total_weighted_cost = 0.0;
                 double total_confidence    = 0.0;
@@ -412,13 +412,13 @@ namespace module::localisation {
 
                 // Add the weighted cost to the total cost
                 if (total_confidence > 0.0) {
-                    cost += total_weighted_cost / total_confidence;  // Normalize by total confidence
+                    cost += total_weighted_cost / total_confidence;  // Normalise by total confidence
                 }
             }
 
             // --- Goal post cost ---
             // Only consider goal post cost if there are two goals
-            if (goals && goals->goals.size() == 2) {
+            if (goals && goals->goals.size() == 2 && cfg.goal_post_distance_weight != 0.0) {
                 // Ensure the goal posts are roughly correct distance apart
                 auto Hwc              = Eigen::Isometry3d(goals->Hcw).inverse();
                 auto rGWw_1           = Hwc * (goals->goals[0].post.bottom * goals->goals[0].post.distance);
