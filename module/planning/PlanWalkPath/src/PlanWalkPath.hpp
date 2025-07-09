@@ -93,7 +93,7 @@ namespace module::planning {
         } cfg;
 
         /// @brief Previous walk command
-        Eigen::Vector3d previous_walk_command;
+        Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Update frequency of the walk command smoothing
         static constexpr int UPDATE_FREQUENCY = 10;
@@ -102,7 +102,7 @@ namespace module::planning {
         double velocity_magnitude = 0.0;
 
         /// @brief Current stability of the robot
-        message::behaviour::state::Stability stability;
+        message::behaviour::state::Stability stability{};
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain

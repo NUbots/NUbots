@@ -224,7 +224,7 @@ namespace module::planning {
                 // Emit the walk task with the calculated velocities
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
 
-                // Emit debugging information for visualization and monitoring
+                // Emit debugging information for visualisation and monitoring
                 auto debug_information                       = std::make_unique<WalkToDebug>();
                 debug_information->Hrd.translation().head(2) = rDRr;
                 debug_information->Hrd.linear()     = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
