@@ -1,6 +1,6 @@
 import { observable } from "mobx";
 
-import { FieldDimensions } from "../../../../shared/field/dimensions";
+import { FieldDimensions } from "../../../../../shared/field/dimensions";
 
 export class GroundModel {
   @observable bottomGoalColor: string;
@@ -21,7 +21,7 @@ export class GroundModel {
     return new GroundModel({
       bottomGoalColor: "#0000ff",
       dimensions: FieldDimensions.of(),
-      fieldColor: "#15803d",
+      fieldColor: "#009900",
       lineColor: "#ffffff",
       topGoalColor: "#ffff00",
     });
