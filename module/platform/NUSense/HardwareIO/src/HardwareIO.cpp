@@ -167,6 +167,7 @@ namespace module::platform::NUSense {
         });
 
         // Handle successfully decoded NUSense data
+        // Single is added to prevent a seg fault, todo investigate further
         on<Trigger<NUSense>, With<ServoOffsets>, Single>().then(
             [this](const NUSense& data, const ServoOffsets& offsets) {
                 // Will contain data from the NUSense to emit to the rest of the system
