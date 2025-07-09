@@ -77,6 +77,7 @@ namespace module::strategy {
             cfg.approach_offset        = config["approach_offset"].as<double>();
             cfg.tackle_angle_offset    = config["tackle_angle_offset"].as<double>();
             cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
+            cfg.infront_of_ball_radius = config["infront_of_ball_radius"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -97,8 +98,11 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToKickBall>, With<Ball>, With<Sensors>, With<Field>>().then(
-            [this](const Ball& ball, const Sensors& sensors, const Field& field) {
+        on<Provide<WalkToKickBall>, Optional<With<Robots>>, With<Ball>, With<Sensors>, With<Field>>().then(
+            [this](const std::shared_ptr<const Robots>& robots,
+                   const Ball& ball,
+                   const Sensors& sensors,
+                   const Field& field) {
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -155,6 +159,26 @@ namespace module::strategy {
                     double angle_scale     = std::clamp(std::abs(angle_error) / cfg.max_angle_error, 0.0, 1.0);
                     Eigen::Vector3d target = kick_target - uGBf * cfg.ball_approach_distance * angle_scale;
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
+                }
+                // If there are robots, check if there are obstacles in the way
+                if (robots != nullptr) {
+                    log<DEBUG>("Checking for obstacles in the way of kick path");
+                    // Get the positions of all robots in the world
+                    std::vector<Eigen::Vector2d> all_obstacles{};
+                    for (const auto& robot : robots->robots) {
+                        all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
+                    }
+                    auto robot_infront = robot_infront_of_ball(all_obstacles, rBFf.head(2));
+                    if (robot_infront.has_value()) {
+                        log<DEBUG>("Robot in front of ball", robot_infront.value());
+                        // Move to the side of the ball
+                        if (robot_infront.value().y() > rBFf.y()) {
+                            Hfk = pos_rpy_to_transform(rGFf, Eigen::Vector3d(0, 0, desired_heading + M_PI_4));
+                        }
+                        else {
+                            Hfk = pos_rpy_to_transform(rGFf, Eigen::Vector3d(0, 0, desired_heading - M_PI_4));
+                        }
+                    }
                 }
 
                 // Issue walking task toward final position and orientation
