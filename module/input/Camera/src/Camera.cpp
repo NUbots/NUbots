@@ -207,17 +207,13 @@ namespace module::input {
             int width    = config["settings"]["Width"].as<Expression>();
             int height   = config["settings"]["Height"].as<Expression>();
 
-            // Renormalise the focal length
+            // Focal length
             float fx  = config["lens"]["fx"].as<Expression>();
             float fy  = config["lens"]["fy"].as<Expression>();
             float fov = config["lens"]["fov"].as<Expression>();
 
             // Recentre/renormalise the centre
-            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width;
-            centre += Eigen::Vector2f(offset_x - (full_width - width - offset_x),
-                                      offset_y - (full_height - height - offset_y))
-                      * 0.5;
-            centre /= width;
+            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>());
 
             // Adjust the distortion parameters for the new width units
             Eigen::Vector4f k = config["lens"]["k"].as<Expression>();

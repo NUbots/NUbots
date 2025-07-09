@@ -241,9 +241,9 @@ namespace module::vision {
                 };
 
                 // Helper function to simplify projecting rays onto the field plane then transforming into camera space
-                auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {
-                    Eigen::Vector3d uBCw = Hwc.rotation() * ray;
-                    Eigen::Vector3d rPWw = uBCw * std::abs(Hwc.translation().z() / uBCw.z()) + Hwc.translation();
+                auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& uPCc) {
+                    Eigen::Vector3d uPCw = Hwc.rotation() * uPCc;
+                    Eigen::Vector3d rPWw = uPCw * std::abs(Hwc.translation().z() / uPCw.z()) + Hwc.translation();
                     return Hwc.inverse() * rPWw;
                 };
 
