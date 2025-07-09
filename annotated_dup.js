@@ -131,6 +131,7 @@ var annotated_dup =
         ] ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
+        [ "FieldIntersectionAssociation", "structmodule_1_1localisation_1_1FieldIntersectionAssociation.html", "structmodule_1_1localisation_1_1FieldIntersectionAssociation" ],
         [ "FieldLocalisationNLopt", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html", "classmodule_1_1localisation_1_1FieldLocalisationNLopt" ],
         [ "GoalPost", "structmodule_1_1localisation_1_1GoalPost.html", "structmodule_1_1localisation_1_1GoalPost" ],
         [ "Mocap", "classmodule_1_1localisation_1_1Mocap.html", "classmodule_1_1localisation_1_1Mocap" ],
