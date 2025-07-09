@@ -79,10 +79,10 @@ namespace module::platform {
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
     using message::platform::webots::MotorVelocity;
+    using message::platform::webots::RobotsGroundTruth;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
-    using message::platform::webots::RobotsGroundTruth;
     using message::support::optimisation::OptimisationCommand;
     using message::support::optimisation::OptimisationResetDone;
     using message::support::optimisation::OptimisationRobotPosition;
@@ -835,7 +835,7 @@ namespace module::platform {
         }
 
         if (sensor_measurements.robots_ground_truth.exists) {
-            auto robots_ground_truth = std::make_unique<message::platform::webots::RobotsGroundTruth>();
+            auto robots_ground_truth    = std::make_unique<message::platform::webots::RobotsGroundTruth>();
             robots_ground_truth->robots = sensor_measurements.robots_ground_truth.robots;
             emit(robots_ground_truth);
         }

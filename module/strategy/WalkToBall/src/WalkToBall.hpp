@@ -69,7 +69,23 @@ namespace module::strategy {
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
 
+            /// @brief Radius of circle around ball where an opponent robot is considered to be in front of the ball
+            double infront_of_ball_radius = 0.0;
+
+            // TODO: We want to dribble around a robot if we are in possession
+
         } cfg;
+
+        std::optional<Eigen::Vector2d> robot_infront_of_ball(const std::vector<Eigen::Vector2d>& all_obstacles,
+                                                             const Eigen::Vector2d& rBFf) {
+            // Check if the robot is in front of the ball
+            for (const auto& obstacle : all_obstacles) {
+                if (obstacle.x() < rBFf.x() && (rBFf - obstacle).norm() < cfg.infront_of_ball_radius) {
+                    return obstacle;
+                }
+            }
+            return std::nullopt;
+        }
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
