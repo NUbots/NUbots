@@ -91,7 +91,7 @@ def _setup_volume(volume_name, clean_volume):
     return volume
 
 
-def _setup_internal_image(image, rebuild, clean_volume):
+def _setup_internal_image(image, rebuild, clean_volume, clean_uv_cache):
     # Extract the repository and platform
     repository, target = image.split(":")
     _, repository = repository.split("/")
@@ -111,11 +111,18 @@ def _setup_internal_image(image, rebuild, clean_volume):
     nusight_volume_name = f"{repository}_{defaults.local_user}_node_modules"
     nusight_volume = _setup_volume(nusight_volume_name, clean_volume)
 
+    # Ensure the python volume exists (clean it only if explicitly requested)
+    # This volume persists Python package cache across clean builds
+    python_volume_name = f"{repository}_{defaults.local_user}_python"
+    python_volume = _setup_volume(python_volume_name, clean_uv_cache)
+
     mounts = [
         "--mount",
         f"type=volume,source={build_volume},target=/home/{defaults.image_user}/build,consistency=delegated",
         "--mount",
         f"type=volume,source={nusight_volume},target=/home/{defaults.image_user}/{defaults.directory}/nusight2/node_modules,consistency=delegated",
+        "--mount",
+        f"type=volume,source={python_volume},target=/home/{defaults.image_user}/python,consistency=delegated",
     ]
 
     # Get the path to the users ssh configuration folder
@@ -221,6 +228,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
                     image=image,
                     rebuild=rebuild or not image_found,
                     clean_volume=kwargs["clean"],
+                    clean_uv_cache=kwargs["clean_uv_cache"],
                 )
             )
 

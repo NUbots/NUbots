@@ -42,6 +42,7 @@ namespace module::input {
     using message::localisation::ResetFieldLocalisation;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::math::filter::MahonyFilter;
+    using utility::math::filter::YawFilter;
     using utility::support::Expression;
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -60,11 +61,18 @@ namespace module::input {
             nugus_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
 
             // Configure the Mahony filter
-            mahony_filter = MahonyFilter<double>(
-                config["mahony"]["Kp"].as<Expression>(),
+            cfg.adaptive_gains.standing_Kp = config["mahony"]["adaptive_gains"]["standing"]["Kp"].as<double>();
+            cfg.adaptive_gains.dynamic_Kp  = config["mahony"]["adaptive_gains"]["dynamic"]["Kp"].as<double>();
+            mahony_filter                  = MahonyFilter<double>(
+                cfg.adaptive_gains.standing_Kp,
                 config["mahony"]["Ki"].as<Expression>(),
                 Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>()),
                 rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>())));
+
+            // Configure the yaw filter
+            yaw_filter = YawFilter<double>(config["yaw_filter"]["alpha"].as<Expression>(),
+                                           config["yaw_filter"]["beta"].as<Expression>(),
+                                           config["yaw_filter"]["max_bias"].as<Expression>());
 
             // Velocity filter config
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();
@@ -132,6 +140,9 @@ namespace module::input {
                                                                                        std::string("left_foot_base"))
                                         .translation()
                                         .y();
+
+            // Reset yaw filter
+            yaw_filter.reset();
         });
     }
 

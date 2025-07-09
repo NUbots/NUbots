@@ -41,10 +41,12 @@
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/filter/MahonyFilter.hpp"
+#include "utility/math/filter/YawFilter.hpp"
 
 namespace module::input {
 
     using utility::math::filter::MahonyFilter;
+    using utility::math::filter::YawFilter;
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
@@ -64,6 +66,14 @@ namespace module::input {
                 std::string method = "UNKNOWN";
                 double threshold   = 0.0;
             } foot_down;
+
+            /// @brief Adaptive Mahony filter gains based on stability state
+            struct AdaptiveGains {
+                /// @brief Kp gain for standing state
+                double standing_Kp = 0.0;
+                /// @brief Kp gain for dynamic states
+                double dynamic_Kp = 0.0;
+            } adaptive_gains;
 
             /// @brief The number of times a button must be pressed before it is considered pressed
             int button_debounce_threshold = 0;
@@ -89,6 +99,9 @@ namespace module::input {
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
+
+        /// @brief Yaw filter for fusing gyroscope and kinematic estimates
+        YawFilter<double> yaw_filter{};
 
         /// @brief Bias used in the mahony filter, updates with each mahony update
         Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();

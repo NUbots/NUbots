@@ -6,7 +6,7 @@ import { TextBillboard } from "./text_billboard";
 
 interface PurposeLabelProps {
   Hft: Matrix4;
-  player_id: number;
+  playerId: number;
   purpose: string;
   textColor?: string;
   backgroundColor: string;
@@ -16,7 +16,7 @@ interface PurposeLabelProps {
 
 export const PurposeLabel: React.FC<PurposeLabelProps> = ({
   Hft,
-  player_id,
+  playerId,
   purpose,
   textColor = "white",
   backgroundColor = "black",
@@ -24,7 +24,7 @@ export const PurposeLabel: React.FC<PurposeLabelProps> = ({
   cameraYaw,
 }) => {
   const rTFf = Hft.decompose().translation;
-  const label = player_id == -1 ? purpose : "N" + player_id + " " + purpose;
+  const label = playerId == -1 ? purpose : "N" + playerId + " " + purpose;
 
   return (
     <TextBillboard

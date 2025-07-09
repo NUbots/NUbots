@@ -304,7 +304,7 @@ namespace module::localisation {
                     // Association (run once for debugging in NUsight)
                     auto associations = data_association(field_intersections, field->Hfw);
                     for (const auto& association : associations) {
-                        field->association_lines.push_back({association.first, association.second});
+                        field->association_lines.push_back({association.landmark, association.intersection});
                     }
 
                     // Add cost, covariance, and uncertainty to the field message
@@ -354,7 +354,7 @@ namespace module::localisation {
                                fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }
 
-    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
+    std::vector<FieldIntersectionAssociation> FieldLocalisationNLopt::data_association(
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const Eigen::Isometry3d& Hfw) {
         // If there are no field intersections, return an empty vector
@@ -396,14 +396,24 @@ namespace module::localisation {
 
             // --- Field line intersection cost ---
             if (field_intersections) {
-                auto associations = data_association(field_intersections, Hfw);
+                auto associations          = data_association(field_intersections, Hfw);
+                double total_weighted_cost = 0.0;
+                double total_confidence    = 0.0;
+
                 for (const auto& association : associations) {
                     // Calculate the distance between the observed intersection and the closest landmark
-                    double distance = (association.first - association.second).norm();
-                    cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
+                    double distance = (association.landmark - association.intersection).norm();
+                    // Weight the cost by confidence - higher confidence detections have more influence
+                    double weighted_cost =
+                        cfg.field_line_intersection_weight * std::pow(distance, 2) * association.confidence;
+                    total_weighted_cost += weighted_cost;
+                    total_confidence += association.confidence;
                 }
-                // Average the cost by the number of associations
-                cost /= associations.size() > 0 ? associations.size() : 1;
+
+                // Add the weighted cost to the total cost
+                if (total_confidence > 0.0) {
+                    cost += total_weighted_cost / total_confidence;  // Normalize by total confidence
+                }
             }
 
             // --- Goal post cost ---
