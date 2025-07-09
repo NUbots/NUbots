@@ -222,6 +222,7 @@ var hierarchy =
     [ "module::platform::OpenCR::OpenCRWriteData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html", null ],
     [ "module::platform::Webots::CameraContext", "structmodule_1_1platform_1_1Webots_1_1CameraContext.html", null ],
     [ "module::platform::Webots::ServoState", "structmodule_1_1platform_1_1Webots_1_1ServoState.html", null ],
+    [ "module::purpose::Attack::Config", "structmodule_1_1purpose_1_1Attack_1_1Config.html", null ],
     [ "module::purpose::DisableIdle", "structmodule_1_1purpose_1_1DisableIdle.html", null ],
     [ "module::purpose::EnableIdle", "structmodule_1_1purpose_1_1EnableIdle.html", null ],
     [ "module::purpose::FieldPlayer::Config", "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html", null ],

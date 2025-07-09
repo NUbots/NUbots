@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#aa33613bbc0ecf00e9106bd00ea695a44":[3,0,3,8,1,6,0,4],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#ad69720d0c5c50552c499027753b7f9dc":[3,0,3,8,1,6,0,2],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html":[3,0,3,8,1,6,1],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a0f02400323e93ce3a4de429bfc6f81df":[3,0,3,8,1,6,1,1],
@@ -84,6 +85,8 @@ var NAVTREEINDEX16 =
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9fc7e19c27a3246634979ef75c0273d0":[3,0,3,8,3,1,2],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#aa696d83e83b19c24b7b4627ed37bdf72":[3,0,3,8,3,1,4],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#af6e7f671e77fb21da5fc2098d3335bf6":[3,0,3,8,3,1,10],
+"structmodule_1_1purpose_1_1Attack_1_1Config.html":[3,0,3,9,0,0],
+"structmodule_1_1purpose_1_1Attack_1_1Config.html#a193969d18093c499e24d8f4abdb5fd9e":[3,0,3,9,0,0,0],
 "structmodule_1_1purpose_1_1DisableIdle.html":[3,0,3,9,2],
 "structmodule_1_1purpose_1_1EnableIdle.html":[3,0,3,9,3],
 "structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html":[3,0,3,9,4,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a323bfce873a59a213eaeaa2d487fb93da8241873fab21489d5b7ee1969633f80c":[3,0,3,12,2,2,1,0,3],
 "structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a323bfce873a59a213eaeaa2d487fb93da9bfe822e840239582f20963c0710c2cd":[3,0,3,12,2,2,1,0,6],
 "structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a323bfce873a59a213eaeaa2d487fb93dab882031e5fa092b062e6087bca62ac9a":[3,0,3,12,2,2,1,0,2],
-"structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a323bfce873a59a213eaeaa2d487fb93daf2ab83554b2b3b77c14e3ef1a848f280":[3,0,3,12,2,2,1,0,1],
-"structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a54de8fb138c00ba980f5be1e83da6349":[3,0,3,12,2,2,1,3],
-"structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a92a0284ee70d541b15953db720725ed2":[3,0,3,12,2,2,1,4],
-"structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#ac63c04ab02c7225dbed9287008b410a3":[3,0,3,12,2,2,1,1]
+"structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html#a323bfce873a59a213eaeaa2d487fb93daf2ab83554b2b3b77c14e3ef1a848f280":[3,0,3,12,2,2,1,0,1]
 };

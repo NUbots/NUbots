@@ -62,7 +62,8 @@ var NAVTREEINDEX4 =
 "classmodule_1_1platform_1_1Webots.html#afbd3a1a09ee1fc6c9d42964d9fb9a24d":[3,0,3,8,3,3],
 "classmodule_1_1platform_1_1Webots.html#aff6bcefaac9f9579110d8fc9c8c1ce23":[3,0,3,8,3,15],
 "classmodule_1_1purpose_1_1Attack.html":[3,0,3,9,0],
-"classmodule_1_1purpose_1_1Attack.html#adb0fe6f2470566c8914210572493e5cf":[3,0,3,9,0,0],
+"classmodule_1_1purpose_1_1Attack.html#a74e407aa3d6b43e9593036256532a35b":[3,0,3,9,0,2],
+"classmodule_1_1purpose_1_1Attack.html#adb0fe6f2470566c8914210572493e5cf":[3,0,3,9,0,1],
 "classmodule_1_1purpose_1_1Defend.html":[3,0,3,9,1],
 "classmodule_1_1purpose_1_1Defend.html#a7abdfea72bbe766b30c3ca2484741903":[3,0,3,9,1,0],
 "classmodule_1_1purpose_1_1FieldPlayer.html":[3,0,3,9,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1Kicker.html#a7bd3a20dbda83a8f5e9a9d768d5f4329":[3,0,3,10,6,4],
 "classmodule_1_1skill_1_1Kicker.html#acd370f6bfe21dbc98088da25f4449741":[3,0,3,10,6,2],
 "classmodule_1_1skill_1_1Kicker.html#adc720fa422042679e09b9ea71c08a298":[3,0,3,10,6,8],
-"classmodule_1_1skill_1_1Look.html":[3,0,3,10,8],
-"classmodule_1_1skill_1_1Look.html#a9a18c367bd8fa8a76a7dc227d47b2373":[3,0,3,10,8,2]
+"classmodule_1_1skill_1_1Look.html":[3,0,3,10,8]
 };
