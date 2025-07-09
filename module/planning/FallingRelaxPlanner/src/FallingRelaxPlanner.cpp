@@ -79,7 +79,9 @@ namespace module::planning {
                 cfg.fall_script = "RelaxHead.yaml";
                 make_relax<HeadSequence>();
             }
-            // Else set to none or not valid
+            else {
+                log<ERROR>("Unknown relax part: ", relax_part);
+            }
         });
     }
 
