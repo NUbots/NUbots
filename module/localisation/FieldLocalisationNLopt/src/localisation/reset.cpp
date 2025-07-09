@@ -111,13 +111,6 @@ namespace module::localisation {
             log<INFO>("Uncertainty reset (global): Cost too high, searching whole field", hypotheses[0].second);
         }
 
-        // Get our side so we can restrict the global search space
-        bool our_side_of_field = rRFf.x() > 0;
-        // If we are on our side of the field, restrict x_min to the robot's position
-        x_min = rRFf.x() > 0 ? std::max(x_min, rRFf.x()) : x_min;
-        // If we are on the opponent side of the field, restrict x_max to the robot's position
-        x_max = rRFf.x() < 0 ? std::min(x_max, rRFf.x()) : x_max;
-
         // Iterate over the entire field area with a grid search
         hypotheses.clear();
         for (double x = x_min; x <= x_max; x += cfg.step_size) {

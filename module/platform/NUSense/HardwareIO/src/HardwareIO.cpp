@@ -167,118 +167,119 @@ namespace module::platform::NUSense {
         });
 
         // Handle successfully decoded NUSense data
-        on<Trigger<NUSense>, With<ServoOffsets>>().then([this](const NUSense& data, const ServoOffsets& offsets) {
-            // Will contain data from the NUSense to emit to the rest of the system
-            auto sensors = std::make_unique<RawSensors>();
+        on<Trigger<NUSense>, With<ServoOffsets>, Single>().then(
+            [this](const NUSense& data, const ServoOffsets& offsets) {
+                // Will contain data from the NUSense to emit to the rest of the system
+                auto sensors = std::make_unique<RawSensors>();
 
-            // Timestamp when this message was created because the incoming packet doesn't have a timestamp
-            sensors->timestamp = NUClear::clock::now();
+                // Timestamp when this message was created because the incoming packet doesn't have a timestamp
+                sensors->timestamp = NUClear::clock::now();
 
-            // Subcontroller data
-            sensors->subcontroller_error = 0;  // TODO (NUSense people) not yet implemented
-            sensors->led_panel           = 0;  // TODO (NUSense people) not yet implemented
-            sensors->head_led            = 0;  // TODO (NUSense people) not yet implemented
-            sensors->eye_led             = 0;  // TODO (NUSense people) not yet implemented
-            sensors->buttons.left        = data.buttons.left;
-            sensors->buttons.middle      = data.buttons.middle;
+                // Subcontroller data
+                sensors->subcontroller_error = 0;  // TODO (NUSense people) not yet implemented
+                sensors->led_panel           = 0;  // TODO (NUSense people) not yet implemented
+                sensors->head_led            = 0;  // TODO (NUSense people) not yet implemented
+                sensors->eye_led             = 0;  // TODO (NUSense people) not yet implemented
+                sensors->buttons.left        = data.buttons.left;
+                sensors->buttons.middle      = data.buttons.middle;
 
-            // Set IMU
-            sensors->accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
-            sensors->gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
+                // Set IMU
+                sensors->accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
+                sensors->gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
 
-            // Battery data
-            sensors->battery = 0;  // not yet implemented
+                // Battery data
+                sensors->battery = 0;  // not yet implemented
 
-            // Servo data
-            for (const auto& [key, val] : data.servo_map) {
-                // Get a reference to the servo we are populating
-                RawSensors::Servo& servo = utility::platform::get_raw_servo(val.id - 1, *sensors);
-                // Fill all servo values from the reference
-                servo.hardware_error        = val.hardware_error;
-                servo.torque_enabled        = val.torque_enabled;
-                servo.velocity_i_gain       = 0;  // Not present in NUSense message
-                servo.velocity_p_gain       = 0;  // Not present in NUSense message
-                servo.position_d_gain       = 0;  // Not present in NUSense message
-                servo.position_i_gain       = 0;  // Not present in NUSense message
-                servo.position_p_gain       = 0;  // Not present in NUSense message
-                servo.feed_forward_1st_Gain = 0;  // Not present in NUSense message
-                servo.feed_forward_2nd_Gain = 0;  // Not present in NUSense message
-                servo.present_PWM           = val.present_pwm;
-                servo.present_current       = val.present_current;
-                servo.present_velocity      = val.present_velocity;
-                servo.present_position      = val.present_position;
-                servo.goal_PWM              = val.goal_pwm;
-                servo.goal_current          = val.goal_current;
-                servo.goal_velocity         = val.goal_velocity;
-                servo.goal_position         = val.goal_position;
-                servo.voltage               = val.voltage;
-                servo.temperature           = val.temperature;
-                servo.profile_acceleration  = 0;  // Not present in NUSense message
-                servo.profile_velocity      = 0;  // Not present in NUSense message
+                // Servo data
+                for (const auto& [key, val] : data.servo_map) {
+                    // Get a reference to the servo we are populating
+                    RawSensors::Servo& servo = utility::platform::get_raw_servo(val.id - 1, *sensors);
+                    // Fill all servo values from the reference
+                    servo.hardware_error        = val.hardware_error;
+                    servo.torque_enabled        = val.torque_enabled;
+                    servo.velocity_i_gain       = 0;  // Not present in NUSense message
+                    servo.velocity_p_gain       = 0;  // Not present in NUSense message
+                    servo.position_d_gain       = 0;  // Not present in NUSense message
+                    servo.position_i_gain       = 0;  // Not present in NUSense message
+                    servo.position_p_gain       = 0;  // Not present in NUSense message
+                    servo.feed_forward_1st_Gain = 0;  // Not present in NUSense message
+                    servo.feed_forward_2nd_Gain = 0;  // Not present in NUSense message
+                    servo.present_PWM           = val.present_pwm;
+                    servo.present_current       = val.present_current;
+                    servo.present_velocity      = val.present_velocity;
+                    servo.present_position      = val.present_position;
+                    servo.goal_PWM              = val.goal_pwm;
+                    servo.goal_current          = val.goal_current;
+                    servo.goal_velocity         = val.goal_velocity;
+                    servo.goal_position         = val.goal_position;
+                    servo.voltage               = val.voltage;
+                    servo.temperature           = val.temperature;
+                    servo.profile_acceleration  = 0;  // Not present in NUSense message
+                    servo.profile_velocity      = 0;  // Not present in NUSense message
 
-                // Log any errors and timeouts from the servo.
-                if (val.packet_counts.packet_errors != 0) {
-                    log<WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
-                                          val.packet_counts.packet_errors,
-                                          val.id,
-                                          nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                    // Log any errors and timeouts from the servo.
+                    if (val.packet_counts.packet_errors != 0) {
+                        log<WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
+                                              val.packet_counts.packet_errors,
+                                              val.id,
+                                              nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                    }
+                    if (val.packet_counts.crc_errors != 0) {
+                        // For now, the CRC is set to debug until terminating-resistors are gotten since there are many
+                        // when the robot is walking.
+                        log<DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
+                                               val.packet_counts.crc_errors,
+                                               val.id,
+                                               nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                    }
+                    if (val.packet_counts.timeouts != 0) {
+                        log<WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
+                                              val.packet_counts.timeouts,
+                                              val.id,
+                                              nugus.device_name(static_cast<NUgus::ID>(val.id))));
+                    }
+
+                    // Add the offsets and switch the direction.
+                    servo.present_position *= offsets.offsets[val.id - 1].direction;
+                    servo.present_position += offsets.offsets[val.id - 1].offset;
+                    servo.goal_position *= offsets.offsets[val.id - 1].direction;
+                    servo.goal_position += offsets.offsets[val.id - 1].offset;
                 }
-                if (val.packet_counts.crc_errors != 0) {
-                    // For now, the CRC is set to debug until terminating-resistors are gotten since there are many when
-                    // the robot is walking.
-                    log<DEBUG>(fmt::format("{} CRC-error(s) from ID {} ({})",
-                                           val.packet_counts.crc_errors,
-                                           val.id,
-                                           nugus.device_name(static_cast<NUgus::ID>(val.id))));
+
+                log<TRACE>(
+                    fmt::format("\nIMU Data\n"
+                                "\tAccel(xyz): {} - {} - {}\n"
+                                "\t Gyro(xyz): {} - {} - {}\n ",
+                                data.imu.accel.x,
+                                data.imu.accel.y,
+                                data.imu.accel.z,
+                                data.imu.gyro.x,
+                                data.imu.gyro.y,
+                                data.imu.gyro.z));
+
+                log<TRACE>("Logging servo states...");
+
+                for (const auto& [key, val] : data.servo_map) {
+                    log<TRACE>(fmt::format("      key: {}", key));
+
+                    log<TRACE>(fmt::format("       id: {}", val.id));
+                    log<TRACE>(fmt::format("   hw_err: {}", val.hardware_error));
+                    log<TRACE>(fmt::format("torque_en: {}", val.torque_enabled));
+                    log<TRACE>(fmt::format("     ppwm: {}", val.present_pwm));
+                    log<TRACE>(fmt::format("    pcurr: {}", val.present_current));
+                    log<TRACE>(fmt::format("    pvelo: {}", val.present_velocity));
+                    log<TRACE>(fmt::format("     ppos: {}", val.present_position));
+                    log<TRACE>(fmt::format("     gpwm: {}", val.goal_pwm));
+                    log<TRACE>(fmt::format("    gcurr: {}", val.goal_current));
+                    log<TRACE>(fmt::format("    gvelo: {}", val.goal_velocity));
+                    log<TRACE>(fmt::format("     gpos: {}", val.goal_position));
+                    log<TRACE>(fmt::format("  voltage: {}", val.voltage));
+                    log<TRACE>(fmt::format("     temp: {}", val.temperature));
                 }
-                if (val.packet_counts.timeouts != 0) {
-                    log<WARN>(fmt::format("{} dropped packet(s) from ID {} ({})",
-                                          val.packet_counts.timeouts,
-                                          val.id,
-                                          nugus.device_name(static_cast<NUgus::ID>(val.id))));
-                }
 
-                // Add the offsets and switch the direction.
-                servo.present_position *= offsets.offsets[val.id - 1].direction;
-                servo.present_position += offsets.offsets[val.id - 1].offset;
-                servo.goal_position *= offsets.offsets[val.id - 1].direction;
-                servo.goal_position += offsets.offsets[val.id - 1].offset;
-            }
-
-            log<TRACE>(
-                fmt::format("\nIMU Data\n"
-                            "\tAccel(xyz): {} - {} - {}\n"
-                            "\t Gyro(xyz): {} - {} - {}\n ",
-                            data.imu.accel.x,
-                            data.imu.accel.y,
-                            data.imu.accel.z,
-                            data.imu.gyro.x,
-                            data.imu.gyro.y,
-                            data.imu.gyro.z));
-
-            log<TRACE>("Logging servo states...");
-
-            for (const auto& [key, val] : data.servo_map) {
-                log<TRACE>(fmt::format("      key: {}", key));
-
-                log<TRACE>(fmt::format("       id: {}", val.id));
-                log<TRACE>(fmt::format("   hw_err: {}", val.hardware_error));
-                log<TRACE>(fmt::format("torque_en: {}", val.torque_enabled));
-                log<TRACE>(fmt::format("     ppwm: {}", val.present_pwm));
-                log<TRACE>(fmt::format("    pcurr: {}", val.present_current));
-                log<TRACE>(fmt::format("    pvelo: {}", val.present_velocity));
-                log<TRACE>(fmt::format("     ppos: {}", val.present_position));
-                log<TRACE>(fmt::format("     gpwm: {}", val.goal_pwm));
-                log<TRACE>(fmt::format("    gcurr: {}", val.goal_current));
-                log<TRACE>(fmt::format("    gvelo: {}", val.goal_velocity));
-                log<TRACE>(fmt::format("     gpos: {}", val.goal_position));
-                log<TRACE>(fmt::format("  voltage: {}", val.voltage));
-                log<TRACE>(fmt::format("     temp: {}", val.temperature));
-            }
-
-            // Emit the raw sensor data
-            emit(sensors);
-        });
+                // Emit the raw sensor data
+                emit(sensors);
+            });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto command_list = std::make_unique<ServoTargets>();
