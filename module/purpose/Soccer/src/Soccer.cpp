@@ -177,9 +177,9 @@ namespace module::purpose {
 
         on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<DisableIdle>>().then([this] {
-            // If the robot is not idle, restart the Director graph for the soccer scenario!
-            if (!idle) {
+        on<Trigger<DisableIdle>, With<GameState>>().then([this](const GameState& game_state) {
+            // If the robot is not idle nor penalised, restart the Director graph for the soccer scenario!
+            if (!idle && game_state.self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 emit<Task>(std::make_unique<FallRecovery>(), 2);
                 log<INFO>("Idle mode disabled");
