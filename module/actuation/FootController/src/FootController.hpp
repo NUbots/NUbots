@@ -162,7 +162,7 @@ namespace module::actuation {
                 double fused_pitch  = rpy.y();
 
                 if (log_level <= DEBUG) {
-                    // graph the correction being applied
+                    // Graph the correction being applied
                     emit(graph("Balance/Actual_Roll", fused_roll));
                     emit(graph("Balance/Actual_Pitch", fused_pitch));
                 }
