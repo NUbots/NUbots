@@ -32,9 +32,9 @@ use_hungarian: false
 out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
-reset_on_cost: false
+reset_on_cost: true
 # Cost threshold for the optimisation to trigger a reset
-cost_threshold: 2.0
+cost_threshold: 1.5
 # Time (s) to wait before allowing a localisation reset again
 reset_delay: 3
 # Maximum number of times the cost can be over threshold before a reset is triggered
@@ -47,10 +47,10 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 0.1
+field_line_distance_weight: 2.0
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 10
+field_line_intersection_weight: 5.0
 
 # Weighting associated with change between last solution result
 state_change_weight: 0.0
