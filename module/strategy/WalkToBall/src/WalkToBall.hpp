@@ -68,21 +68,14 @@ namespace module::strategy {
             double distance_behind_ball = 0.0;
             /// @brief Radius of circle around ball where an opponent robot is considered to be in front of the ball
             double infront_of_ball_radius = 0.0;
+            /// @brief Distance in front of the ball to check for obstacles
+            double infront_check_distance = 0.0;
 
         } cfg;
 
         std::optional<Eigen::Vector2d> robot_infront_of_ball(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                             const Eigen::Vector2d& rBFf) {
-            // Check if the robot is in front of the ball
-            for (const auto& obstacle : all_obstacles) {
-                log<DEBUG>("Cfg infront", cfg.infront_of_ball_radius);
-                if (obstacle.x() < rBFf.x() && (rBFf - obstacle).norm() < cfg.infront_of_ball_radius) {
-                    log<DEBUG>("Found robot in front of ball at", obstacle);
-                    return obstacle;
-                }
-            }
-            return std::nullopt;
-        }
+                                                             const Eigen::Vector2d& rBFf);
+
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
