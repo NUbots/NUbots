@@ -74,7 +74,8 @@ namespace module::strategy {
         } cfg;
 
         std::optional<Eigen::Vector2d> robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                             const Eigen::Vector2d& rBFf);
+                                                             const Eigen::Vector2d& rBFf,
+                                                             const Eigen::Vector2d& rGFf);
 
 
         /// @brief The position of the goal {g} in field {f} space

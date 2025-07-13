@@ -172,7 +172,7 @@ namespace module::strategy {
                         all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
                     }
 
-                    auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2));
+                    auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
                     if (robot_infront.has_value()) {
                         // Unit vector from ball → robot
                         Eigen::Vector2d ball_to_robot = (rRFf.head<2>() - rBFf.head<2>()).normalized();
@@ -331,20 +331,20 @@ namespace module::strategy {
     }
 
     std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                     const Eigen::Vector2d& rBFf) {
+                                                                     const Eigen::Vector2d& rBFf, const Eigen::Vector2d& rGFf) {
         // Normalized direction from robot to ball
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front = obstacle.x() < rBFf.x();
+            const bool in_front = obstacle.x() < rBFf.x(); // TODO: check this is the correct obstacle
             log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
             const bool past_ball = obstacle.norm() > rBFf.norm();
             log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
             double dist_robot_obs = obstacle.norm() - rBFf.norm();
             const bool within_range = dist_robot_obs < cfg.infront_check_distance;
-            log<DEBUG>("within_range:", obstacle.norm(), "cfg.infront_check_distance:", cfg.infront_check_distance);
+            log<DEBUG>("within_range:", obstacle.norm(), "rBFf", rBFf.norm(), "check distance:", cfg.infront_check_distance);
             const bool intersects_path =
-                utility::math::geometry::intersection_line_and_circle(Eigen::Vector2d::Zero(),
+                utility::math::geometry::intersection_line_and_circle(rGFf,
                                                                       rBFf,
                                                                       obstacle,
                                                                       cfg.infront_of_ball_radius);
