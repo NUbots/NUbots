@@ -35,6 +35,7 @@ import sys
 # Don't make .pyc files
 sys.dont_write_bytecode = True
 
+
 # Populate this with dependencies for the script as needed
 class Dependencies:
     def __init__(self):
@@ -78,6 +79,7 @@ def reexecute_with_dependencies():
 
         # Re-execute through uv run directly
         os.execvpe("uv", cmd, os.environ)
+
 
 # Go and get all the relevant directories and variables from cmake
 nuclear_dir = os.path.dirname(os.path.realpath(__file__))
@@ -185,12 +187,22 @@ async def main():
     for components in useable:
         if sys.argv[1 : len(components) + 1] == components:
             module_name = ".".join(components)
+            # If this is a submodule, ensure the parent package is loaded first
+            if len(components) > 1:
+                parent_module_name = ".".join(components[:-1])
+                if parent_spec := importlib.util.find_spec(parent_module_name):
+                    parent_module = importlib.util.module_from_spec(parent_spec)
+                    sys.modules[parent_module_name] = parent_module
+                    parent_spec.loader.exec_module(parent_module)
+
+            # Re-run with updated dependencies if we need to (before loading the module)
+            reexecute_with_dependencies()
+
             if spec := importlib.util.find_spec(module_name):
                 module = importlib.util.module_from_spec(spec)
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
                 if hasattr(module, "register") and hasattr(module, "run"):
-
                     # Build up the base subcommands to this point
                     subcommand = subcommands
                     for c in components[:-1]:
