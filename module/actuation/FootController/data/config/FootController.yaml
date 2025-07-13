@@ -33,3 +33,6 @@ balance:
   pitch_d_gain: 0.08
 
   max_i_error: 0.1
+
+  max_pitch_error: 0.2
+  max_roll_error: 0.2
