@@ -174,32 +174,26 @@ namespace module::strategy {
 
                     auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2));
                     if (robot_infront.has_value()) {
-                        log<DEBUG>("Found robot in front of ball at", robot_infront.value());
-                        // Use 3D field-frame positions
+                        // Unit vector from ball → robot
                         Eigen::Vector2d ball_to_robot = (rRFf.head<2>() - rBFf.head<2>()).normalized();
-                        Eigen::Vector2d left_dir(-ball_to_robot.y(), ball_to_robot.x());
 
-                        // Distances
-                        double behind_dist = 0.2;
-                        double side_dist   = 0.15;
+                        // Determine which direction is most convenient to step around the obstacle
+                        bool go_left = robot_infront.value().y() > rBFf.y();
+                        double sign  = go_left ? -1.0 : 1.0;
 
-                        // Choose side
-                        bool go_left     = robot_infront.value().y() > rBFf.y();
-                        double side_sign = go_left ? -1.0 : 1.0;
+                        double behind_dist  = 0.2;   // how far behind the ball
+                        double forward_dist = 0.15;  // how far to step along the angled heading
 
-                        // Compute 2D offset
-                        Eigen::Vector2d offset2D = (-ball_to_robot * behind_dist) + (side_sign * left_dir * side_dist);
-                        Eigen::Vector3d offset3D(offset2D.x(), offset2D.y(), 0.0);
+                        double heading_offset = sign * M_PI_4;
+                        Eigen::Rotation2Dd R(heading_offset);
+                        Eigen::Vector2d angled_dir = R * ball_to_robot;  // the direction you’d have to move if you wanted to go straight behind the ball
 
-                        // Final 3D target position
-                        Eigen::Vector3d rGFf = rBFf + offset3D;
+                        Eigen::Vector2d offset2D = (-ball_to_robot * behind_dist) + (angled_dir * forward_dist);
 
-                        // Heading toward ball from the offset
-                        double desired_heading = std::atan2(rBFf.y() - rGFf.y(), rBFf.x() - rGFf.x());
-                        double heading_offset  = go_left ? -M_PI_4 : M_PI_4;
-                        double final_heading   = desired_heading + heading_offset;
+                        Eigen::Vector3d rGFf = rBFf + Eigen::Vector3d(offset2D.x(), offset2D.y(), 0.0);
 
-                        // Build final transform
+                        double final_heading = std::atan2(rBFf.y() - rGFf.y(), rBFf.x() - rGFf.x());
+
                         Hfk = pos_rpy_to_transform(rGFf, Eigen::Vector3d(0, 0, final_heading));
                     }
                 }
@@ -342,12 +336,12 @@ namespace module::strategy {
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front    = obstacle.x() < rBFf.x();
+            const bool in_front = obstacle.x() < rBFf.x();
             log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
             const bool past_ball = obstacle.norm() > rBFf.norm();
             log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
-            const bool within_range =
-                obstacle.norm() < cfg.infront_check_distance;
+            double dist_robot_obs = obstacle.norm() - rBFf.norm();
+            const bool within_range = dist_robot_obs < cfg.infront_check_distance;
             log<DEBUG>("within_range:", obstacle.norm(), "cfg.infront_check_distance:", cfg.infront_check_distance);
             const bool intersects_path =
                 utility::math::geometry::intersection_line_and_circle(Eigen::Vector2d::Zero(),
@@ -362,7 +356,7 @@ namespace module::strategy {
                        " | past_ball:",
                        past_ball,
                        " | within_range:",
-                        within_range,
+                       within_range,
                        " | intersects:",
                        intersects_path);
 
