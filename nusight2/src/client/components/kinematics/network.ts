@@ -59,6 +59,11 @@ export class KinematicsNetwork {
     robot.motors.leftAnkleRoll.angle = sensors.servo[17].presentPosition!;
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
+
+    // Update servo temperatures
+    sensors.servo.forEach((servo) => {
+      robot.servoTemperatures.set(servo.id!, servo.temperature!);
+    });
   };
 }
 

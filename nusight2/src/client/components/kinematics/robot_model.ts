@@ -5,6 +5,7 @@ import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
+import { ServoNames } from "./model";
 
 class ServoMotor {
   @observable angle: number;
@@ -117,6 +118,7 @@ export class KinematicsRobotModel {
   @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
+  @observable servoTemperatures: Map<number, number> = new Map();
 
   constructor({
     model,
@@ -168,5 +170,28 @@ export class KinematicsRobotModel {
   @computed
   get Hft(): Matrix4 {
     return this.Hfw.multiply(this.Htw.invert());
+  }
+
+  @computed
+  get averageTemperature(): number {
+    const temps = Array.from(this.servoTemperatures.values());
+    return temps.length > 0 ? temps.reduce((a, b) => a + b) / temps.length : 0;
+  }
+
+  @computed
+  get highestTemperature(): number {
+    return Math.max(...Array.from(this.servoTemperatures.values()), 0);
+  }
+
+  @computed
+  get highestTemperatureServo(): { id: number; name: string; temperature: number } | null {
+    if (this.servoTemperatures.size === 0) return null;
+    const entries = Array.from(this.servoTemperatures.entries());
+    const [id, temp] = entries.reduce((max, current) => (current[1] > max[1] ? current : max));
+    return {
+      id,
+      name: ServoNames[id] || `Servo ${id}`,
+      temperature: temp,
+    };
   }
 }
