@@ -26,15 +26,6 @@ export default function IconServos(props: { className?: string }) {
       <line x1="65" y1="65" x2="75" y2="75" />
       <line x1="25" y1="75" x2="35" y2="65" />
       <line x1="65" y1="35" x2="75" y2="25" />
-
-      {/* Small servo indicators */}
-      <circle cx="20" cy="20" r="8" />
-      <circle cx="80" cy="20" r="8" />
-      <circle cx="20" cy="80" r="8" />
-      <circle cx="80" cy="80" r="8" />
-
-      {/* Temperature indicator */}
-      <path d="M 30 70 Q 40 60, 50 70 Q 60 80, 70 70" stroke="red" strokeWidth="2" />
     </svg>
   );
 }
