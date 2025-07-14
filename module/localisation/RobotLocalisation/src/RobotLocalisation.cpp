@@ -73,7 +73,7 @@ namespace module::localisation {
             .then([this](const Configuration& config, const GlobalConfig& global_config) {
                 // Use configuration here from file RobotLocalisation.yaml
                 this->log_level = config["log_level"].as<NUClear::LogLevel>();
-                PLAYER_ID       = global_config.player_id;
+                player_id       = global_config.player_id;
 
                 // Set our UKF filter parameters
                 cfg.ukf.noise.measurement.position =
@@ -127,7 +127,8 @@ namespace module::localisation {
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : robots_ground_truth->robots) {
                         // Skip our own robot using GlobalConfig player_id and team colour
-                        if (!(gt_robot.player_number == static_cast<int32_t>(PLAYER_ID)
+                        // TODO: move to webots module
+                        if (!(gt_robot.player_number == static_cast<int32_t>(player_id)
                               && gt_robot.team == our_team_colour)) {
                             LocalisationRobot localisation_robot;
                             localisation_robot.id = gt_robot.player_number;
@@ -141,7 +142,7 @@ namespace module::localisation {
 
                             // Set purpose information
                             localisation_robot.purpose.player_id = gt_robot.player_number;
-                            // Could set other purpose fields if needed
+                            // TODO: could rest of purpose info from R2RC
                             localisation_robots->robots.push_back(localisation_robot);
                         }
                     }
