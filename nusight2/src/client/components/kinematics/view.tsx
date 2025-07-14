@@ -31,7 +31,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Highest Temperature</h4>
           {robot.highestTemperatureServo && (
             <div className="text-lg font-bold">
-              <span className={robot.highestTemperatureServo.temperature > 50 ? "text-red-600" : "text-green-600"}>
+              <span className={robot.highestTemperatureServo.temperature > 50 ? "text-red-600" : "text-[#888888]"}>
                 {robot.highestTemperatureServo.temperature.toFixed(1)}°C
               </span>
               <div className="text-xs text-gray-500">{robot.highestTemperatureServo.name}</div>
@@ -40,7 +40,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
         </div>
         <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Temperature</h4>
-          <div className="text-lg font-bold">{robot.averageTemperature.toFixed(1)}°C</div>
+          <div className="text-lg font-bold text-[#888888]">{robot.averageTemperature.toFixed(1)}°C</div>
         </div>
       </div>
 
@@ -60,14 +60,19 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
               const servoName = ServoNames[servoId] || jointName.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (match) => match.toUpperCase());
               const temperature = robot.servoTemperatures.get(servoId);
               const angle = unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${((motor.angle * 180) / Math.PI).toFixed(2)}°`;
+              const isOverLimit = temperature !== undefined && temperature > 50;
 
               return (
-                <tr key={jointName} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr
+                  key={jointName}
+                  className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${isOverLimit ? 'bg-red-50 dark:bg-red-900/20' : ''
+                    }`}
+                >
                   <td className="p-2 font-medium">{servoName}</td>
                   <td className="p-2 text-right">{angle}</td>
                   <td className="p-2 text-right">
                     {temperature !== undefined ? (
-                      <span className={temperature > 50 ? "text-red-600 font-medium" : "text-green-600"}>
+                      <span className={isOverLimit ? "text-red-600 font-medium" : "text-[#888888]"}>
                         {temperature.toFixed(1)}°C
                       </span>
                     ) : (
