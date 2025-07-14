@@ -97,8 +97,8 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToKickBall>, With<Ball>, With<Sensors>, With<Field>>().then(
-            [this](const Ball& ball, const Sensors& sensors, const Field& field) {
+        on<Provide<WalkToKickBall>, Optional<With<Robots>>, With<Ball>, With<Sensors>, With<Field>>().then(
+            [this](const std::shared_ptr<const Robots>& robots, const Ball& ball, const Sensors& sensors, const Field& field) {
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -157,6 +157,8 @@ namespace module::strategy {
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
                 }
 
+
+
                 // Issue walking task toward final position and orientation
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
             });
@@ -166,66 +168,39 @@ namespace module::strategy {
         // Otherwise it will emit a Task to walk to the ball
         on<Provide<TackleBall>, With<Ball>, With<Sensors>, With<Field>, With<Robots>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field, const Robots& robots) {
-                // Position of the ball relative to the robot in the robot space
-                Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
-                // Add an offset to account for walking with the foot in front of the ball
-                rBRr.y() += cfg.ball_y_offset;
-
-                // Position of the ball relative to the field in the field space
-                Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
-
                 // If there are no robots, we cannot tackle the ball
-                if (robots.robots.size() == 0) {
+                if (robots.robots.empty()) {
                     return;
                 }
 
-                // Find the robot in possession
-                Eigen::Vector3d rOBf = (field.Hfw * robots.robots[0].rRWw) - rBFf;
-                // Loop over all opponent robots and find the one closest to the ball
+                // Ball and goal positions in field frame
+                const Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
+                const Eigen::Vector3d rGBf = rGFf - rBFf;        // Vector from ball to goal
+                const Eigen::Vector3d uGBf = rGBf.normalized();  // Unit vector toward goal
+
+                // Compute desired heading angle (towards goal from ball)
+                double desired_heading = std::atan2(rGBf.y(), rGBf.x());
+
+                // Compute kick target position (directly behind the ball)
+                const Eigen::Vector3d kick_target = rBFf - uGBf * cfg.ball_kick_distance;
+
+                // Find the closest opponent robot to the ball
+                Eigen::Vector3d rOBf = Eigen::Vector3d::Zero();
+                bool found_opponent = false;
                 for (const auto& robot : robots.robots) {
                     if (!robot.teammate) {
-                        // field.Hfw * robot.rRWw -> rRFf
                         Eigen::Vector3d candidate_rOBf = (field.Hfw * robot.rRWw) - rBFf;
-                        if (candidate_rOBf.norm() < rOBf.norm()) {
+                        if (!found_opponent || candidate_rOBf.norm() < rOBf.norm()) {
                             rOBf = candidate_rOBf;
+                            found_opponent = true;
                         }
                     }
                 }
 
-                // Normalise the vector
-                Eigen::Vector3d uOBf = rOBf.normalized();
+                // Set heading offset for tackling/dribbling around the opponent
+                double heading_offset = (rBFf.y() > 0) ? M_PI_4 : -M_PI_4;
+                Eigen::Isometry3d Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading + heading_offset));
 
-                // Get position of robot on field
-                Eigen::Isometry3d Hfr   = field.Hfw * sensors.Hrw.inverse();
-                Eigen::Vector3d rRFf    = Hfr.translation();
-                Eigen::Vector3d robot_x = Hfr.linear().col(0);  // Robot forward direction in field
-                double robot_heading    = std::atan2(robot_x.y(), robot_x.x());
-
-                // Create left/right perpendicular unit vectors to opponent direction
-                Eigen::Vector3d uLeft  = Eigen::Vector3d(-uOBf.y(), uOBf.x(), 0);  // 90 deg left
-                Eigen::Vector3d uRight = Eigen::Vector3d(uOBf.y(), -uOBf.x(), 0);  // 90 deg right
-
-                // Offset positions from the ball on both sides
-                Eigen::Vector3d rLeftFf  = rBFf + uLeft * cfg.approach_offset;
-                Eigen::Vector3d rRightFf = rBFf + uRight * cfg.approach_offset;
-
-                // Choose the side to approach based on which is closer to the robot
-                // Unit vector of the heading in field space
-                Eigen::Vector3d uHf = (rRFf - rLeftFf).norm() < (rRFf - rRightFf).norm() ? uRight : uLeft;
-                double heading      = std::atan2(uHf.y(), uHf.x());
-                // Error between the robot's heading and the desired heading perpendicular to the opponent
-                double angle_error = std::atan2(std::sin(heading - robot_heading), std::cos(heading - robot_heading));
-
-                // if not robot is not yet aligned, add the offset to approach to the side of the opponent
-                Eigen::Vector3d rApproachFf = rBFf;
-                if (std::abs(angle_error) > cfg.tackle_angle_offset) {
-                    // Add y offset in the direction of the perpendicular vector
-                    rApproachFf -= uHf * cfg.approach_offset;
-                }
-                // Always add some distance backwards from opponent along opponent vector
-                rApproachFf -= uOBf * cfg.avoid_opponent_offset;
-
-                Eigen::Isometry3d Hfk = pos_rpy_to_transform(rApproachFf, Eigen::Vector3d(0, 0, heading));
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
             });
 
