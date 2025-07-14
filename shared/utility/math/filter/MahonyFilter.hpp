@@ -112,6 +112,26 @@ namespace utility {
                 void set_state(const Eigen::Matrix<Scalar, 3, 3>& Rwb) {
                     this->Rwb = Rwb;
                 }
+
+                /// @brief Set the proportional gain
+                void set_Kp(const Scalar new_Kp) {
+                    this->Kp = new_Kp;
+                }
+
+                /// @brief Get the current proportional gain
+                Scalar get_Kp() const {
+                    return Kp;
+                }
+
+                /// @brief Set the integral gain
+                void set_Ki(const Scalar new_Ki) {
+                    this->Ki = new_Ki;
+                }
+
+                /// @brief Get the current integral gain
+                Scalar get_Ki() const {
+                    return Ki;
+                }
             };
 
         }  // namespace filter
