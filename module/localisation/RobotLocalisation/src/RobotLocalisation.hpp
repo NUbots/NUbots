@@ -72,6 +72,7 @@ namespace module::localisation {
             double max_localisation_cost = 0.0;
             /// @brief Whether to use ground truth robot data from Webots when available
             bool use_ground_truth = false;
+            bool force_playing = false;  // Temp: If we are force-playing, we need to default to our using RED as our team colour
 
         } cfg;
 
