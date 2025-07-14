@@ -243,7 +243,8 @@ namespace utility::skill {
             else if (kick_requested && engine_state.value == WalkState::State::WALKING) {
                 // Kick is requested and we are walking, transition to kicking
                 engine_state = WalkState::State::KICKING;
-            } else if (!kick_requested && engine_state.value == WalkState::State::KICKING) {
+            }
+            else if (!kick_requested && engine_state.value == WalkState::State::KICKING) {
                 // Kick is not requested and we are kicking, transition to walking
                 engine_state = WalkState::State::WALKING;
             }
@@ -567,17 +568,17 @@ namespace utility::skill {
          * @brief Generate kicking trajectories for the torso and swing foot.
          */
         void generate_kicking_trajectories(const Vec3& velocity_target) {
-               // Compute the next step placement in the planted foot frame based on the requested velocity target
-               Vec3 step = Vec3::Zero();
-               step.x()  = std::max(std::min(velocity_target.x() * p.step_period, p.step_limits.x()), -p.step_limits.x());
-               step.y()  = std::max(std::min(velocity_target.y() * p.step_period, p.step_limits.y()), -p.step_limits.y());
-               step.z()  = std::max(std::min(velocity_target.z() * p.step_period, p.step_limits.z()), -p.step_limits.z());
+            // Compute the next step placement in the planted foot frame based on the requested velocity target
+            Vec3 step = Vec3::Zero();
+            step.x()  = std::max(std::min(velocity_target.x() * p.step_period, p.step_limits.x()), -p.step_limits.x());
+            step.y()  = std::max(std::min(velocity_target.y() * p.step_period, p.step_limits.y()), -p.step_limits.y());
+            step.z()  = std::max(std::min(velocity_target.z() * p.step_period, p.step_limits.z()), -p.step_limits.z());
 
-               // Generate torso trajectory
-               generate_torso_trajectory(step, velocity_target);
+            // Generate torso trajectory
+            generate_torso_trajectory(step, velocity_target);
 
-               // Generate kick swing foot trajectory
-               generate_kick_swing_foot_trajectory(step, velocity_target);
+            // Generate kick swing foot trajectory
+            generate_kick_swing_foot_trajectory(step, velocity_target);
         }
 
         /**

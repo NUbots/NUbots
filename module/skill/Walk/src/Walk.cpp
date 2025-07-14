@@ -88,10 +88,11 @@ namespace module::skill {
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
 
             // Configure kick parameters
-            cfg.walk_generator_parameters.kick_height = config["kick"]["kick_height"].as<double>();
+            cfg.walk_generator_parameters.kick_height           = config["kick"]["kick_height"].as<double>();
             cfg.walk_generator_parameters.kick_forward_distance = config["kick"]["kick_forward_distance"].as<double>();
-            cfg.walk_generator_parameters.kick_backward_distance = config["kick"]["kick_backward_distance"].as<double>();
-            cfg.walk_generator_parameters.kick_apex_ratio = config["kick"]["kick_apex_ratio"].as<double>();
+            cfg.walk_generator_parameters.kick_backward_distance =
+                config["kick"]["kick_backward_distance"].as<double>();
+            cfg.walk_generator_parameters.kick_apex_ratio   = config["kick"]["kick_apex_ratio"].as<double>();
             cfg.walk_generator_parameters.kick_timing_ratio = config["kick"]["kick_timing_ratio"].as<double>();
             cfg.walk_generator_parameters.kick_windup_ratio = config["kick"]["kick_windup_ratio"].as<double>();
 
@@ -199,7 +200,9 @@ namespace module::skill {
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
-                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase, kick_step_in_progress).value) {
+                    switch (walk_generator
+                                .update(time_delta, velocity_target, sensors.planted_foot_phase, kick_step_in_progress)
+                                .value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
                         case WalkState::State::KICKING:
