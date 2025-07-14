@@ -313,131 +313,133 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
   }, [robot.hasErrors, isAlarmPlaying, alarmEnabled, playAlarm, stopAlarm]);
 
   return (
-    <div className="p-4 border border-black dark:border-white rounded-lg w-full">
-      <div className="flex justify-between items-center mb-4 pb-2">
-        <h3 className="text-xl font-semibold">Servo Information</h3>
-        <div className="flex items-center gap-2">
+    <div className="p-3 sm:p-4 border border-black dark:border-white rounded-lg w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 pb-2 gap-2">
+        <h3 className="text-lg sm:text-xl font-semibold">Servo Information</h3>
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           {robot.hasErrors && (
             <div className="flex items-center gap-1 text-red-600">
               <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
               <span className="text-xs font-medium">ALARM</span>
             </div>
           )}
-          <div className="text-xs text-gray-500">{audioStatus}</div>
+          <div className="text-xs text-gray-500 hidden sm:block">{audioStatus}</div>
           <button
             onClick={toggleAlarm}
-            className={`text-xs px-2 py-1 rounded mr-2 ${alarmEnabled
-                ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-gray-400 text-white hover:bg-gray-500'
+            className={`text-xs px-2 py-1 rounded ${alarmEnabled
+              ? 'bg-red-600 text-white hover:bg-red-700'
+              : 'bg-gray-400 text-white hover:bg-gray-500'
               }`}
           >
-            {alarmEnabled ? 'Disable Alarm' : 'Enable Alarm'}
+            {alarmEnabled ? 'Disable' : 'Enable'}
           </button>
           <button
             onClick={() => {
               console.log('Testing audio...');
               createBeep();
             }}
-            className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 mr-2"
+            className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
           >
             Test Audio
           </button>
           <button
             onClick={() => setUnit(unit === "rad" ? "deg" : "rad")}
-            className="text-sm px-2 py-1 border rounded hover:bg-gray-300 dark:hover:bg-gray-600 border-black dark:border-white"
+            className="text-xs sm:text-sm px-2 py-1 border rounded hover:bg-gray-300 dark:hover:bg-gray-600 border-black dark:border-white"
           >
-            Show in {unit === "rad" ? "Degrees" : "Radians"}
+            {unit === "rad" ? "Deg" : "Rad"}
           </button>
         </div>
       </div>
 
       {/* Error Summary */}
       {robot.hasErrors && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">Servo Errors Detected</h4>
-          <div className="space-y-1">
+        <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <h4 className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200 mb-1 sm:mb-2">Servo Errors Detected</h4>
+          <div className="space-y-0.5 sm:space-y-1">
+            {/* Hardware Errors */}
             {robot.servosWithErrors.map((servo) => (
               <div key={servo.id} className="text-xs text-red-700 dark:text-red-300">
                 <span className="font-medium">{servo.name}:</span> {getErrorDescription(servo.error).join(", ")}
               </div>
             ))}
+            {/* Overheating Servos */}
+            {Array.from(robot.servoTemperatures.entries())
+              .filter(([id, temp]) => temp > 50)
+              .map(([id, temp]) => {
+                const servoName = ServoNames[id] || `Servo ${id}`;
+                return (
+                  <div key={`temp-${id}`} className="text-xs text-red-700 dark:text-red-300">
+                    <span className="font-medium">{servoName}:</span> Overheating ({temp.toFixed(1)}°C)
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}
 
-      {/* Temperature Summary */}
-      <div className="mb-4 grid grid-cols-2 gap-4">
-        <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Highest Temperature</h4>
-          {robot.highestTemperatureServo && (
-            <div className="text-lg font-bold">
-              <span className={robot.highestTemperatureServo.temperature > 50 ? "text-red-600" : "text-[#888888]"}>
-                {robot.highestTemperatureServo.temperature.toFixed(1)}°C
-              </span>
-              <div className="text-xs text-gray-500">{robot.highestTemperatureServo.name}</div>
-            </div>
-          )}
-        </div>
-        <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Temperature</h4>
-          <div className="text-lg font-bold text-[#888888]">{robot.averageTemperature.toFixed(1)}°C</div>
-        </div>
-      </div>
+
 
       {/* Servo Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-300 dark:border-gray-600">
-              <th className="text-left p-2 font-medium">Servo</th>
-              <th className="text-right p-2 font-medium">Angle</th>
-              <th className="text-right p-2 font-medium">Temperature</th>
-              <th className="text-right p-2 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {Object.entries(robot.motors).map(([jointName, motor], index) => {
-              const servoId = index;
-              const servoName = ServoNames[servoId] || jointName.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (match) => match.toUpperCase());
-              const temperature = robot.servoTemperatures.get(servoId);
-              const error = robot.servoErrors.get(servoId);
-              const angle = unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${((motor.angle * 180) / Math.PI).toFixed(2)}°`;
-              const isOverLimit = temperature !== undefined && temperature > 50;
-              const hasError = error !== undefined && error !== 0;
+      <div className="flex-1 overflow-hidden">
+        <div className="overflow-auto h-full scrollbar-hide">
+          <table className="w-full text-xs min-w-full">
+            <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
+              <tr className="border-b border-gray-300 dark:border-gray-600">
+                <th className="text-left p-1 sm:p-2 font-medium text-xs">Servo</th>
+                <th className="text-right p-1 sm:p-2 font-medium text-xs">Angle</th>
+                <th className="text-right p-1 sm:p-2 font-medium text-xs">Temp</th>
+                <th className="text-right p-1 sm:p-2 font-medium text-xs">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {Object.entries(robot.motors).map(([jointName, motor], index) => {
+                const servoId = index;
+                const servoName = ServoNames[servoId] || jointName.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (match) => match.toUpperCase());
+                const temperature = robot.servoTemperatures.get(servoId);
+                const error = robot.servoErrors.get(servoId);
+                const angle = unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${((motor.angle * 180) / Math.PI).toFixed(2)}°`;
+                const isOverLimit = temperature !== undefined && temperature > 50;
+                const hasError = error !== undefined && error !== 0;
 
-              return (
-                <tr
-                  key={jointName}
-                  className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${isOverLimit || hasError ? 'bg-red-50 dark:bg-red-900/20' : ''
-                    }`}
-                >
-                  <td className="p-2 font-medium">{servoName}</td>
-                  <td className="p-2 text-right">{angle}</td>
-                  <td className="p-2 text-right">
-                    {temperature !== undefined ? (
-                      <span className={isOverLimit ? "text-red-600 font-medium" : "text-[#888888]"}>
-                        {temperature.toFixed(1)}°C
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="p-2 text-right">
-                    {isOverLimit ? (
-                      <span className="text-red-600 font-medium text-xs">HOT</span>
-                    ) : hasError ? (
-                      <span className="text-red-600 font-medium text-xs">
-                        {getErrorDescription(error!)[0]}
-                      </span>
-                    ) : (
-                      <span className="text-green-600 text-xs">OK</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                return (
+                  <tr
+                    key={jointName}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${isOverLimit || hasError ? 'bg-red-50 dark:bg-red-900/20' : ''
+                      }`}
+                  >
+                    <td className="p-1 sm:p-2 font-medium truncate max-w-[120px] sm:max-w-none">
+                      <span className="block truncate text-xs" title={servoName}>{servoName}</span>
+                    </td>
+                    <td className="p-1 sm:p-2 text-right font-mono text-xs">
+                      {angle}
+                    </td>
+                    <td className="p-1 sm:p-2 text-right">
+                      {temperature !== undefined ? (
+                        <span className={`font-mono text-xs ${isOverLimit ? "text-red-600 font-medium" : "text-[#888888]"}`}>
+                          {temperature.toFixed(1)}°C
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">-</span>
+                      )}
+                    </td>
+                    <td className="p-1 sm:p-2 text-right">
+                      {isOverLimit ? (
+                        <span className="text-red-600 font-medium text-xs">HOT</span>
+                      ) : hasError ? (
+                        <span className="text-red-600 font-medium text-xs">
+                          {getErrorDescription(error!)[0]}
+                        </span>
+                      ) : (
+                        <span className="text-green-600 text-xs">OK</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -469,12 +471,12 @@ export class KinematicsView extends React.Component<{
         </Menu>
 
         {selectedRobot && (
-          <div className="flex flex-1 overflow-hidden">
-            <div className="flex-1 relative">
+          <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+            <div className="flex-1 relative min-h-0">
               <CanvasWrapper selectedRobot={selectedRobot} />
             </div>
 
-            <div className="w-1/3 h-full overflow-y-auto">
+            <div className="w-full lg:w-1/3 xl:w-1/4 h-64 lg:h-full overflow-hidden border-t lg:border-t-0 lg:border-l border-gray-300 dark:border-gray-600">
               <ServoDataDisplay robot={selectedRobot} />
             </div>
           </div>
