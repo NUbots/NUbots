@@ -435,9 +435,6 @@ namespace module::localisation {
 
             // --- State change cost ---
             cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
-            if (log_level <= DEBUG) {
-                emit(graph("Cost", cost));
-            }
 
             return cost;
         };
