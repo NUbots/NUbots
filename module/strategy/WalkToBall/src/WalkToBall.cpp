@@ -172,22 +172,16 @@ namespace module::strategy {
                             all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
                         }
 
-                        auto robot_infront =
-                            robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2), rRFf.head(2));
-
+                        auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
                         if (robot_infront.has_value()) {
-                            desired_heading = robot_infront.value().y() > rBFf.y() ? desired_heading + M_PI_4
-                                                                                   : desired_heading - M_PI_4;
-
-							// If the robot is not facing the desired heading, adjust the kick target
-							// to walk to the side of the ball instead
-							// Adjust the kick target to walk to the side of the ball
-							Eigen::Vector3d kick_target = rBFf + cfg.avoid_ball_offset;
-
-                            Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading));
-                            log<DEBUG>("Robot in front of ball", robot_infront.value());
-
-
+                          log<DEBUG>("Robot in front of ball", robot_infront.value());
+                            // Move to the side of the ball
+                            if (robot_infront.value().y() > rBFf.y()) {
+                                Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading + M_PI_4));
+                            }
+                            else {
+                                Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading - M_PI_4));
+                            }
                         }
                     }
                 }
@@ -325,26 +319,23 @@ namespace module::strategy {
     }
 
     std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                     const Eigen::Vector2d& rBFf,
-                                                                     const Eigen::Vector2d& rGFf) {
+                                                                     const Eigen::Vector2d& rBFf, const Eigen::Vector2d& rGFf) {
         // Normalized direction from robot to ball
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front = obstacle.x() < rBFf.x();  // TODO: check this is the correct obstacle
+            const bool in_front = obstacle.x() < rBFf.x(); // TODO: check this is the correct obstacle
             log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
             const bool past_ball = obstacle.norm() > rBFf.norm();
             log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
-            double dist_robot_obs   = obstacle.norm() - rBFf.norm();
+            double dist_robot_obs = obstacle.norm() - rBFf.norm();
             const bool within_range = dist_robot_obs < cfg.infront_check_distance;
-            log<DEBUG>("within_range:",
-                       obstacle.norm(),
-                       "rBFf",
-                       rBFf.norm(),
-                       "check distance:",
-                       cfg.infront_check_distance);
+            log<DEBUG>("within_range:", obstacle.norm(), "rBFf", rBFf.norm(), "check distance:", cfg.infront_check_distance);
             const bool intersects_path =
-                utility::math::geometry::intersection_line_and_circle(rGFf, rBFf, obstacle, cfg.infront_of_ball_radius);
+                utility::math::geometry::intersection_line_and_circle(rGFf,
+                                                                      rBFf,
+                                                                      obstacle,
+                                                                      cfg.infront_of_ball_radius);
 
             log<DEBUG>("Obstacle:",
                        obstacle.transpose(),
