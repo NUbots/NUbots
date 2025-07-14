@@ -73,9 +73,7 @@ namespace module::strategy {
             cfg.goal_target_offset     = config["goal_target_offset"].as<double>();
             cfg.max_angle_error        = config["max_angle_error"].as<Expression>();
             cfg.avoid_ball_offset      = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
-            cfg.avoid_opponent_offset  = config["avoid_opponent_offset"].as<double>();
-            cfg.approach_offset        = config["approach_offset"].as<double>();
-            cfg.tackle_angle_offset    = config["tackle_angle_offset"].as<double>();
+            cfg.tackle_angle_offset    = config["tackle_angle_offset"].as<Expression>();
             cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
         });
 
@@ -198,7 +196,7 @@ namespace module::strategy {
                 }
 
                 // Set heading offset for tackling/dribbling around the opponent
-                double heading_offset = (rBFf.y() > 0) ? M_PI_4 : -M_PI_4;
+                double heading_offset = (rBFf.y() > 0) ? cfg.tackle_angle_offset : -cfg.tackle_angle_offset;
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading + heading_offset));
 
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
