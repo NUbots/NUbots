@@ -192,14 +192,10 @@ namespace module::skill {
                         if ((end_of && correct_support) || (!end_of && !correct_support)) {
                             kick_step_in_progress = false;
                             emit<Task>(std::make_unique<Done>());
-                            log<INFO>("Kick step ended");
-                            // return;
                         }
                         // Otherwise continue to kick
                     }
                 }
-
-                log<INFO>("Kick step in progress: ", kick_step_in_progress);
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
