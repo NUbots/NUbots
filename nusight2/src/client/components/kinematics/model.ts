@@ -30,6 +30,41 @@ export const ServoNames: { [key: number]: string } = {
   19: "HEAD_PITCH",
 };
 
+// Hardware error constants from RawSensors.proto
+export const HardwareError = {
+  HARDWARE_OK: 0,
+  INPUT_VOLTAGE: 1,
+  UNUSED_BIT_1: 2,
+  OVERHEATING: 4,
+  MOTOR_ENCODER: 8,
+  ELECTRICAL_SHOCK: 16,
+  OVERLOAD: 32,
+} as const;
+
+export const getErrorDescription = (errorCode: number): string[] => {
+  const errors: string[] = [];
+
+  if (errorCode === 0) return ["No errors"];
+
+  if (errorCode & HardwareError.INPUT_VOLTAGE) {
+    errors.push("Input Voltage Error");
+  }
+  if (errorCode & HardwareError.OVERHEATING) {
+    errors.push("Overheating");
+  }
+  if (errorCode & HardwareError.MOTOR_ENCODER) {
+    errors.push("Motor Encoder Malfunction");
+  }
+  if (errorCode & HardwareError.ELECTRICAL_SHOCK) {
+    errors.push("Electrical Shock/Insufficient Power");
+  }
+  if (errorCode & HardwareError.OVERLOAD) {
+    errors.push("Overload");
+  }
+
+  return errors.length > 0 ? errors : ["Unknown Error"];
+};
+
 export class KinematicsModel {
   @observable selectedRobot?: KinematicsRobotModel;
 

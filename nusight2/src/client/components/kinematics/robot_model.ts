@@ -119,6 +119,7 @@ export class KinematicsRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable servoTemperatures: Map<number, number> = new Map();
+  @observable servoErrors: Map<number, number> = new Map();
 
   constructor({
     model,
@@ -193,5 +194,44 @@ export class KinematicsRobotModel {
       name: ServoNames[id] || `Servo ${id}`,
       temperature: temp,
     };
+  }
+
+  @computed
+  get servosWithErrors(): { id: number; name: string; error: number }[] {
+    const errors: { id: number; name: string; error: number }[] = [];
+    this.servoErrors.forEach((error, id) => {
+      if (error !== 0) {
+        errors.push({
+          id,
+          name: ServoNames[id] || `Servo ${id}`,
+          error,
+        });
+      }
+    });
+    return errors;
+  }
+
+  @computed
+  get hasErrors(): boolean {
+    // Check for hardware errors
+    const hasHardwareErrors = this.servosWithErrors.length > 0;
+
+    // Check for overheating (temperature > 50°C)
+    const hasOverheating = Array.from(this.servoTemperatures.values()).some(temp => temp > 50);
+
+    const hasErrors = hasHardwareErrors || hasOverheating;
+
+    // Debug logging
+    if (hasErrors) {
+      console.log('Servo errors detected:', {
+        hardwareErrors: hasHardwareErrors,
+        overheating: hasOverheating,
+        errorCount: this.servosWithErrors.length,
+        temperatures: Array.from(this.servoTemperatures.entries()),
+        hotServos: Array.from(this.servoTemperatures.entries()).filter(([id, temp]) => temp > 50)
+      });
+    }
+
+    return hasErrors;
   }
 }

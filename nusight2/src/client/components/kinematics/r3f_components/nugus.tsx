@@ -93,6 +93,14 @@ export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
     emissiveIntensity: 0.2,
   });
 
+  const errorMaterial = new THREE.MeshStandardMaterial({
+    color: "#FF8800",
+    roughness: 0.5,
+    metalness: 0.2,
+    emissive: "#442200",
+    emissiveIntensity: 0.3,
+  });
+
   if (robotRef.current) {
     robotRef.current.traverse((child) => {
       if (child.type === "URDFVisual" && child.children.length > 0) {
@@ -113,9 +121,18 @@ export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
         if (jointName && jointToServoId[jointName] !== undefined) {
           const servoId = jointToServoId[jointName];
           const temperature = model.servoTemperatures.get(servoId);
+          const error = model.servoErrors.get(servoId);
           const isOverLimit = temperature !== undefined && temperature > 50;
+          const hasError = error !== undefined && error !== 0;
 
-          mesh.material = isOverLimit ? hotMaterial : normalMaterial;
+          // Priority: Error > Temperature > Normal
+          if (hasError) {
+            mesh.material = errorMaterial;
+          } else if (isOverLimit) {
+            mesh.material = hotMaterial;
+          } else {
+            mesh.material = normalMaterial;
+          }
         } else {
           // Default material for non-joint parts
           mesh.material = normalMaterial;
