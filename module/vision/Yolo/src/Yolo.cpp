@@ -265,6 +265,12 @@ namespace module::vision {
                         pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height);
                     Eigen::Vector3d top_centre_ray = pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y);
 
+                    // After calculating boxes[idx] but before ray_to_camera_space
+                    double distance_from_optical_center =
+                        std::sqrt(std::pow(boxes[idx].x + boxes[idx].width / 2.0 - 646.93, 2)
+                                  + std::pow(boxes[idx].y + boxes[idx].height / 2.0 - 423.30, 2));
+                    log<INFO>("Detection at distance ", distance_from_optical_center, " pixels from optical center");
+
                     auto bbox        = std::make_unique<BoundingBox>();
                     bbox->name       = objects[class_id].name;
                     bbox->confidence = class_confidences[idx];

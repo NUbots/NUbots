@@ -24,8 +24,8 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
-  #vision::Yolo
-  vision::FisheyeProjection
+  vision::Yolo
+  #vision::FisheyeProjection
   # Localisation
   localisation::BallLocalisation
   localisation::FieldLocalisationNLopt

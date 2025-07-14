@@ -100,7 +100,8 @@
     "variant": "cpp",
     "core": "cpp",
     "ios": "cpp",
-    "__split_buffer": "cpp"
+    "__split_buffer": "cpp",
+    "__locale": "cpp"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
