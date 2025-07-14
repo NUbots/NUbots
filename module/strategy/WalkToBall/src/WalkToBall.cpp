@@ -162,39 +162,33 @@ namespace module::strategy {
                     double angle_scale     = std::clamp(std::abs(angle_error) / cfg.max_angle_error, 0.0, 1.0);
                     Eigen::Vector3d target = kick_target - uGBf * cfg.ball_approach_distance * angle_scale;
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
-                }
-                // If there are robots, check if there are obstacles in the way
-                if (robots != nullptr) {
-                    log<DEBUG>("Checking for obstacles in the way of kick path");
-                    // Get the positions of all robots in the world
-                    std::vector<Eigen::Vector2d> all_obstacles{};
-                    for (const auto& robot : robots->robots) {
-                        all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
-                    }
 
-                    auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
-                    if (robot_infront.has_value()) {
-                        // Unit vector from ball → robot
-                        Eigen::Vector2d ball_to_robot = (rRFf.head<2>() - rBFf.head<2>()).normalized();
+                    // If there are robots, check if there are obstacles in the way
+                    if (robots != nullptr) {
+                        log<DEBUG>("Checking for obstacles in the way of kick path");
+                        // Get the positions of all robots in the world
+                        std::vector<Eigen::Vector2d> all_obstacles{};
+                        for (const auto& robot : robots->robots) {
+                            all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
+                        }
 
-                        // Determine which direction is most convenient to step around the obstacle
-                        bool go_left = robot_infront.value().y() > rBFf.y();
-                        double sign  = go_left ? -1.0 : 1.0;
+                        auto robot_infront =
+                            robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2), rRFf.head(2));
 
-                        double behind_dist  = 0.2;   // how far behind the ball
-                        double forward_dist = 0.15;  // how far to step along the angled heading
+                        if (robot_infront.has_value()) {
+                            desired_heading = robot_infront.value().y() > rBFf.y() ? desired_heading + M_PI_4
+                                                                                   : desired_heading - M_PI_4;
 
-                        double heading_offset = sign * M_PI_4;
-                        Eigen::Rotation2Dd R(heading_offset);
-                        Eigen::Vector2d angled_dir = R * ball_to_robot;  // the direction you’d have to move if you wanted to go straight behind the ball
+							// If the robot is not facing the desired heading, adjust the kick target
+							// to walk to the side of the ball instead
+							// Adjust the kick target to walk to the side of the ball
+							Eigen::Vector3d kick_target = rBFf + cfg.avoid_ball_offset;
 
-                        Eigen::Vector2d offset2D = (-ball_to_robot * behind_dist) + (angled_dir * forward_dist);
+                            Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading));
+                            log<DEBUG>("Robot in front of ball", robot_infront.value());
 
-                        Eigen::Vector3d rGFf = rBFf + Eigen::Vector3d(offset2D.x(), offset2D.y(), 0.0);
 
-                        double final_heading = std::atan2(rBFf.y() - rGFf.y(), rBFf.x() - rGFf.x());
-
-                        Hfk = pos_rpy_to_transform(rGFf, Eigen::Vector3d(0, 0, final_heading));
+                        }
                     }
                 }
 
@@ -331,23 +325,26 @@ namespace module::strategy {
     }
 
     std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                     const Eigen::Vector2d& rBFf, const Eigen::Vector2d& rGFf) {
+                                                                     const Eigen::Vector2d& rBFf,
+                                                                     const Eigen::Vector2d& rGFf) {
         // Normalized direction from robot to ball
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front = obstacle.x() < rBFf.x(); // TODO: check this is the correct obstacle
+            const bool in_front = obstacle.x() < rBFf.x();  // TODO: check this is the correct obstacle
             log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
             const bool past_ball = obstacle.norm() > rBFf.norm();
             log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
-            double dist_robot_obs = obstacle.norm() - rBFf.norm();
+            double dist_robot_obs   = obstacle.norm() - rBFf.norm();
             const bool within_range = dist_robot_obs < cfg.infront_check_distance;
-            log<DEBUG>("within_range:", obstacle.norm(), "rBFf", rBFf.norm(), "check distance:", cfg.infront_check_distance);
+            log<DEBUG>("within_range:",
+                       obstacle.norm(),
+                       "rBFf",
+                       rBFf.norm(),
+                       "check distance:",
+                       cfg.infront_check_distance);
             const bool intersects_path =
-                utility::math::geometry::intersection_line_and_circle(rGFf,
-                                                                      rBFf,
-                                                                      obstacle,
-                                                                      cfg.infront_of_ball_radius);
+                utility::math::geometry::intersection_line_and_circle(rGFf, rBFf, obstacle, cfg.infront_of_ball_radius);
 
             log<DEBUG>("Obstacle:",
                        obstacle.transpose(),

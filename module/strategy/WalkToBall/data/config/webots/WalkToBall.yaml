@@ -27,4 +27,4 @@ tackle_angle_offset: 0.2
 
 infront_of_ball_radius: 0.8
 # Distance in front of the ball to check for obstacles
-infront_check_distance: 2.0
+infront_check_distance: 1.5
