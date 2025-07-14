@@ -151,6 +151,7 @@ namespace module::skill {
 
                 // Always enter the kick if its a new kick, otherwise only enter if we're not done yet
                 if (walk_task.kick) {
+                    log<INFO>("Kick step requested");
                     double current_time    = walk_generator.get_time();
                     double full_period     = walk_generator.get_step_period();
                     WalkState::Phase phase = walk_generator.get_phase();
@@ -161,7 +162,7 @@ namespace module::skill {
                     if (!kick_step_in_progress) {
                         // Check if the conditions allow for the kick to start
                         // Todo maybe set offset based on the frequency
-                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
+                        bool end_of = (current_time + time_delta) >= full_period;
 
                         // If the leg we want to kick with is planted, we can kick at the end of the step
                         bool other_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
@@ -170,12 +171,11 @@ namespace module::skill {
                         if (end_of && other_support) {
                             log<INFO>("Kick step started");
                             kick_step_in_progress = true;
-                            velocity_target       = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
                         }
                     }
                     else {
                         // Check if the step can end
-                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
+                        bool end_of = (current_time + time_delta) >= full_period;
                         // On the correct support foot, so can't be the beginning of the kick
                         bool correct_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
                                                                                  : phase == WalkState::Phase::LEFT;
@@ -187,15 +187,15 @@ namespace module::skill {
                             return;
                         }
                         // Otherwise continue to kick
-                        velocity_target = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
                     }
                 }
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
-                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase).value) {
+                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase, kick_step_in_progress).value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
+                        case WalkState::State::KICKING:
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                         case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                         case WalkState::State::UNKNOWN:

@@ -200,11 +200,13 @@ namespace utility::skill {
          * @param dt Time step.
          * @param velocity_target Requested velocity target (dx, dy, dtheta).
          * @param sensors_planted_foot_phase Planted foot phase from sensors.
+         * @param kick_requested Whether a kick is requested.
          * @return Engine state.
          */
         WalkState::State update(const Scalar& dt,
                                 const Vec3& velocity_target,
-                                const WalkState::Phase& sensors_planted_foot_phase) {
+                                const WalkState::Phase& sensors_planted_foot_phase,
+                                const bool& kick_requested = false) {
             if (velocity_target.isZero() && t < p.step_period) {
                 // Requested velocity target is zero and we haven't finished taking a step, continue stopping
                 engine_state = WalkState::State::STOPPING;
@@ -218,6 +220,10 @@ namespace utility::skill {
                 // Requested velocity target is non-zero and we are stopped, start walking
                 engine_state = WalkState::State::STARTING;
                 t            = 0;
+            }
+            else if (kick_requested && engine_state.value == WalkState::State::WALKING) {
+                // Kick is requested and we are walking, transition to kicking
+                engine_state = WalkState::State::KICKING;
             }
 
             // If the sensors have detected either double support or next foot planted, allow switching the planted foot
@@ -248,6 +254,15 @@ namespace utility::skill {
                 case WalkState::State::STOPPED:
                     // We do not update the time here because we want to remain in the stopped state
                     reset();
+                    break;
+                case WalkState::State::KICKING:
+                    update_time(dt);
+                    // If we are at the end of the step and can switch feet, switch the planted foot and reset time
+                    if (t >= p.step_period && can_switch) {
+                        switch_planted_foot();
+                    }
+                    // Generate kicking trajectories for the torso and swing foot
+                    generate_kicking_trajectories(velocity_target);
                     break;
                 default: NUClear::log<NUClear::LogLevel::WARN>("Unknown state", engine_state.value);
             }
@@ -471,6 +486,23 @@ namespace utility::skill {
             wp.orientation      = Vec3(0.0, p.torso_pitch, 0);
             wp.angular_velocity = Vec3(0.0, 0.0, 0);
             torso_trajectory.add_waypoint(wp);
+        }
+
+        /**
+         * @brief Generate kicking trajectories for the torso and swing foot.
+         */
+        void generate_kicking_trajectories(const Vec3& velocity_target) {
+               // Compute the next step placement in the planted foot frame based on the requested velocity target
+               Vec3 step = Vec3::Zero();
+               step.x()  = std::max(std::min(velocity_target.x() * p.step_period, p.step_limits.x()), -p.step_limits.x());
+               step.y()  = std::max(std::min(velocity_target.y() * p.step_period, p.step_limits.y()), -p.step_limits.y());
+               step.z()  = std::max(std::min(velocity_target.z() * p.step_period, p.step_limits.z()), -p.step_limits.z());
+
+               // Generate torso trajectory
+               generate_torso_trajectory(step, velocity_target);
+
+               // Generate swing foot trajectory
+               generate_swing_foot_trajectory(step, velocity_target);
         }
 
         /**
