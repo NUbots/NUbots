@@ -47,3 +47,11 @@ kick:
   kick_velocity_x: 0.35 # Forward velocity during kick (m/s)
   kick_velocity_y: 0.001 # Lateral velocity during kick (m/s)
   kick_timing_offset: 0.1 # Buffer time before the kick starts (in seconds)
+
+  # Kick trajectory parameters
+  kick_height: 0.07 # Height of the foot during kick (m)
+  kick_forward_distance: 0.085 # Forward distance the foot moves during kick (m)
+  kick_backward_distance: 0.05 # Backward distance for windup (m)
+  kick_apex_ratio: 0.6 # Ratio of step period when foot is at highest point during kick
+  kick_timing_ratio: 0.8 # Ratio of step period when the actual kick occurs
+  kick_windup_ratio: 0.4 # Ratio of step period when windup occurs

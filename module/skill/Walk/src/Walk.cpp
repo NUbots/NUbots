@@ -86,6 +86,15 @@ namespace module::skill {
             cfg.walk_generator_parameters.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
             cfg.walk_generator_parameters.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
+
+            // Configure kick parameters
+            cfg.walk_generator_parameters.kick_height = config["kick"]["kick_height"].as<double>();
+            cfg.walk_generator_parameters.kick_forward_distance = config["kick"]["kick_forward_distance"].as<double>();
+            cfg.walk_generator_parameters.kick_backward_distance = config["kick"]["kick_backward_distance"].as<double>();
+            cfg.walk_generator_parameters.kick_apex_ratio = config["kick"]["kick_apex_ratio"].as<double>();
+            cfg.walk_generator_parameters.kick_timing_ratio = config["kick"]["kick_timing_ratio"].as<double>();
+            cfg.walk_generator_parameters.kick_windup_ratio = config["kick"]["kick_windup_ratio"].as<double>();
+
             walk_generator.set_parameters(cfg.walk_generator_parameters);
             cfg.walk_generator_parameters.only_switch_when_planted =
                 config["walk"]["only_switch_when_planted"].as<bool>();
@@ -184,11 +193,13 @@ namespace module::skill {
                             kick_step_in_progress = false;
                             emit<Task>(std::make_unique<Done>());
                             log<INFO>("Kick step ended");
-                            return;
+                            // return;
                         }
                         // Otherwise continue to kick
                     }
                 }
+
+                log<INFO>("Kick step in progress: ", kick_step_in_progress);
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
