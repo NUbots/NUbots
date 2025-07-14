@@ -160,7 +160,6 @@ namespace module::skill {
 
                 // Always enter the kick if its a new kick, otherwise only enter if we're not done yet
                 if (walk_task.kick) {
-                    log<INFO>("Kick step requested");
                     double current_time    = walk_generator.get_time();
                     double full_period     = walk_generator.get_step_period();
                     WalkState::Phase phase = walk_generator.get_phase();
@@ -192,6 +191,7 @@ namespace module::skill {
                         if ((end_of && correct_support) || (!end_of && !correct_support)) {
                             kick_step_in_progress = false;
                             emit<Task>(std::make_unique<Done>());
+                            log<INFO>("Kick step ended");
                         }
                         // Otherwise continue to kick
                     }
