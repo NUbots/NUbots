@@ -131,10 +131,8 @@ namespace module::localisation {
                               && gt_robot.team == our_team_colour)) {
                             LocalisationRobot localisation_robot;
                             localisation_robot.id = gt_robot.player_number;
-                            localisation_robot.rRWw =
-                                Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
-                            localisation_robot.vRw =
-                                Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
+                            localisation_robot.rRWw = gt_robot.rRWw;
+                            localisation_robot.vRw = gt_robot.vRw;
                             localisation_robot.covariance = Eigen::Matrix4d::Zero();  // Ground truth has no uncertainty
                             localisation_robot.time_of_measurement = horizon.timestamp;
                             localisation_robot.teammate            = (gt_robot.team == our_team_colour);
