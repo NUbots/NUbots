@@ -227,36 +227,40 @@ $(document).ready(function(){initNavTree('GameController_8hpp_source.html',''); 
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        uint send_port;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        uint TEAM_ID;</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        uint PLAYER_ID;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        std::string BROADCAST_IP;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        std::string udp_filter_address;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        std::set&lt;std::string&gt; ignored_ip_addresses;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">        /// @brief The address to use to send reply packets back to game controller (unicast)</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8">   60</a></span>&#160;<span class="comment"></span>        std::string <a class="code" href="classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8">game_controller_address</a> = <span class="stringliteral">&quot;&quot;</span>;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keywordtype">bool</span> self_penalised = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        ReactionHandle listen_handle;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        std::string udp_filter_address = <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        std::set&lt;std::string&gt; ignored_ip_addresses{};</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> packet;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        gamecontroller::Mode mode;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordtype">bool</span> self_penalised = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        ReactionHandle listen_handle;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keywordtype">void</span> reset_state();</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordtype">void</span> process(<span class="keyword">const</span> message::input::GameState&amp; old_game_state,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; old_packet,</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; new_packet);</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keywordtype">void</span> send_reply_message(<span class="keyword">const</span> gamecontroller::ReplyMessage&amp; message);</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; get_own_team(<span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; get_opponent_team(</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;            <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        [[nodiscard]] <span class="keyword">static</span> message::input::GameState::PenaltyReason get_penalty_reason(</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;            <span class="keyword">const</span> gamecontroller::PenaltyState&amp; penalty_state);</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        [[nodiscard]] <span class="keyword">static</span> std::string ip_address_int_to_string(<span class="keyword">const</span> uint32_t&amp; ip_addr);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1input_1_1GameController.html">GameController</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    };</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;}  <span class="comment">// namespace module::input</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULES_INPUT_GAMECONTROLLER_HPP</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> packet;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        gamecontroller::Mode mode;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keywordtype">void</span> reset_state();</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keywordtype">void</span> process(<span class="keyword">const</span> message::input::GameState&amp; old_game_state,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; old_packet,</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                     <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; new_packet);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keywordtype">void</span> send_reply_message(<span class="keyword">const</span> gamecontroller::ReplyMessage&amp; message);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; get_own_team(<span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a>&amp; get_opponent_team(</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;            <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&amp; state) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        [[nodiscard]] <span class="keyword">static</span> message::input::GameState::PenaltyReason get_penalty_reason(</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;            <span class="keyword">const</span> gamecontroller::PenaltyState&amp; penalty_state);</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        [[nodiscard]] <span class="keyword">static</span> std::string ip_address_int_to_string(<span class="keyword">const</span> uint32_t&amp; ip_addr);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1input_1_1GameController.html">GameController</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    };</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;}  <span class="comment">// namespace module::input</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULES_INPUT_GAMECONTROLLER_HPP</span></div>
 <div class="ttc" id="aclassmodule_1_1input_1_1GameController_html"><div class="ttname"><a href="classmodule_1_1input_1_1GameController.html">module::input::GameController</a></div><div class="ttdoc">Monitors the match Game Controller.</div><div class="ttdef"><b>Definition:</b> GameController.hpp:47</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1GameController_html_a14d21bf060502e88c9b86cc3b058fda8"><div class="ttname"><a href="classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8">module::input::GameController::game_controller_address</a></div><div class="ttdeci">std::string game_controller_address</div><div class="ttdoc">The address to use to send reply packets back to game controller (unicast)</div><div class="ttdef"><b>Definition:</b> GameController.hpp:60</div></div>
 <div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">module::input::gamecontroller::GameControllerPacket</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:112</div></div>
 <div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1Team_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">module::input::gamecontroller::Team</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:100</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -265,7 +269,7 @@ $(document).ready(function(){initNavTree('GameController_8hpp_source.html',''); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_4d10c6a6480147e17a39ec31ce05eab6.html">input</a></li><li class="navelem"><a class="el" href="dir_0963710d67a5dff2eb9a67dd21d0ed1f.html">GameController</a></li><li class="navelem"><a class="el" href="dir_05850918ca416851b8e368145e1c8638.html">src</a></li><li class="navelem"><b>GameController.hpp</b></li>
-    <li class="footer">Generated on Tue Jul 15 2025 15:58:57 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jul 15 2025 18:53:26 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -9,7 +9,7 @@ var classmodule_1_1input_1_1GameController =
     [ "reset_state", "classmodule_1_1input_1_1GameController.html#a0d18714780a73407222b6992175d0455", null ],
     [ "send_reply_message", "classmodule_1_1input_1_1GameController.html#ad82b15dc8b430a7c95c8cd3287c9d42a", null ],
     [ "ACTIVE_PLAYERS_PER_TEAM", "classmodule_1_1input_1_1GameController.html#a2b955ad4f0d898538cc3a3ad595794b2", null ],
-    [ "BROADCAST_IP", "classmodule_1_1input_1_1GameController.html#af0c44df7e4c4648a4641de5a44fa02d5", null ],
+    [ "game_controller_address", "classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8", null ],
     [ "ignored_ip_addresses", "classmodule_1_1input_1_1GameController.html#a238ff12d77c3f42e3d8f6cbd98749701", null ],
     [ "listen_handle", "classmodule_1_1input_1_1GameController.html#a51971ab114f2472f71e8febacc716978", null ],
     [ "mode", "classmodule_1_1input_1_1GameController.html#afe8b57c31dd6904be067a463c282173f", null ],
