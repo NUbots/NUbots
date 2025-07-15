@@ -335,15 +335,6 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
             {alarmEnabled ? 'Disable' : 'Enable'}
           </button>
           <button
-            onClick={() => {
-              console.log('Testing audio...');
-              createBeep();
-            }}
-            className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Test Audio
-          </button>
-          <button
             onClick={() => setUnit(unit === "rad" ? "deg" : "rad")}
             className="text-xs sm:text-sm px-2 py-1 border rounded hover:bg-gray-300 dark:hover:bg-gray-600 border-black dark:border-white"
           >
