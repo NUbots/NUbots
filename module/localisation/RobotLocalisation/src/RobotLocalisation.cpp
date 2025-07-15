@@ -88,7 +88,7 @@ namespace module::localisation {
                 cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
                 cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
                 cfg.use_ground_truth                = config["use_ground_truth"].as<bool>();
-                cfg.force_playing                    = config["force_playing"].as<bool>();
+                cfg.force_playing                   = config["force_playing"].as<bool>();
             });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -120,7 +120,7 @@ namespace module::localisation {
                     std::string our_team_colour =
                         (game_state.team.team_colour == GameState::TeamColour::BLUE) ? "BLUE" : "RED";
                     // TODO: fix this
-                        if (cfg.force_playing) {
+                    if (cfg.force_playing) {
                         // If we are force-playing, we need to default to our using RED as our team colour
                         our_team_colour = "RED";
                     }
@@ -131,9 +131,9 @@ namespace module::localisation {
                         if (!(gt_robot.player_number == static_cast<int32_t>(player_id)
                               && gt_robot.team == our_team_colour)) {
                             LocalisationRobot localisation_robot;
-                            localisation_robot.id = gt_robot.player_number;
-                            localisation_robot.rRWw = gt_robot.rRWw;
-                            localisation_robot.vRw = gt_robot.vRw;
+                            localisation_robot.id         = gt_robot.player_number;
+                            localisation_robot.rRWw       = gt_robot.rRWw;
+                            localisation_robot.vRw        = gt_robot.vRw;
                             localisation_robot.covariance = Eigen::Matrix4d::Zero();  // Ground truth has no uncertainty
                             localisation_robot.time_of_measurement = horizon.timestamp;
                             localisation_robot.teammate            = (gt_robot.team == our_team_colour);
