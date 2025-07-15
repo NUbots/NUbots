@@ -97,7 +97,7 @@ namespace module::purpose {
             });
     }
 
-    void Attack::confirm_possession(bool in_possession_proposal) {
+    void Attack::confirm_possession(const bool& in_possession_proposal) {
         // get the time since the last attack message
         auto now                    = NUClear::clock::now();
         auto time_since_last_attack = now - last_timestamp;

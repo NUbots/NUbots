@@ -53,7 +53,7 @@ namespace module::purpose {
         } cfg;
 
         // function to handle the buffer of team possession time
-        void confirm_possession(bool in_possession_proposal);
+        void confirm_possession(const bool& in_possession_proposal);
 
     public:
         /// @brief Called by the powerplant to build and setup the Attack reactor.
