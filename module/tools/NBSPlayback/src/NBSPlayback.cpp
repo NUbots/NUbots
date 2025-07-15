@@ -32,17 +32,11 @@ namespace module::tools {
 
     using extension::Configuration;
 
-    using message::nbs::player::LoadRequest;
-    using message::nbs::player::PauseRequest;
-    using message::nbs::player::PlaybackFinished;
-    using message::nbs::player::PlaybackState;
-    using message::nbs::player::PlayRequest;
-    using message::nbs::player::SetModeRequest;
-
-
-    using message::nbs::player::PlaybackMode::FAST;
-    using message::nbs::player::PlaybackMode::REALTIME;
-    using message::nbs::player::PlaybackMode::SEQUENTIAL;
+    using message::eye::ScrubberLoadRequest;
+    using message::eye::ScrubberPlaybackFinished;
+    using message::eye::ScrubberPlayRequest;
+    using message::eye::ScrubberSetModeRequest;
+    using message::eye::ScrubberState;
 
     using NUClear::message::CommandLineArguments;
 
@@ -52,20 +46,8 @@ namespace module::tools {
         on<Configuration>("NBSPlayback.yaml").then([this](const Configuration& cfg) {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
-            auto playback_mode = cfg["playback_mode"].as<std::string>();
-            if (playback_mode == "FAST") {
-                config.mode = FAST;
-            }
-            else if (playback_mode == "SEQUENTIAL") {
-                config.mode = SEQUENTIAL;
-            }
-            else if (playback_mode == "REALTIME") {
-                config.mode = REALTIME;
-            }
-            else {
-                log<ERROR>("Playback mode is invalid, stopping playback");
-                powerplant.shutdown();
-            }
+            config.mode              = cfg["playback_mode"].as<std::string>();
+            config.progress_bar_mode = cfg["progress_bar_mode"].as<std::string>();
 
             // Update which types we will be playing
             for (const auto& setting : cfg["messages"]) {
@@ -79,27 +61,46 @@ namespace module::tools {
 
         on<Startup, With<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
             // Set playback mode
-            auto set_mode_request  = std::make_unique<SetModeRequest>();
+            auto set_mode_request  = std::make_unique<ScrubberSetModeRequest>();
             set_mode_request->mode = config.mode;
             emit<Scope::INLINE>(set_mode_request);
 
             // Load the files
-            auto load_request      = std::make_unique<LoadRequest>();
+            auto load_request      = std::make_unique<ScrubberLoadRequest>();
             load_request->files    = std::vector<std::string>(std::next(args.begin()), args.end());
             load_request->messages = config.messages;
-            emit<Scope::INLINE>(std::move(load_request));
+            emit<Scope::INLINE>(load_request);
 
             // Start playback
-            emit<Scope::INLINE>(std::make_unique<PlayRequest>());
+            emit<Scope::INLINE>(std::make_unique<ScrubberPlayRequest>());
         });
 
-        on<Trigger<PlaybackState>>().then([this](const PlaybackState& playback_state) {
+        on<Trigger<ScrubberState>>().then([this](const ScrubberState& scrubber_state) {
             // Update progress bar
-            progress_bar.update(playback_state.current_message, playback_state.total_messages, "", "NBS Playback");
+            if (config.progress_bar_mode == "COUNT") {
+                progress_bar.update(scrubber_state.current_message,
+                                    scrubber_state.total_messages,
+                                    " msgs",
+                                    "NBS Playback");
+            }
+            else if (config.progress_bar_mode == "TIME") {
+                progress_bar.update(
+                    std::chrono::duration_cast<std::chrono::seconds>(scrubber_state.timestamp.time_since_epoch()
+                                                                     - scrubber_state.start.time_since_epoch())
+                        .count(),
+                    std::chrono::duration_cast<std::chrono::seconds>(scrubber_state.end.time_since_epoch()
+                                                                     - scrubber_state.start.time_since_epoch())
+                        .count(),
+                    " seconds",
+                    "NBS Playback");
+            }
+            else {
+                log<ERROR>("Invalid progress bar mode");
+            }
         });
 
-        on<Trigger<PlaybackFinished>>().then([this] {
-            log<INFO>("Finished playback");
+        on<Trigger<ScrubberPlaybackFinished>>().then([this] {
+            log<INFO>("Playback finished.");
             progress_bar.close();
             powerplant.shutdown();
         });
