@@ -6,7 +6,7 @@ walk:
   # Bool to indicate whether or not to only switch if the next foot is planted
   only_switch_when_planted: true
   # Bool to indicate whether or not to use balance control. NOTE: correction_enabled must be true in FootController config
-  use_balance_control: true
+  use_balance_control: false
 
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
@@ -50,4 +50,3 @@ kick:
   kick_velocity_x: 0.35 # Forward velocity during kick (m/s)
   kick_velocity_y: 0.001 # Lateral velocity during kick (m/s)
   kick_timing_offset: 0.1 # Buffer time before the kick starts (in seconds)
-`
