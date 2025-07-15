@@ -84,6 +84,11 @@ namespace module::input {
         emit(graph("Yaw Filter/Fused Yaw", yaw_filter.get_yaw()));
         emit(graph("Yaw Filter/Bias", yaw_filter.get_bias()));
 
+        // Mahony filter debug information
+        emit(graph("Mahony Filter/Current Kp", mahony_filter.get_Kp()));
+        emit(graph("Mahony Filter/Acceleration Magnitude", sensors->accelerometer.norm()));
+        emit(graph("Mahony Filter/Acceleration Deviation", std::abs(sensors->accelerometer.norm() - 9.81)));
+
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (robot_pose_ground_truth) {
             Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(ground_truth_Hfw.inverse() * robot_pose_ground_truth->Hft);

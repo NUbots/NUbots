@@ -73,6 +73,10 @@ namespace module::input {
                 double standing_Kp = 0.0;
                 /// @brief Kp gain for dynamic states
                 double dynamic_Kp = 0.0;
+                /// @brief Acceleration scaling factor for continuous adaptation
+                double lambda = 1.0;
+                /// @brief Minimum Kp multiplier (prevents Kp from going to zero)
+                double min_mul = 0.1;
             } adaptive_gains;
 
             /// @brief The number of times a button must be pressed before it is considered pressed

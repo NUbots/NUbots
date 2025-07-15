@@ -2,14 +2,6 @@
 mahony:
   # Integral gain
   Ki: 0.2
-  # Adaptive gains based on stability state
-  adaptive_gains:
-    # More aggressive gain when standing (stationary)
-    standing:
-      Kp: 0.5
-    # Default gain for dynamic states (walking, falling, etc.)
-    dynamic:
-      Kp: 0.2
   # Initial bias
   initial_bias:
     - 0

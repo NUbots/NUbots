@@ -14,12 +14,15 @@ mahony:
   Ki: 0.1
   # Adaptive gains based on stability state
   adaptive_gains:
-    # More aggressive gain when standing (stationary)
-    standing:
-      Kp: 0.8
-    # Default gain for dynamic states (walking, falling, etc.)
-    dynamic:
-      Kp: 0.2
+    Kp:
+      # More aggressive gain when standing (stationary)
+      standing: 0.5
+      # Default gain for dynamic states (walking, falling, etc.)
+      dynamic: 0.2
+    # Acceleration scaling factor for continuous adaptation
+    lambda: 1.0
+    # Minimum Kp multiplier (prevents Kp from going to zero)
+    min_mul: 0.1
   # Initial bias
   initial_bias: [0, 0, 0]
   # Initial orientation (roll, pitch, yaw)

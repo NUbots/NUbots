@@ -61,8 +61,10 @@ namespace module::input {
             nugus_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
 
             // Configure the Mahony filter
-            cfg.adaptive_gains.standing_Kp = config["mahony"]["adaptive_gains"]["standing"]["Kp"].as<double>();
-            cfg.adaptive_gains.dynamic_Kp  = config["mahony"]["adaptive_gains"]["dynamic"]["Kp"].as<double>();
+            cfg.adaptive_gains.standing_Kp = config["mahony"]["adaptive_gains"]["Kp"]["standing"].as<double>();
+            cfg.adaptive_gains.dynamic_Kp  = config["mahony"]["adaptive_gains"]["Kp"]["dynamic"].as<double>();
+            cfg.adaptive_gains.lambda      = config["mahony"]["adaptive_gains"]["lambda"].as<double>();
+            cfg.adaptive_gains.min_mul     = config["mahony"]["adaptive_gains"]["min_mul"].as<double>();
             mahony_filter                  = MahonyFilter<double>(
                 cfg.adaptive_gains.standing_Kp,
                 config["mahony"]["Ki"].as<Expression>(),

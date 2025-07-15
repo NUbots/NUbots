@@ -82,13 +82,17 @@ namespace module::input {
                 .count(),
             0.0);
 
-        // Adapt Mahony filter Kp gain based on stability state
-        if (stability == Stability::STANDING) {
-            mahony_filter.set_Kp(cfg.adaptive_gains.standing_Kp);
-        }
-        else {
-            mahony_filter.set_Kp(cfg.adaptive_gains.dynamic_Kp);
-        }
+        // Adaptive Mahony filter Kp gain based on acceleration magnitude
+        double Kp = stability == Stability::STANDING ? cfg.adaptive_gains.standing_Kp : cfg.adaptive_gains.dynamic_Kp;
+
+        // Continuous function to adapt Kp based on acceleration magnitude with exponential decay
+        const double gravity   = 9.81;
+        const double deviation = std::abs(sensors->accelerometer.norm() - gravity);
+
+        Kp *= cfg.adaptive_gains.min_mul
+              + (1.0 - cfg.adaptive_gains.min_mul) * std::exp(-cfg.adaptive_gains.lambda * deviation);
+
+        mahony_filter.set_Kp(Kp);
 
         // Perform Mahony update
         const auto Rwt_mahony      = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
