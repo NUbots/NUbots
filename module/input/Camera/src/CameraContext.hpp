@@ -28,16 +28,18 @@
 #define MODULE_INPUT_CAMERA_CONTEXT_HPP
 
 #include <Eigen/Geometry>
+#include <aravis-0.8/arv.h>
+#include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <nuclear>
 #include <string>
 
-#include "message/input/Image.hpp"
+#include "extension/Configuration.hpp"
 
-extern "C" {
-#include <aravis-0.8/arv.h>
-}
+#include "message/input/Lens.hpp"
+
 
 namespace module::input {
     // Forward declare camera
@@ -45,23 +47,68 @@ namespace module::input {
 
     // Camera contextual information for Aravis new-buffer callback function.
     struct CameraContext {
+        CameraContext(Camera& reactor,
+                      ::extension::Configuration config,
+                      std::string name,
+                      const uint32_t& id,
+                      const NUClear::clock::duration& reset_sleep_duration,
+                      const NUClear::clock::time_point& last_frame)
+            : reactor(reactor)
+            , config(std::move(config))
+            , name(std::move(name))
+            , id(id)
+            // Set last reset time in the past so that the camera will be configured immediately
+            , reset_time(NUClear::clock::now() - reset_sleep_duration, true)
+            , reset_sleep_duration(reset_sleep_duration)
+            , last_frame(last_frame) {}
+        CameraContext(Camera& reactor,
+                      ::extension::Configuration config,
+                      std::string name,
+                      const uint32_t& id,
+                      std::shared_ptr<ArvCamera>& camera,
+                      std::shared_ptr<ArvStream>& stream,
+                      std::shared_ptr<ArvDevice>& device,
+                      std::pair<NUClear::clock::time_point, bool> reset_time,
+                      const NUClear::clock::duration& reset_sleep_duration,
+                      const NUClear::clock::time_point& last_frame)
+            : reactor(reactor)
+            , config(std::move(config))
+            , name(std::move(name))
+            , id(id)
+            , camera(camera)
+            , stream(stream)
+            , device(device)
+            , reset_time(std::move(reset_time))
+            , reset_sleep_duration(reset_sleep_duration)
+            , last_frame(last_frame) {}
+
         Camera& reactor;
+        NUClear::threading::ReactionHandle watchdog{};
+
+        /// Mutex to control reset operations on the camera
+        std::unique_ptr<std::mutex> reset_mutex{std::make_unique<std::mutex>()};
+        ::extension::Configuration config;
         std::string name;
-        uint32_t fourcc;
+        uint32_t fourcc{0};
         uint32_t id;
-        message::input::Image::Lens lens;
-        // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached
-        // to
-        Eigen::Isometry3d Hpc;
-        std::shared_ptr<ArvCamera> camera;
-        std::shared_ptr<ArvStream> stream;
+        message::input::Lens lens{};
+        /// Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached to
+        Eigen::Isometry3d Hpc{Eigen::Isometry3d::Identity()};
+        std::shared_ptr<ArvCamera> camera{nullptr};
+        std::shared_ptr<ArvStream> stream{nullptr};
+        std::shared_ptr<ArvDevice> device{nullptr};
+
+        std::pair<NUClear::clock::time_point, bool> reset_time;
+        NUClear::clock::duration reset_sleep_duration;
+        NUClear::clock::time_point last_frame;
 
         // Values used to correct the time between the clock on the device and the local clock
         struct TimeCorrection {
+            // The type of method we are using to sync with the camera
             // The amount to add to camera timestamps
             std::int64_t offset;
             union {
-                struct {
+                struct {  // NOLINT(clang-diagnostic-nested-anon-types)
                     /// The time on the camera at calibration time
                     std::int64_t cam_at_calibration;
                     /// The time on the local machine at calibration time
@@ -72,18 +119,19 @@ namespace module::input {
                     /// If this exceeds a threshold we assume the clock is out of sync
                     std::int64_t over_time_count;
                 } drift;
-                struct {
-                    // Estimation error covariance
+                struct {  // NOLINT(clang-diagnostic-nested-anon-types)
+                    /// Estimation error covariance
                     double p;
-                    // Measurement noise covariance
+                    /// Measurement noise covariance
                     double r;
-                    // Process noise covariance
+                    /// Process noise covariance
                     double q;
                 } kf;
             };
-            bool live;
-        } time;
+            enum { LIVE, LATCHED, PTP } type;
+        } time{};
     };
+
 }  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_CONTEXT_HPP
