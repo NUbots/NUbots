@@ -51,9 +51,9 @@ namespace module::localisation {
     using VisionRobots       = message::vision::Robots;
     using PenaltyState       = message::input::State;
     using GroundTruthRobots  = message::platform::webots::RobotsGroundTruth;
+    using TeamColour         = message::input::GameState::TeamColour;
 
     using message::eye::DataPoint;
-    using message::input::GameState;
     using message::input::RoboCup;
     using message::localisation::Field;
     using message::purpose::Purpose;
@@ -73,7 +73,7 @@ namespace module::localisation {
             .then([this](const Configuration& config, const GlobalConfig& global_config) {
                 // Use configuration here from file RobotLocalisation.yaml
                 this->log_level = config["log_level"].as<NUClear::LogLevel>();
-                PLAYER_ID       = global_config.player_id;
+                player_id       = global_config.player_id;
 
                 // Set our UKF filter parameters
                 cfg.ukf.noise.measurement.position =
@@ -96,13 +96,13 @@ namespace module::localisation {
            With<FieldDescription>,
            Optional<With<GroundTruthRobots>>,
            With<GlobalConfig>,
-           With<GameState>,
+           With<TeamColour>,
            Sync<RobotLocalisation>>()
             .then([this](const GreenHorizon& horizon,
                          const Field& field,
                          const FieldDescription& field_desc,
                          const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth,
-                         const GameState& game_state) {
+                         const TeamColour& team_colour) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -116,26 +116,24 @@ namespace module::localisation {
                 if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
                     log<DEBUG>("Using ground truth for localisation.");
                     // Get our team colour as a string from GameState
-                    std::string our_team_colour =
-                        (game_state.team.team_colour == GameState::TeamColour::BLUE) ? "BLUE" : "RED";
+                    std::string our_team_colour = (team_colour == TeamColour::BLUE) ? "BLUE" : "RED";
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : robots_ground_truth->robots) {
                         // Skip our own robot using GlobalConfig player_id and team colour
-                        if (!(gt_robot.player_number == static_cast<int32_t>(PLAYER_ID)
-                              && gt_robot.team == our_team_colour)) {
+                        // TODO: move to webots module
+                        if (!(gt_robot.player_number == static_cast<int32_t>(player_id))
+                            || !(gt_robot.team == our_team_colour)) {
                             LocalisationRobot localisation_robot;
-                            localisation_robot.id = gt_robot.player_number;
-                            localisation_robot.rRWw =
-                                Eigen::Vector3d(gt_robot.rRWw.x(), gt_robot.rRWw.y(), gt_robot.rRWw.z());
-                            localisation_robot.vRw =
-                                Eigen::Vector3d(gt_robot.vRw.x(), gt_robot.vRw.y(), gt_robot.vRw.z());
+                            localisation_robot.id         = gt_robot.player_number;
+                            localisation_robot.rRWw       = gt_robot.rRWw;
+                            localisation_robot.vRw        = gt_robot.vRw;
                             localisation_robot.covariance = Eigen::Matrix4d::Zero();  // Ground truth has no uncertainty
                             localisation_robot.time_of_measurement = horizon.timestamp;
                             localisation_robot.teammate            = (gt_robot.team == our_team_colour);
 
                             // Set purpose information
                             localisation_robot.purpose.player_id = gt_robot.player_number;
-                            // Could set other purpose fields if needed
+                            // TODO: could rest of purpose info from R2RC
                             localisation_robots->robots.push_back(localisation_robot);
                         }
                     }

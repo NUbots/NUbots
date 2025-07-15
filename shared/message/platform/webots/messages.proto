@@ -115,9 +115,9 @@ message RobotGroundTruth {
     /// Player number within team
     int32 player_number = 3;
     /// Position of robot in world space
-    fvec3 rRWw = 4;
+    vec3 rRWw = 4;
     /// Velocity of robot in world space
-    fvec3 vRw = 5;
+    vec3 vRw = 5;
     /// Rotation of robot (yaw angle in radians)
     float yaw = 6;
 }
