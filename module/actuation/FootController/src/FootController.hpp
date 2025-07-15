@@ -183,17 +183,6 @@ namespace module::actuation {
                 auto roll_error  = desired_roll - fused_roll;
                 auto pitch_error = desired_pitch - fused_pitch;
 
-                // If the error is too large, we are probably falling over and should pause applying control.
-                if (std::abs(roll_error) > cfg.max_roll_error || std::abs(pitch_error) > cfg.max_pitch_error) {
-                    if (log_level <= DEBUG) {
-                        log<DEBUG>(fmt::format(
-                            "Balance correction disabled due to large error: roll_error = {}, pitch_error = {}",
-                            roll_error,
-                            pitch_error));
-                    }
-                    return;  // Do not apply control if the error is too large
-                }
-
                 if (log_level <= DEBUG) {
                     // Graph the errors
                     emit(graph("Balance/Roll_Error", roll_error));
@@ -206,8 +195,26 @@ namespace module::actuation {
                 last_update_time = NUClear::clock::now();
 
                 // P control
-                desired_roll += cfg.roll_p_gain * roll_error;
-                desired_pitch += cfg.pitch_p_gain * pitch_error;
+                auto clamped_roll_error  = utility::math::clamp(-cfg.max_roll_error, roll_error, cfg.max_roll_error);
+                auto clamped_pitch_error = utility::math::clamp(-cfg.max_pitch_error, pitch_error, cfg.max_pitch_error);
+                desired_roll += cfg.roll_p_gain * clamped_roll_error;
+                desired_pitch += cfg.pitch_p_gain * clamped_pitch_error;
+
+                if (log_level <= DEBUG) {
+                    if (roll_error > cfg.max_roll_error || roll_error < -cfg.max_roll_error) {
+                        // If the error is too large, we are probably falling over and should pause applying control.
+                        log<DEBUG>(fmt::format("Balance correction disabled due to large ROLL error: roll_error = {}",
+                                               roll_error));
+                        log<DEBUG>(fmt::format("Clamping roll error to: {}", clamped_roll_error));
+                    }
+
+                    if (pitch_error > cfg.max_pitch_error || pitch_error < -cfg.max_pitch_error) {
+                        // If the error is too large, we are probably falling over and should pause applying control.
+                        log<DEBUG>(fmt::format("Balance correction disabled due to large error: pitch_error = {}",
+                                               pitch_error));
+                        log<DEBUG>(fmt::format("Clamping pitch error to: {}", clamped_pitch_error));
+                    }
+                }
 
                 // Graph P Correction
                 if (log_level <= DEBUG) {
