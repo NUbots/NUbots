@@ -81,13 +81,14 @@ namespace module::purpose {
                 if (attack.ball_pos == message::strategy::Who::OPPONENT) {
                     // Tackle the ball from the opponent
                     log<DEBUG>("Opponent has the ball, tackle it!");
-                    emit<Task>(std::make_unique<TackleBall>());
-                    return;
+                    emit<Task>(std::make_unique<TackleBall>(), 1);
+                    emit<Task>(std::make_unique<WalkToKickBall>(), 0);
                 }
                 else {
                     log<DEBUG>("We have the ball or it is free, walk to the goal!");
                     // Try to walk to the ball and align towards opponents goal
-                    emit<Task>(std::make_unique<WalkToKickBall>());
+                    emit<Task>(std::make_unique<TackleBall>(), 0);
+                    emit<Task>(std::make_unique<WalkToKickBall>(), 1);
                 }
             });
     }
