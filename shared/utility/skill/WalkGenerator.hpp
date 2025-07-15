@@ -85,7 +85,8 @@ namespace utility::skill {
             /// @brief Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
             Vec3 torso_sway_offset = Vec3::Zero();
 
-            /// @brief Torso offset from the planted foot [x,y,z] (in meters) during starting step, at time = step_period
+            /// @brief Torso offset from the planted foot [x,y,z] (in meters) during starting step, at time =
+            /// step_period
             Vec3 torso_start_sway_offset = Vec3::Zero();
 
             /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
@@ -468,8 +469,9 @@ namespace utility::skill {
             // Middle waypoint: Shift torso over planted foot
             wp.time_point         = p.step_period;
             Scalar torso_offset_y = phase == LEFT ? -p.torso_start_sway_offset.y() : p.torso_start_sway_offset.y();
-            wp.position = Vec3(p.torso_start_sway_offset.x(), torso_offset_y, p.torso_height + p.torso_start_sway_offset.z())
-                          + p.torso_position_offset;
+            wp.position =
+                Vec3(p.torso_start_sway_offset.x(), torso_offset_y, p.torso_height + p.torso_start_sway_offset.z())
+                + p.torso_position_offset;
             wp.velocity         = Vec3(0, 0, 0);
             wp.orientation      = Vec3(0.0, p.torso_pitch, 0);
             wp.angular_velocity = Vec3(0.0, 0.0, 0);
