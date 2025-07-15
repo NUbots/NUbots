@@ -80,15 +80,15 @@ namespace module::localisation {
                 associations.emplace_back(landmark.rLFf, rIFf);
             }
             else {
-                log<INFO>("Rejected assignment due to excessive cost: intersection ",
-                          intersection_index,
-                          " ↔ landmark ",
-                          landmark_index,
-                          " (cost ",
-                          cost,
-                          " greater than ",
-                          cfg.max_association_distance,
-                          ")");
+                log<DEBUG>("Rejected assignment due to excessive cost: intersection ",
+                           intersection_index,
+                           " ↔ landmark ",
+                           landmark_index,
+                           " (cost ",
+                           cost,
+                           " greater than ",
+                           cfg.max_association_distance,
+                           ")");
             }
         }
 
