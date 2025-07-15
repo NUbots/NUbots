@@ -1,4 +1,5 @@
-# A test role to check if robot communication between robots is working. Set RobotCommunication's log level to `DEBUG` to see a log each time a teammate sends a message, with the teammate's ID.
+# A test role to check if robot communication between robots is working. Set RobotCommunication's log level to `DEBUG`
+# to see a log each time a teammate sends a message, with the teammate's ID.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
   extension::FileWatcher # Watches configuration files for changes
