@@ -1,47 +1,74 @@
 log_level: INFO
 
-# List the message types you want to send
-# Depending on what value you put it will influence how it is sent:
-#   false -> don't send this message type and disable the reaction
-#   true -> attempt to send every message that you see of this type
-#   number -> send messages at most at this framerate (e.g. if you put 10 it will send no more than 10 messages per second)
-#             if you put in 0 here, it will act the same as if you put false
+# The configuration value for each `send` message type must be one of:
+#
+#     `true`: Forward every locally emitted message of this type to the target client.
+#    `false`: Do not forward locally emitted messages of this type to the target client. This is the same as omitting
+#             the message type in the config.
+# `reliable`: Forward every locally emitted message of this type to the target client using the "reliable UDP"
+#             NUClearNet protocol.
+# `<number>`: Forward locally emitted messages of this type to the target client at a maximum rate of `<number>` per
+#             second. For message types that contain an `id` field, the rate limit is applied per unique `id` value.
+#
+# The configuration value for each `recv` message type must be one of:
+#
+#  `true`: Forward every message of this type received from the target client.
+# `false`: Do not forward messages of this type received from the target client. This is the same as omitting the
+#          message type in the config.
+#
+# Example configuration:
+#
+# targets:
+#   client1:
+#     # The forwarding configuration for a NUClearNet client named "client1"
+#     send:
+#       # When emitted locally, these message types will be forwarded to "client1" over NUClearNet if not `false`
+#       message.example.Example1: true
+#       message.example.Example2: false
+#       message.example.Example3: reliable
+#       message.example.Example4: 10
+#     recv:
+#       # When received from "client1" over NUClearNet, these message types will be emitted locally if not `false`
+#       message.example.Example5: true
+#       message.example.Example6: false
+
 targets:
   nusight:
-    # Overview packets for the overview screen
-    message.support.nusight.Overview: false
-    message.support.FieldDescription: false
-    message.support.nuclear.ReactionProfiles: false
+    send:
+      # Overview packets for the overview screen
+      message.support.nusight.Overview: false
+      message.support.FieldDescription: false
+      message.support.nuclear.ReactionProfiles: false
 
-    # DataPoints power the chart view
-    message.eye.DataPoint: false
+      # DataPoints power the chart view
+      message.eye.DataPoint: false
 
-    # Sensor data
-    message.input.Sensors: true
+      # Sensor data
+      message.input.Sensors: true
 
-    # Vision messages
-    message.input.Image: false # You probably don't want this unless you're testing something very weird
-    message.output.CompressedImage: 10
-    message.vision.Balls: true
-    message.vision.Goals: true
-    message.vision.Robots: true
-    message.vision.GreenHorizon: true
-    message.vision.FieldLines: true
-    message.vision.VisualMesh: false
-    message.vision.FieldIntersections: true
-    message.vision.BoundingBoxes: true
+      # Vision messages
+      message.input.Image: false # You probably don't want this unless you're testing something very weird
+      message.output.CompressedImage: 10
+      message.vision.Balls: true
+      message.vision.Goals: true
+      message.vision.Robots: true
+      message.vision.GreenHorizon: true
+      message.vision.FieldLines: true
+      message.vision.VisualMesh: false
+      message.vision.FieldIntersections: true
+      message.vision.BoundingBoxes: true
 
-    # Localisation Messages
-    message.localisation.Ball: true
-    message.localisation.Field: true
-    message.localisation.Robots: true
+      # Localisation Messages
+      message.localisation.Ball: true
+      message.localisation.Field: true
+      message.localisation.Robots: true
 
-    # Log messages
-    message.nuclear.LogMessage: false
-    message.nuclear.ReactionStatistics: false
+      # Log messages
+      message.nuclear.LogMessage: false
+      message.nuclear.ReactionStatistics: false
 
-    # Behaviour
-    message.purpose.Purpose: true
-    message.planning.WalkToDebug: true
-    message.strategy.WalkInsideBoundedBox: true
-    message.behaviour.state.WalkState: true
+      # Behaviour
+      message.purpose.Purpose: true
+      message.planning.WalkToDebug: true
+      message.strategy.WalkInsideBoundedBox: true
+      message.behaviour.state.WalkState: true
