@@ -3,10 +3,10 @@ log_level: INFO
 
 # Map of possible ssid and passwords
 wifi_networks:
-  Humanoid_A: "rc2024humanoid"
-  Humanoid_B: "rc2024humanoid"
-  Humanoid_C: "rc2024humanoid"
-  Humanoid_D: "rc2024humanoid"
+  KID1_5G: "01234567"
+  KID2_5G: "01234567"
+  KID3_5G: "01234567"
+  KID4_5G: "01234567"
 
 common_ips: [
     "10.1.1.X", # Typical ethernet/lab IP
