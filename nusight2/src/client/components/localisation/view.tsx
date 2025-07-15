@@ -296,9 +296,10 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
       className={`
         w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm font-medium
         transition-all duration-150 ease-out
-        ${props.isVisible
-          ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
-          : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
+        ${
+          props.isVisible
+            ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
+            : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
         }
         focus:outline-none focus:ring-1 focus:ring-auto-primary
         active:scale-[0.98]
@@ -395,7 +396,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
 });
 
 // Right-side visibility toggle panel
-const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, 'Menu'>) => {
+const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">) => {
   const { model } = props;
 
   const toggleGroups = [

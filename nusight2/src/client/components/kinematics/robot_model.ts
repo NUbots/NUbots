@@ -5,6 +5,7 @@ import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
+
 import { ServoNames } from "./model";
 
 class ServoMotor {
@@ -217,18 +218,18 @@ export class KinematicsRobotModel {
     const hasHardwareErrors = this.servosWithErrors.length > 0;
 
     // Check for overheating (temperature > 50°C)
-    const hasOverheating = Array.from(this.servoTemperatures.values()).some(temp => temp > 50);
+    const hasOverheating = Array.from(this.servoTemperatures.values()).some((temp) => temp > 50);
 
     const hasErrors = hasHardwareErrors || hasOverheating;
 
     // Debug logging
     if (hasErrors) {
-      console.log('Servo errors detected:', {
+      console.log("Servo errors detected:", {
         hardwareErrors: hasHardwareErrors,
         overheating: hasOverheating,
         errorCount: this.servosWithErrors.length,
         temperatures: Array.from(this.servoTemperatures.entries()),
-        hotServos: Array.from(this.servoTemperatures.entries()).filter(([, temp]) => temp > 50)
+        hotServos: Array.from(this.servoTemperatures.entries()).filter(([, temp]) => temp > 50),
       });
     }
 

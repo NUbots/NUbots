@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState, useRef, useEffect } from "react";
+import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
 
@@ -6,7 +6,7 @@ import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { KinematicsController } from "./controller";
-import { KinematicsModel, ServoNames, getErrorDescription } from "./model";
+import { getErrorDescription, KinematicsModel, ServoNames } from "./model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper";
 import { KinematicsRobotModel } from "./robot_model";
 
@@ -16,8 +16,8 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
   const [audioStatus, setAudioStatus] = useState<string>("Initializing...");
   const [alarmEnabled, setAlarmEnabled] = useState<boolean>(() => {
     // Load alarm setting from localStorage, default to enabled
-    const saved = localStorage.getItem('servoAlarmEnabled');
-    return saved === null ? true : saved === 'true';
+    const saved = localStorage.getItem("servoAlarmEnabled");
+    return saved === null ? true : saved === "true";
   });
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
@@ -32,16 +32,16 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         audioContextRef.current = new AudioContextClass();
 
-        if (audioContextRef.current.state === 'suspended') {
+        if (audioContextRef.current.state === "suspended") {
           await audioContextRef.current.resume();
         }
 
-        console.log('Web Audio API initialized successfully');
+        console.log("Web Audio API initialized successfully");
         audioInitialized = true;
         setAudioStatus("Audio Ready");
         return true;
       } catch (error) {
-        console.warn('Web Audio API failed:', error);
+        console.warn("Web Audio API failed:", error);
         return false;
       }
     };
@@ -50,18 +50,19 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
       try {
         const audio = new Audio();
         // Create a simple beep using data URL
-        const beepDataUrl = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT';
+        const beepDataUrl =
+          "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT";
         audio.src = beepDataUrl;
         audio.volume = 0.5;
-        audio.preload = 'auto';
+        audio.preload = "auto";
 
         audioElementRef.current = audio;
-        console.log('HTML5 Audio initialized successfully');
+        console.log("HTML5 Audio initialized successfully");
         audioInitialized = true;
         setAudioStatus("Audio Ready");
         return true;
       } catch (error) {
-        console.warn('HTML5 Audio failed:', error);
+        console.warn("HTML5 Audio failed:", error);
         return false;
       }
     };
@@ -85,24 +86,24 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
         await initAudio();
       }
 
-      if (audioContextRef.current?.state === 'suspended') {
+      if (audioContextRef.current?.state === "suspended") {
         try {
           await audioContextRef.current.resume();
-          console.log('Audio context resumed');
+          console.log("Audio context resumed");
         } catch (error) {
-          console.warn('Failed to resume audio context:', error);
+          console.warn("Failed to resume audio context:", error);
         }
       }
     };
 
     // Add multiple event listeners for user interaction
-    const events = ['click', 'keydown', 'touchstart', 'mousedown', 'focus'];
-    events.forEach(event => {
+    const events = ["click", "keydown", "touchstart", "mousedown", "focus"];
+    events.forEach((event) => {
       document.addEventListener(event, handleUserInteraction, { once: true });
     });
 
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         document.removeEventListener(event, handleUserInteraction);
       });
 
@@ -121,7 +122,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
 
       // Create alternating high and low tones for warning effect
       const highFreq = 1200; // Higher frequency for urgency
-      const lowFreq = 800;   // Lower frequency for contrast
+      const lowFreq = 800; // Lower frequency for contrast
 
       // First tone (high)
       const osc1 = audioContextRef.current.createOscillator();
@@ -130,7 +131,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
       gain1.connect(audioContextRef.current.destination);
 
       osc1.frequency.setValueAtTime(highFreq, now);
-      osc1.type = 'square'; // Square wave for more harsh warning sound
+      osc1.type = "square"; // Square wave for more harsh warning sound
 
       gain1.gain.setValueAtTime(0, now);
       gain1.gain.linearRampToValueAtTime(0.2, now + 0.05);
@@ -146,7 +147,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
       gain2.connect(audioContextRef.current.destination);
 
       osc2.frequency.setValueAtTime(lowFreq, now + 0.25);
-      osc2.type = 'square';
+      osc2.type = "square";
 
       gain2.gain.setValueAtTime(0, now + 0.25);
       gain2.gain.linearRampToValueAtTime(0.2, now + 0.3);
@@ -157,7 +158,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
 
       return true;
     } catch (error) {
-      console.warn('Web Audio alarm failed:', error);
+      console.warn("Web Audio alarm failed:", error);
       return false;
     }
   };
@@ -168,16 +169,17 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
 
     try {
       // Create a more warning-like sound with multiple tones
-      const warningDataUrl = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT';
+      const warningDataUrl =
+        "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT";
       audioElementRef.current.src = warningDataUrl;
       audioElementRef.current.volume = 0.4;
       audioElementRef.current.currentTime = 0;
-      audioElementRef.current.play().catch(error => {
-        console.warn('HTML5 Audio play failed:', error);
+      audioElementRef.current.play().catch((error) => {
+        console.warn("HTML5 Audio play failed:", error);
       });
       return true;
     } catch (error) {
-      console.warn('HTML5 Audio alarm failed:', error);
+      console.warn("HTML5 Audio alarm failed:", error);
       return false;
     }
   };
@@ -186,7 +188,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
   const createSystemBeep = () => {
     try {
       // Try to use system beep if available
-      if (typeof window !== 'undefined' && (window as any).beep) {
+      if (typeof window !== "undefined" && (window as any).beep) {
         (window as any).beep();
         return true;
       }
@@ -219,34 +221,34 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
 
       return true;
     } catch (error) {
-      console.warn('System alarm failed:', error);
+      console.warn("System alarm failed:", error);
       return false;
     }
   };
 
   // Unified warning alarm function that tries multiple methods
   const createBeep = () => {
-    console.log('Attempting to create warning alarm...');
+    console.log("Attempting to create warning alarm...");
 
     // Try Web Audio API first
     if (createWebAudioBeep()) {
-      console.log('Warning alarm created with Web Audio API');
+      console.log("Warning alarm created with Web Audio API");
       return true;
     }
 
     // Try HTML5 Audio
     if (createHTML5Beep()) {
-      console.log('Warning alarm created with HTML5 Audio');
+      console.log("Warning alarm created with HTML5 Audio");
       return true;
     }
 
     // Try system beep as last resort
     if (createSystemBeep()) {
-      console.log('Warning alarm created with system beep');
+      console.log("Warning alarm created with system beep");
       return true;
     }
 
-    console.warn('All audio methods failed');
+    console.warn("All audio methods failed");
     return false;
   };
 
@@ -254,21 +256,21 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
   const toggleAlarm = React.useCallback(() => {
     const newState = !alarmEnabled;
     setAlarmEnabled(newState);
-    localStorage.setItem('servoAlarmEnabled', newState.toString());
+    localStorage.setItem("servoAlarmEnabled", newState.toString());
 
     // If disabling alarm while it's playing, stop it
     if (!newState && isAlarmPlaying) {
       stopAlarm();
     }
 
-    console.log(`Alarm ${newState ? 'enabled' : 'disabled'}`);
+    console.log(`Alarm ${newState ? "enabled" : "disabled"}`);
   }, [alarmEnabled, isAlarmPlaying]);
 
   // Audio alarm function
   const playAlarm = React.useCallback(() => {
     if (isAlarmPlaying || !alarmEnabled) return;
 
-    console.log('Starting alarm...');
+    console.log("Starting alarm...");
     setIsAlarmPlaying(true);
 
     // Play initial beep
@@ -282,13 +284,12 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
           alarmIntervalRef.current = null;
         }
         setIsAlarmPlaying(false);
-        console.log('Warning alarm stopped - no errors or alarm disabled');
+        console.log("Warning alarm stopped - no errors or alarm disabled");
         return;
       }
 
       createBeep();
     }, 1500);
-
   }, [isAlarmPlaying, robot.hasErrors, alarmEnabled]);
 
   // Stop alarm when errors clear
@@ -298,16 +299,16 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
       alarmIntervalRef.current = null;
     }
     setIsAlarmPlaying(false);
-    console.log('Alarm stopped manually');
+    console.log("Alarm stopped manually");
   }, []);
 
   // Trigger alarm when errors are detected or cleared
   React.useEffect(() => {
     if (robot.hasErrors && !isAlarmPlaying && alarmEnabled) {
-      console.log('Servo errors detected, starting alarm');
+      console.log("Servo errors detected, starting alarm");
       playAlarm();
     } else if ((!robot.hasErrors || !alarmEnabled) && isAlarmPlaying) {
-      console.log('Servo errors cleared or alarm disabled, stopping alarm');
+      console.log("Servo errors cleared or alarm disabled, stopping alarm");
       stopAlarm();
     }
   }, [robot.hasErrors, isAlarmPlaying, alarmEnabled, playAlarm, stopAlarm]);
@@ -327,12 +328,11 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
           <div className="text-xs text-gray-500 hidden sm:block">{audioStatus}</div>
           <button
             onClick={toggleAlarm}
-            className={`text-xs px-2 py-1 rounded ${alarmEnabled
-              ? 'bg-red-600 text-white hover:bg-red-700'
-              : 'bg-gray-400 text-white hover:bg-gray-500'
-              }`}
+            className={`text-xs px-2 py-1 rounded ${
+              alarmEnabled ? "bg-red-600 text-white hover:bg-red-700" : "bg-gray-400 text-white hover:bg-gray-500"
+            }`}
           >
-            {alarmEnabled ? 'Disable' : 'Enable'}
+            {alarmEnabled ? "Disable" : "Enable"}
           </button>
           <button
             onClick={() => setUnit(unit === "rad" ? "deg" : "rad")}
@@ -346,7 +346,9 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
       {/* Error Summary */}
       {robot.hasErrors && (
         <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <h4 className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200 mb-1 sm:mb-2">Servo Errors Detected</h4>
+          <h4 className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200 mb-1 sm:mb-2">
+            Servo Errors Detected
+          </h4>
           <div className="space-y-0.5 sm:space-y-1">
             {/* Hardware Errors */}
             {robot.servosWithErrors.map((servo) => (
@@ -369,8 +371,6 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
         </div>
       )}
 
-
-
       {/* Servo Table */}
       <div className="flex-1 overflow-hidden">
         <div className="overflow-auto h-full scrollbar-hide">
@@ -386,28 +386,34 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {Object.entries(robot.motors).map(([jointName, motor], index) => {
                 const servoId = index;
-                const servoName = ServoNames[servoId] || jointName.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (match) => match.toUpperCase());
+                const servoName =
+                  ServoNames[servoId] ||
+                  jointName.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (match) => match.toUpperCase());
                 const temperature = robot.servoTemperatures.get(servoId);
                 const error = robot.servoErrors.get(servoId);
-                const angle = unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${((motor.angle * 180) / Math.PI).toFixed(2)}°`;
+                const angle =
+                  unit === "rad" ? `${motor.angle.toFixed(2)} rad` : `${((motor.angle * 180) / Math.PI).toFixed(2)}°`;
                 const isOverLimit = temperature !== undefined && temperature > 50;
                 const hasError = error !== undefined && error !== 0;
 
                 return (
                   <tr
                     key={jointName}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${isOverLimit || hasError ? 'bg-red-50 dark:bg-red-900/20' : ''
-                      }`}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                      isOverLimit || hasError ? "bg-red-50 dark:bg-red-900/20" : ""
+                    }`}
                   >
                     <td className="p-1 sm:p-2 font-medium truncate max-w-[120px] sm:max-w-none">
-                      <span className="block truncate text-xs" title={servoName}>{servoName}</span>
+                      <span className="block truncate text-xs" title={servoName}>
+                        {servoName}
+                      </span>
                     </td>
-                    <td className="p-1 sm:p-2 text-right font-mono text-xs">
-                      {angle}
-                    </td>
+                    <td className="p-1 sm:p-2 text-right font-mono text-xs">{angle}</td>
                     <td className="p-1 sm:p-2 text-right">
                       {temperature !== undefined ? (
-                        <span className={`font-mono text-xs ${isOverLimit ? "text-red-600 font-medium" : "text-[#888888]"}`}>
+                        <span
+                          className={`font-mono text-xs ${isOverLimit ? "text-red-600 font-medium" : "text-[#888888]"}`}
+                        >
                           {temperature.toFixed(1)}°C
                         </span>
                       ) : (
@@ -418,9 +424,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
                       {isOverLimit ? (
                         <span className="text-red-600 font-medium text-xs">HOT</span>
                       ) : hasError ? (
-                        <span className="text-red-600 font-medium text-xs">
-                          {getErrorDescription(error!)[0]}
-                        </span>
+                        <span className="text-red-600 font-medium text-xs">{getErrorDescription(error!)[0]}</span>
                       ) : (
                         <span className="text-green-600 text-xs">OK</span>
                       )}
