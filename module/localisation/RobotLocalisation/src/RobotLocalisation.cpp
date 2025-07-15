@@ -51,9 +51,9 @@ namespace module::localisation {
     using VisionRobots       = message::vision::Robots;
     using PenaltyState       = message::input::State;
     using GroundTruthRobots  = message::platform::webots::RobotsGroundTruth;
+    using TeamColour         = message::input::GameState::TeamColour;
 
     using message::eye::DataPoint;
-    using message::input::GameState;
     using message::input::RoboCup;
     using message::localisation::Field;
     using message::purpose::Purpose;
@@ -96,13 +96,13 @@ namespace module::localisation {
            With<FieldDescription>,
            Optional<With<GroundTruthRobots>>,
            With<GlobalConfig>,
-           With<GameState>,
+           With<TeamColour>,
            Sync<RobotLocalisation>>()
             .then([this](const GreenHorizon& horizon,
                          const Field& field,
                          const FieldDescription& field_desc,
                          const std::shared_ptr<const GroundTruthRobots>& robots_ground_truth,
-                         const GameState& game_state) {
+                         const TeamColour& team_colour) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -117,7 +117,7 @@ namespace module::localisation {
                     log<DEBUG>("Using ground truth for localisation.");
                     // Get our team colour as a string from GameState
                     std::string our_team_colour =
-                        (game_state.team.team_colour == GameState::TeamColour::BLUE) ? "BLUE" : "RED";
+                        (team_colour == TeamColour::BLUE) ? "BLUE" : "RED";
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : robots_ground_truth->robots) {
                         // Skip our own robot using GlobalConfig player_id and team colour
