@@ -83,7 +83,9 @@ namespace module::skill {
             cfg.walk_generator_parameters.torso_position_offset =
                 config["walk"]["torso"]["position_offset"].as<Expression>();
             cfg.walk_generator_parameters.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
-            cfg.walk_generator_parameters.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
+            cfg.walk_generator_parameters.torso_start_sway_offset =
+                config["walk"]["torso"]["start_sway_offset"].as<Expression>();
+            cfg.walk_generator_parameters.torso_sway_ratio = config["walk"]["torso"]["sway_ratio"].as<double>();
             cfg.walk_generator_parameters.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
             walk_generator.set_parameters(cfg.walk_generator_parameters);
