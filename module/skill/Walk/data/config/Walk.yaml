@@ -6,7 +6,7 @@ walk:
   # Bool to indicate whether or not to only switch if the next foot is planted
   only_switch_when_planted: true
   # Bool to indicate whether or not to use balance control. NOTE: correction_enabled must be true in FootController config
-  use_balance_control: false
+  use_balance_control: true
 
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
