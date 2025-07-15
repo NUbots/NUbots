@@ -116,8 +116,7 @@ namespace module::localisation {
                 if (cfg.use_ground_truth && robots_ground_truth && !robots_ground_truth->robots.empty()) {
                     log<DEBUG>("Using ground truth for localisation.");
                     // Get our team colour as a string from GameState
-                    std::string our_team_colour =
-                        (team_colour == TeamColour::BLUE) ? "BLUE" : "RED";
+                    std::string our_team_colour = (team_colour == TeamColour::BLUE) ? "BLUE" : "RED";
                     // Use ground truth data from Webots
                     for (const auto& gt_robot : robots_ground_truth->robots) {
                         // Skip our own robot using GlobalConfig player_id and team colour
