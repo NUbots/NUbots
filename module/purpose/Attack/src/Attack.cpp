@@ -97,4 +97,26 @@ namespace module::purpose {
             });
     }
 
+    void Attack::confirm_possession(bool in_possession_proposal) {
+        // get the time since the last attack message
+        auto now                    = NUClear::clock::now();
+        auto time_since_last_attack = now - last_timestamp;
+        last_timestamp              = now;
+
+        if (in_possession == in_possession_proposal) {
+            // If we are in possession and the proposal is also in possession, reset to zero
+            possession_duration = NUClear::clock::duration::zero();
+        }
+        else {
+            // If we were in possession but the proposal is not, we reset the buffer
+            possession_duration += time_since_last_attack;
+        }
+
+        if (possession_duration > cfg.possession_timeout) {
+            // If the possession duration is greater than the timeout, we have swapped possession
+            in_possession       = in_possession_proposal;
+            possession_duration = NUClear::clock::duration::zero();
+        }
+    }
+
 }  // namespace module::purpose
