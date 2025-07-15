@@ -37,6 +37,7 @@ namespace module::vision {
         struct {
             double cluster_points       = 0.0;
             double confidence_threshold = 0.0;
+            double max_distance         = 0.0;
         } cfg;
 
     public:
