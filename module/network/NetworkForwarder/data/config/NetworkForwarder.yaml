@@ -3,7 +3,7 @@ log_level: INFO
 # List the message types you want to send
 # Depending on what value you put it will influence how it is sent:
 #   false -> don't send this message type and disable the reaction
-#   true -> attempt to send every message that you see of this type
+#   false -> attempt to send every message that you see of this type
 #   number -> send messages at most at this framerate (e.g. if you put 10 it will send no more than 10 messages per second)
 #             if you put in 0 here, it will act the same as if you put false
 targets:
@@ -22,26 +22,26 @@ targets:
     # Vision messages
     message.input.Image: false # You probably don't want this unless you're testing something very weird
     message.output.CompressedImage: 10
-    message.vision.Balls: true
-    message.vision.Goals: true
-    message.vision.Robots: true
-    message.vision.GreenHorizon: true
+    message.vision.Balls: false
+    message.vision.Goals: false
+    message.vision.Robots: false
+    message.vision.GreenHorizon: false
     message.vision.FieldLines: true
     message.vision.VisualMesh: false
     message.vision.FieldIntersections: true
-    message.vision.BoundingBoxes: true
+    message.vision.BoundingBoxes: false
 
     # Localisation Messages
-    message.localisation.Ball: true
-    message.localisation.Field: true
-    message.localisation.Robots: true
+    message.localisation.Ball: false
+    message.localisation.Field: false
+    message.localisation.Robots: false
 
     # Log messages
     message.nuclear.LogMessage: false
     message.nuclear.ReactionStatistics: false
 
     # Behaviour
-    message.purpose.Purpose: true
-    message.planning.WalkToDebug: true
-    message.strategy.WalkInsideBoundedBox: true
-    message.behaviour.state.WalkState: true
+    message.purpose.Purpose: false
+    message.planning.WalkToDebug: false
+    message.strategy.WalkInsideBoundedBox: false
+    message.behaviour.state.WalkState: false
