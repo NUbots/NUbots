@@ -105,6 +105,11 @@ namespace module::input {
                                           return;
                                       }
 
+                                      if (game_controller_address != remote_addr) {
+                                          game_controller_address = remote_addr;
+                                          log<INFO>("Game controller address", game_controller_address);
+                                      }
+
                                       // Get our packet contents
                                       const GameControllerPacket& new_packet =
                                           *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
@@ -144,8 +149,8 @@ namespace module::input {
         packet->player  = PLAYER_ID;
         packet->message = message;
 
-        if (BROADCAST_IP != "") {
-            emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
+        if (game_controller_address != "") {
+            emit<Scope::UDP>(packet, game_controller_address, send_port);
         }
     }
 

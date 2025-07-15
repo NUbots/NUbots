@@ -56,6 +56,7 @@ namespace module::input {
         uint TEAM_ID;
         uint PLAYER_ID;
         std::string BROADCAST_IP;
+        std::string game_controller_address;
         std::string udp_filter_address;
         std::set<std::string> ignored_ip_addresses;
 
