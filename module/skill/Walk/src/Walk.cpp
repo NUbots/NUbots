@@ -57,6 +57,7 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
+    using message::skill::SmoothWalk;
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
@@ -111,9 +112,32 @@ namespace module::skill {
             cfg.kick_velocity_y    = config["kick"]["kick_velocity_y"].as<double>();
             cfg.kick_timing_offset = config["kick"]["kick_timing_offset"].as<double>();
 
+            // Exponential smoothing configuration
+            cfg.tau = config["walk"]["smoother"]["tau"].as<Expression>();
+            // Ensure safety for division by zero if tau is zero
+            cfg.alpha = (cfg.tau.array() > 0.01)
+                            .select((1.0 - (-1.0 / (UPDATE_FREQUENCY * cfg.tau.array())).exp()).matrix(),
+                                    Eigen::Vector3d::Ones());
+            cfg.one_minus_alpha = Eigen::Vector3d::Ones() - cfg.alpha;
+
+            // Starting velocity
+            cfg.starting_velocity = config["walk"]["smoother"]["starting_velocity"].as<Expression>();
+            cfg.smooth_clip_min   = config["walk"]["smoother"]["clip_min"].as<double>();
+
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
+
+        // on<Trigger<Stability>>().then([this](const Stability& new_stability) {
+        //     // If transitioning from FALLEN to DYNAMIC stability state, reset smoothed walk command
+        //     if ((stability == Stability::FALLEN && new_stability == Stability::DYNAMIC)
+        //         || (stability == Stability::STANDING && new_stability == Stability::DYNAMIC)) {
+        //         previous_walk_target = cfg.starting_velocity;
+        //         log<DEBUG>("Resetting walk command to starting velocity");
+        //     }
+
+        //     stability = new_stability;
+        // });
 
         // Start - Runs every time the Walk provider starts (wasn't running)
         on<Start<WalkTask>>().then([this]() {
@@ -130,16 +154,45 @@ namespace module::skill {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 
+        // Intercept Walk commands and apply smoothing
+        on<Provide<WalkTask>, Needs<SmoothWalk>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then(
+            [this](const WalkTask& walk_task) {
+                // Apply exponential smoothing to the walk command
+                Eigen::Vector3d smoothed_target = walk_task.velocity_target.cwiseProduct(cfg.alpha)
+                                                  + previous_walk_target.cwiseProduct(cfg.one_minus_alpha);
+
+                if (smoothed_target.x() <= cfg.smooth_clip_min)
+                    smoothed_target.x() = 0.0;
+                if (smoothed_target.y() <= cfg.smooth_clip_min)
+                    smoothed_target.y() = 0.0;
+                if (smoothed_target.z() <= cfg.smooth_clip_min)
+                    smoothed_target.z() = 0.0;
+
+                // Store for next iteration
+                previous_walk_target = smoothed_target;
+
+                // Forward the smoothed command to the actual Walk skill
+                emit<Task>(std::make_unique<SmoothWalk>(smoothed_target, walk_task.kick, walk_task.leg));
+
+                // Debugging
+                if (log_level <= DEBUG) {
+                    // Visualise the walk path in NUsight
+                    emit(graph("Raw walk velocity target",
+                               walk_task.velocity_target.x(),
+                               walk_task.velocity_target.y(),
+                               walk_task.velocity_target.z()));
+                }
+            });
+
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
-        on<Provide<WalkTask>,
+        on<Provide<SmoothWalk>,
            Needs<ControlLeftFoot>,
            Needs<ControlRightFoot>,
            With<Sensors>,
            With<Stability>,
-           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
            Priority::HIGH>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
+            .then([this](const SmoothWalk& smooth_walk, const Sensors& sensors, const Stability& stability) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -147,10 +200,10 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
                 // Set the velocity target locally so the kick can modify it if needed
-                Eigen::Vector3d velocity_target = walk_task.velocity_target;
+                Eigen::Vector3d velocity_target = smooth_walk.velocity_target;
 
                 // Always enter the kick if its a new kick, otherwise only enter if we're not done yet
-                if (walk_task.kick) {
+                if (smooth_walk.kick) {
                     double current_time    = walk_generator.get_time();
                     double full_period     = walk_generator.get_step_period();
                     WalkState::Phase phase = walk_generator.get_phase();
@@ -164,8 +217,8 @@ namespace module::skill {
                         bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
 
                         // If the leg we want to kick with is planted, we can kick at the end of the step
-                        bool other_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
-                                                                               : phase == WalkState::Phase::RIGHT;
+                        bool other_support = smooth_walk.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
+                                                                                 : phase == WalkState::Phase::RIGHT;
                         // If its the end of the kick foot's support, we can kick
                         if (end_of && other_support) {
                             log<INFO>("Kick step started");
@@ -177,8 +230,8 @@ namespace module::skill {
                         // Check if the step can end
                         bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
                         // On the correct support foot, so can't be the beginning of the kick
-                        bool correct_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
-                                                                                 : phase == WalkState::Phase::LEFT;
+                        bool correct_support = smooth_walk.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
+                                                                                   : phase == WalkState::Phase::LEFT;
                         // If its not the end of the kick and we're not on the right support, we shouldn't be kicking
                         if ((end_of && correct_support) || (!end_of && !correct_support)) {
                             kick_step_in_progress = false;

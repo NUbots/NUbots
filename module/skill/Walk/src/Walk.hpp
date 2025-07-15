@@ -33,6 +33,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoCommand.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -66,7 +67,27 @@ namespace module::skill {
             double kick_velocity_y = 0.0;
             /// @brief Buffer time before the kick starts
             double kick_timing_offset = 0.0;
+
+            /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
+            /// @note  Set to [0, 0, 0] to functionally disable smoothing
+            Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);
+            /// @brief Exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d alpha = Eigen::Vector3d(1, 1, 1);
+            /// @brief Complementary exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
+
+            /// @brief Starting velocity for the walk command
+            Eigen::Vector3d starting_velocity = Eigen::Vector3d(0, 0, 0);
+
+            /// @brief Minimum smoother velocity component before clipping to zero
+            double smooth_clip_min = 0.0;
         } cfg;
+
+        /// @brief Previous walk command
+        Eigen::Vector3d previous_walk_target = Eigen::Vector3d::Zero();
+
+        /// @brief Current stability of the robot
+        message::behaviour::state::Stability stability{};
 
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};

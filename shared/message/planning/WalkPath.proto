@@ -36,10 +36,6 @@ message WalkTo {
     iso3 Hrd = 1;
 }
 
-message WalkProposal {
-    vec3 velocity_target = 1;
-}
-
 /// Turn on the spot in the given direction
 message TurnOnSpot {
     /// Direction to turn
