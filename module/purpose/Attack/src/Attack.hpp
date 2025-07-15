@@ -62,18 +62,16 @@ namespace module::purpose {
             if (in_possession == in_possession_proposal) {
                 // If we are in possession and the proposal is also in possession, reset to zero
                 possession_duration = NUClear::clock::duration::zero();
-                log<DEBUG>("reset");
             }
             else {
                 // If we were in possession but the proposal is not, we reset the buffer
                 possession_duration += time_since_last_attack;
-                log<DEBUG>("adding");
             }
 
             if (possession_duration > cfg.possession_timeout) {
                 // If the possession duration is greater than the timeout, we have swapped possession
                 in_possession = in_possession_proposal;
-                log<DEBUG>("swapped");
+                possession_duration = NUClear::clock::duration::zero();
             }
         }
 
