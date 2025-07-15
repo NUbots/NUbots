@@ -90,6 +90,7 @@ namespace module::purpose {
 
             if (cfg.force_playing) {
                 emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+                emit(std::make_unique<GameState::TeamColour>(GameState::TeamColour::BLUE));
             }
         });
 
