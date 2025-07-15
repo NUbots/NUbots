@@ -55,10 +55,12 @@ namespace module::input {
         uint send_port;
         uint TEAM_ID;
         uint PLAYER_ID;
-        std::string BROADCAST_IP;
-        std::string game_controller_address;
-        std::string udp_filter_address;
-        std::set<std::string> ignored_ip_addresses;
+
+        /// @brief The address to use to send reply packets back to game controller (unicast)
+        std::string game_controller_address = "";
+
+        std::string udp_filter_address = "";
+        std::set<std::string> ignored_ip_addresses{};
 
         bool self_penalised = true;
         ReactionHandle listen_handle;
