@@ -78,16 +78,7 @@ namespace module::skill {
 
             /// @brief Starting velocity for the walk command
             Eigen::Vector3d starting_velocity = Eigen::Vector3d(0, 0, 0);
-
-            /// @brief Minimum smoother velocity component before clipping to zero
-            double smooth_clip_min = 0.0;
         } cfg;
-
-        /// @brief Previous walk command
-        Eigen::Vector3d previous_walk_target = Eigen::Vector3d::Zero();
-
-        /// @brief Current stability of the robot
-        message::behaviour::state::Stability stability{};
 
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};
