@@ -55,7 +55,7 @@ interface FieldDimensionSelectorProps {
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
   private dropdownToggle = (
     <button className="inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]">
-      <Icon size={28} className="mt-1 -ml-5">
+      <Icon size={24} className="mt-1 -ml-5">
         tune
       </Icon>
       <span className="text-[0.7rem]">Field Type</span>
@@ -296,10 +296,9 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
       className={`
         w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm font-medium
         transition-all duration-150 ease-out
-        ${
-          props.isVisible
-            ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
-            : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
+        ${props.isVisible
+          ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
+          : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
         }
         focus:outline-none focus:ring-1 focus:ring-auto-primary
         active:scale-[0.98]
@@ -312,7 +311,7 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
         ${props.isVisible ? "bg-auto-primary/30 text-auto-primary" : "bg-auto-surface-3 text-auto-on-surface/60"}
       `}
       >
-        <Icon size={10}>{props.isVisible ? "visibility" : "visibility_off"}</Icon>
+        <Icon size={20}>{props.isVisible ? "visibility" : "visibility_off"}</Icon>
       </div>
       <span className="flex-1 text-left">{props.label}</span>
       <div
@@ -339,7 +338,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
                 className="inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]"
                 onClick={props.onHawkEyeClick}
               >
-                <Icon size={28} className="mt-1 -ml-5 text-blue-500">
+                <Icon size={24} className="mt-1 -ml-5 text-blue-500">
                   visibility
                 </Icon>
                 <span className="text-[0.7rem]">Hawk Eye</span>
@@ -358,7 +357,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
                 `}
                 onClick={props.toggleDashboardVisibility}
               >
-                <Icon size={28} className="mt-1 -ml-5">
+                <Icon size={24} className="mt-1 -ml-5">
                   dashboard
                 </Icon>
                 <span className="text-[0.7rem]">Dashboard</span>
@@ -396,7 +395,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
 });
 
 // Right-side visibility toggle panel
-const VisibilityPanel = observer((props: LocalisationMenuBarProps) => {
+const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, 'Menu'>) => {
   const { model } = props;
 
   const toggleGroups = [
