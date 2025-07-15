@@ -28,7 +28,10 @@ import os
 import re
 import subprocess
 
+import b
 from utility.dockerise import run_on_docker
+
+b.dependencies.register("protobuf==4.21.12")
 
 
 @run_on_docker
