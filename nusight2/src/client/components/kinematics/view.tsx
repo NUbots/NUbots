@@ -356,7 +356,7 @@ const ServoDataDisplay: React.FC<{ robot: KinematicsRobotModel }> = observer(({ 
             ))}
             {/* Overheating Servos */}
             {Array.from(robot.servoTemperatures.entries())
-              .filter(([id, temp]) => temp > 50)
+              .filter(([, temp]) => temp > 50)
               .map(([id, temp]) => {
                 const servoName = ServoNames[id] || `Servo ${id}`;
                 return (

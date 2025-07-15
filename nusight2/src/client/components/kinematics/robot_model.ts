@@ -228,7 +228,7 @@ export class KinematicsRobotModel {
         overheating: hasOverheating,
         errorCount: this.servosWithErrors.length,
         temperatures: Array.from(this.servoTemperatures.entries()),
-        hotServos: Array.from(this.servoTemperatures.entries()).filter(([id, temp]) => temp > 50)
+        hotServos: Array.from(this.servoTemperatures.entries()).filter(([, temp]) => temp > 50)
       });
     }
 

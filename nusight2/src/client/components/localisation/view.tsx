@@ -55,7 +55,9 @@ interface FieldDimensionSelectorProps {
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
   private dropdownToggle = (
     <button className="inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]">
-      <Icon size={28} className="mt-1 -ml-5">tune</Icon>
+      <Icon size={28} className="mt-1 -ml-5">
+        tune
+      </Icon>
       <span className="text-[0.7rem]">Field Type</span>
     </button>
   );
@@ -294,31 +296,31 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
       className={`
         w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm font-medium
         transition-all duration-150 ease-out
-        ${props.isVisible
-          ? 'bg-auto-primary/20 text-auto-primary border border-auto-primary/30'
-          : 'bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3'
+        ${
+          props.isVisible
+            ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
+            : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
         }
         focus:outline-none focus:ring-1 focus:ring-auto-primary
         active:scale-[0.98]
       `}
       onClick={props.onClick}
     >
-      <div className={`
+      <div
+        className={`
         flex items-center justify-center w-3.5 h-3.5 rounded
-        ${props.isVisible
-          ? 'bg-auto-primary/30 text-auto-primary'
-          : 'bg-auto-surface-3 text-auto-on-surface/60'
-        }
-      `}>
-        <Icon size={10}>
-          {props.isVisible ? "visibility" : "visibility_off"}
-        </Icon>
+        ${props.isVisible ? "bg-auto-primary/30 text-auto-primary" : "bg-auto-surface-3 text-auto-on-surface/60"}
+      `}
+      >
+        <Icon size={10}>{props.isVisible ? "visibility" : "visibility_off"}</Icon>
       </div>
       <span className="flex-1 text-left">{props.label}</span>
-      <div className={`
+      <div
+        className={`
         w-1 h-1 rounded-full transition-colors
-        ${props.isVisible ? 'bg-auto-primary' : 'bg-auto-on-surface/40'}
-      `} />
+        ${props.isVisible ? "bg-auto-primary" : "bg-auto-on-surface/40"}
+      `}
+      />
     </button>
   );
 };
@@ -337,7 +339,9 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
                 className="inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]"
                 onClick={props.onHawkEyeClick}
               >
-                <Icon size={28} className="mt-1 -ml-5 text-blue-500">visibility</Icon>
+                <Icon size={28} className="mt-1 -ml-5 text-blue-500">
+                  visibility
+                </Icon>
                 <span className="text-[0.7rem]">Hawk Eye</span>
               </button>
             </div>
@@ -350,11 +354,13 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
               <button
                 className={`
                   inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]
-                  ${model.dashboard.visible ? 'text-green-600' : 'text-gray-600'}
+                  ${model.dashboard.visible ? "text-green-600" : "text-gray-600"}
                 `}
                 onClick={props.toggleDashboardVisibility}
               >
-                <Icon size={28} className="mt-1 -ml-5">dashboard</Icon>
+                <Icon size={28} className="mt-1 -ml-5">
+                  dashboard
+                </Icon>
                 <span className="text-[0.7rem]">Dashboard</span>
               </button>
               <button
@@ -362,7 +368,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
                 onClick={props.toggleDashboardVisibility}
               >
                 <Icon size={20} weight="500" className="transition-transform">
-                  {model.dashboard.visible ? 'expand_less' : 'expand_more'}
+                  {model.dashboard.visible ? "expand_less" : "expand_more"}
                 </Icon>
               </button>
             </div>
@@ -400,8 +406,12 @@ const VisibilityPanel = observer((props: LocalisationMenuBarProps) => {
         { label: "Field", isVisible: model.fieldVisible, onClick: props.toggleFieldVisibility },
         { label: "Grid", isVisible: model.gridVisible, onClick: props.toggleGridVisibility },
         { label: "Lines", isVisible: model.fieldLinePointsVisible, onClick: props.toggleFieldLinePointsVisibility },
-        { label: "Intersections", isVisible: model.fieldIntersectionsVisible, onClick: props.toggleFieldIntersectionsVisibility },
-      ]
+        {
+          label: "Intersections",
+          isVisible: model.fieldIntersectionsVisible,
+          onClick: props.toggleFieldIntersectionsVisibility,
+        },
+      ],
     },
     {
       title: "Objects",
@@ -409,7 +419,7 @@ const VisibilityPanel = observer((props: LocalisationMenuBarProps) => {
         { label: "Robots", isVisible: model.robotVisible, onClick: props.toggleRobotVisibility },
         { label: "Balls", isVisible: model.ballVisible, onClick: props.toggleBallVisibility },
         { label: "Goals", isVisible: model.goalsVisible, onClick: props.toggleGoalVisibility },
-      ]
+      ],
     },
     {
       title: "Debug",
@@ -417,8 +427,8 @@ const VisibilityPanel = observer((props: LocalisationMenuBarProps) => {
         { label: "Particles", isVisible: model.particlesVisible, onClick: props.toggleParticleVisibility },
         { label: "Walk Path", isVisible: model.walkToDebugVisible, onClick: props.toggleWalkToDebugVisibility },
         { label: "Bounding Box", isVisible: model.boundedBoxVisible, onClick: props.toggleBoundedBoxVisibility },
-      ]
-    }
+      ],
+    },
   ];
 
   return (
