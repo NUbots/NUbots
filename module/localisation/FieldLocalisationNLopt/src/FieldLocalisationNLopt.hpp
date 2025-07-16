@@ -257,8 +257,9 @@ namespace module::localisation {
             /// @brief Number of yaw angles to try during uncertainty reset
             int num_angles = 0;
 
-            /// @brief Exponential filter smoothing factor (0 < alpha <= 1)
-            double alpha = 0.1;
+            /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
+            /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
+            Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform

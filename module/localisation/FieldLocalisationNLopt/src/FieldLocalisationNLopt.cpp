@@ -101,7 +101,7 @@ namespace module::localisation {
             cfg.maxeval  = config["opt"]["maxeval"].as<int>();
 
             // Exponential filter parameters
-            cfg.alpha = config["exponential_filter"]["alpha"].as<double>();
+            cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -250,7 +250,7 @@ namespace module::localisation {
                         filtered_state = state;
                         first_measurement = false;
                     } else {
-                        filtered_state = cfg.alpha * state + (1.0 - cfg.alpha) * filtered_state;
+                        filtered_state = cfg.alpha.cwiseProduct(state) + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
                     }
 
                     // Check if uncertainty is too high

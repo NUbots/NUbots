@@ -74,7 +74,7 @@ opt:
   maxeval: 1000
 
 exponential_filter:
-  # Smoothing factor for exponential filter (0 < alpha <= 1)
-  # Higher values = more responsive to new measurements
+  # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
+  # [x, y, theta] - Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
-  alpha: 0.1
+  alpha: [0.1, 0.1, 0.1]
