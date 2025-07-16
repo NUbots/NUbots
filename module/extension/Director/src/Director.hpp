@@ -438,7 +438,7 @@ namespace module::extension {
         NUClear::id_t unique_id_source = 0;
 
         /// The protobuf message that holds the current state of the director
-        message::behaviour::state::DirectorState director_state;
+        message::behaviour::DirectorState director_state;
         /// The last emitted state, used to check for changes
         bool state_changed = false;
     };

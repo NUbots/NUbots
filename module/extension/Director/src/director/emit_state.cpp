@@ -32,7 +32,7 @@
 
 namespace module::extension {
 
-    using message::behaviour::state::DirectorState;
+    using message::behaviour::DirectorState;
 
     void Director::emit_state() {
 

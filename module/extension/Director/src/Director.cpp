@@ -43,7 +43,7 @@ namespace module::extension {
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
-    using message::behaviour::state::DirectorState;
+    using message::behaviour::DirectorState;
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
 
     /**
