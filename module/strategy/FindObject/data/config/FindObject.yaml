@@ -2,7 +2,7 @@
 log_level: INFO
 
 # How long to wait until the ball is lost and we should look for it
-ball_search_timeout: 2
+ball_search_timeout: 5
 
 # Distance from field border that triggers moving to centre (in metres)
 border_threshold: 0.3
