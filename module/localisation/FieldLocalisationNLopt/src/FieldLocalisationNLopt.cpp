@@ -102,7 +102,6 @@ namespace module::localisation {
 
             // Exponential filter parameters
             cfg.alpha = config["exponential_filter"]["alpha"].as<double>();
-            cfg.covariance = Eigen::Matrix3d(config["exponential_filter"]["covariance"].as<Expression>());
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -295,8 +294,8 @@ namespace module::localisation {
 
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost        = chosen_state_cost;
-                    field->covariance  = cfg.covariance;
-                    field->uncertainty = cfg.covariance.diagonal().sum();
+                    field->covariance  = Eigen::Matrix3d::Zero();
+                    field->uncertainty = 0.0;
 
                     emit(field);
                 });

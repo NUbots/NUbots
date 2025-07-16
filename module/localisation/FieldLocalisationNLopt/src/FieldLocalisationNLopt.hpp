@@ -259,9 +259,6 @@ namespace module::localisation {
 
             /// @brief Exponential filter smoothing factor (0 < alpha <= 1)
             double alpha = 0.1;
-
-            /// @brief Fixed covariance for uncertainty estimation
-            Eigen::Matrix3d covariance = Eigen::Matrix3d::Identity();
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform

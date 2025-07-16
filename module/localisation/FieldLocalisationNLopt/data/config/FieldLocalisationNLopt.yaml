@@ -49,7 +49,7 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 0.0
+field_line_distance_weight: 1.0
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 5.0
@@ -82,8 +82,3 @@ exponential_filter:
   # Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
   alpha: 0.1
-  # Fixed covariance matrix for uncertainty estimation
-  covariance:
-    - [1e-2, 0, 0]
-    - [0, 1e-2, 0]
-    - [0, 0, 1e-1]
