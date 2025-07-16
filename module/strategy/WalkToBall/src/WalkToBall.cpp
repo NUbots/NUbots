@@ -100,11 +100,12 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToKickBall>, Optional<With<Robots>>, With<Ball>, With<Sensors>, With<Field>>().then(
+        on<Provide<WalkToKickBall>, Optional<With<Robots>>, With<Ball>, With<Sensors>, With<Field>, With<FieldDescription>>().then(
             [this](const std::shared_ptr<const Robots>& robots,
                    const Ball& ball,
                    const Sensors& sensors,
-                   const Field& field) {
+                   const Field& field,
+                   const FieldDescription& field_description) {
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -176,20 +177,37 @@ namespace module::strategy {
 
                     auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
                     if (robot_infront.has_value()) {
-                        log<DEBUG>("Robot in front of ball", robot_infront.value());
-                        // Compute a perpendicular vector to uGBf (the approach direction)
                         Eigen::Vector3d side_offset =
-                            Eigen::Vector3d(uGBf.y() - 0.5, uGBf.x(), 0).normalized() * cfg.ball_approach_distance;
-                        // Decide which side to go around based on the obstacle's position
+                            Eigen::Vector3d(-uGBf.y(), uGBf.x(), 0).normalized() * cfg.ball_approach_distance;
+                        // Decide which side to go around based on where we are on the field
+                        double center_point = 0;
+                        double left_point = center_point - field_description.dimensions.goal_width / 2.0;
+                        double right_point = center_point + field_description.dimensions.goal_width / 2.0;
                         Eigen::Vector3d adjusted_target;
-                        if (robot_infront.value().y() > rGFf.y()) {
+
+                        if (rRFf.y() > left_point && rRFf.y() < right_point) {
+                            // If we are in the middle of the field, go around the robot based on which side we are facing
+                            // facing left in field space, go around left side and turn right
+                            if (robot_heading > 0) {
+                                adjusted_target = kick_target + side_offset;
+                                desired_heading -= M_PI_4;  // Turn right
+                            }
+                            else {
+                                adjusted_target = kick_target - side_offset;
+                                desired_heading += M_PI_4;  // Turn left
+                            }
+
+                        }
+                        else if (rRFf.y() < left_point) {
+                            log<DEBUG>("Robot on the left side of the field, going around on the right side");
+                            // If we are on the left side of the field, go around the robot on the right side
                             adjusted_target = kick_target - side_offset;
-                            log<DEBUG>("Adjusting target to the right side of the ball");
                             desired_heading += M_PI_4;  // Turn left
                         }
-                        else {
+                        else if (rRFf.y() > right_point) {
+                            log<DEBUG>("Robot on the right side of the field, going around on the left side");
+                            // If we are on the right side of the field, go around the robot on the left side
                             adjusted_target = kick_target + side_offset;
-                            log<DEBUG>("Adjusting target to the left side of the ball");
                             desired_heading -= M_PI_4;  // Turn right
                         }
 
@@ -348,27 +366,11 @@ namespace module::strategy {
             log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
             const bool past_ball = obstacle.norm() > rBFf.norm();
             log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
-            double dist_robot_obs   = (obstacle - rBFf).norm();
-            const bool within_range = dist_robot_obs < cfg.infront_check_distance;
-            log<DEBUG>("within_range:",
-                       obstacle.norm(),
-                       "rBFf",
-                       rBFf.norm(),
-                       "check distance:",
-                       cfg.infront_check_distance);
+            const bool within_range = (obstacle - rBFf).norm() < cfg.infront_check_distance;
+
             const bool intersects_path =
                 utility::math::geometry::intersection_line_and_circle(rGFf, rBFf, obstacle, cfg.infront_of_ball_radius);
 
-            log<DEBUG>("Obstacle:",
-                       obstacle.transpose(),
-                       " | in_front:",
-                       in_front,
-                       " | past_ball:",
-                       past_ball,
-                       " | within_range:",
-                       within_range,
-                       " | intersects:",
-                       intersects_path);
 
             if (in_front && past_ball && within_range && intersects_path) {
                 return obstacle;
