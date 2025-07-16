@@ -212,13 +212,16 @@ namespace module::skill {
                     }
                 }
 
-                // If the new walk command is larger than the current one, accelerate towards it
-                auto dv = cfg.acceleration * std::min(time_delta, 1.0);  // never accelerate too much
-                walk.velocity_target =
-                    current_walk.velocity_target
-                    + (new_walk.velocity_target - current_walk.velocity_target).cwiseMax(-dv).cwiseMin(dv);
+                if (!kick_step_in_progress) {
+                    // If the new walk command is larger than the current one, accelerate towards it
+                    auto dv = cfg.acceleration * std::min(time_delta, 1.0);  // never accelerate too much
+                    walk.velocity_target =
+                        current_walk.velocity_target
+                        + (new_walk.velocity_target - current_walk.velocity_target).cwiseMax(-dv).cwiseMin(dv);
+                }
 
-                emit(std::make_unique<CurrentWalkTask>(walk));  // Update the state for next time
+                // Update the state for next time
+                emit(std::make_unique<CurrentWalkTask>(walk));
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
