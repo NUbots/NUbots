@@ -7,4 +7,4 @@ stopped_threshold: 0.4
 
 # Time-based hysteresis to prevent rapid stopping/starting
 min_stop_time: 0.25      # Minimum time (seconds) robot must be within threshold before stopping
-min_resume_time: 1.0    # Minimum time (seconds) robot must be outside threshold before resuming
+min_resume_time: 3.0    # Minimum time (seconds) robot must be outside threshold before resuming
