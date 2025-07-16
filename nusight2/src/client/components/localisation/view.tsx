@@ -23,6 +23,7 @@ import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections";
 import { FieldObjects } from "./r3f_components/field_objects";
 import { FieldPoints } from "./r3f_components/field_points";
+import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
 import { PurposeLabel } from "./r3f_components/purpose_label";
@@ -626,6 +627,16 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
 
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
+
+    {/* Goal labels - default to blue team if no robots available */}
+    {model.goalsVisible && (
+      <GoalLabels
+        fieldModel={model.field}
+        teamColour={model.robots.length > 0 ? (model.target || model.robots[0]).teamColour : "blue"}
+        cameraPitch={model.camera.pitch}
+        cameraYaw={model.camera.yaw}
+      />
+    )}
 
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>

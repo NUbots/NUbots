@@ -73,38 +73,8 @@ opt:
   # Maximum number of evaluations for the optimization
   maxeval: 1000
 
-kalman:
-  # Continuous time process model:
-  A:
-    - [0, 0, 0]
-    - [0, 0, 0]
-    - [0, 0, 0]
-  # Continuous time input model: No inputs
-  B: []
-  # Continuous time measurement model:
-  C:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-
-  # Process model noise
-  Q:
-    - - 0.0029527627707046774
-      - 0
-      - 0
-    - - 0
-      - 1.5106536134854267e-06
-      - 0
-    - - 0
-      - 0
-      - 0.0017559165899632613
-  R:
-    - - 5.7015410799196165
-      - 0
-      - 0
-    - - 0
-      - 3.123101158544384
-      - 0
-    - - 0
-      - 0
-      - 4.37215045186137
+exponential_filter:
+  # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
+  # [x, y, theta] - Higher values = more responsive to new measurements
+  # Lower values = more smoothed/filtered output
+  alpha: [0.1, 0.1, 0.1]
