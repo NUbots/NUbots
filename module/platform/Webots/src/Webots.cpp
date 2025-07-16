@@ -79,6 +79,7 @@ namespace module::platform {
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
     using message::platform::webots::MotorVelocity;
+    using message::platform::webots::RobotsGroundTruth;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
@@ -833,6 +834,12 @@ namespace module::platform {
             robot_pose_ground_truth->Hft = sensor_measurements.robot_pose_ground_truth.Hft;
             robot_pose_ground_truth->vTf = sensor_measurements.robot_pose_ground_truth.vTf;
             emit(robot_pose_ground_truth);
+        }
+
+        if (sensor_measurements.robots_ground_truth.exists) {
+            auto robots_ground_truth    = std::make_unique<message::platform::webots::RobotsGroundTruth>();
+            robots_ground_truth->robots = sensor_measurements.robots_ground_truth.robots;
+            emit(robots_ground_truth);
         }
 
         // Parse the errors and warnings from Webots and log them.

@@ -10,7 +10,7 @@ Tracked robots are discarded if they are not seen for a consecutive number of ti
 
 ## Usage
 
-Incluide this role to track other robots on the field.
+Include this role to track other robots on the field.
 
 ## Consumes
 
