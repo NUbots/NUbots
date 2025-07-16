@@ -27,8 +27,8 @@
 #ifndef MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
 #define MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
 
-#include <nuclear>
 #include <chrono>
+#include <nuclear>
 
 #include "extension/Behaviour.hpp"
 
