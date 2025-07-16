@@ -163,26 +163,45 @@ namespace module::strategy {
                     Eigen::Vector3d target = kick_target - uGBf * cfg.ball_approach_distance * angle_scale;
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
 
-                    // If there are robots, check if there are obstacles in the way
-                    if (robots != nullptr) {
-                        log<DEBUG>("Checking for obstacles in the way of kick path");
-                        // Get the positions of all robots in the world
-                        std::vector<Eigen::Vector2d> all_obstacles{};
-                        for (const auto& robot : robots->robots) {
-                            all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
+                }
+
+                // If there are robots, check if there are obstacles in the way
+                if (robots != nullptr) {
+                    log<DEBUG>("Checking for obstacles in the way of kick path");
+                    // Get the positions of all robots in the world
+                    std::vector<Eigen::Vector2d> all_obstacles{};
+                    for (const auto& robot : robots->robots) {
+                        all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
+                    }
+
+                    auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
+                    if (robot_infront.has_value()) {
+                        log<DEBUG>("Robot in front of ball", robot_infront.value());
+                        // Compute a perpendicular vector to uGBf (the approach direction)
+                        Eigen::Vector3d side_offset =
+                            Eigen::Vector3d(uGBf.y() - 0.5, uGBf.x(), 0).normalized() * cfg.ball_approach_distance;
+                        // Decide which side to go around based on the obstacle's position
+                        Eigen::Vector3d adjusted_target;
+                        if (robot_infront.value().y() > rGFf.y()) {
+                            adjusted_target = kick_target - side_offset;
+                            log<DEBUG>("Adjusting target to the right side of the ball");
+                            desired_heading += M_PI_4;  // Turn left
+                        }
+                        else {
+                            adjusted_target = kick_target + side_offset;
+                            log<DEBUG>("Adjusting target to the left side of the ball");
+                            desired_heading -= M_PI_4;  // Turn right
                         }
 
-                        auto robot_infront = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
-                        if (robot_infront.has_value()) {
-                          log<DEBUG>("Robot in front of ball", robot_infront.value());
-                            // Move to the side of the ball
-                            if (robot_infront.value().y() > rBFf.y()) {
-                                Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading + M_PI_4));
-                            }
-                            else {
-                                Hfk = pos_rpy_to_transform(kick_target, Eigen::Vector3d(0, 0, desired_heading - M_PI_4));
-                            }
+                        // Check we are facing a good angle to clear the other robot
+                        double angle_error = std::atan2(std::sin(desired_heading - robot_heading), std::cos(desired_heading - robot_heading));
+                        // Walk into the ball if we are facing the right direction
+                        if (std::abs(angle_error) < (cfg.max_angle_error/2)) {
+                            log<DEBUG>("Facing the right direction, walking into the ball");
+                            adjusted_target = rBFf - uGBf * cfg.ball_kick_distance;
                         }
+
+                        Hfk = pos_rpy_to_transform(adjusted_target, Eigen::Vector3d(0, 0, desired_heading));
                     }
                 }
 
@@ -319,23 +338,26 @@ namespace module::strategy {
     }
 
     std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
-                                                                     const Eigen::Vector2d& rBFf, const Eigen::Vector2d& rGFf) {
+                                                                     const Eigen::Vector2d& rBFf,
+                                                                     const Eigen::Vector2d& rGFf) {
         // Normalized direction from robot to ball
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front = obstacle.x() < rBFf.x(); // TODO: check this is the correct obstacle
+            const bool in_front = obstacle.x() < rBFf.x();  // TODO: check this is the correct obstacle
             log<DEBUG>("obstacle x:", obstacle.x(), " | rBFf x:", rBFf.x());
             const bool past_ball = obstacle.norm() > rBFf.norm();
             log<DEBUG>("Obstacle norm:", obstacle.norm(), " | rBFf norm:", rBFf.norm());
-            double dist_robot_obs = obstacle.norm() - rBFf.norm();
+            double dist_robot_obs   = (obstacle - rBFf).norm();
             const bool within_range = dist_robot_obs < cfg.infront_check_distance;
-            log<DEBUG>("within_range:", obstacle.norm(), "rBFf", rBFf.norm(), "check distance:", cfg.infront_check_distance);
+            log<DEBUG>("within_range:",
+                       obstacle.norm(),
+                       "rBFf",
+                       rBFf.norm(),
+                       "check distance:",
+                       cfg.infront_check_distance);
             const bool intersects_path =
-                utility::math::geometry::intersection_line_and_circle(rGFf,
-                                                                      rBFf,
-                                                                      obstacle,
-                                                                      cfg.infront_of_ball_radius);
+                utility::math::geometry::intersection_line_and_circle(rGFf, rBFf, obstacle, cfg.infront_of_ball_radius);
 
             log<DEBUG>("Obstacle:",
                        obstacle.transpose(),
