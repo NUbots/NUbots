@@ -100,27 +100,9 @@ namespace module::localisation {
             cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
             cfg.maxeval  = config["opt"]["maxeval"].as<int>();
 
-            // Define the process model
-            cfg.A = config["kalman"]["A"].as<Expression>();
-
-            // Define the input model
-            cfg.B = Eigen::Matrix<double, n_states, n_inputs>::Zero();
-
-            // Define the measurement model
-            cfg.C = config["kalman"]["C"].as<Expression>();
-
-            // Define the process noise covariance
-            cfg.Q = config["kalman"]["Q"].as<Expression>();
-
-            // Define the measurement noise covariance
-            cfg.R = config["kalman"]["R"].as<Expression>();
-            kf    = utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements>(cfg.initial_state,
-                                                                                                 cfg.P0,
-                                                                                                 cfg.A,
-                                                                                                 cfg.B,
-                                                                                                 cfg.C,
-                                                                                                 cfg.Q,
-                                                                                                 cfg.R);
+            // Exponential filter parameters
+            cfg.alpha = config["exponential_filter"]["alpha"].as<double>();
+            cfg.covariance = Eigen::Matrix3d(config["exponential_filter"]["covariance"].as<Expression>());
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -185,7 +167,8 @@ namespace module::localisation {
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
             state = cfg.initial_hypotheses[0];
-            kf.set_state(state);
+            filtered_state = state;
+            first_measurement = true;
             startup    = true;
             last_reset = NUClear::clock::now();
         });
@@ -251,22 +234,25 @@ namespace module::localisation {
                         state              = best_hypothesis->first;
                         chosen_state_cost  = best_hypothesis->second;
                         last_certain_state = state;
-                        kf.set_state(state);
+                        filtered_state = state;
+                        first_measurement = true;
                         startup = false;
                     }
                     else {
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(kf.get_state(), field_lines.rPWw, field_intersections, goals);
+                            run_field_line_optimisation(filtered_state, field_lines.rPWw, field_intersections, goals);
                         state             = opt_results.first;
                         chosen_state_cost = opt_results.second;
                     }
 
-                    // Time update (no process model)
-                    kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
-
-                    // Measurement update
-                    kf.measure(state);
+                    // Apply exponential filter to smooth the state estimate
+                    if (first_measurement) {
+                        filtered_state = state;
+                        first_measurement = false;
+                    } else {
+                        filtered_state = cfg.alpha * state + (1.0 - cfg.alpha) * filtered_state;
+                    }
 
                     // Check if uncertainty is too high
                     emit(graph("Cost", chosen_state_cost));
@@ -290,12 +276,12 @@ namespace module::localisation {
                     else if ((chosen_state_cost < cfg.cost_threshold)) {
                         // Update the last certain state
                         num_over_cost      = 0;
-                        last_certain_state = kf.get_state();
+                        last_certain_state = filtered_state;
                     }
 
                     // Emit the field message
                     auto field = std::make_unique<Field>();
-                    field->Hfw = compute_Hfw(kf.get_state());
+                    field->Hfw = compute_Hfw(filtered_state);
 
                     // Debugging
                     if (log_level <= DEBUG) {
@@ -309,8 +295,8 @@ namespace module::localisation {
 
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost        = chosen_state_cost;
-                    field->covariance  = kf.get_covariance();
-                    field->uncertainty = kf.get_covariance().diagonal().sum();
+                    field->covariance  = cfg.covariance;
+                    field->uncertainty = cfg.covariance.diagonal().sum();
 
                     emit(field);
                 });
@@ -318,7 +304,7 @@ namespace module::localisation {
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw) {
         emit(graph("opt state", state.x(), state.y(), state.z()));
-        emit(graph("kf state", kf.get_state().x(), kf.get_state().y(), kf.get_state().z()));
+        emit(graph("filtered state", filtered_state.x(), filtered_state.y(), filtered_state.z()));
         // Determine translational distance error
         Eigen::Vector3d true_rFWw  = ground_truth_Hfw.translation();
         Eigen::Vector3d rFWw       = (Hfw.translation());
