@@ -70,6 +70,8 @@ namespace module::skill {
 
             /// @brief Max acceleration for smoothing walk commands
             Eigen::Vector3d acceleration = Eigen::Vector3d(0.0, 0.0, 0.0);
+            /// @brief Option to use balance control when walking
+            bool use_balance_control = false;
         } cfg;
 
         /// @brief Last time we updated the walk engine

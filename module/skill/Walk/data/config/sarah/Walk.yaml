@@ -1,13 +1,10 @@
-log_level: DEBUG
+log_level: INFO
 
 walk:
   # Time for one complete step (in seconds).
   period: 0.39
   # Bool to indicate whether or not to only switch if the next foot is planted
   only_switch_when_planted: true
-  # Bool to indicate whether or not to use balance control. NOTE: correction_enabled must be true in FootController config
-  use_balance_control: true
-
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]
@@ -21,7 +18,7 @@ walk:
     # Torso height (in meters)
     height: 0.46
     # Torso pitch (in radians)
-    pitch: 12 * pi / 180
+    pitch: 18 * pi / 180
     # Torso constant position offset
     position_offset: [0.01, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
@@ -34,8 +31,6 @@ walk:
     # For example, a value of [0.5, 0.5, 1] would position the torso halfway between the planted and swing foot and with
     # torso yaw rotation equal to swing foot yaw
     final_position_ratio: [0.5, 0.5, 1]
-  # Maximum acceleration for smoothing walk commands
-  acceleration: [0.2, 0.2, 0.5]
 
 gains:
   arms: 1

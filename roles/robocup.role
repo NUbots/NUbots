@@ -13,9 +13,7 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
-  network::PlotJuggler
   output::Overview
-  output::ImageCompressor
   # Sensors and network (input)
   input::SensorFilter
   input::Camera

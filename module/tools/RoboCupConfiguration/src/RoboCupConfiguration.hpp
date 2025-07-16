@@ -57,7 +57,7 @@ namespace module::tools {
         /// @brief The ID that the robot is player for
         int team_id = 0;
         /// @brief Max team team ID
-        static const int MAX_TEAM_ID = 33;
+        static const int MAX_TEAM_ID = 99;
         /// @brief The player ID of the robot
         int player_id = 0;
         /// @brief Max player ID
