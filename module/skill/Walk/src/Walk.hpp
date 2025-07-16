@@ -68,16 +68,8 @@ namespace module::skill {
             /// @brief Buffer time before the kick starts
             double kick_timing_offset = 0.0;
 
-            /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
-            /// @note  Set to [0, 0, 0] to functionally disable smoothing
-            Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);
-            /// @brief Exponential smoothing factor for the velocity command [x, y, theta]
-            Eigen::Vector3d alpha = Eigen::Vector3d(1, 1, 1);
-            /// @brief Complementary exponential smoothing factor for the velocity command [x, y, theta]
-            Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
-
-            /// @brief Starting velocity for the walk command
-            Eigen::Vector3d starting_velocity = Eigen::Vector3d(0, 0, 0);
+            /// @brief Max acceleration for smoothing walk commands
+            Eigen::Vector3d acceleration = Eigen::Vector3d(0.0, 0.0, 0.0);
         } cfg;
 
         /// @brief Last time we updated the walk engine

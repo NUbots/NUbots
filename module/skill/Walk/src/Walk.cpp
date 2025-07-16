@@ -117,22 +117,8 @@ namespace module::skill {
             cfg.kick_velocity_y    = config["kick"]["kick_velocity_y"].as<double>();
             cfg.kick_timing_offset = config["kick"]["kick_timing_offset"].as<double>();
 
-            // Exponential smoothing configuration
-            cfg.tau = config["walk"]["smoother"]["tau"].as<Expression>();
-            // Ensure safety for division by zero if tau is zero
-            cfg.alpha = (cfg.tau.array() > 0.01)
-                            .select((1.0 - (-1.0 / (UPDATE_FREQUENCY * cfg.tau.array())).exp()).matrix(),
-                                    Eigen::Vector3d::Ones());
-            cfg.one_minus_alpha = Eigen::Vector3d::Ones() - cfg.alpha;
-            log<DEBUG>("Smoothing parameters: tau = ",
-                       cfg.tau.transpose(),
-                       ", alpha = ",
-                       cfg.alpha.transpose(),
-                       ", one_minus_alpha = ",
-                       cfg.one_minus_alpha.transpose());
-
-            // Starting velocity
-            cfg.starting_velocity = config["walk"]["smoother"]["starting_velocity"].as<Expression>();
+            // Max acceleration
+            cfg.acceleration = config["walk"]["acceleration"].as<Expression>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -164,11 +150,17 @@ namespace module::skill {
            With<Sensors>,
            With<Stability>,
            Single,
+           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Priority::HIGH>()
             .then([this](const WalkTask& new_walk,
+                         const RunReason& run_reason,
                          const CurrentWalkTask& current_walk,
                          const Sensors& sensors,
                          const Stability& stability) {
+                // Force the walk to run at a known rate
+                if (run_reason != RunReason::OTHER_TRIGGER)
+                    return;
+
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -220,12 +212,12 @@ namespace module::skill {
                     }
                 }
 
-                // Apply exponential smoothing to the walk command
-                walk.velocity_target = new_walk.velocity_target.cwiseProduct(cfg.alpha)
-                                       + current_walk.velocity_target.cwiseProduct(cfg.one_minus_alpha);
-                // Clip the velocity target to zero if below the threshold
-                walk.velocity_target = (walk.velocity_target.cwiseAbs().array() > cfg.alpha.array() / 10.0)
-                                           .select(walk.velocity_target, Eigen::Vector3d::Zero());
+                // If the new walk command is larger than the current one, accelerate towards it
+                auto dv = cfg.acceleration * std::min(time_delta, 1.0);  // never accelerate too much
+                walk.velocity_target =
+                    current_walk.velocity_target
+                    + (new_walk.velocity_target - current_walk.velocity_target).cwiseMax(-dv).cwiseMin(dv);
+
                 emit(std::make_unique<CurrentWalkTask>(walk));  // Update the state for next time
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
