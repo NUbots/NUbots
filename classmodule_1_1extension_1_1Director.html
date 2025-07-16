@@ -194,8 +194,9 @@ Collaboration diagram for module::extension::Director:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1extension_1_1Director__coll__graph.png" border="0" usemap="#amodule_1_1extension_1_1Director_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1extension_1_1Director_coll__map" id="amodule_1_1extension_1_1Director_coll__map">
-<area shape="rect" title=" " alt="" coords="5,80,156,121"/>
-<area shape="rect" title=" " alt="" coords="13,5,148,32"/>
+<area shape="rect" title=" " alt="" coords="69,95,220,136"/>
+<area shape="rect" title=" " alt="" coords="5,5,140,32"/>
+<area shape="rect" title=" " alt="" coords="164,5,272,32"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -263,6 +264,10 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a6e12b0846a7c148a6dea84299670b45c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c">challenge_priority</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;incumbent, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;challenger)</td></tr>
 <tr class="memdesc:a6e12b0846a7c148a6dea84299670b45c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the challenge priorities of two director tasks and returns true if the challenger has priority over the incumbent using challenge priority.  <a href="classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c">More...</a><br /></td></tr>
 <tr class="separator:a6e12b0846a7c148a6dea84299670b45c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a145fac51d3d13f5bc2b6247e90f17136"><td class="memItemLeft" align="right" valign="top"><a id="a145fac51d3d13f5bc2b6247e90f17136"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a145fac51d3d13f5bc2b6247e90f17136">emit_state</a> ()</td></tr>
+<tr class="memdesc:a145fac51d3d13f5bc2b6247e90f17136"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits the director state if it has changed. <br /></td></tr>
+<tr class="separator:a145fac51d3d13f5bc2b6247e90f17136"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53c31913830e62fdc1b7c49c9a259191"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a53c31913830e62fdc1b7c49c9a259191">find_ok_solution</a> (const <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &amp;requirement, const std::set&lt; std::type_index &gt; &amp;used_types)</td></tr>
 <tr class="memdesc:a53c31913830e62fdc1b7c49c9a259191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the first available option for a solution that we can run now for this solution.  <a href="classmodule_1_1extension_1_1Director.html#a53c31913830e62fdc1b7c49c9a259191">More...</a><br /></td></tr>
 <tr class="separator:a53c31913830e62fdc1b7c49c9a259191"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -317,6 +322,10 @@ Static Private Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
+<tr class="memitem:a115baf7b805ff9c82728aaa5519cd756"><td class="memItemLeft" align="right" valign="top"><a id="a115baf7b805ff9c82728aaa5519cd756"></a>
+message::behaviour::DirectorState&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a115baf7b805ff9c82728aaa5519cd756">director_state</a></td></tr>
+<tr class="memdesc:a115baf7b805ff9c82728aaa5519cd756"><td class="mdescLeft">&#160;</td><td class="mdescRight">The protobuf message that holds the current state of the director. <br /></td></tr>
+<tr class="separator:a115baf7b805ff9c82728aaa5519cd756"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="memItemLeft" align="right" valign="top"><a id="ab2350ea1c07f3e9dd54776dcadf29e4d"></a>
 std::map&lt; std::type_index, <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d">groups</a></td></tr>
 <tr class="memdesc:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of Provider groups. <br /></td></tr>
@@ -325,6 +334,10 @@ std::map&lt; std::type_index, <a class="el" href="structmodule_1_1extension_1_1c
 std::map&lt; NUClear::id_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a77eb6bb5d67d9956c0cce227bcc38276">providers</a></td></tr>
 <tr class="memdesc:a77eb6bb5d67d9956c0cce227bcc38276"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps reaction_id to the Provider which implements it. <br /></td></tr>
 <tr class="separator:a77eb6bb5d67d9956c0cce227bcc38276"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41e3c60745f867993e75a694f1dead54"><td class="memItemLeft" align="right" valign="top"><a id="a41e3c60745f867993e75a694f1dead54"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a41e3c60745f867993e75a694f1dead54">state_changed</a> = false</td></tr>
+<tr class="memdesc:a41e3c60745f867993e75a694f1dead54"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last emitted state, used to check for changes. <br /></td></tr>
+<tr class="separator:a41e3c60745f867993e75a694f1dead54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5ef90d64bf20ee88eec5c956790d55b"><td class="memItemLeft" align="right" valign="top"><a id="af5ef90d64bf20ee88eec5c956790d55b"></a>
 NUClear::id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af5ef90d64bf20ee88eec5c956790d55b">unique_id_source</a> = 0</td></tr>
 <tr class="memdesc:af5ef90d64bf20ee88eec5c956790d55b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue. <br /></td></tr>
@@ -1290,6 +1303,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <li>module/extension/Director/src/<a class="el" href="Director_8hpp_source.html">Director.hpp</a></li>
 <li>module/extension/Director/src/director/challenge_priority.cpp</li>
 <li>module/extension/Director/src/director/direct_priority.cpp</li>
+<li>module/extension/Director/src/director/emit_state.cpp</li>
 <li>module/extension/Director/src/director/find_ok_solution.cpp</li>
 <li>module/extension/Director/src/director/reevaluate_group.cpp</li>
 <li>module/extension/Director/src/director/remove_task.cpp</li>
@@ -1304,7 +1318,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Wed Jul 16 2025 11:38:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jul 16 2025 21:08:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

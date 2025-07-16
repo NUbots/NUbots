@@ -1,5 +1,12 @@
 var NAVTREEINDEX15 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da4f3621ae9bb7a1b0c678372eafd2c498":[3,0,3,8,1,1,0,116],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da507386ab71cbcf02075c0b153723414d":[3,0,3,8,1,1,0,198],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da519c13ec51fec58626086ce3351472b5":[3,0,3,8,1,1,0,68],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da51f0ff6d8a54fc6f1485202de1c83c32":[3,0,3,8,1,1,0,255],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da52fbab1dd4680ce2e99f5b758ac278ef":[3,0,3,8,1,1,0,107],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da538170974ef0ed18dbf77c1a1dcb5f85":[3,0,3,8,1,1,0,196],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da53cd6edcaf3e809afd613634480b30d5":[3,0,3,8,1,1,0,222],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da53e0dbc06e48e3d381ac224fa8bae3df":[3,0,3,8,1,1,0,49],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da543b92e34c15572c974e8ad192da01a2":[3,0,3,8,1,1,0,184],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da54a8c6ae27d2fdc1f27c81ef7b40e023":[3,0,3,8,1,1,0,258],
@@ -242,12 +249,5 @@ var NAVTREEINDEX15 =
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a29f64b7d3c182adeda218d7af177e9d7":[3,0,3,8,1,6,0,0],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a390dea89a85bca3458ef50afee650327":[3,0,3,8,1,6,0,3],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a95ccf44799f073fcb1b3e5c5f36a355f":[3,0,3,8,1,6,0,5],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#aa33613bbc0ecf00e9106bd00ea695a44":[3,0,3,8,1,6,0,4],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#ad69720d0c5c50552c499027753b7f9dc":[3,0,3,8,1,6,0,2],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html":[3,0,3,8,1,6,1],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a0f02400323e93ce3a4de429bfc6f81df":[3,0,3,8,1,6,1,1],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a2133e5cb72cc18cb6fe72ed7d7996b7e":[3,0,3,8,1,6,1,3],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a23244b3976c1c0f6dcaaebb8264fc39a":[3,0,3,8,1,6,1,2],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#acc680091ac55fe93f70a054818767681":[3,0,3,8,1,6,1,4],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#aeb93cb3790ddcfacc3b309d24c9f23d2":[3,0,3,8,1,6,1,0]
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#aa33613bbc0ecf00e9106bd00ea695a44":[3,0,3,8,1,6,0,4]
 };

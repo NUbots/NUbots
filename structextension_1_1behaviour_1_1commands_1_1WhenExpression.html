@@ -182,9 +182,9 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1comman
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5a918eb5d56d6e563a89aa4432eb2ea8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a5a918eb5d56d6e563a89aa4432eb2ea8">WhenExpression</a> (std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_, const std::type_index &amp;type_, std::function&lt; bool(const int &amp;)&gt; validator_, std::function&lt; int()&gt; current_, std::function&lt; NUClear::threading::ReactionHandle(NUClear::Reactor &amp;, std::function&lt; void(const int &amp;)&gt;)&gt; binder_)</td></tr>
-<tr class="memdesc:a5a918eb5d56d6e563a89aa4432eb2ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new <a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html" title="Message used to tell the behaviour system about a new When condition on a Provider.">WhenExpression</a> object to send to the behaviour system.  <a href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a5a918eb5d56d6e563a89aa4432eb2ea8">More...</a><br /></td></tr>
-<tr class="separator:a5a918eb5d56d6e563a89aa4432eb2ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a932f0f2dd65f003c03f313d92657d107"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a932f0f2dd65f003c03f313d92657d107">WhenExpression</a> (std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_, const std::type_index &amp;type_, const std::type_index &amp;comparator_type_, const std::string &amp;expected_state_string_, const int &amp;expected_state_value_, std::function&lt; bool(const int &amp;)&gt; validator_, std::function&lt; int()&gt; current_, std::function&lt; NUClear::threading::ReactionHandle(NUClear::Reactor &amp;, std::function&lt; void(const int &amp;)&gt;)&gt; binder_)</td></tr>
+<tr class="memdesc:a932f0f2dd65f003c03f313d92657d107"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new <a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html" title="Message used to tell the behaviour system about a new When condition on a Provider.">WhenExpression</a> object to send to the behaviour system.  <a href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a932f0f2dd65f003c03f313d92657d107">More...</a><br /></td></tr>
+<tr class="separator:a932f0f2dd65f003c03f313d92657d107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -192,10 +192,22 @@ Public Attributes</h2></td></tr>
 std::function&lt; NUClear::threading::ReactionHandle(NUClear::Reactor &amp;, std::function&lt; void(const int &amp;)&gt;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a20fd09a60a363d6bf78b667d7ff2baf2">binder</a></td></tr>
 <tr class="memdesc:a20fd09a60a363d6bf78b667d7ff2baf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to bind a reaction to monitor when this state changes. <br /></td></tr>
 <tr class="separator:a20fd09a60a363d6bf78b667d7ff2baf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d10741fa7e9babf05ae160fc0ed800d"><td class="memItemLeft" align="right" valign="top"><a id="a9d10741fa7e9babf05ae160fc0ed800d"></a>
+std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a9d10741fa7e9babf05ae160fc0ed800d">comparator_type</a></td></tr>
+<tr class="memdesc:a9d10741fa7e9babf05ae160fc0ed800d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The type of the comparator. <br /></td></tr>
+<tr class="separator:a9d10741fa7e9babf05ae160fc0ed800d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4627e7f15bb0a0ab98ec54b342a57082"><td class="memItemLeft" align="right" valign="top"><a id="a4627e7f15bb0a0ab98ec54b342a57082"></a>
 std::function&lt; int()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a4627e7f15bb0a0ab98ec54b342a57082">current</a></td></tr>
 <tr class="memdesc:a4627e7f15bb0a0ab98ec54b342a57082"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to get the current state from the global cache. <br /></td></tr>
 <tr class="separator:a4627e7f15bb0a0ab98ec54b342a57082"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73fac1479a1fcb9a6bc6628ffbc88bc2"><td class="memItemLeft" align="right" valign="top"><a id="a73fac1479a1fcb9a6bc6628ffbc88bc2"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a73fac1479a1fcb9a6bc6628ffbc88bc2">expected_state_string</a></td></tr>
+<tr class="memdesc:a73fac1479a1fcb9a6bc6628ffbc88bc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The expected state as a string. <br /></td></tr>
+<tr class="separator:a73fac1479a1fcb9a6bc6628ffbc88bc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05a1563168b866ad461981e7ab23819d"><td class="memItemLeft" align="right" valign="top"><a id="a05a1563168b866ad461981e7ab23819d"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a05a1563168b866ad461981e7ab23819d">expected_state_value</a></td></tr>
+<tr class="memdesc:a05a1563168b866ad461981e7ab23819d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The expected state as an int. <br /></td></tr>
+<tr class="separator:a05a1563168b866ad461981e7ab23819d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae62c71b72ddb5532f209705478e13c5"><td class="memItemLeft" align="right" valign="top"><a id="aae62c71b72ddb5532f209705478e13c5"></a>
 std::shared_ptr&lt; NUClear::threading::Reaction &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#aae62c71b72ddb5532f209705478e13c5">reaction</a></td></tr>
 <tr class="memdesc:aae62c71b72ddb5532f209705478e13c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Provider reaction that is contingent on this when condition. <br /></td></tr>
@@ -212,8 +224,8 @@ std::function&lt; bool(const int &amp;)&gt;&#160;</td><td class="memItemRight" v
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Message used to tell the behaviour system about a new <a class="el" href="structextension_1_1behaviour_1_1When.html" title="Limit access to this Provider unless a condition is true.">When</a> condition on a Provider. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a5a918eb5d56d6e563a89aa4432eb2ea8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a918eb5d56d6e563a89aa4432eb2ea8">&#9670;&nbsp;</a></span>WhenExpression()</h2>
+<a id="a932f0f2dd65f003c03f313d92657d107"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a932f0f2dd65f003c03f313d92657d107">&#9670;&nbsp;</a></span>WhenExpression()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -232,6 +244,24 @@ std::function&lt; bool(const int &amp;)&gt;&#160;</td><td class="memItemRight" v
           <td></td>
           <td class="paramtype">const std::type_index &amp;&#160;</td>
           <td class="paramname"><em>type_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::type_index &amp;&#160;</td>
+          <td class="paramname"><em>comparator_type_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>expected_state_string_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>expected_state_value_</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -287,7 +317,7 @@ std::function&lt; bool(const int &amp;)&gt;&#160;</td><td class="memItemRight" v
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="namespaceextension_1_1behaviour_1_1commands.html">commands</a></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html">WhenExpression</a></li>
-    <li class="footer">Generated on Wed Jul 16 2025 11:38:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jul 16 2025 21:08:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -1,5 +1,8 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a53e0dbc06e48e3d381ac224fa8bae3df":[3,0,3,8,1,10,0,8],
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a567c6b092b7022df5dff239b8667c4c1":[3,0,3,8,1,10,0,31],
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a57b35198356d373bcd2a6e08abcb3795":[3,0,3,8,1,10,0,13],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5a5f6aeae27081db41c5c5cd5d644fdf":[3,0,3,8,1,10,0,20],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5a619f7694797486d89b9670ccefff1e":[3,0,3,8,1,10,0,21],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5fc8de992cb54e07b7143d0b4b3858df":[3,0,3,8,1,10,0,33],
@@ -246,8 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1Kicker.html#a740a67edc8d3104dbdac4f9c14dc8723":[3,0,3,10,6,1],
 "classmodule_1_1skill_1_1Kicker.html#a7bd3a20dbda83a8f5e9a9d768d5f4329":[3,0,3,10,6,4],
 "classmodule_1_1skill_1_1Kicker.html#acd370f6bfe21dbc98088da25f4449741":[3,0,3,10,6,2],
-"classmodule_1_1skill_1_1Kicker.html#adc720fa422042679e09b9ea71c08a298":[3,0,3,10,6,8],
-"classmodule_1_1skill_1_1Look.html":[3,0,3,10,8],
-"classmodule_1_1skill_1_1Look.html#a9a18c367bd8fa8a76a7dc227d47b2373":[3,0,3,10,8,2],
-"classmodule_1_1skill_1_1Look.html#aab0a3bf4b133df9f44c1fdc44c28a1a8":[3,0,3,10,8,3]
+"classmodule_1_1skill_1_1Kicker.html#adc720fa422042679e09b9ea71c08a298":[3,0,3,10,6,8]
 };

@@ -1,5 +1,12 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a61177071594a7cb9747f15a71c99cee3":[3,0,3,1,1,2,0,1],
+"structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#af195f0718ed48640ac9265206e9487fc":[3,0,3,1,1,2,0,2],
+"structmodule_1_1extension_1_1Director_1_1TaskPack.html":[3,0,3,1,1,3],
+"structmodule_1_1extension_1_1Director_1_1TaskPack.html#a368b622c0baa497f7ad0d7dd3d382c56":[3,0,3,1,1,3,0],
+"structmodule_1_1extension_1_1Director_1_1TaskPack.html#a56faeff130ec229d05af2979d5c6a285":[3,0,3,1,1,3,1],
+"structmodule_1_1extension_1_1Director_1_1WaitFinished.html":[3,0,3,1,1,4],
+"structmodule_1_1extension_1_1Director_1_1WaitFinished.html#afc8f8125d37af729f05eb0fd7fb1ad66":[3,0,3,1,1,4,0],
 "structmodule_1_1extension_1_1FileWatcher_1_1Watch.html":[3,0,3,1,2,0],
 "structmodule_1_1extension_1_1FileWatcher_1_1Watch.html#a266993ae12f4ae307c6b51b2206c293f":[3,0,3,1,2,0,5],
 "structmodule_1_1extension_1_1FileWatcher_1_1Watch.html#a4982ec0566174d5e6dfbf8c91097697e":[3,0,3,1,2,0,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html":[3,0,3,2,30],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a23591516abf64e8986d18f13e34b9efb":[3,0,3,2,30,3],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a40bdd50e441e3f864d15427a4ee905c9":[3,0,3,2,30,0],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a66594e4f239820abba94cc4e0a736004":[3,0,3,2,30,2],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a742abcb7a0fff57e4dbec6e782e629a5":[3,0,3,2,30,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html":[3,0,3,2,1,0],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a002c7f0b4a6d8b317b47878c5d84df1f":[3,0,3,2,1,0,10],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a05fedb18a1f550df82bd076a257c6300":[3,0,3,2,1,0,0],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a072649d6dc3cd8268506c67285e58270":[3,0,3,2,1,0,13],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a180afaa98321f36dc22ce3f8d6b5a73c":[3,0,3,2,1,0,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a29d5536a8dd324998eba2c932e69c033":[3,0,3,2,1,0,6]
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a66594e4f239820abba94cc4e0a736004":[3,0,3,2,30,2]
 };

@@ -18,6 +18,7 @@ var classmodule_1_1extension_1_1Director =
     [ "add_when", "classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43", null ],
     [ "challenge_priority", "classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c", null ],
     [ "direct_priority", "classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812", null ],
+    [ "emit_state", "classmodule_1_1extension_1_1Director.html#a145fac51d3d13f5bc2b6247e90f17136", null ],
     [ "find_ok_solution", "classmodule_1_1extension_1_1Director.html#a53c31913830e62fdc1b7c49c9a259191", null ],
     [ "find_ok_solution", "classmodule_1_1extension_1_1Director.html#a90923156eb8865e70b76295c7f2925ac", null ],
     [ "find_ok_solutions", "classmodule_1_1extension_1_1Director.html#a064eb8cb122b43693170af234a60756b", null ],
@@ -34,7 +35,9 @@ var classmodule_1_1extension_1_1Director =
     [ "solve_task", "classmodule_1_1extension_1_1Director.html#addeec0f3be82e2b190be9af57edfb40d", null ],
     [ "solve_when", "classmodule_1_1extension_1_1Director.html#a065cf29244da79d96ebd3c94fea7153f", null ],
     [ "concurrency", "classmodule_1_1extension_1_1Director.html#a774a9943509e7bd672ac9e54c8aa7026", null ],
+    [ "director_state", "classmodule_1_1extension_1_1Director.html#a115baf7b805ff9c82728aaa5519cd756", null ],
     [ "groups", "classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d", null ],
     [ "providers", "classmodule_1_1extension_1_1Director.html#a77eb6bb5d67d9956c0cce227bcc38276", null ],
+    [ "state_changed", "classmodule_1_1extension_1_1Director.html#a41e3c60745f867993e75a694f1dead54", null ],
     [ "unique_id_source", "classmodule_1_1extension_1_1Director.html#af5ef90d64bf20ee88eec5c956790d55b", null ]
 ];

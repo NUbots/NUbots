@@ -1,5 +1,12 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a742abcb7a0fff57e4dbec6e782e629a5":[3,0,3,2,30,1],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html":[3,0,3,2,1,0],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a002c7f0b4a6d8b317b47878c5d84df1f":[3,0,3,2,1,0,10],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a05fedb18a1f550df82bd076a257c6300":[3,0,3,2,1,0,0],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a072649d6dc3cd8268506c67285e58270":[3,0,3,2,1,0,13],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a180afaa98321f36dc22ce3f8d6b5a73c":[3,0,3,2,1,0,1],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a29d5536a8dd324998eba2c932e69c033":[3,0,3,2,1,0,6],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a2e2933f82fa1cafa336fae56e54f7112":[3,0,3,2,1,0,7],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4a7b4602069a952638f10c112dccce27":[3,0,3,2,1,0,8],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a5f5f56d45df44dec37672148e530d40a":[3,0,3,2,1,0,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#afcfb69afa6019ea325a2b93185b83295":[3,0,3,6,0,1,3,19],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#afff9419f5bddf0f9149882646944c657":[3,0,3,6,0,1,3,17],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html":[3,0,3,6,0,1,0,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html#a2ea2bafd41ce27979ed3cec08cd85f24":[3,0,3,6,0,1,0,1,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html#ad8add0fb973dacb28b138ed539d58c2b":[3,0,3,6,0,1,0,1,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html":[3,0,3,6,0,1,1,0,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html#a067531f68af2df6d1c7ab370c38e0ce1":[3,0,3,6,0,1,1,0,0,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html#a27b36094515eb52b17cc0fdaad0bf071":[3,0,3,6,0,1,1,0,0,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html#a5bab73f5bd98617f0673bafcec5853bf":[3,0,3,6,0,1,1,0,0,2],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html#a7243d3a776a46f153bee9dcd442ce845":[3,0,3,6,0,1,1,0,0,9],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html#a7d9935455390eef680ec9d1570aff1db":[3,0,3,6,0,1,1,0,0,8]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html#a2ea2bafd41ce27979ed3cec08cd85f24":[3,0,3,6,0,1,0,1,1]
 };
