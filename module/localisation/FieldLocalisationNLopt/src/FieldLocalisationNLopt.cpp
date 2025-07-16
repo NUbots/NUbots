@@ -165,11 +165,11 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
-            state = cfg.initial_hypotheses[0];
-            filtered_state = state;
+            state             = cfg.initial_hypotheses[0];
+            filtered_state    = state;
             first_measurement = true;
-            startup    = true;
-            last_reset = NUClear::clock::now();
+            startup           = true;
+            last_reset        = NUClear::clock::now();
         });
 
         on<Trigger<FieldLines>,
@@ -233,9 +233,9 @@ namespace module::localisation {
                         state              = best_hypothesis->first;
                         chosen_state_cost  = best_hypothesis->second;
                         last_certain_state = state;
-                        filtered_state = state;
-                        first_measurement = true;
-                        startup = false;
+                        filtered_state     = state;
+                        first_measurement  = true;
+                        startup            = false;
                     }
                     else {
                         // Run the optimisation routine
@@ -247,10 +247,12 @@ namespace module::localisation {
 
                     // Apply exponential filter to smooth the state estimate
                     if (first_measurement) {
-                        filtered_state = state;
+                        filtered_state    = state;
                         first_measurement = false;
-                    } else {
-                        filtered_state = cfg.alpha.cwiseProduct(state) + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
+                    }
+                    else {
+                        filtered_state = cfg.alpha.cwiseProduct(state)
+                                         + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
                     }
 
                     // Check if uncertainty is too high
