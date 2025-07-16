@@ -200,15 +200,15 @@ namespace module::strategy {
                         }
                         else if (rRFf.y() < left_point) {
                             log<DEBUG>("Robot on the left side of the field, going around on the right side");
-                            // If we are on the left side of the field, go around the robot on the right side
-                            adjusted_target = kick_target - side_offset;
-                            desired_heading += M_PI_4;  // Turn left
-                        }
-                        else if (rRFf.y() > right_point) {
-                            log<DEBUG>("Robot on the right side of the field, going around on the left side");
                             // If we are on the right side of the field, go around the robot on the left side
                             adjusted_target = kick_target + side_offset;
                             desired_heading -= M_PI_4;  // Turn right
+                        }
+                        else {
+                            log<DEBUG>("Robot on the right side of the field, going around on the left side");
+                            // If we are on the left side of the field, go around the robot on the right side
+                            adjusted_target = kick_target - side_offset;
+                            desired_heading += M_PI_4;  // Turn left
                         }
 
                         // Check we are facing a good angle to clear the other robot
