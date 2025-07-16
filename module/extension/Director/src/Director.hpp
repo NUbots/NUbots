@@ -38,7 +38,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/behaviour/state/Director.hpp"
+#include "message/behaviour/Director.hpp"
 
 namespace module::extension {
 

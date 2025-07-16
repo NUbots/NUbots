@@ -24,7 +24,7 @@
 // SOFTWARE.
 syntax = "proto3";
 
-package message.behaviour.state;
+package message.behaviour;
 
 message DirectorState {
 
