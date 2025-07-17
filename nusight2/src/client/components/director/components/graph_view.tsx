@@ -322,7 +322,7 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
           zoomOnScroll
           zoomOnPinch
           panOnScroll
-          nodesDraggable={false}
+          nodesDraggable={true}
           nodesConnectable={false}
           elementsSelectable={true}
           translateExtent={translateExtent}
