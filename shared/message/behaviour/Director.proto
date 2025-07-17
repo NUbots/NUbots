@@ -40,12 +40,10 @@ message DirectorState {
         string name = 1;
         /// The id of the group that this task wants to run on
         uint64 target_group = 2;
-        /// The id of the provider that is requesting this task
-        uint64 requester_provider_id = 3;
         /// The priority of this task
-        int32 priority = 4;
+        int32 priority = 3;
         /// If this task is optional
-        bool optional = 5;
+        bool optional = 4;
     };
 
     message Provider {
@@ -87,20 +85,16 @@ message DirectorState {
         string type = 1;
         /// The ids of the providers that are part of this group
         repeated uint64 provider_ids = 2;
-        /// If the groups last run emitted a done task
-        bool done = 3;
         /// The id of the provider that is currently active or 0 if no provider is active
-        uint64 active_provider = 4;
-        /// Task ids that are watching this group
-        repeated uint64 watchers = 5;
-        /// The ids of the tasks that are currently running
-        repeated uint64 subtasks = 6;
+        uint64 active_provider = 3;
+        /// The id of the provider that is currently controlling this group
+        uint64 parent_provider = 4;
+        /// The ids of the tasks that this group wants to run/is running
+        repeated DirectorTask subtasks = 5;
     }
 
     /// Groups of providers
     map<uint64, Group> groups = 1;
     /// Providers in the system
     map<uint64, Provider> providers = 2;
-    /// Tasks that are currently running
-    map<uint64, DirectorTask> tasks = 3;
 }

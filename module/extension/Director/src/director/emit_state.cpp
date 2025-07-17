@@ -49,41 +49,17 @@ namespace module::extension {
 
             auto& proto_group = director_state.groups.at(group_id.hash_code());
 
-            update(proto_group.done, group.done);
             update(proto_group.active_provider, group.active_provider ? group.active_provider->id : 0);
-
-            std::vector<uint64_t> watcher_ids;
-            watcher_ids.reserve(group.watchers.size());
-            for (const auto& watcher : group.watchers) {
-                watcher_ids.push_back(watcher->requester_id);
-            }
-            update(proto_group.watchers, watcher_ids);
+            update(proto_group.parent_provider, group.active_task ? group.active_task->requester_id : 0);
 
             // Rebuild subtasks for this group
-            std::vector<uint64_t> subtask_ids;
-            subtask_ids.reserve(group.subtasks.size());
+            std::vector<DirectorState::DirectorTask> subtasks;
+            subtasks.reserve(group.subtasks.size());
             for (const auto& subtask : group.subtasks) {
-                subtask_ids.push_back(subtask->requester_task_id);
+                subtasks.emplace_back(subtask->name, subtask->type.hash_code(), subtask->priority, subtask->optional);
             }
-            update(proto_group.subtasks, subtask_ids);
+            update(proto_group.subtasks, subtasks);
         }
-
-        // We rebuild all the tasks each time from all subtasks
-        std::map<uint64_t, DirectorState::DirectorTask> new_tasks;
-        for (const auto& group_entry : groups) {
-            for (const auto& subtask : group_entry.second.subtasks) {
-                if (subtask) {
-                    auto& proto_task                 = new_tasks[subtask->requester_task_id];
-                    proto_task.name                  = subtask->name;
-                    proto_task.target_group          = subtask->type.hash_code();
-                    proto_task.requester_provider_id = subtask->requester_id;
-                    proto_task.priority              = subtask->priority;
-                    proto_task.optional              = subtask->optional;
-                }
-            }
-        }
-
-        update(director_state.tasks, new_tasks);
 
         // If we updated the state, emit it
         if (state_changed) {
