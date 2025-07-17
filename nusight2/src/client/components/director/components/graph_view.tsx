@@ -1,170 +1,116 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useMemo } from "react";
+import ReactFlow, {
+  Background,
+  Edge,
+  Node,
+  Position,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  Handle,
+} from "reactflow";
+import "reactflow/dist/style.css";
+import dagre from "@dagrejs/dagre";
 
 import { DirectorGraph, GroupModel } from "../model";
+import { MarkerType } from "reactflow";
 import { ProviderGroupView } from "./provider_group_view";
 
-interface Point {
-  x: number;
-  y: number;
+// Fixed box dimensions for ProviderGroupView (should match CSS)
+const NODE_WIDTH = 260;
+
+function estimateHeight(g: GroupModel): number {
+  const header = 40; // title + padding
+  const providerH = 140; // approx per provider view
+  const taskRow = g.subtasks.length ? 32 : 0;
+  return header + g.providers.length * providerH + taskRow;
 }
 
-interface Edge {
-  id: string;
-  source: string; // group id or task id string
-  target: string; // group id
-  from: Point;
-  to: Point;
-}
+/**
+ * Convert DirectorGraph into React Flow nodes & edges and run Dagre (top-bottom) layout.
+ */
+function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
 
-export function GraphView({ graph }: { graph: DirectorGraph }) {
-  // Refs
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [canvasSize, setCanvasSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
-  const edgesJsonRef = useRef<string>("[]");
-
-  const recalculateEdges = () => {
-    if (!containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-
-    const positions: Record<string, DOMRect> = {};
-    Object.entries(groupRefs.current).forEach(([gid, el]) => {
-      if (el) positions[gid] = el.getBoundingClientRect();
+  // create nodes with size estimation
+  for (const g of Object.values(graph.groupsById)) {
+    nodes.push({
+      id: g.id,
+      type: "providerGroup",
+      data: g,
+      position: { x: 0, y: 0 }, // dagre will update
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Top,
     });
+  }
 
-    const newEdges: Edge[] = [];
-
-    const addEdge = (srcId: string, tgtId: string, from: Point, to: Point) => {
+  // edges based on parentProvider (tree that is actually running)
+  for (const g of Object.values(graph.groupsById)) {
+    if (g.parentProvider && g.parentProvider.group) {
+      const srcId = g.parentProvider.group.id;
+      const tgtId = g.id;
       const id = `${srcId}->${tgtId}`;
-      if (newEdges.some((e) => e.id === id)) return;
-      newEdges.push({ id, source: srcId, target: tgtId, from, to });
-    };
-
-    for (const group of Object.values(graph.groupsById)) {
-      const srcRect = positions[group.id];
-      if (!srcRect) continue;
-
-      const centerSrc: Point = {
-        x: srcRect.left - containerRect.left + srcRect.width / 2,
-        y: srcRect.top - containerRect.top + srcRect.height / 2,
-      };
-
-      // Subtask edges
-      for (const task of group.subtasks) {
-        const tgtRect = positions[task.targetGroup.id];
-        if (!tgtRect) continue;
-        const centerTgt: Point = {
-          x: tgtRect.left - containerRect.left + tgtRect.width / 2,
-          y: tgtRect.top - containerRect.top + tgtRect.height / 2,
-        };
-        addEdge(group.id, task.targetGroup.id, centerSrc, centerTgt);
-      }
-
-      // Needs edges
-      for (const provider of group.providers) {
-        for (const needGroup of provider.needs) {
-          const tgtRect = positions[needGroup.id];
-          if (!tgtRect) continue;
-          const centerTgt: Point = {
-            x: tgtRect.left - containerRect.left + tgtRect.width / 2,
-            y: tgtRect.top - containerRect.top + tgtRect.height / 2,
-          };
-          addEdge(group.id, needGroup.id, centerSrc, centerTgt);
-        }
-      }
+      edges.push({ id, source: srcId, target: tgtId, markerEnd: { type: MarkerType.ArrowClosed } });
     }
+  }
 
-    const json = JSON.stringify(newEdges);
-    if (json !== edgesJsonRef.current) {
-      edgesJsonRef.current = json;
-      setEdges(newEdges);
-    }
-  };
+  // dagre layout
+  const gDagre = new dagre.graphlib.Graph();
+  gDagre.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 80 });
+  gDagre.setDefaultEdgeLabel(() => ({}));
 
-  // Recalculate when data or DOM changes
-  useLayoutEffect(recalculateEdges);
+  nodes.forEach((n) => {
+    const h = estimateHeight(n.data as GroupModel);
+    gDagre.setNode(n.id, { width: NODE_WIDTH, height: h });
+  });
+  edges.forEach((e) => gDagre.setEdge(e.source, e.target));
 
-  // Recalculate on scroll and resize
-  useEffect(() => {
-    const handleResize = () => recalculateEdges();
-    window.addEventListener("resize", handleResize);
+  dagre.layout(gDagre);
 
-    const container = containerRef.current;
-    if (container) container.addEventListener("scroll", recalculateEdges, { passive: true });
+  nodes.forEach((n) => {
+    const nodeWithPos = gDagre.node(n.id);
+    const h = estimateHeight(n.data as GroupModel);
+    n.position = { x: nodeWithPos.x - NODE_WIDTH / 2, y: nodeWithPos.y - h / 2 };
+  });
 
-    // Update canvas size
-    if (containerRef.current) {
-      setCanvasSize({ w: containerRef.current.scrollWidth, h: containerRef.current.scrollHeight });
-    }
+  return { nodes, edges };
+}
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      if (container) container.removeEventListener("scroll", recalculateEdges);
-    };
-  }, []);
-
+// Custom node renderer that reuses existing ProviderGroupView
+function ProviderGroupNode({ data }: { data: GroupModel }) {
   return (
-    <div className="relative" ref={containerRef}>
-      {/* SVG edges overlay */}
-      <svg className="absolute inset-0 pointer-events-none" width={canvasSize.w} height={canvasSize.h}>
-        {edges.map((e) => (
-          <line
-            key={e.id}
-            x1={e.from.x}
-            y1={e.from.y}
-            x2={e.to.x}
-            y2={e.to.y}
-            stroke="currentColor"
-            strokeWidth={1}
-            className="text-gray-400" // override via tailwind colour
-          />
-        ))}
-      </svg>
-
-      {/* Group layout */}
-      <div className="flex flex-row gap-4 p-4">
-        {getRootGroups(graph).map((g) => (
-          <GraphNode key={g.id} group={g} />
-        ))}
-      </div>
+    <div className="relative">
+      {/* handles for reactflow connections */}
+      <Handle type="target" id="t" position={Position.Top} style={{ opacity: 0 }} />
+      <Handle type="source" id="b" position={Position.Bottom} style={{ opacity: 0 }} />
+      <ProviderGroupView group={data} />
     </div>
   );
+}
 
-  // ----- helper components/funcs -----
+const nodeTypes = { providerGroup: ProviderGroupNode };
 
-  function GraphNode({ group }: { group: GroupModel }) {
-    // dedupe child groups and preserve order
-    const childGroups: GroupModel[] = Array.from(new Set(group.subtasks.map((t) => t.targetGroup)));
+export function GraphView({ graph }: { graph: DirectorGraph }) {
+  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => graphToFlow(graph), [graph]);
 
-    return (
-      <div className="flex flex-col items-center">
-        <ProviderGroupView
-          group={group}
-          ref={(el) => {
-            groupRefs.current[group.id] = el;
-          }}
-        />
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
-        {childGroups.length > 0 && (
-          <div className="flex flex-row gap-4 mt-4">
-            {childGroups.map((c) => (
-              <GraphNode key={c.id} group={c} />
-            ))}
-          </div>
-        )}
+  return (
+    <ReactFlowProvider>
+      <div className="w-full h-full relative bg-auto-surface-1">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          fitView
+        >
+          <Background gap={32} size={1} />
+        </ReactFlow>
       </div>
-    );
-  }
-
-  function getRootGroups(gr: DirectorGraph): GroupModel[] {
-    // If canonical root (-1) exists, use its subtasks
-    const canonical = gr.groupsById["-1"];
-    if (canonical) {
-      return Array.from(new Set(canonical.subtasks.map((t) => t.targetGroup)));
-    }
-    // Fallback: groups without parentProvider
-    return Object.values(gr.groupsById).filter((g) => !g.parentProvider && g.id !== "-1");
-  }
+    </ReactFlowProvider>
+  );
 }

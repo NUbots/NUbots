@@ -2,6 +2,7 @@ import React, { ComponentType, PropsWithChildren } from "react";
 import { observer } from "mobx-react";
 
 import { DirectorModel } from "./model";
+import { GraphView } from "./components/graph_view";
 
 export interface DirectorViewProps {
   model: DirectorModel;
@@ -27,12 +28,7 @@ export const DirectorView = observer(function DirectorView(props: DirectorViewPr
       {/* Graph viewport */}
       <div className="flex-grow relative bg-auto-surface-1 overflow-auto p-4">
         {model.graph ? (
-          <div className="text-sm text-auto-contrast">
-            <p className="mb-2 font-semibold">Director state loaded</p>
-            <p>{Object.keys(model.graph.groupsById).length} groups</p>
-            <p>{Object.keys(model.graph.providersById).length} providers</p>
-            {/* TODO: replace with SVG graph visualisation */}
-          </div>
+          <GraphView graph={model.graph} />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <p className="text-lg text-auto-contrast">Waiting for DirectorState...</p>
