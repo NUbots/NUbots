@@ -188,8 +188,8 @@ namespace module::strategy {
 
                         // Decide which side to go around based on where we are on the field
                         double center_point     = 0;
-                        double left_goal_point  = center_point - field_description.dimensions.goal_width / 2.0;
-                        double right_goal_point = center_point + field_description.dimensions.goal_width / 2.0;
+                        double left_goal_point  = center_point - field_description.dimensions.goal_width / 2.0 + 0.2;
+                        double right_goal_point = center_point + field_description.dimensions.goal_width / 2.0 - 0.2;
 
                         // Calculate a perpendicular vector to the direction of the target point (2D)
                         const Eigen::Vector2d perp(rGBf.normalized().y(), -rGBf.normalized().x());
@@ -215,7 +215,8 @@ namespace module::strategy {
                             rBFf.head(2) - right_avoid_vector.normalized() * cfg.ball_approach_distance;
 
                         Eigen::Vector2d adjusted_target;
-                        if (rRFf.y() > left_goal_point && rRFf.y() < right_goal_point) {
+                        log<DEBUG>("Obstacle detected at", obstacle2d.y());
+                        if (obstacle2d.y() > left_goal_point && obstacle2d.y() < right_goal_point) {
                             // If we are in the middle of the field, go around the robot based on which side we are
                             // facing facing left in field space, go around left side and turn right
                             if (robot_heading > 0) {
@@ -227,7 +228,7 @@ namespace module::strategy {
                                 desired_heading = left_angle;
                             }
                         }
-                        else if (rRFf.y() < left_goal_point) {
+                        else if (obstacle2d.y() < left_goal_point) {
                             adjusted_target = right_adjusted_target;
                             log<DEBUG>("Robot on the left side of the field, going around on the right side");
                             desired_heading = right_angle;  // Turn right
