@@ -197,20 +197,22 @@ namespace module::strategy {
                         Eigen::Vector2d obstacle2d((*obstacle).x(), (*obstacle).y());
 
                         // Get the vector to avoid the obstacle to the left
-                        const Eigen::Vector2d left_avoid_point  = obstacle2d - perp * cfg.obstacle_radius;
-                        const auto left_angle                   = vector_to_bearing(left_avoid_point - rBFf.head(2));
+                        const Eigen::Vector2d left_avoid_point = obstacle2d - perp * cfg.obstacle_radius;
+                        const auto left_angle                  = vector_to_bearing(left_avoid_point - rBFf.head(2));
 
                         // Create a new walk target point behind the ball to face the avoidance point
                         const Eigen::Vector2d left_avoid_vector = left_avoid_point - rBFf.head(2);
-                        const Eigen::Vector2d left_adjusted_target = rBFf.head(2) - left_avoid_vector.normalized() * cfg.ball_approach_distance;
+                        const Eigen::Vector2d left_adjusted_target =
+                            rBFf.head(2) - left_avoid_vector.normalized() * cfg.ball_approach_distance;
 
                         // Get the vector to avoid the obstacle to the right
                         const Eigen::Vector2d right_avoid_point = obstacle2d + perp * cfg.obstacle_radius;
-                        const auto right_angle = vector_to_bearing(right_avoid_point - rBFf.head(2));
+                        const auto right_angle                  = vector_to_bearing(right_avoid_point - rBFf.head(2));
 
                         // Create a new walk target point behind the ball to face the right avoidance point
                         const Eigen::Vector2d right_avoid_vector = right_avoid_point - rBFf.head(2);
-                        const Eigen::Vector2d right_adjusted_target = rBFf.head(2) - right_avoid_vector.normalized() * cfg.ball_approach_distance;
+                        const Eigen::Vector2d right_adjusted_target =
+                            rBFf.head(2) - right_avoid_vector.normalized() * cfg.ball_approach_distance;
 
                         Eigen::Vector2d adjusted_target;
                         if (rRFf.y() > left_goal_point && rRFf.y() < right_goal_point) {
@@ -247,7 +249,7 @@ namespace module::strategy {
                         }
 
                         Hfk = pos_rpy_to_transform(Eigen::Vector3d(adjusted_target.x(), adjusted_target.y(), 0),
-                                                    Eigen::Vector3d(0, 0, desired_heading));
+                                                   Eigen::Vector3d(0, 0, desired_heading));
                     }
                 }
 
@@ -390,8 +392,8 @@ namespace module::strategy {
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front = obstacle.x() < rBFf.x();  // TODO: check this is the correct obstacle
-            const bool past_ball = obstacle.norm() > rBFf.norm();
+            const bool in_front     = obstacle.x() < rBFf.x();  // TODO: check this is the correct obstacle
+            const bool past_ball    = obstacle.norm() > rBFf.norm();
             const bool within_range = (obstacle - rBFf).norm() < cfg.infront_check_distance;
 
             const bool intersects_path =
