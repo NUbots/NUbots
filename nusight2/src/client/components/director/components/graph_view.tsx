@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import ReactFlow, {
   Background,
   Edge,
@@ -94,17 +94,55 @@ const nodeTypes = { providerGroup: ProviderGroupNode };
 export function GraphView({ graph }: { graph: DirectorGraph }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [translateExtent, setTranslateExtent] = React.useState<[[number, number], [number, number]] | undefined>(
+    undefined,
+  );
+  const [minZoom, setMinZoom] = React.useState(0.2);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
 
   // recompute flow whenever graph observable changes
   React.useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = graphToFlow(graph);
     setNodes(newNodes);
     setEdges(newEdges);
+
+    // compute bounding box for pan limits
+    if (newNodes.length) {
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
+      newNodes.forEach((n) => {
+        minX = Math.min(minX, n.position.x);
+        minY = Math.min(minY, n.position.y);
+        maxX = Math.max(maxX, n.position.x + NODE_WIDTH);
+        const h = estimateHeight(n.data as GroupModel);
+        maxY = Math.max(maxY, n.position.y + h);
+      });
+      const padding = 200;
+      const ext: [[number, number], [number, number]] = [
+        [minX - padding, minY - padding],
+        [maxX + padding, maxY + padding],
+      ];
+      setTranslateExtent(ext);
+
+      // calculate minZoom so that entire extent fits in view
+      if (wrapperRef.current) {
+        const w = wrapperRef.current.clientWidth;
+        const h = wrapperRef.current.clientHeight;
+        const extW = ext[1][0] - ext[0][0];
+        const extH = ext[1][1] - ext[0][1];
+        if (extW > 0 && extH > 0 && w > 0 && h > 0) {
+          const z = Math.min(w / extW, h / extH) * 0.9; // 10% margin
+          setMinZoom(z);
+        }
+      }
+    }
   }, [graph, setNodes, setEdges]);
 
   return (
     <ReactFlowProvider>
-      <div className="w-full h-full relative bg-auto-surface-1">
+      <div ref={wrapperRef} className="w-full h-full relative bg-auto-surface-1">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -112,6 +150,15 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           fitView
+          minZoom={minZoom}
+          maxZoom={2}
+          zoomOnScroll
+          zoomOnPinch
+          panOnScroll
+          nodesDraggable={false}
+          nodesConnectable={false}
+          elementsSelectable={true}
+          translateExtent={translateExtent}
         >
           <Background gap={32} size={1} />
         </ReactFlow>
