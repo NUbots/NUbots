@@ -48,7 +48,7 @@ servos:
     offset: 0.0
     simulated: false
   - # [12] R_KNEE
-    direction: -1
+    direction: 1
     offset: pi / 4
     simulated: false
   - # [13] L_KNEE
