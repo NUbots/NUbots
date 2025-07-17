@@ -3,3 +3,6 @@ log_level: INFO
 
 # When to kick the ball - "Never", "Always", "AttackingThird"
 kick_when: "AttackingThird"
+
+# The amount of time we think a team is in possession, before we confirm it (seconds)
+possession_timeout: 2

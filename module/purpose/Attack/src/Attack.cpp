@@ -54,8 +54,10 @@ namespace module::purpose {
 
         on<Configuration>("Attack.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Attack.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.kick_when   = config["kick_when"].as<std::string>();
+            this->log_level        = config["log_level"].as<NUClear::LogLevel>();
+            cfg.kick_when          = config["kick_when"].as<std::string>();
+            cfg.possession_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["possession_timeout"].as<double>()));
         });
 
         on<Provide<AttackMsg>, With<Ball>, With<Field>, With<FieldDescription>>().then(
@@ -76,20 +78,45 @@ namespace module::purpose {
                 }
                 // If kick_when is never, do not request the kick task
 
-                // In this state, either we have the ball or we are the closest to getting the ball and should go for it
-                // If the opponent has the ball, we need to tackle it from them
-                if (attack.ball_pos == message::strategy::Who::OPPONENT) {
-                    // Tackle the ball from the opponent
-                    log<DEBUG>("Opponent has the ball, tackle it!");
-                    emit<Task>(std::make_unique<TackleBall>());
-                    return;
+                // Check if the ball is in our possession
+                bool in_possession_proposal = !(attack.ball_pos == message::strategy::Who::OPPONENT);
+                // Confirm possession
+                confirm_possession(in_possession_proposal);
+
+                if (in_possession) {
+                    log<DEBUG>("We have the ball or it is free, walk to the goal!");
+                    emit<Task>(std::make_unique<TackleBall>(), 0);
+                    emit<Task>(std::make_unique<WalkToKickBall>(), 1);
                 }
                 else {
-                    log<DEBUG>("We have the ball or it is free, walk to the goal!");
-                    // Try to walk to the ball and align towards opponents goal
-                    emit<Task>(std::make_unique<WalkToKickBall>());
+                    // If the opponent has had the ball for longer than the timeout, we assume they are in possession
+                    log<DEBUG>("Opponent has the ball, tackle it!");
+                    emit<Task>(std::make_unique<TackleBall>(), 1);
+                    emit<Task>(std::make_unique<WalkToKickBall>(), 0);
                 }
             });
+    }
+
+    void Attack::confirm_possession(const bool& in_possession_proposal) {
+        // get the time since the last attack message
+        auto now                    = NUClear::clock::now();
+        auto time_since_last_attack = now - last_timestamp;
+        last_timestamp              = now;
+
+        if (in_possession == in_possession_proposal) {
+            // If we are in possession and the proposal is also in possession, reset to zero
+            possession_duration = NUClear::clock::duration::zero();
+        }
+        else {
+            // If we were in possession but the proposal is not, we reset the buffer
+            possession_duration += time_since_last_attack;
+        }
+
+        if (possession_duration > cfg.possession_timeout) {
+            // If the possession duration is greater than the timeout, we have swapped possession
+            in_possession       = in_possession_proposal;
+            possession_duration = NUClear::clock::duration::zero();
+        }
     }
 
 }  // namespace module::purpose
