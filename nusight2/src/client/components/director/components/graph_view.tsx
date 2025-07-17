@@ -49,6 +49,37 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Secondary "blocked" edges – tasks that request a target group that is not
+  // currently controlled by this group (i.e. the target group's parentProvider
+  // is *not* from this source group). These are rendered as dashed grey lines.
+  // ---------------------------------------------------------------------------
+
+  for (const g of Object.values(graph.groupsById)) {
+    for (const task of g.subtasks ?? []) {
+      const target = task.targetGroup;
+      if (!target) continue;
+
+      // A task is considered "blocked" when the target group's parentProvider
+      // is undefined or originates from a *different* group than the source.
+      const controlledBySource = target.parentProvider?.group?.id === g.id;
+      if (controlledBySource) continue; // not blocked – handled by control edge
+
+      const edgeId = `blocked:${g.id}->${target.id}`;
+
+      // Prevent duplicates in case multiple tasks create the same blocked edge
+      if (edges.some((e) => e.id === edgeId)) continue;
+
+      edges.push({
+        id: edgeId,
+        source: g.id,
+        target: target.id,
+        markerEnd: { type: MarkerType.ArrowClosed },
+        style: { strokeDasharray: "4 4", stroke: "#9ca3af" }, // tailwind gray-400
+      });
+    }
+  }
+
   return { nodes, edges };
 }
 
