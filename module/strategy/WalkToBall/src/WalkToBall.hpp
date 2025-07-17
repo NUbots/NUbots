@@ -75,6 +75,11 @@ namespace module::strategy {
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
 
+        /// @brief Check if there is a robot between us and the goal
+        std::optional<Eigen::Vector2d> robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
+                                                                     const Eigen::Vector2d& rBFf,
+                                                                     const Eigen::Vector2d& rGFf);
+
     public:
         /// @brief Called by the powerplant to build and setup the WalkToBall reactor.
         explicit WalkToBall(std::unique_ptr<NUClear::Environment> environment);
