@@ -33,6 +33,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoCommand.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -66,6 +67,9 @@ namespace module::skill {
             double kick_velocity_y = 0.0;
             /// @brief Buffer time before the kick starts
             double kick_timing_offset = 0.0;
+
+            /// @brief Max acceleration for smoothing walk commands
+            Eigen::Vector3d acceleration = Eigen::Vector3d(0.0, 0.0, 0.0);
             /// @brief Option to use balance control when walking
             bool use_balance_control = false;
         } cfg;

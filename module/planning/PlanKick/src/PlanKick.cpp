@@ -64,7 +64,7 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>>().then(
+        on<Provide<KickTo>, Needs<Kick>, Trigger<Ball>, With<Sensors>>().then(
             [this](const KickTo& kick_to, const Uses<Kick>& kick, const Ball& ball, const Sensors& sensors) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == RunState::RUNNING && !kick.done) {
