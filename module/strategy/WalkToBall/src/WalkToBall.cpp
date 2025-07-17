@@ -172,10 +172,8 @@ namespace module::strategy {
                     Eigen::Vector3d target = kick_target - uGBf * cfg.ball_approach_distance * angle_scale;
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
                 }
-
                 // If there are robots, check if there are obstacles in the way
                 if (robots != nullptr) {
-                    log<DEBUG>("Checking for obstacles in the way of kick path");
                     // Get the positions of all robots in the world
                     std::vector<Eigen::Vector2d> all_obstacles{};
                     for (const auto& robot : robots->robots) {
@@ -184,7 +182,7 @@ namespace module::strategy {
 
                     auto obstacle = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
                     if (obstacle.has_value()) {
-                        log<DEBUG>("Avoiding obstacle");
+                        log<DEBUG>("Avoiding obstacle in the way of kick path");
                         Eigen::Vector2d side_offset =
                             Eigen::Vector2d(-uGBf.y(), uGBf.x()).normalized() * cfg.ball_approach_distance;
 
@@ -192,14 +190,13 @@ namespace module::strategy {
                         double center_point     = 0;
                         double left_goal_point  = center_point - field_description.dimensions.goal_width / 2.0;
                         double right_goal_point = center_point + field_description.dimensions.goal_width / 2.0;
-                        Eigen::Vector2d adjusted_target;
 
                         // Calculate a perpendicular vector to the direction of the target point (2D)
                         const Eigen::Vector2d perp(rGBf.normalized().y(), -rGBf.normalized().x());
 
                         // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
+                        // TODO: this seems important idk
                         auto proj = [&perp](const Eigen::Vector2d& point) { return perp.dot(point); };
-
 
                         Eigen::Vector2d obstacle2d((*obstacle).x(), (*obstacle).y());
 
@@ -219,9 +216,7 @@ namespace module::strategy {
                         const Eigen::Vector2d right_avoid_vector = right_avoid_point - rBFf.head(2);
                         const Eigen::Vector2d right_adjusted_target = rBFf.head(2) - right_avoid_vector.normalized() * cfg.ball_approach_distance;
 
-                        // Convert kick_target to 2D for intermediate calculations
-                        Eigen::Vector2d kick_target_2d = kick_target.head(2);
-
+                        Eigen::Vector2d adjusted_target;
                         if (rRFf.y() > left_goal_point && rRFf.y() < right_goal_point) {
                             // If we are in the middle of the field, go around the robot based on which side we are
                             // facing facing left in field space, go around left side and turn right

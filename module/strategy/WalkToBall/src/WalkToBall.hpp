@@ -71,6 +71,9 @@ namespace module::strategy {
             /// @brief Distance in front of the ball to check for obstacles
             double infront_check_distance = 0.0;
 
+            /// @brief Radius to avoid obstacles when walking to the ball
+            double obstacle_radius = 0.0;
+
         } cfg;
 
         std::optional<Eigen::Vector2d> robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
