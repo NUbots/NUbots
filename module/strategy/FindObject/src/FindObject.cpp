@@ -105,8 +105,6 @@ namespace module::strategy {
                         // Start searching by emitting Search task
                         log<INFO>("Searching for the ball.");
                         emit<Task>(std::make_unique<Search>());
-                        // Conduct a head search while searching for the ball
-                        emit<Task>(std::make_unique<LookAround>());
                     }
                     else {
                         emit<Task>(std::make_unique<Continue>());
@@ -126,6 +124,9 @@ namespace module::strategy {
 
         on<Provide<Search>, Every<1, Per<std::chrono::seconds>>, With<Field>, With<Sensors>, With<FieldDescription>>()
             .then([this](const Field& field, const Sensors& sensors, const FieldDescription& field_desc) {
+                // Conduct a head search while searching for the ball
+                emit<Task>(std::make_unique<LookAround>());
+
                 // Get robot position and check border
                 Eigen::Vector3d rRFf = (field.Hfw * sensors.Hrw.inverse()).translation();
                 Eigen::Matrix3d Rfr  = (sensors.Hrw * field.Hfw.inverse()).inverse().rotation();
