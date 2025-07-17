@@ -8,6 +8,7 @@ import ReactFlow, {
   useEdgesState,
   useNodesState,
   Handle,
+  useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import dagre from "@dagrejs/dagre";
@@ -16,36 +17,28 @@ import { DirectorGraph, GroupModel } from "../model";
 import { MarkerType } from "reactflow";
 import { ProviderGroupView } from "./provider_group_view";
 
-// Fixed box dimensions for ProviderGroupView (should match CSS)
-const NODE_WIDTH = 260;
-
-function estimateHeight(g: GroupModel): number {
-  const header = 40; // title + padding
-  const providerH = 140; // approx per provider view
-  const taskRow = g.subtasks.length ? 32 : 0;
-  return header + g.providers.length * providerH + taskRow;
-}
-
 /**
- * Convert DirectorGraph into React Flow nodes & edges and run Dagre (top-bottom) layout.
+ * Convert DirectorGraph into React Flow nodes & edges.
+ * The actual layout (positions) is performed later once the real
+ * rendered size of each node is known.
  */
 function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  // create nodes with size estimation
+  // Create a node for every provider group (position is a placeholder for now)
   for (const g of Object.values(graph.groupsById)) {
     nodes.push({
       id: g.id,
       type: "providerGroup",
       data: g,
-      position: { x: 0, y: 0 }, // dagre will update
+      position: { x: 0, y: 0 },
       sourcePosition: Position.Bottom,
       targetPosition: Position.Top,
     });
   }
 
-  // edges based on parentProvider (tree that is actually running)
+  // Edges based on parentProvider (tree that is actually running)
   for (const g of Object.values(graph.groupsById)) {
     if (g.parentProvider && g.parentProvider.group) {
       const srcId = g.parentProvider.group.id;
@@ -54,25 +47,6 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
       edges.push({ id, source: srcId, target: tgtId, markerEnd: { type: MarkerType.ArrowClosed } });
     }
   }
-
-  // dagre layout
-  const gDagre = new dagre.graphlib.Graph();
-  gDagre.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 80 });
-  gDagre.setDefaultEdgeLabel(() => ({}));
-
-  nodes.forEach((n) => {
-    const h = estimateHeight(n.data as GroupModel);
-    gDagre.setNode(n.id, { width: NODE_WIDTH, height: h });
-  });
-  edges.forEach((e) => gDagre.setEdge(e.source, e.target));
-
-  dagre.layout(gDagre);
-
-  nodes.forEach((n) => {
-    const nodeWithPos = gDagre.node(n.id);
-    const h = estimateHeight(n.data as GroupModel);
-    n.position = { x: nodeWithPos.x - NODE_WIDTH / 2, y: nodeWithPos.y - h / 2 };
-  });
 
   return { nodes, edges };
 }
@@ -99,34 +73,119 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
   );
   const [minZoom, setMinZoom] = React.useState(0.2);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
+  // refs to compare values and avoid endless updates
+  const translateExtentRef = React.useRef<[[number, number], [number, number]] | undefined>(undefined);
+  const minZoomRef = React.useRef<number>(0.2);
+
+  // ---------------------------------------------------------------------------
+  // Build initial flow graph whenever the underlying DirectorGraph changes
+  // ---------------------------------------------------------------------------
 
   // recompute flow whenever graph observable changes
   React.useEffect(() => {
-    const { nodes: newNodes, edges: newEdges } = graphToFlow(graph);
-    setNodes(newNodes);
-    setEdges(newEdges);
+    const { nodes: baseNodes, edges: newEdges } = graphToFlow(graph);
 
-    // compute bounding box for pan limits
-    if (newNodes.length) {
+    // Reuse previous positions (and measured sizes) where possible to avoid flicker
+    setNodes((prev) => {
+      const posMap = new Map<string, { x: number; y: number }>(prev.map((n) => [n.id, n.position]));
+      const sizeMap = new Map<string, { width?: number; height?: number }>(
+        prev.map((n) => [n.id, { width: n.width ?? undefined, height: n.height ?? undefined }]),
+      );
+
+      const merged = baseNodes.map((n) => {
+        const pos = posMap.get(n.id);
+        const size = sizeMap.get(n.id);
+        return pos || size ? { ...n, position: pos ?? n.position, ...size } : n;
+      });
+
+      return merged;
+    });
+
+    // update edges directly (no prior state to preserve)
+    setEdges(newEdges);
+  }, [graph]);
+
+  // ---------------------------------------------------------------------------
+  // LayoutUpdater: measures real node sizes, performs dagre layout, and
+  // updates viewport limits.
+  // ---------------------------------------------------------------------------
+
+  function LayoutUpdater() {
+    const { getNodes } = useReactFlow();
+
+    React.useLayoutEffect(() => {
+      const rfNodes = getNodes();
+      if (!rfNodes.length) return;
+
+      // Ensure all nodes have measured dimensions
+      if (rfNodes.some((n: any) => n.width == null || n.height == null)) return;
+
+      // Dagre layout with real sizes
+      const gDagre = new dagre.graphlib.Graph();
+      gDagre.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 80 });
+      gDagre.setDefaultEdgeLabel(() => ({}));
+
+      rfNodes.forEach((n: Node) => {
+        gDagre.setNode(n.id, { width: n.width!, height: n.height! });
+      });
+      edges.forEach((e) => gDagre.setEdge(e.source, e.target));
+
+      dagre.layout(gDagre);
+
+      // Build new node positions and update state only if something actually changed
+      const nextNodes = nodes.map((n) => {
+        const pos = gDagre.node(n.id);
+        if (!pos) return n;
+        const referenceNode = rfNodes.find((r: Node) => r.id === n.id);
+        const width = n.width ?? referenceNode?.width ?? 0;
+        const height = n.height ?? referenceNode?.height ?? 0;
+        const newX = pos.x - width / 2;
+        const newY = pos.y - height / 2;
+        if (n.position.x !== newX || n.position.y !== newY) {
+          return { ...n, position: { x: newX, y: newY } };
+        }
+        return n;
+      });
+
+      const changed = nextNodes.some((n, idx) => {
+        const o = nodes[idx];
+        return o.position.x !== n.position.x || o.position.y !== n.position.y;
+      });
+
+      if (changed) {
+        setNodes(nextNodes);
+      }
+
+      // Compute translate extent & minZoom based on laid-out nodes
       let minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
         maxY = -Infinity;
-      newNodes.forEach((n) => {
+      rfNodes.forEach((n: Node) => {
         minX = Math.min(minX, n.position.x);
         minY = Math.min(minY, n.position.y);
-        maxX = Math.max(maxX, n.position.x + NODE_WIDTH);
-        const h = estimateHeight(n.data as GroupModel);
-        maxY = Math.max(maxY, n.position.y + h);
+        maxX = Math.max(maxX, n.position.x + (n.width ?? 0));
+        maxY = Math.max(maxY, n.position.y + (n.height ?? 0));
       });
       const padding = 200;
       const ext: [[number, number], [number, number]] = [
         [minX - padding, minY - padding],
         [maxX + padding, maxY + padding],
       ];
-      setTranslateExtent(ext);
+      // Update translateExtent only if it changed (shallow compare numbers)
+      const prevExt = translateExtentRef.current;
+      const extChanged =
+        !prevExt ||
+        prevExt[0][0] !== ext[0][0] ||
+        prevExt[0][1] !== ext[0][1] ||
+        prevExt[1][0] !== ext[1][0] ||
+        prevExt[1][1] !== ext[1][1];
+      if (extChanged) {
+        translateExtentRef.current = ext;
+        setTranslateExtent(ext);
+      }
 
-      // calculate minZoom so that entire extent fits in view
+      // Fit-to-view zoom
       if (wrapperRef.current) {
         const w = wrapperRef.current.clientWidth;
         const h = wrapperRef.current.clientHeight;
@@ -134,11 +193,16 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
         const extH = ext[1][1] - ext[0][1];
         if (extW > 0 && extH > 0 && w > 0 && h > 0) {
           const z = Math.min(w / extW, h / extH) * 0.9; // 10% margin
-          setMinZoom(z);
+          if (Math.abs(z - minZoomRef.current) > 0.0001) {
+            minZoomRef.current = z;
+            setMinZoom(z);
+          }
         }
       }
-    }
-  }, [graph, setNodes, setEdges]);
+    }, [edges, getNodes]);
+
+    return null;
+  }
 
   return (
     <ReactFlowProvider>
@@ -161,6 +225,8 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
           translateExtent={translateExtent}
         >
           <Background gap={32} size={1} />
+          {/* Perform dynamic layout & viewport calculations */}
+          <LayoutUpdater />
         </ReactFlow>
       </div>
     </ReactFlowProvider>
