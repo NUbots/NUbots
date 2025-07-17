@@ -80,6 +80,67 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Needs edges – overlay or create edges based on provider.needs relationships.
+  // If an edge already exists between source and target (control/blocked), we
+  // recolour it to indicate a "needs" relationship. Otherwise, for groups that
+  // currently have NO active provider, we add a new edge (solid/dashed based on
+  // control) provided the provider's `when` conditions are satisfied.
+  // ---------------------------------------------------------------------------
+
+  const NEED_COLOR = "#8b5cf6"; // Tailwind violet-500
+
+  // Helper to key by src->tgt regardless of edge id prefix
+  function key(src: string, tgt: string) {
+    return `${src}->${tgt}`;
+  }
+
+  const edgeMap = new Map<string, Edge>();
+  edges.forEach((e) => edgeMap.set(key(e.source, e.target), e));
+
+  for (const provider of Object.values(graph.providersById)) {
+    const srcGroup = provider.group;
+
+    // Only consider providers whose when conditions are met (or have none)
+    const whenOk = (provider.when ?? []).every((w) => w.current !== false);
+    if (!whenOk) continue;
+
+    for (const tgtGroup of provider.needs ?? []) {
+      if (!tgtGroup) continue;
+
+      const k = key(srcGroup.id, tgtGroup.id);
+      const controlsTarget = tgtGroup.parentProvider?.group?.id === srcGroup.id;
+
+      if (edgeMap.has(k)) {
+        // Transform existing edge to needs styling
+        const e = edgeMap.get(k)!;
+        e.style = {
+          ...(e.style ?? {}),
+          stroke: NEED_COLOR,
+        };
+        // Keep dash pattern if it existed (for blocked)
+        e.markerEnd = { type: MarkerType.ArrowClosed, color: NEED_COLOR } as any;
+      } else {
+        // Only introduce new edges for groups with no active provider (fallback)
+        if (srcGroup.activeProvider) continue;
+
+        const newId = `need:${srcGroup.id}->${tgtGroup.id}`;
+        const newEdge: Edge = {
+          id: newId,
+          source: srcGroup.id,
+          target: tgtGroup.id,
+          markerEnd: { type: MarkerType.ArrowClosed, color: NEED_COLOR } as any,
+          style: {
+            stroke: NEED_COLOR,
+            ...(controlsTarget ? {} : { strokeDasharray: "4 4" }),
+          },
+        };
+        edges.push(newEdge);
+        edgeMap.set(k, newEdge);
+      }
+    }
+  }
+
   return { nodes, edges };
 }
 
