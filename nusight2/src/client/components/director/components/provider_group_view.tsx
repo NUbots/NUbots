@@ -25,8 +25,8 @@ export const ProviderGroupView = observer(
     return (
       <div
         ref={ref}
-        className="border rounded p-2 bg-auto-surface-2 space-y-2 w-64 flex-none"
-        style={{ minWidth: "16rem", maxWidth: "16rem" }}
+        className="border rounded p-2 bg-auto-surface-2 space-y-2 flex-none"
+        style={{ minWidth: "16rem" }}
         data-testid="provider-group"
       >
         <div className="font-semibold text-sm mb-1" title={group.type}>
