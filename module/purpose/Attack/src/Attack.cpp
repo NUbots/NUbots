@@ -64,7 +64,7 @@ namespace module::purpose {
             [this](const AttackMsg& attack, const Ball& ball, const Field& field, const FieldDescription& fd) {
                 // Always request a kick task
                 if (cfg.kick_when == "Always") {
-                    emit<Task>(std::make_unique<KickTo>(), 1);
+                    emit<Task>(std::make_unique<KickTo>(), 3);
                 }
                 // Only kick in the attacking third
                 else if (cfg.kick_when == "AttackingThird") {
@@ -73,7 +73,7 @@ namespace module::purpose {
                     // If the ball is in the attacking third of the field, activate the kick
                     if (rBFf.x() < attacking_third) {
                         log<DEBUG>("Ball in attacking third, kick!");
-                        emit<Task>(std::make_unique<KickTo>(), 1);  // kick the ball towards the goal
+                        emit<Task>(std::make_unique<KickTo>(), 3);  // kick the ball towards the goal
                     }
                 }
                 // If kick_when is never, do not request the kick task
@@ -83,16 +83,15 @@ namespace module::purpose {
                 // Confirm possession
                 confirm_possession(in_possession_proposal);
 
+                emit<Task>(std::make_unique<WalkToKickBall>(), 1);
                 if (in_possession) {
                     log<DEBUG>("We have the ball or it is free, walk to the goal!");
                     emit<Task>(std::make_unique<TackleBall>(), 0);
-                    emit<Task>(std::make_unique<WalkToKickBall>(), 1);
                 }
                 else {
                     // If the opponent has had the ball for longer than the timeout, we assume they are in possession
                     log<DEBUG>("Opponent has the ball, tackle it!");
-                    emit<Task>(std::make_unique<TackleBall>(), 1);
-                    emit<Task>(std::make_unique<WalkToKickBall>(), 0);
+                    emit<Task>(std::make_unique<TackleBall>(), 2);
                 }
             });
     }
