@@ -35,6 +35,7 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
       position: { x: 0, y: 0 },
       sourcePosition: Position.Bottom,
       targetPosition: Position.Top,
+      className: "transition-transform duration-300 ease-in-out",
     });
   }
 
@@ -71,6 +72,16 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
   const [translateExtent, setTranslateExtent] = React.useState<[[number, number], [number, number]] | undefined>(
     undefined,
   );
+  // new global style injection
+  // Inject CSS once to animate edge path 'd' attribute changes
+  React.useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `.react-flow__edge-path { transition: d 0.3s ease-in-out; }`;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [minZoom, setMinZoom] = React.useState(0.2);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   // refs to compare values and avoid endless updates
