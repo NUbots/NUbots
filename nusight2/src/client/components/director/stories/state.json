@@ -1,0 +1,680 @@
+{
+  "groups": {
+    "15158391694066604522": {
+      "type": "message::skill::ControlRightFoot",
+      "providerIds": ["450"],
+      "activeProvider": "450",
+      "parentProvider": "454",
+      "subtasks": [{ "name": "Control right foot", "targetGroup": "15476150259407315265" }]
+    },
+    "4861804114103301199": { "type": "message::actuation::ArmsSequence", "providerIds": ["445"] },
+    "13183634821679111135": {
+      "type": "extension::behaviour::commands::RootProvider<message::skill::Walk>",
+      "providerIds": ["18446744073709551615"],
+      "activeProvider": "18446744073709551615",
+      "subtasks": [{ "targetGroup": "5715460735790508797" }]
+    },
+    "7708071413339186395": {
+      "type": "message::actuation::RightElbow",
+      "providerIds": ["411"],
+      "activeProvider": "411",
+      "parentProvider": "429"
+    },
+    "1211547058726770070": { "type": "message::actuation::UpperBodySequence", "providerIds": ["438"] },
+    "4865481196236495201": {
+      "type": "message::strategy::WalkToKickBall",
+      "providerIds": ["487"],
+      "activeProvider": "487",
+      "parentProvider": "511",
+      "subtasks": [{ "targetGroup": "8260534354822040047" }]
+    },
+    "10554592001872891475": { "type": "message::strategy::PositionBehindBall", "providerIds": ["489"] },
+    "1817817075637277641": { "type": "message::skill::Kick", "providerIds": ["456"] },
+    "6870516315091454866": {
+      "type": "message::strategy::FallRecovery",
+      "providerIds": ["478"],
+      "activeProvider": "478",
+      "parentProvider": "18446744073709551612",
+      "subtasks": [{ "targetGroup": "4441339325095686647", "priority": 2 }]
+    },
+    "4924997646936392751": {
+      "type": "message::actuation::LeftShoulderPitch",
+      "providerIds": ["408"],
+      "activeProvider": "408",
+      "parentProvider": "430"
+    },
+    "17910495792594945177": {
+      "type": "message::actuation::Head",
+      "providerIds": ["431"],
+      "activeProvider": "431",
+      "parentProvider": "405",
+      "subtasks": [{ "targetGroup": "8119807754543996117" }, { "targetGroup": "17578277164170799756" }]
+    },
+    "7519367924433539846": {
+      "type": "message::actuation::RightHipPitch",
+      "providerIds": ["417"],
+      "activeProvider": "417",
+      "parentProvider": "427"
+    },
+    "16058268293720573063": { "type": "message::planning::KickTo", "providerIds": ["473"] },
+    "6404674740995907681": { "type": "message::strategy::LookAtGoals", "providerIds": ["483"] },
+    "2439906222973614601": {
+      "type": "message::actuation::LeftArm",
+      "providerIds": ["430"],
+      "activeProvider": "430",
+      "parentProvider": "454",
+      "subtasks": [
+        { "targetGroup": "4924997646936392751" },
+        { "targetGroup": "14335016981581538616" },
+        { "targetGroup": "18098539844275922707" }
+      ]
+    },
+    "17099091559978723528": { "type": "message::purpose::Support", "providerIds": ["523"] },
+    "15476150259407315265": {
+      "type": "message::actuation::RightLegIK",
+      "providerIds": ["404"],
+      "activeProvider": "404",
+      "parentProvider": "450",
+      "subtasks": [{ "targetGroup": "2374486900855128856" }]
+    },
+    "9318877112001468367": { "type": "message::actuation::LeftLegSequence", "providerIds": ["441"] },
+    "13449649878716219877": {
+      "type": "message::strategy::FindBall",
+      "providerIds": ["494"],
+      "activeProvider": "494",
+      "parentProvider": "517",
+      "subtasks": [{ "targetGroup": "669753295093135032" }, { "targetGroup": "7804063202163522101" }]
+    },
+    "18366721949909346457": {
+      "type": "message::actuation::Body",
+      "providerIds": ["432"],
+      "subtasks": [
+        { "targetGroup": "13708681220677612028" },
+        { "targetGroup": "8275028482148678601" },
+        { "targetGroup": "9273444655109743447" },
+        { "targetGroup": "18238999516121450759" },
+        { "targetGroup": "14009193113820258499" },
+        { "targetGroup": "13924193296807099856" },
+        { "targetGroup": "15591923282640524169" },
+        { "targetGroup": "9275686325956957739" },
+        { "targetGroup": "7519367924433539846" },
+        { "targetGroup": "5908535294104592167" },
+        { "targetGroup": "4710927186489555975" },
+        { "targetGroup": "16883902353630041046" },
+        { "targetGroup": "9850522803296221244" },
+        { "targetGroup": "14410098789018693926" },
+        { "targetGroup": "7708071413339186395" },
+        { "targetGroup": "4924997646936392751" },
+        { "targetGroup": "14335016981581538616" },
+        { "targetGroup": "18098539844275922707" }
+      ]
+    },
+    "1915825166656479535": {
+      "type": "extension::behaviour::commands::RootProvider<message::purpose::FindPurpose>",
+      "providerIds": ["18446744073709551613"],
+      "activeProvider": "18446744073709551613",
+      "subtasks": [{ "targetGroup": "2222222722766410008", "priority": 1 }]
+    },
+    "7804063202163522101": {
+      "type": "message::planning::TurnOnSpot",
+      "providerIds": ["466"],
+      "activeProvider": "466",
+      "parentProvider": "494",
+      "subtasks": [{ "targetGroup": "18124528150538716997" }]
+    },
+    "2607451398943406964": { "type": "message::purpose::ReadyAttack", "providerIds": ["513"] },
+    "12918279049746634720": {
+      "type": "message::actuation::LeftLegIK",
+      "providerIds": ["403"],
+      "activeProvider": "403",
+      "parentProvider": "449",
+      "subtasks": [{ "targetGroup": "14534700959703704310" }]
+    },
+    "16339333099484980039": { "type": "message::actuation::Legs", "providerIds": ["435"] },
+    "14410098789018693926": {
+      "type": "message::actuation::RightShoulderRoll",
+      "providerIds": ["409"],
+      "activeProvider": "409",
+      "parentProvider": "429"
+    },
+    "15591923282640524169": {
+      "type": "message::actuation::RightHipYaw",
+      "providerIds": ["413"],
+      "activeProvider": "413",
+      "parentProvider": "427"
+    },
+    "2759248914750715515": {
+      "type": "message::skill::ControlLeftFoot",
+      "providerIds": ["449"],
+      "activeProvider": "449",
+      "parentProvider": "454",
+      "subtasks": [{ "name": "Control left foot", "targetGroup": "12918279049746634720" }]
+    },
+    "6555087039103096875": { "type": "message::actuation::LeftArmSequence", "providerIds": ["444"] },
+    "2834021629473476842": { "type": "message::actuation::LegsSequence", "providerIds": ["442"] },
+    "13881759476737135335": {
+      "type": "extension::behaviour::commands::RootProvider<message::strategy::FallRecovery>",
+      "providerIds": ["18446744073709551612"],
+      "activeProvider": "18446744073709551612",
+      "subtasks": [{ "targetGroup": "6870516315091454866", "priority": 2 }]
+    },
+    "18098539844275922707": {
+      "type": "message::actuation::LeftElbow",
+      "providerIds": ["412"],
+      "activeProvider": "412",
+      "parentProvider": "430"
+    },
+    "5715460735790508797": {
+      "type": "message::skill::Walk",
+      "providerIds": ["452", "453", "454"],
+      "activeProvider": "454",
+      "parentProvider": "468",
+      "subtasks": [
+        { "targetGroup": "2759248914750715515" },
+        { "targetGroup": "15158391694066604522" },
+        { "name": "Walk left arm", "targetGroup": "2439906222973614601", "optional": true },
+        { "name": "Walk right arm", "targetGroup": "9552870712503648631", "optional": true }
+      ]
+    },
+    "4441339325095686647": {
+      "type": "message::planning::GetUpWhenFallen",
+      "providerIds": ["475"],
+      "activeProvider": "475",
+      "parentProvider": "478"
+    },
+    "7632568719895069744": { "type": "message::strategy::TackleBall", "providerIds": ["488"] },
+    "11994184488322556644": { "type": "message::planning::RelaxWhenFalling", "providerIds": ["477"] },
+    "14386454659336927556": { "type": "message::planning::PivotAroundPoint", "providerIds": ["467"] },
+    "13924193296807099856": {
+      "type": "message::actuation::LeftAnkleRoll",
+      "providerIds": ["424"],
+      "activeProvider": "424",
+      "parentProvider": "428"
+    },
+    "14335016981581538616": {
+      "type": "message::actuation::LeftShoulderRoll",
+      "providerIds": ["410"],
+      "activeProvider": "410",
+      "parentProvider": "430"
+    },
+    "669753295093135032": {
+      "type": "message::planning::LookAround",
+      "providerIds": ["470", "471"],
+      "activeProvider": "470",
+      "parentProvider": "494",
+      "subtasks": [{ "targetGroup": "2767542489014969950" }]
+    },
+    "1337859529340759913": { "type": "message::actuation::RightLegSequence", "providerIds": ["440"] },
+    "17578277164170799756": {
+      "type": "message::actuation::HeadPitch",
+      "providerIds": ["426"],
+      "activeProvider": "426",
+      "parentProvider": "431"
+    },
+    "2222222722766410008": {
+      "type": "message::purpose::FindPurpose",
+      "providerIds": ["501"],
+      "activeProvider": "501",
+      "parentProvider": "18446744073709551613",
+      "subtasks": [{ "targetGroup": "16559002028837163298" }]
+    },
+    "2766509028230333814": { "type": "message::skill::Dive", "providerIds": ["462"] },
+    "2520945108814622683": {
+      "type": "message::strategy::LookAtBall",
+      "providerIds": ["482"],
+      "activeProvider": "482",
+      "parentProvider": "517",
+      "subtasks": [{ "targetGroup": "2767542489014969950" }]
+    },
+    "13854855221640251944": { "type": "message::actuation::Arms", "providerIds": ["436"] },
+    "9275686325956957739": {
+      "type": "message::actuation::RightHipRoll",
+      "providerIds": ["415"],
+      "activeProvider": "415",
+      "parentProvider": "427"
+    },
+    "2767542489014969950": {
+      "type": "message::skill::Look",
+      "providerIds": ["460"],
+      "activeProvider": "460",
+      "parentProvider": "470",
+      "subtasks": [{ "targetGroup": "5476481127998322493" }]
+    },
+    "6221758625140188805": { "type": "message::actuation::UpperBody", "providerIds": ["433"] },
+    "14726662088314675418": { "type": "message::actuation::HeadSequence", "providerIds": ["446"] },
+    "5908535294104592167": {
+      "type": "message::actuation::RightKnee",
+      "providerIds": ["419"],
+      "activeProvider": "419",
+      "parentProvider": "427"
+    },
+    "2374486900855128856": {
+      "type": "message::actuation::RightLeg",
+      "providerIds": ["427"],
+      "activeProvider": "427",
+      "parentProvider": "404",
+      "subtasks": [
+        { "targetGroup": "15591923282640524169" },
+        { "targetGroup": "9275686325956957739" },
+        { "targetGroup": "7519367924433539846" },
+        { "targetGroup": "5908535294104592167" },
+        { "targetGroup": "4710927186489555975" },
+        { "targetGroup": "16883902353630041046" }
+      ]
+    },
+    "14009193113820258499": {
+      "type": "message::actuation::LeftAnklePitch",
+      "providerIds": ["422"],
+      "activeProvider": "422",
+      "parentProvider": "428"
+    },
+    "9807184200801059314": {
+      "type": "message::planning::WalkTo",
+      "providerIds": ["465"],
+      "activeProvider": "465",
+      "parentProvider": "492",
+      "subtasks": [{ "targetGroup": "18124528150538716997" }]
+    },
+    "9850522803296221244": {
+      "type": "message::actuation::RightShoulderPitch",
+      "providerIds": ["407"],
+      "activeProvider": "407",
+      "parentProvider": "429"
+    },
+    "1081738018236787733": { "type": "message::actuation::LimbsSequence", "providerIds": ["439"] },
+    "18124528150538716997": {
+      "type": "message::planning::WalkProposal",
+      "providerIds": ["468"],
+      "activeProvider": "468",
+      "parentProvider": "466",
+      "subtasks": [{ "targetGroup": "5715460735790508797" }]
+    },
+    "17640526745838813362": {
+      "type": "message::skill::GetUp",
+      "providerIds": ["458"],
+      "subtasks": [{ "targetGroup": "7978134741046053615" }]
+    },
+    "14534700959703704310": {
+      "type": "message::actuation::LeftLeg",
+      "providerIds": ["428"],
+      "activeProvider": "428",
+      "parentProvider": "403",
+      "subtasks": [
+        { "targetGroup": "13708681220677612028" },
+        { "targetGroup": "8275028482148678601" },
+        { "targetGroup": "9273444655109743447" },
+        { "targetGroup": "18238999516121450759" },
+        { "targetGroup": "14009193113820258499" },
+        { "targetGroup": "13924193296807099856" }
+      ]
+    },
+    "7403426566613923152": {
+      "type": "message::purpose::Attack",
+      "providerIds": ["511"],
+      "activeProvider": "511",
+      "parentProvider": "517",
+      "subtasks": [{ "targetGroup": "4865481196236495201" }]
+    },
+    "284601043982946014": { "type": "message::strategy::WalkToBall", "providerIds": ["486"] },
+    "17837793702148028269": { "type": "message::purpose::Goalie", "providerIds": ["525", "527", "529"] },
+    "494147534738048061": {
+      "type": "extension::behaviour::commands::RootProvider<message::skill::Look>",
+      "providerIds": ["18446744073709551614"],
+      "activeProvider": "18446744073709551614",
+      "subtasks": [{ "targetGroup": "2767542489014969950" }]
+    },
+    "5693732859503812040": { "type": "message::strategy::StandStill", "providerIds": ["480"] },
+    "9273444655109743447": {
+      "type": "message::actuation::LeftHipPitch",
+      "providerIds": ["418"],
+      "activeProvider": "418",
+      "parentProvider": "428"
+    },
+    "7978134741046053615": {
+      "type": "message::actuation::BodySequence",
+      "providerIds": ["437"],
+      "subtasks": [{ "targetGroup": "18366721949909346457" }]
+    },
+    "16883902353630041046": {
+      "type": "message::actuation::RightAnkleRoll",
+      "providerIds": ["423"],
+      "activeProvider": "423",
+      "parentProvider": "427"
+    },
+    "8275028482148678601": {
+      "type": "message::actuation::LeftHipRoll",
+      "providerIds": ["416"],
+      "activeProvider": "416",
+      "parentProvider": "428"
+    },
+    "9016981053120705579": { "type": "message::strategy::DiveToBall", "providerIds": ["497"] },
+    "8260534354822040047": {
+      "type": "message::strategy::WalkToFieldPosition",
+      "providerIds": ["491", "492"],
+      "activeProvider": "492",
+      "parentProvider": "487",
+      "subtasks": [{ "targetGroup": "9807184200801059314" }]
+    },
+    "5476481127998322493": {
+      "type": "message::actuation::HeadIK",
+      "providerIds": ["405"],
+      "activeProvider": "405",
+      "parentProvider": "460",
+      "subtasks": [{ "targetGroup": "17910495792594945177" }]
+    },
+    "8119807754543996117": {
+      "type": "message::actuation::HeadYaw",
+      "providerIds": ["425"],
+      "activeProvider": "425",
+      "parentProvider": "431"
+    },
+    "4710927186489555975": {
+      "type": "message::actuation::RightAnklePitch",
+      "providerIds": ["421"],
+      "activeProvider": "421",
+      "parentProvider": "427"
+    },
+    "10592789024329814597": { "type": "message::actuation::Limbs", "providerIds": ["434"] },
+    "5760709102441410677": { "type": "message::actuation::RightArmSequence", "providerIds": ["443"] },
+    "16559002028837163298": {
+      "type": "message::purpose::FieldPlayer",
+      "providerIds": ["517", "519", "521"],
+      "activeProvider": "517",
+      "parentProvider": "501",
+      "subtasks": [
+        { "targetGroup": "13449649878716219877", "priority": 2 },
+        { "targetGroup": "2520945108814622683", "priority": 1 },
+        { "targetGroup": "7403426566613923152" }
+      ]
+    },
+    "9552870712503648631": {
+      "type": "message::actuation::RightArm",
+      "providerIds": ["429"],
+      "activeProvider": "429",
+      "parentProvider": "454",
+      "subtasks": [
+        { "targetGroup": "9850522803296221244" },
+        { "targetGroup": "14410098789018693926" },
+        { "targetGroup": "7708071413339186395" }
+      ]
+    },
+    "5604602586761894681": { "type": "message::purpose::Defend", "providerIds": ["515"] },
+    "18238999516121450759": {
+      "type": "message::actuation::LeftKnee",
+      "providerIds": ["420"],
+      "activeProvider": "420",
+      "parentProvider": "428"
+    },
+    "13708681220677612028": {
+      "type": "message::actuation::LeftHipYaw",
+      "providerIds": ["414"],
+      "activeProvider": "414",
+      "parentProvider": "428"
+    },
+    "10061707703738407005": { "type": "message::strategy::Search", "providerIds": ["495"] }
+  },
+  "providers": {
+    "435": {
+      "id": "435",
+      "group": "16339333099484980039",
+      "needs": [
+        "13708681220677612028",
+        "8275028482148678601",
+        "9273444655109743447",
+        "18238999516121450759",
+        "14009193113820258499",
+        "13924193296807099856",
+        "15591923282640524169",
+        "9275686325956957739",
+        "7519367924433539846",
+        "5908535294104592167",
+        "4710927186489555975",
+        "16883902353630041046"
+      ]
+    },
+    "426": { "id": "426", "group": "17578277164170799756" },
+    "527": {
+      "id": "527",
+      "group": "17837793702148028269",
+      "when": [
+        {
+          "type": "message::input::GameState::Phase",
+          "comparator": "std::equal_to<int>",
+          "expectedState": { "name": "READY", "value": 2 }
+        }
+      ]
+    },
+    "431": { "id": "431", "group": "17910495792594945177", "needs": ["8119807754543996117", "17578277164170799756"] },
+    "443": { "id": "443", "group": "5760709102441410677", "needs": ["9552870712503648631"] },
+    "413": { "id": "413", "group": "15591923282640524169" },
+    "430": {
+      "id": "430",
+      "group": "2439906222973614601",
+      "needs": ["4924997646936392751", "14335016981581538616", "18098539844275922707"]
+    },
+    "415": { "id": "415", "group": "9275686325956957739" },
+    "409": { "id": "409", "group": "14410098789018693926" },
+    "511": { "id": "511", "group": "7403426566613923152" },
+    "440": { "id": "440", "group": "1337859529340759913", "needs": ["2374486900855128856"] },
+    "492": { "id": "492", "group": "8260534354822040047" },
+    "408": { "id": "408", "group": "4924997646936392751" },
+    "450": { "id": "450", "group": "15158391694066604522", "needs": ["15476150259407315265"] },
+    "414": { "id": "414", "group": "13708681220677612028" },
+    "462": { "id": "462", "group": "2766509028230333814" },
+    "494": { "id": "494", "group": "13449649878716219877" },
+    "411": { "id": "411", "group": "7708071413339186395" },
+    "454": { "id": "454", "group": "5715460735790508797", "needs": ["2759248914750715515", "15158391694066604522"] },
+    "497": { "id": "497", "group": "9016981053120705579" },
+    "404": { "id": "404", "group": "15476150259407315265", "needs": ["2374486900855128856"] },
+    "439": { "id": "439", "group": "1081738018236787733", "needs": ["10592789024329814597"] },
+    "419": { "id": "419", "group": "5908535294104592167" },
+    "483": { "id": "483", "group": "6404674740995907681" },
+    "482": { "id": "482", "group": "2520945108814622683" },
+    "417": { "id": "417", "group": "7519367924433539846" },
+    "523": { "id": "523", "group": "17099091559978723528" },
+    "449": { "id": "449", "group": "2759248914750715515", "needs": ["12918279049746634720"] },
+    "436": {
+      "id": "436",
+      "group": "13854855221640251944",
+      "needs": [
+        "9850522803296221244",
+        "14410098789018693926",
+        "7708071413339186395",
+        "4924997646936392751",
+        "14335016981581538616",
+        "18098539844275922707"
+      ]
+    },
+    "438": { "id": "438", "group": "1211547058726770070", "needs": ["6221758625140188805"] },
+    "18446744073709551613": {
+      "id": "18446744073709551613",
+      "group": "1915825166656479535",
+      "classification": "STOP"
+    },
+    "418": { "id": "418", "group": "9273444655109743447" },
+    "480": { "id": "480", "group": "5693732859503812040" },
+    "433": {
+      "id": "433",
+      "group": "6221758625140188805",
+      "needs": [
+        "9850522803296221244",
+        "14410098789018693926",
+        "7708071413339186395",
+        "4924997646936392751",
+        "14335016981581538616",
+        "18098539844275922707",
+        "8119807754543996117",
+        "17578277164170799756"
+      ]
+    },
+    "453": { "id": "453", "group": "5715460735790508797", "classification": "START" },
+    "468": { "id": "468", "group": "18124528150538716997" },
+    "486": { "id": "486", "group": "284601043982946014" },
+    "467": { "id": "467", "group": "14386454659336927556" },
+    "452": { "id": "452", "group": "5715460735790508797", "classification": "PROVIDE" },
+    "458": { "id": "458", "group": "17640526745838813362", "needs": ["7978134741046053615"] },
+    "428": {
+      "id": "428",
+      "group": "14534700959703704310",
+      "needs": [
+        "13708681220677612028",
+        "8275028482148678601",
+        "9273444655109743447",
+        "18238999516121450759",
+        "14009193113820258499",
+        "13924193296807099856"
+      ]
+    },
+    "407": { "id": "407", "group": "9850522803296221244" },
+    "432": {
+      "id": "432",
+      "group": "18366721949909346457",
+      "needs": [
+        "13708681220677612028",
+        "8275028482148678601",
+        "9273444655109743447",
+        "18238999516121450759",
+        "14009193113820258499",
+        "13924193296807099856",
+        "15591923282640524169",
+        "9275686325956957739",
+        "7519367924433539846",
+        "5908535294104592167",
+        "4710927186489555975",
+        "16883902353630041046",
+        "9850522803296221244",
+        "14410098789018693926",
+        "7708071413339186395",
+        "4924997646936392751",
+        "14335016981581538616",
+        "18098539844275922707",
+        "8119807754543996117",
+        "17578277164170799756"
+      ]
+    },
+    "18446744073709551614": { "id": "18446744073709551614", "group": "494147534738048061", "classification": "STOP" },
+    "513": { "id": "513", "group": "2607451398943406964" },
+    "487": { "id": "487", "group": "4865481196236495201" },
+    "424": { "id": "424", "group": "13924193296807099856" },
+    "446": { "id": "446", "group": "14726662088314675418", "needs": ["17910495792594945177"] },
+    "416": { "id": "416", "group": "8275028482148678601" },
+    "473": { "id": "473", "group": "16058268293720573063" },
+    "434": {
+      "id": "434",
+      "group": "10592789024329814597",
+      "needs": [
+        "13708681220677612028",
+        "8275028482148678601",
+        "9273444655109743447",
+        "18238999516121450759",
+        "14009193113820258499",
+        "13924193296807099856",
+        "15591923282640524169",
+        "9275686325956957739",
+        "7519367924433539846",
+        "5908535294104592167",
+        "4710927186489555975",
+        "16883902353630041046",
+        "9850522803296221244",
+        "14410098789018693926",
+        "7708071413339186395",
+        "4924997646936392751",
+        "14335016981581538616",
+        "18098539844275922707"
+      ]
+    },
+    "465": { "id": "465", "group": "9807184200801059314" },
+    "427": {
+      "id": "427",
+      "group": "2374486900855128856",
+      "needs": [
+        "15591923282640524169",
+        "9275686325956957739",
+        "7519367924433539846",
+        "5908535294104592167",
+        "4710927186489555975",
+        "16883902353630041046"
+      ]
+    },
+    "495": { "id": "495", "group": "10061707703738407005" },
+    "441": { "id": "441", "group": "9318877112001468367", "needs": ["14534700959703704310"] },
+    "445": { "id": "445", "group": "4861804114103301199", "needs": ["13854855221640251944"] },
+    "420": { "id": "420", "group": "18238999516121450759" },
+    "425": { "id": "425", "group": "8119807754543996117" },
+    "18446744073709551612": {
+      "id": "18446744073709551612",
+      "group": "13881759476737135335",
+      "classification": "STOP"
+    },
+    "478": { "id": "478", "group": "6870516315091454866" },
+    "422": { "id": "422", "group": "14009193113820258499" },
+    "421": { "id": "421", "group": "4710927186489555975" },
+    "519": {
+      "id": "519",
+      "group": "16559002028837163298",
+      "when": [
+        {
+          "type": "message::input::GameState::Phase",
+          "comparator": "std::equal_to<int>",
+          "expectedState": { "name": "READY", "value": 2 }
+        }
+      ]
+    },
+    "489": { "id": "489", "group": "10554592001872891475" },
+    "501": { "id": "501", "group": "2222222722766410008" },
+    "471": { "id": "471", "group": "669753295093135032", "classification": "PROVIDE" },
+    "488": { "id": "488", "group": "7632568719895069744" },
+    "405": { "id": "405", "group": "5476481127998322493", "needs": ["17910495792594945177"] },
+    "403": { "id": "403", "group": "12918279049746634720", "needs": ["14534700959703704310"] },
+    "18446744073709551615": {
+      "id": "18446744073709551615",
+      "group": "13183634821679111135",
+      "classification": "STOP"
+    },
+    "460": { "id": "460", "group": "2767542489014969950", "needs": ["5476481127998322493"] },
+    "517": {
+      "id": "517",
+      "group": "16559002028837163298",
+      "when": [
+        {
+          "type": "message::input::GameState::Phase",
+          "comparator": "std::equal_to<int>",
+          "expectedState": { "name": "PLAYING", "value": 4 },
+          "current": true
+        }
+      ]
+    },
+    "412": { "id": "412", "group": "18098539844275922707" },
+    "529": { "id": "529", "group": "17837793702148028269" },
+    "442": { "id": "442", "group": "2834021629473476842", "needs": ["16339333099484980039"] },
+    "423": { "id": "423", "group": "16883902353630041046" },
+    "475": { "id": "475", "group": "4441339325095686647" },
+    "525": {
+      "id": "525",
+      "group": "17837793702148028269",
+      "when": [
+        {
+          "type": "message::input::GameState::Phase",
+          "comparator": "std::equal_to<int>",
+          "expectedState": { "name": "PLAYING", "value": 4 },
+          "current": true
+        }
+      ]
+    },
+    "521": { "id": "521", "group": "16559002028837163298" },
+    "444": { "id": "444", "group": "6555087039103096875", "needs": ["2439906222973614601"] },
+    "410": { "id": "410", "group": "14335016981581538616" },
+    "429": {
+      "id": "429",
+      "group": "9552870712503648631",
+      "needs": ["9850522803296221244", "14410098789018693926", "7708071413339186395"]
+    },
+    "456": { "id": "456", "group": "1817817075637277641" },
+    "470": { "id": "470", "group": "669753295093135032" },
+    "466": { "id": "466", "group": "7804063202163522101" },
+    "515": { "id": "515", "group": "5604602586761894681" },
+    "437": { "id": "437", "group": "7978134741046053615", "needs": ["18366721949909346457"] },
+    "477": { "id": "477", "group": "11994184488322556644" },
+    "491": { "id": "491", "group": "8260534354822040047", "classification": "PROVIDE" }
+  }
+}

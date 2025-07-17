@@ -19,6 +19,7 @@ import { installProfiler } from "./components/profiler/install";
 import { installTempMonitor } from "./components/temp_monitor/install";
 import { installVision } from "./components/vision/install";
 import { installVisualMesh } from "./components/visual_mesh/install";
+import { installDirector } from "./components/director/install";
 import { NavigationConfiguration } from "./navigation";
 import { NUsightNetwork } from "./network/nusight_network";
 
@@ -42,6 +43,7 @@ installProfiler({ nav, appModel, nusightNetwork, Menu });
 installTempMonitor({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
 installKinematics({ nav, appModel, nusightNetwork, Menu });
+installDirector({ nav, appModel, nusightNetwork, Menu });
 
 configure({ enforceActions: "observed" });
 createRoot(document.getElementById("root")!).render(<AppView nav={nav} />);
