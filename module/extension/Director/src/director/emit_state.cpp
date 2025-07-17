@@ -53,15 +53,12 @@ namespace module::extension {
             update(proto_group.parent_provider, group.active_task ? group.active_task->requester_id : 0);
 
             // Rebuild subtasks for this group
-            std::vector<uint64_t> subtask_ids;
-            subtask_ids.reserve(group.subtasks.size());
+            std::vector<DirectorState::DirectorTask> subtasks;
+            subtasks.reserve(group.subtasks.size());
             for (const auto& subtask : group.subtasks) {
-                subtask_ids.emplace_back(subtask->name,
-                                         subtask->type.hash_code(),
-                                         subtask->priority,
-                                         subtask->optional);
+                subtasks.emplace_back(subtask->name, subtask->type.hash_code(), subtask->priority, subtask->optional);
             }
-            update(proto_group.subtasks, subtask_ids);
+            update(proto_group.subtasks, subtasks);
         }
 
         // If we updated the state, emit it
