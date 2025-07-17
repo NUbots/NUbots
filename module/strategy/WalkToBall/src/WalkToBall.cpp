@@ -194,10 +194,6 @@ namespace module::strategy {
                         // Calculate a perpendicular vector to the direction of the target point (2D)
                         const Eigen::Vector2d perp(rGBf.normalized().y(), -rGBf.normalized().x());
 
-                        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
-                        // TODO: this seems important idk
-                        auto proj = [&perp](const Eigen::Vector2d& point) { return perp.dot(point); };
-
                         Eigen::Vector2d obstacle2d((*obstacle).x(), (*obstacle).y());
 
                         // Get the vector to avoid the obstacle to the left
