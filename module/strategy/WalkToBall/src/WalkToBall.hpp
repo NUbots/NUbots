@@ -67,6 +67,9 @@ namespace module::strategy {
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
 
+            /// @brief Radius to avoid obstacles
+            double obstacle_radius = 0.0;
+
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space

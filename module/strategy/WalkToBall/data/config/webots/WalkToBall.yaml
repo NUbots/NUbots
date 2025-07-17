@@ -24,3 +24,5 @@ avoid_opponent_offset: 0.15
 approach_offset: 0.6
 # While angle error is larger than this, apply the offset to position next to the ball when tackling
 tackle_angle_offset: 0.2
+
+obstacle_radius: 0.8
