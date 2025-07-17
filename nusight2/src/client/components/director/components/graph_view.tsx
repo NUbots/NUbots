@@ -92,10 +92,15 @@ function ProviderGroupNode({ data }: { data: GroupModel }) {
 const nodeTypes = { providerGroup: ProviderGroupNode };
 
 export function GraphView({ graph }: { graph: DirectorGraph }) {
-  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => graphToFlow(graph), [graph]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  // recompute flow whenever graph observable changes
+  React.useEffect(() => {
+    const { nodes: newNodes, edges: newEdges } = graphToFlow(graph);
+    setNodes(newNodes);
+    setEdges(newEdges);
+  }, [graph, setNodes, setEdges]);
 
   return (
     <ReactFlowProvider>
