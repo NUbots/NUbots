@@ -4,6 +4,9 @@ import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { message } from "../../../shared/messages";
 
+export type ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
+export const ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
+
 /** Local representation of an enum value coming from DirectorState */
 export interface EnumValue {
   name: string;
@@ -16,14 +19,6 @@ export interface WhenCondition {
   comparator: string;
   expectedState: EnumValue;
   current: boolean;
-}
-
-export enum ProviderClassification {
-  UNKNOWN = 0,
-  PROVIDE = 1,
-  START = 2,
-  STOP = 3,
-  ROOT = 4,
 }
 
 export interface GroupModel {
@@ -56,6 +51,15 @@ export interface DirectorGraph {
   providersById: Record<string, ProviderModel>;
 }
 
+function isRootGroup(
+  group: message.behaviour.DirectorState.IGroup,
+  providers: Record<string, message.behaviour.DirectorState.IProvider>,
+): boolean {
+  return (
+    group.providerIds?.length === 1 && providers[group.providerIds[0]]?.classification === ProviderClassification.ROOT
+  );
+}
+
 /**
  * Convert a raw protobuf DirectorState into an enriched graph that the UI can work with.
  */
@@ -63,28 +67,68 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
   const groupsById: Record<string, GroupModel> = {};
   const providersById: Record<string, ProviderModel> = {};
 
-  // 1. Build groups map
+  // Create canonical root group with a single provider (id -1)
+  const canonicalRoot: GroupModel = {
+    id: "-1",
+    type: "Root",
+    providers: [],
+    activeProvider: undefined,
+    parentProvider: undefined,
+    subtasks: [],
+  };
+
+  const rootProvider: ProviderModel = {
+    id: "-1",
+    classification: message.behaviour.DirectorState.Provider.Classification.ROOT,
+    group: canonicalRoot,
+    when: [],
+    causing: {},
+    needs: [],
+  };
+
+  canonicalRoot.providers.push(rootProvider);
+  canonicalRoot.activeProvider = rootProvider;
+
+  groupsById[canonicalRoot.id] = canonicalRoot;
+  providersById[rootProvider.id] = rootProvider;
+
+  // Identify root groups from raw message
+  const rootProviderIds = new Set<string>();
+  const rootGroupIds = new Set<string>();
+  const rootSubtasks: message.behaviour.DirectorState.IDirectorTask[] = [];
+
   if (state.groups) {
+    // Create all the group models/update root group pointers
     for (const [gid, g] of Object.entries(state.groups)) {
-      groupsById[gid] = {
-        id: gid,
-        type: g.type ?? "unknown",
-        providers: [],
-        activeProvider: undefined,
-        parentProvider: undefined,
-        subtasks: [],
-      };
+      if (isRootGroup(g, state.providers)) {
+        rootGroupIds.add(gid);
+        rootProviderIds.add(g.providerIds?.[0] ?? "");
+        rootSubtasks.push(...(g.subtasks ?? []));
+      } else {
+        // Create the group model
+        groupsById[gid] = {
+          id: gid,
+          type: g.type!,
+          providers: [],
+          activeProvider: undefined,
+          parentProvider: undefined,
+          subtasks: [],
+        };
+      }
     }
   }
 
-  // 2. Build providers and attach to groups
+  // Treat the synthetic canonical root as a root group too so later passes skip it
+  rootGroupIds.add(canonicalRoot.id);
+
+  // Make providers for non-root groups
   if (state.providers) {
-    for (const [pid, p] of Object.entries(state.providers)) {
+    for (const [pid, p] of Object.entries(state.providers).filter(([pid]) => !rootProviderIds.has(pid))) {
       const group = groupsById[p.group!.toString()];
       if (!group) continue;
       const provider: ProviderModel = {
         id: pid,
-        classification: (p.classification ?? 0) as ProviderClassification,
+        classification: p.classification!,
         group,
         when: (p.when ?? []).map((w) => ({
           type: w.type ?? "",
@@ -105,23 +149,22 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
     }
   }
 
-  // 3. Resolve needs links
-  for (const provider of Object.values(providersById)) {
-    const raw = state.providers![provider.id];
-    const needs = raw.needs ?? [];
-    provider.needs = needs.map((gid) => groupsById[gid.toString()]).filter(Boolean);
+  // Resolve needs links
+  for (const provider of Object.values(providersById).filter((p) => !rootProviderIds.has(p.id))) {
+    provider.needs = (state.providers?.[provider.id]?.needs ?? []).map((gid) => groupsById[gid]).filter(Boolean);
   }
 
-  // 4. Resolve group provider pointers and subtasks
-  for (const group of Object.values(groupsById)) {
-    const raw = state.groups![group.id];
-    if (raw.activeProvider) {
-      group.activeProvider = providersById[raw.activeProvider.toString()];
-    }
-    if (raw.parentProvider) {
-      group.parentProvider = providersById[raw.parentProvider.toString()];
-    }
-    group.subtasks = (raw.subtasks ?? []).map((t): TaskModel => {
+  // Resolve the provider pointers
+  for (const [gid, g] of Object.entries(groupsById).filter(([gid]) => !rootGroupIds.has(gid))) {
+    const { activeProvider, parentProvider } = state.groups?.[gid]!;
+    g.activeProvider = rootProviderIds.has(activeProvider) ? rootProvider : providersById[activeProvider];
+    g.parentProvider = rootProviderIds.has(parentProvider) ? rootProvider : providersById[parentProvider];
+  }
+
+  // Resolve the subtasks
+  for (const [gid, group] of Object.entries(groupsById)) {
+    const subtasks = group === canonicalRoot ? rootSubtasks : (state.groups?.[gid]?.subtasks ?? []);
+    group.subtasks = (subtasks ?? []).map((t): TaskModel => {
       const target = groupsById[t.targetGroup!.toString()];
       return {
         name: t.name ?? undefined,

@@ -3,9 +3,14 @@ import { observer } from "mobx-react";
 
 import { ProviderModel, ProviderClassification } from "../model";
 import { NeedChip } from "./need_chip";
+import { WhenChip } from "./when_chip";
 
 export interface ProviderViewProps {
   provider: ProviderModel;
+}
+
+function lastComponent(str: string): string {
+  return str.split("::").pop() ?? str;
 }
 
 export const ProviderView = observer(function ProviderView({ provider }: ProviderViewProps) {
@@ -29,25 +34,31 @@ export const ProviderView = observer(function ProviderView({ provider }: Provide
       {when && when.length > 0 && (
         <div>
           <span className="font-medium">When:</span>
-          <ul className="list-disc ml-4">
+          <div className="flex flex-wrap gap-1 mt-1">
             {when.map((w, i) => (
-              <li key={i} className={w.current ? "" : "line-through"}>
-                {w.type} {w.comparator} {w.expectedState?.name}
-              </li>
+              <WhenChip key={i} condition={w} />
             ))}
-          </ul>
+          </div>
         </div>
       )}
       {causing && Object.keys(causing).length > 0 && (
         <div>
           <span className="font-medium">Causing:</span>
-          <ul className="list-disc ml-4">
-            {Object.entries(causing).map(([k, v]) => (
-              <li key={k}>
-                {k}: {v.name}
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {Object.entries(causing).map(([k, v]) => {
+              const displayKey = lastComponent(k);
+              const displayVal = lastComponent(v.name);
+              return (
+                <div
+                  key={k}
+                  title={`${k}: ${v.name}`}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-yellow-200 dark:bg-yellow-700 text-yellow-900 dark:text-yellow-100 border-yellow-300 dark:border-yellow-600 select-none whitespace-nowrap"
+                >
+                  {displayKey}: {displayVal}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       {needs && needs.length > 0 && (
