@@ -45,7 +45,14 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
       const srcId = g.parentProvider.group.id;
       const tgtId = g.id;
       const id = `${srcId}->${tgtId}`;
-      edges.push({ id, source: srcId, target: tgtId, markerEnd: { type: MarkerType.ArrowClosed } });
+      edges.push({
+        id,
+        source: srcId,
+        target: tgtId,
+        markerEnd: { type: MarkerType.ArrowClosed },
+        // Make active/control edges thicker for better visibility
+        style: { strokeWidth: 5 },
+      });
     }
   }
 
@@ -75,7 +82,8 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
         source: g.id,
         target: target.id,
         markerEnd: { type: MarkerType.ArrowClosed },
-        style: { strokeDasharray: "4 4", stroke: "#9ca3af" }, // tailwind gray-400
+        // Thicker dashed edge to indicate blocked relationship clearly
+        style: { strokeDasharray: "4 4", stroke: "#9ca3af", strokeWidth: 5 }, // tailwind gray-400
       });
     }
   }
