@@ -66,11 +66,11 @@ namespace module::purpose {
             [this](const AttackMsg& attack, const Ball& ball, const Field& field, const FieldDescription& fd) {
                 // Find the ball if we don't have it
 
-                emit<Task>(std::make_unique<FindBall>(), 2);  // Need to know where the ball is
+                emit<Task>(std::make_unique<FindBall>(), 4);  // Need to know where the ball is
 
                 // Always request a kick task
                 if (cfg.kick_when == "Always") {
-                    emit<Task>(std::make_unique<KickTo>(), 1);
+                    emit<Task>(std::make_unique<KickTo>(), 3);
                 }
                 // Only kick in the attacking third
                 else if (cfg.kick_when == "AttackingThird") {
@@ -79,7 +79,7 @@ namespace module::purpose {
                     // If the ball is in the attacking third of the field, activate the kick
                     if (rBFf.x() < attacking_third) {
                         log<DEBUG>("Ball in attacking third, kick!");
-                        emit<Task>(std::make_unique<KickTo>(), 1);  // kick the ball towards the goal
+                        emit<Task>(std::make_unique<KickTo>(), 3);  // kick the ball towards the goal
                     }
                 }
                 // If kick_when is never, do not request the kick task
