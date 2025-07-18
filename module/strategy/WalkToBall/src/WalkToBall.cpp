@@ -88,6 +88,7 @@ namespace module::strategy {
             cfg.infront_of_ball_radius = config["infront_of_ball_radius"].as<double>();
             cfg.infront_check_distance = config["infront_check_distance"].as<double>();
             cfg.obstacle_radius        = config["obstacle_radius"].as<double>();
+            cfg.goal_width_margin      = config["goal_width_margin"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -185,9 +186,9 @@ namespace module::strategy {
                         log<DEBUG>("Avoiding obstacle in the way of kick path");
 
                         // Define goal boundaries for side selection
-                        const double goal_width_margin = 0.2;
-                        const double left_boundary = -field_description.dimensions.goal_width / 2.0 + goal_width_margin;
-                        const double right_boundary = field_description.dimensions.goal_width / 2.0 - goal_width_margin;
+                        const double right_boundary =
+                            field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
+                        const double left_boundary = -right_boundary;
 
                         // Calculate avoidance points and angles for both sides
                         const Eigen::Vector3d perp(rGBf.normalized().y(), -rGBf.normalized().x(), 0);
