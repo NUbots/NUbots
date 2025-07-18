@@ -58,9 +58,6 @@ message Field {
     repeated Line association_lines = 6;
 }
 
-message ResetFieldLocalisation {
-    bool custom_position = 1;
-    vec3 position = 2;
-}
+message ResetFieldLocalisation {}
 message UncertaintyResetFieldLocalisation {}
 message FinishReset {}
