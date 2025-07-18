@@ -18,7 +18,7 @@ max_angle_error: 45 * pi / 180
 
 # Target further behind the ball when approaching from a "bad position"
 max_error_y: 0.5
-error_gain_perp: 0.25
+error_gain_perp: 0.4
 
 # Sideways offset when approaching from in front of the ball
 min_offset_y: 0.3
