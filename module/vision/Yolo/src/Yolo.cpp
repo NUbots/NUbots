@@ -79,9 +79,9 @@ namespace module::vision {
             objects[0].confidence_threshold = config["ball_confidence_threshold"].as<double>();
             objects[1].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
             objects[2].confidence_threshold = config["robot_confidence_threshold"].as<double>();
-            objects[3].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[4].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[5].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[3].confidence_threshold = config["l_intersection_confidence_threshold"].as<double>();
+            objects[4].confidence_threshold = config["t_intersection_confidence_threshold"].as<double>();
+            objects[5].confidence_threshold = config["x_intersection_confidence_threshold"].as<double>();
             cfg.nms_threshold               = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
