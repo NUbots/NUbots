@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 import { observer } from "mobx-react";
 
-import { GroupModel } from "../model";
+import { GroupModel, ProviderClassification } from "../model";
 
 import { ProviderView } from "./provider_view";
 import { TaskChip } from "./task_chip";
@@ -22,13 +22,30 @@ export const ProviderGroupView = observer(
     const providerIds = (group.providers ?? []).map((p) => p.id);
     const subtasks = group.subtasks ?? [];
 
+    const hasParent = !!group.parentProvider;
+    const isRoot = group.providers.some((p) => p.classification === ProviderClassification.ROOT);
+
     return (
       <div
         ref={ref}
-        className="border rounded p-2 bg-auto-surface-2 space-y-2 flex-none"
+        className={`relative rounded p-2 bg-auto-surface-2 space-y-2 flex-none ${(() => {
+          if (hasParent) return "border";
+          if (isRoot) return "border-2 border-blue-500";
+          return "border-2 border-red-500 border-dashed";
+        })()}`}
         style={{ minWidth: "16rem" }}
         data-testid="provider-group"
       >
+        {/* badge */}
+        {!hasParent && (
+          <span
+            className={`absolute -top-2 right-2 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+              isRoot ? "bg-blue-500" : "bg-red-500"
+            }`}
+          >
+            {isRoot ? "ROOT" : "ORPHAN"}
+          </span>
+        )}
         <div className="font-semibold text-sm mb-1" title={group.type}>
           {group.type ? shortName(group.type) : `Group ${group}`}
         </div>
