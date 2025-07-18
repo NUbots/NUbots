@@ -393,15 +393,11 @@ namespace module::strategy {
         const Eigen::Vector2d dir_to_ball = rBFf.normalized();
 
         for (const auto& obstacle : all_obstacles) {
-            const bool in_front     = obstacle.x() < rBFf.x();  // TODO: check this is the correct obstacle
-            const bool past_ball    = obstacle.norm() > rBFf.norm();
+            const bool in_front     = obstacle.x() < rBFf.x();
             const bool within_range = (obstacle - rBFf).norm() < cfg.infront_check_distance;
-
             const bool intersects_path =
                 utility::math::geometry::intersection_line_and_circle(rGFf, rBFf, obstacle, cfg.infront_of_ball_radius);
-
-
-            if (in_front && past_ball && within_range && intersects_path) {
+            if (in_front && within_range && intersects_path) {
                 return obstacle;
             }
         }
