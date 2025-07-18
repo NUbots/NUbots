@@ -1,24 +1,65 @@
 #include "PenaltyShootout.hpp"
 
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
+
+#include "message/actuation/Limbs.hpp"
+#include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
+#include "message/input/GameState.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/planning/LookAround.hpp"
+#include "message/skill/Look.hpp"
+#include "message/skill/Walk.hpp"
+#include "message/strategy/FallRecovery.hpp"
+#include "message/strategy/FindBall.hpp"
+#include "message/strategy/LookAtFeature.hpp"
+#include "message/strategy/WalkToBall.hpp"
+#include "message/support/FieldDescription.hpp"
+
+#include "utility/skill/Script.hpp"
 
 namespace module::purpose {
 
     using extension::Configuration;
+    using utility::skill::load_script;
+
+    using Phase = message::input::GameState::Phase;
+
+    using message::actuation::BodySequence;
+    using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
+    using message::input::GameState;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::planning::LookAround;
+    using message::skill::Look;
+    using message::skill::Walk;
+    using message::strategy::FallRecovery;
+    using message::strategy::FindBall;
+    using message::strategy::LookAtBall;
+    using message::strategy::WalkToBall;
+    using message::support::FieldDescription;
 
     struct StartPenalty {};
+    struct PenaltyGoalie {};
     struct Play {};
 
     PenaltyShootout::PenaltyShootout(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("PenaltyShootout.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PenaltyShootout.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.is_goalie   = config["is_goalie"].as<bool>();
+            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
+            cfg.is_goalie            = config["is_goalie"].as<bool>();
+            cfg.ball_action_distance = config["ball_action_distance"].as<double>();
+            cfg.startup_delay        = config["startup_delay"].as<int>();
+            cfg.ball_search_timeout  = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
         });
 
-        on<Startup, With<FieldDescription>>().then([this](const FieldDescription& field_description) {
+        on<Startup>().then([this] {
             // At the start of the program, we should be standing
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -29,16 +70,6 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
             // Startup delay to prevent issues with low servo gains at the start
             emit<Scope::DELAY>(std::make_unique<StartPenalty>(), std::chrono::seconds(cfg.startup_delay));
-
-            // Emit localisation reset in specific custom positions for the penalty
-            if (cfg.is_goalie) {
-                double x = field_description.field_length / 2.0;
-                emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>(true, Eigen::Vector3d(x, 0.0, 0.0)));
-            }
-            else {
-                double x = field_description.field_length / 2.0 - field_description.dimensions.penalty_mark_distance;
-                emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>(true, Eigen::Vector3d(x, 0.0, 0.0)));
-            }
         });
 
         on<Trigger<StartPenalty>>().then([this] {
@@ -48,75 +79,45 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<Play>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
-            if (cfg.is_goalie) {
-                emit<Task>(std::make_unique<WalkToFieldPosition>());
-            }
-            else {
-                emit<Task>(std::make_unique<FieldPlayer>());
-            }
-        });
+        on<Provide<Play>,
+           Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>,
+           Optional<With<Ball>>,
+           When<Phase, std::equal_to, Phase::PLAYING>>()
+            .then([this](const std::shared_ptr<const Ball>& ball) {
+                if (cfg.is_goalie) {
+                    log<INFO>("Playing as goalie!");
+                    emit<Task>(std::make_unique<PenaltyGoalie>());
+                    emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
+                }
+                else {
+                    log<INFO>("Playing!");
+                    emit<Task>(std::make_unique<WalkToBall>());
+                    emit<Task>(std::make_unique<LookAtBall>());
 
-        on<Trigger<Penalisation>, With<GlobalConfig>, With<GameState>>().then(
-            [this](const Penalisation& self_penalisation,
-                   const GlobalConfig& global_config,
-                   const GameState& game_state) {
-                // If the robot is penalised, it must stand still
-                if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
-                    emit(std::make_unique<Purpose>(global_config.player_id,
-                                                   message::purpose::SoccerPosition::UNKNOWN,
-                                                   false,
-                                                   false,
-                                                   game_state.team.team_colour));
-                    emit(std::make_unique<Stability>(Stability::UNKNOWN));
-                    emit(std::make_unique<ResetFieldLocalisation>());
-                    emit<Task>(std::unique_ptr<Play>(nullptr));
+                    if (ball == nullptr
+                        || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                        emit<Task>(std::make_unique<LookAround>());
+                    }
                 }
             });
 
-        on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
-            // If the robot is unpenalised, stop standing still and find its purpose
-            if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
-                emit<Task>(std::make_unique<Play>(), 1);
-                emit<Task>(std::make_unique<FallRecovery>(), 2);
+        on<Provide<PenaltyGoalie>, With<Ball>, With<Sensors>>().then([this](const Ball& ball, const Sensors& sensors) {
+            // Get position of the ball in robot space
+            Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+
+            // Check if the ball is close enough to act yet
+            if (rBRr.norm() > cfg.ball_action_distance) {
+                return;
             }
-        });
 
-        // Left button pauses the soccer scenario
-        on<Trigger<ButtonLeftDown>>().then([this] {
-            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
-            emit<Scope::INLINE>(std::make_unique<EnableIdle>());
-            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
-            idle = true;
-        });
-
-        on<Trigger<ButtonLeftUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
-
-        on<Trigger<EnableIdle>>().then([this] {
-            // Stop all tasks and stand still
-            emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-            emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
-            emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            log<INFO>("Idle mode enabled");
-        });
-
-        // Middle button resumes the soccer scenario
-        on<Trigger<ButtonMiddleDown>>().then([this] {
-            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
-            // Restart the Director graph for the soccer scenario after a delay
-            emit<Scope::DELAY>(std::make_unique<DisableIdle>(), std::chrono::seconds(cfg.disable_idle_delay));
-            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
-            idle = false;
-        });
-
-        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
-
-        on<Trigger<DisableIdle>, With<GameState>>().then([this](const GameState& game_state) {
-            // If the robot is not idle nor penalised, restart the Director graph for the soccer scenario!
-            if (!idle && game_state.self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
-                emit<Task>(std::make_unique<FindPurpose>(), 1);
-                emit<Task>(std::make_unique<FallRecovery>(), 2);
-                log<INFO>("Idle mode disabled");
+            // The ball is close enough. If the ball is in front of us, fall forwards
+            if (rBRr.x() > 0) {
+                log<DEBUG>("Ball in front, falling forwards.");
+                emit<Task>(load_script<BodySequence>("FallFront.yaml"));
+            }
+            else {
+                log<DEBUG>("Ball behind, falling backwards.");
+                emit<Task>(load_script<BodySequence>("FallBack.yaml"));
             }
         });
     }
