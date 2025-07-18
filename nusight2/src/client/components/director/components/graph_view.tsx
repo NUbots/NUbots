@@ -13,7 +13,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import dagre from "@dagrejs/dagre";
 
-import { DirectorGraph, GroupModel } from "../model";
+import { DirectorGraph, GroupModel, ProviderClassification } from "../model";
 import { MarkerType } from "reactflow";
 import { ProviderGroupView } from "./provider_group_view";
 
@@ -107,6 +107,9 @@ function graphToFlow(graph: DirectorGraph): { nodes: Node[]; edges: Edge[] } {
   edges.forEach((e) => edgeMap.set(key(e.source, e.target), e));
 
   for (const provider of Object.values(graph.providersById)) {
+    // Only consider providers that actually PROVIDE (exclude START/STOP/ROOT)
+    if (provider.classification !== ProviderClassification.PROVIDE) continue;
+
     const srcGroup = provider.group;
 
     // Only consider providers whose when conditions are met (or have none)
