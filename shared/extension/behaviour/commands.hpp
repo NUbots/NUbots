@@ -113,18 +113,12 @@ namespace extension::behaviour::commands {
          */
         WhenExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                        const std::type_index& type_,
-                       const std::type_index& comparator_type_,
-                       const std::string& expected_state_string_,
-                       const int& expected_state_value_,
                        std::function<bool(const int&)> validator_,
                        std::function<int()> current_,
                        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
                                                                         std::function<void(const int&)>)> binder_)
             : reaction(std::move(reaction_))
             , type(type_)
-            , comparator_type(comparator_type_)
-            , expected_state_string(expected_state_string_)
-            , expected_state_value(expected_state_value_)
             , validator(std::move(validator_))
             , current(std::move(current_))
             , binder(std::move(binder_)) {}
@@ -133,12 +127,6 @@ namespace extension::behaviour::commands {
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The enum type that this when expression is looking at
         std::type_index type;
-        /// The type of the comparator
-        std::type_index comparator_type;
-        /// The expected state as a string
-        std::string expected_state_string;
-        /// The expected state as an int
-        int expected_state_value;
         /// Function to determine if the passed state is valid
         std::function<bool(const int&)> validator;
         /// Function to get the current state from the global cache
@@ -161,20 +149,14 @@ namespace extension::behaviour::commands {
          */
         CausingExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                           const std::type_index& type_,
-                          const int& resulting_state_value_,
-                          const std::string& resulting_state_string_)
-            : reaction(std::move(reaction_))
-            , type(type_)
-            , resulting_state_value(resulting_state_value_)
-            , resulting_state_string(resulting_state_string_) {}
+                          const int& resulting_state_)
+            : reaction(std::move(reaction_)), type(type_), resulting_state(resulting_state_) {}
         /// The Provider reaction that will cause this state
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The enum type that this `When` expression claims to manipulate
         std::type_index type;
         /// The resulting state this Provider is claiming to provide if it is executed
-        int resulting_state_value;
-        /// The resulting state as a string
-        std::string resulting_state_string;
+        int resulting_state;
     };
 
     /**

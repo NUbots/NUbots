@@ -38,8 +38,6 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/behaviour/Director.hpp"
-
 namespace module::extension {
 
     class Director : public NUClear::Reactor {
@@ -424,11 +422,6 @@ namespace module::extension {
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /**
-         * Emits the director state if it has changed.
-         */
-        void emit_state();
-
         /// A list of Provider groups
         std::map<std::type_index, component::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
@@ -436,11 +429,6 @@ namespace module::extension {
 
         /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
         NUClear::id_t unique_id_source = 0;
-
-        /// The protobuf message that holds the current state of the director
-        message::behaviour::DirectorState director_state;
-        /// The last emitted state, used to check for changes
-        bool state_changed = false;
     };
 
 }  // namespace module::extension

@@ -206,12 +206,6 @@ namespace extension::behaviour {
                 reaction,
                 // typeindex of the enum value
                 typeid(State),
-                // comparator type
-                typeid(expr<int>),
-                // expected state as a string
-                std::string(State(value)),
-                // expected state as an integer
-                static_cast<int>(value),
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) -> bool { return expr<int>()(v, value); },
                 // Function that uses get to get the current state of the condition
@@ -254,10 +248,7 @@ namespace extension::behaviour {
         static void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
             reaction->reactor.emit<NUClear::dsl::word::emit::Inline>(
-                std::make_unique<commands::CausingExpression>(reaction,
-                                                              typeid(State),
-                                                              value,
-                                                              std::string(State(value))));
+                std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
     };
 

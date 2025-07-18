@@ -1,47 +1,105 @@
 /*
- * Copyright (C) 2013-2016 Trent Houliston <trent@houliston.me>
+ * MIT License
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Copyright (c) 2013 NUbots
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "NUClearNet.hpp"
 
 #include "extension/Configuration.hpp"
 
+#include "utility/support/network.hpp"
+
 namespace module::network {
 
     using extension::Configuration;
+    using NUClear::message::CommandLineArguments;
 
     NUClearNet::NUClearNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
-            auto net_config              = std::make_unique<NUClear::message::NetworkConfiguration>();
-            net_config->name             = config["name"].as<std::string>();
-            net_config->announce_address = config["address"].as<std::string>();
-            net_config->announce_port    = config["port"].as<uint16_t>();
-            emit<Scope::INLINE>(net_config);
-        });
+        on<Configuration, Trigger<CommandLineArguments>>("NUClearNet.yaml")
+            .then([this](const Configuration& config, const CommandLineArguments& args) {
+                log_level                   = config["log_level"].as<NUClear::LogLevel>();
+                auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
+                auto name                   = config["name"].as<std::string>();
+                netConfig->name             = name.empty() ? utility::support::get_hostname() : name;
+                netConfig->announce_address = config["address"].as<std::string>();
+                netConfig->announce_port    = config["port"].as<uint16_t>();
+
+                // Check if --team_id is set in the command line arguments
+                // Use this to set the name, to uniquely identify the robot
+                if (std::find(args.begin(), args.end(), "--team_id") != args.end()) {
+                    // Get the index of the team_id
+                    auto it = std::find(args.begin(), args.end(), "--team_id");
+                    if (it + 1 != args.end()) {
+                        netConfig->name += "_" + *(it + 1);
+                    }
+                }
+
+                emit<Scope::INLINE>(netConfig);
+            });
 
         on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {
-            auto [addr, port] = event.address.address();
+            char c[255];
+            std::memset(c, 0, sizeof(c));
+            std::string addr;
+            int port = 0;
+
+            switch (event.address.sock.sa_family) {
+                case AF_INET:
+                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv4.sin_addr, c, sizeof(c));
+                    port = ntohs(event.address.ipv4.sin_port);
+                    break;
+
+                case AF_INET6:
+                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv6.sin6_addr, c, sizeof(c));
+                    port = ntohs(event.address.ipv6.sin6_port);
+                    break;
+            }
+
             log<INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
         });
 
         on<Trigger<NUClear::message::NetworkLeave>>().then([this](const NUClear::message::NetworkLeave& event) {
-            auto [addr, port] = event.address.address();
+            char c[255];
+            std::memset(c, 0, sizeof(c));
+            std::string addr;
+            int port = 0;
+
+            switch (event.address.sock.sa_family) {
+                case AF_INET:
+                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv4.sin_addr, c, sizeof(c));
+                    port = ntohs(event.address.ipv4.sin_port);
+                    break;
+
+                case AF_INET6:
+                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv6.sin6_addr, c, sizeof(c));
+                    port = ntohs(event.address.ipv6.sin6_port);
+                    break;
+            }
+
             log<INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
         });
     }
-
 }  // namespace module::network
