@@ -85,7 +85,20 @@ namespace module::strategy {
             /// @brief Maximum sideways offset when approaching from in front of the ball
             double max_offset_y = 0.0;
 
+            /// @brief Radius of circle around ball where an opponent robot is considered to be in front of the ball
+            double infront_of_ball_radius = 0.0;
+            /// @brief Distance in front of the ball to check for obstacles
+            double infront_check_distance = 0.0;
+
+            /// @brief Radius to avoid obstacles when dribbling the ball
+            double obstacle_radius = 0.0;
+
         } cfg;
+
+        std::optional<Eigen::Vector3d> robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
+                                                             const Eigen::Vector3d& rBFf,
+                                                             const Eigen::Vector3d& rGFf);
+
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
