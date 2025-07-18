@@ -52,7 +52,6 @@ namespace module::purpose {
         on<Configuration>("PenaltyShootout.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PenaltyShootout.yaml
             this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.is_goalie            = config["is_goalie"].as<bool>();
             cfg.ball_action_distance = config["ball_action_distance"].as<double>();
             cfg.startup_delay        = config["startup_delay"].as<int>();
             cfg.ball_search_timeout  = duration_cast<NUClear::clock::duration>(

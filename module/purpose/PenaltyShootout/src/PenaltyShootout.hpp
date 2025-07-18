@@ -11,8 +11,6 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Whether this robot is the goalie
-            bool is_goalie = false;
             /// @brief Distance from the ball at which to perform actions
             double ball_action_distance = 0.5;
             /// @brief Delay before playing
