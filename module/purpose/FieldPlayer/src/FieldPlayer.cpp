@@ -65,7 +65,6 @@ namespace module::purpose {
     using message::purpose::ReadyAttack;
     using message::purpose::SoccerPosition;
     using message::purpose::Support;
-    using message::strategy::FindBall;
     using message::strategy::LookAtBall;
     using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
@@ -132,8 +131,7 @@ namespace module::purpose {
                     return;
                 }
 
-                // General tasks
-                emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
+                // Always look at the ball if possible
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
 
                 // If there's no ball message, we can't play, just look for the ball
