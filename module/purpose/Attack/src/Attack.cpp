@@ -84,15 +84,15 @@ namespace module::purpose {
                 confirm_possession(in_possession_proposal);
 
                 emit<Task>(std::make_unique<WalkToKickBall>(), 1);
-                if (in_possession) {
-                    log<DEBUG>("We have the ball or it is free, walk to the goal!");
-                    emit<Task>(std::make_unique<TackleBall>(), 0);
-                }
-                else {
-                    // If the opponent has had the ball for longer than the timeout, we assume they are in possession
-                    log<DEBUG>("Opponent has the ball, tackle it!");
-                    emit<Task>(std::make_unique<TackleBall>(), 2);
-                }
+                // if (in_possession) {
+                //     log<DEBUG>("We have the ball or it is free, walk to the goal!");
+                //     emit<Task>(std::make_unique<TackleBall>(), 0);
+                // }
+                // else {
+                //     // If the opponent has had the ball for longer than the timeout, we assume they are in possession
+                //     log<DEBUG>("Opponent has the ball, tackle it!");
+                //     emit<Task>(std::make_unique<TackleBall>(), 2);
+                // }
             });
     }
 
