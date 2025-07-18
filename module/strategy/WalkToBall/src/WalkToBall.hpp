@@ -67,6 +67,24 @@ namespace module::strategy {
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
 
+            /// @brief Maximum perpendicular translation error for scaling walk approach
+            double max_translation_perpendicular = 0.0;
+
+            /// @brief Maximum parallel translation error for scaling walk approach
+            double max_translation_parallel = 0.0;
+
+            /// @brief Maximum error in the y direction for scaling walk approach
+            double max_error_y = 0.0;
+
+            /// @brief Gain for the perpendicular error when approaching the ball
+            double error_gain_perp = 0.0;
+
+            /// @brief Minimum sideways offset when approaching from in front of the ball
+            double min_offset_y = 0.0;
+
+            /// @brief Maximum sideways offset when approaching from in front of the ball
+            double max_offset_y = 0.0;
+
         } cfg;
 
         /// @brief The position of the goal {g} in field {f} space

@@ -16,6 +16,14 @@ ball_kick_distance: 0.0
 # Maximum angle error which indicates that robot is approaching from a "bad position"
 max_angle_error: 45 * pi / 180
 
+# Target further behind the ball when approaching from a "bad position"
+max_error_y: 0.5
+error_gain_perp: 0.25
+
+# Sideways offset when approaching from in front of the ball
+min_offset_y: 0.3
+max_offset_y: 1.0
+
 avoid_ball_offset: [0.25, 0.5, 0]
 
 distance_behind_ball: 0.4
