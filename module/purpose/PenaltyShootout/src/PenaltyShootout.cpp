@@ -81,23 +81,24 @@ namespace module::purpose {
 
         on<Provide<Play>,
            Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>,
+           With<GameState>,
            Optional<With<Ball>>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
-            .then([this](const std::shared_ptr<const Ball>& ball) {
-                if (cfg.is_goalie) {
-                    log<INFO>("Playing as goalie!");
-                    emit<Task>(std::make_unique<PenaltyGoalie>());
-                    emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
+            .then([this](const GameState& game_state, const std::shared_ptr<const Ball>& ball) {
+                // Find the ball first
+                if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                    emit<Task>(std::make_unique<LookAround>());
                 }
-                else {
-                    log<INFO>("Playing!");
+
+                // If our kick off, walk the ball into the goal!
+                if (game_state.our_kick_off) {
                     emit<Task>(std::make_unique<WalkToBall>());
                     emit<Task>(std::make_unique<LookAtBall>());
-
-                    if (ball == nullptr
-                        || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
-                        emit<Task>(std::make_unique<LookAround>());
-                    }
+                }
+                // Else be a goalie!
+                else {
+                    emit<Task>(std::make_unique<PenaltyGoalie>());
+                    emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
                 }
             });
 
@@ -110,15 +111,8 @@ namespace module::purpose {
                 return;
             }
 
-            // The ball is close enough. If the ball is in front of us, fall forwards
-            if (rBRr.x() > 0) {
-                log<DEBUG>("Ball in front, falling forwards.");
-                emit<Task>(load_script<BodySequence>("FallFront.yaml"));
-            }
-            else {
-                log<DEBUG>("Ball behind, falling backwards.");
-                emit<Task>(load_script<BodySequence>("FallBack.yaml"));
-            }
+            // Walk the ball away
+            emit<Task>(std::make_unique<WalkToBall>());
         });
     }
 
