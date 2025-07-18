@@ -163,14 +163,9 @@ namespace module::localisation {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this](const ResetFieldLocalisation& msg) {
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
-            if (msg.custom_position) {
-                state = msg.position;
-            }
-            else {
-                state = cfg.initial_hypotheses[0];
-            }
+            state             = cfg.initial_hypotheses[0];
             filtered_state    = state;
             first_measurement = true;
             startup           = true;
