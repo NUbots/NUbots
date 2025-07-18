@@ -29,7 +29,7 @@ export function layoutGraph(graph: DirectorGraph): GraphLayoutRow[] {
   const unplaced = Object.values(graph.groupsById).filter((g) => depthMap[g.id] === undefined);
   if (unplaced.length) {
     // Place unconnected groups starting on a new row after placed ones
-    let row = rows.length;
+    const row = rows.length;
     unplaced.forEach((g) => {
       if (!rows[row]) rows[row] = [];
       rows[row].push(g);
@@ -57,11 +57,6 @@ export function layoutGraph(graph: DirectorGraph): GraphLayoutRow[] {
     if (!rows[d]) rows[d] = [];
     rows[d].push(group);
   }
-}
-
-function firstPriority(g: GroupModel): number {
-  const task = g.subtasks.find((t) => !t.optional) || g.subtasks[0];
-  return task ? task.priority : 0;
 }
 
 function compareGroups(a: GroupModel, b: GroupModel): number {

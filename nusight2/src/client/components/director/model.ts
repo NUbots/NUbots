@@ -1,8 +1,8 @@
 import { observable } from "mobx";
 
+import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
-import { message } from "../../../shared/messages";
 
 export type ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
 export const ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
@@ -159,7 +159,7 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
 
   // Resolve the provider pointers
   for (const [gid, g] of Object.entries(groupsById).filter(([gid]) => !rootGroupIds.has(gid))) {
-    const { activeProvider, parentProvider } = state.groups?.[gid]!;
+    const { activeProvider, parentProvider } = state.groups[gid]!;
     g.activeProvider = rootProviderIds.has(activeProvider) ? rootProvider : providersById[activeProvider];
     g.parentProvider = rootProviderIds.has(parentProvider) ? rootProvider : providersById[parentProvider];
   }
