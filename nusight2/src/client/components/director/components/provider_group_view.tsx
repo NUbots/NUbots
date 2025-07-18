@@ -24,6 +24,7 @@ export const ProviderGroupView = observer(
 
     const hasParent = !!group.parentProvider;
     const isRoot = group.providers.some((p) => p.classification === ProviderClassification.ROOT);
+    const isRunning = !!group.activeProvider && !isRoot;
 
     return (
       <div
@@ -31,7 +32,8 @@ export const ProviderGroupView = observer(
         className={`relative rounded p-2 bg-auto-surface-2 space-y-2 flex-none ${(() => {
           if (hasParent) return "border";
           if (isRoot) return "border-2 border-blue-500";
-          return "border-2 border-red-500 border-dashed";
+          // Orphan: dashed border with default colour
+          return "border-2 border-dashed";
         })()}`}
         style={{ minWidth: "16rem" }}
         data-testid="provider-group"
@@ -44,6 +46,12 @@ export const ProviderGroupView = observer(
             }`}
           >
             {isRoot ? "ROOT" : "ORPHAN"}
+          </span>
+        )}
+        {/* running badge */}
+        {isRunning && (
+          <span className="absolute -top-2 right-2 bg-green-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+            RUNNING
           </span>
         )}
         <div className="font-semibold text-sm mb-1" title={group.type}>

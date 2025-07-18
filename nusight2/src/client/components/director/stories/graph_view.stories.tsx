@@ -1,9 +1,10 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
-import raw from "./state.json";
-import { transformDirectorState } from "../model";
 import { GraphView } from "../components/graph_view";
+import { transformDirectorState } from "../model";
+
+import raw from "./state.json";
 
 const graph = transformDirectorState(raw as any);
 

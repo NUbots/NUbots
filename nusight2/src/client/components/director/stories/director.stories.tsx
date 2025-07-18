@@ -4,9 +4,9 @@ import { Meta, StoryObj } from "@storybook/react";
 import { AppController } from "../../app/controller";
 import { AppModel } from "../../app/model";
 import { withRobotSelectorMenuBar } from "../../menu_bar/view";
-
 import { DirectorModel, transformDirectorState } from "../model";
 import { DirectorView } from "../view";
+
 import sampleState from "./state.json";
 
 interface StoryProps {}

@@ -121,6 +121,9 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
   // Treat the synthetic canonical root as a root group too so later passes skip it
   rootGroupIds.add(canonicalRoot.id);
 
+  // Sort collected root subtasks so that highest priority (lowest number) appears first
+  rootSubtasks.sort((a, z) => (z.priority ?? 0) - (a.priority ?? 0));
+
   // Make providers for non-root groups
   if (state.providers) {
     for (const [pid, p] of Object.entries(state.providers).filter(([pid]) => !rootProviderIds.has(pid))) {

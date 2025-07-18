@@ -1,7 +1,8 @@
 import React from "react";
 import { observer } from "mobx-react";
 
-import { ProviderModel, ProviderClassification } from "../model";
+import { ProviderClassification, ProviderModel } from "../model";
+
 import { NeedChip } from "./need_chip";
 import { WhenChip } from "./when_chip";
 

@@ -1,9 +1,10 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
-import raw from "./state.json";
-import { transformDirectorState } from "../model";
 import { ProviderView } from "../components/provider_view";
+import { transformDirectorState } from "../model";
+
+import raw from "./state.json";
 
 const graph = transformDirectorState(raw as any);
 const providerExample = graph.providersById["450"];

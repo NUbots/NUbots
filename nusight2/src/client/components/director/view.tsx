@@ -1,8 +1,8 @@
 import React, { ComponentType, PropsWithChildren } from "react";
 import { observer } from "mobx-react";
 
-import { DirectorModel } from "./model";
 import { GraphView } from "./components/graph_view";
+import { DirectorModel } from "./model";
 
 export interface DirectorViewProps {
   model: DirectorModel;

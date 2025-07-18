@@ -1,20 +1,22 @@
+import "reactflow/dist/style.css";
+
 import React from "react";
+import dagre from "@dagrejs/dagre";
 import ReactFlow, {
   Background,
   Edge,
+  Handle,
   Node,
   Position,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  Handle,
   useReactFlow,
 } from "reactflow";
-import "reactflow/dist/style.css";
-import dagre from "@dagrejs/dagre";
+import { MarkerType } from "reactflow";
 
 import { DirectorGraph, GroupModel, ProviderClassification } from "../model";
-import { MarkerType } from "reactflow";
+
 import { ProviderGroupView } from "./provider_group_view";
 
 /**

@@ -1,9 +1,10 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
-import raw from "./state.json";
-import { transformDirectorState } from "../model";
 import { ProviderGroupView } from "../components/provider_group_view";
+import { transformDirectorState } from "../model";
+
+import raw from "./state.json";
 
 const graph = transformDirectorState(raw as any);
 const groupExample = graph.groupsById["5715460735790508797"];

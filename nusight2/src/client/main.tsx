@@ -10,6 +10,7 @@ import { AppModel } from "./components/app/model";
 import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
+import { installDirector } from "./components/director/install";
 import { installKinematics } from "./components/kinematics/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
@@ -19,7 +20,6 @@ import { installProfiler } from "./components/profiler/install";
 import { installTempMonitor } from "./components/temp_monitor/install";
 import { installVision } from "./components/vision/install";
 import { installVisualMesh } from "./components/visual_mesh/install";
-import { installDirector } from "./components/director/install";
 import { NavigationConfiguration } from "./navigation";
 import { NUsightNetwork } from "./network/nusight_network";
 
