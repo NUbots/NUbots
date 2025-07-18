@@ -48,11 +48,10 @@ message DirectorState {
 
     message Provider {
         enum Classification {
-            UNKNOWN = 0;
-            PROVIDE = 1;
-            START   = 2;
-            STOP    = 3;
-            ROOT    = 4;
+            PROVIDE = 0;
+            START   = 1;
+            STOP    = 2;
+            ROOT    = 3;
         }
 
         message WhenCondition {
