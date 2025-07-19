@@ -6,9 +6,12 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Buttons.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -30,16 +33,20 @@ namespace module::purpose {
     using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
     using message::input::GameState;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::PenaltyReset;
+    using message::output::Buzzer;
     using message::planning::LookAround;
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
-    using message::strategy::WalkToBall;
+    using message::strategy::WalkToKickBall;
     using message::support::FieldDescription;
 
     struct StartPenalty {};
@@ -91,7 +98,7 @@ namespace module::purpose {
 
                 // If our kick off, walk the ball into the goal!
                 if (game_state.our_kick_off) {
-                    emit<Task>(std::make_unique<WalkToBall>());
+                    emit<Task>(std::make_unique<WalkToKickBall>());
                     emit<Task>(std::make_unique<LookAtBall>());
                 }
                 // Else be a goalie!
@@ -111,8 +118,20 @@ namespace module::purpose {
             }
 
             // Walk the ball away
-            emit<Task>(std::make_unique<WalkToBall>());
+            emit<Task>(std::make_unique<WalkToKickBall>());
         });
+
+        // Middle button resumes the soccer scenario
+        on<Trigger<ButtonMiddleDown>, With<FieldDescription>, With<GameState>>().then(
+            [this](const FieldDescription& fd, const GameState& game_state) {
+                Eigen::Vector3d rRFf =
+                    game_state.our_kick_off
+                        ? Eigen::Vector3d(-fd.dimensions.field_length / 2 + fd.dimensions.penalty_mark_distance, 0, 0)
+                        : Eigen::Vector3d(fd.dimensions.field_length / 2, 0, 0);
+                emit(std::make_unique<PenaltyReset>(rRFf));
+            });
+
+        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
     }
 
 }  // namespace module::purpose
