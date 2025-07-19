@@ -168,7 +168,7 @@ namespace module::strategy {
                         const bool obs_in_goal = std::abs(rOFf.y()) <= boundary;
                         // Obstacle in the middle: choose side based on robot heading
                         // Obstacle on the side: go to the opposite side
-                        const bool go_right = obs_in_goal ? (robot_heading > 0) : (rOFf.y() < 0);
+                        const bool go_right = obs_in_goal ? (robot_heading < 0) : (rOFf.y() < 0);
 
                         rTFf = go_right ? rArFf : rAlFf;
                     }
