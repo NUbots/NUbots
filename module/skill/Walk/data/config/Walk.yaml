@@ -17,6 +17,8 @@ walk:
     width: 0.27
     # Ratio of the step_period where the foot should be at its highest point, between [0 1].
     apex_ratio: 0.4
+    # y-offset of the swing foot at the apex of the step (in meters)
+    swing_y_offset: -0.1
   torso:
     # Torso height (in meters)
     height: 0.44

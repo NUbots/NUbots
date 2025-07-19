@@ -79,13 +79,14 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Configure the motion generation options
-            cfg.walk_generator_parameters.step_period     = config["walk"]["period"].as<double>();
-            cfg.walk_generator_parameters.step_apex_ratio = config["walk"]["step"]["apex_ratio"].as<double>();
-            cfg.walk_generator_parameters.step_limits     = config["walk"]["step"]["limits"].as<Expression>();
-            cfg.walk_generator_parameters.step_height     = config["walk"]["step"]["height"].as<double>();
-            cfg.walk_generator_parameters.step_width      = config["walk"]["step"]["width"].as<double>();
-            cfg.walk_generator_parameters.torso_height    = config["walk"]["torso"]["height"].as<double>();
-            cfg.walk_generator_parameters.torso_pitch     = config["walk"]["torso"]["pitch"].as<Expression>();
+            cfg.walk_generator_parameters.step_period         = config["walk"]["period"].as<double>();
+            cfg.walk_generator_parameters.step_apex_ratio     = config["walk"]["step"]["apex_ratio"].as<double>();
+            cfg.walk_generator_parameters.step_limits         = config["walk"]["step"]["limits"].as<Expression>();
+            cfg.walk_generator_parameters.step_height         = config["walk"]["step"]["height"].as<double>();
+            cfg.walk_generator_parameters.step_width          = config["walk"]["step"]["width"].as<double>();
+            cfg.walk_generator_parameters.step_swing_y_offset = config["walk"]["step"]["swing_y_offset"].as<double>();
+            cfg.walk_generator_parameters.torso_height        = config["walk"]["torso"]["height"].as<double>();
+            cfg.walk_generator_parameters.torso_pitch         = config["walk"]["torso"]["pitch"].as<Expression>();
             cfg.walk_generator_parameters.torso_position_offset =
                 config["walk"]["torso"]["position_offset"].as<Expression>();
             cfg.walk_generator_parameters.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();

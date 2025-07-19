@@ -70,6 +70,9 @@ namespace utility::skill {
             /// @brief Ratio of the step_period where the foot should be at its highest point, between [0 1]
             Scalar step_apex_ratio = 0.0;
 
+            /// @brief Sway offset in the y direction of the swing foot (in meters)
+            Scalar step_swing_y_offset = 0.0;
+
             /// @brief Torso height (in meters)
             Scalar torso_height = 0.0;
 
@@ -332,6 +335,12 @@ namespace utility::skill {
             return phase == LEFT ? -p.step_width : p.step_width;
         }
 
+        /// @brief Get the current step swing y offset.
+        /// @return Current step swing y offset.
+        Scalar get_step_swing_y_offset() const {
+            return phase == LEFT ? -p.step_swing_y_offset : p.step_swing_y_offset;
+        }
+
         /**
          * @brief Generate torso trajectory for the current step.
          * @param step Step placement in the planted foot frame.
@@ -395,7 +404,7 @@ namespace utility::skill {
 
             // Middle waypoint: Raise foot to step height
             wp.time_point       = p.step_apex_ratio * p.step_period;
-            wp.position         = Vec3(0, get_foot_width_offset(), p.step_height);
+            wp.position         = Vec3(0, get_foot_width_offset() + get_step_swing_y_offset(), p.step_height);
             wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
             wp.orientation      = Vec3(0.0, 0.0, velocity_target.z() * p.step_apex_ratio * p.step_period);
             wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
