@@ -175,22 +175,49 @@ namespace module::strategy {
                         return (Hfr.inverse() * rOFf).squaredNorm();
                     });
 
-                    auto obstacle = robot_infront_of_path(all_obstacles, rBFf, rTFf);
+                    auto obstacles = robot_infront_of_path(all_obstacles, rBFf, rTFf);
 
-                    if (obstacle.has_value()) {
-                        log<DEBUG>("Avoiding obstacle in the way of kick path");
-                        auto rOFf = *obstacle;  // Safe to dereference now
+                    if (!obstacles.empty()) {
+                        log<INFO>("Avoiding", obstacles.size(), "obstacles in the way of kick path");
+
+                        // Calculate the center point of all obstacles
+                        Eigen::Vector3d r0cFf = Eigen::Vector3d::Zero();
+                        for (const auto& obstacle : obstacles) {
+                            r0cFf += obstacle;
+                        }
+                        r0cFf /= static_cast<double>(obstacles.size());
+
+                        // Calculate a perpendicular vector to the direction of the target point (similar to PlanWalkPath)
+                        const Eigen::Vector3d perp(-uTBf.y(), uTBf.x(), 0);
+
+                        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
+                        auto proj = [&perp](const Eigen::Vector3d& v) { return v.dot(perp); };
+
+                        // Find the most positive and negative projections to determine avoidance sides
+                        const Eigen::Vector3d rOlFf = *std::ranges::min_element(obstacles, {}, proj);
+                        const Eigen::Vector3d rOrFf = *std::ranges::max_element(obstacles, {}, proj);
+
+                        // log obstacle length
+                        log<INFO>("Obstacle length:", (rOrFf - rOlFf).norm());
 
                         // Calculate avoidance points for both sides
-                        const Eigen::Vector3d rAlFf = rOFf + uTBf_p * cfg.obstacle_radius;
-                        const Eigen::Vector3d rArFf = rOFf - uTBf_p * cfg.obstacle_radius;
+                        const Eigen::Vector3d rAlFf = rOlFf + perp * cfg.obstacle_radius;
+                        const Eigen::Vector3d rArFf = rOrFf - perp * cfg.obstacle_radius;
+
+                        // I don't think this will realistically ever happen
+
+                        // // If the left avoidance points is too far away from the robot, do not adjust the target
+                        // if ((rAlFf - robot.position).norm() > cfg.infront_of_ball_radius && (rArFf - robot.position).norm() > cfg.infront_of_ball_radius) {
+                        //     log<DEBUG>("Avoidance points too far apart, not adjusting target");
+                        //     return;
+                        // }
 
                         // Determine which side to go around based on field position and robot heading
                         const double boundary = field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
-                        const bool obs_in_field_centre = std::abs(rOFf.y()) <= boundary;
+                        const bool obs_in_field_centre = std::abs(r0cFf.y()) <= boundary;
                         // Obstacle in the middle: choose side based on robot heading
                         // Obstacle on the side: go to the opposite side
-                        const bool go_right = obs_in_field_centre ? (rRFf.y() < rBFf.y()) : (rOFf.y() < 0);
+                        const bool go_right = obs_in_field_centre ? (rRFf.y() < rBFf.y()) : (r0cFf.y() < 0);
 
                         rTFf = go_right ? rArFf : rAlFf;
                     }
@@ -368,21 +395,49 @@ namespace module::strategy {
                 // Stop when at the target position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, true));
             });
-    }
+    }    std::vector<Eigen::Vector3d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
+                                                                  const Eigen::Vector3d& rBFf,
+                                                                  const Eigen::Vector3d& rGFf) {
+        // Find all obstacles in the path
+        std::vector<Eigen::Vector3d> primary_obstacles;
 
-    std::optional<Eigen::Vector3d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
-                                                                     const Eigen::Vector3d& rBFf,
-                                                                     const Eigen::Vector3d& rGFf) {
         for (const auto& rOFf : all_obstacles) {
             const bool in_front     = rOFf.x() < rBFf.x();
             const bool within_range = (rOFf - rBFf).norm() < cfg.infront_check_distance;
             const bool intersects_path =
                 intersection_line_and_circle(rGFf.head(2), rBFf.head(2), rOFf.head(2), cfg.infront_of_ball_radius);
             if (in_front && within_range && intersects_path) {
-                return rOFf;
+                primary_obstacles.push_back(rOFf);
             }
         }
-        return std::nullopt;
+
+        // If no primary obstacles found, return empty vector
+        if (primary_obstacles.empty()) {
+            return {};
+        }
+
+        // Find nearby obstacles that should be considered together
+        std::vector<Eigen::Vector3d> obstacle_cluster = primary_obstacles;
+
+        for (const auto& rOFf : all_obstacles) {
+            // Skip if already in primary obstacles
+            if (std::find(primary_obstacles.begin(), primary_obstacles.end(), rOFf) != primary_obstacles.end()) {
+                continue;
+            }
+
+            // Check if this obstacle is close to any obstacle in our cluster
+            for (const auto& cluster_obstacle : obstacle_cluster) {
+                const double distance = (rOFf - cluster_obstacle).norm();
+                const double cluster_threshold = cfg.obstacle_radius * 3.0; // 3x radius for clustering
+
+                if (distance < cluster_threshold) {
+                    obstacle_cluster.push_back(rOFf);
+                    break; // Added to cluster, no need to check other cluster members
+                }
+            }
+        }
+
+        return obstacle_cluster;
     }
 
 }  // namespace module::strategy
