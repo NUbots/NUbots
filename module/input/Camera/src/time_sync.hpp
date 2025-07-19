@@ -32,7 +32,9 @@
 #include "CameraContext.hpp"
 
 namespace module::input {
+
     CameraContext::TimeCorrection sync_clocks(ArvDevice* device);
+
 }  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_TIMESYNC_HPP
