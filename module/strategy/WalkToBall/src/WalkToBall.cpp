@@ -182,15 +182,15 @@ namespace module::strategy {
                         auto rOFf = *obstacle;  // Safe to dereference now
 
                         // Calculate avoidance points for both sides
-                        const Eigen::Vector3d rAlFf = rOFf - uTBf_p * cfg.obstacle_radius;
-                        const Eigen::Vector3d rArFf = rOFf + uTBf_p * cfg.obstacle_radius;
+                        const Eigen::Vector3d rAlFf = rOFf + uTBf_p * cfg.obstacle_radius;
+                        const Eigen::Vector3d rArFf = rOFf - uTBf_p * cfg.obstacle_radius;
 
                         // Determine which side to go around based on field position and robot heading
-                        const double boundary  = field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
-                        const bool obs_in_goal = std::abs(rOFf.y()) <= boundary;
+                        const double boundary = field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
+                        const bool obs_in_field_centre = std::abs(rOFf.y()) <= boundary;
                         // Obstacle in the middle: choose side based on robot heading
                         // Obstacle on the side: go to the opposite side
-                        const bool go_right = obs_in_goal ? (robot_heading < 0) : (rOFf.y() < 0);
+                        const bool go_right = obs_in_field_centre ? (rRFf.y() < rBFf.y()) : (rOFf.y() < 0);
 
                         rTFf = go_right ? rArFf : rAlFf;
                     }
@@ -221,6 +221,7 @@ namespace module::strategy {
 
                 // Add a sideways offset if we're in front of the ball (so we walk around it)
                 if (err_x > 0) {
+                    log<DEBUG>("In front of the ball, adjusting target sideways for ball approach.");
                     target += uTBf_p * (err_y < 0 ? -1 : 1) * std::clamp(err_x, cfg.min_offset_y, cfg.max_offset_y);
                 }
                 // Aim for further behind the ball if we are perpendicular misaligned
