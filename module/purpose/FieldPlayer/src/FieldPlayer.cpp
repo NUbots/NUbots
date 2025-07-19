@@ -65,8 +65,8 @@ namespace module::purpose {
     using message::purpose::ReadyAttack;
     using message::purpose::SoccerPosition;
     using message::purpose::Support;
+    using message::strategy::FindBall;
     using message::strategy::LookAtBall;
-    using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -90,16 +90,16 @@ namespace module::purpose {
         on<Provide<FieldPlayerMsg>,
            Optional<With<Ball>>,
            Optional<With<Robots>>,
+           Optional<With<Field>>,
            With<Sensors>,
-           With<Field>,
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Robots>& robots,
+                         const std::shared_ptr<const Field>& field,
                          const Sensors& sensors,
-                         const Field& field,
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
@@ -117,8 +117,15 @@ namespace module::purpose {
                     return;
                 }
 
+                // Search if no ball or field
+                if (!field || !ball) {
+                    log<DEBUG>("No field or ball, searching for landmarks to localise.");
+                    emit<Task>(std::make_unique<FindBall>());
+                    return;
+                }
+
                 // If the robot is uncertain about its position, it should not play
-                if (cfg.search_when_lost && field.cost > cfg.max_localisation_cost) {
+                if (cfg.search_when_lost && field->cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::UNKNOWN,
@@ -127,17 +134,12 @@ namespace module::purpose {
                                                    game_state.team.team_colour));
 
                     // Search for landmarks to localise
-                    emit<Task>(std::make_unique<Search>());
+                    emit<Task>(std::make_unique<FindBall>());
                     return;
                 }
 
                 // Always look at the ball if possible
-                emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
-
-                // If there's no ball message, we can't play, just look for the ball
-                if (ball == nullptr) {
-                    return;
-                }
+                emit<Task>(std::make_unique<LookAtBall>(), 1);
 
                 // Make an ignore list with inactive teammates
                 std::vector<unsigned int> ignore_ids{};
@@ -154,7 +156,7 @@ namespace module::purpose {
                 // If there are no robots, use an empty vector
                 Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
                                                                   (robots ? *robots : Robots{}),
-                                                                  field.Hfw,
+                                                                  field->Hfw,
                                                                   sensors.Hrw,
                                                                   cfg.ball_threshold,
                                                                   cfg.equidistant_threshold,
@@ -164,7 +166,7 @@ namespace module::purpose {
                 // If we have robots, determine if we are closest to the ball
                 // Otherwise assume we are alone and closest by default
                 // Only consider the goalie if the ball is in the defending third
-                Eigen::Vector3d rBFf     = field.Hfw * ball->rBWw;
+                Eigen::Vector3d rBFf     = field->Hfw * ball->rBWw;
                 double defending_third_x = fd.dimensions.field_length / 3.0;
                 if (robots && rBFf.x() < defending_third_x) {
                     for (const auto& robot : robots->robots) {
@@ -177,7 +179,7 @@ namespace module::purpose {
                 const unsigned int closest_to_ball =
                     robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
                                                                         *robots,
-                                                                        field.Hfw,
+                                                                        field->Hfw,
                                                                         sensors.Hrw,
                                                                         cfg.equidistant_threshold,
                                                                         global_config.player_id,
@@ -187,7 +189,7 @@ namespace module::purpose {
 
                 // Determine if we need to wait for the other team to kick off
                 // If the ball moves, it is in play
-                bool ball_moved   = (field.Hfw * ball->rBWw).norm() > cfg.ball_off_center_threshold;
+                bool ball_moved   = (field->Hfw * ball->rBWw).norm() > cfg.ball_off_center_threshold;
                 bool kickoff_wait = !ball_moved && !game_state.our_kick_off
                                     && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
                 // At this point, if a penalty state is in progress, it must be in sub_mode 1,
@@ -235,7 +237,7 @@ namespace module::purpose {
                     }
                 }
                 bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
-                                                                               field.Hfw,
+                                                                               field->Hfw,
                                                                                sensors.Hrw,
                                                                                cfg.equidistant_threshold,
                                                                                global_config.player_id,
