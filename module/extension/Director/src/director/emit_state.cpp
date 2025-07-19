@@ -58,7 +58,7 @@ namespace module::extension {
             for (const auto& subtask : group.subtasks) {
 
                 // Specific handling for the wait task
-                if (t->type == typeid(::extension::behaviour::Wait)) {
+                if (subtask->type == typeid(::extension::behaviour::Wait)) {
                     subtasks.emplace_back("Wait", subtask->type.hash_code(), subtask->priority, subtask->optional);
                 }
                 else {
