@@ -44,3 +44,11 @@ obstacle_radius: 0.8
 
 # Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
 goal_width_margin: 0.2
+
+# Error thresholds for determining when robot is ready to kick the ball
+# X error threshold (parallel to ball-target vector) - robot should be behind ball
+err_x_ok: 0.05
+# Y error threshold (perpendicular to ball-target vector) - robot should be aligned laterally
+err_y_ok: 0.1
+# Heading error threshold - robot should be facing the target
+err_z_ok: 15 * pi / 180

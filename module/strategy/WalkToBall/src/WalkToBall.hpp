@@ -96,6 +96,15 @@ namespace module::strategy {
             /// @brief Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
             double goal_width_margin = 0.0;
 
+            /// @brief Acceptable error threshold in x direction (parallel to ball-target vector) for kicking
+            double err_x_ok = 0.0;
+
+            /// @brief Acceptable error threshold in y direction (perpendicular to ball-target vector) for kicking
+            double err_y_ok = 0.0;
+
+            /// @brief Acceptable heading error threshold for kicking
+            double err_z_ok = 0.0;
+
         } cfg;
 
         std::optional<Eigen::Vector3d> robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,

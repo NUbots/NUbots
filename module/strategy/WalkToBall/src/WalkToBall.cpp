@@ -91,6 +91,9 @@ namespace module::strategy {
             cfg.infront_check_distance = config["infront_check_distance"].as<double>();
             cfg.obstacle_radius        = config["obstacle_radius"].as<double>();
             cfg.goal_width_margin      = config["goal_width_margin"].as<double>();
+            cfg.err_x_ok               = config["err_x_ok"].as<double>();
+            cfg.err_y_ok               = config["err_y_ok"].as<double>();
+            cfg.err_z_ok               = config["err_z_ok"].as<Expression>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -201,8 +204,8 @@ namespace module::strategy {
                 // Compute desired heading angle (towards goal from ball)
                 double desired_heading = vector_to_bearing(rTBf.head(2));
 
-                // Compute kick target position (directly behind the ball)
-                Eigen::Vector3d target = rBFf - uTBf * cfg.ball_kick_distance;
+                // Compute kick target position (at the ball for now, change later)
+                Eigen::Vector3d target = rBFf;
 
                 // Simplify below calculations
                 auto progress = [](auto val, auto max_val) { return std::clamp(val / max_val, 0.0, 1.0); };
@@ -224,6 +227,13 @@ namespace module::strategy {
                 target -= uTBf * progress(std::abs(err_y), cfg.max_error_y) * cfg.error_gain_perp;
                 // Aim for further behind the ball if our heading angle is wrong (to give us time to align)
                 target -= uTBf * cfg.ball_approach_distance * progress(std::abs(err_z), cfg.max_angle_error);
+
+                // If no error is too high, we're ready to walk into the ball.
+                if (std::max(err_x, 0.0) < cfg.err_x_ok   //
+                    && std::abs(err_y) < cfg.err_y_ok     //
+                    && std::abs(err_z) < cfg.err_z_ok) {  //
+                    target -= uTBf * cfg.ball_kick_distance;
+                }
 
                 // Final walking target pose
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
