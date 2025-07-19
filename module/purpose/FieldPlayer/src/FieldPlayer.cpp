@@ -188,10 +188,8 @@ namespace module::purpose {
                 bool is_closest = closest_to_ball == global_config.player_id;
 
                 // Determine if we need to wait for the other team to kick off
-                // If the ball moves, it is in play
-                bool ball_moved   = (field->Hfw * ball->rBWw).norm() > cfg.ball_off_center_threshold;
-                bool kickoff_wait = !ball_moved && !game_state.our_kick_off
-                                    && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
+                bool kickoff_wait =
+                    !game_state.our_kick_off && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
                 // At this point, if a penalty state is in progress, it must be in sub_mode 1,
                 // which is the setup phase where the robot can position to defend or attack.
                 bool allowed_to_attack = !(kickoff_wait || penalty);
