@@ -35,10 +35,12 @@ approach_offset: 0.6
 # While angle error is larger than this, apply the offset to position next to the ball when tackling
 tackle_angle_offset: 0.2
 
-
 infront_of_ball_radius: 0.8
 # Distance in front of the ball to check for obstacles
 infront_check_distance: 1.5
 
 # Radius to avoid obstacles when walking to the ball
 obstacle_radius: 0.8
+
+# Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
+goal_width_margin: 0.2
