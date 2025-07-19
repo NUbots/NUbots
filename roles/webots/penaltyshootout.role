@@ -8,7 +8,6 @@ nuclear_role(
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::SoccerConfig # Field description
   support::configuration::GlobalConfig
-
   # Sensors and network (input)
   platform::Webots
   input::SensorFilter
