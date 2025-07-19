@@ -76,4 +76,5 @@ namespace module::extension {
                 emit(std::make_unique<DirectorState>(director_state));
             }
         }
-    }  // namespace module::extension
+    }
+}  // namespace module::extension
