@@ -25,6 +25,7 @@ export const ProviderGroupView = observer(
     const hasParent = !!group.parentProvider;
     const isRoot = group.providers.some((p) => p.classification === ProviderClassification.ROOT);
     const isRunning = !!group.activeProvider && !isRoot;
+    const hasFailed = group.failed;
 
     return (
       <div
@@ -52,6 +53,12 @@ export const ProviderGroupView = observer(
         {isRunning && (
           <span className="absolute -top-2 right-2 bg-green-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
             RUNNING
+          </span>
+        )}
+        {/* failed badge */}
+        {hasFailed && (
+          <span className="absolute -top-2 left-2 bg-yellow-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+            FAILED
           </span>
         )}
         <div className="font-semibold text-sm mb-1" title={group.type}>
