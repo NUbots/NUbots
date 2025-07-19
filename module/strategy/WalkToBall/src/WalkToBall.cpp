@@ -128,27 +128,24 @@ namespace module::strategy {
 
                 // Ball and goal positions in field frame
                 const Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
-                const Eigen::Vector3d rGBf = rGFf - rBFf;        // Vector from ball to goal
-                const Eigen::Vector3d uGBf = rGBf.normalized();  // Unit vector toward goal
+                const Eigen::Vector3d rGBf = rGFf - rBFf;              // Vector from ball to goal
+                const Eigen::Vector3d uGBf = rGBf.normalized();        // Unit vector toward goal
+                const Eigen::Vector3d uGBf_p(-uGBf.y(), uGBf.x(), 0);  // perpendicular
 
                 // Robot position and orientation in field frame
                 Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
                 Eigen::Vector3d rRFf  = Hfr.translation();  // Robot position in field
 
                 // Compute desired heading angle (towards goal from ball)
-                double desired_heading  = std::atan2(rGBf.y(), rGBf.x());
-                Eigen::Vector3d robot_x = Hfr.linear().col(0);  // Robot forward direction in field
-                double robot_heading    = std::atan2(robot_x.y(), robot_x.x());
+                double desired_heading = vector_to_bearing(rGBf.head(2));
+                double robot_heading =
+                    vector_to_bearing(Hfr.linear().col(0).head(2));  // Robot forward direction in field
 
                 // Compute kick target position (directly behind the ball)
                 Eigen::Vector3d target = rBFf - uGBf * cfg.ball_kick_distance;
 
-                // Final walking target pose
-                Eigen::Isometry3d Hfk = Eigen::Isometry3d::Identity();
-
                 // Simplify below calculations
-                auto progress     = [](auto val, auto max_val) { return std::clamp(val / max_val, 0.0, 1.0); };
-                const auto uGBf_p = Eigen::Vector3d(-uGBf.y(), uGBf.x(), 0);  // perpendicular
+                auto progress = [](auto val, auto max_val) { return std::clamp(val / max_val, 0.0, 1.0); };
 
                 // Error in the direction parallel to the ball-goal vector
                 const double err_x = (rRFf - rBFf).dot(uGBf);
@@ -163,10 +160,8 @@ namespace module::strategy {
                 if (err_x > 0) {
                     target += uGBf_p * (err_y < 0 ? -1 : 1) * std::clamp(err_x, cfg.min_offset_y, cfg.max_offset_y);
                 }
-
                 // Aim for further behind the ball if we are perpendicular misaligned
                 target -= uGBf * progress(std::abs(err_y), cfg.max_error_y) * cfg.error_gain_perp;
-
                 // Aim for further behind the ball if our heading angle is wrong (to give us time to align)
                 target -= uGBf * cfg.ball_approach_distance * progress(std::abs(err_z), cfg.max_angle_error);
 
@@ -178,25 +173,20 @@ namespace module::strategy {
                         all_obstacles.emplace_back(field.Hfw * robot.rRWw);
                     }
                     // Sort obstacles based on distance from the robot
-                    std::ranges::sort(all_obstacles, {}, [&Hfr](const auto& obstacle) {
-                        return (Hfr.inverse() * obstacle).squaredNorm();
+                    std::ranges::sort(all_obstacles, {}, [&Hfr](const auto& rOFf) {
+                        return (Hfr.inverse() * rOFf).squaredNorm();
                     });
 
                     auto obstacle = robot_infront_of_path(all_obstacles, rBFf, rGFf);
 
                     if (obstacle.has_value()) {
                         log<DEBUG>("Avoiding obstacle in the way of kick path");
-
-                        // Define goal boundaries for side selection
-                        const double right_boundary =
-                            field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
-                        const double left_boundary = -right_boundary;
+                        auto rOFf = *obstacle;  // Safe to dereference now
 
                         // Calculate avoidance points and angles for both sides
-                        const Eigen::Vector3d perp(rGBf.normalized().y(), -rGBf.normalized().x(), 0);
                         auto calculate_avoidance = [&](int sign) {
-                            const Eigen::Vector3d avoid_point = *obstacle + perp * (sign * cfg.obstacle_radius);
-                            const double angle                = vector_to_bearing(avoid_point.head(2) - rBFf.head(2));
+                            const Eigen::Vector3d avoid_point = rOFf + uGBf_p * (sign * cfg.obstacle_radius);
+                            const double angle                = vector_to_bearing((avoid_point - rBFf).head(2));
                             const Eigen::Vector3d target =
                                 rBFf - (avoid_point - rBFf).normalized() * cfg.ball_approach_distance;
                             return std::make_pair(target, angle);
@@ -206,10 +196,11 @@ namespace module::strategy {
                         const auto [right_target, right_angle] = calculate_avoidance(1);
 
                         // Determine which side to go around based on field position and robot heading
+                        const double boundary = field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
                         const bool go_right =
-                            (left_boundary <= obstacle->y() && obstacle->y() <= right_boundary)
+                            (std::abs(rOFf.y()) <= boundary)
                                 ? (robot_heading > 0)  // Middle of field: choose based on robot heading direction
-                                : (obstacle->y() < left_boundary);  // Side of field: go to the opposite side
+                                : (rOFf.y() < 0);      // Side of field: go to the opposite side
 
                         // Adjust target and headings based on side selection
                         target          = go_right ? right_target : left_target;
@@ -224,7 +215,8 @@ namespace module::strategy {
                     }
                 }
 
-                Hfk = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
+                // Final walking target pose
+                Eigen::Isometry3d Hfk = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
 
                 // Issue walking task toward final position and orientation
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
@@ -322,8 +314,7 @@ namespace module::strategy {
                 double robot_heading    = std::atan2(robot_x.y(), robot_x.x());
 
                 // Heading error (difference between robot and desired heading)
-                double angle_error =
-                    std::atan2(std::sin(desired_heading - robot_heading), std::cos(desired_heading - robot_heading));
+                double angle_error = normalise_angle(desired_heading - robot_heading);
 
                 // Compute kick target position (directly behind the ball)
                 const Eigen::Vector3d kick_target = rBFf - uGBf * cfg.distance_behind_ball;
@@ -361,13 +352,13 @@ namespace module::strategy {
     std::optional<Eigen::Vector3d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
                                                                      const Eigen::Vector3d& rBFf,
                                                                      const Eigen::Vector3d& rGFf) {
-        for (const auto& obstacle : all_obstacles) {
-            const bool in_front     = obstacle.x() < rBFf.x();
-            const bool within_range = (obstacle - rBFf).norm() < cfg.infront_check_distance;
+        for (const auto& rOFf : all_obstacles) {
+            const bool in_front     = rOFf.x() < rBFf.x();
+            const bool within_range = (rOFf - rBFf).norm() < cfg.infront_check_distance;
             const bool intersects_path =
-                intersection_line_and_circle(rGFf.head(2), rBFf.head(2), obstacle.head(2), cfg.infront_of_ball_radius);
+                intersection_line_and_circle(rGFf.head(2), rBFf.head(2), rOFf.head(2), cfg.infront_of_ball_radius);
             if (in_front && within_range && intersects_path) {
-                return obstacle;
+                return rOFf;
             }
         }
         return std::nullopt;
