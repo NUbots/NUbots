@@ -66,8 +66,20 @@ namespace module::strategy {
 
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
+            /// @brief Radius of circle around ball where an opponent robot is considered to be in front of the ball
+            double infront_of_ball_radius = 0.0;
+            /// @brief Distance in front of the ball to check for obstacles
+            double infront_check_distance = 0.0;
+
+            /// @brief Radius to avoid obstacles when dribbling the ball
+            double obstacle_radius = 0.0;
 
         } cfg;
+
+        std::optional<Eigen::Vector2d> robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
+                                                             const Eigen::Vector2d& rBFf,
+                                                             const Eigen::Vector2d& rGFf);
+
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();

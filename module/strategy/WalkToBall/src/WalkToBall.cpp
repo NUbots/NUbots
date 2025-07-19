@@ -38,7 +38,9 @@
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
 
+#include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/math/geometry/intersection.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::strategy {
@@ -58,6 +60,7 @@ namespace module::strategy {
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
 
+    using utility::math::angle::vector_to_bearing;
     using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
@@ -77,6 +80,9 @@ namespace module::strategy {
             cfg.approach_offset        = config["approach_offset"].as<double>();
             cfg.tackle_angle_offset    = config["tackle_angle_offset"].as<double>();
             cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
+            cfg.infront_of_ball_radius = config["infront_of_ball_radius"].as<double>();
+            cfg.infront_check_distance = config["infront_check_distance"].as<double>();
+            cfg.obstacle_radius        = config["obstacle_radius"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -97,8 +103,17 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToKickBall>, With<Ball>, With<Sensors>, With<Field>>().then(
-            [this](const Ball& ball, const Sensors& sensors, const Field& field) {
+        on<Provide<WalkToKickBall>,
+           Optional<With<Robots>>,
+           With<Ball>,
+           With<Sensors>,
+           With<Field>,
+           With<FieldDescription>>()
+            .then([this](const std::shared_ptr<const Robots>& robots,
+                         const Ball& ball,
+                         const Sensors& sensors,
+                         const Field& field,
+                         const FieldDescription& field_description) {
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -129,6 +144,7 @@ namespace module::strategy {
 
                 // If robot is approaching from behind the ball (x-axis direction)
                 if (rBFf.x() > rRFf.x()) {
+                    log<DEBUG>("Approaching from behind the ball");
                     // Compute left and right side positions to walk around the ball
                     Eigen::Vector3d rAlFf = rBFf + cfg.avoid_ball_offset;
                     Eigen::Vector3d rArFf = rBFf + cfg.avoid_ball_offset.cwiseProduct(Eigen::Vector3d(1, -1, 1));
@@ -156,6 +172,87 @@ namespace module::strategy {
                     Eigen::Vector3d target = kick_target - uGBf * cfg.ball_approach_distance * angle_scale;
                     Hfk                    = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
                 }
+                // If there are robots, check if there are obstacles in the way
+                if (robots != nullptr) {
+                    // Get the positions of all robots in the world
+                    std::vector<Eigen::Vector2d> all_obstacles{};
+                    for (const auto& robot : robots->robots) {
+                        all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
+                    }
+
+                    auto obstacle = robot_infront_of_path(all_obstacles, rBFf.head(2), rGFf.head(2));
+                    if (obstacle.has_value()) {
+                        log<DEBUG>("Avoiding obstacle in the way of kick path");
+                        Eigen::Vector2d side_offset =
+                            Eigen::Vector2d(-uGBf.y(), uGBf.x()).normalized() * cfg.ball_approach_distance;
+
+                        // Decide which side to go around based on where we are on the field
+                        double center_point     = 0;
+                        double left_goal_point  = center_point - field_description.dimensions.goal_width / 2.0 + 0.2;
+                        double right_goal_point = center_point + field_description.dimensions.goal_width / 2.0 - 0.2;
+
+                        // Calculate a perpendicular vector to the direction of the target point (2D)
+                        const Eigen::Vector2d perp(rGBf.normalized().y(), -rGBf.normalized().x());
+
+                        Eigen::Vector2d obstacle2d((*obstacle).x(), (*obstacle).y());
+
+                        // Get the vector to avoid the obstacle to the left
+                        const Eigen::Vector2d left_avoid_point = obstacle2d - perp * cfg.obstacle_radius;
+                        const auto left_angle                  = vector_to_bearing(left_avoid_point - rBFf.head(2));
+
+                        // Create a new walk target point behind the ball to face the avoidance point
+                        const Eigen::Vector2d left_avoid_vector = left_avoid_point - rBFf.head(2);
+                        const Eigen::Vector2d left_adjusted_target =
+                            rBFf.head(2) - left_avoid_vector.normalized() * cfg.ball_approach_distance;
+
+                        // Get the vector to avoid the obstacle to the right
+                        const Eigen::Vector2d right_avoid_point = obstacle2d + perp * cfg.obstacle_radius;
+                        const auto right_angle                  = vector_to_bearing(right_avoid_point - rBFf.head(2));
+
+                        // Create a new walk target point behind the ball to face the right avoidance point
+                        const Eigen::Vector2d right_avoid_vector = right_avoid_point - rBFf.head(2);
+                        const Eigen::Vector2d right_adjusted_target =
+                            rBFf.head(2) - right_avoid_vector.normalized() * cfg.ball_approach_distance;
+
+                        Eigen::Vector2d adjusted_target;
+                        log<DEBUG>("Obstacle detected at", obstacle2d.y());
+                        if (obstacle2d.y() > left_goal_point && obstacle2d.y() < right_goal_point) {
+                            // If we are in the middle of the field, go around the robot based on which side we are
+                            // facing facing left in field space, go around left side and turn right
+                            if (robot_heading > 0) {
+                                adjusted_target = right_adjusted_target;
+                                desired_heading = right_angle;
+                            }
+                            else {
+                                adjusted_target = left_adjusted_target;
+                                desired_heading = left_angle;
+                            }
+                        }
+                        else if (obstacle2d.y() < left_goal_point) {
+                            adjusted_target = right_adjusted_target;
+                            log<DEBUG>("Robot on the left side of the field, going around on the right side");
+                            desired_heading = right_angle;  // Turn right
+                        }
+                        else {
+                            log<DEBUG>("Robot on the right side of the field, going around on the left side");
+                            // If we are on the left side of the field, go around the robot on the right side
+                            adjusted_target = left_adjusted_target;
+                            desired_heading = left_angle;  // Turn left
+                        }
+
+                        // Check we are facing a good angle to clear the other robot
+                        double angle_error = std::atan2(std::sin(desired_heading - robot_heading),
+                                                        std::cos(desired_heading - robot_heading));
+                        // Walk into the ball if we are facing the right direction
+                        if (std::abs(angle_error) < (cfg.max_angle_error / 2)) {
+                            log<DEBUG>("Facing the right direction, walking into the ball");
+                            adjusted_target = rBFf.head(2) - uGBf.head(2) * cfg.ball_kick_distance;
+                        }
+
+                        Hfk = pos_rpy_to_transform(Eigen::Vector3d(adjusted_target.x(), adjusted_target.y(), 0),
+                                                   Eigen::Vector3d(0, 0, desired_heading));
+                    }
+                }
 
                 // Issue walking task toward final position and orientation
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
@@ -166,6 +263,7 @@ namespace module::strategy {
         // Otherwise it will emit a Task to walk to the ball
         on<Provide<TackleBall>, With<Ball>, With<Sensors>, With<Field>, With<Robots>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field, const Robots& robots) {
+                log<DEBUG>("Tackling the ball");
                 // Position of the ball relative to the robot in the robot space
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 // Add an offset to account for walking with the foot in front of the ball
@@ -232,6 +330,7 @@ namespace module::strategy {
         // Walk and stop behind the ball, facing the goal. Avoids walking into the ball.
         on<Provide<PositionBehindBall>, With<Ball>, With<Sensors>, With<Field>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field) {
+                log<DEBUG>("Positioning behind the ball");
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -285,6 +384,24 @@ namespace module::strategy {
                 // Stop when at the target position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, true));
             });
+    }
+
+    std::optional<Eigen::Vector2d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector2d>& all_obstacles,
+                                                                     const Eigen::Vector2d& rBFf,
+                                                                     const Eigen::Vector2d& rGFf) {
+        // Normalized direction from robot to ball
+        const Eigen::Vector2d dir_to_ball = rBFf.normalized();
+
+        for (const auto& obstacle : all_obstacles) {
+            const bool in_front     = obstacle.x() < rBFf.x();
+            const bool within_range = (obstacle - rBFf).norm() < cfg.infront_check_distance;
+            const bool intersects_path =
+                utility::math::geometry::intersection_line_and_circle(rGFf, rBFf, obstacle, cfg.infront_of_ball_radius);
+            if (in_front && within_range && intersects_path) {
+                return obstacle;
+            }
+        }
+        return std::nullopt;
     }
 
 }  // namespace module::strategy
