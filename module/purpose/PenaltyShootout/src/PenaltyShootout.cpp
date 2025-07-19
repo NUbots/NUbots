@@ -50,7 +50,6 @@ namespace module::purpose {
     using message::support::FieldDescription;
 
     struct StartPenalty {};
-    struct PenaltyGoalie {};
     struct Play {};
 
     PenaltyShootout::PenaltyShootout(std::unique_ptr<NUClear::Environment> environment)
@@ -101,25 +100,11 @@ namespace module::purpose {
                     emit<Task>(std::make_unique<WalkToKickBall>());
                     emit<Task>(std::make_unique<LookAtBall>());
                 }
-                // Else be a goalie!
+                // Else do nothing cause the goalie can't move off the line and we don't want to dive and break!
                 else {
-                    emit<Task>(std::make_unique<PenaltyGoalie>());
                     emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
                 }
             });
-
-        on<Provide<PenaltyGoalie>, With<Ball>, With<Sensors>>().then([this](const Ball& ball, const Sensors& sensors) {
-            // Get position of the ball in robot space
-            Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
-
-            // Check if the ball is close enough to act yet
-            if (rBRr.norm() > cfg.ball_action_distance) {
-                return;
-            }
-
-            // Walk the ball away
-            emit<Task>(std::make_unique<WalkToKickBall>());
-        });
 
         // Middle button resumes the soccer scenario
         on<Trigger<ButtonMiddleDown>, With<FieldDescription>, With<GameState>>().then(
