@@ -82,6 +82,7 @@ message GameState {
         PenaltyReason penalty_reason = 2;
         /// The timestamp when the robot will be playing again
         google.protobuf.Timestamp unpenalised = 3;
+        bool goalie = 4;  // Whether this robot is a goalie
     }
 
     message Team {
