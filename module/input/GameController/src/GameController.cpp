@@ -281,7 +281,8 @@ namespace module::input {
             GameState::Robot own_player =
                 GameState::Robot(player_id,
                                  get_penalty_reason(new_own_player.penalty_state),
-                                 NUClear::clock::now() + std::chrono::seconds(new_own_player.penalised_time_left));
+                                 NUClear::clock::now() + std::chrono::seconds(new_own_player.penalised_time_left),
+                                 new_own_player.goal_keeper);
             state->team.players.push_back(own_player);
             if (player_id == PLAYER_ID) {
                 state->self = own_player;
