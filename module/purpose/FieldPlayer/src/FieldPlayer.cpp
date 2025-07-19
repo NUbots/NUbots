@@ -67,7 +67,6 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
-    using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -118,10 +117,10 @@ namespace module::purpose {
                     return;
                 }
 
-                // If there's no field, search because it's hard to do anything without localisation
-                if (!field) {
-                    log<DEBUG>("No field, searching for landmarks to localise.");
-                    emit<Task>(std::make_unique<Search>());
+                // Search if no ball or field
+                if (!field || !ball) {
+                    log<DEBUG>("No field or ball, searching for landmarks to localise.");
+                    emit<Task>(std::make_unique<FindBall>());
                     return;
                 }
 
@@ -135,18 +134,12 @@ namespace module::purpose {
                                                    game_state.team.team_colour));
 
                     // Search for landmarks to localise
-                    emit<Task>(std::make_unique<Search>());
+                    emit<Task>(std::make_unique<FindBall>());
                     return;
                 }
 
                 // Always look at the ball if possible
-                emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
-
-                // If there's no ball message, we can't play, just look for the ball
-                if (ball == nullptr) {
-                    emit<Task>(std::make_unique<FindBall>(), 2);
-                    return;
-                }
+                emit<Task>(std::make_unique<LookAtBall>(), 1);
 
                 // Make an ignore list with inactive teammates
                 std::vector<unsigned int> ignore_ids{};
