@@ -136,14 +136,26 @@ namespace module::strategy {
             initial_heading_saved = false;
         });
 
-        on<Provide<Search>, Every<1, Per<std::chrono::seconds>>, With<Field>, With<Sensors>, With<FieldDescription>>()
-            .then([this](const Field& field, const Sensors& sensors, const FieldDescription& field_desc) {
+        on<Provide<Search>,
+           Every<1, Per<std::chrono::seconds>>,
+           Optional<With<Field>>,
+           With<Sensors>,
+           With<FieldDescription>>()
+            .then([this](const std::shared_ptr<const Field>& field,
+                         const Sensors& sensors,
+                         const FieldDescription& field_desc) {
                 // Conduct a head search while searching for the ball
                 emit<Task>(std::make_unique<LookAround>());
 
+                // No field, just turn on spot
+                if (!field) {
+                    emit<Task>(std::make_unique<TurnOnSpot>(false));
+                    return;
+                }
+
                 // Get robot position and check border
-                Eigen::Vector3d rRFf = (field.Hfw * sensors.Hrw.inverse()).translation();
-                Eigen::Matrix3d Rfr  = (sensors.Hrw * field.Hfw.inverse()).inverse().rotation();
+                Eigen::Vector3d rRFf = (field->Hfw * sensors.Hrw.inverse()).translation();
+                Eigen::Matrix3d Rfr  = (sensors.Hrw * field->Hfw.inverse()).inverse().rotation();
                 bool near_border =
                     (std::abs(rRFf.x()) > (field_desc.dimensions.field_length / 2.0 - cfg.border_threshold))
                     || (std::abs(rRFf.y()) > (field_desc.dimensions.field_width / 2.0 - cfg.border_threshold));
