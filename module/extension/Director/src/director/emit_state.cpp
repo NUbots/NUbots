@@ -56,15 +56,24 @@ namespace module::extension {
             std::vector<DirectorState::DirectorTask> subtasks;
             subtasks.reserve(group.subtasks.size());
             for (const auto& subtask : group.subtasks) {
-                subtasks.emplace_back(subtask->name, subtask->type.hash_code(), subtask->priority, subtask->optional);
+
+                // Specific handling for the wait task
+                if (t->type == typeid(::extension::behaviour::Wait)) {
+                    subtasks.emplace_back("Wait", subtask->type.hash_code(), subtask->priority, subtask->optional);
+                }
+                else {
+                    subtasks.emplace_back(subtask->name,
+                                          subtask->type.hash_code(),
+                                          subtask->priority,
+                                          subtask->optional);
+                }
             }
             update(proto_group.subtasks, subtasks);
-        }
 
-        // If we updated the state, emit it
-        if (state_changed) {
-            state_changed = false;
-            emit(std::make_unique<DirectorState>(director_state));
+            // If we updated the state, emit it
+            if (state_changed) {
+                state_changed = false;
+                emit(std::make_unique<DirectorState>(director_state));
+            }
         }
-    }
-}  // namespace module::extension
+    }  // namespace module::extension
