@@ -142,8 +142,8 @@ namespace module::strategy {
                 Eigen::Vector3d rTFf = rGFf;
 
                 // If we're aligned with the goal and close, adjust the Goal target
+                auto goal_line_x = -field_description.dimensions.field_length / 2.0;
                 if (std::abs(rRFf.y()) < field_description.dimensions.goal_width / 2.0) {
-                    auto goal_line_x = -field_description.dimensions.field_length / 2.0;
                     // If we're in the goal, set the target to the middle of the goal
                     if (rRFf.x() < goal_line_x) {
                         rTFf.x() = rGFf.x() - field_description.dimensions.goal_depth / 2.0;
@@ -163,8 +163,8 @@ namespace module::strategy {
                 Eigen::Vector3d uTBf = rTBf.normalized();        // Unit vector toward goal
                 Eigen::Vector3d uTBf_p(-uTBf.y(), uTBf.x(), 0);  // perpendicular
 
-                // If there are robots, check if there are obstacles in the way
-                if (robots) {
+                // If there are robots in the way, and we aren't in the goal area, dribble around them
+                if (robots && !(rRFf.x() < goal_line_x + field_description.dimensions.goal_area_length)) {
                     // Get the positions of all robots in the world
                     std::vector<Eigen::Vector3d> all_obstacles{};
                     for (const auto& robot : robots->robots) {
@@ -200,15 +200,6 @@ namespace module::strategy {
                         // Calculate avoidance points for both sides
                         const Eigen::Vector3d rAlFf = rOlFf + uTBf_p * cfg.obstacle_radius;
                         const Eigen::Vector3d rArFf = rOrFf - uTBf_p * cfg.obstacle_radius;
-
-                        // I don't think this will realistically ever happen
-
-                        // // If the left avoidance points is too far away from the robot, do not adjust the target
-                        // if ((rAlFf - robot.position).norm() > cfg.infront_of_ball_radius && (rArFf -
-                        // robot.position).norm() > cfg.infront_of_ball_radius) {
-                        //     log<DEBUG>("Avoidance points too far apart, not adjusting target");
-                        //     return;
-                        // }
 
                         // Determine which side to go around based on field position and robot heading
                         const double boundary = field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
