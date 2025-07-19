@@ -85,7 +85,6 @@ namespace module::purpose {
             this->log_level        = config["log_level"].as<NUClear::LogLevel>();
             cfg.force_playing      = config["force_playing"].as<bool>();
             cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
-            cfg.is_goalie          = config["is_goalie"].as<bool>();
             cfg.startup_delay      = config["startup_delay"].as<int>();
 
             if (cfg.force_playing) {
@@ -114,14 +113,16 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
-            if (cfg.is_goalie) {
-                emit<Task>(std::make_unique<Goalie>());
-            }
-            else {
-                emit<Task>(std::make_unique<FieldPlayer>());
-            }
-        });
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.self.goalie) {
+                    log<INFO>("Playing as a goalie");
+                    emit<Task>(std::make_unique<Goalie>());
+                }
+                else {
+                    emit<Task>(std::make_unique<FieldPlayer>());
+                }
+            });
 
         on<Trigger<Penalisation>, With<GlobalConfig>, With<GameState>>().then(
             [this](const Penalisation& self_penalisation,
