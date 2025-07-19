@@ -116,10 +116,11 @@ namespace module::purpose {
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
             [this](const GameState& game_state) {
                 if (game_state.self.goalie) {
-                    log<INFO>("Playing as a goalie");
+                    log<DEBUG>("Playing as a goalie");
                     emit<Task>(std::make_unique<Goalie>());
                 }
                 else {
+                    log<DEBUG>("Playing as a field player");
                     emit<Task>(std::make_unique<FieldPlayer>());
                 }
             });
