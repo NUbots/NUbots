@@ -187,11 +187,8 @@ namespace module::strategy {
                         }
                         r0cFf /= static_cast<double>(obstacles.size());
 
-                        // Calculate a perpendicular vector to the direction of the target point (similar to PlanWalkPath)
-                        const Eigen::Vector3d perp(-uTBf.y(), uTBf.x(), 0);
-
                         // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
-                        auto proj = [&perp](const Eigen::Vector3d& v) { return v.dot(perp); };
+                        auto proj = [&uTBf_p](const Eigen::Vector3d& v) { return v.dot(uTBf_p); };
 
                         // Find the most positive and negative projections to determine avoidance sides
                         const Eigen::Vector3d rOlFf = *std::ranges::min_element(obstacles, {}, proj);
@@ -201,13 +198,14 @@ namespace module::strategy {
                         log<INFO>("Obstacle length:", (rOrFf - rOlFf).norm());
 
                         // Calculate avoidance points for both sides
-                        const Eigen::Vector3d rAlFf = rOlFf + perp * cfg.obstacle_radius;
-                        const Eigen::Vector3d rArFf = rOrFf - perp * cfg.obstacle_radius;
+                        const Eigen::Vector3d rAlFf = rOlFf + uTBf_p * cfg.obstacle_radius;
+                        const Eigen::Vector3d rArFf = rOrFf - uTBf_p * cfg.obstacle_radius;
 
                         // I don't think this will realistically ever happen
 
                         // // If the left avoidance points is too far away from the robot, do not adjust the target
-                        // if ((rAlFf - robot.position).norm() > cfg.infront_of_ball_radius && (rArFf - robot.position).norm() > cfg.infront_of_ball_radius) {
+                        // if ((rAlFf - robot.position).norm() > cfg.infront_of_ball_radius && (rArFf -
+                        // robot.position).norm() > cfg.infront_of_ball_radius) {
                         //     log<DEBUG>("Avoidance points too far apart, not adjusting target");
                         //     return;
                         // }
@@ -395,9 +393,11 @@ namespace module::strategy {
                 // Stop when at the target position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, true));
             });
-    }    std::vector<Eigen::Vector3d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
-                                                                  const Eigen::Vector3d& rBFf,
-                                                                  const Eigen::Vector3d& rGFf) {
+    }
+
+    std::vector<Eigen::Vector3d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
+                                                                   const Eigen::Vector3d& rBFf,
+                                                                   const Eigen::Vector3d& rGFf) {
         // Find all obstacles in the path
         std::vector<Eigen::Vector3d> primary_obstacles;
 
@@ -427,12 +427,12 @@ namespace module::strategy {
 
             // Check if this obstacle is close to any obstacle in our cluster
             for (const auto& cluster_obstacle : obstacle_cluster) {
-                const double distance = (rOFf - cluster_obstacle).norm();
-                const double cluster_threshold = cfg.obstacle_radius * 3.0; // 3x radius for clustering
+                const double distance          = (rOFf - cluster_obstacle).norm();
+                const double cluster_threshold = cfg.obstacle_radius * 3.0;  // 3x radius for clustering
 
                 if (distance < cluster_threshold) {
                     obstacle_cluster.push_back(rOFf);
-                    break; // Added to cluster, no need to check other cluster members
+                    break;  // Added to cluster, no need to check other cluster members
                 }
             }
         }
