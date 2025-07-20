@@ -77,7 +77,7 @@ namespace module::vision {
             // Method 2: Direct from Left.yaml values for comparison
             message::input::Image::Lens lens_direct;
             lens_direct.fx = 441.15;
-            lens_direct.fy = 440.01;
+            lens_direct.fy = 440.90;
             lens_direct.centre << 646.93, 423.30;
             lens_direct.k = lens.k;  // Same distortion coefficients
 

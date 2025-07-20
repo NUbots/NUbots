@@ -22,7 +22,7 @@ lens:
   # # The polynomial distortion coefficients for the lens
   # k: [0.4718296027381958, 0.22726744036437643]
   fx: 441.15
-  fy: 440.01
+  fy: 440.90
   # Normalised image centre offset: pixels from centre to optical axis / image width
   centre: [646.93, 423.30]
   # The polynomial distortion coefficients for the lens

@@ -27,9 +27,18 @@ namespace utility::vision {
         // Convert to OpenCV coordinate frame
         Eigen::Matrix<T, 3, 1> ray_opencv = R_nubots_to_opencv.template cast<T>() * ray;
 
-        std::vector<cv::Point3d> objectPoints = {cv::Point3d(static_cast<double>(ray_opencv.x()),
-                                                             static_cast<double>(ray_opencv.y()),
-                                                             static_cast<double>(ray_opencv.z()))};
+        // Check if point is behind camera
+        if (ray_opencv.z() <= T(0)) {
+            return Eigen::Matrix<T, 2, 1>(T(-1), T(-1));  // Invalid projection
+        }
+
+        // Scale the unit ray to be at distance 1 from camera (z=1)
+        // This creates a 3D point that represents the ray direction
+        Eigen::Matrix<T, 3, 1> point_3d = ray_opencv / ray_opencv.z();
+
+        std::vector<cv::Point3d> objectPoints = {cv::Point3d(static_cast<double>(point_3d.x()),
+                                                             static_cast<double>(point_3d.y()),
+                                                             static_cast<double>(point_3d.z()))};
 
         std::vector<cv::Point2d> imagePoints;
 
@@ -48,7 +57,11 @@ namespace utility::vision {
                      static_cast<double>(lens.k(2)),
                      static_cast<double>(lens.k(3)));
 
-        cv::fisheye::projectPoints(objectPoints, imagePoints, cv::Vec3d(0, 0, 0), cv::Vec3d(0, 0, 0), K, D);
+        // Zero rotation and translation (we're already in camera frame)
+        cv::Vec3d rvec(0, 0, 0);
+        cv::Vec3d tvec(0, 0, 0);
+
+        cv::fisheye::projectPoints(objectPoints, imagePoints, rvec, tvec, K, D);
 
         return Eigen::Matrix<T, 2, 1>(static_cast<T>(imagePoints[0].x), static_cast<T>(imagePoints[0].y));
     }
@@ -66,7 +79,7 @@ namespace utility::vision {
         std::vector<cv::Point2d> distortedPoints = {
             cv::Point2d(static_cast<double>(px.x()), static_cast<double>(px.y()))};
 
-        std::vector<cv::Point2d> undistorted;
+        std::vector<cv::Point2d> undistortedPoints;
 
         cv::Mat K = (cv::Mat_<double>(3, 3) << static_cast<double>(lens.fx),
                      0.0,
@@ -83,13 +96,19 @@ namespace utility::vision {
                      static_cast<double>(lens.k(2)),
                      static_cast<double>(lens.k(3)));
 
-        cv::fisheye::undistortPoints(distortedPoints, undistorted, K, D);
+        // Undistort the points - this gives us normalized coordinates
+        cv::fisheye::undistortPoints(distortedPoints, undistortedPoints, K, D);
 
-        Eigen::Matrix<T, 3, 1> ray_opencv(static_cast<T>(undistorted[0].x),
-                                          static_cast<T>(undistorted[0].y),
+        // Convert normalized coordinates to 3D ray in OpenCV frame
+        // The undistorted point represents (x/z, y/z) where z=1
+        Eigen::Matrix<T, 3, 1> ray_opencv(static_cast<T>(undistortedPoints[0].x),
+                                          static_cast<T>(undistortedPoints[0].y),
                                           static_cast<T>(1.0));
+
+        // Normalize to unit vector
         ray_opencv.normalize();
 
+        // Convert back to NUbots coordinate system
         return R_opencv_to_nubots.template cast<T>() * ray_opencv;
     }
 
