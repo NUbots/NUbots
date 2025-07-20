@@ -1,8 +1,17 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-voice: "en_US/vctk_low#p363"
+# Voice to use (relative to model_path)
+voice: "en_US-lessac-medium"
 
+# Audio device name for playback
 device_name: "default"
 
-startup_text: "Hello."
+# Text to say on startup
+startup_text: ""
+
+# Path to espeak-ng data directory
+espeak_data_path: "/openvino/piper/build/pi/share/espeak-ng-data"
+
+# Path to voice models
+model_path: "piper_model"
