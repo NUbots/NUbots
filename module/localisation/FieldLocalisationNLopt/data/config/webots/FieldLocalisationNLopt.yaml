@@ -60,7 +60,7 @@ change_limit:
   - 0.03379241736537422
   - 0.9101752727583227
   - 0.010117827606743983
-max_association_distance: 5.241746373959887
+max_association_distance: 5
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
