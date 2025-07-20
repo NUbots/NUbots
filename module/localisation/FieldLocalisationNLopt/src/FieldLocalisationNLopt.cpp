@@ -45,6 +45,7 @@ namespace module::localisation {
     using message::localisation::Field;
     using message::localisation::FinishReset;
     using message::localisation::Line;
+    using message::localisation::PenaltyReset;
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::RobotPoseGroundTruth;
     using message::localisation::UncertaintyResetFieldLocalisation;
@@ -188,6 +189,14 @@ namespace module::localisation {
             kf.set_state(state);
             startup    = true;
             last_reset = NUClear::clock::now();
+        });
+
+        on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
+            log<INFO>("Resetting field localisation for penalty kick");
+            state              = reset.penalty_kick_position;
+            filtered_state     = state;
+            first_measurement  = true;
+            last_certain_state = state;  // Update the last certain state
         });
 
         on<Trigger<FieldLines>,
