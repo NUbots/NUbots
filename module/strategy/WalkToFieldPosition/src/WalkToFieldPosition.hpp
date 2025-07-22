@@ -27,6 +27,7 @@
 #ifndef MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
 #define MODULE_STRATEGY_WALKTOFIELDPOSITION_HPP
 
+#include <chrono>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -40,10 +41,24 @@ namespace module::strategy {
             double stop_threshold = 0.0;
             /// @brief Error threshold for resuming walking.
             double stopped_threshold = 0.0;
+            /// @brief Minimum time (seconds) the robot must be within threshold before stopping.
+            double min_stop_time = 0.0;
+            /// @brief Minimum time (seconds) the robot must be outside threshold before resuming.
+            double min_resume_time = 0.0;
         } cfg;
 
         /// @brief The current threshold to use for stopping the robot.
         double current_threshold = 0.0;
+
+        /// @brief Time when we first entered the stopping threshold.
+        std::chrono::steady_clock::time_point entered_stop_threshold;
+        /// @brief Time when we first left the stopping threshold.
+        std::chrono::steady_clock::time_point left_stop_threshold;
+
+        /// @brief Whether we are currently in the stopping state.
+        bool in_stopping_state = false;
+        /// @brief Whether we are currently in the resuming state.
+        bool in_resuming_state = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.

@@ -54,6 +54,7 @@ namespace module::vision {
             log_level                = config["log_level"].as<NUClear::LogLevel>();
             cfg.confidence_threshold = config["confidence_threshold"].as<double>();
             cfg.cluster_points       = config["cluster_points"].as<int>();
+            cfg.max_distance         = config["max_distance"].as<double>();
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Field Line Detector", [this](const GreenHorizon& horizon) {
@@ -110,6 +111,11 @@ namespace module::vision {
 
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
+                    // Skip points far away
+                    if ((horizon.Hcw * rPWw.col(idx)).norm() > cfg.max_distance) {
+                        continue;
+                    }
+
                     lines->points.push_back(uPCw.col(idx));
                     lines->rPWw.push_back(rPWw.col(idx));
                 }

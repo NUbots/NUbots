@@ -21,7 +21,7 @@ export function installKinematics({
   nav.addRoute({
     path: "/kinematics",
     Icon,
-    label: "Kinematics",
+    label: "Servos",
     Content: React.lazy(async () => {
       const { createKinematicsView } = await import("./create");
       return {

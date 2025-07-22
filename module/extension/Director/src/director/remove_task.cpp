@@ -82,13 +82,14 @@ namespace module::extension {
                     reevaluate_group(pusher);
                 }
 
+                auto subtasks = group.subtasks;
+                group.subtasks.clear();
+                group.watch_handles.clear();
+
                 // Remove any subtasks this group had recursively
-                for (const auto& t : group.subtasks) {
+                for (const auto& t : subtasks) {
                     remove_task(t);
                 }
-
-                // We now have no subtasks
-                group.subtasks.clear();
             }
             // After we have removed all our subtasks we are no longer a zombie, we are just dead
             group.zombie = false;

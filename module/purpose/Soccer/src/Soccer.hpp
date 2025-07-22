@@ -44,8 +44,6 @@ namespace module::purpose {
             bool force_playing = false;
             /// @brief Delay in seconds before the robot starts playing after button press
             int disable_idle_delay = 0;
-            /// @brief Whether or not the player is a goalie
-            bool is_goalie = false;
             /// @brief Delay in seconds before the robot can start playing after startup
             int startup_delay = 0;
         } cfg;

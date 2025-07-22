@@ -61,3 +61,7 @@ message Field {
 message ResetFieldLocalisation {}
 message UncertaintyResetFieldLocalisation {}
 message FinishReset {}
+message PenaltyReset {
+    /// The penalty kick position in field space
+    vec3 penalty_kick_position = 1;
+}

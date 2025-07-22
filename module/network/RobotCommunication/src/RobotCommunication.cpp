@@ -139,6 +139,8 @@ namespace module::network {
 
                                 // Filter out messages from ourselves and from other teams
                                 if (!own_player_message && own_team_message) {
+                                    log<DEBUG>("Message received from teammate ID",
+                                               incoming_msg.current_pose.player_id);
                                     emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
                                 }
                             });
