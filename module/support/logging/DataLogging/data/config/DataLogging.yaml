@@ -9,14 +9,14 @@ output:
 # You can put any messages that is emitted in the system here and it will be logged
 messages:
   # Input
-  message.platform.RawSensors: false
+  message.platform.RawSensors: true
   message.input.Image: true
   message.output.CompressedImage: true
   # Vision
-  message.vision.Balls: false
-  message.vision.Goals: false
+  message.vision.Balls: true
+  message.vision.Goals: true
   message.vision.GreenHorizon: false
-  message.vision.FieldLines: false
+  message.vision.FieldLines: true
   message.vision.VisualMesh: false
   message.vision.BoundingBoxes: false
   # Odometry and Localisation

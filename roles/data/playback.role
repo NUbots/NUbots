@@ -14,6 +14,8 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   network::PlotJuggler
+  # Input
+  input::ImageDecompressor
   # Output
   output::Overview
   output::ImageCompressor
@@ -21,16 +23,17 @@ nuclear_role(
   input::SensorFilter
   # Vision
   #vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::BallDetector
-  vision::FieldLineDetector
+  #vision::GreenHorizonDetector
+  #vision::BallDetector
+  #vision::FieldLineDetector
   vision::Yolo
-  vision::FisheyeProjection
+  #vision::FisheyeProjection
   # Localisation
-  localisation::BallLocalisation
-  localisation::FieldLocalisationNLopt
-  localisation::RobotLocalisation
+  #localisation::BallLocalisation
+  #localisation::FieldLocalisationNLopt
+  #localisation::RobotLocalisation
   # Platform
   tools::NBSPlayback
   nbs::Player
+  support::logging::DataLogging
 )

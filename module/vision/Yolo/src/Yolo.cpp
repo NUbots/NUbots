@@ -121,7 +121,19 @@ namespace module::vision {
         on<Trigger<Image>, Optional<With<GreenHorizon>>, Single>().then(
             "Yolo Main Loop",
             [this](const Image& img, const std::shared_ptr<const GreenHorizon>& horizon) {
-                // Start timer for benchmarking
+                // Create a mutable copy of the lens
+                auto lens = img.lens;
+
+                // Patch it if needed
+                if (lens.fx < 1.0 || lens.k == Eigen::Vector4f::Zero()) {
+                    log<INFO>("Overwriting lens intrinsics with calibrated values from Left.yaml");
+
+                    lens.fx     = 441.1879701439167f;
+                    lens.fy     = 440.93855497755015f;
+                    lens.centre = Eigen::Vector2f(646.9268331f, 529.1308499f);
+                    lens.k      = Eigen::Vector4f(-0.042640899f, -0.007311187f, 0.002785233f, -0.000910121f);
+                    lens.fov    = 2;
+                }
                 auto start = std::chrono::high_resolution_clock::now();
                 // -------- Convert image to cv::Mat -------
                 const int width  = img.dimensions.x();
@@ -236,16 +248,23 @@ namespace module::vision {
                 // Helper function to simplify unprojection calls
                 auto pix_to_ray = [&](double x, double y) {
                     return utility::vision::unproject(Eigen::Vector2d(x, y),  // Pixel coordinates
-                                                      img.lens                // Lens with fx, fy, centre, k
+                                                      lens                    // Lens with fx, fy, centre, k
                     );
                 };
-
+                // log<INFO>("Image dimensions: ", width, " x ", height);
+                // log<INFO>("Lens projection: ", static_cast<int>(lens.projection));
+                // log<INFO>("Lens fx: ", lens.fx, " fy: ", lens.fy);
+                // log<INFO>("Lens centre: ", lens.centre.x(), " ", lens.centre.y());
+                // log<INFO>("Lens fov: ", lens.fov);
+                // log<INFO>("Lens k: [", lens.k.x(), ", ", lens.k.y(), ", ", lens.k.z(), ", ", lens.k.w(), "]");
                 // Helper function to simplify projecting rays onto the field plane then transforming into camera space
                 auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& uPCc) {
                     Eigen::Vector3d uPCw = Hwc.rotation() * uPCc;
                     Eigen::Vector3d rPWw = uPCw * std::abs(Hwc.translation().z() / uPCw.z()) + Hwc.translation();
                     return Hwc.inverse() * rPWw;
                 };
+                log<INFO>("Hcw.translation: ", img.Hcw.translation().transpose());
+                log<INFO>("Hcw.rotation:\n", img.Hcw.rotation());
 
                 for (size_t i = 0; i < indices.size(); i++) {
                     // Get the index of the detected object from list of indices
@@ -265,12 +284,6 @@ namespace module::vision {
                         pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height);
                     Eigen::Vector3d top_centre_ray = pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y);
 
-                    // After calculating boxes[idx] but before ray_to_camera_space
-                    double distance_from_optical_center =
-                        std::sqrt(std::pow(boxes[idx].x + boxes[idx].width / 2.0 - 646.93, 2)
-                                  + std::pow(boxes[idx].y + boxes[idx].height / 2.0 - 423.30, 2));
-                    log<INFO>("Detection at distance ", distance_from_optical_center, " pixels from optical center");
-
                     auto bbox        = std::make_unique<BoundingBox>();
                     bbox->name       = objects[class_id].name;
                     bbox->confidence = class_confidences[idx];
@@ -278,7 +291,6 @@ namespace module::vision {
                     bbox->corners.push_back(top_right_ray);
                     bbox->corners.push_back(bottom_right_ray);
                     bbox->corners.push_back(bottom_left_ray);
-
 
                     if (objects[class_id].name == "ball") {
                         // Get the vector in world space to check if it is in the field

@@ -103,16 +103,17 @@ namespace module::input {
                     msg->format = result.second;
 
                     // Copy across the other attributes
-                    msg->dimensions        = image.dimensions;
-                    msg->id                = image.id;
-                    msg->name              = image.name;
-                    msg->timestamp         = image.timestamp;
-                    msg->Hcw               = image.Hcw;
-                    msg->lens.projection   = int(image.lens.projection);
-                    msg->lens.focal_length = image.lens.focal_length;
-                    msg->lens.fov          = image.lens.fov;
-                    msg->lens.centre       = image.lens.centre;
-                    msg->lens.k            = image.lens.k;
+                    msg->dimensions      = image.dimensions;
+                    msg->id              = image.id;
+                    msg->name            = image.name;
+                    msg->timestamp       = image.timestamp;
+                    msg->Hcw             = image.Hcw;
+                    msg->lens.projection = int(image.lens.projection);
+                    msg->lens.fx         = image.lens.fx;
+                    msg->lens.fy         = image.lens.fy;
+                    msg->lens.fov        = image.lens.fov;
+                    msg->lens.centre     = image.lens.centre;
+                    msg->lens.k          = image.lens.k;
 
                     // Emit the compressed image
                     emit(msg);

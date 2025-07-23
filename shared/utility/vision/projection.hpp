@@ -23,22 +23,23 @@ namespace utility::vision {
      * @return 2D pixel coordinate
      */
     template <typename T, typename Lens>
-    inline Eigen::Matrix<T, 2, 1> project(const Eigen::Matrix<T, 3, 1>& ray, const Lens& lens) {
+    inline Eigen::Matrix<T, 2, 1> project(const Eigen::Matrix<T, 3, 1>& ray,
+                                          const Lens& lens) {  // Add dimensions
         // Convert to OpenCV coordinate frame
         Eigen::Matrix<T, 3, 1> ray_opencv = R_nubots_to_opencv.template cast<T>() * ray;
 
-        // Check if point is behind camera
+        // Check if point is behind camera (ADD THIS BACK)
         if (ray_opencv.z() <= T(0)) {
-            return Eigen::Matrix<T, 2, 1>(T(-1), T(-1));  // Invalid projection
+            return Eigen::Matrix<T, 2, 1>(T(-1), T(-1));
         }
 
         // Scale the unit ray to be at distance 1 from camera (z=1)
         // This creates a 3D point that represents the ray direction
-        Eigen::Matrix<T, 3, 1> point_3d = ray_opencv / ray_opencv.z();
+        // Eigen::Matrix<T, 3, 1> point_3d = ray_opencv / ray_opencv.z();
 
-        std::vector<cv::Point3d> objectPoints = {cv::Point3d(static_cast<double>(point_3d.x()),
-                                                             static_cast<double>(point_3d.y()),
-                                                             static_cast<double>(point_3d.z()))};
+        std::vector<cv::Point3d> objectPoints = {cv::Point3d(static_cast<double>(ray_opencv.x()),
+                                                             static_cast<double>(ray_opencv.y()),
+                                                             static_cast<double>(ray_opencv.z()))};
 
         std::vector<cv::Point2d> imagePoints;
 
