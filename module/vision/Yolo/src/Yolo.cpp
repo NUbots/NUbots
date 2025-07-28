@@ -124,16 +124,16 @@ namespace module::vision {
                 // Create a mutable copy of the lens
                 auto lens = img.lens;
 
-                // Patch it if needed
-                if (lens.fx < 1.0 || lens.k == Eigen::Vector4f::Zero()) {
-                    log<INFO>("Overwriting lens intrinsics with calibrated values from Left.yaml");
+                // // Patch it if needed
+                // if (lens.fx < 1.0 || lens.k == Eigen::Vector4f::Zero()) {
+                //     log<INFO>("Overwriting lens intrinsics with calibrated values from Left.yaml");
 
-                    lens.fx     = 441.1879701439167f;
-                    lens.fy     = 440.93855497755015f;
-                    lens.centre = Eigen::Vector2f(646.9268331f, 529.1308499f);
-                    lens.k      = Eigen::Vector4f(-0.042640899f, -0.007311187f, 0.002785233f, -0.000910121f);
-                    lens.fov    = 2;
-                }
+                //     lens.fx     = 441.1879701439167f;
+                //     lens.fy     = 440.93855497755015f;
+                //     lens.centre = Eigen::Vector2f(646.9268331f, 529.1308499f);
+                //     lens.k      = Eigen::Vector4f(-0.042640899f, -0.007311187f, 0.002785233f, -0.000910121f);
+                //     lens.fov    = 2;
+                // }
                 auto start = std::chrono::high_resolution_clock::now();
                 // -------- Convert image to cv::Mat -------
                 const int width  = img.dimensions.x();

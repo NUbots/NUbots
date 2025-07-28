@@ -22,7 +22,7 @@ nuclear_role(
   input::SensorFilter
   localisation::Mocap
   # Vision
-  vision::VisualMesh
+  # vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector

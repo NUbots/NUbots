@@ -35,7 +35,7 @@ namespace utility::vision {
 
         // Scale the unit ray to be at distance 1 from camera (z=1)
         // This creates a 3D point that represents the ray direction
-        // Eigen::Matrix<T, 3, 1> point_3d = ray_opencv / ray_opencv.z();
+        Eigen::Matrix<T, 3, 1> point_3d = ray_opencv / ray_opencv.z();
 
         std::vector<cv::Point3d> objectPoints = {cv::Point3d(static_cast<double>(ray_opencv.x()),
                                                              static_cast<double>(ray_opencv.y()),
