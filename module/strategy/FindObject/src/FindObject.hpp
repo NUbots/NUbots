@@ -46,7 +46,7 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Length of time before the ball detection is too old and we should search for the ball
-            NUClear::clock::duration ball_search_timeout{};
+            NUClear::clock::duration ball_search_timeout = std::chrono::seconds(0);
             /// @brief Distance from field border that triggers moving to centre
             double border_threshold = 0.0;
             /// @brief How far to move towards centre
@@ -58,23 +58,17 @@ namespace module::strategy {
             /// @brief Angular threshold for completing a turn (radians)
             double turn_completion_threshold = 0.0;
             /// @brief Duration to turn on the spot (seconds)
-            NUClear::clock::duration turn_duration{std::chrono::seconds(0)};
+            NUClear::clock::duration turn_duration = std::chrono::seconds(0);
         } cfg;
 
         /// @brief Current state of the search state machine
-        SearchState current_state{SearchState::TURNING_ON_SPOT};
+        SearchState current_state = SearchState::TURNING_ON_SPOT;
 
         /// @brief Current patrol target index for cycling through patrol points
-        int patrol_target{0};
+        int patrol_target = 0;
 
         /// @brief Time when current state started (for fallback transitions)
-        NUClear::clock::time_point state_start_time{NUClear::clock::now()};
-
-        /// @brief Initial heading when starting to turn on spot (in radians)
-        double initial_turn_heading{0.0};
-
-        /// @brief Whether we've saved the initial heading for turning
-        bool initial_heading_saved{false};
+        NUClear::clock::time_point state_start_time = NUClear::clock::now();
 
     public:
         /// @brief Called by the powerplant to build and setup the FindObject reactor.

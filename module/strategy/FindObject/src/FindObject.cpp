@@ -116,10 +116,9 @@ namespace module::strategy {
         // Initialise state machine when Search starts
         on<Start<Search>>().then([this] {
             log<DEBUG>("Starting Search - initialising state machine to TURNING_ON_SPOT");
-            current_state         = SearchState::TURNING_ON_SPOT;
-            patrol_target         = 0;
-            state_start_time      = NUClear::clock::now();
-            initial_heading_saved = false;
+            current_state    = SearchState::TURNING_ON_SPOT;
+            patrol_target    = 0;
+            state_start_time = NUClear::clock::now();
         });
 
         on<Provide<Search>, Every<1, Per<std::chrono::seconds>>, With<Field>, With<Sensors>, With<FieldDescription>>()
@@ -136,22 +135,19 @@ namespace module::strategy {
 
                 if (near_border) {
                     log<DEBUG>("Near border, moving to centre");
-                    current_state         = SearchState::MOVING_TO_CENTRE;
-                    state_start_time      = NUClear::clock::now();
-                    initial_heading_saved = false;
+                    current_state    = SearchState::MOVING_TO_CENTRE;
+                    state_start_time = NUClear::clock::now();
                 }
 
                 switch (current_state) {
                     case SearchState::TURNING_ON_SPOT: {
                         log<DEBUG>("Turning on spot to find the ball");
-
                         emit<Task>(std::make_unique<TurnOnSpot>(false));
 
                         // Check if we've been turning for the configured duration
                         if ((NUClear::clock::now() - state_start_time) > cfg.turn_duration) {
-                            current_state         = SearchState::MOVING_TO_CENTRE;
-                            state_start_time      = NUClear::clock::now();
-                            initial_heading_saved = false;
+                            current_state    = SearchState::MOVING_TO_CENTRE;
+                            state_start_time = NUClear::clock::now();
                         }
                         break;
                     }
