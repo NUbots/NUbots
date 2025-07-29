@@ -36,11 +36,45 @@ namespace module::strategy {
     class FindObject : public ::extension::behaviour::BehaviourReactor {
 
     private:
+        /// @brief State machine states for ball searching behavior
+        enum class SearchState {
+            TURNING_ON_SPOT,   ///< Robot is turning on the spot to search
+            MOVING_TO_CENTRE,  ///< Robot is moving towards centre of field
+            PATROLLING         ///< Robot is patrolling around the field
+        };
+
         /// @brief Stores configuration values
         struct Config {
             /// @brief Length of time before the ball detection is too old and we should search for the ball
             NUClear::clock::duration ball_search_timeout{};
+            /// @brief Distance from field border that triggers moving to centre
+            double border_threshold = 0.0;
+            /// @brief How far to move towards centre
+            double centre_move_ratio = 0.0;
+            /// @brief Distance from centre to be considered "at centre"
+            double centre_reached_threshold = 0.0;
+            /// @brief Distance from patrol point to be considered "reached"
+            double patrol_reached_threshold = 0.0;
+            /// @brief Angular threshold for completing a turn (radians)
+            double turn_completion_threshold = 0.0;
+            /// @brief Duration to turn on the spot (seconds)
+            NUClear::clock::duration turn_duration{std::chrono::seconds(0)};
         } cfg;
+
+        /// @brief Current state of the search state machine
+        SearchState current_state{SearchState::TURNING_ON_SPOT};
+
+        /// @brief Current patrol target index for cycling through patrol points
+        int patrol_target{0};
+
+        /// @brief Time when current state started (for fallback transitions)
+        NUClear::clock::time_point state_start_time{NUClear::clock::now()};
+
+        /// @brief Initial heading when starting to turn on spot (in radians)
+        double initial_turn_heading{0.0};
+
+        /// @brief Whether we've saved the initial heading for turning
+        bool initial_heading_saved{false};
 
     public:
         /// @brief Called by the powerplant to build and setup the FindObject reactor.
