@@ -195,7 +195,9 @@ namespace module::input {
             // Apply roll and pitch offsets
             double roll_offset  = config["roll_offset"].as<Expression>();
             double pitch_offset = config["pitch_offset"].as<Expression>();
-            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+            double yaw_offset   = config["yaw_offset"].as<Expression>();
+            context.Hpc         = Eigen::AngleAxisd(yaw_offset, Eigen::Vector3d::UnitX()).toRotationMatrix()
+                          * Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
                           * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             // Apply image offsets to lens_centre, optical axis:
