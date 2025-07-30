@@ -121,8 +121,9 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
   // Treat the synthetic canonical root as a root group too so later passes skip it
   rootGroupIds.add(canonicalRoot.id);
 
-  // Sort collected root subtasks so that highest priority (lowest number) appears first
-  rootSubtasks.sort((a, z) => (z.priority ?? 0) - (a.priority ?? 0));
+  // Sort collected root subtasks so that highest priority appears first
+  // Then sort by name as the javascript uses a hash map which breaks ordering of objects
+  rootSubtasks.sort((a, z) => (z.priority ?? 0) - (a.priority ?? 0) || a.targetGroup - z.targetGroup);
 
   // Make providers for non-root groups
   if (state.providers) {
