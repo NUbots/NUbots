@@ -9,5 +9,3 @@ disable_idle_delay: 5
 
 # Delay in seconds before the robot can start playing after startup
 startup_delay: 3
-
-is_goalie: false
