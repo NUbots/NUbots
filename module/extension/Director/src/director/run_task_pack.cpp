@@ -234,17 +234,16 @@ namespace module::extension {
 
                 // Don't wait if already waited (prevents double waiting)
                 if (std::find(group.subtasks.begin(), group.subtasks.end(), t) == group.subtasks.end()) {
-                    // Schedule the Provider to run again
-                    // Get the time to wait for
-                    auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
-                    std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
+                // Schedule the Provider to run again
+                // Get the time to wait for
+                auto now    = NUClear::clock::now();
+                auto target = std::static_pointer_cast<::extension::behaviour::Wait>(t->data)->time;
 
-                    // If the delay is over, just run the provider
-                    if (delay <= std::chrono::nanoseconds(0)) {
-                        run_task_on_provider(group.active_task, provider, RunReason::SUBTASK_DONE);
-                        continue;
-                    }
-
+                // Skip the chrono controller if we already passed the time and directly say the wait finished
+                if (target <= now) {
+                    emit(std::make_unique<WaitFinished>(provider));
+                }
+                else {
                     // Otherwise, send it to the ChronoController to handle
                     // Make a weak pointer to the task so we can check if it still exists when the task is run
                     std::weak_ptr<component::DirectorTask> weak_task = t;
@@ -257,9 +256,10 @@ namespace module::extension {
                             // Don't do anything else with this task
                             return false;
                         },
-                        NUClear::clock::now() + delay,
+                        target,
                         -1));  // Our ID is -1 as we will remove ourselves
                 }
+            }
             }
 
             else {
