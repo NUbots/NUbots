@@ -261,7 +261,6 @@ namespace module::extension {
                     }
                 }
             }
-
             else {
                 running_tasks.push_back(t);
             }
