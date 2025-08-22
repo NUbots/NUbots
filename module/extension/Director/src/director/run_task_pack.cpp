@@ -232,30 +232,33 @@ namespace module::extension {
             if (t->type == typeid(::extension::behaviour::Wait)) {
                 non_running_tasks.push_back(t);
 
-                // Schedule the Provider to run again
-                // Get the time to wait for
-                auto now    = NUClear::clock::now();
-                auto target = std::static_pointer_cast<::extension::behaviour::Wait>(t->data)->time;
+                // Don't wait if already waited (prevents double waiting)
+                if (std::find(group.subtasks.begin(), group.subtasks.end(), t) == group.subtasks.end()) {
+                    // Schedule the Provider to run again
+                    // Get the time to wait for
+                    auto now    = NUClear::clock::now();
+                    auto target = std::static_pointer_cast<::extension::behaviour::Wait>(t->data)->time;
 
-                // Skip the chrono controller if we already passed the time and directly say the wait finished
-                if (target <= now) {
-                    emit(std::make_unique<WaitFinished>(provider));
-                }
-                else {
-                    // Otherwise, send it to the ChronoController to handle
-                    // Make a weak pointer to the task so we can check if it still exists when the task is run
-                    std::weak_ptr<component::DirectorTask> weak_task = t;
-                    emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
-                        [this, provider, weak_task](const NUClear::clock::time_point&) {
-                            // Check if the task still exists
-                            if (weak_task.lock() != nullptr) {
-                                emit(std::make_unique<WaitFinished>(provider));
-                            }
-                            // Don't do anything else with this task
-                            return false;
-                        },
-                        target,
-                        -1));  // Our ID is -1 as we will remove ourselves
+                    // Skip the chrono controller if we already passed the time and directly say the wait finished
+                    if (target <= now) {
+                        emit(std::make_unique<WaitFinished>(provider));
+                    }
+                    else {
+                        // Otherwise, send it to the ChronoController to handle
+                        // Make a weak pointer to the task so we can check if it still exists when the task is run
+                        std::weak_ptr<component::DirectorTask> weak_task = t;
+                        emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
+                            [this, provider, weak_task](const NUClear::clock::time_point&) {
+                                // Check if the task still exists
+                                if (weak_task.lock() != nullptr) {
+                                    emit(std::make_unique<WaitFinished>(provider));
+                                }
+                                // Don't do anything else with this task
+                                return false;
+                            },
+                            target,
+                            -1));  // Our ID is -1 as we will remove ourselves
+                    }
                 }
             }
             else {
