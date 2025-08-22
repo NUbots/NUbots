@@ -1,5 +1,12 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a230ba1374f5367c4976b771b25a39b88":[3,0,3,3,6,1,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8":[3,0,3,3,6,1,4],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef":[3,0,3,3,6,1,3],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6edc2d1948e44ce1d1d2f785ed20d27e":[3,0,3,3,6,1,2],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e":[3,0,3,3,6,1,6],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#acd8aff552e5423ffca06c379e3d826e7":[3,0,3,3,6,1,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aebac714f65d6eb975801e6c2935735c0":[3,0,3,3,6,1,5],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aec36cc55f6743f5778e891fc9cd7cb39":[3,0,3,3,6,1,7],
 "structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html":[3,0,3,3,7,0],
 "structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html#a4bde75a77c54af078551a23ff99520da":[3,0,3,3,7,0,8],
@@ -242,12 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a54ccb2195783aaaf68b60792ada5c23f":[3,0,3,8,0,5,1],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a96b09da54316217b1e7ca39fc896c481":[3,0,3,8,0,5,4],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a9aff86bc6e653bcdc1e774b15420a7fc":[3,0,3,8,0,5,2],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87c":[3,0,3,8,0,5,0],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87ca0e7305e9260382a4c1e2d5290b4c22ab":[3,0,3,8,0,5,0,1],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87ca3d515bdfb605645c9d32e22f5d1512d9":[3,0,3,8,0,5,0,2],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87ca51bc69ada9189281e661f9d285c3ac14":[3,0,3,8,0,5,0,3],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87ca6a64af5a90389801c556d984c4ab5f77":[3,0,3,8,0,5,0,4],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87cafa6b42f3c50b78e9de012dbae60bf189":[3,0,3,8,0,5,0,0],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html":[3,0,3,8,1,1],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227d":[3,0,3,8,1,1,0]
+"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87c":[3,0,3,8,0,5,0]
 };

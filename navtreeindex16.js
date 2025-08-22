@@ -1,5 +1,12 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad56304c4babfc4025446e277493dbcff":[3,0,3,8,1,1,0,53],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad735b21d9b2a4a711fa475854ab683e3":[3,0,3,8,1,1,0,62],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad96997cbe2f85f1573684e711a8fb881":[3,0,3,8,1,1,0,201],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dada8cea1f63f48a124f55888e402050ff":[3,0,3,8,1,1,0,29],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dadbe3ded5d15abc5957279acca687b0e4":[3,0,3,8,1,1,0,66],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dadc6b58dfa0dc07f40c33d9b11450f44c":[3,0,3,8,1,1,0,96],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dade356a1e28668cdefb088a50fe4aa2d6":[3,0,3,8,1,1,0,18],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dadfee7176caa413749e33ce4cc277ebf6":[3,0,3,8,1,1,0,69],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae017055a547e09b8c669930af2c6edfa":[3,0,3,8,1,1,0,257],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dae45c8e0906c258f0cd3de4915694779d":[3,0,3,8,1,1,0,186],
@@ -242,12 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1skill_1_1KickWalk_1_1Config.html#a3a5112b2d45fde5370cc9910ae83b3c4":[3,0,3,10,7,0,1],
 "structmodule_1_1skill_1_1KickWalk_1_1Config.html#a44d11b3a1ae78060080f680295584b15":[3,0,3,10,7,0,2],
 "structmodule_1_1skill_1_1KickWalk_1_1Config.html#af2a305e60d0dd619d675636fb99970b1":[3,0,3,10,7,0,0],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html":[3,0,3,10,6,0],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#a33c5e8be970777a5d1d0acdff594fa33":[3,0,3,10,6,0,2],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#a7e42d193eeb6264f4607390e054c4598":[3,0,3,10,6,0,6],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#a84edb88c5d2cfccd9697241b52fe17ee":[3,0,3,10,6,0,5],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#a8b3cb2cea24eaf7f52daa4fb67f16196":[3,0,3,10,6,0,0],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#a8ba88ee869f7d4fae1643ae72bdeedc3":[3,0,3,10,6,0,1],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#a8ebc54b51daf2e97671fe34e64517f31":[3,0,3,10,6,0,3],
-"structmodule_1_1skill_1_1Kicker_1_1Config.html#ae21ba2008c01e5dd36fa4e0061ca63c9":[3,0,3,10,6,0,4]
+"structmodule_1_1skill_1_1Kicker_1_1Config.html":[3,0,3,10,6,0]
 };

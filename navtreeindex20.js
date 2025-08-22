@@ -1,5 +1,18 @@
 var NAVTREEINDEX20 =
 {
+"structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5baa786e3db040f403b6748f2ab08aa8544":[3,0,7,15,0,0,4],
+"structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5baa90deb692f893fa76a28cdea31843707":[3,0,7,15,0,0,7],
+"structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5bab375819f4165ad2ca676f6041f2fadda":[3,0,7,15,0,0,6],
+"structutility_1_1vision_1_1Colour.html#a7c42174781a49a54baed92ce6df69b0e":[3,0,7,15,0,2],
+"structutility_1_1vision_1_1Colour.html#a85c1f6382613b9e410788cd8244eaf07":[3,0,7,15,0,19],
+"structutility_1_1vision_1_1Colour.html#a86045568cfcac4956e86e43b2d9d8323":[3,0,7,15,0,3],
+"structutility_1_1vision_1_1Colour.html#a89036356b9e35d8070ad9a99b29c4ca2":[3,0,7,15,0,22],
+"structutility_1_1vision_1_1Colour.html#a9dd100096a1743bb6c0f66239f78b971":[3,0,7,15,0,25],
+"structutility_1_1vision_1_1Colour.html#ab11d48fb821dbca72f44a4ea73d90afe":[3,0,7,15,0,12],
+"structutility_1_1vision_1_1Colour.html#ab4b88262873ba6e5221177d8e30777e2":[3,0,7,15,0,8],
+"structutility_1_1vision_1_1Colour.html#adc96af0bc0575b4cd66228019988e909":[3,0,7,15,0,4],
+"structutility_1_1vision_1_1Colour.html#ae220c6b2218148994bc8cbf42cf26ce4":[3,0,7,15,0,13],
+"structutility_1_1vision_1_1Colour.html#ae9e453d9b9f6701cbfedaeaa7dc92fb2":[3,0,7,15,0,10],
 "structutility_1_1vision_1_1Colour.html#aeb8aa59a9345724687661780dbc277a9":[3,0,7,15,0,11],
 "structutility_1_1vision_1_1Pixel.html":[3,0,7,15,2],
 "structutility_1_1vision_1_1Pixel.html#a042d4052eaa9fff25a605b3cda93a46e":[3,0,7,15,2,10],

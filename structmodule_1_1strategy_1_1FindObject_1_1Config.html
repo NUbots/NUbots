@@ -180,9 +180,33 @@ $(document).ready(function(){initNavTree('structmodule_1_1strategy_1_1FindObject
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a76245341420b126ec22af604d4bf9973"><td class="memItemLeft" align="right" valign="top"><a id="a76245341420b126ec22af604d4bf9973"></a>
-NUClear::clock::duration&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#a76245341420b126ec22af604d4bf9973">ball_search_timeout</a> {}</td></tr>
+NUClear::clock::duration&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#a76245341420b126ec22af604d4bf9973">ball_search_timeout</a> = std::chrono::seconds(0)</td></tr>
 <tr class="memdesc:a76245341420b126ec22af604d4bf9973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Length of time before the ball detection is too old and we should search for the ball. <br /></td></tr>
 <tr class="separator:a76245341420b126ec22af604d4bf9973"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4dae3184ec29a55186c5d2a68afb87b8"><td class="memItemLeft" align="right" valign="top"><a id="a4dae3184ec29a55186c5d2a68afb87b8"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#a4dae3184ec29a55186c5d2a68afb87b8">border_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a4dae3184ec29a55186c5d2a68afb87b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance from field border that triggers moving to centre. <br /></td></tr>
+<tr class="separator:a4dae3184ec29a55186c5d2a68afb87b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc02b3e5ad5322ac3689c17190a952d6"><td class="memItemLeft" align="right" valign="top"><a id="afc02b3e5ad5322ac3689c17190a952d6"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#afc02b3e5ad5322ac3689c17190a952d6">centre_move_ratio</a> = 0.0</td></tr>
+<tr class="memdesc:afc02b3e5ad5322ac3689c17190a952d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">How far to move towards centre. <br /></td></tr>
+<tr class="separator:afc02b3e5ad5322ac3689c17190a952d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a782f75c40641b3655161a0692f6e21"><td class="memItemLeft" align="right" valign="top"><a id="a2a782f75c40641b3655161a0692f6e21"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#a2a782f75c40641b3655161a0692f6e21">centre_reached_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a2a782f75c40641b3655161a0692f6e21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance from centre to be considered "at centre". <br /></td></tr>
+<tr class="separator:a2a782f75c40641b3655161a0692f6e21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a226d1ceb6ecd8495f852770f503462a1"><td class="memItemLeft" align="right" valign="top"><a id="a226d1ceb6ecd8495f852770f503462a1"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#a226d1ceb6ecd8495f852770f503462a1">patrol_reached_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a226d1ceb6ecd8495f852770f503462a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance from patrol point to be considered "reached". <br /></td></tr>
+<tr class="separator:a226d1ceb6ecd8495f852770f503462a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e4a657c13111b80133ada463fecddae"><td class="memItemLeft" align="right" valign="top"><a id="a9e4a657c13111b80133ada463fecddae"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#a9e4a657c13111b80133ada463fecddae">turn_completion_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a9e4a657c13111b80133ada463fecddae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Angular threshold for completing a turn (radians) <br /></td></tr>
+<tr class="separator:a9e4a657c13111b80133ada463fecddae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac0b061d135be4405209261b92b0af0e"><td class="memItemLeft" align="right" valign="top"><a id="aac0b061d135be4405209261b92b0af0e"></a>
+NUClear::clock::duration&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html#aac0b061d135be4405209261b92b0af0e">turn_duration</a> = std::chrono::seconds(0)</td></tr>
+<tr class="memdesc:aac0b061d135be4405209261b92b0af0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Duration to turn on the spot (seconds) <br /></td></tr>
+<tr class="separator:aac0b061d135be4405209261b92b0af0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
@@ -195,7 +219,7 @@ NUClear::clock::duration&#160;</td><td class="memItemRight" valign="bottom"><a c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>strategy</b></li><li class="navelem"><a class="el" href="classmodule_1_1strategy_1_1FindObject.html">FindObject</a></li><li class="navelem"><a class="el" href="structmodule_1_1strategy_1_1FindObject_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Wed Jul 30 2025 03:22:19 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 00:05:30 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

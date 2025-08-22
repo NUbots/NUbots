@@ -1,5 +1,12 @@
 var NAVTREEINDEX9 =
 {
+"classutility_1_1openai_1_1__detail_1_1Session.html#abe024a9a7d043fbeeb244713e0bb2db0":[3,0,7,8,0,13,1],
+"classutility_1_1openai_1_1__detail_1_1Session.html#ad062ac8b3d204692762c8a4a0673d347":[3,0,7,8,0,13,15],
+"classutility_1_1openai_1_1__detail_1_1Session.html#ae9bed6c3400a303343edc9d806a7459e":[3,0,7,8,0,13,2],
+"classutility_1_1openai_1_1__detail_1_1Session.html#af1b482cde37da8a30447c0f5d29fb8e4":[3,0,7,8,0,13,6],
+"classutility_1_1openai_1_1__detail_1_1Session.html#af3ecaad4b2e15fc1102e7b8b510ec27e":[3,0,7,8,0,13,12],
+"classutility_1_1reactor_1_1StreamReactor.html":[3,0,7,9,0],
+"classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747":[3,0,7,9,0,24],
 "classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0":[3,0,7,9,0,20],
 "classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482":[3,0,7,9,0,19],
 "classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27":[3,0,7,9,0,22],
@@ -189,8 +196,8 @@ var NAVTREEINDEX9 =
 "functions_type.html":[3,3,3],
 "functions_u.html":[3,3,0,20],
 "functions_v.html":[3,3,0,21],
-"functions_vars.html":[3,3,2,0],
 "functions_vars.html":[3,3,2],
+"functions_vars.html":[3,3,2,0],
 "functions_vars_b.html":[3,3,2,1],
 "functions_vars_c.html":[3,3,2,2],
 "functions_vars_d.html":[3,3,2,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX9 =
 "group__ErrorAccumulations.html#ga940da1b30d0b47957fe49d646101d45b":[3,0,3,13,0,9],
 "group__ErrorAccumulations.html#gaf31f8f5be8dabf6ad83e36f0d33c6212":[3,0,3,13,2,11],
 "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5d":[2,0,3,8,1,16],
-"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da029bcf6a5b5cb28d33634f4e4549f215":[2,0,3,8,1,16,2],
-"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da442f0b6625bbdda7f8ec5ce2fd27126e":[2,0,3,8,1,16,3],
-"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da567bb7d42622ad0d2d636aea2b8152db":[2,0,3,8,1,16,5],
-"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da75815bad26a6db6f30b95e1fe252fe35":[2,0,3,8,1,16,0],
-"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5dae7f66be9ec3ebd3c838cee9554ad037e":[2,0,3,8,1,16,1],
-"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5daf0f15806f9693e6917234c4bdef14780":[2,0,3,8,1,16,4],
-"hierarchy.html":[3,2],
-"huffman__table_8cpp.html#abafa3480b14b3d6de416c6169ab79d01":[2,0,3,6,0,1,1,3]
+"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da029bcf6a5b5cb28d33634f4e4549f215":[2,0,3,8,1,16,2]
 };
