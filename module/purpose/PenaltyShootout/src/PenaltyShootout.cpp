@@ -3,12 +3,10 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameState.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
@@ -16,27 +14,21 @@
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
-#include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/support/FieldDescription.hpp"
 
-#include "utility/skill/Script.hpp"
-
 namespace module::purpose {
 
     using extension::Configuration;
-    using utility::skill::load_script;
 
     using Phase = message::input::GameState::Phase;
 
-    using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::GameState;
-    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::PenaltyReset;
     using message::output::Buzzer;
@@ -44,7 +36,6 @@ namespace module::purpose {
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
-    using message::strategy::FindBall;
     using message::strategy::LookAtBall;
     using message::strategy::WalkToKickBall;
     using message::support::FieldDescription;
@@ -57,10 +48,9 @@ namespace module::purpose {
 
         on<Configuration>("PenaltyShootout.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PenaltyShootout.yaml
-            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_action_distance = config["ball_action_distance"].as<double>();
-            cfg.startup_delay        = config["startup_delay"].as<int>();
-            cfg.ball_search_timeout  = duration_cast<NUClear::clock::duration>(
+            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
+            cfg.startup_delay       = config["startup_delay"].as<int>();
+            cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
         });
 

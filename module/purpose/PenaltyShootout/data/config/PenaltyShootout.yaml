@@ -1,9 +1,6 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Distance from the ball at which the goalie will act
-ball_action_distance: 1.0
-
 # Delay before the penalty shootout starts
 startup_delay: 2
 
