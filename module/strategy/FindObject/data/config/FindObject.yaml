@@ -2,4 +2,19 @@
 log_level: INFO
 
 # How long to wait until the ball is lost and we should look for it
-ball_search_timeout: 2
+ball_search_timeout: 5
+
+# Distance from field border that triggers moving to centre (in metres)
+border_threshold: 0.3
+
+# How far to move towards centre when near border (0.5 = halfway to centre)
+centre_move_ratio: 0.5
+
+# Distance from centre to be considered "at centre" (in metres)
+centre_reached_threshold: 1.0
+
+# Distance from patrol point to be considered "reached" (in metres)
+patrol_reached_threshold: 0.5
+
+# Time to turn on the spot when searching for the ball (in seconds)
+turn_duration: 15.0
