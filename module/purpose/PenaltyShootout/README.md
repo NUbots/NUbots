@@ -2,7 +2,7 @@
 
 ## Description
 
-This module handles penalty shootout scenarios in robot soccer. It manages the robot's behavior during penalty kicks, with different actions depending on whether the robot is taking the penalty shot or acting as a goalkeeper.
+This module handles penalty shootout scenarios in robot soccer. It manages the robot's behaviour during penalty kicks, with different actions depending on whether the robot is taking the penalty shot or acting as a goalkeeper.
 
 When it's the robot's kick off (taking the penalty), the robot will search for the ball, walk to it, and attempt to kick it into the goal. When it's the opponent's kick off (acting as goalkeeper), the robot remains stationary on the goal line and tracks the ball with its head, as per RoboCup rules that prevent goalkeepers from moving off the line during penalty kicks.
 
