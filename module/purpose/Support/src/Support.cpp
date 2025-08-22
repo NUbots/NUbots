@@ -33,6 +33,7 @@
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Player.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
 
@@ -47,6 +48,7 @@ namespace module::purpose {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::strategy::FindBall;
     using message::strategy::WalkToFieldPosition;
     using message::support::FieldDescription;
 
@@ -61,6 +63,9 @@ namespace module::purpose {
 
         on<Provide<SupportMsg>, With<Ball>, With<Sensors>, With<Field>, With<FieldDescription>>().then(
             [this](const Ball& ball, const Sensors& sensors, const Field& field, const FieldDescription& fd) {
+                // Find the ball if we don't have it
+                emit<Task>(std::make_unique<FindBall>(), 1);  // Need to know where the ball is
+
                 // Get ball in field coordinates
                 Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
                 Eigen::Vector3d rRFf = (field.Hfw * sensors.Hrw.inverse()).translation();

@@ -5,7 +5,7 @@ log_level: INFO
 model_path: "yolo.onnx"
 
 # Minimum confidence required for a ball detection to be accepted
-ball_confidence_threshold: 0.2
+ball_confidence_threshold: 0.29
 
 # Minimum confidence required for a goal detection to be accepted
 goalpost_confidence_threshold: 0.5
@@ -13,8 +13,14 @@ goalpost_confidence_threshold: 0.5
 # Minimum confidence required for a robot detection to be accepted
 robot_confidence_threshold: 0.2
 
-# Minimum confidence required for a field line intersection detection to be accepted
-intersection_confidence_threshold: 0.4
+# Minimum confidence required for L-intersection detection to be accepted
+l_intersection_confidence_threshold: 0.45
+
+# Minimum confidence required for T-intersection detection to be accepted
+t_intersection_confidence_threshold: 0.45
+
+# Minimum confidence required for X-intersection detection to be accepted
+x_intersection_confidence_threshold: 0.6
 
 # NMS threshold for filtering out overlapping bounding boxes
 nms_threshold: 0.5
