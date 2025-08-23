@@ -400,6 +400,54 @@ RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
 
+# CXSparse required for g2o's CSparse backend
+# Add required packages (Arch Linux syntax for NUbots base)
+RUN install-package suitesparse sqlite
+
+# g2o (Graph Optimization Library)
+RUN install-from-source https://github.com/RainerKuemmerle/g2o/archive/refs/tags/20241228_git.tar.gz \
+    --build-system cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DG2O_BUILD_APPS=OFF \
+    -DG2O_BUILD_EXAMPLES=OFF \
+    -DG2O_USE_OPENGL=OFF \
+    -DG2O_USE_CSPARSE=ON \
+    -DG2O_BUILD_SOLVER_CSPARSE=ON \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_INSTALL_INCLUDEDIR=include
+
+# Install fbow before Stella
+RUN install-from-source https://github.com/stella-cv/FBoW/archive/refs/heads/master.tar.gz \
+    --build-system cmake \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DCMAKE_INSTALL_INCLUDEDIR=include \
+    -DCMAKE_INSTALL_LIBDIR=lib
+
+# Install tinycolormap (header-only)
+RUN install-from-source https://github.com/yuki-koyama/tinycolormap/archive/refs/heads/master.tar.gz \
+    --build-system cmake \
+    -DCMAKE_INSTALL_PREFIX=/usr/local
+
+# Install nlohmann-json3-dev
+RUN install-package nlohmann-json
+
+# Then install Stella VSLAM
+RUN ldconfig && install-from-source https://github.com/stella-cv/stella_vslam/archive/refs/tags/0.6.0.tar.gz \
+    --build-system cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DUSE_PANGOLIN_VIEWER=OFF \
+    -DUSE_SOCKET_PUBLISHER=OFF \
+    -DUSE_STACK_TRACE_LOGGER=OFF \
+    -DUSE_G2O=ON \
+    -DUSE_FBoW=ON \
+    -DUSE_OPENMP=ON \
+    -DBUILD_TESTS=OFF \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DCMAKE_INSTALL_INCLUDEDIR=include \
+    -DCMAKE_INSTALL_LIBDIR=lib
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################

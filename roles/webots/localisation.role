@@ -22,11 +22,12 @@ nuclear_role(
   network::RobotCommunication
   platform::Webots
   # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::FieldLineDetector
-  vision::BallDetector
-  vision::Yolo
+  # vision::VisualMesh
+  # vision::GreenHorizonDetector
+  # vision::FieldLineDetector
+  # vision::BallDetector
+  # vision::Yolo
+  input::Stella
   # Localisation
   localisation::BallLocalisation
   localisation::FieldLocalisationNLopt
@@ -50,4 +51,7 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  # Stella
+  input::Stella
+  support::logging::DataLogging
 )

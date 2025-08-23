@@ -26,33 +26,24 @@
 # SOFTWARE.
 #
 
-import multiprocessing
 import os
-
-# Tell tensorflow to shut up
-if "TF_CPP_MIN_LOG_LEVEL" not in os.environ:
-    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+from typing import Dict, Tuple
 
 import numpy as np
-import tensorflow as tf
 from tqdm import tqdm
 
 from utility.nbs import LinearDecoder
-
 from .images import decode_image
 from .images.video_recorder import Recorder
 
-# Configure TensorFlow to use CPU only for multiprocessing compatibility
-tf.config.set_visible_devices([], "GPU")
-
 
 def register(command):
-    command.description = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
+    command.description = "Decode an NBS file and export embedded images to MP4 video(s)."
 
     # Command arguments
-    command.add_argument("files", metavar="files", nargs="+", help="The nbs files to extract the videos from")
+    command.add_argument("files", metavar="files", nargs="+", help="The NBS files to extract the videos from")
     command.add_argument("--output", "-o", default=os.getcwd(), help="The folder to create the videos in")
-    command.add_argument("--quality", "-q", default="30M", help="The quality to encode the videos at")
+    command.add_argument("--quality", "-q", default="30M", help="The target video bitrate/quality (e.g. 18M, 30M)")
     command.add_argument(
         "--encoder",
         "-e",
@@ -62,83 +53,111 @@ def register(command):
     )
 
 
-def init_worker():
-    """Initialize worker process with TensorFlow CPU-only configuration"""
-    tf.config.set_visible_devices([], "GPU")
-
-
-def process_frame(item):
-    data = decode_image(item["data"], item["format"])
-
-    return {
-        "timestamp": item["timestamp"],
-        "data": [
-            {"image": d["image"].numpy(), "name": "{}{}".format(item["camera_name"], d["name"]), "fourcc": d["fourcc"]}
-            for d in data
-        ],
-    }
-
-
-def packetise_stream(decoder):
+def _packetise_stream(decoder):
+    """
+    Yields packets that contain image data in a pickleable format.
+    """
     for packet in decoder:
-        # Check for compressed images
         if packet.type.name in ("message.output.CompressedImage", "message.input.Image"):
-            # Get some useful info into a pickleable format
             yield {
-                "camera_name": packet.msg.name,
+                "camera_name": packet.msg.name,  # e.g. "top" / "bottom"
                 "timestamp": (packet.msg.timestamp.seconds, packet.msg.timestamp.nanos),
                 "data": packet.msg.data,
                 "format": packet.msg.format,
             }
 
 
+def _to_numpy_image(x):
+    """
+    Ensure the image is a NumPy array with shape (H, W) or (H, W, C).
+    decode_image() typically returns TF tensors; convert safely.
+    """
+    # TF eager tensor path
+    if hasattr(x, "numpy"):
+        x = x.numpy()
+
+    # Already numpy?
+    if isinstance(x, np.ndarray):
+        return x
+
+    # Fallback: try to coerce bytes-like (e.g. encoded JPEG) into numpy so callers can decide
+    if isinstance(x, (bytes, bytearray)):
+        # Keep as bytes; decode_image should normally have handled decoding.
+        # Returning None signals bad type for raw frame ingest.
+        return None
+
+    # Last resort: attempt numpy conversion
+    try:
+        return np.array(x)
+    except Exception:
+        return None
+
+
 def run(files, output, encoder, quality, **kwargs):
+    """
+    Single-process, TensorFlow-free path:
+      - iterate LinearDecoder
+      - decode with decode_image()
+      - open a Recorder per stream and write frames
+    """
     os.makedirs(output, exist_ok=True)
 
-    recorders = {}
+    # name -> Recorder
+    recorders: Dict[str, Recorder] = {}
+    # name -> (H, W, C)
+    sizes: Dict[str, Tuple[int, int, int]] = {}
 
-    with multiprocessing.Pool(multiprocessing.cpu_count(), initializer=init_worker) as pool:
+    try:
+        decoder = LinearDecoder(*files, show_progress=True)
+        stream = _packetise_stream(
+            tqdm(decoder, unit="packet", unit_scale=True, dynamic_ncols=True)
+        )
 
-        def record_frame(msg):
-            # If we haven't seen this camera before, make a new encoder for it
-            for frame in msg["data"]:
-                if frame["name"] not in recorders:
-                    recorders[frame["name"]] = Recorder(
-                        os.path.join(output, "{}.mp4".format(frame["name"])),
-                        tf.shape(frame["image"]),
-                        frame["fourcc"],
+        for msg in stream:
+            # decode_image returns a list of dicts like:
+            #   {"image": <tensor/ndarray>, "name": "_raw" or suffix, "fourcc": "BGR3"/"GRAY"/etc}
+            frames = decode_image(msg["data"], msg["format"])
+
+            # Build output per substream
+            for d in frames:
+                img = _to_numpy_image(d["image"])
+                if img is None:
+                    continue
+
+                # Ensure 3D shape for recorder
+                if img.ndim == 2:  # grayscale
+                    img = img[..., None]
+                if img.ndim != 3:
+                    # Skip invalid frame shapes gracefully
+                    continue
+
+                h, w, c = img.shape
+                name = f'{msg["camera_name"]}{d["name"]}'  # e.g. "top_raw" / "bottom_rect"
+                fourcc = d.get("fourcc", "BGR3")
+
+                if name not in recorders:
+                    # Recorder expects a (H, W, C)-like shape; it formats as WxH internally.
+                    recorders[name] = Recorder(
+                        os.path.join(output, f"{name}.mp4"),
+                        (h, w, c),
+                        fourcc,
                         encoder,
                         quality,
                     )
+                    sizes[name] = (h, w, c)
 
-                # Push the next packet
-                recorders[frame["name"]].encode({"timestamp": msg["timestamp"], "image": frame["image"]})
+                # If the stream size changes mid-log, clamp to the first size (resize here if needed)
+                if (h, w, c) != sizes[name]:
+                    # Minimal safety: drop mismatched frame (could also resize here if desired)
+                    # import cv2; img = cv2.resize(img, (sizes[name][1], sizes[name][0]))
+                    continue
 
-        results = []
-        for msg in packetise_stream(
-            tqdm(
-                LinearDecoder(*files, show_progress=True),
-                unit="packet",
-                unit_scale=True,
-                dynamic_ncols=True,
-            )
-        ):
-            # Add a task to the pool to process
-            results.append(pool.apply_async(process_frame, (msg,)))
+                recorders[name].encode({"timestamp": msg["timestamp"], "image": img})
 
-            # Only buffer 1024 images for each cpu core to avoid running out of memory
-            if len(results) > 1024 * multiprocessing.cpu_count():
-                results[0].wait()
-
-            # If the next one is ready process it
-            if len(results) > 0 and results[0].ready():
-                record_frame(results.pop(0).get())
-
-        # Drain the remainder of the images
-        while len(results) > 0:
-            record_frame(results.pop(0).get())
-
-    # Once we have finished reading all the frames, we need to finish writing the remainder of the buffer
-    # And then use the timecode file we made to setup the VFR timecodes
-    for k, r in recorders.items():
-        r.close()
+    finally:
+        # Always close any open recorders
+        for r in recorders.values():
+            try:
+                r.close()
+            except Exception:
+                pass

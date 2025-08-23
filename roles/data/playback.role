@@ -19,16 +19,7 @@ nuclear_role(
   output::ImageCompressor
   # Input
   input::SensorFilter
-  # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::BallDetector
-  vision::FieldLineDetector
-  vision::Yolo
-  # Localisation
-  localisation::BallLocalisation
-  localisation::FieldLocalisationNLopt
-  localisation::RobotLocalisation
+  input::Stella
   # Platform
   tools::NBSPlayback
   nbs::Player

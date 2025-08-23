@@ -1,0 +1,33 @@
+log_level: INFO
+
+Camera:
+  name: "NUbots Webots"
+  setup: "monocular"
+  model: "perspective"        # Use perspective
+
+  # Intrinsics from Webots lens
+  fx: 320.0                   # 0.5 * width
+  fy: 320.0                   # assuming square pixels
+  cx: 320.0                   # width / 2
+  cy: 240.0                   # height / 2
+
+  # No distortion
+  k1: 0.0
+  k2: 0.0
+  p1: 0.0                     # must exist in Stella YAML
+  p2: 0.0
+  k3: 0.0
+
+  fps: 31.0
+  cols: 640
+  rows: 480
+
+  color_order: "RGB"
+
+Feature:
+  name: "NUbots soccer field - high threshold approach"
+  max_num_keypoints: 2000      # Limit features like working config
+  scale_factor: 1.2          # The factor between pyramid levels for feature detection; 1.1 means each level is 10% smaller than the previous, allowing for finer scale detection.
+  num_levels: 8             # The number of pyramid levels used for multi-scale feature detection; more levels allow features to be detected at more scales.
+  ini_fast_threshold: 12      # Initial threshold for FAST corner detection (higher = fewer features)
+  min_fast_threshold: 5       # Minimum threshold for FAST (higher = more robust, fewer features)
