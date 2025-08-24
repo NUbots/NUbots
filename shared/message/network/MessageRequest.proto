@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package message.network;
+
+import "message/eye/Rpc.proto";
+
+/**
+ * Request the most recent instance of a message to be transmitted reliably over the network.
+ */
+message MessageRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+
+    /// The fully qualified name of the message to get
+    string name = 2;
+
+    /// The subtype of the message to get
+    uint32 subtype = 3;
+}
