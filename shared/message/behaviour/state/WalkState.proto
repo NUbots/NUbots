@@ -36,8 +36,9 @@ message WalkState {
         UNKNOWN  = 0;
         STARTING = 1;
         WALKING  = 2;
-        STOPPING = 3;
-        STOPPED  = 4;
+        KICKING  = 3;
+        STOPPING = 4;
+        STOPPED  = 5;
     }
 
     enum Phase {
