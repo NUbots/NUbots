@@ -97,8 +97,8 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToKickBall>, With<Ball>, With<Sensors>, With<Field>>().then(
-            [this](const Ball& ball, const Sensors& sensors, const Field& field) {
+        on<Provide<WalkToKickBall>, Optional<With<Robots>>, With<Ball>, With<Sensors>, With<Field>>().then(
+            [this](const std::shared_ptr<const Robots>& robots, const Ball& ball, const Sensors& sensors, const Field& field) {
                 // Ball position relative to robot in robot frame (rBRr)
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 rBRr.y() += cfg.ball_y_offset;  // Offset for ball-walking alignment
@@ -147,6 +147,25 @@ namespace module::strategy {
                     log<DEBUG>(fmt::format("Large angle error: {} radians, backing off further", angle_error));
                     Eigen::Vector3d approach = kick_target - uGBf * cfg.ball_approach_distance;
                     Hfk                      = pos_rpy_to_transform(approach, Eigen::Vector3d(0, 0, desired_heading));
+                }
+                // If there are robots, check if there are obstacles in the way
+                if (robots != nullptr) {
+                    // Get the positions of all robots in the world
+                    std::vector<Eigen::Vector2d> all_obstacles{};
+                    for (const auto& robot : robots->robots) {
+                        all_obstacles.emplace_back((field.Hfw * robot.rRWw).head(2));
+                    }
+                    auto robot_infront = robot_infront_of_ball(all_obstacles, rBFf.head(2));
+                    if (robot_infront.has_value()) {
+                        log<DEBUG>("Robot in front of ball", robot_infront.value());
+                        // Move to the side of the ball
+                        if (robot_infront.value().y() > rBFf.y()) {
+                            Hfk = pos_rpy_to_transform(rGFf, Eigen::Vector3d(0, 0, desired_heading + M_PI_4));
+                        }
+                        else {
+                            Hfk = pos_rpy_to_transform(rGFf, Eigen::Vector3d(0, 0, desired_heading - M_PI_4));
+                        }
+                    }
                 }
                 // Otherwise, walk directly to scaled approach position
                 else {
