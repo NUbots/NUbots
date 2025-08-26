@@ -17,3 +17,5 @@ scripts:
   # If this is the case, the safest thing we can do is to relax all the servos to avoid injuring someone.
   getup_upside_down:
     - "Relax.yaml"
+  getup_side:
+    - "SideRoll.yaml"
