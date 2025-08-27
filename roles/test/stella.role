@@ -21,6 +21,19 @@
     input::Camera
     input::Stella
     input::SensorFilter
+    # Director
+    extension::Director
+    # Servos
+    actuation::Kinematics
+    actuation::Servos
+    actuation::FootController
+    # Skills
+    skill::Walk
+    skill::KickWalk
+    skill::GetUp
+    skill::Look
+    # Purpose
+    purpose::KeyboardWalk
     # Platform
     platform::${SUBCONTROLLER}::HardwareIO
   )
