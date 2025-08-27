@@ -46,7 +46,34 @@ namespace module::input {
                                        const std::shared_ptr<const Sensors>& previous_sensors,
                                        const RawSensors& raw_sensors,
                                        const message::behaviour::state::Stability& stability,
-                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                                       const std::shared_ptr<const StellaMsg>& stella) {
+
+        if (!stella_initialised) {
+            Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
+            // Remove y translation from Htf
+            auto Htw = Htf;
+            Htw.translation().y() = 0;
+
+            Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
+            auto Hwc = Htw.inverse() * Htc;
+            // 90 degrees y, -90 degrees z
+            auto Hcn = Eigen::Isometry3d::Identity();
+            Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            Hwn = Hwc * Hcn;
+
+            stella_initialised = true;
+        }
+
+        if (stella) {
+            auto Htc =  Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
+            // Add roll, pitch, yaw offsets to Htc
+
+            auto Hnc = stella->Hnc;
+            sensors->Htw = Htc * Hnc.inverse() * Hwn.inverse();
+            return;
+        }
+
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
             Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);

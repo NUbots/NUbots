@@ -37,8 +37,10 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/Stella.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
+
 
 #include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/math/filter/YawFilter.hpp"
@@ -51,6 +53,7 @@ namespace module::input {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using StellaMsg = message::input::Stella;
     using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
 
@@ -117,6 +120,11 @@ namespace module::input {
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
 
+        /// @brief Fixed transform from nubots world to stella world frame
+        Eigen::Isometry3d Hwn = Eigen::Isometry3d::Identity();
+
+        bool stella_initialised = false;
+
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
         /// @param sensors The sensors message to update
@@ -145,13 +153,17 @@ namespace module::input {
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
                              const message::behaviour::state::Stability& stability,
-                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                             const std::shared_ptr<const StellaMsg>& stella);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
         /// @param robot_pose_ground_truth The ground truth robot pose
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
                                  const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
+
+
+
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

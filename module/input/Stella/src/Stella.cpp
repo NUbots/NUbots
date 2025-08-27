@@ -9,12 +9,11 @@
 #include "message/input/Image.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/Stella.hpp"
 
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "utility/math/euler.hpp"
-#include <thread>
-
 
 namespace fs = std::filesystem;
 namespace module::input {
@@ -22,7 +21,7 @@ namespace module::input {
     using extension::Configuration;
     using message::input::Image;
     using message::output::CompressedImage;
-    using message::input::Sensors;
+    using StellaMsg = message::input::Stella;
 
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -51,23 +50,10 @@ namespace module::input {
 
             map_publisher = slam_system->get_map_publisher();
 
-            log<INFO>("Creating socket publisher");
-            publisher = std::make_shared<socket_publisher::publisher>(
-                socket_config,
-                slam_system,
-                frame_publisher,
-                map_publisher);
-
             log<INFO>("Stella initialized. Debug frames will be saved to stella_output/");
         });
 
-        on<Trigger<Image>, Single, MainThread>().then([this](const Image& image) {
-            // if (publisher)
-            // {
-            // publisher->run();  // This blocks this thread, not the main thread
-            // }
-
-
+        on<Trigger<Image>,Single, MainThread>().then([this](const Image& image) {
             int width  = image.dimensions.x();
             int height = image.dimensions.y();
 
@@ -141,37 +127,59 @@ namespace module::input {
             }
 
             // Emit a sensors message
-            auto sensors = std::make_unique<Sensors>();
+            auto stella = std::make_unique<StellaMsg>();
+            // // Keep your mapping (nu -> cv)
+            Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
+            Hkc.matrix() <<
+                0, -1,  0, 0,
+                0,  0, -1, 0,
+                1,  0,  0, 0,
+                0, 0, 0, 1;
 
-            // Get rotation and translation from stella_vslam
+            // // persistent alignment (computed once when first pose arrives)
+            // static bool have_align = false;
+            // static Eigen::Matrix3d R_align = Eigen::Matrix3d::Identity();
+
             if (camera_pose) {
-                // camera_pose points to Twc (camera in world coords)
-                // We need Htw (torso to world), so we'll use the camera pose directly
-                // Convert Mat44_t to Eigen::Isometry3d
-                Eigen::Isometry3d Hwc = Eigen::Isometry3d::Identity();
+                const auto& M = *camera_pose;
+                Eigen::Isometry3d Hnk= Eigen::Isometry3d::Identity();
+                Hnk.linear()      = M.block<3,3>(0,0);
+                Hnk.translation() = M.block<3,1>(0,3);
 
-                // Extract rotation and translation from the Mat44_t
-                const auto& pose_matrix = *camera_pose;
-                Hwc.translation() = Eigen::Vector3d(pose_matrix(0, 3), pose_matrix(1, 3), pose_matrix(2, 3));
-                Hwc.linear() = pose_matrix.block<3, 3>(0, 0);
 
-                // Obtain rpy from the camera pose
-                Eigen::Vector3d rpy = mat_to_rpy_intrinsic(Hwc.rotation());
+                Eigen::Isometry3d Hnc = Hnk * Hkc;
 
-                // Rotate the camera pose to the torso frame (x forward, y left, z up), reconstructing the matrix
-                Eigen::Matrix3d R = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy.z(), -rpy.x(), -rpy.y()));
+                // // Camera->world (cv) to Torso->world (nu) BEFORE world alignment
+                // Eigen::Matrix3d R0 = Hnc.rotation() * R_nu_to_cv;
 
-                // positive y is negative is negative x
-                // negatve x is negative yaw
-                // positive z is negative pitch y
-                Hwc.linear() = R;
+                // // // Compute alignment once to make Z point up (and optionally face +X)
+                // // if (!have_align) {
+                // //     // 1) Gravity align: map current up (torso Z) to world +Z
+                // //     const Eigen::Vector3d z_now = R0.col(2);                      // torso Z in world
+                // //     const Eigen::Matrix3d Rg =
+                // //         Eigen::Quaterniond::FromTwoVectors(z_now, Eigen::Vector3d::UnitZ()).toRotationMatrix();
 
-                // For now, use Hwc as Htw (assuming camera is mounted on torso)
-                // You might need to adjust this based on your robot's camera mounting
-                sensors->Htw = Hwc.inverse();
+                // //     Eigen::Matrix3d R1 = Rg * R0;                                 // now Z is up
+
+                // //     // 2) (Optional) Heading align: rotate about +Z so torso X faces +X
+                // //     const Eigen::Vector3d x_now = R1.col(0);
+                // //     const double psi = std::atan2(x_now.y(), x_now.x());           // current yaw heading
+                // //     const Eigen::Matrix3d Rh =
+                // //         Eigen::AngleAxisd(-psi, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+
+                // //     R_align = Rh * Rg;
+                // //     have_align = true;
+                // // }
+
+                // // Apply alignment
+                // Eigen::Isometry3d Htw = Eigen::Isometry3d::Identity();
+                // Eigen::Matrix3d R_tw = R0;      // your current torso->world
+                // Htw.linear()      = R_tw.transpose();
+                // Htw.translation() = Hnc.translation(); // rotate translation too
+                stella->Hnc = Hnc;
             }
 
-            emit(std::move(sensors));
+            emit(std::move(stella));
         });
     }
 
