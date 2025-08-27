@@ -5,6 +5,7 @@
     # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
     extension::FileWatcher # Watches configuration files for changes
     support::SignalCatcher # Allows for graceful shutdown
+    support::logging::ConsoleLogHandler
     # Configuration
     actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
     support::configuration::GlobalConfig
