@@ -432,13 +432,26 @@ RUN install-from-source https://github.com/yuki-koyama/tinycolormap/archive/refs
 # Install nlohmann-json3-dev
 RUN install-package nlohmann-json
 
+RUN install-from-source https://github.com/zaphoyd/websocketpp/archive/refs/tags/0.8.2.tar.gz
+
+RUN install-from-source https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-30-2.tar.gz \
+    --header-path include
+
+RUN git clone https://github.com/shinsumicco/socket.io-client-cpp.git && \
+    cd socket.io-client-cpp && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_TESTS=OFF && \
+    cmake --build . --target sioclient sioclient_tls -j"$(nproc)" && \
+    cmake --install . && \
+    cd ../.. && rm -rf socket.io-client-cpp
+
 # Then install Stella VSLAM
 RUN ldconfig && install-from-source https://github.com/stella-cv/stella_vslam/archive/refs/tags/0.6.0.tar.gz \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DUSE_PANGOLIN_VIEWER=OFF \
-    -DUSE_SOCKET_PUBLISHER=OFF \
+    -DUSE_SOCKET_PUBLISHER=ON \
     -DUSE_STACK_TRACE_LOGGER=OFF \
     -DUSE_G2O=ON \
     -DUSE_FBoW=ON \
