@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <stella_vslam/publish/frame_publisher.h>
+#include "socket_publisher/publisher.h"
 
 #include "extension/Configuration.hpp"
 
@@ -19,7 +20,22 @@ namespace module::input {
     using message::input::Image;
     using message::output::CompressedImage;
 
-    static int frame_counter = 0;
+    void Stella::start_socket_once() {
+        if (socket_thread_running.exchange(true)) return;
+        socket_thread = std::thread([this] {
+            // blocking loop; exits after request_terminate()
+            socket_publisher->run();
+        });
+    }
+
+    void Stella::stop_socket_and_publishers() {
+        if (!socket_thread_running) return;
+        // Stop socket first (it’s the consumer of frame/map pubs)
+        socket_publisher->request_terminate();
+
+        if (socket_thread.joinable()) socket_thread.join();
+        socket_thread_running = false;
+    }
 
     Stella::Stella(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Configuration>("Stella.yaml").then([this](const Configuration& config) {
@@ -27,20 +43,35 @@ namespace module::input {
 
             if (slam_system) {
                 log<INFO>("SLAM system already initialized, shutting down gracefully...");
+                stop_socket_and_publishers();
                 slam_system->shutdown();
                 slam_system.reset();
                 frame_publisher.reset();
+                map_publisher.reset();
+                socket_publisher.reset();
             }
 
-            std::string config_path = "/home/nubots/NUbots/module/input/Stella/data/config/Stella.yaml";
-            std::string vocab_file  = "/home/nubots/NUbots/module/input/Stella/data/orb_vocab.fbow";
+            std::string config_path = config["config_path"].as<std::string>();
+            std::string vocab_file  = config["vocab_path"].as<std::string>();
 
             slam_config = std::make_shared<stella_vslam::config>(config_path);
-            slam_system = std::make_unique<stella_vslam::system>(slam_config, vocab_file);
+            slam_system = std::make_shared<stella_vslam::system>(slam_config, vocab_file);
             slam_system->startup();
 
             // 🔹 Get the frame publisher for debug visualization
             frame_publisher = slam_system->get_frame_publisher();
+
+            // get map publisher
+            map_publisher = slam_system->get_map_publisher();
+
+            socket_publisher = std::make_shared<socket_publisher::publisher>(
+                config["SocketPublisher"],
+                slam_system,
+                frame_publisher,
+                map_publisher
+            );
+
+            start_socket_once();
 
             log<INFO>("Stella initialized. Debug frames will be saved to stella_output/");
         });

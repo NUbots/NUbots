@@ -1,26 +1,27 @@
 log_level: INFO
+config_path: "config/Stella.yaml"
+vocab_path: "orb_vocab.fbow"
 
 Camera:
   name: "NUbots Webots"
   setup: "monocular"
-  model: "perspective"        # Use perspective
+  model: "fisheye"        # Use perspective
 
   # Intrinsics from Webots lens
-  fx: 320.0                   # 0.5 * width
-  fy: 320.0                   # assuming square pixels
-  cx: 320.0                   # width / 2
-  cy: 240.0                   # height / 2
+  fx: 441.1879701439167                   # 0.5 * width
+  fy: 440.93855497755015                   # assuming square pixels
+  cx: 646.9268331017927                   # width / 2
+  cy: 529.1308499051486                   # height / 2
 
   # No distortion
-  k1: 0.0
-  k2: 0.0
-  p1: 0.0                     # must exist in Stella YAML
-  p2: 0.0
-  k3: 0.0
+  k1: -0.042640899882448645
+  k2: -0.00731118750954912
+  k3: 0.0027852336852226918
+  k4: -0.0009101216953410924
 
   fps: 31.0
-  cols: 640
-  rows: 480
+  cols: 1280
+  rows: 1024
 
   color_order: "RGB"
 
@@ -31,3 +32,9 @@ Feature:
   num_levels: 8             # The number of pyramid levels used for multi-scale feature detection; more levels allow features to be detected at more scales.
   ini_fast_threshold: 12      # Initial threshold for FAST corner detection (higher = fewer features)
   min_fast_threshold: 5       # Minimum threshold for FAST (higher = more robust, fewer features)
+
+SocketPublisher:
+  server_uri: "http://127.0.0.1:3000"
+  emitting_interval: 15000
+  image_quality: 20
+  publish_points: true
