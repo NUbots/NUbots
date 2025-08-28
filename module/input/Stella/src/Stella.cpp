@@ -85,14 +85,6 @@ namespace module::input {
 
 
             if (!debug_frame.empty()) {
-                // // Convert BGR to RGB format for JPEG compression
-                // cv::Mat rgb_frame;
-                // if (image.format == utility::vision::FOURCC::RGGB) {
-                //     cv::cvtColor(debug_frame, rgb_frame, cv::COLOR_BayerRG2RGB);
-                // } else {
-                //     cv::cvtColor(debug_frame, rgb_frame, cv::COLOR_BGR2RGB);
-                // }
-
                 // Compress to JPEG using OpenCV
                 std::vector<uint8_t> jpeg_data;
                 std::vector<int> compression_params = {cv::IMWRITE_JPEG_QUALITY, 85}; // 85% quality
@@ -136,46 +128,14 @@ namespace module::input {
                 1,  0,  0, 0,
                 0, 0, 0, 1;
 
-            // // persistent alignment (computed once when first pose arrives)
-            // static bool have_align = false;
-            // static Eigen::Matrix3d R_align = Eigen::Matrix3d::Identity();
-
             if (camera_pose) {
                 const auto& M = *camera_pose;
                 Eigen::Isometry3d Hnk= Eigen::Isometry3d::Identity();
                 Hnk.linear()      = M.block<3,3>(0,0);
                 Hnk.translation() = M.block<3,1>(0,3);
 
-
                 Eigen::Isometry3d Hnc = Hnk * Hkc;
 
-                // // Camera->world (cv) to Torso->world (nu) BEFORE world alignment
-                // Eigen::Matrix3d R0 = Hnc.rotation() * R_nu_to_cv;
-
-                // // // Compute alignment once to make Z point up (and optionally face +X)
-                // // if (!have_align) {
-                // //     // 1) Gravity align: map current up (torso Z) to world +Z
-                // //     const Eigen::Vector3d z_now = R0.col(2);                      // torso Z in world
-                // //     const Eigen::Matrix3d Rg =
-                // //         Eigen::Quaterniond::FromTwoVectors(z_now, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-
-                // //     Eigen::Matrix3d R1 = Rg * R0;                                 // now Z is up
-
-                // //     // 2) (Optional) Heading align: rotate about +Z so torso X faces +X
-                // //     const Eigen::Vector3d x_now = R1.col(0);
-                // //     const double psi = std::atan2(x_now.y(), x_now.x());           // current yaw heading
-                // //     const Eigen::Matrix3d Rh =
-                // //         Eigen::AngleAxisd(-psi, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-
-                // //     R_align = Rh * Rg;
-                // //     have_align = true;
-                // // }
-
-                // // Apply alignment
-                // Eigen::Isometry3d Htw = Eigen::Isometry3d::Identity();
-                // Eigen::Matrix3d R_tw = R0;      // your current torso->world
-                // Htw.linear()      = R_tw.transpose();
-                // Htw.translation() = Hnc.translation(); // rotate translation too
                 stella->Hnc = Hnc;
             }
 
