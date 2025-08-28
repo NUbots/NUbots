@@ -99,7 +99,7 @@ export class ControlsModel {
 export class DashboardModel {
   @observable visible = false;
 
-  constructor() {}
+  constructor() { }
 
   static of(): DashboardModel {
     return new DashboardModel();
@@ -126,6 +126,7 @@ export class LocalisationModel {
   @observable goalsVisible = true;
   @observable fieldLinePointsVisible = true;
   @observable fieldIntersectionsVisible = true;
+  @observable stellaMapPointsVisible = true;
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
 

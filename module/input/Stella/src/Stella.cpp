@@ -167,6 +167,22 @@ namespace module::input {
                 stella->Hnc = Hnc;
             }
 
+            // Get map points from Stella
+            std::vector<std::shared_ptr<stella_vslam::data::landmark>> all_landmarks;
+            std::set<std::shared_ptr<stella_vslam::data::landmark>> local_landmarks;
+            map_publisher->get_landmarks(all_landmarks, local_landmarks);
+
+            if (!all_landmarks.empty()) {
+                for (const auto& landmark : all_landmarks) {
+                    if (!landmark || landmark->will_be_erased()) {
+                        continue;
+                    }
+
+                    const auto pos = landmark->get_pos_in_world();
+                    stella->map_points.push_back(Eigen::Vector3d(pos[0], pos[1], pos[2]));
+                }
+            }
+
             emit(std::move(stella));
         });
     }

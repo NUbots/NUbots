@@ -15,6 +15,8 @@
 #include <stella_vslam/camera/perspective.h>
 #include <stella_vslam/config.h>
 #include <stella_vslam/system.h>
+#include <stella_vslam/data/landmark.h>
+#include <stella_vslam/publish/map_publisher.h>
 // #include <stella_vslam/util/yaml.h>
 
 // Socket publisher include

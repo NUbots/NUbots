@@ -71,6 +71,9 @@ namespace module::input {
 
             auto Hnc = stella->Hnc;
             sensors->Htw = Htc * Hnc.inverse() * Hwn.inverse();
+
+            // Set the Hwn transform in the sensors message
+            sensors->Hwn = Hwn;
             return;
         }
 

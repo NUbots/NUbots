@@ -186,6 +186,8 @@ export class LocalisationRobotModel {
     timestamp: number;
     phase: message.behaviour.state.WalkState.Phase;
   }[] = [];
+  @observable stellaMapPoints: { rNWn: Vector3[] } = { rNWn: [] };
+  @observable Hwn: Matrix4 = Matrix4.of();  // Add this line to store Hwn transform
 
   constructor({
     model,
@@ -221,6 +223,8 @@ export class LocalisationRobotModel {
     swingFootTrajectory,
     walkPhase,
     trajectoryHistory,
+    stellaMapPoints,
+    Hwn,
   }: {
     model: RobotModel;
     name: string;
@@ -261,6 +265,8 @@ export class LocalisationRobotModel {
       timestamp: number;
       phase: message.behaviour.state.WalkState.Phase;
     }[];
+    stellaMapPoints: { rNWn: Vector3[] };
+    Hwn: Matrix4;
   }) {
     this.model = model;
     this.name = name;
@@ -295,6 +301,8 @@ export class LocalisationRobotModel {
     this.swingFootTrajectory = swingFootTrajectory;
     this.walkPhase = walkPhase;
     this.trajectoryHistory = trajectoryHistory;
+    this.stellaMapPoints = stellaMapPoints;
+    this.Hwn = Hwn;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -328,6 +336,8 @@ export class LocalisationRobotModel {
       swingFootTrajectory: [],
       walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
       trajectoryHistory: [],
+      stellaMapPoints: { rNWn: [] },
+      Hwn: Matrix4.of(),
     });
   });
 
@@ -399,6 +409,17 @@ export class LocalisationRobotModel {
         position: intersection.position.applyMatrix4(this.Hfw),
       });
     });
+  }
+
+  /** Stella map points in field space */
+  @computed
+  get rNFf(): Vector3[] {
+    // Transform from Stella world frame {n} to field frame {f}
+    // First transform from Stella world to NUbots world: Hwn * rNWn
+    // Then transform from NUbots world to field: Hfw * (Hwn * rNWn)
+    return this.stellaMapPoints.rNWn.map((rNWn) =>
+      rNWn.applyMatrix4(this.Hwn).applyMatrix4(this.Hfw)
+    );
   }
 
   /** Torso trajectory (Hpt) in field space */

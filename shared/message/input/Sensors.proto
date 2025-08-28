@@ -157,8 +157,11 @@ message Sensors {
     /// Homogeneous transform: planted foot {p} to world {w}
     iso3 Hwp = 15;
 
-    /// Translational velocity of torso {t} in world {w} space
-    vec3 vTw = 16;
+    /// Homogeneous transform: nubots world {w} to stella world {n}
+    iso3 Hwn = 16;
 
-    behaviour.state.WalkState.Phase planted_foot_phase = 17;
+    /// Translational velocity of torso {t} in world {w} space
+    vec3 vTw = 17;
+
+    behaviour.state.WalkState.Phase planted_foot_phase = 18;
 }

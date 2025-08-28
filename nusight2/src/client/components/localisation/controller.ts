@@ -141,6 +141,9 @@ export class LocalisationController {
         case KeyCode.F:
           model.controls.down = false;
           return;
+        case KeyCode.S:
+          model.stellaMapPointsVisible = !model.stellaMapPointsVisible;
+          break;
       }
     }
   }

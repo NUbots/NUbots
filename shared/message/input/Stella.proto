@@ -38,5 +38,8 @@ import "message/behaviour/state/WalkState.proto";
 
 message Stella {
     /// Homogeneous transform: stella world frame {n} to camera {c}
-    iso3 Hnc = 14;
+    iso3 Hnc = 1;
+
+    /// Map points in stella world frame {n}
+    repeated vec3 map_points = 2;
 }

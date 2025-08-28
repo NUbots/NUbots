@@ -21,6 +21,12 @@
     input::Camera
     input::Stella
     input::SensorFilter
+    # # Vision
+    # vision::VisualMesh
+    # vision::GreenHorizonDetector
+    # vision::FieldLineDetector
+    # vision::Yolo
+    # localisation::FieldLocalisationNLopt
     # Director
     extension::Director
     # Servos
