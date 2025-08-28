@@ -6,6 +6,8 @@ The Stella module is a NUClear reactor that integrates Stella VSLAM into the NUb
 The module processes incoming camera images, feeds them to the Stella VSLAM system for feature detection and tracking, and provides both debug visualization and real-time mapping data through a socket publisher interface.
 
 ## Usage
+Run the following commands to copy libsocket_publisher.so to the robot:
+scp libsocket_publisher.so nubots@10.1.1.1:/usr/local/lib/
 Run ./test/stella on robot:
  - Visualizer in NUsight both the normal camera feed + Stella camera feed (with feature detections).
 
