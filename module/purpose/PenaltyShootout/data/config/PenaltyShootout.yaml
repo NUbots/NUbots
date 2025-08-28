@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Delay before the penalty shootout starts
+startup_delay: 2
+
+# Timeout for searching for the ball
+ball_search_timeout: 3
