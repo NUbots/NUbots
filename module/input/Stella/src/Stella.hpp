@@ -1,9 +1,11 @@
 #ifndef MODULE_INPUT_STELLA_HPP
 #define MODULE_INPUT_STELLA_HPP
 
+#include <atomic>
 #include <chrono>
 #include <memory>
 #include <nuclear>
+#include <thread>
 #include <yaml-cpp/yaml.h>
 
 // Stella VSLAM includes
@@ -14,6 +16,9 @@
 #include <stella_vslam/config.h>
 #include <stella_vslam/system.h>
 // #include <stella_vslam/util/yaml.h>
+
+// Socket publisher include
+#include "socket_publisher/publisher.h"
 
 // OpenCV includes
 #include <opencv2/core.hpp>
@@ -35,8 +40,16 @@ namespace module::input {
         /// @brief Frame publisher for debug visualization
         std::shared_ptr<stella_vslam::publish::frame_publisher> frame_publisher;
 
-        /// @brief Map publisher for debug visualization
+        /// @brief Map publisher for map visualization
         std::shared_ptr<stella_vslam::publish::map_publisher> map_publisher;
+
+        /// @brief Socket publisher for map visualization
+        std::shared_ptr<socket_publisher::publisher> socket_publisher;
+
+        std::thread socket_thread;
+        std::atomic<bool> socket_thread_running{false};
+        void start_socket_once();
+        void stop_socket_and_publishers();
 
     public:
         /// @brief Called by the powerplant to build and setup the Stella reactor.

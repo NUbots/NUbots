@@ -24,6 +24,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
+
 find_package(OpenCV REQUIRED)
 
 # Add Stella + FBoW include paths
@@ -38,9 +39,23 @@ link_directories(
     /usr/local/lib
 )
 
+# Add socket_publisher include path
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/socket_publisher/include
+    ${CMAKE_CURRENT_BINARY_DIR}/src/socket_publisher
+)
+
+# Add protobuf include directories
+find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+
+# Build the socket_publisher library first
+add_subdirectory(src/socket_publisher)
+
 # Define your NUClear module
 nuclear_module(LIBRARIES
     ${OpenCV_LIBRARIES}
     stella_vslam
     fbow
+    socket_publisher
 )
