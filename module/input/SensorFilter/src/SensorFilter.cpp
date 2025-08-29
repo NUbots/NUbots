@@ -86,6 +86,11 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
+
+            // Camera offset config
+            cfg.camera_offsets.roll_offset = config["camera_offsets"]["roll_offset"].as<Expression>();
+            cfg.camera_offsets.pitch_offset = config["camera_offsets"]["pitch_offset"].as<Expression>();
+            cfg.camera_offsets.yaw_offset = config["camera_offsets"]["yaw_offset"].as<Expression>();
         });
 
         on<Startup>().then([this] {

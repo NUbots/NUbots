@@ -33,7 +33,7 @@ targets:
     message.vision.BoundingBoxes: true
 
     # Localisation Messages
-    message.localisation.Ball: true
+    message.localisation.Ball: false
     message.localisation.Field: false
     message.localisation.Robots: true
 

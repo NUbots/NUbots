@@ -86,6 +86,13 @@ namespace module::input {
             double y_cut_off_frequency = 0.0;
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+
+            /// @brief Camera extrinsic offsets
+            struct CameraOffsets {
+                double roll_offset = 0.0;
+                double pitch_offset = 0.0;
+                double yaw_offset = 0.0;
+            } camera_offsets;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot

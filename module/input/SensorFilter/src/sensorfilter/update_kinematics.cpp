@@ -51,12 +51,11 @@ namespace module::input {
         std::vector<Eigen::Isometry3d> fk = tinyrobotics::forward_kinematics(nugus_model, q);
         auto Htx                          = forward_kinematics_to_servo_map(fk);
 
-        // Apply extrinsic offset to the cameras
-        // // Apply roll and pitch offsets
-        // double roll_offset  = config["roll_offset"].as<Expression>();
-        // double pitch_offset = config["pitch_offset"].as<Expression>();
-        // context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-        //               * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+        // Apply extrinsic offsets to the cameras
+        auto& Hpc = Htx[FrameID::L_CAMERA];
+        Hpc = Eigen::AngleAxisd(cfg.camera_offsets.yaw_offset, Eigen::Vector3d::UnitX()).toRotationMatrix()
+            * Eigen::AngleAxisd(cfg.camera_offsets.pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+            * Eigen::AngleAxisd(cfg.camera_offsets.roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
 
         for (const auto& entry : Htx) {

@@ -42,6 +42,12 @@ velocity_low_pass:
   y_cut_off_frequency: 0.01
   x_cut_off_frequency: 0.05
 
+# Camera extrinsic offsets for Stella
+camera_offsets:
+  roll_offset: 1.0 * pi / 180   # 1 degree (rotation around Y axis)
+  pitch_offset: -2.0 * pi / 180  # -2 degrees (rotation around Z axis)
+  yaw_offset: 0.0 * pi / 180    # 0 degrees (rotation around X axis)
+
 # Specify whether or not to use ground truth odometry from simulator
 use_ground_truth: false
 
