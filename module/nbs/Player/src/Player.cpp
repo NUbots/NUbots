@@ -1,32 +1,8 @@
-/*
- * MIT License
- *
- * Copyright (c) 2024 NUbots
- *
- * This file is part of the NUbots codebase.
- * See https://github.com/NUbots/NUbots for further info.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 #include "Player.hpp"
 
 #include <cmath>
+
+#include "bind.hpp"
 
 #include "extension/Configuration.hpp"
 
@@ -35,47 +11,66 @@
 namespace module::nbs {
 
     using message::eye::RpcResponseMeta;
-    using message::nbs::player::LoadRequest;
-    using message::nbs::player::PauseRequest;
-    using message::nbs::player::PlaybackFinished;
-    using message::nbs::player::PlaybackState;
-    using message::nbs::player::PlayRequest;
-    using message::nbs::player::SetModeRequest;
-    using message::nbs::player::SetPlaybackSpeedRequest;
-    using message::nbs::player::PlaybackMode::FAST;
-    using message::nbs::player::PlaybackMode::REALTIME;
-    using message::nbs::player::PlaybackMode::SEQUENTIAL;
+
+    using Load     = message::eye::ScrubberLoadRequest;
+    using Pause    = message::eye::ScrubberPauseRequest;
+    using Finished = message::eye::ScrubberPlaybackFinished;
+    using Play     = message::eye::ScrubberPlayRequest;
+    using SetMode  = message::eye::ScrubberSetModeRequest;
+    using SetSpeed = message::eye::ScrubberSetPlaybackSpeedRequest;
+    using State    = message::eye::ScrubberState;
+
+    template <typename T>
+    using Unbind = NUClear::dsl::operation::Unbind<T>;
+    using NUClear::dsl::operation::ChronoTask;
+    using NUClear::message::TimeTravel;
 
     using extension::Configuration;
 
-    Player::Player(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    /// Structure used to emit a message from the decoder iterator
+    struct EmitMessage {
+        EmitMessage(utility::nbs::Decoder::Iterator decoder_iterator) : decoder_iterator(std::move(decoder_iterator)) {}
+        utility::nbs::Decoder::Iterator decoder_iterator;  /// The decoder iterator containing the message to emit
+    };
 
-        // Register emitters for all the message types enabled
-        register_emitters();
+    /// Structure used to emit the current player state
+    struct EmitState : message::eye::ScrubberState {
+        using message::eye::ScrubberState::ScrubberState;
+    };
+    /// Structure used to emit the finished state when playback completes
+    struct EmitFinished : State {
+        using message::eye::ScrubberState::ScrubberState;
+    };
+
+
+    Player::Player(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        // Initialize playback state
+        state.playback_state = State::State::ENDED;
+        state.playback_speed = 0;  // Playback speed is measured in log increments so 0 = 100 speed (log(0) = 1)
 
         on<Configuration>("Player.yaml").then([this](const Configuration& cfg) {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Trigger<LoadRequest>>().then([this](const LoadRequest& load_request) {
-            if (playback_state != message::nbs::player::PlaybackState::State::ENDED) {
-                log<ERROR>("Cannot load NBS files while playing.");
-                emit(std::make_unique<LoadRequest::Response>(
-                    RpcResponseMeta(load_request.rpc.token, false, "Cannot load NBS files while playing.")));
-                return;
+        // If the system is idle, then we might need to skip time forward to the next action
+        on<Idle<>, Sync<Player>>().then([this] {
+            // If playing in fast or playback mode skip to the next action
+            if (state.playback_state == State::State::PLAYING
+                && (state.playback_mode == State::Mode::FAST || state.playback_mode == State::Mode::SEQUENTIAL)) {
+                log<DEBUG>("Skipping time forward to the next action");
+                emit<Scope::INLINE>(std::make_unique<TimeTravel>(state.end, rtf(), TimeTravel::Action::NEAREST));
             }
+        });
 
-            if (load_request.files.empty()) {
-                // If no NBS files are provided, don't continue
-                log<ERROR>("No NBS files provided.");
-                emit(std::make_unique<LoadRequest::Response>(
-                    RpcResponseMeta(load_request.rpc.token, false, "No NBS files provided.")));
-                return;
-            }
+        on<Trigger<Load>, Sync<Player>>().then([this](const Load& load) {
+            // Ensure we are unbound from the previous player
+            unbind_player();
+            // Use the reaction id of the load reaction as the chrono task id
+            chrono_task_id = NUClear::threading::ReactionTask::get_current_task()->id;
 
             log<INFO>("Loading NBS files:");
             std::vector<std::filesystem::path> file_paths;
-            for (const auto& path : load_request.files) {
+            for (const auto& path : load.files) {
                 std::filesystem::path file_path(path);
                 if (std::filesystem::exists(file_path)) {
                     file_paths.push_back(file_path);
@@ -88,208 +83,164 @@ namespace module::nbs {
 
             if (file_paths.empty()) {
                 log<ERROR>("No valid NBS files to load.");
-                emit(std::make_unique<LoadRequest::Response>(
-                    RpcResponseMeta(load_request.rpc.token, false, "No valid NBS files to load.")));
+                emit(std::make_unique<Load::Response>(
+                    RpcResponseMeta(load.rpc.token, false, "No valid NBS files to load.")));
                 return;
             }
-            decoder = utility::nbs::Decoder(file_paths, true);
-            // Get the total number of messages
-            total_messages = std::distance(decoder.begin(), decoder.end());
-            // Get the timestamp of the last message
-            auto last_message = std::prev(decoder.end());
-            end_time = NUClear::clock::time_point(std::chrono::nanoseconds((*last_message).item->item.timestamp));
-            // Get the timestamp of the first message
-            auto first_message = decoder.begin();
-            start_time = NUClear::clock::time_point(std::chrono::nanoseconds((*first_message).item->item.timestamp));
+
+            decoder          = utility::nbs::Decoder(file_paths);
             decoder_iterator = decoder.begin();
+
+            // Store the initial player state
+            state.end =
+                NUClear::clock::time_point(std::chrono::nanoseconds(std::prev(decoder.end())->item->item.timestamp));
+            state.start = NUClear::clock::time_point(std::chrono::nanoseconds(decoder.begin()->item->item.timestamp));
+            state.timestamp       = state.start;
+            state.playback_state  = State::State::PAUSED;
+            state.playback_speed  = 0;
+            state.playback_repeat = false;
+            state.total_messages  = uint32_t(std::distance(decoder.begin(), decoder.end()));
+            state.current_message = 0;
+
+            // Synchronise the clock epoch to the first message and set the playback speed to 0.0
+            // Future chrono tasks are moved relatively so future everys etc won't be in the distant future
+            emit<Scope::INLINE>(std::make_unique<TimeTravel>(state.start, 0.0, TimeTravel::Action::RELATIVE));
 
             // Update which types we will be playing
             log<INFO>("Enabling messages:");
-            for (const auto& message_name : load_request.messages) {
-                // Hash our type to work out our type on the wire
-                uint64_t hash =
-                    NUClear::util::serialise::xxhash64(message_name.c_str(), message_name.size(), 0x4e55436c);
-                if (emitters.find(hash) != emitters.end()) {
-                    emitters[hash](decoder);
-                    log<INFO>(" - ", message_name);
+            for (const auto& message_name : load.messages) {
+                log<INFO>(" - ", message_name, "enabled");
+                bind(message_name, *this, decoder);
+            }
+
+            // Emit the player state
+            emit(std::make_unique<State>(state));
+
+            emit(std::make_unique<Load::Response>(RpcResponseMeta(load.rpc.token, true)));
+        });
+
+        on<Trigger<SetMode>, Sync<Player>>().then([this](const SetMode& set_mode) {
+            state.playback_mode = set_mode.mode;
+            update_clock();
+            emit(std::make_unique<State>(state));
+
+            log<INFO>("Playback mode set to: ", set_mode.mode);
+
+            emit(std::make_unique<SetMode::Response>(RpcResponseMeta(set_mode.rpc.token, true)));
+        });
+
+        on<Trigger<Play>, Sync<Player>>().then([this](const Play& play) {
+            state.playback_state = State::State::PLAYING;
+            update_clock();
+            emit(std::make_unique<State>(state));
+
+            bind_player();  // This starts the player running
+
+            log<INFO>("Playback started");
+
+            emit(std::make_unique<Play::Response>(RpcResponseMeta(play.rpc.token, true)));
+        });
+
+        on<Trigger<Pause>, Sync<Player>>().then([this](const Pause& pause) {
+            state.playback_state = State::State::PAUSED;
+            update_clock();
+            emit(std::make_unique<State>(state));
+
+            log<INFO>("Playback paused");
+
+            emit(std::make_unique<Pause::Response>(RpcResponseMeta(pause.rpc.token, true)));
+        });
+
+        on<Trigger<SetSpeed>, Sync<Player>>().then([this](const SetSpeed& set_speed) {
+            state.playback_speed = set_speed.playback_speed;
+            update_clock();
+            emit(std::make_unique<State>(state));
+
+            log<INFO>("Setting playback speed to: ", set_speed.playback_speed);
+
+            emit(std::make_unique<SetSpeed::Response>(RpcResponseMeta(set_speed.rpc.token, true)));
+        });
+
+
+        // These trigger is specifically used to break the loop in the chrono task below
+        // If that task directly emits the state, it can go to another module which may try to make its own chrono tasks
+        // In that case the system will deadlock as ChronoController tries to obtain its own mutex
+        // This trigger fixes that by moving the actual emitting to the Player thread
+        // It is kept as sync to ensure that the state update messages are always emitted in order
+        on<Trigger<EmitMessage>, Inline::NEVER>().then(
+            [](const EmitMessage& send_message) { (*send_message.decoder_iterator)(); });
+        on<Trigger<EmitState>, Sync<Player>>().then(
+            [this](const EmitState& emit_state) { emit(std::make_unique<State>(emit_state)); });
+        on<Trigger<EmitFinished>, Sync<Player>, Inline::NEVER>().then([this](const EmitFinished& emit_finished) {
+            emit(std::make_unique<TimeTravel>(state.end, 0.0, TimeTravel::Action::ABSOLUTE));
+            emit(std::make_unique<State>(emit_finished));
+            emit(std::make_unique<Finished>());
+        });
+    }
+
+    double Player::rtf() const {
+        // All states should have the clock frozen except when running in non-sequential mode
+        return state.playback_state == State::State::PLAYING && state.playback_mode != State::Mode::SEQUENTIAL
+                   ? std::pow(2, state.playback_speed)
+                   : 0.0;
+    }
+
+    void Player::update_clock() {
+        emit<Scope::INLINE>(std::make_unique<TimeTravel>(NUClear::clock::now(), rtf(), TimeTravel::Action::ABSOLUTE));
+    }
+
+    void Player::bind_player() {
+        // Create the chrono task
+        emit<Scope::INLINE>(std::make_unique<ChronoTask>(
+            [this](NUClear::clock::time_point& t) {
+                // Skip to the next message that has a callback
+                while (decoder_iterator != decoder.end() && !decoder_iterator->has_callback()) {
+                    ++decoder_iterator;
+                }
+
+                if (decoder_iterator != decoder.end()) {
+                    auto ts =
+                        NUClear::clock::time_point(std::chrono::nanoseconds(decoder_iterator->item->item.timestamp));
+
+                    if (ts <= t) {
+                        state.timestamp       = ts;
+                        state.current_message = uint32_t(std::distance(decoder.begin(), decoder_iterator));
+
+                        // Emit the message and state, done in a separate trigger to avoid locking up chrono controller
+                        emit(std::make_unique<EmitMessage>(decoder_iterator));
+                        emit(std::make_unique<EmitState>(state));
+
+                        ++decoder_iterator;
+
+                        // Now skip ahead to the next message that has a callback
+                        while (decoder_iterator != decoder.end() && !decoder_iterator->has_callback()) {
+                            t = NUClear::clock::time_point(
+                                std::chrono::nanoseconds(decoder_iterator->item->item.timestamp));
+                            ++decoder_iterator;
+                        }
+                    }
+                    else {
+                        t = ts;
+                    }
                 }
                 else {
-                    log<ERROR>("Message type not found: ", message_name);
+                    state.timestamp      = state.end;
+                    state.playback_state = State::State::ENDED;
+                    emit(std::make_unique<EmitFinished>(state));
+                    return false;  // Don't run the chrono task again
                 }
-            }
 
-            // Synchronise the clock epoch to the first message timestamp
-            if (decoder_iterator != decoder.end()) {
-                emit<Scope::INLINE>(
-                    std::make_unique<NUClear::message::TimeTravel>(start_time,
-                                                                   playback_speed,
-                                                                   NUClear::message::TimeTravel::Action::RELATIVE));
-                // Emit the first message
-                emit_next_message();
-            }
-
-            // Emit the playback state
-            emit_playback_state();
-
-            // Emit RPC response
-            emit(std::make_unique<LoadRequest::Response>(RpcResponseMeta(load_request.rpc.token, true)));
-        });
-
-        on<Trigger<SetModeRequest>>().then([this](const SetModeRequest& set_mode_request) {
-            mode = set_mode_request.mode;
-            log<INFO>("Playback mode set to: ", set_mode_request.mode);
-
-            // Emit the playback state
-            emit_playback_state();
-
-            // Emit RPC response
-            emit(std::make_unique<SetModeRequest::Response>(RpcResponseMeta(set_mode_request.rpc.token, true)));
-        });
-
-        on<Trigger<PauseRequest>>().then([this](const PauseRequest& pause_request) {
-            // Set the clock rtf to 0.0 to pause time
-            emit<Scope::INLINE>(
-                std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                               0.0,
-                                                               NUClear::message::TimeTravel::Action::RELATIVE));
-            // Unbind the player handles
-            realtime_player_handle.disable();
-            skip_idle_player_handle.disable();
-
-            // Emit the playback state
-            playback_state = message::nbs::player::PlaybackState::State::PAUSED;
-            emit_playback_state();
-
-            // Emit RPC response
-            emit(std::make_unique<PauseRequest::Response>(RpcResponseMeta(pause_request.rpc.token, true)));
-        });
-
-        on<Trigger<SetPlaybackSpeedRequest>>().then([this](const SetPlaybackSpeedRequest& set_speed_request) {
-            playback_speed = std::pow(2.0, set_speed_request.playback_speed);
-
-            // Emit the playback state
-            emit_playback_state();
-
-            // Emit RPC response
-            emit(std::make_unique<SetPlaybackSpeedRequest::Response>(
-                RpcResponseMeta(set_speed_request.rpc.token, true)));
-        });
-
-        on<Trigger<PlayRequest>>().then([this](const PlayRequest& play_request) {
-            // Disable the player handles
-            realtime_player_handle.disable();
-            skip_idle_player_handle.disable();
-
-            switch (mode.value) {
-                case FAST:
-                    // Set RTF to match the desired playback speed
-                    emit<Scope::INLINE>(
-                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                                       playback_speed,
-                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
-                    enable_skip_idle_player();
-                    enable_realtime_player();
-                    break;
-
-                case REALTIME:
-                    // Set RTF to match the desired playback speed
-                    emit<Scope::INLINE>(
-                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                                       playback_speed,
-                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
-                    enable_realtime_player();
-                    break;
-
-                case SEQUENTIAL:
-                    // Set RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
-                    playback_speed = 0.0;
-                    emit<Scope::INLINE>(
-                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                                       playback_speed,
-                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
-                    enable_skip_idle_player();
-                    break;
-                default:
-                    log<ERROR>("Invalid playback mode selected.");
-                    emit(std::make_unique<PlayRequest::Response>(
-                        RpcResponseMeta(play_request.rpc.token, false, "Invalid playback mode selected.")));
-                    return;
-                    break;
-            }
-
-            // Emit the playback state
-            playback_state = message::nbs::player::PlaybackState::State::PLAYING;
-            emit_playback_state();
-
-            // Emit RPC response
-            emit(std::make_unique<PlayRequest::Response>(RpcResponseMeta(play_request.rpc.token, true)));
-        });
+                return true;
+            },
+            state.start,
+            chrono_task_id));
     }
 
-    void Player::enable_skip_idle_player() {
-        skip_idle_player_handle = on<Idle<>, Single>().then([this] {
-            std::lock_guard<std::mutex> decoder_lock(decoder_mutex);
-            if (NUClear::clock::now() < target_emit_time) {
-                emit<Scope::INLINE>(
-                    std::make_unique<NUClear::message::TimeTravel>(target_emit_time,
-                                                                   playback_speed,
-                                                                   NUClear::message::TimeTravel::Action::NEAREST));
-            }
-            emit_next_message();
-            cv.notify_all();
-        });
-        skip_idle_player_handle.enable();
-    }
-
-    void Player::enable_realtime_player() {
-        realtime_player_handle = on<Always>().then([this] {
-            std::unique_lock<std::mutex> decoder_lock(decoder_mutex);
-            emit_next_message();
-            cv.wait_until(decoder_lock, target_emit_time);
-        });
-        realtime_player_handle.enable();
-    }
-
-    void Player::emit_next_message() {
-        if (decoder_iterator != decoder.end() && (*decoder_iterator).has_callback()) {
-            target_emit_time =
-                NUClear::clock::time_point(std::chrono::nanoseconds((*decoder_iterator).item->item.timestamp));
-
-            // Only emit the message if the target emit time has been reached
-            if (NUClear::clock::now() >= target_emit_time) {
-                // Emit the message
-                (*decoder_iterator)();
-                ++decoder_iterator;
-                // Emit the playback state
-                emit_playback_state();
-            }
-        }
-
-        // Skip the message if it has no callback
-        while (decoder_iterator != decoder.end() && !(*decoder_iterator).has_callback()) {
-            ++decoder_iterator;
-        }
-
-        if (playback_state != message::nbs::player::PlaybackState::State::ENDED && decoder_iterator == decoder.end()) {
-            realtime_player_handle.disable();
-            skip_idle_player_handle.disable();
-            playback_state = message::nbs::player::PlaybackState::State::ENDED;
-            // Emit the playback state
-            emit_playback_state();
-            emit(std::make_unique<PlaybackFinished>());
+    void Player::unbind_player() {
+        if (chrono_task_id != 0) {
+            emit<Scope::INLINE>(std::make_unique<Unbind<ChronoTask>>(chrono_task_id));
         }
     }
 
-    void Player::emit_playback_state() {
-        auto playback_state             = std::make_unique<PlaybackState>();
-        playback_state->current_message = std::distance(decoder.begin(), decoder_iterator);
-        playback_state->total_messages  = total_messages;
-        playback_state->timestamp       = NUClear::clock::now();
-        playback_state->start           = start_time;
-        playback_state->end             = end_time;
-        playback_state->playback_state  = message::nbs::player::PlaybackState::State::PLAYING;
-        playback_state->playback_speed  = int32_t(std::log2(playback_speed));
-        emit(std::move(playback_state));
-    }
 
 }  // namespace module::nbs

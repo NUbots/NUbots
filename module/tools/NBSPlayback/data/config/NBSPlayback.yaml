@@ -6,8 +6,16 @@ log_level: INFO
 # SEQUENTIAL - one message at a time, waits for all message sub tasks to complete before continuing
 playback_mode: FAST
 
-# You can put any messages that is emitted in the system here and it will be played back
-# The below ones are just the most common and here as an example
+# Progress bar display mode
+#   COUNT - Displays the current message count / total messages
+#   TIME - Displays the current time / end time (in seconds)
+progress_bar_mode: "COUNT"
+
+# You can put any message that is emitted in the system here and it will be played back from the nbs file
+# Examples (see .proto files in shared/message for all messages):
+# message.folder[.subfolder].[message name in the .proto file]: true/false
+# message.input.Sensors: true
+# message.output.CompressedImage: true
 messages:
   # Sensors
   message.platform.RawSensors: true
