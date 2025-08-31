@@ -48,7 +48,7 @@ namespace module::skill {
             cfg.new_kick_wait_time       = config["new_kick_wait_time"].as<double>();
         });
 
-        on<Provide<Kick>, Uses<Walk>>().then(
+        on<Provide<Kick>, Needs<Walk>>().then(
             [this](const Kick& kick, const RunReason& run_reason, const Uses<Walk>& walk) {
                 if (run_reason == RunReason::NEW_TASK) {
                     if (NUClear::clock::now() - last_kick_end < std::chrono::seconds(cfg.new_kick_wait_time)) {

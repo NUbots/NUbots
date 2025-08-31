@@ -25,7 +25,7 @@ acceptance_radius: 2
 max_rejections: 25
 
 # Robot to robot communication parameters
-use_r2r_balls: true
+use_r2r_balls: false
 
 # Maximum time in seconds before a teammates ball is discarded
 team_ball_recency: 3.0

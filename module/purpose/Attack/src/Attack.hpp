@@ -35,11 +35,25 @@ namespace module::purpose {
 
     class Attack : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief Tracks the time the current team has had the ball (seconds)
+        NUClear::clock::duration possession_duration = NUClear::clock::duration::zero();
+
+        /// @brief Last timestamp when we received an attack message (seconds)
+        NUClear::clock::time_point last_timestamp;
+
+        /// @brief Whether or not we are in possession
+        bool in_possession = false;
+
         /// @brief Stores configuration values
         struct Config {
             /// @brief When to kick the ball - "Never", "Always", "AttackingThird"
             std::string kick_when = "";  // Default to kicking in the attacking third
+            /// @brief The amount of time the robot should think the opponent has had the ball before tackling
+            NUClear::clock::duration possession_timeout{};
         } cfg;
+
+        // function to handle the buffer of team possession time
+        void confirm_possession(const bool& in_possession_proposal);
 
     public:
         /// @brief Called by the powerplant to build and setup the Attack reactor.

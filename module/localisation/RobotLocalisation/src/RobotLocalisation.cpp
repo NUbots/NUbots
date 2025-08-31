@@ -116,12 +116,6 @@ namespace module::localisation {
 
         on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
             [this](const RoboCup& robocup, const Field& field) {
-                // Do not consider a teammate's localisation if their cost is too high
-                if (robocup.current_pose.cost > cfg.max_localisation_cost) {
-                    log<DEBUG>("Teammate's localisation cost is too high, not processing.");
-                    return;
-                }
-
                 // **Run prediction step**
                 prediction();
 
