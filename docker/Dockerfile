@@ -391,6 +391,14 @@ RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
 
+# RUN install-from-source https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz
+RUN git clone https://github.com/rhasspy/piper.git && \
+    cd piper && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
