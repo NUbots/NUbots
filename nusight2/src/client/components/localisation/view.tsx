@@ -360,7 +360,10 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       <Nugus model={robot} />
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
-      {model.stellaMapPointsVisible && <FieldSpheres points={robot.rNFf} color={"red"} size={0.015} />}
+      {model.stellaMapPointsVisible && robot.stellaMapPoints.rPWw_map && <FieldSpheres points={robot.stellaMapPoints.rPWw_map} color={"blue"} size={0.015} />}
+      {/* {model.stellaMapPointsVisible && robot.stellaMapPoints.rPWw_ground && <FieldSpheres points={robot.stellaMapPoints.rPWw_ground} color={"green"} size={0.015} />} */}
+      {model.stellaMapPointsVisible && robot.stellaMapPoints.rPWw_scale && <FieldSpheres points={robot.stellaMapPoints.rPWw_scale} color={"red"} size={0.016} />}
+      {/* {model.stellaMapPointsVisible && robot.stellaMapPoints.rPWw_unscaled && <FieldSpheres points={robot.stellaMapPoints.rPWw_unscaled} color={"red"} size={0.015} />} */}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}

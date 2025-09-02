@@ -43,3 +43,17 @@ message Stella {
     /// Map points in stella world frame {n}
     repeated vec3 map_points = 2;
 }
+
+message StellaMap {
+    /// Map points in stella world frame {n}
+    repeated vec3 rPWw_map = 1;
+
+    /// Map points projected onto ground
+    repeated vec3 rPWw_ground = 2;
+
+    /// Accepted points for scale calc
+    repeated vec3 rPWw_scale = 3;
+
+    /// Unscaled map points
+    repeated vec3 rPWw_unscaled = 4;
+}

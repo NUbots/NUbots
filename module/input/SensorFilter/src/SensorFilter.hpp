@@ -100,6 +100,12 @@ namespace module::input {
         /// @brief Transform from planted foot {p} to world {w} space
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
+        double scale_factor = 1.0;
+
+        // Start time
+        bool received_first_stella_points = false;
+        std::chrono::steady_clock::time_point start_time;
+
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
 

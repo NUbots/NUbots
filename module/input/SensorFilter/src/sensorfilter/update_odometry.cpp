@@ -36,6 +36,7 @@ namespace module::input {
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
     using message::platform::RawSensors;
+    using message::input::StellaMap;
 
     using utility::input::FrameID;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -49,33 +50,7 @@ namespace module::input {
                                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
                                        const std::shared_ptr<const StellaMsg>& stella) {
 
-        if (!stella_initialised) {
-            Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
-            // Remove y translation from Htf
-            auto Htw = Htf;
-            Htw.translation().y() = 0;
 
-            Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
-            auto Hwc = Htw.inverse() * Htc;
-            // 90 degrees y, -90 degrees z
-            auto Hcn = Eigen::Isometry3d::Identity();
-            Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            Hwn = Hwc * Hcn;
-
-            stella_initialised = true;
-        }
-
-        if (stella) {
-            auto Htc =  Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
-            // Add roll, pitch, yaw offsets to Htc
-
-            auto Hnc = stella->Hnc;
-            sensors->Htw = Htc * Hnc.inverse() * Hwn.inverse();
-
-            // Set the Hwn transform in the sensors message
-            sensors->Hwn = Hwn;
-            return;
-        }
 
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
@@ -184,26 +159,119 @@ namespace module::input {
         // Combine Mahony roll/pitch with fused yaw
         Eigen::Vector3d rpy_fused(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
         Hwt.linear() = rpy_intrinsic_to_mat(rpy_fused);
-        sensors->Htw = Hwt.inverse();
+        Eigen::Isometry3d Htw_mahony = Hwt.inverse();
 
-        // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
-        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
-        sensors->Hrw          = Hwr.inverse();
+        // // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
+        // Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+        // Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        // Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
+        // sensors->Hrw          = Hwr.inverse();
 
         // Low pass filter for torso velocity
-        const double y_current     = Hwt.translation().y();
-        const double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
-        const double y_dot_current = (y_current - y_prev) / dt;
-        const double y_dot =
-            (dt / cfg.y_cut_off_frequency) * y_dot_current + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
-        const double x_current     = Hwt.translation().x();
-        const double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
-        const double x_dot_current = (x_current - x_prev) / dt;
-        const double x_dot =
-            (dt / cfg.x_cut_off_frequency) * x_dot_current + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
-        sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
+        // const double y_current     = Hwt.translation().y();
+        // const double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
+        // const double y_dot_current = (y_current - y_prev) / dt;
+        // const double y_dot =
+        //     (dt / cfg.y_cut_off_frequency) * y_dot_current + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
+        // const double x_current     = Hwt.translation().x();
+        // const double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
+        // const double x_dot_current = (x_current - x_prev) / dt;
+        // const double x_dot =
+        //     (dt / cfg.x_cut_off_frequency) * x_dot_current + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
+        // sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
+    if (stella && !stella_initialised && stella->map_points.size() > 0 && !received_first_stella_points) {
+        received_first_stella_points = true;
+        start_time = std::chrono::steady_clock::now();
+        log<INFO>("Received first stella points");
     }
+    double time_since_first_points = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - start_time).count();
+    if (!stella_initialised && received_first_stella_points && time_since_first_points > 10) {
+        Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
+        // Remove y translation from Htf
+        auto Htw = Htf;
+        Htw.translation().y() = 0;
+
+        Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
+        auto Hwc = Htw.inverse() * Htc;
+        // 90 degrees y, -90 degrees z
+        auto Hcn = Eigen::Isometry3d::Identity();
+        Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwn = Hwc * Hcn;
+
+        stella_initialised = true;
+        log<INFO>("Stella initialised");
+    }
+
+    if (stella && stella_initialised) {
+        auto Htc =  Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
+        auto Hwc = Hwt_anchor * Htc;
+        // Get the map points from stella
+        std::vector<Eigen::Vector3d> rPNn_points = stella->map_points;
+
+        // Transform the map points into the world frame and project onto the field plane
+        std::vector<Eigen::Vector3d> rPWw_stella;
+        std::vector<Eigen::Vector3d> rPCw_stella;
+        std::vector<Eigen::Vector3d> rPWw_ground;
+        std::vector<Eigen::Vector3d> rPCw_ground;
+        for (const auto& rPNn : rPNn_points) {
+            auto rPWw = Hwn * rPNn;
+            rPWw_stella.push_back(rPWw);
+            auto rPCw = rPWw - Hwc.translation();
+            rPCw_stella.push_back(rPCw);
+
+            // Project onto the field plane
+            auto uPCw = rPCw / rPCw.norm();
+            auto rPCw_g = uPCw * std::abs(Hwc.translation().z() / uPCw.z());
+            auto rPWw_g = rPCw_g + Hwc.translation();
+            rPWw_ground.push_back(rPWw_g);
+            rPCw_ground.push_back(rPCw_g);
+        }
+
+        // Calculate the scale factor between the map points and the ground points,
+        // but only consider points whose ground-projected distance is less than 2m
+        double new_scale_factor = 1.0;
+        size_t count = 0;
+        std::vector<Eigen::Vector3d> rPWw_accepted;
+        for (size_t i = 0; i < rPCw_stella.size(); i++) {
+            // Only consider points that are less than 2m away, have a non-zero distance, and are on the ground
+            if (rPCw_ground[i].norm() < 2.0 && rPCw_stella[i].norm() > 1e-6 && rPWw_ground[i].z() < 1e-4) { // avoid divide by zero
+                new_scale_factor += rPCw_ground[i].norm() / rPCw_stella[i].norm();
+                count++;
+                rPWw_accepted.push_back(rPWw_ground[i]);
+            }
+        }
+        if (count > 0) {
+            new_scale_factor /= count;
+        }
+
+        // Exponential filter the scale factor
+        double alpha = 0.9;
+        scale_factor = (1 - alpha) * scale_factor + alpha * new_scale_factor;
+
+        log<INFO>("scale_factor: {}", scale_factor);
+
+        auto stella_map = std::make_unique<StellaMap>();
+        std::vector<Eigen::Vector3d> rPWw_map;
+        for (size_t i = 0; i < rPCw_stella.size(); i++) {
+            Eigen::Vector3d rPWw_scaled = Hwc.translation() + rPCw_stella[i] * scale_factor;
+            rPWw_map.push_back(rPWw_scaled);
+        }
+        stella_map->rPWw_map = rPWw_map;
+        stella_map->rPWw_ground = rPWw_ground;
+        stella_map->rPWw_scale = rPWw_accepted;
+        stella_map->rPWw_unscaled = rPWw_stella;
+        emit(std::move(stella_map));
+
+        auto Hnc = stella->Hnc;
+        Hnc.translation() = Hnc.translation() * scale_factor;
+
+        auto Htw_stella = Htc * Hnc.inverse() * Hwn.inverse();
+        sensors->Htw = Htw_stella;
+
+        // Set the Hwn transform in the sensors message
+        sensors->Hwn = Hwn;
+    }
+}
+
 
 }  // namespace module::input

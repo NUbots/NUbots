@@ -186,8 +186,7 @@ export class LocalisationRobotModel {
     timestamp: number;
     phase: message.behaviour.state.WalkState.Phase;
   }[] = [];
-  @observable stellaMapPoints: { rNWn: Vector3[] } = { rNWn: [] };
-  @observable Hwn: Matrix4 = Matrix4.of();  // Add this line to store Hwn transform
+  @observable stellaMapPoints: { rPWw_map: Vector3[]; rPWw_ground: Vector3[]; rPWw_scale: Vector3[]; rPWw_unscaled: Vector3[] } = { rPWw_map: [], rPWw_ground: [], rPWw_scale: [], rPWw_unscaled: [] };
 
   constructor({
     model,
@@ -224,7 +223,6 @@ export class LocalisationRobotModel {
     walkPhase,
     trajectoryHistory,
     stellaMapPoints,
-    Hwn,
   }: {
     model: RobotModel;
     name: string;
@@ -265,8 +263,7 @@ export class LocalisationRobotModel {
       timestamp: number;
       phase: message.behaviour.state.WalkState.Phase;
     }[];
-    stellaMapPoints: { rNWn: Vector3[] };
-    Hwn: Matrix4;
+    stellaMapPoints: { rPWw_map: Vector3[]; rPWw_ground: Vector3[]; rPWw_scale: Vector3[]; rPWw_unscaled: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -302,7 +299,6 @@ export class LocalisationRobotModel {
     this.walkPhase = walkPhase;
     this.trajectoryHistory = trajectoryHistory;
     this.stellaMapPoints = stellaMapPoints;
-    this.Hwn = Hwn;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -336,8 +332,7 @@ export class LocalisationRobotModel {
       swingFootTrajectory: [],
       walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
       trajectoryHistory: [],
-      stellaMapPoints: { rNWn: [] },
-      Hwn: Matrix4.of(),
+      stellaMapPoints: { rPWw_map: [], rPWw_ground: [], rPWw_scale: [], rPWw_unscaled: [] },
     });
   });
 
@@ -415,10 +410,10 @@ export class LocalisationRobotModel {
   @computed
   get rNFf(): Vector3[] {
     // Transform from Stella world frame {n} to field frame {f}
-    // First transform from Stella world to NUbots world: Hwn * rNWn
-    // Then transform from NUbots world to field: Hfw * (Hwn * rNWn)
-    return this.stellaMapPoints.rNWn.map((rNWn) =>
-      rNWn.applyMatrix4(this.Hwn).applyMatrix4(this.Hfw)
+    // First transform from Stella world to NUbots world: Hwn * rPNn
+    // Then transform from NUbots world to field: Hfw * (Hwn * rPNn)
+    return this.stellaMapPoints.rPWw_map.map((rPWw_map) =>
+      rPWw_map.applyMatrix4(this.Hfw)
     );
   }
 

@@ -37,7 +37,7 @@ export class LocalisationNetwork {
     this.network.on(message.purpose.Purpose, this.onPurpose);
     this.network.on(message.behaviour.state.WalkState, this.onWalkState);
     this.network.on(message.support.nusight.Overview, this.onOverview);
-    this.network.on(message.input.Stella, this.onStella);
+    this.network.on(message.input.StellaMap, this.onStellaMap);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -196,6 +196,7 @@ export class LocalisationNetwork {
     if (sensors.Hwn) {
       robot.Hwn = Matrix4.from(sensors.Hwn);
     }
+    console.log("Hwn translation", robot.Hwn.decompose().translation);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;
     robot.motors.leftShoulderPitch.angle = sensors.servo[1].presentPosition!;
@@ -220,12 +221,17 @@ export class LocalisationNetwork {
   };
 
   @action.bound
-  private onStella(robotModel: RobotModel, stella: message.input.Stella) {
+  private onStellaMap(robotModel: RobotModel, stella: message.input.StellaMap) {
     const robot = LocalisationRobotModel.of(robotModel);
 
+    console.log("Stella map points", stella.rPWwMap.length);
+
     // Update Stella map points
-    if (stella.mapPoints && stella.mapPoints.length > 0) {
-      robot.stellaMapPoints.rNWn = stella.mapPoints.map((point) => Vector3.from(point));
+    if (stella.rPWwMap && stella.rPWwMap.length > 0) {
+      robot.stellaMapPoints.rPWw_map = stella.rPWwMap.map((point) => Vector3.from(point));
+      robot.stellaMapPoints.rPWw_ground = stella.rPWwGround.map((point) => Vector3.from(point));
+      robot.stellaMapPoints.rPWw_scale = stella.rPWwScale.map((point) => Vector3.from(point));
+      robot.stellaMapPoints.rPWw_unscaled = stella.rPWwUnscaled.map((point) => Vector3.from(point));
     }
   }
 
