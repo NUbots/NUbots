@@ -186,7 +186,7 @@ export class LocalisationRobotModel {
     timestamp: number;
     phase: message.behaviour.state.WalkState.Phase;
   }[] = [];
-  @observable stellaMapPoints: { rPWw_map: Vector3[]; rPWw_ground: Vector3[]; rPWw_scale: Vector3[]; rPWw_unscaled: Vector3[] } = { rPWw_map: [], rPWw_ground: [], rPWw_scale: [], rPWw_unscaled: [] };
+  @observable stellaMapPoints: { rPWw_map: Vector3[] } = { rPWw_map: [] };
 
   constructor({
     model,
@@ -263,7 +263,7 @@ export class LocalisationRobotModel {
       timestamp: number;
       phase: message.behaviour.state.WalkState.Phase;
     }[];
-    stellaMapPoints: { rPWw_map: Vector3[]; rPWw_ground: Vector3[]; rPWw_scale: Vector3[]; rPWw_unscaled: Vector3[] };
+    stellaMapPoints: { rPWw_map: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -332,7 +332,7 @@ export class LocalisationRobotModel {
       swingFootTrajectory: [],
       walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
       trajectoryHistory: [],
-      stellaMapPoints: { rPWw_map: [], rPWw_ground: [], rPWw_scale: [], rPWw_unscaled: [] },
+      stellaMapPoints: { rPWw_map: [] },
     });
   });
 

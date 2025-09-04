@@ -224,14 +224,8 @@ export class LocalisationNetwork {
   private onStellaMap(robotModel: RobotModel, stella: message.input.StellaMap) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    console.log("Stella map points", stella.rPWwMap.length);
-
-    // Update Stella map points
     if (stella.rPWwMap && stella.rPWwMap.length > 0) {
       robot.stellaMapPoints.rPWw_map = stella.rPWwMap.map((point) => Vector3.from(point));
-      robot.stellaMapPoints.rPWw_ground = stella.rPWwGround.map((point) => Vector3.from(point));
-      robot.stellaMapPoints.rPWw_scale = stella.rPWwScale.map((point) => Vector3.from(point));
-      robot.stellaMapPoints.rPWw_unscaled = stella.rPWwUnscaled.map((point) => Vector3.from(point));
     }
   }
 

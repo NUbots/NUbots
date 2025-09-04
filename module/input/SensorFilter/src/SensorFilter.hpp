@@ -89,6 +89,20 @@ namespace module::input {
             double y_cut_off_frequency = 0.0;
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+
+            /// @brief Z-bias filter configuration
+            struct StellaConfig {
+                /// @brief Process noise covariance for z-bias estimation
+                double process_noise = 0.001;
+                /// @brief Measurement noise covariance for z-bias estimation
+                double measurement_noise = 0.05;
+                /// @brief Initial covariance for z-bias state
+                double initial_covariance = 1.0;
+                /// @brief Delay before Stella initialization (seconds)
+                double initialization_delay = 10.0;
+                /// @brief Alpha parameter for scale factor exponential filtering
+                double scale_factor_alpha = 0.9;
+            } stella_config;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot

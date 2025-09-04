@@ -86,6 +86,42 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
+
+            // Z-bias filter config
+            cfg.stella_config.process_noise = config["stella_config"]["process_noise"].as<double>();
+            cfg.stella_config.measurement_noise = config["stella_config"]["measurement_noise"].as<double>();
+            cfg.stella_config.initial_covariance = config["stella_config"]["initial_covariance"].as<double>();
+            cfg.stella_config.initialization_delay = config["stella_config"]["initialization_delay"].as<double>();
+            cfg.stella_config.scale_factor_alpha = config["stella_config"]["scale_factor_alpha"].as<double>();
+
+            // Initialize the z-bias Kalman filter
+            Eigen::Matrix<double, 1, 1> initial_state;
+            initial_state << 0.0;
+
+            Eigen::Matrix<double, 1, 1> initial_covariance;
+            initial_covariance << cfg.stella_config.initial_covariance;
+
+            // State transition matrix (random walk model)
+            Eigen::Matrix<double, 1, 1> A;
+            A << 0.0;
+
+            // No control input
+            Eigen::Matrix<double, 1, 0> B;
+
+            // Measurement model (direct observation of bias)
+            Eigen::Matrix<double, 1, 1> C;
+            C << 1.0;
+
+            // Process noise
+            Eigen::Matrix<double, 1, 1> Q;
+            Q << cfg.stella_config.process_noise;
+
+            // Measurement noise
+            Eigen::Matrix<double, 1, 1> R;
+            R << cfg.stella_config.measurement_noise;
+
+            z_bias_filter = KalmanFilter<double, 1, 0, 1>(initial_state, initial_covariance, A, B, C, Q, R);
+            z_bias_filter_initialized = true;
         });
 
         on<Startup>().then([this] {

@@ -169,24 +169,6 @@ namespace module::input {
         Eigen::Isometry3d Htw_mahony = Hwt.inverse();
 
 
-        // // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
-        // Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        // Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        // Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
-        // sensors->Hrw          = Hwr.inverse();
-
-        // Low pass filter for torso velocity
-        // const double y_current     = Hwt.translation().y();
-        // const double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
-        // const double y_dot_current = (y_current - y_prev) / dt;
-        // const double y_dot =
-        //     (dt / cfg.y_cut_off_frequency) * y_dot_current + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
-        // const double x_current     = Hwt.translation().x();
-        // const double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
-        // const double x_dot_current = (x_current - x_prev) / dt;
-        // const double x_dot =
-        //     (dt / cfg.x_cut_off_frequency) * x_dot_current + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
-        // sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
     // Handle Stella initialization state transitions
     if (stella && stella->map_points.size() > 0) {
         if (stella_state == StellaState::WAITING_FOR_POINTS) {
@@ -196,7 +178,7 @@ namespace module::input {
         } else if (stella_state == StellaState::WAITING_FOR_DELAY) {
             double time_since_first_points = std::chrono::duration_cast<std::chrono::duration<double>>(
                 std::chrono::steady_clock::now() - *stella_start_time).count();
-            if (time_since_first_points > 10)
+            if (time_since_first_points > cfg.stella_config.initialization_delay)
             {
                 Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
                 // Remove y translation from Htf
@@ -209,40 +191,6 @@ namespace module::input {
                 auto Hcn = Eigen::Isometry3d::Identity();
                 Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                 Hwn = Hwc * Hcn;
-
-                // Initialize the z-bias Kalman filter
-                if (!z_bias_filter_initialized) {
-                    // State: [z_bias] - initial bias is 0
-                    Eigen::Matrix<double, 1, 1> initial_state;
-                    initial_state << 0.0;
-
-                    // Initial covariance - moderate uncertainty
-                    Eigen::Matrix<double, 1, 1> initial_covariance;
-                    initial_covariance << 1.0;
-
-                    // State transition matrix (bias is constant)
-                    Eigen::Matrix<double, 1, 1> A;
-                    A << 0.0;
-
-                    // No control input
-                    Eigen::Matrix<double, 1, 0> B;
-
-                    // Measurement model (direct observation of bias)
-                    Eigen::Matrix<double, 1, 1> C;
-                    C << 1.0;
-
-                                        // Process noise (very small - bias should be nearly constant)
-                    Eigen::Matrix<double, 1, 1> Q;
-                    Q << 0.001;
-
-                    // Measurement noise (smaller - trust the measurements more for faster convergence)
-                    Eigen::Matrix<double, 1, 1> R;
-                    R << 0.05;
-
-                    z_bias_filter = KalmanFilter<double, 1, 0, 1>(initial_state, initial_covariance, A, B, C, Q, R);
-                    z_bias_filter_initialized = true;
-                    log<INFO>("Z-bias Kalman filter initialized");
-                }
 
                 stella_state = StellaState::INITIALIZED;
                 log<INFO>("Stella initialised");
@@ -293,10 +241,7 @@ namespace module::input {
         }
 
         // Exponential filter the scale factor
-        double alpha = 0.9;
-        scale_factor = (1 - alpha) * scale_factor + alpha * new_scale_factor;
-
-        log<INFO>("scale_factor: {}", scale_factor);
+        scale_factor = (1 - cfg.stella_config.scale_factor_alpha) * scale_factor + cfg.stella_config.scale_factor_alpha * new_scale_factor;
 
         auto stella_map = std::make_unique<StellaMap>();
         std::vector<Eigen::Vector3d> rPWw_map;
@@ -305,28 +250,27 @@ namespace module::input {
             rPWw_map.push_back(rPWw_scaled);
         }
         stella_map->rPWw_map = rPWw_map;
-        stella_map->rPWw_ground = rPWw_ground;
-        stella_map->rPWw_scale = rPWw_accepted;
-        stella_map->rPWw_unscaled = rPWw_stella;
         emit(std::move(stella_map));
 
+
+        // Adjust the Hnc transform to account for the scale factor
         auto Hnc = stella->Hnc;
         Hnc.translation() = Hnc.translation() * scale_factor;
 
+        // Construct the Htw transform using the stella pose
         auto Htw_stella = Htc * Hnc.inverse() * Hwn.inverse();
 
-        // Z-bias estimation and correction
+        // Estimate and correct the z-bias of the stella pose using kinematics
         if (z_bias_filter_initialized && dt > 0) {
             // Get z positions from both methods
             double z_anchor = Hwt_anchor.translation().z();  // Anchor point method z
             double z_stella = Htw_stella.inverse().translation().z();  // Stella method z
 
             // Calculate the observed z error (stella - anchor)
-            // Positive error means Stella is too high, negative means too low
             double z_error = z_stella - z_anchor;
 
             // Time update (predict step) - no control input
-            Eigen::Matrix<double, 0, 1> control_input;  // Empty control input
+            Eigen::Matrix<double, 0, 1> control_input;
             z_bias_filter.time(control_input, dt);
 
             // Measurement update (correct step) - measure the error
@@ -334,42 +278,47 @@ namespace module::input {
             measurement << z_error;
             z_bias_filter.measure(measurement);
 
-            // Get the estimated bias (accumulated error that needs correction)
+            // Get the estimated bias
             double estimated_z_bias = z_bias_filter.get_state()(0);
 
-            // Apply the bias correction to Hwn (but keep original Hwn for next iteration)
-            // The bias represents how much Stella is consistently off from anchor
-            // We need to adjust Hwn to compensate: if Stella is too high, lower Hwn.z
+            // Apply the bias correction to Hwn
             Eigen::Isometry3d Hwn_corrected = Hwn;
-            Hwn_corrected.translation().z() -= estimated_z_bias;  // Subtract bias to bring Stella down
+            Hwn_corrected.translation().z() -= estimated_z_bias;
 
-            // Recalculate Stella transform with corrected Hwn
+            // Correct the Stella transform with the corrected Hwn
             auto Htw_stella_corrected = Htc * Hnc.inverse() * Hwn_corrected.inverse();
             sensors->Htw = Htw_stella_corrected;
 
-            // Note: Keep Hwn fixed at initial estimate for consistent bias convergence
-
-            // Calculate corrected error to verify convergence
-            double z_stella_corrected = Htw_stella_corrected.inverse().translation().z();
-            double z_error_after_correction = z_stella_corrected - z_anchor;
-
             emit(graph("Z-bias estimate", estimated_z_bias));
             emit(graph("Z-error measurement", z_error));
-            emit(graph("Z-error after correction", z_error_after_correction));
             emit(graph("Z anchor", z_anchor));
             emit(graph("Z stella original", z_stella));
-            emit(graph("Z stella corrected", z_stella_corrected));
-            emit(graph("Filter covariance", z_bias_filter.get_covariance()(0,0)));
+            emit(graph("Z stella corrected", Htw_stella_corrected.inverse().translation().z()));
         } else {
             // Use uncorrected Stella transform if filter not ready
             sensors->Htw = Htw_stella;
         }
-
-        emit(graph("Kinematic translation", Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), Hwt_anchor.translation().z()));
-        emit(graph("Stella translation", sensors->Htw.inverse().translation().x(), sensors->Htw.inverse().translation().y(), sensors->Htw.inverse().translation().z()));
-
-        // Set the Hwn transform in the sensors message
         sensors->Hwn = Hwn;
+
+        // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
+        auto Hwt = sensors->Htw;
+        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+        Hwr.linear()          = Eigen::AngleAxisd(mat_to_rpy_intrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+        sensors->Hrw          = Hwr.inverse();
+
+        // Low pass filter for torso velocity
+        const double y_current     = Hwt.translation().y();
+        const double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
+        const double y_dot_current = (y_current - y_prev) / dt;
+        const double y_dot =
+            (dt / cfg.y_cut_off_frequency) * y_dot_current + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
+        const double x_current     = Hwt.translation().x();
+        const double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
+        const double x_dot_current = (x_current - x_prev) / dt;
+        const double x_dot =
+            (dt / cfg.x_cut_off_frequency) * x_dot_current + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
+        sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
     }
 }
 

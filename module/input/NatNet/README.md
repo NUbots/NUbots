@@ -39,6 +39,7 @@ In the Motive software, ensure the advanced streaming settings are set to the fo
 - **Multicast Interface:** `239.255.42.99`
 - **Multicast as Broadcast:** On
 - **Socket Size:** 1000000
+- **Subnet:** Ensure all devices are on the same subnet (Johanne will know)
 
 ## Usage
 

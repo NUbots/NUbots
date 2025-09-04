@@ -20,6 +20,7 @@
     # Input
     input::Camera
     input::Stella
+    input::NatNet
     input::SensorFilter
     # # Vision
     # vision::VisualMesh
@@ -27,6 +28,7 @@
     # vision::FieldLineDetector
     # vision::Yolo
     # localisation::FieldLocalisationNLopt
+    localisation::Mocap
     # Director
     extension::Director
     # Servos

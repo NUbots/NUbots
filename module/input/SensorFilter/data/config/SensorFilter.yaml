@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 buttons:
   debounce_threshold: 7
@@ -47,3 +47,16 @@ use_ground_truth: false
 
 # Path to URDF file
 urdf_path: "models/robot.urdf"
+
+# Z-bias filter for correcting Stella z-drift using anchor point method
+stella_config:
+  # Process noise covariance (how much bias can change between updates)
+  process_noise: 0.001
+  # Measurement noise covariance (uncertainty in z-difference measurements)
+  measurement_noise: 0.05
+  # Initial uncertainty in bias estimate
+  initial_covariance: 1.0
+  # Delay before Stella initialization (seconds)
+  initialization_delay: 5.0
+  # Alpha parameter for scale factor exponential filtering (0-1)
+  scale_factor_alpha: 0.9
