@@ -33,15 +33,6 @@ Feature:
   ini_fast_threshold: 12      # Initial threshold for FAST corner detection (higher = fewer features)
   min_fast_threshold: 5       # Minimum threshold for FAST (higher = more robust, fewer features)
 
-# Initializer:
-#   scaling_factor: 5.0
-
-# Mapping:
-#   baseline_dist_thr_ratio: 0.02
-#   redundant_obs_ratio_thr: 0.9
-#   num_covisibilities_for_landmark_generation: 20
-#   num_covisibilities_for_landmark_fusion: 20
-
 SocketPublisher:
   server_uri: "http://127.0.0.1:3000"
   emitting_interval: 15000

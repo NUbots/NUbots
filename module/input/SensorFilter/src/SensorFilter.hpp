@@ -31,6 +31,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <optional>
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
 
@@ -42,6 +43,7 @@
 #include "message/platform/RawSensors.hpp"
 
 
+#include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/math/filter/YawFilter.hpp"
 
@@ -49,6 +51,7 @@ namespace module::input {
 
     using utility::math::filter::MahonyFilter;
     using utility::math::filter::YawFilter;
+    using utility::math::filter::KalmanFilter;
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
@@ -102,9 +105,15 @@ namespace module::input {
 
         double scale_factor = 1.0;
 
-        // Start time
-        bool received_first_stella_points = false;
-        std::chrono::steady_clock::time_point start_time;
+        /// @brief Stella initialization states
+        enum class StellaState {
+            WAITING_FOR_POINTS,    // Waiting for first map points
+            WAITING_FOR_DELAY,     // Got points, waiting for 10s delay
+            INITIALIZED            // Ready to use
+        };
+
+        StellaState stella_state = StellaState::WAITING_FOR_POINTS;
+        std::optional<std::chrono::steady_clock::time_point> stella_start_time;
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
@@ -129,7 +138,12 @@ namespace module::input {
         /// @brief Fixed transform from nubots world to stella world frame
         Eigen::Isometry3d Hwn = Eigen::Isometry3d::Identity();
 
-        bool stella_initialised = false;
+        /// @brief 1D Kalman filter for estimating z-bias between Stella and anchor point methods
+        /// State: [z_bias], Input: [], Measurement: [z_diff]
+        KalmanFilter<double, 1, 0, 1> z_bias_filter{};
+
+        /// @brief Flag to track if z-bias filter has been initialized
+        bool z_bias_filter_initialized = false;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
