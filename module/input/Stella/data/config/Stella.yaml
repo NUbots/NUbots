@@ -33,6 +33,11 @@ Feature:
   ini_fast_threshold: 12      # Initial threshold for FAST corner detection (higher = fewer features)
   min_fast_threshold: 5       # Minimum threshold for FAST (higher = more robust, fewer features)
 
+Tracking:
+  enable_auto_relocalization: true
+  backend: "g2o"               # or "gtsam"
+  max_num_local_keyfrms: 80
+
 SocketPublisher:
   server_uri: "http://127.0.0.1:3000"
   emitting_interval: 15000

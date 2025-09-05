@@ -260,44 +260,45 @@ namespace module::input {
         // Construct the Htw transform using the stella pose
         auto Htw_stella = Htc * Hnc.inverse() * Hwn.inverse();
 
-        // Estimate and correct the z-bias of the stella pose using kinematics
-        if (z_bias_filter_initialized && dt > 0) {
-            // Get z positions from both methods
-            double z_anchor = Hwt_anchor.translation().z();  // Anchor point method z
-            double z_stella = Htw_stella.inverse().translation().z();  // Stella method z
+        // Apply constraints: Force Stella to use kinematic z + IMU roll/pitch
+        auto Hwt_stella = Htw_stella.inverse();  // Get world-to-torso transform from Stella
+        Eigen::Vector3d rpy_imu = mat_to_rpy_intrinsic(Rwt_mahony);  // Get IMU roll/pitch from Mahony filter
+        Eigen::Vector3d rpy_stella = mat_to_rpy_intrinsic(Hwt_stella.linear());  // Get Stella's original attitude
 
-            // Calculate the observed z error (stella - anchor)
-            double z_error = z_stella - z_anchor;
+        // Create constrained transform: Stella's x,y,yaw + kinematic z + IMU roll/pitch
+        Eigen::Isometry3d Hwt_constrained = Eigen::Isometry3d::Identity();
 
-            // Time update (predict step) - no control input
-            Eigen::Matrix<double, 0, 1> control_input;
-            z_bias_filter.time(control_input, dt);
+        // Keep Stella's x, y position
+        Hwt_constrained.translation().x() = Hwt_stella.translation().x();
+        Hwt_constrained.translation().y() = Hwt_stella.translation().y();
 
-            // Measurement update (correct step) - measure the error
-            Eigen::Matrix<double, 1, 1> measurement;
-            measurement << z_error;
-            z_bias_filter.measure(measurement);
+        // Apply constraints:
+        // - z from kinematics: g_z(z) = z_stella - z_kinematic = 0
+        Hwt_constrained.translation().z() = Hwt_anchor.translation().z();
 
-            // Get the estimated bias
-            double estimated_z_bias = z_bias_filter.get_state()(0);
+        // - roll/pitch from IMU: g_roll(roll) = roll_stella - roll_imu = 0
+        //                        g_pitch(pitch) = pitch_stella - pitch_imu = 0
+        // - yaw from Stella (preserve Stella's yaw estimate)
+        Eigen::Vector3d rpy_constrained(rpy_imu.x(),      // Roll from IMU
+                                       rpy_imu.y(),      // Pitch from IMU
+                                       rpy_stella.z());  // Yaw from Stella
+        Hwt_constrained.linear() = rpy_intrinsic_to_mat(rpy_constrained);
 
-            // Apply the bias correction to Hwn
-            Eigen::Isometry3d Hwn_corrected = Hwn;
-            Hwn_corrected.translation().z() -= estimated_z_bias;
+        sensors->Htw = Hwt_constrained.inverse();
 
-            // Correct the Stella transform with the corrected Hwn
-            auto Htw_stella_corrected = Htc * Hnc.inverse() * Hwn_corrected.inverse();
-            sensors->Htw = Htw_stella_corrected;
-
-            emit(graph("Z-bias estimate", estimated_z_bias));
-            emit(graph("Z-error measurement", z_error));
-            emit(graph("Z anchor", z_anchor));
-            emit(graph("Z stella original", z_stella));
-            emit(graph("Z stella corrected", Htw_stella_corrected.inverse().translation().z()));
-        } else {
-            // Use uncorrected Stella transform if filter not ready
-            sensors->Htw = Htw_stella;
-        }
+        // Emit debug graphs for monitoring
+        emit(graph("Roll IMU", rpy_imu.x()));
+        emit(graph("Pitch IMU", rpy_imu.y()));
+        emit(graph("Roll stella original", rpy_stella.x()));
+        emit(graph("Pitch stella original", rpy_stella.y()));
+        emit(graph("Roll constrained", rpy_constrained.x()));
+        emit(graph("Pitch constrained", rpy_constrained.y()));
+        emit(graph("Z anchor (kinematic)", Hwt_anchor.translation().z()));
+        emit(graph("Z stella original", Hwt_stella.translation().z()));
+        emit(graph("Z constrained", Hwt_constrained.translation().z()));
+        emit(graph("Roll constraint error", rpy_stella.x() - rpy_imu.x()));
+        emit(graph("Pitch constraint error", rpy_stella.y() - rpy_imu.y()));
+        emit(graph("Z constraint error", Hwt_stella.translation().z() - Hwt_anchor.translation().z()));
         sensors->Hwn = Hwn;
 
         // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
