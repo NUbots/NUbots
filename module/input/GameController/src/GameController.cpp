@@ -225,10 +225,14 @@ namespace module::input {
         const auto& new_opponent_team = get_opponent_team(new_packet);
 
         // Get colours
-        state->team.team_colour =
-            new_own_team.team_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
+        state->team.team_colour = new_own_team.team_colour == gamecontroller::TeamColour::BLUE  ? TeamColour::BLUE
+                                  : new_own_team.team_colour == gamecontroller::TeamColour::RED ? TeamColour::RED
+                                                                                                : TeamColour::UNKNOWN;
+
         state->opponent.team_colour =
-            new_opponent_team.team_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
+            new_opponent_team.team_colour == gamecontroller::TeamColour::BLUE  ? TeamColour::BLUE
+            : new_opponent_team.team_colour == gamecontroller::TeamColour::RED ? TeamColour::RED
+                                                                               : TeamColour::UNKNOWN;
 
         /*******************************************************************************************
          * Process score updates
