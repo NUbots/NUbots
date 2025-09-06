@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Amount of time to sleep (in seconds) before attempting a reconnect after a disconnect
+reset_sleep_duration: 1
+
+# Amount of time (in seconds) to wait while receiving no camera frames before terminating the program
+dead_man_switch: 60
