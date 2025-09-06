@@ -1,0 +1,74 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+file_path: recordings/reference.json
+
+walk:
+  # Time for one complete step (in seconds).
+  period: 0.39
+  # Bool to indicate whether or not to only switch if the next foot is planted
+  only_switch_when_planted: true
+  step:
+    # Maximum step limits in x and y (in meters), and theta (in radians).
+    limits: [0.5, 0.2, 0.4]
+    # Step height (in meters)
+    height: 0.085
+    # Lateral distance in meters between feet (how spread apart the feet should be)
+    width: 0.225
+    # Ratio of the step_period where the foot should be at its highest point, between [0 1].
+    apex_ratio: 0.4
+  torso:
+    # Torso height (in meters)
+    height: 0.46
+    # Torso pitch (in radians)
+    pitch: 12 * pi / 180
+    # Torso constant position offset
+    position_offset: [0.01, 0, 0]
+    # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
+    sway_offset: [0, 0.08, 0]
+    # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
+    sway_ratio: 0.5
+    # Determines where to position the torso at the end of the step using a ratio of the next step placement.
+    # For example, a value of [0.5, 0.5, 1] would position the torso halfway between the planted and swing foot and with
+    # torso yaw rotation equal to swing foot yaw
+    final_position_ratio: [0.5, 0.5, 1]
+
+gains:
+  arms: 1
+
+# Fixed position of the arm joints during walking
+arms:
+  right_shoulder_pitch: 1.7
+  left_shoulder_pitch: 1.7
+  right_shoulder_roll: -0.4
+  left_shoulder_roll: 0.35
+  right_elbow: -0.7
+  left_elbow: -0.7
+
+# Reference velocity command ranges
+ranges:
+  x_vel_range: [-0.5, 0.5]
+  y_vel_range: [-0.3, 0.3]
+  yaw_vel_range: [-0.5, 0.5]
+  vel_increment: 0.1
+
+urdf_path: "models/robot.urdf"
+
+# Stopping tolerance for IK
+ik_tolerance: 1e-5
+# Maximum number of iterations for IK
+ik_max_iterations: 500
+# IK method to use, either JACOBIAN, NLOPT, LEVENBERG_MARQUARDT, PARTICLE_SWARM or BFGS
+ik_method: LEVENBERG_MARQUARDT
+
+links:
+  torso: "torso"
+  left_foot: "left_foot_base"
+  right_foot: "right_foot_base"
+
+  # Playback mode settings
+playback:
+  # Velocity to playback [x_vel, y_vel, yaw_vel]
+  velocity: [0.2, 0.0, 0.0]
+  # Playback rate multiplier (1.0 = realtime, 2.0 = 2x speed, etc.)
+  rate: 0.1
