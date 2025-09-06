@@ -53,6 +53,9 @@ namespace module::skill {
 
             /// @brief Desired arm positions while walking
             std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
+
+            /// @brief Option to use balance control when kicking
+            bool use_balance_control = false;
         } cfg;
 
         /// @brief Last time we updated the walk engine
