@@ -57,7 +57,7 @@ def extract_pose_from_transform(Htw_iso3):
     return position, orientation
 
 # Path to your nbs file
-nbs_file = "/home/willburgin/NUbots/recordings/stella-mocap/20250908T14_39_50.nbs"
+nbs_file = "/home/willburgin/NUbots/recordings/stella-mocap/20250908T14_44_59.nbs"
 
 print("Loading Ground Truth data...")
 # Load ground truth messages
@@ -148,27 +148,79 @@ stella_yaws = unwrap_angles(np.array(stella_yaws))
 print(f"Ground Truth: {len(gt_timestamps)} samples over {gt_timestamps[-1]:.2f} seconds")
 print(f"Stella: {len(stella_timestamps)} samples over {stella_timestamps[-1]:.2f} seconds")
 
+# Compute offset from first 100 samples
+n_samples = 100
+if len(gt_xs) >= n_samples and len(stella_xs) >= n_samples:
+    print(f"\nComputing offset from first {n_samples} samples...")
+
+    # Calculate mean position offset
+    gt_mean_pos = np.array([np.mean(gt_xs[:n_samples]),
+                           np.mean(gt_ys[:n_samples]),
+                           np.mean(gt_zs[:n_samples])])
+
+    stella_mean_pos = np.array([np.mean(stella_xs[:n_samples]),
+                               np.mean(stella_ys[:n_samples]),
+                               np.mean(stella_zs[:n_samples])])
+
+    position_offset = gt_mean_pos - stella_mean_pos
+
+    # Calculate mean orientation offset
+    gt_mean_orient = np.array([np.mean(gt_rolls[:n_samples]),
+                              np.mean(gt_pitches[:n_samples]),
+                              np.mean(gt_yaws[:n_samples])])
+
+    stella_mean_orient = np.array([np.mean(stella_rolls[:n_samples]),
+                                  np.mean(stella_pitches[:n_samples]),
+                                  np.mean(stella_yaws[:n_samples])])
+
+    orientation_offset = gt_mean_orient - stella_mean_orient
+
+    print(f"Position offset: X={position_offset[0]:.3f}, Y={position_offset[1]:.3f}, Z={position_offset[2]:.3f} m")
+    print(f"Orientation offset: Roll={orientation_offset[0]:.2f}, Pitch={orientation_offset[1]:.2f}, Yaw={orientation_offset[2]:.2f} degrees")
+
+    # Apply offset to Stella data
+    stella_xs_corrected = np.array(stella_xs) + position_offset[0]
+    stella_ys_corrected = np.array(stella_ys) + position_offset[1]
+    stella_zs_corrected = np.array(stella_zs) + position_offset[2]
+
+    stella_rolls_corrected = stella_rolls + orientation_offset[0]
+    stella_pitches_corrected = stella_pitches + orientation_offset[1]
+    stella_yaws_corrected = stella_yaws + orientation_offset[2]
+
+else:
+    print(f"\nNot enough samples for offset calculation (need {n_samples}, got GT:{len(gt_xs)}, Stella:{len(stella_xs)})")
+    # Use uncorrected data
+    stella_xs_corrected = np.array(stella_xs)
+    stella_ys_corrected = np.array(stella_ys)
+    stella_zs_corrected = np.array(stella_zs)
+    stella_rolls_corrected = stella_rolls
+    stella_pitches_corrected = stella_pitches
+    stella_yaws_corrected = stella_yaws
+
 # Plot translations comparison
 plt.figure(figsize=(15, 10))
 
 plt.subplot(3, 1, 1)
 plt.plot(gt_timestamps, gt_xs, 'r-', label="Ground Truth", linewidth=2)
-plt.plot(stella_timestamps, stella_xs, 'b--', label="Stella", linewidth=2)
+plt.plot(stella_timestamps, stella_xs_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+plt.plot(stella_timestamps, stella_xs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
 plt.ylabel("X Position [m]")
-plt.title("Position Comparison: Ground Truth vs Stella")
+plt.title("Position Comparison: Ground Truth vs Stella (with offset correction)")
 plt.legend()
 plt.grid(True, alpha=0.3)
 
 plt.subplot(3, 1, 2)
 plt.plot(gt_timestamps, gt_ys, 'r-', label="Ground Truth", linewidth=2)
-plt.plot(stella_timestamps, stella_ys, 'b--', label="Stella", linewidth=2)
+plt.plot(stella_timestamps, stella_ys_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+plt.plot(stella_timestamps, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
 plt.ylabel("Y Position [m]")
 plt.legend()
 plt.grid(True, alpha=0.3)
 
 plt.subplot(3, 1, 3)
 plt.plot(gt_timestamps, gt_zs, 'r-', label="Ground Truth", linewidth=2)
-plt.plot(stella_timestamps, stella_zs, 'b--', label="Stella", linewidth=2)
+plt.plot(stella_timestamps, stella_zs_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+plt.plot(stella_timestamps, stella_zs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
 plt.ylabel("Z Position [m]")
 plt.xlabel("Time [s]")
 plt.legend()
@@ -182,22 +234,25 @@ plt.figure(figsize=(15, 10))
 
 plt.subplot(3, 1, 1)
 plt.plot(gt_timestamps, gt_rolls, 'r-', label="Ground Truth", linewidth=2)
-plt.plot(stella_timestamps, stella_rolls, 'b--', label="Stella", linewidth=2)
+plt.plot(stella_timestamps, stella_rolls_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+plt.plot(stella_timestamps, stella_rolls, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
 plt.ylabel("Roll [degrees]")
-plt.title("Orientation Comparison: Ground Truth vs Stella")
+plt.title("Orientation Comparison: Ground Truth vs Stella (with offset correction)")
 plt.legend()
 plt.grid(True, alpha=0.3)
 
 plt.subplot(3, 1, 2)
 plt.plot(gt_timestamps, gt_pitches, 'r-', label="Ground Truth", linewidth=2)
-plt.plot(stella_timestamps, stella_pitches, 'b--', label="Stella", linewidth=2)
+plt.plot(stella_timestamps, stella_pitches_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+plt.plot(stella_timestamps, stella_pitches, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
 plt.ylabel("Pitch [degrees]")
 plt.legend()
 plt.grid(True, alpha=0.3)
 
 plt.subplot(3, 1, 3)
 plt.plot(gt_timestamps, gt_yaws, 'r-', label="Ground Truth", linewidth=2)
-plt.plot(stella_timestamps, stella_yaws, 'b--', label="Stella", linewidth=2)
+plt.plot(stella_timestamps, stella_yaws_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+plt.plot(stella_timestamps, stella_yaws, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
 plt.ylabel("Yaw [degrees]")
 plt.xlabel("Time [s]")
 plt.legend()
@@ -209,21 +264,21 @@ plt.show()
 # Plot 2D trajectory comparison
 plt.figure(figsize=(10, 8))
 plt.plot(gt_xs, gt_ys, 'r-', label="Ground Truth", linewidth=2, alpha=0.8)
-plt.plot(stella_xs, stella_ys, 'b--', label="Stella", linewidth=2, alpha=0.8)
-plt.scatter(gt_xs[0], gt_ys[0], color='green', s=100, label='Start', zorder=5)
-plt.scatter(gt_xs[-1], gt_ys[-1], color='red', s=100, label='End', zorder=5)
+plt.plot(stella_xs_corrected, stella_ys_corrected, 'b--', label="Stella (Corrected)", linewidth=2, alpha=0.8)
+plt.plot(stella_xs, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.5)
+plt.scatter(gt_xs[0], gt_ys[0], color='red', s=100, label='GT Start', zorder=5)
+plt.scatter(stella_xs_corrected[0], stella_ys_corrected[0], color='blue', s=100, label='Stella Start', zorder=5)
 plt.xlabel('X Position [m]')
 plt.ylabel('Y Position [m]')
-plt.title('2D Trajectory Comparison: Ground Truth vs Stella')
+plt.title('2D Trajectory Comparison: Ground Truth vs Stella (with offset correction)')
 plt.grid(True, alpha=0.3)
 plt.axis('equal')
 plt.legend()
 plt.show()
 
-# Print comparison statistics
-print(f"\n=== Comparison Statistics ===")
-if len(gt_xs) > 0 and len(stella_xs) > 0:
-    print(f"Position RMS Error:")
+# Print comparison statistics (update the interpolation section)
+if len(gt_xs) > 0 and len(stella_xs_corrected) > 0:
+    print(f"\n=== Comparison Statistics (After Offset Correction) ===")
 
     # Only compare overlapping time periods
     common_start = max(gt_timestamps[0], stella_timestamps[0])
@@ -235,34 +290,31 @@ if len(gt_xs) > 0 and len(stella_xs) > 0:
 
     if np.sum(gt_mask) > 1 and np.sum(stella_mask) > 1:
         try:
-            # Simple numpy-based interpolation
-            gt_times_common = gt_timestamps[gt_mask]
-            stella_times_common = stella_timestamps[stella_mask]
+            # Interpolate CORRECTED Stella data to GT timestamps using numpy
+            stella_x_interp = np.interp(gt_timestamps[gt_mask], stella_timestamps[stella_mask], stella_xs_corrected[stella_mask])
+            stella_y_interp = np.interp(gt_timestamps[gt_mask], stella_timestamps[stella_mask], stella_ys_corrected[stella_mask])
+            stella_z_interp = np.interp(gt_timestamps[gt_mask], stella_timestamps[stella_mask], stella_zs_corrected[stella_mask])
 
-            # Interpolate Stella data to GT timestamps using numpy
-            stella_x_interp = np.interp(gt_times_common, stella_times_common, np.array(stella_xs)[stella_mask])
-            stella_y_interp = np.interp(gt_times_common, stella_times_common, np.array(stella_ys)[stella_mask])
-            stella_z_interp = np.interp(gt_times_common, stella_times_common, np.array(stella_zs)[stella_mask])
-
-            # Calculate RMS errors
+            # Calculate RMS errors with corrected data
             x_error = np.sqrt(np.mean((np.array(gt_xs)[gt_mask] - stella_x_interp)**2))
             y_error = np.sqrt(np.mean((np.array(gt_ys)[gt_mask] - stella_y_interp)**2))
             z_error = np.sqrt(np.mean((np.array(gt_zs)[gt_mask] - stella_z_interp)**2))
 
+            print(f"Position RMS Error (Corrected):")
             print(f"  X: {x_error:.3f} m")
             print(f"  Y: {y_error:.3f} m")
             print(f"  Z: {z_error:.3f} m")
 
-            # Also compute orientation errors
-            stella_roll_interp = np.interp(gt_times_common, stella_times_common, stella_rolls[stella_mask])
-            stella_pitch_interp = np.interp(gt_times_common, stella_times_common, stella_pitches[stella_mask])
-            stella_yaw_interp = np.interp(gt_times_common, stella_times_common, stella_yaws[stella_mask])
+            # Also compute orientation errors with corrected data
+            stella_roll_interp = np.interp(gt_timestamps[gt_mask], stella_timestamps[stella_mask], stella_rolls_corrected[stella_mask])
+            stella_pitch_interp = np.interp(gt_timestamps[gt_mask], stella_timestamps[stella_mask], stella_pitches_corrected[stella_mask])
+            stella_yaw_interp = np.interp(gt_timestamps[gt_mask], stella_timestamps[stella_mask], stella_yaws_corrected[stella_mask])
 
             roll_error = np.sqrt(np.mean((gt_rolls[gt_mask] - stella_roll_interp)**2))
             pitch_error = np.sqrt(np.mean((gt_pitches[gt_mask] - stella_pitch_interp)**2))
             yaw_error = np.sqrt(np.mean((gt_yaws[gt_mask] - stella_yaw_interp)**2))
 
-            print(f"Orientation RMS Error:")
+            print(f"Orientation RMS Error (Corrected):")
             print(f"  Roll:  {roll_error:.2f} degrees")
             print(f"  Pitch: {pitch_error:.2f} degrees")
             print(f"  Yaw:   {yaw_error:.2f} degrees")
