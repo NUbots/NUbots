@@ -42,6 +42,9 @@ message Stella {
 
     /// Map points in stella world frame {n}
     repeated vec3 map_points = 2;
+
+    /// Tracking state: "Initializing", "Tracking", or "Lost"
+    string tracking_state = 3;
 }
 
 message StellaMap {

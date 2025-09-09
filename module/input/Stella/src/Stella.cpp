@@ -167,6 +167,11 @@ namespace module::input {
                 stella->Hnc = Hnc;
             }
 
+            std::string state = frame_publisher->get_tracking_state();
+            // Returns: "Initializing", "Tracking", or "Lost"
+
+            stella->tracking_state = state;  // Add this line
+
             // Get map points from Stella
             std::vector<std::shared_ptr<stella_vslam::data::landmark>> all_landmarks;
             std::set<std::shared_ptr<stella_vslam::data::landmark>> local_landmarks;

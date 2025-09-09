@@ -122,6 +122,16 @@ namespace module::input {
 
             z_bias_filter = KalmanFilter<double, 1, 0, 1>(initial_state, initial_covariance, A, B, C, Q, R);
             z_bias_filter_initialized = true;
+
+            // Sliding window config
+            cfg.sliding_window.enabled = config["sliding_window"]["enabled"].as<bool>();
+            cfg.sliding_window.window_size = config["sliding_window"]["window_size"].as<int>();
+            cfg.sliding_window.smoothness_weight = config["sliding_window"]["smoothness_weight"].as<double>();
+            cfg.sliding_window.stella_base_weight = config["sliding_window"]["stella_base_weight"].as<double>();
+            cfg.sliding_window.kinematic_base_weight = config["sliding_window"]["kinematic_base_weight"].as<double>();
+            cfg.sliding_window.xtol_rel = config["sliding_window"]["optimization"]["xtol_rel"].as<double>();
+            cfg.sliding_window.ftol_rel = config["sliding_window"]["optimization"]["ftol_rel"].as<double>();
+            cfg.sliding_window.maxeval = config["sliding_window"]["optimization"]["maxeval"].as<int>();
         });
 
         on<Startup>().then([this] {

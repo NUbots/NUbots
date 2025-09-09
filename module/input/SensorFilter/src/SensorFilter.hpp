@@ -32,6 +32,8 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 #include <optional>
+#include <deque>  // Add this for std::deque
+#include <chrono>  // Add this for timestamps
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
 
@@ -103,6 +105,18 @@ namespace module::input {
                 /// @brief Alpha parameter for scale factor exponential filtering
                 double scale_factor_alpha = 0.9;
             } stella_config;
+
+            /// @brief Sliding window configuration
+            struct SlidingWindowConfig {
+                bool enabled = false;
+                int window_size = 10;
+                double smoothness_weight = 1.0;
+                double stella_base_weight = 1.0;
+                double kinematic_base_weight = 1.0;
+                double xtol_rel = 1e-6;
+                double ftol_rel = 1e-6;
+                int maxeval = 100;
+            } sliding_window;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
@@ -158,6 +172,47 @@ namespace module::input {
 
         /// @brief Flag to track if z-bias filter has been initialized
         bool z_bias_filter_initialized = false;
+
+        /// @brief Measurement factor for sliding window optimization
+        struct MeasurementFactor {
+            enum Type { STELLA, KINEMATIC };
+            Type type;
+            int time_index;
+            Eigen::Vector2d measurement;
+            double weight;
+            std::chrono::steady_clock::time_point timestamp;
+        };
+
+        /// @brief Sliding window pose history
+        std::deque<Eigen::Vector2d> pose_window_;
+
+        /// @brief Current factors for optimization (used by objective function)
+        std::vector<MeasurementFactor> current_factors_;
+
+        /// @brief Fault detection status
+        struct FaultDetectionStatus {
+            bool stella_healthy = true;
+            bool kinematics_healthy = true;
+            double stella_confidence = 1.0;
+            double kinematics_confidence = 1.0;
+        };
+
+        /// @brief Optimize sliding window states
+        std::pair<Eigen::VectorXd, double> optimize_sliding_window(
+            const Eigen::VectorXd& initial_guess,
+            const std::vector<MeasurementFactor>& factors);
+
+        /// @brief Compute cost for sliding window optimization
+        double compute_sliding_window_cost(const Eigen::VectorXd& states);
+
+        /// @brief Update odometry with sliding window optimization
+        void update_odometry_sliding_window(std::unique_ptr<Sensors>& sensors,
+                                           const std::shared_ptr<const Sensors>& previous_sensors,
+                                           const RawSensors& raw_sensors,
+                                           const message::behaviour::state::Stability& stability,
+                                           const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                                           const std::shared_ptr<const StellaMsg>& stella,
+                                           const FaultDetectionStatus& fault_status);
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.

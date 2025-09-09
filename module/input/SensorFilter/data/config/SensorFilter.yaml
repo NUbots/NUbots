@@ -60,3 +60,14 @@ stella_config:
   initialization_delay: 5.0
   # Alpha parameter for scale factor exponential filtering (0-1)
   scale_factor_alpha: 0.9
+
+sliding_window:
+  enabled: true
+  window_size: 10
+  smoothness_weight: 1.0
+  stella_base_weight: 5.0
+  kinematic_base_weight: 0.5
+  optimization:
+    xtol_rel: 1e-6
+    ftol_rel: 1e-6
+    maxeval: 100
