@@ -97,13 +97,18 @@ namespace module::input {
             total_cost += factor.weight * residual.squaredNorm();
         }
 
-        // Smoothness regularization
+        // Smoothness regularization - normalize by window size to make weight more intuitive
         int window_size = states.size() / 2;
-        for (int k = 0; k < window_size - 1; ++k) {
-            Eigen::Vector2d state_k(states[2*k], states[2*k + 1]);
-            Eigen::Vector2d state_k1(states[2*(k+1)], states[2*(k+1) + 1]);
-            Eigen::Vector2d diff = state_k1 - state_k;
-            total_cost += cfg.sliding_window.smoothness_weight * diff.squaredNorm();
+        if (window_size > 1) {
+            // Scale smoothness weight by number of constraints to make it comparable to measurement weights
+            double normalized_smoothness_weight = cfg.sliding_window.smoothness_weight / (window_size - 1);
+
+            for (int k = 0; k < window_size - 1; ++k) {
+                Eigen::Vector2d state_k(states[2*k], states[2*k + 1]);
+                Eigen::Vector2d state_k1(states[2*(k+1)], states[2*(k+1) + 1]);
+                Eigen::Vector2d diff = state_k1 - state_k;
+                total_cost += normalized_smoothness_weight * diff.squaredNorm();
+            }
         }
 
         return total_cost;

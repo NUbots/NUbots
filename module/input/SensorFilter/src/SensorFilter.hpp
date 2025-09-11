@@ -113,8 +113,8 @@ namespace module::input {
                 double smoothness_weight = 1.0;
                 double stella_base_weight = 1.0;
                 double kinematic_base_weight = 1.0;
-                double xtol_rel = 1e-6;
-                double ftol_rel = 1e-6;
+                double xtol_rel = 0.000001;
+                double ftol_rel = 0.000001;
                 int maxeval = 100;
             } sliding_window;
         } cfg;

@@ -64,10 +64,9 @@ stella_config:
 sliding_window:
   enabled: true
   window_size: 10
-  smoothness_weight: 1.0
-  stella_base_weight: 5.0
+  smoothness_weight: 5.0  # Now normalized per constraint, so can be higher
+  stella_base_weight: 50.0  # Increase to strongly prefer Stella
   kinematic_base_weight: 0.5
-  optimization:
-    xtol_rel: 1e-6
-    ftol_rel: 1e-6
-    maxeval: 100
+  xtol_rel: 0.000001
+  ftol_rel: 0.000001
+  maxeval: 100

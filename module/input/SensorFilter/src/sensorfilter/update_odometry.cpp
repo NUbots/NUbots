@@ -568,71 +568,100 @@ void SensorFilter::update_odometry_sliding_window(
         stella_available = true;
     }
 
-    // 3. Collect measurements for sliding window optimization
+    // 3. Maintain sliding window of poses
+    Eigen::Vector2d initial_pos;
+
+    if (fault_status.stella_healthy) {
+        initial_pos = Eigen::Vector2d(Hwt_stella.translation().x(), Hwt_stella.translation().y());
+    } else {
+        initial_pos = Eigen::Vector2d(Hwt_kinematic.translation().x(), Hwt_kinematic.translation().y());
+    }
+
+    // Initialize or update pose window
+    if (pose_window_.empty()) {
+        // Initialize with current position
+        pose_window_.push_back(initial_pos);
+    } else {
+        // Add new pose to window
+        pose_window_.push_back(initial_pos);
+
+        // Maintain window size
+        while (pose_window_.size() > static_cast<size_t>(cfg.sliding_window.window_size)) {
+            pose_window_.pop_front();
+        }
+    }
+
+    // 4. Collect measurements for sliding window optimization
     std::vector<MeasurementFactor> current_factors;
 
-    // Add kinematic measurement if healthy
+    // Add kinematic measurement for the LATEST timestep in the window
     if (fault_status.kinematics_healthy) {
         MeasurementFactor kinematic_factor;
         kinematic_factor.type = MeasurementFactor::KINEMATIC;
-        kinematic_factor.time_index = 0;  // Current time step
-        kinematic_factor.measurement = Eigen::Vector2d(Hwt_kinematic.translation().x(),
-                                                      Hwt_kinematic.translation().y());
+        kinematic_factor.time_index = pose_window_.size() - 1;  // Latest timestep
+        Eigen::Vector2d current_kinematic_pos(Hwt_kinematic.translation().x(), Hwt_kinematic.translation().y());
+        kinematic_factor.measurement = current_kinematic_pos;
         kinematic_factor.weight = cfg.sliding_window.kinematic_base_weight * fault_status.kinematics_confidence;
         current_factors.push_back(kinematic_factor);
-        log<INFO>("Added kinematic measurement: [" + std::to_string(kinematic_factor.measurement.x()) +
+        log<INFO>("Added kinematic measurement at timestep " + std::to_string(kinematic_factor.time_index) +
+                  ": [" + std::to_string(kinematic_factor.measurement.x()) +
                   ", " + std::to_string(kinematic_factor.measurement.y()) + "] weight: " +
                   std::to_string(kinematic_factor.weight));
     }
 
-    // Add Stella measurement if available and healthy
+    // Add Stella measurement for the LATEST timestep in the window
     if (fault_status.stella_healthy) {
         MeasurementFactor stella_factor;
         stella_factor.type = MeasurementFactor::STELLA;
-        stella_factor.time_index = 0;  // Current time step
+        stella_factor.time_index = pose_window_.size() - 1;  // Latest timestep
         stella_factor.measurement = Eigen::Vector2d(Hwt_stella.translation().x(),
                                                    Hwt_stella.translation().y());
         stella_factor.weight = cfg.sliding_window.stella_base_weight * fault_status.stella_confidence;
         current_factors.push_back(stella_factor);
-        log<INFO>("Added Stella measurement: [" + std::to_string(stella_factor.measurement.x()) +
+        log<INFO>("Added Stella measurement at timestep " + std::to_string(stella_factor.time_index) +
+                  ": [" + std::to_string(stella_factor.measurement.x()) +
                   ", " + std::to_string(stella_factor.measurement.y()) + "] weight: " +
                   std::to_string(stella_factor.weight));
     }
 
-    // 4. Run sliding window optimization
+    // 5. Run sliding window optimization over ALL poses in window
     Eigen::Isometry3d Hwt_final;
-    double optimization_cost = -1.0;  // Add this line to track cost outside the block
+    double optimization_cost = -1.0;
 
     if (!current_factors.empty()) {
-        // Create initial guess (weighted average of available measurements)
-        Eigen::Vector2d initial_pos = Eigen::Vector2d::Zero();
-        double total_weight = 0.0;
-        for (const auto& factor : current_factors) {
-            initial_pos += factor.weight * factor.measurement;
-            total_weight += factor.weight;
+        // Create initial guess from entire pose window
+        Eigen::VectorXd initial_guess(pose_window_.size() * 2);
+        for (size_t i = 0; i < pose_window_.size(); ++i) {
+            initial_guess[2*i] = pose_window_[i].x();
+            initial_guess[2*i + 1] = pose_window_[i].y();
         }
-        if (total_weight > 0) {
-            initial_pos /= total_weight;
-        }
-
-        Eigen::VectorXd initial_guess(2);
-        initial_guess << initial_pos.x(), initial_pos.y();
 
         log<INFO>("Running sliding window optimization with " + std::to_string(current_factors.size()) +
-                  " factors (Stella healthy: " + std::to_string(fault_status.stella_healthy) +
+                  " factors over " + std::to_string(pose_window_.size()) + " timesteps " +
+                  "(Stella healthy: " + std::to_string(fault_status.stella_healthy) +
                   ", Kinematic healthy: " + std::to_string(fault_status.kinematics_healthy) + ")");
 
-        // Call your optimization!
+        // Optimize over the full window
         auto [optimized_states, cost] = optimize_sliding_window(initial_guess, current_factors);
-        optimization_cost = cost;  // Store cost for later use
+        optimization_cost = cost;
 
         log<INFO>("Optimization completed with cost: " + std::to_string(cost));
 
-        // Use optimized result
+        // Update pose window with optimized results
+        for (size_t i = 0; i < pose_window_.size(); ++i) {
+            pose_window_[i] = Eigen::Vector2d(optimized_states[2*i], optimized_states[2*i + 1]);
+        }
+
+        // Use the LATEST optimized pose as the current estimate
         Hwt_final = Eigen::Isometry3d::Identity();
-        Hwt_final.translation().x() = optimized_states[0];
-        Hwt_final.translation().y() = optimized_states[1];
+        Hwt_final.translation().x() = pose_window_.back().x();
+        Hwt_final.translation().y() = pose_window_.back().y();
         Hwt_final.translation().z() = Hwt_kinematic.translation().z();  // Always use kinematic z
+
+        // Update sensors with corrected anchor frame
+        sensors->Hwp = Hwp;
+
+        log<INFO>("Updated anchor frame directly from optimized result");
 
     } else {
         log<WARN>("No healthy measurements available for sliding window optimization - using kinematic fallback");
@@ -644,6 +673,33 @@ void SensorFilter::update_odometry_sliding_window(
     const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
     Eigen::Vector3d rpy_final_orientation(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);  // Rename this variable
     Hwt_final.linear() = rpy_intrinsic_to_mat(rpy_final_orientation);
+
+    // ===== ANCHOR FRAME CORRECTION =====
+    // Update the anchor frame to align with the optimized POSITION result only
+    // This prevents kinematic drift from accumulating over time
+
+    // Only correct the anchor frame if we have optimization results
+    if (optimization_cost >= 0 && !pose_window_.empty()) {
+        // Create a position-only corrected transform (keep kinematic z and orientation)
+        Eigen::Isometry3d Hwt_position_corrected = Hwt_kinematic;
+        Hwt_position_corrected.translation().x() = pose_window_.back().x();
+        Hwt_position_corrected.translation().y() = pose_window_.back().y();
+        // Keep kinematic z and orientation unchanged for anchor correction
+
+        // Compute Htp (torso to planted foot transform) from current kinematics
+        const Eigen::Isometry3d Htp = planted_anchor_foot.value == WalkState::Phase::RIGHT
+                                            ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE])
+                                            : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
+
+        // Set anchor frame using position-corrected transform: Hwp = Hwt_position_corrected * Htp
+        Hwp = Hwt_position_corrected * Htp;
+
+        // Ensure anchor frame stays on field plane (z=0, roll=0, pitch=0)
+        Hwp.translation().z() = 0;
+        Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
+
+        log<INFO>("Updated anchor frame using position-corrected transform");
+    }
 
     // 6. Set final sensor outputs
     sensors->Htw = Hwt_final.inverse();
@@ -666,7 +722,14 @@ void SensorFilter::update_odometry_sliding_window(
     }
 
     // Debug output
-    emit(graph("SW Optimization Cost", optimization_cost));  // Use the stored cost
+    emit(graph("SW Optimization Cost", optimization_cost));
+    emit(graph("SW Window Size", static_cast<double>(pose_window_.size())));
+    emit(graph("SW Smoothness Weight", cfg.sliding_window.smoothness_weight));
+
+    // Anchor frame tracking
+    emit(graph("SW Anchor Frame X", Hwp.translation().x()));
+    emit(graph("SW Anchor Frame Y", Hwp.translation().y()));
+    emit(graph("SW Anchor Frame Yaw", mat_to_rpy_intrinsic(Hwp.linear()).z()));
 
     // Position outputs
     emit(graph("SW Position X", Hwt_final.translation().x()));
@@ -702,6 +765,25 @@ void SensorFilter::update_odometry_sliding_window(
             emit(graph(prefix + " Meas X " + std::to_string(i), factor.measurement.x()));
             emit(graph(prefix + " Meas Y " + std::to_string(i), factor.measurement.y()));
             emit(graph(prefix + " Weight " + std::to_string(i), factor.weight));
+        }
+    }
+
+    // Sliding window smoothness analysis
+    if (pose_window_.size() > 1) {
+        // Velocity between last two poses
+        Eigen::Vector2d velocity = pose_window_.back() - pose_window_[pose_window_.size()-2];
+        emit(graph("SW Velocity X", velocity.x()));
+        emit(graph("SW Velocity Y", velocity.y()));
+        emit(graph("SW Velocity Magnitude", velocity.norm()));
+
+        // Average velocity over entire window
+        if (pose_window_.size() > 2) {
+            double total_distance = 0.0;
+            for (size_t i = 1; i < pose_window_.size(); ++i) {
+                total_distance += (pose_window_[i] - pose_window_[i-1]).norm();
+            }
+            double avg_velocity = total_distance / (pose_window_.size() - 1);
+            emit(graph("SW Avg Velocity", avg_velocity));
         }
     }
 
