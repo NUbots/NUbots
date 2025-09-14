@@ -151,7 +151,6 @@ RUN install-from-source http://github.com/KhronosGroup/SPIRV-LLVM-Translator/arc
 RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v15.0.1.tar.gz \
     --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/0ce9b1513ad424dd1cca804413acda7417832640/resource_linker_skip_cross.patch \
     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DSPIRV_TRANSLATOR_DIR=${prefix} \
     -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
 
@@ -186,13 +185,11 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DIGC_OPTION__SPIRV_TOOLS_MODE=Prebuilds \
     -DIGC_OPTION__SPIRV_TRANSLATOR_MODE=Prebuilds \
     -DIGC_OPTION__VC_INTRINSICS_MODE=Prebuilds \
-    -DINSTALL_GENX_IR=ON \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    -DINSTALL_GENX_IR=ON
 
 # gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.7.2.tar.gz\
+RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.8.1.tar.gz \
     --build-system cmake \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DRUN_TEST_SUITE=OFF
 
 # Libpci access and libdrm for communicating with graphics hardware
@@ -207,7 +204,6 @@ RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.
 RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-25.1.4.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
     -DBUILD_TESTING=OFF \
@@ -218,15 +214,16 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
     -DCMAKE_CXX_FLAGS="-w"
 
 # Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/25.18.33578.6.tar.gz \
+RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/25.31.34666.3.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
-    -DIGC_DIR=${prefix}
+    -DIGC_DIR=${prefix} \
+    -DGMM_DIR=${prefix}
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz \
 
-# OpenCL loader library
-RUN install-package ruby
+    # OpenCL loader library
+    RUN install-package ruby
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
 
 # OpenCV
