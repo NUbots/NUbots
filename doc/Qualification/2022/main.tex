@@ -1,0 +1,141 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NUbots' TDP 2022
+%
+% Date: 24.11.2022
+%
+%
+\documentclass{llncs}
+%
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{verbatim}
+%
+\begin{document}
+%
+
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+\addtocmark{The NUbots Qualification Material for RoboCup 2022} % additional mark in the TOC
+%
+%
+\mainmatter              % start of the contributions
+%
+\title{The NUbots Team Extended Abstract 2022}
+%
+\titlerunning{The NUbots Extended Abstract for 2022}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+
+\author{Alex Biddulph
+        \and Peta Carlyle
+        \and Stephan Chalup
+        \and Lachlan Court
+        \and Liam Craft
+        \and Nicholas Dziura
+        \and Abigail Hall
+        \and Yuji Ishikawa
+        \and Sam McFarlane
+        \and Alexandre Mendes
+        \and Cameron Murtagh
+        \and Alana Noonan
+        \and Josephus Paye II
+        \and Mikyla Peters
+        \and Thomas O'Brien
+        \and Ysobel Sims
+        \and Bryce Tuppurainen
+        \and David Wieland
+        \and Joel Wong
+        \and Benjamin Young
+        \and Taylor Young
+        }
+       
+%
+\authorrunning{Biddulph et al.}   % abbreviated author list (for running head)
+%
+%%%% modified list of auther for the TOC (add the affiliations)
+\tocauthor{
+A. Biddulph,
+P. Carlyle,
+S. Chalup,
+L. Court,
+L. Craft,
+N. Dziura,
+A. Hall,
+Y. Ishikawa,
+S. McFarlane,
+A. Mendes,
+C. Murtagh,
+A. Noonan,
+J. Paye II,
+M. Peters,
+T. O'Brien,
+Y. Sims,
+B. Tuppurainen,
+D. Wieland,
+J. Wong,
+B. Young,
+T. Young
+}
+
+%
+\institute{Newcastle Robotics Laboratory\\ School of Information and Physical Sciences\\
+College of Engineering, Science and Environment\\
+The University of Newcastle, Callaghan 2308, Australia\\
+Contact: \email{nubots@newcastle.edu.au}\\
+Homepage: \url{http://robots.newcastle.edu.au}}
+%
+
+\maketitle              % typeset the title of the contribution
+
+
+
+\section{History and Overview}
+% * ... include lessons learned from the participation in the previous RoboCup competition
+% * ... highlight major problems the team is trying to solve for the upcoming competition
+
+NUbots are the RoboCup team at the University of Newcastle, Australia. In 2022 they will participate in the Kid Size Humanoid League, with their NUgus design based on the iGus platform\cite{Nimbro2018TDP}. NUbots have previously participated in the Standard Platform League (2002-2011), the Kid Size Humanoid League (2012-2017, 2021), and the Teen Size Humanoid league (2018-2019).
+
+% The NUbots' research addresses applications of machine learning, computer vision, sensor fusion and hardware. % The team's current research focus is Deep Learning. % This extended abstract gives an overview of developments made by the team and planned developments.
+
+In the last physical RoboCup competition, which was held in 2019, NUbots faced issues with locomotion, hardware and sensors.
+
+% The team learnt at the 2019 competition that the vision system lacked robustness. Because of this the team is working towards new ways to get large robust datasets for vision and improving our existing methods. 
+
+% The walk engine used is a legacy walk engine based on the Team Darwin 2013 code release. This has not been suitable for the larger NUgus robot, and so a major problem the team is trying to solve for the 2020 competition is the walk engine. The team has multiple projects being worked on to develop a new walk engine. 
+
+% The team is working to improve the robot hardware and sensor capabilities. Several mechatronics projects are in progress to address issues with these areas.
+
+\section{Developments}
+% * ... outline the plans of major changes the team anticipates to have implemented by the RoboCup 2020 competition
+% * ... describes the status of implementation of the planned changes by the time of submitting the application
+
+% \noindent\textbf{Semi-Synthetic Data Generation:}   % WORK INTEGRATED LEARNING STUFF+ANYTHING ELSE (MATT, ALEX)
+
+\noindent\textbf{Robotic Simulation:}   % Webots developments
+NUbots have developed Webots \cite{Webots} communication capabilities in NUClear \cite{HoulistonEtAl2016} and have created a robot model for use in Webots. Webots has been used to optimise simple walk motions using genetic algorithms, with the team now working on more complex motion optimisations. Webots has also been used to create quasi-static and dynamic walk routines, however these have not been transferred to the real robot hardware yet. Visual odometry has also been explored, and is described below.\newline
+
+\noindent\textbf{Vision and Localisation:}
+The NUbots team have rewritten their particle filter localisation system. They have implemented visual odometry in Webots and are in the process of integrating this on the real robot. Work has begun on detection of field features from Visual Mesh \cite{Houliston2018VisualMR} field line detections to then be used in the localisation particle filter. \newline
+
+\noindent\textbf{Vision Data Collection:}
+NUbots are currently working on a range of automatic vision data collection tools. A CycleGAN method has been investigated and trained, and the team is now preparing to train a Multimodal CycleGAN for creation of synthetic vision data. The team is in the design phase of creating a tool that uses tracking devices to automatically segment real images.\newline 
+
+\noindent\textbf{Walk Engine:}
+The team has moved to using Bit-Bots' Quintic Walk~\cite{bitbotsMotionGit}, based off Rhoban's Quintic Walk and IK Walk~\cite{rhobanModelGit} since the 2019 competition. The team plans to further improve the walk before the 2022 competition.
+An ongoing project currently in the testing and debugging phase involves creation of a modular walk engine with dynamic motion controllers based on vector fields. \newline
+
+\noindent\textbf{Hardware:}
+The NUgus platform contains undesirable flex around the hip joint. A set of metal legs have been created to combat this issue. The team are considering further design improvements. \newline
+
+\noindent\textbf{Protobuf Communication Protocol:}
+A standard communication protocol~\cite{nubotsProtocolGit}, based on Protobuf messages, was proposed by NUbots to the Technical Committee. A prototype tool, based on the NUsight~\cite{nubotsNUsightGit} debugging utility, for monitoring network communications and displaying robot communications in a meaningful manner is being developed, with part of the user interface completed.\newline
+
+\noindent\textbf{High Level System Documentation:} 
+A new comprehensive documentation resource has been developed in the form of a public website~\cite{nubotsNUbookGit}, providing detailed information about the hardware and software systems along with guides. It is hoped that this resource will be useful not only for the NUbots team, but also the broader RoboCup community. \newline
+
+\bibliographystyle{plain}
+% argument is your BibTeX string definitions and bibliography database(s)
+\bibliography{nubots}
+
+\end{document}

@@ -1,19 +1,15 @@
-log_level: INFO
-
-buttons:
-  debounce_threshold: 7
-
-foot_down:
-  # Either (Z_HEIGHT or FSR)
-  method: Z_HEIGHT # Foot sensor reading
-  threshold: 0.01 # Height difference of the Z for the Z height method
-
 # Mahony filter for roll + pitch
 mahony:
-  # Proportional gain
-  Kp: 0.5
   # Integral gain
-  Ki: 0.3
+  Ki: 0.2
+  # Adaptive gains based on stability state
+  adaptive_gains:
+    # More aggressive gain when standing (stationary)
+    standing:
+      Kp: 0.5
+    # Default gain for dynamic states (walking, falling, etc.)
+    dynamic:
+      Kp: 0.2
   # Initial bias
   initial_bias:
     - 0
@@ -25,13 +21,19 @@ mahony:
     - 0.21
     - 0
 
+# Yaw complementary filter for fusing gyroscope and kinematic estimates
+yaw_filter:
+  # Complementary filter coefficient (0-1)
+  # Higher values give more weight to kinematic measurement, lower values to gyroscope prediction
+  alpha: 0.01
+  # Bias learning rate (0-1)
+  # Higher values allow faster bias adaptation, lower values provide more stability
+  # The filter automatically estimates and corrects for gyroscope bias drift
+  beta: 0.005
+  # Maximum allowed bias
+  max_bias: 0.1
+
 # Cut off frequency for low-pass filter on torso velocity
 velocity_low_pass:
   x_cut_off_frequency: 0.015
   y_cut_off_frequency: 0.01
-
-# Specify whether or not to use ground truth odometry from simulator
-use_ground_truth: false
-
-# Path to URDF file
-urdf_path: models/robot.urdf

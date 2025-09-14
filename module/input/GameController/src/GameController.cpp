@@ -31,7 +31,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
@@ -106,13 +105,14 @@ namespace module::input {
                                           return;
                                       }
 
+                                      if (game_controller_address != remote_addr) {
+                                          game_controller_address = remote_addr;
+                                          log<INFO>("Game controller address", game_controller_address);
+                                      }
+
                                       // Get our packet contents
                                       const GameControllerPacket& new_packet =
                                           *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
-
-                                      // Get the IP we are getting this packet from
-                                      // Store it and use it to send back to the game controller using emit UDP
-                                      BROADCAST_IP = p.local.address;
 
                                       if (new_packet.version == SUPPORTED_VERSION) {
                                           try {
@@ -145,8 +145,8 @@ namespace module::input {
         packet->player  = PLAYER_ID;
         packet->message = message;
 
-        if (BROADCAST_IP != "") {
-            emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
+        if (game_controller_address != "") {
+            emit<Scope::UDP>(packet, game_controller_address, send_port);
         }
     }
 
@@ -201,9 +201,9 @@ namespace module::input {
         initial_state->our_kick_off     = false;
 
         initial_state->team.team_id         = TEAM_ID;
-        initial_state->team.team_colour     = TeamColour::UNKNOWN_TEAM_COLOUR;
+        initial_state->team.team_colour     = TeamColour::UNKNOWN;
         initial_state->opponent.team_id     = 0;
-        initial_state->opponent.team_colour = TeamColour::UNKNOWN_TEAM_COLOUR;
+        initial_state->opponent.team_colour = TeamColour::UNKNOWN;
 
         emit(std::move(initial_state));
         emit(std::make_unique<GameState::Phase>(GameState::Phase::INITIAL));
@@ -281,7 +281,8 @@ namespace module::input {
             GameState::Robot own_player =
                 GameState::Robot(player_id,
                                  get_penalty_reason(new_own_player.penalty_state),
-                                 NUClear::clock::now() + std::chrono::seconds(new_own_player.penalised_time_left));
+                                 NUClear::clock::now() + std::chrono::seconds(new_own_player.penalised_time_left),
+                                 new_own_player.goal_keeper);
             state->team.players.push_back(own_player);
             if (player_id == PLAYER_ID) {
                 state->self = own_player;

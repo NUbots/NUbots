@@ -165,22 +165,23 @@ export class LocalisationRobotModel {
   @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
   @observable associationLines?: Line[];
-  @observable max_align_radius: number;
-  @observable min_align_radius: number;
-  @observable angle_to_final_heading: number;
-  @observable angle_to_target: number;
-  @observable translational_error: number;
-  @observable min_angle_error: number;
-  @observable max_angle_error: number;
-  @observable velocity_target: Vector3;
+  @observable maxAlignRadius: number;
+  @observable minAlignRadius: number;
+  @observable angleToFinalHeading: number;
+  @observable angleToTarget: number;
+  @observable translationalError: number;
+  @observable minAngleError: number;
+  @observable maxAngleError: number;
+  @observable velocityTarget: Vector3;
   @observable boundingBox?: BoundingBox;
-  @observable player_id: number;
-  @observable torso_trajectory: Matrix4[];
-  @observable swing_foot_trajectory: Matrix4[];
-  @observable walk_phase: message.behaviour.state.WalkState.Phase;
-  @observable trajectory_history: {
+  @observable playerId: number;
+  @observable teamColour: "red" | "blue" = "blue";
+  @observable torsoTrajectory: Matrix4[];
+  @observable swingFootTrajectory: Matrix4[];
+  @observable walkPhase: message.behaviour.state.WalkState.Phase;
+  @observable trajectoryHistory: {
     torso: Matrix4[];
-    swing_foot: Matrix4[];
+    swingFoot: Matrix4[];
     color: string;
     timestamp: number;
     phase: message.behaviour.state.WalkState.Phase;
@@ -205,20 +206,21 @@ export class LocalisationRobotModel {
     robots,
     purpose,
     associationLines,
-    max_align_radius,
-    min_align_radius,
-    angle_to_final_heading,
-    angle_to_target,
-    translational_error,
-    min_angle_error,
-    max_angle_error,
-    velocity_target,
+    maxAlignRadius,
+    minAlignRadius,
+    angleToFinalHeading,
+    angleToTarget,
+    translationalError,
+    minAngleError,
+    maxAngleError,
+    velocityTarget,
     boundingBox,
-    player_id,
-    torso_trajectory,
-    swing_foot_trajectory,
-    walk_phase,
-    trajectory_history,
+    playerId,
+    teamColour,
+    torsoTrajectory,
+    swingFootTrajectory,
+    walkPhase,
+    trajectoryHistory,
   }: {
     model: RobotModel;
     name: string;
@@ -238,22 +240,23 @@ export class LocalisationRobotModel {
     robots: { id: number; rRWw: Vector3; color: string }[];
     purpose: string;
     associationLines?: Line[];
-    max_align_radius: number;
-    min_align_radius: number;
-    angle_to_final_heading: number;
-    angle_to_target: number;
-    translational_error: number;
-    min_angle_error: number;
-    max_angle_error: number;
-    velocity_target: Vector3;
+    maxAlignRadius: number;
+    minAlignRadius: number;
+    angleToFinalHeading: number;
+    angleToTarget: number;
+    translationalError: number;
+    minAngleError: number;
+    maxAngleError: number;
+    velocityTarget: Vector3;
     boundingBox?: BoundingBox;
-    player_id: number;
-    torso_trajectory: Matrix4[];
-    swing_foot_trajectory: Matrix4[];
-    walk_phase: message.behaviour.state.WalkState.Phase;
-    trajectory_history: {
+    playerId: number;
+    teamColour?: "red" | "blue";
+    torsoTrajectory: Matrix4[];
+    swingFootTrajectory: Matrix4[];
+    walkPhase: message.behaviour.state.WalkState.Phase;
+    trajectoryHistory: {
       torso: Matrix4[];
-      swing_foot: Matrix4[];
+      swingFoot: Matrix4[];
       color: string;
       timestamp: number;
       phase: message.behaviour.state.WalkState.Phase;
@@ -276,21 +279,22 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.teamColour = teamColour || "blue";
     this.associationLines = associationLines;
-    this.max_align_radius = max_align_radius;
-    this.min_align_radius = min_align_radius;
-    this.angle_to_final_heading = angle_to_final_heading;
-    this.angle_to_target = angle_to_target;
-    this.translational_error = translational_error;
-    this.min_angle_error = min_angle_error;
-    this.max_angle_error = max_angle_error;
-    this.velocity_target = velocity_target;
+    this.maxAlignRadius = maxAlignRadius;
+    this.minAlignRadius = minAlignRadius;
+    this.angleToFinalHeading = angleToFinalHeading;
+    this.angleToTarget = angleToTarget;
+    this.translationalError = translationalError;
+    this.minAngleError = minAngleError;
+    this.maxAngleError = maxAngleError;
+    this.velocityTarget = velocityTarget;
     this.boundingBox = boundingBox;
-    this.player_id = player_id;
-    this.torso_trajectory = torso_trajectory;
-    this.swing_foot_trajectory = swing_foot_trajectory;
-    this.walk_phase = walk_phase;
-    this.trajectory_history = trajectory_history;
+    this.playerId = playerId;
+    this.torsoTrajectory = torsoTrajectory;
+    this.swingFootTrajectory = swingFootTrajectory;
+    this.walkPhase = walkPhase;
+    this.trajectoryHistory = trajectoryHistory;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -310,19 +314,20 @@ export class LocalisationRobotModel {
       robots: [],
       purpose: "",
       associationLines: [],
-      max_align_radius: 0,
-      min_align_radius: 0,
-      angle_to_final_heading: 0,
-      angle_to_target: 0,
-      translational_error: 0,
-      min_angle_error: 0,
-      max_angle_error: 0,
-      velocity_target: Vector3.of(),
-      player_id: -1,
-      torso_trajectory: [],
-      swing_foot_trajectory: [],
-      walk_phase: message.behaviour.state.WalkState.Phase.DOUBLE,
-      trajectory_history: [],
+      maxAlignRadius: 0,
+      minAlignRadius: 0,
+      angleToFinalHeading: 0,
+      angleToTarget: 0,
+      translationalError: 0,
+      minAngleError: 0,
+      maxAngleError: 0,
+      velocityTarget: Vector3.of(),
+      playerId: -1,
+      teamColour: "blue",
+      torsoTrajectory: [],
+      swingFootTrajectory: [],
+      walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
+      trajectoryHistory: [],
     });
   });
 
@@ -398,37 +403,37 @@ export class LocalisationRobotModel {
 
   /** Torso trajectory (Hpt) in field space */
   @computed
-  get torso_trajectoryF(): Matrix4[] {
-    return this.torso_trajectory.map((Hpt) => this.Hfw.multiply(this.Hwp).multiply(Hpt));
+  get torsoTrajectoryF(): Matrix4[] {
+    return this.torsoTrajectory.map((Hpt) => this.Hfw.multiply(this.Hwp).multiply(Hpt));
   }
 
   /** Swing foot trajectory (Hps) in field space */
   @computed
-  get swing_foot_trajectoryF(): Matrix4[] {
-    return this.swing_foot_trajectory.map((Hps) => this.Hfw.multiply(this.Hwp).multiply(Hps));
+  get swingFootTrajectoryF(): Matrix4[] {
+    return this.swingFootTrajectory.map((Hps) => this.Hfw.multiply(this.Hwp).multiply(Hps));
   }
 
   @action
-  addToTrajectoryHistory(torso: Matrix4[], swing_foot: Matrix4[]) {
-    if (torso.length === 0 || swing_foot.length === 0) {
+  addToTrajectoryHistory(torso: Matrix4[], swingFoot: Matrix4[]) {
+    if (torso.length === 0 || swingFoot.length === 0) {
       return;
     }
 
-    this.trajectory_history.push({
+    this.trajectoryHistory.push({
       torso: torso.map((m) => Matrix4.from(m)),
-      swing_foot: swing_foot.map((m) => Matrix4.from(m)),
+      swingFoot: swingFoot.map((m) => Matrix4.from(m)),
       color: "#ffa500",
       timestamp: Date.now(),
-      phase: this.walk_phase,
+      phase: this.walkPhase,
     });
 
     const MAX_HISTORY = 10;
-    if (this.trajectory_history.length > MAX_HISTORY) {
-      this.trajectory_history.shift();
+    if (this.trajectoryHistory.length > MAX_HISTORY) {
+      this.trajectoryHistory.shift();
     }
 
     const MAX_AGE_MS = 10000;
     const now = Date.now();
-    this.trajectory_history = this.trajectory_history.filter((t) => now - t.timestamp < MAX_AGE_MS);
+    this.trajectoryHistory = this.trajectoryHistory.filter((t) => now - t.timestamp < MAX_AGE_MS);
   }
 }

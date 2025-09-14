@@ -260,21 +260,12 @@ RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 
 
 # Download AUR patches
 WORKDIR /openvino
-RUN curl -L -o 010-openvino-change-install-paths.patch \
-    https://aur.archlinux.org/cgit/aur.git/plain/010-openvino-change-install-paths.patch?h=openvino && \
-    curl -L -o 020-openvino-disable-werror.patch \
-    https://aur.archlinux.org/cgit/aur.git/plain/020-openvino-disable-werror.patch?h=openvino && \
-    curl -L -o 030-openvino-level-zero-disable-werror.patch \
-    https://aur.archlinux.org/cgit/aur.git/plain/030-openvino-level-zero-disable-werror.patch?h=openvino && \
-    curl -L -o 040-openvino-protobuf23-fix.patch \
-    https://aur.archlinux.org/cgit/aur.git/plain/040-openvino-protobuf23-fix.patch?h=openvino
+RUN curl -L -o openvino_patch.patch \
+    https://gist.github.com/ZeoNyph/cf8216bc1ffa15b0e44b17899f355c07/raw/42a6a040f41c03714507b86cf257546ebbb6a0cc/openvino_patch.patch
 
 # Apply patches
 RUN cd /openvino && \
-    patch -d . -p1 < 010-openvino-change-install-paths.patch && \
-    patch -d . -p1 < 020-openvino-disable-werror.patch && \
-    patch -d thirdparty/level_zero/level-zero -p1 < 030-openvino-level-zero-disable-werror.patch && \
-    patch -d . -p1 < 040-openvino-protobuf23-fix.patch
+    patch -d . -p1 -i openvino_patch.patch
 
 # Build OpenVINO
 RUN mkdir build && cd build && \
@@ -424,8 +415,6 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
-    arm-none-eabi-gcc \
-    arm-none-eabi-newlib \
     doxygen \
     gcc13
 
@@ -442,9 +431,10 @@ RUN npm install -g \
 # Install uv for python package management and set it to use the build directory for storage
 RUN pip install uv==0.7.2
 
-# When in the docker image uv will use the build directory for storage
-ENV UV_CACHE_DIR=/home/nubots/build/uv-cache
-ENV UV_PROJECT_ENVIRONMENT=/home/nubots/build/.venv
+# When in the docker image uv will use a separate volume for the cache and venv
+# Virtual environments are on the same volume as the uv cache to allow hard linking for ~speed~
+ENV UV_CACHE_DIR=/home/nubots/python/uv-cache
+ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -493,6 +483,7 @@ COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots \
     && install -d -m 0777 /home/nubots/build \
+    && install -d -m 0777 /home/nubots/python \
     && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
 
 # Configure the cache directories

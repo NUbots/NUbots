@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# The offset to ensure the robot is definitely outside of the center circle
+center_circle_offset: 0.5
+
+# The distance away from the ball when it's the opponent's penalty (0.75 per rules, use 1m to ensure compliance)
+penalty_defend_distance: 1.0
