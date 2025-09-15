@@ -409,6 +409,10 @@ void SensorFilter::update_odometry_sliding_window(
 
     // ===== SLIDING WINDOW OPTIMIZATION IMPLEMENTATION =====
 
+    // 0. Track Stella health for failure detection
+    static bool previous_stella_healthy = false;
+    static Eigen::Isometry3d last_stella_pose = Eigen::Isometry3d::Identity();
+
     // 1. Compute kinematic estimate (always needed as potential measurement)
     if (planted_anchor_foot != sensors->planted_foot_phase && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
         switch (planted_anchor_foot.value) {
@@ -429,7 +433,7 @@ void SensorFilter::update_odometry_sliding_window(
     const Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT
                                      ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
                                      : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
-    const Eigen::Isometry3d Hwt_kinematic = Hwp * Hpt;
+    Eigen::Isometry3d Hwt_kinematic = Hwp * Hpt;
 
     // 2. Compute Stella estimate (if available and healthy)
     Eigen::Isometry3d Hwt_stella = Eigen::Isometry3d::Identity();
@@ -566,7 +570,36 @@ void SensorFilter::update_odometry_sliding_window(
         emit(graph("Z constraint error", Hwt_stella_unconstrained.translation().z() - Hwt_kinematic.translation().z()));
 
         stella_available = true;
+        // Store Stella's pose for potential failure handling
+        last_stella_pose = Hwt_stella;
     }
+
+    // 2.5. Handle Stella failure and reset kinematic odometry
+    bool stella_just_failed = previous_stella_healthy && !fault_status.stella_healthy;
+
+    if (stella_just_failed) {
+        log<WARN>("Stella failed - resetting kinematic odometry to Stella's last position");
+
+        // Reset anchor frame to Stella's last position
+        const Eigen::Isometry3d Htp = planted_anchor_foot.value == WalkState::Phase::RIGHT
+                                            ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE])
+                                            : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
+
+        Hwp = last_stella_pose * Htp;
+        Hwp.translation().z() = 0;
+        Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
+
+        Hwt_kinematic = Hwp * Htp.inverse();
+
+        // Clear pose window and start fresh
+        pose_window_.clear();
+
+        log<INFO>("Reset kinematic odometry to Stella's last position: [" +
+                  std::to_string(last_stella_pose.translation().x()) + ", " +
+                  std::to_string(last_stella_pose.translation().y()) + "]");
+    }
+
+    previous_stella_healthy = fault_status.stella_healthy;
 
     // 3. Maintain sliding window of poses
     Eigen::Vector2d initial_pos;
@@ -668,38 +701,28 @@ void SensorFilter::update_odometry_sliding_window(
         Hwt_final = Hwt_kinematic;
     }
 
-    // 5. Set final orientation (IMU roll/pitch + fused yaw)
+    // 5. Set final orientation (IMU roll/pitch + prioritized yaw)
     const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_kinematic.linear()).z();
-    const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
-    Eigen::Vector3d rpy_final_orientation(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);  // Rename this variable
-    Hwt_final.linear() = rpy_intrinsic_to_mat(rpy_final_orientation);
+    double fused_yaw;
 
-    // ===== ANCHOR FRAME CORRECTION =====
-    // Update the anchor frame to align with the optimized POSITION result only
-    // This prevents kinematic drift from accumulating over time
+    if (fault_status.stella_healthy && stella_available) {
+        // Prioritize Stella's yaw when available and healthy
+        const double stella_yaw = mat_to_rpy_intrinsic(Hwt_stella.linear()).z();
+        fused_yaw = stella_yaw;
 
-    // Only correct the anchor frame if we have optimization results
-    if (optimization_cost >= 0 && !pose_window_.empty()) {
-        // Create a position-only corrected transform (keep kinematic z and orientation)
-        Eigen::Isometry3d Hwt_position_corrected = Hwt_kinematic;
-        Hwt_position_corrected.translation().x() = pose_window_.back().x();
-        Hwt_position_corrected.translation().y() = pose_window_.back().y();
-        // Keep kinematic z and orientation unchanged for anchor correction
+        // Update yaw filter with Stella's yaw to maintain continuity when Stella fails
+        yaw_filter.update(sensors->gyroscope.z(), stella_yaw, dt);
 
-        // Compute Htp (torso to planted foot transform) from current kinematics
-        const Eigen::Isometry3d Htp = planted_anchor_foot.value == WalkState::Phase::RIGHT
-                                            ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE])
-                                            : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
+        log<INFO>("Using Stella yaw: " + std::to_string(stella_yaw) + " (kinematic yaw: " + std::to_string(kinematic_yaw) + ")");
+    } else {
+        // Fall back to fused yaw when Stella is not available
+        fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
 
-        // Set anchor frame using position-corrected transform: Hwp = Hwt_position_corrected * Htp
-        Hwp = Hwt_position_corrected * Htp;
-
-        // Ensure anchor frame stays on field plane (z=0, roll=0, pitch=0)
-        Hwp.translation().z() = 0;
-        Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
-
-        log<INFO>("Updated anchor frame using position-corrected transform");
+        log<INFO>("Using fused yaw: " + std::to_string(fused_yaw) + " (kinematic yaw: " + std::to_string(kinematic_yaw) + ")");
     }
+
+    Eigen::Vector3d rpy_final_orientation(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
+    Hwt_final.linear() = rpy_intrinsic_to_mat(rpy_final_orientation);
 
     // 6. Set final sensor outputs
     sensors->Htw = Hwt_final.inverse();
@@ -740,6 +763,17 @@ void SensorFilter::update_odometry_sliding_window(
     emit(graph("SW Roll", rpy_final_orientation.x()));
     emit(graph("SW Pitch", rpy_final_orientation.y()));
     emit(graph("SW Yaw", rpy_final_orientation.z()));
+
+    // Yaw source tracking
+    emit(graph("SW Yaw Source", (fault_status.stella_healthy && stella_available) ? 1.0 : 0.0));  // 1 = Stella, 0 = Fused
+    if (fault_status.stella_healthy && stella_available) {
+        emit(graph("SW Stella Yaw", mat_to_rpy_intrinsic(Hwt_stella.linear()).z()));
+    }
+    emit(graph("SW Kinematic Yaw", kinematic_yaw));
+    emit(graph("SW Fused Yaw", yaw_filter.get_yaw()));  // Current filter state
+
+    // Stella failure tracking
+    emit(graph("SW Stella Failure Event", stella_just_failed ? 1.0 : 0.0));
 
     // Health status
     emit(graph("SW Stella Health", fault_status.stella_confidence));

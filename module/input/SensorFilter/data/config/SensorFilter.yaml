@@ -67,6 +67,6 @@ sliding_window:
   smoothness_weight: 5.0  # Now normalized per constraint, so can be higher
   stella_base_weight: 50.0  # Increase to strongly prefer Stella
   kinematic_base_weight: 0.5
-  xtol_rel: 0.000001
-  ftol_rel: 0.000001
-  maxeval: 100
+  xtol_rel: 1e-12
+  ftol_rel: 1e-12
+  maxeval: 1000
