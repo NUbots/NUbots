@@ -98,6 +98,7 @@ namespace module::input {
 
             // Construct world {w} to torso {t} space transform from ground truth pose
             sensors->Htw = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
+            sensors->Htw_gt = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
             // Construct robot {r} to world {w} space transform from ground truth
             Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
             auto Hwt              = sensors->Htw.inverse();
@@ -107,6 +108,21 @@ namespace module::input {
             sensors->Hrw      = Hwr.inverse();
             sensors->vTw      = Eigen::Vector3d(robot_pose_ground_truth->vTf);
             return;
+        }
+        else if (robot_pose_ground_truth)
+        {
+            Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+            if (!ground_truth_initialised) {
+                // Initialise the ground truth Hfw
+                ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+                ground_truth_Hfw.translation()[2]        = 0;
+                double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+                ground_truth_initialised                 = true;
+            }
+
+            // Construct world {w} to torso {t} space transform from ground truth pose
+            sensors->Htw_gt = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
         }
         else if (cfg.use_ground_truth && !robot_pose_ground_truth) {
             log<WARN>("No ground truth data received, but use_ground_truth is true");
@@ -311,6 +327,14 @@ namespace module::input {
 
         sensors->Htw = Hwt_constrained.inverse();
 
+        // Create Htw_imukin: kinematics position + IMU orientation
+        Eigen::Isometry3d Hwt_imukin = Eigen::Isometry3d::Identity();
+        // Position from kinematics
+        Hwt_imukin.translation() = Hwt_anchor.translation();
+        // Orientation from IMU (roll, pitch, yaw)
+        Hwt_imukin.linear() = Rwt_mahony;
+        sensors->Htw_imukin = Hwt_imukin.inverse();
+
         // Emit debug graphs for monitoring
         emit(graph("Roll IMU", rpy_imu.x()));
         emit(graph("Pitch IMU", rpy_imu.y()));
@@ -359,24 +383,45 @@ void SensorFilter::update_odometry_sliding_window(
 
     log<INFO>("Using sliding window odometry with optimization");
 
-    // Handle ground truth case
+    // Use ground truth instead of calculating odometry, then return
     if (cfg.use_ground_truth && robot_pose_ground_truth) {
         Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
         if (!ground_truth_initialised) {
+            // Initialise the ground truth Hfw
             ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
             ground_truth_Hfw.translation()[2]        = 0;
             double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
             ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
             ground_truth_initialised                 = true;
         }
+
+        // Construct world {w} to torso {t} space transform from ground truth pose
         sensors->Htw = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
+        sensors->Htw_gt = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
+        // Construct robot {r} to world {w} space transform from ground truth
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
         auto Hwt              = sensors->Htw.inverse();
-        Hwr.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.linear() =
+            Eigen::AngleAxisd(mat_to_rpy_intrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hwr.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
         sensors->Hrw      = Hwr.inverse();
         sensors->vTw      = Eigen::Vector3d(robot_pose_ground_truth->vTf);
         return;
+    }
+    else if (robot_pose_ground_truth)
+    {
+        Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+        if (!ground_truth_initialised) {
+            // Initialise the ground truth Hfw
+            ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+            ground_truth_Hfw.translation()[2]        = 0;
+            double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+            ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+            ground_truth_initialised                 = true;
+        }
+
+        // Construct world {w} to torso {t} space transform from ground truth pose
+        sensors->Htw_gt = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
     }
 
     // Compute dt
@@ -454,7 +499,7 @@ void SensorFilter::update_odometry_sliding_window(
                 Htw.translation().y() = 0;
                 Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
                 auto Hwc = Htw.inverse() * Htc;
-                auto Hcn = Eigen::Isometry3d::Identity();
+                auto Hcn = stella->Hnc.inverse(); // TODO: CHECK THIS IS FIXING THE OFFSET ISSUE
                 Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() *
                                Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                 Hwn = Hwc * Hcn;
@@ -601,7 +646,7 @@ void SensorFilter::update_odometry_sliding_window(
 
     previous_stella_healthy = fault_status.stella_healthy;
 
-    // 3. Maintain sliding window of poses
+    // 3. Maintain sliding window of poses AND measurements
     Eigen::Vector2d initial_pos;
 
     if (fault_status.stella_healthy) {
@@ -612,73 +657,94 @@ void SensorFilter::update_odometry_sliding_window(
 
     // Initialize or update pose window
     if (pose_window_.empty()) {
-        // Initialize with current position
         pose_window_.push_back(initial_pos);
     } else {
-        // Add new pose to window
         pose_window_.push_back(initial_pos);
 
         // Maintain window size
         while (pose_window_.size() > static_cast<size_t>(cfg.sliding_window.window_size)) {
             pose_window_.pop_front();
+            // Also remove old measurements
+            if (!measurement_history_.empty()) {
+                measurement_history_.pop_front();
+            }
         }
     }
 
-    // 4. Collect measurements for sliding window optimization
-    std::vector<MeasurementFactor> current_factors;
+    // 4. Store current measurements for this timestep
+    std::vector<MeasurementFactor> current_timestep_factors;
 
-    // Add kinematic measurement for the LATEST timestep in the window
+    // Add kinematic measurement for the CURRENT timestep
     if (fault_status.kinematics_healthy) {
         MeasurementFactor kinematic_factor;
         kinematic_factor.type = MeasurementFactor::KINEMATIC;
-        kinematic_factor.time_index = pose_window_.size() - 1;  // Latest timestep
+        kinematic_factor.time_index = pose_window_.size() - 1;
+
+        // Apply exponential filtering to kinematic measurement
         Eigen::Vector2d current_kinematic_pos(Hwt_kinematic.translation().x(), Hwt_kinematic.translation().y());
+        if (previous_sensors) {
+            auto prev_pos = previous_sensors->Htw.inverse().translation();
+            double alpha = cfg.sliding_window.measurement_filter_alpha;
+            current_kinematic_pos.x() = alpha * current_kinematic_pos.x() + (1.0 - alpha) * prev_pos.x();
+            current_kinematic_pos.y() = alpha * current_kinematic_pos.y() + (1.0 - alpha) * prev_pos.y();
+        }
+
         kinematic_factor.measurement = current_kinematic_pos;
         kinematic_factor.weight = cfg.sliding_window.kinematic_base_weight * fault_status.kinematics_confidence;
-        current_factors.push_back(kinematic_factor);
-        log<INFO>("Added kinematic measurement at timestep " + std::to_string(kinematic_factor.time_index) +
-                  ": [" + std::to_string(kinematic_factor.measurement.x()) +
-                  ", " + std::to_string(kinematic_factor.measurement.y()) + "] weight: " +
-                  std::to_string(kinematic_factor.weight));
+        current_timestep_factors.push_back(kinematic_factor);
     }
 
-    // Add Stella measurement for the LATEST timestep in the window
+    // Add Stella measurement for the CURRENT timestep
     if (fault_status.stella_healthy) {
         MeasurementFactor stella_factor;
         stella_factor.type = MeasurementFactor::STELLA;
-        stella_factor.time_index = pose_window_.size() - 1;  // Latest timestep
-        stella_factor.measurement = Eigen::Vector2d(Hwt_stella.translation().x(),
-                                                   Hwt_stella.translation().y());
+        stella_factor.time_index = pose_window_.size() - 1;
+
+        // Apply exponential filtering to Stella measurement
+        Eigen::Vector2d current_stella_pos(Hwt_stella.translation().x(), Hwt_stella.translation().y());
+        if (previous_sensors) {
+            auto prev_pos = previous_sensors->Htw.inverse().translation();
+            double alpha = cfg.sliding_window.measurement_filter_alpha;
+            current_stella_pos.x() = alpha * current_stella_pos.x() + (1.0 - alpha) * prev_pos.x();
+            current_stella_pos.y() = alpha * current_stella_pos.y() + (1.0 - alpha) * prev_pos.y();
+        }
+
+        stella_factor.measurement = current_stella_pos;
         stella_factor.weight = cfg.sliding_window.stella_base_weight * fault_status.stella_confidence;
-        current_factors.push_back(stella_factor);
-        log<INFO>("Added Stella measurement at timestep " + std::to_string(stella_factor.time_index) +
-                  ": [" + std::to_string(stella_factor.measurement.x()) +
-                  ", " + std::to_string(stella_factor.measurement.y()) + "] weight: " +
-                  std::to_string(stella_factor.weight));
+        current_timestep_factors.push_back(stella_factor);
     }
 
-    // 5. Run sliding window optimization over ALL poses in window
+    // Store measurements for this timestep
+    measurement_history_.push_back(current_timestep_factors);
+
+    // 5. Collect ALL measurements for sliding window optimization
+    std::vector<MeasurementFactor> all_factors;
+
+    // Add measurements from ALL timesteps in the window
+    for (size_t t = 0; t < measurement_history_.size(); ++t) {
+        for (const auto& factor : measurement_history_[t]) {
+            // Adjust time index to account for window sliding
+            MeasurementFactor adjusted_factor = factor;
+            adjusted_factor.time_index = t;
+            all_factors.push_back(adjusted_factor);
+        }
+    }
+
+    // 6. Run sliding window optimization over ALL poses in window
     Eigen::Isometry3d Hwt_final;
     double optimization_cost = -1.0;
 
-    if (!current_factors.empty()) {
-        // Create initial guess from entire pose window
+    if (!all_factors.empty()) {
+        // Create initial guess from PREVIOUSLY OPTIMIZED pose window
         Eigen::VectorXd initial_guess(pose_window_.size() * 2);
         for (size_t i = 0; i < pose_window_.size(); ++i) {
             initial_guess[2*i] = pose_window_[i].x();
             initial_guess[2*i + 1] = pose_window_[i].y();
         }
 
-        log<INFO>("Running sliding window optimization with " + std::to_string(current_factors.size()) +
-                  " factors over " + std::to_string(pose_window_.size()) + " timesteps " +
-                  "(Stella healthy: " + std::to_string(fault_status.stella_healthy) +
-                  ", Kinematic healthy: " + std::to_string(fault_status.kinematics_healthy) + ")");
-
-        // Optimize over the full window
-        auto [optimized_states, cost] = optimize_sliding_window(initial_guess, current_factors);
+        // Optimize over the full window with ALL measurements
+        auto [optimized_states, cost] = optimize_sliding_window(initial_guess, all_factors);
         optimization_cost = cost;
-
-        log<INFO>("Optimization completed with cost: " + std::to_string(cost));
 
         // Update pose window with optimized results
         for (size_t i = 0; i < pose_window_.size(); ++i) {
@@ -689,15 +755,9 @@ void SensorFilter::update_odometry_sliding_window(
         Hwt_final = Eigen::Isometry3d::Identity();
         Hwt_final.translation().x() = pose_window_.back().x();
         Hwt_final.translation().y() = pose_window_.back().y();
-        Hwt_final.translation().z() = Hwt_kinematic.translation().z();  // Always use kinematic z
-
-        // Update sensors with corrected anchor frame
-        sensors->Hwp = Hwp;
-
-        log<INFO>("Updated anchor frame directly from optimized result");
+        Hwt_final.translation().z() = Hwt_kinematic.translation().z();
 
     } else {
-        log<WARN>("No healthy measurements available for sliding window optimization - using kinematic fallback");
         Hwt_final = Hwt_kinematic;
     }
 
@@ -726,6 +786,14 @@ void SensorFilter::update_odometry_sliding_window(
 
     // 6. Set final sensor outputs
     sensors->Htw = Hwt_final.inverse();
+
+    // Create Htw_imukin: kinematics position + IMU orientation
+    Eigen::Isometry3d Hwt_imukin = Eigen::Isometry3d::Identity();
+    // Position from kinematics
+    Hwt_imukin.translation() = Hwt_kinematic.translation();
+    // Orientation from IMU (roll, pitch, yaw)
+    Hwt_imukin.linear() = Rwt_mahony;
+    sensors->Htw_imukin = Hwt_imukin.inverse();
 
     // Robot pose (x,y translation + yaw rotation only)
     Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
@@ -759,6 +827,14 @@ void SensorFilter::update_odometry_sliding_window(
     emit(graph("SW Position Y", Hwt_final.translation().y()));
     emit(graph("SW Position Z", Hwt_final.translation().z()));
 
+    // IMU+Kinematics outputs (pure kinematics position + IMU orientation)
+    emit(graph("IMUKin Position X", Hwt_kinematic.translation().x()));
+    emit(graph("IMUKin Position Y", Hwt_kinematic.translation().y()));
+    emit(graph("IMUKin Position Z", Hwt_kinematic.translation().z()));
+    emit(graph("IMUKin Roll", rpy_mahony.x()));
+    emit(graph("IMUKin Pitch", rpy_mahony.y()));
+    emit(graph("IMUKin Yaw", rpy_mahony.z()));
+
     // Orientation outputs - use the final orientation variable
     emit(graph("SW Roll", rpy_final_orientation.x()));
     emit(graph("SW Pitch", rpy_final_orientation.y()));
@@ -778,7 +854,7 @@ void SensorFilter::update_odometry_sliding_window(
     // Health status
     emit(graph("SW Stella Health", fault_status.stella_confidence));
     emit(graph("SW Kinematic Health", fault_status.kinematics_confidence));
-    emit(graph("SW Num Factors", static_cast<double>(current_factors.size())));
+    emit(graph("SW Num Factors", static_cast<double>(all_factors.size())));
 
     // Compare with individual measurements
     if (fault_status.kinematics_healthy) {
@@ -791,35 +867,35 @@ void SensorFilter::update_odometry_sliding_window(
         emit(graph("SW Stella Y", Hwt_stella.translation().y()));
     }
 
-    // Optimization vs measurements comparison
-    if (!current_factors.empty()) {
-        for (size_t i = 0; i < current_factors.size(); ++i) {
-            const auto& factor = current_factors[i];
-            std::string prefix = (factor.type == MeasurementFactor::STELLA) ? "SW Stella" : "SW Kinematic";
-            emit(graph(prefix + " Meas X " + std::to_string(i), factor.measurement.x()));
-            emit(graph(prefix + " Meas Y " + std::to_string(i), factor.measurement.y()));
-            emit(graph(prefix + " Weight " + std::to_string(i), factor.weight));
-        }
-    }
+    // // Optimization vs measurements comparison
+    // if (!all_factors.empty()) {
+    //     for (size_t i = 0; i < all_factors.size(); ++i) {
+    //         const auto& factor = all_factors[i];
+    //         std::string prefix = (factor.type == MeasurementFactor::STELLA) ? "SW Stella" : "SW Kinematic";
+    //         emit(graph(prefix + " Meas X " + std::to_string(i), factor.measurement.x()));
+    //         emit(graph(prefix + " Meas Y " + std::to_string(i), factor.measurement.y()));
+    //         emit(graph(prefix + " Weight " + std::to_string(i), factor.weight));
+    //     }
+    // }
 
-    // Sliding window smoothness analysis
-    if (pose_window_.size() > 1) {
-        // Velocity between last two poses
-        Eigen::Vector2d velocity = pose_window_.back() - pose_window_[pose_window_.size()-2];
-        emit(graph("SW Velocity X", velocity.x()));
-        emit(graph("SW Velocity Y", velocity.y()));
-        emit(graph("SW Velocity Magnitude", velocity.norm()));
+    // // Sliding window smoothness analysis
+    // if (pose_window_.size() > 1) {
+    //     // Velocity between last two poses
+    //     Eigen::Vector2d velocity = pose_window_.back() - pose_window_[pose_window_.size()-2];
+    //     emit(graph("SW Velocity X", velocity.x()));
+    //     emit(graph("SW Velocity Y", velocity.y()));
+    //     emit(graph("SW Velocity Magnitude", velocity.norm()));
 
-        // Average velocity over entire window
-        if (pose_window_.size() > 2) {
-            double total_distance = 0.0;
-            for (size_t i = 1; i < pose_window_.size(); ++i) {
-                total_distance += (pose_window_[i] - pose_window_[i-1]).norm();
-            }
-            double avg_velocity = total_distance / (pose_window_.size() - 1);
-            emit(graph("SW Avg Velocity", avg_velocity));
-        }
-    }
+    //     // Average velocity over entire window
+    //     if (pose_window_.size() > 2) {
+    //         double total_distance = 0.0;
+    //         for (size_t i = 1; i < pose_window_.size(); ++i) {
+    //             total_distance += (pose_window_[i] - pose_window_[i-1]).norm();
+    //         }
+    //         double avg_velocity = total_distance / (pose_window_.size() - 1);
+    //         emit(graph("SW Avg Velocity", avg_velocity));
+    //     }
+    // }
 
 }
 

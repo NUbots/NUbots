@@ -113,6 +113,7 @@ namespace module::input {
                 double smoothness_weight = 1.0;
                 double stella_base_weight = 1.0;
                 double kinematic_base_weight = 1.0;
+                double measurement_filter_alpha = 0.8;
                 double xtol_rel = 0.000001;
                 double ftol_rel = 0.000001;
                 int maxeval = 100;
@@ -188,6 +189,9 @@ namespace module::input {
 
         /// @brief Current factors for optimization (used by objective function)
         std::vector<MeasurementFactor> current_factors_;
+
+        /// @brief Measurement history for sliding window optimization
+        std::deque<std::vector<MeasurementFactor>> measurement_history_;
 
         /// @brief Fault detection status
         struct FaultDetectionStatus {

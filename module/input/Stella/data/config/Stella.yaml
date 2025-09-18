@@ -25,6 +25,11 @@ Camera:
 
   color_order: "RGB"
 
+Preprocessing:
+  mask_rectangles:
+    # Format: [x_min, x_max, y_min, y_max] in normalized [0.0 – 1.0] coordinates
+    - [0.0, 1.0, 0.0, 0.4]
+
 Feature:
   name: "NUbots soccer field - high threshold approach"
   max_num_keypoints: 2000      # Limit features like working config
