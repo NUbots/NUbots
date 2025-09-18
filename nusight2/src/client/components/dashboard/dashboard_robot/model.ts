@@ -10,9 +10,9 @@ import { memoize } from "../../../base/memoize";
 import { BrowserSystemClock } from "../../../time/browser_clock";
 import { RobotModel } from "../../robot/model";
 
-import Mode = message.input.GameState.Data.Mode;
-import PenaltyReason = message.input.GameState.Data.PenaltyReason;
-import Phase = message.input.GameState.Data.Phase;
+import Mode = message.input.GameState.Mode;
+import PenaltyReason = message.input.GameState.PenaltyReason;
+import Phase = message.input.GameState.Phase;
 
 export class DashboardRobotModel {
   // Parameters that influence the display

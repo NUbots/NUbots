@@ -39,14 +39,13 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief The time to delay before getting up, in milliseconds, to settle the sensors for accurate side
+            /// detection
+            int delay_time = 0;
             /// @brief Script sequence to run when getting from lying on the front to standing
             std::vector<std::string> getup_front;
             /// @brief Script sequence to run when getting from lying on the back to standing
             std::vector<std::string> getup_back;
-            /// @brief Script sequence to run when getting from lying on the right to standing
-            std::vector<std::string> getup_right;
-            /// @brief Script sequence to run when getting from lying on the left to standing
-            std::vector<std::string> getup_left;
             /// @brief Script sequence to run when already upright
             std::vector<std::string> getup_upright;
             /// @brief Script sequence to run when told to get up while upside down

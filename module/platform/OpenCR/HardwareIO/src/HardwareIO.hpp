@@ -50,7 +50,7 @@ namespace module::platform::OpenCR {
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Makes HardwareIO a threadpool descriptor type
-        static constexpr int thread_count = 1;
+        static constexpr int concurrency = 1;
 
     private:
         /// @brief Manages the connection with OpenCR
@@ -263,6 +263,8 @@ namespace module::platform::OpenCR {
 
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Offset for the gyroscope to zero it at rest
+            Eigen::Vector3f gyro_offset = Eigen::Vector3f::Zero();
             struct {
                 struct {
                     /// @brief Container for the max tolerable temp for all servos

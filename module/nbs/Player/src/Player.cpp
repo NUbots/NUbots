@@ -30,21 +30,23 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/eye/Rpc.hpp"
+
 namespace module::nbs {
 
-    using extension::Configuration;
-
-    using message::nbs::player::Finished;
+    using message::eye::RpcResponseMeta;
     using message::nbs::player::LoadRequest;
     using message::nbs::player::PauseRequest;
+    using message::nbs::player::PlaybackFinished;
     using message::nbs::player::PlaybackState;
     using message::nbs::player::PlayRequest;
     using message::nbs::player::SetModeRequest;
     using message::nbs::player::SetPlaybackSpeedRequest;
-
     using message::nbs::player::PlaybackMode::FAST;
     using message::nbs::player::PlaybackMode::REALTIME;
     using message::nbs::player::PlaybackMode::SEQUENTIAL;
+
+    using extension::Configuration;
 
     Player::Player(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -56,114 +58,179 @@ namespace module::nbs {
         });
 
         on<Trigger<LoadRequest>>().then([this](const LoadRequest& load_request) {
-            if (!load_request.files.empty()) {
-                log<NUClear::INFO>("Loading NBS files:");
-                std::vector<std::filesystem::path> file_paths;
-                for (const auto& path : load_request.files) {
-                    file_paths.push_back(std::filesystem::path(path));
-                    log<NUClear::INFO>(" - ", path);
-                }
-                decoder = utility::nbs::Decoder(file_paths, true);
-                // Get the total number of messages
-                total_messages = std::distance(decoder.begin(), decoder.end());
-                // Get the timestamp of the last message
-                auto last_message = std::prev(decoder.end());
-                end_time = NUClear::clock::time_point(std::chrono::nanoseconds((*last_message).item->item.timestamp));
-                // Get the timestamp of the first message
-                auto first_message = decoder.begin();
-                start_time =
-                    NUClear::clock::time_point(std::chrono::nanoseconds((*first_message).item->item.timestamp));
-                decoder_iterator = decoder.begin();
-            }
-            else {
-                // If no NBS files are provided, don't continue
-                log<NUClear::ERROR>("No NBS files provided.");
+            if (playback_state != message::nbs::player::PlaybackState::State::ENDED) {
+                log<ERROR>("Cannot load NBS files while playing.");
+                emit(std::make_unique<LoadRequest::Response>(
+                    RpcResponseMeta(load_request.rpc.token, false, "Cannot load NBS files while playing.")));
                 return;
             }
 
+            if (load_request.files.empty()) {
+                // If no NBS files are provided, don't continue
+                log<ERROR>("No NBS files provided.");
+                emit(std::make_unique<LoadRequest::Response>(
+                    RpcResponseMeta(load_request.rpc.token, false, "No NBS files provided.")));
+                return;
+            }
+
+            log<INFO>("Loading NBS files:");
+            std::vector<std::filesystem::path> file_paths;
+            for (const auto& path : load_request.files) {
+                std::filesystem::path file_path(path);
+                if (std::filesystem::exists(file_path)) {
+                    file_paths.push_back(file_path);
+                    log<INFO>(" - ", path);
+                }
+                else {
+                    log<ERROR>("File does not exist: ", path);
+                }
+            }
+
+            if (file_paths.empty()) {
+                log<ERROR>("No valid NBS files to load.");
+                emit(std::make_unique<LoadRequest::Response>(
+                    RpcResponseMeta(load_request.rpc.token, false, "No valid NBS files to load.")));
+                return;
+            }
+            decoder = utility::nbs::Decoder(file_paths, true);
+            // Get the total number of messages
+            total_messages = std::distance(decoder.begin(), decoder.end());
+            // Get the timestamp of the last message
+            auto last_message = std::prev(decoder.end());
+            end_time = NUClear::clock::time_point(std::chrono::nanoseconds((*last_message).item->item.timestamp));
+            // Get the timestamp of the first message
+            auto first_message = decoder.begin();
+            start_time = NUClear::clock::time_point(std::chrono::nanoseconds((*first_message).item->item.timestamp));
+            decoder_iterator = decoder.begin();
+
             // Update which types we will be playing
-            log<NUClear::INFO>("Enabling messages:");
+            log<INFO>("Enabling messages:");
             for (const auto& message_name : load_request.messages) {
                 // Hash our type to work out our type on the wire
                 uint64_t hash =
                     NUClear::util::serialise::xxhash64(message_name.c_str(), message_name.size(), 0x4e55436c);
                 if (emitters.find(hash) != emitters.end()) {
                     emitters[hash](decoder);
-                    log<NUClear::INFO>(" - ", message_name);
+                    log<INFO>(" - ", message_name);
+                }
+                else {
+                    log<ERROR>("Message type not found: ", message_name);
                 }
             }
 
             // Synchronise the clock epoch to the first message timestamp
             if (decoder_iterator != decoder.end()) {
-                emit<Scope::DIRECT>(
+                emit<Scope::INLINE>(
                     std::make_unique<NUClear::message::TimeTravel>(start_time,
                                                                    playback_speed,
                                                                    NUClear::message::TimeTravel::Action::RELATIVE));
                 // Emit the first message
                 emit_next_message();
             }
+
+            // Emit the playback state
+            emit_playback_state();
+
+            // Emit RPC response
+            emit(std::make_unique<LoadRequest::Response>(RpcResponseMeta(load_request.rpc.token, true)));
         });
 
         on<Trigger<SetModeRequest>>().then([this](const SetModeRequest& set_mode_request) {
             mode = set_mode_request.mode;
-            log<NUClear::INFO>("Playback mode set to: ", set_mode_request.mode);
+            log<INFO>("Playback mode set to: ", set_mode_request.mode);
+
+            // Emit the playback state
+            emit_playback_state();
+
+            // Emit RPC response
+            emit(std::make_unique<SetModeRequest::Response>(RpcResponseMeta(set_mode_request.rpc.token, true)));
         });
 
-        on<Trigger<PauseRequest>>().then([this]() {
+        on<Trigger<PauseRequest>>().then([this](const PauseRequest& pause_request) {
             // Set the clock rtf to 0.0 to pause time
-            emit<Scope::DIRECT>(
+            emit<Scope::INLINE>(
                 std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                0.0,
                                                                NUClear::message::TimeTravel::Action::RELATIVE));
-            // Disable the player handles
-            main_loop_handle.disable();
-            idle_handle.disable();
+            // Unbind the player handles
+            realtime_player_handle.disable();
+            skip_idle_player_handle.disable();
+
+            // Emit the playback state
+            playback_state = message::nbs::player::PlaybackState::State::PAUSED;
+            emit_playback_state();
+
+            // Emit RPC response
+            emit(std::make_unique<PauseRequest::Response>(RpcResponseMeta(pause_request.rpc.token, true)));
         });
 
         on<Trigger<SetPlaybackSpeedRequest>>().then([this](const SetPlaybackSpeedRequest& set_speed_request) {
-            // Set the clock rtf to match the desired playback speed
             playback_speed = std::pow(2.0, set_speed_request.playback_speed);
-            emit<Scope::DIRECT>(
-                std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                               playback_speed,
-                                                               NUClear::message::TimeTravel::Action::RELATIVE));
+
+            // Emit the playback state
+            emit_playback_state();
+
+            // Emit RPC response
+            emit(std::make_unique<SetPlaybackSpeedRequest::Response>(
+                RpcResponseMeta(set_speed_request.rpc.token, true)));
         });
 
-        on<Trigger<PlayRequest>>().then([this]() {
-            // Unbind previous handles
-            main_loop_handle.unbind();
-            idle_handle.unbind();
+        on<Trigger<PlayRequest>>().then([this](const PlayRequest& play_request) {
+            // Disable the player handles
+            realtime_player_handle.disable();
+            skip_idle_player_handle.disable();
 
-            // clang-format off
             switch (mode.value) {
                 case FAST:
-                    enable_idle_handle();
-                    enable_main_loop_handle();
-                    break;
-
-                case REALTIME:
-                    enable_main_loop_handle();
-                    break;
-
-                case SEQUENTIAL:
-                    // Set the RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
-                    playback_speed = 0.0;
-                    emit<Scope::DIRECT>(
+                    // Set RTF to match the desired playback speed
+                    emit<Scope::INLINE>(
                         std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
                                                                        playback_speed,
                                                                        NUClear::message::TimeTravel::Action::RELATIVE));
-                    enable_idle_handle();
+                    enable_skip_idle_player();
+                    enable_realtime_player();
+                    break;
+
+                case REALTIME:
+                    // Set RTF to match the desired playback speed
+                    emit<Scope::INLINE>(
+                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
+                                                                       playback_speed,
+                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
+                    enable_realtime_player();
+                    break;
+
+                case SEQUENTIAL:
+                    // Set RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
+                    playback_speed = 0.0;
+                    emit<Scope::INLINE>(
+                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
+                                                                       playback_speed,
+                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
+                    enable_skip_idle_player();
+                    break;
+                default:
+                    log<ERROR>("Invalid playback mode selected.");
+                    emit(std::make_unique<PlayRequest::Response>(
+                        RpcResponseMeta(play_request.rpc.token, false, "Invalid playback mode selected.")));
+                    return;
                     break;
             }
-            // clang-format on
+
+            // Emit the playback state
+            playback_state = message::nbs::player::PlaybackState::State::PLAYING;
+            emit_playback_state();
+
+            // Emit RPC response
+            emit(std::make_unique<PlayRequest::Response>(RpcResponseMeta(play_request.rpc.token, true)));
         });
     }
 
-    void Player::enable_idle_handle() {
-        idle_handle = on<Idle<>, Single>().then([this] {
+    void Player::enable_skip_idle_player() {
+        skip_idle_player_handle = on<Idle<>, Single>().then([this] {
             std::lock_guard<std::mutex> decoder_lock(decoder_mutex);
             if (NUClear::clock::now() < target_emit_time) {
-                emit<Scope::DIRECT>(
+                emit<Scope::INLINE>(
                     std::make_unique<NUClear::message::TimeTravel>(target_emit_time,
                                                                    playback_speed,
                                                                    NUClear::message::TimeTravel::Action::NEAREST));
@@ -171,16 +238,16 @@ namespace module::nbs {
             emit_next_message();
             cv.notify_all();
         });
-        idle_handle.enable();
+        skip_idle_player_handle.enable();
     }
 
-    void Player::enable_main_loop_handle() {
-        main_loop_handle = on<Always>().then([this] {
+    void Player::enable_realtime_player() {
+        realtime_player_handle = on<Always>().then([this] {
             std::unique_lock<std::mutex> decoder_lock(decoder_mutex);
             emit_next_message();
             cv.wait_until(decoder_lock, target_emit_time);
         });
-        main_loop_handle.enable();
+        realtime_player_handle.enable();
     }
 
     void Player::emit_next_message() {
@@ -190,20 +257,11 @@ namespace module::nbs {
 
             // Only emit the message if the target emit time has been reached
             if (NUClear::clock::now() >= target_emit_time) {
-                // Emit the playback state
-                auto playback_state             = std::make_unique<PlaybackState>();
-                playback_state->current_message = std::distance(decoder.begin(), decoder_iterator);
-                playback_state->total_messages  = total_messages;
-                playback_state->timestamp       = NUClear::clock::now();
-                playback_state->start           = start_time;
-                playback_state->end             = end_time;
-                playback_state->playback_state  = message::nbs::player::PlaybackState::State::PLAYING;
-                playback_state->playback_speed  = int32_t(std::log2(playback_speed));
-                emit(std::move(playback_state));
-
                 // Emit the message
                 (*decoder_iterator)();
                 ++decoder_iterator;
+                // Emit the playback state
+                emit_playback_state();
             }
         }
 
@@ -212,11 +270,26 @@ namespace module::nbs {
             ++decoder_iterator;
         }
 
-        if (decoder_iterator == decoder.end()) {
-            emit(std::make_unique<Finished>());
-            main_loop_handle.unbind();
-            idle_handle.unbind();
+        if (playback_state != message::nbs::player::PlaybackState::State::ENDED && decoder_iterator == decoder.end()) {
+            realtime_player_handle.disable();
+            skip_idle_player_handle.disable();
+            playback_state = message::nbs::player::PlaybackState::State::ENDED;
+            // Emit the playback state
+            emit_playback_state();
+            emit(std::make_unique<PlaybackFinished>());
         }
+    }
+
+    void Player::emit_playback_state() {
+        auto playback_state             = std::make_unique<PlaybackState>();
+        playback_state->current_message = std::distance(decoder.begin(), decoder_iterator);
+        playback_state->total_messages  = total_messages;
+        playback_state->timestamp       = NUClear::clock::now();
+        playback_state->start           = start_time;
+        playback_state->end             = end_time;
+        playback_state->playback_state  = message::nbs::player::PlaybackState::State::PLAYING;
+        playback_state->playback_speed  = int32_t(std::log2(playback_speed));
+        emit(std::move(playback_state));
     }
 
 }  // namespace module::nbs

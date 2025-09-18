@@ -114,7 +114,7 @@ namespace utility::input {
             int bytes_read = in_file.gcount();
 
             if (bytes_read <= 0) {
-                NUClear::log<NUClear::ERROR>("Failed to read from input file");
+                NUClear::log<NUClear::LogLevel::ERROR>("Failed to read from input file");
                 break;
             }
 

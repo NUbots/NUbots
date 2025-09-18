@@ -87,11 +87,11 @@ namespace module::vision {
                                                         cfg.cluster_points,
                                                         clusters);
 
-            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+            log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
             // Prevent issues if there are no clusters
             if (clusters.size() == 0) {
-                log<NUClear::DEBUG>("No clusters found, cannot form a green horizon");
+                log<DEBUG>("No clusters found, cannot form a green horizon");
                 return;
             }
 
@@ -125,7 +125,7 @@ namespace module::vision {
             field_cluster.resize(std::distance(field_cluster.begin(), boundary));
 
             // Graph the field cluster points if debugging
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 for (int idx : field_cluster) {
                     emit(graph("Field cluster point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
@@ -133,13 +133,12 @@ namespace module::vision {
 
             // The remaining points are on the boundary of the field
             // They may also appear around other objects such as the ball
-            log<NUClear::DEBUG>(
-                fmt::format("Found {} points on the boundary of the cluster to create a convex hull with",
-                            field_cluster.size()));
+            log<DEBUG>(fmt::format("Found {} points on the boundary of the cluster to create a convex hull with",
+                                   field_cluster.size()));
 
             // Convex hull algorithms require at least three points
             if (field_cluster.size() < 3) {
-                log<NUClear::DEBUG>("Not enough points to make a convex hull");
+                log<DEBUG>("Not enough points to make a convex hull");
                 return;
             }
 
@@ -147,7 +146,7 @@ namespace module::vision {
             auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
 
             // Graph the convex hull if debugging
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= DEBUG) {
                 for (int idx : hull_indices) {
                     emit(graph("Convex hull point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
@@ -174,9 +173,9 @@ namespace module::vision {
                 msg->horizon.emplace_back(rPWw.col(idx));
             }
 
-            log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
-                                            hull_indices.size(),
-                                            field_cluster.size()));
+            log<DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
+                                   hull_indices.size(),
+                                   field_cluster.size()));
 
             emit(std::move(msg));
         });

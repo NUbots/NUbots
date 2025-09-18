@@ -46,7 +46,6 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/strategy/StartSafely.hpp"
 
 namespace module::purpose {
 
@@ -63,7 +62,6 @@ namespace module::purpose {
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
-    using message::strategy::StartSafely;
     using NUClear::message::LogMessage;
     using utility::input::LimbID;
 
@@ -76,11 +74,11 @@ namespace module::purpose {
         });
 
         on<Trigger<ButtonMiddleDown>, Single>().then([this] {
-            emit<Scope::DIRECT>(std::make_unique<ResetFieldLocalisation>());
-            emit<Scope::DIRECT>(std::make_unique<Buzzer>(1000));
+            emit<Scope::INLINE>(std::make_unique<ResetFieldLocalisation>());
+            emit<Scope::INLINE>(std::make_unique<Buzzer>(1000));
         });
 
-        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::DIRECT>(std::make_unique<Buzzer>(0)); });
+        on<Trigger<ButtonMiddleUp>, Single>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
@@ -91,9 +89,6 @@ namespace module::purpose {
 
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 5);
-
-            // Start up safely with low gains
-            // emit<Task>(std::make_unique<StartSafely>(), 4);
 
             // Stand Still on startup
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
@@ -133,7 +128,7 @@ namespace module::purpose {
         });
 
         // Trigger when stdin has something to read
-        on<IO>(STDIN_FILENO, IO::READ).then([this] {
+        on<Always>().then([this] {
             switch (tolower(getch())) {
                 case 'w': forward(); break;
                 case 'a': left(); break;
@@ -151,7 +146,7 @@ namespace module::purpose {
                 case KEY_DOWN: look_down(); break;
                 case 'q': quit(); return;
                 default:
-                    log<NUClear::ERROR>("Unknown Command");
+                    log<ERROR>("Unknown Command");
                     print_status();
                     break;
             }
@@ -166,9 +161,9 @@ namespace module::purpose {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task != nullptr) {
+            if (message.statistics != nullptr) {
                 // Get our reactor name
-                std::string reactor = message.task->identifiers.reactor;
+                std::string reactor = message.statistics->identifiers->reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
@@ -176,18 +171,20 @@ namespace module::purpose {
 
                 // This is our source
                 source = reactor + " "
-                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
+                         + (message.statistics->identifiers->name.empty()
+                                ? ""
+                                : "- " + message.statistics->identifiers->name + " ");
             }
 
             LogColours colours;
             switch (message.level) {
-                case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
-                case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
-                case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
-                case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
-                case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
-                case NUClear::UNKNOWN:;
-                case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
+                case NUClear::LogLevel::TRACE: colours = LogColours::TRACE_COLOURS; break;
+                case NUClear::LogLevel::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
+                case NUClear::LogLevel::INFO: colours = LogColours::INFO_COLOURS; break;
+                case NUClear::LogLevel::WARN: colours = LogColours::WARN_COLOURS; break;
+                case NUClear::LogLevel::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                case NUClear::LogLevel::UNKNOWN:;
+                case NUClear::LogLevel::FATAL: colours = LogColours::FATAL_COLOURS; break;
             }
 
             update_window(log_window, colours, source, message.message, true);
@@ -281,50 +278,49 @@ namespace module::purpose {
         walk_command.x() += DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("forward");
+        log<INFO>("forward");
     }
 
     void KeyboardWalk::left() {
         walk_command.y() += DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("left");
+        log<INFO>("left");
     }
 
     void KeyboardWalk::back() {
         walk_command.x() -= DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("back");
+        log<INFO>("back");
     }
 
     void KeyboardWalk::right() {
         walk_command.y() -= DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("right");
+        log<INFO>("right");
     }
 
     void KeyboardWalk::turn_left() {
         walk_command.z() += ROT_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("turn left");
+        log<INFO>("turn left");
     }
 
     void KeyboardWalk::turn_right() {
         walk_command.z() -= ROT_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("turn right");
+        log<INFO>("turn right");
     }
 
     void KeyboardWalk::kick(LimbID::Value l) {
-        reset();
         switch (l) {
             case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3); break;
             case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3); break;
-            default: log<NUClear::ERROR>("Invalid limb ID");
+            default: log<ERROR>("Invalid limb ID");
         }
     }
 
@@ -332,28 +328,28 @@ namespace module::purpose {
         head_yaw += HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look left");
+        log<INFO>("look left");
     }
 
     void KeyboardWalk::look_right() {
         head_yaw -= HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look right");
+        log<INFO>("look right");
     }
 
     void KeyboardWalk::look_up() {
         head_pitch += HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look up");
+        log<INFO>("look up");
     }
 
     void KeyboardWalk::look_down() {
         head_pitch -= HEAD_DIFF;
         update_command();
         print_status();
-        log<NUClear::INFO>("look down");
+        log<INFO>("look down");
     }
 
     void KeyboardWalk::walk_toggle() {
@@ -374,7 +370,7 @@ namespace module::purpose {
         head_pitch   = 0.0f;
         update_command();
         print_status();
-        log<NUClear::INFO>("reset");
+        log<INFO>("reset");
     }
 
     void KeyboardWalk::quit() {

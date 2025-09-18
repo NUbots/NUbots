@@ -35,7 +35,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::SplineKick
+  skill::KickWalk
   skill::GetUp
   skill::Look
   # skill::Say
@@ -47,16 +47,12 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
-  strategy::StartSafely
   strategy::FallRecovery
   strategy::StandStill
   strategy::WalkToFieldPosition
-  strategy::WalkInsideBoundedBox
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
-  strategy::KickToGoal
-  strategy::AlignBallToGoal
   # Purposes
   purpose::Tester
 )

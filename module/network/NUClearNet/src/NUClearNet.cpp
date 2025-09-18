@@ -34,18 +34,31 @@
 namespace module::network {
 
     using extension::Configuration;
+    using NUClear::message::CommandLineArguments;
 
     NUClearNet::NUClearNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
-            log_level                   = config["log_level"].as<NUClear::LogLevel>();
-            auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
-            auto name                   = config["name"].as<std::string>();
-            netConfig->name             = name.empty() ? utility::support::get_hostname() : name;
-            netConfig->announce_address = config["address"].as<std::string>();
-            netConfig->announce_port    = config["port"].as<uint16_t>();
-            emit<Scope::DIRECT>(netConfig);
-        });
+        on<Configuration, Trigger<CommandLineArguments>>("NUClearNet.yaml")
+            .then([this](const Configuration& config, const CommandLineArguments& args) {
+                log_level                   = config["log_level"].as<NUClear::LogLevel>();
+                auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
+                auto name                   = config["name"].as<std::string>();
+                netConfig->name             = name.empty() ? utility::support::get_hostname() : name;
+                netConfig->announce_address = config["address"].as<std::string>();
+                netConfig->announce_port    = config["port"].as<uint16_t>();
+
+                // Check if --team_id is set in the command line arguments
+                // Use this to set the name, to uniquely identify the robot
+                if (std::find(args.begin(), args.end(), "--team_id") != args.end()) {
+                    // Get the index of the team_id
+                    auto it = std::find(args.begin(), args.end(), "--team_id");
+                    if (it + 1 != args.end()) {
+                        netConfig->name += "_" + *(it + 1);
+                    }
+                }
+
+                emit<Scope::INLINE>(netConfig);
+            });
 
         on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {
             char c[255];
@@ -65,7 +78,7 @@ namespace module::network {
                     break;
             }
 
-            log<NUClear::INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
+            log<INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
         });
 
         on<Trigger<NUClear::message::NetworkLeave>>().then([this](const NUClear::message::NetworkLeave& event) {
@@ -86,7 +99,7 @@ namespace module::network {
                     break;
             }
 
-            log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
+            log<INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
         });
     }
 }  // namespace module::network

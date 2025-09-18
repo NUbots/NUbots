@@ -56,9 +56,9 @@ namespace module::strategy {
         });
 
         on<Provide<DiveToBallTask>, Trigger<Ball>, With<Sensors>>().then(
-            [this](const RunInfo& info, const Ball& ball, const Sensors& sensors) {
+            [this](const RunReason& run_reason, const Ball& ball, const Sensors& sensors) {
                 // If we ran because the Dive is done, then we don't keep running the Dive
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                if (run_reason == RunReason::SUBTASK_DONE) {
                     return;
                 }
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;

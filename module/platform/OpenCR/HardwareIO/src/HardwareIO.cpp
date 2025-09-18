@@ -33,6 +33,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoOffsets.hpp"
 #include "message/actuation/ServoTarget.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
@@ -44,6 +45,7 @@
 namespace module::platform::OpenCR {
 
     using extension::Configuration;
+    using message::actuation::ServoOffsets;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
@@ -56,7 +58,7 @@ namespace module::platform::OpenCR {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
-        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
+        on<Configuration>("OpenCR.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
@@ -74,12 +76,6 @@ namespace module::platform::OpenCR {
                 packet_queue[NUgus::ID(id)] = std::vector<PacketTypes>();
             }
 
-            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                nugus.servo_offset[i]     = config["servos"][i]["offset"].as<Expression>();
-                nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
-                servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
-            }
-
             // populate alarm config levels
             cfg.alarms.temperature.level            = config["alarms"]["temperature"]["level"].as<float>();
             cfg.alarms.temperature.buzzer_frequency = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
@@ -88,9 +84,21 @@ namespace module::platform::OpenCR {
             battery_state.charged_voltage = config["battery"]["charged_voltage"].as<float>();
             battery_state.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
             battery_state.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
+
+            // Gyro offset
+            cfg.gyro_offset = config["gyro_offset"].as<Expression>();
         });
 
-        on<Startup>().then("HardwareIO Startup", [this] {
+        on<Trigger<ServoOffsets>>().then([this](const ServoOffsets& offsets) {
+            // Update the servo offsets if the config changes
+            for (size_t i = 0; i < offsets.offsets.size(); ++i) {
+                nugus.servo_offset[i]     = offsets.offsets[i].offset;
+                nugus.servo_direction[i]  = offsets.offsets[i].direction;
+                servo_states[i].simulated = offsets.offsets[i].simulated;
+            }
+        });
+
+        on<Startup, With<ServoOffsets>>().then("HardwareIO Startup", [this](const ServoOffsets& offsets) {
             // The first thing to do is get the model information
             // The model watchdog is started, which has a longer time than the packet watchdog
             // The packet watchdog is disabled until we start the main loop
@@ -98,6 +106,13 @@ namespace module::platform::OpenCR {
 
             // The startup function sets up the subcontroller state
             startup();
+
+            // Set the servo offsets
+            for (size_t i = 0; i < offsets.offsets.size(); ++i) {
+                nugus.servo_offset[i]     = offsets.offsets[i].offset;
+                nugus.servo_direction[i]  = offsets.offsets[i].direction;
+                servo_states[i].simulated = offsets.offsets[i].simulated;
+            }
         });
 
         // When we receive data back from the OpenCR it will arrive here
@@ -114,13 +129,13 @@ namespace module::platform::OpenCR {
 
             // Check we can process this packet
             if (packet_queue.find(packet_id) == packet_queue.end()) {
-                log<NUClear::WARN>(fmt::format("received packet for unexpected ID {}.", packet.id));
+                log<WARN>(fmt::format("received packet for unexpected ID {}.", packet.id));
                 return;
             }
 
             // Check we're expecting the packet
             if (packet_queue[packet_id].empty()) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
+                log<WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
                 return;
             }
 
@@ -196,14 +211,14 @@ namespace module::platform::OpenCR {
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
-                        log<NUClear::TRACE>("Initial data received, kickstarting system");
+                        log<TRACE>("Initial data received, kickstarting system");
 
                         // Stop the model watchdog since we have it now
                         // Start the packet watchdog since the main loop is now starting
                         model_watchdog.disable();
                         model_watchdog.unbind();
 
-                        log<NUClear::INFO>("Packet watchdog enabled");
+                        log<INFO>("Packet watchdog enabled");
 
                         packet_watchdog = create_packet_watchdog();
 
@@ -227,7 +242,7 @@ namespace module::platform::OpenCR {
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
-                        log<NUClear::TRACE>("OpenCR data received, requesting servo data");
+                        log<TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }
 
@@ -241,13 +256,13 @@ namespace module::platform::OpenCR {
 
                     // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
-                        log<NUClear::TRACE>("All servos received, requesting OpenCR data");
+                        log<TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
                     }
 
                     break;
 
-                default: log<NUClear::WARN>("Unknown packet data received"); break;
+                default: log<WARN>("Unknown packet data received"); break;
             }
         });
 
@@ -291,7 +306,7 @@ namespace module::platform::OpenCR {
             command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(command_list));
+            emit<Scope::INLINE>(std::move(command_list));
         });
 
         // If we get a head_led command then write it
@@ -317,7 +332,7 @@ namespace module::platform::OpenCR {
         });
 
         on<Trigger<Buzzer>, Pool<HardwareIO>>().then([this](const Buzzer& buzzer_msg) {
-            log<NUClear::DEBUG>("Received Buzzer message");
+            log<DEBUG>("Received Buzzer message");
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = buzzer_msg.frequency;
             opencr_state.dirty  = true;

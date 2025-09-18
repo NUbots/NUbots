@@ -30,6 +30,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -49,8 +50,18 @@ export class LocalisationNetwork {
   @action
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hfw = Matrix4.from(field.Hfw);
+
+    // Flip the field if the robot is on the red team
+    robot.Hfw =
+      robot.teamColour === "red"
+        ? (robot.Hfw = Matrix4.fromRotationZ(Math.PI).multiply(Matrix4.from(field.Hfw)))
+        : Matrix4.from(field.Hfw);
+
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
 
   @action
@@ -100,6 +111,8 @@ export class LocalisationNetwork {
     } else {
       robot.color = "black";
     }
+
+    robot.teamColour = purpose.teamColour == message.input.GameState.TeamColour.RED ? "red" : "blue";
   }
 
   @action.bound
@@ -117,17 +130,20 @@ export class LocalisationNetwork {
   @action.bound
   private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.robots = localisation_robots.robots.map((localisation_robot) => ({
-      id: localisation_robot.id!,
-      rRWw: Vector3.from(localisation_robot.rRWw),
-    }));
+    robot.robots = localisation_robots.robots.map((localisation_robot) => {
+      return {
+        id: localisation_robot.id!,
+        rRWw: Vector3.from(localisation_robot.rRWw),
+        color: localisation_robot.teammate ? robot.teamColour : robot.teamColour === "red" ? "blue" : "red",
+      };
+    });
   }
 
   @action.bound
   private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+    robot.rIWw = fieldIntersections.intersections.map((intersection) => {
       let intersection_type = "";
       if (intersection.type === 0) {
         intersection_type = "UNKNOWN";
@@ -190,6 +206,22 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
+
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // If phase changed, add current trajectories to history before updating
+    if (robot.walk_phase !== walk_state.phase && robot.torso_trajectory.length > 0) {
+      robot.addToTrajectoryHistory(robot.torso_trajectoryF, robot.swing_foot_trajectoryF);
+    }
+
+    // Update current state
+    robot.torso_trajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
+    robot.swing_foot_trajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
+    robot.Hwp = Matrix4.from(walk_state.Hwp);
+    robot.walk_phase = walk_state.phase;
+  }
 }
 
 function decompose(m: THREE.Matrix4): {

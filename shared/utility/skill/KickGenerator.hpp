@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_MOTION_KICKGENERATOR_HPP
-#define MODULE_MOTION_KICKGENERATOR_HPP
+#ifndef MODULE_SKILL_KICKGENERATOR_HPP
+#define MODULE_SKILL_KICKGENERATOR_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -34,14 +34,14 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/splines/Trajectory.hpp"
+#include "utility/skill/splines/Trajectory.hpp"
 
 namespace utility::skill {
 
     using utility::input::LimbID;
     using utility::math::euler::mat_to_rpy_intrinsic;
-    using utility::motion::splines::Trajectory;
-    using utility::motion::splines::Waypoint;
+    using utility::skill::splines::Trajectory;
+    using utility::skill::splines::Waypoint;
 
     template <typename Scalar>
     class KickGenerator {
@@ -116,13 +116,13 @@ namespace utility::skill {
 
             // Check for negative time step
             if (dt <= 0.0f) {
-                NUClear::log<NUClear::WARN>("dt <= 0.0f");
+                NUClear::log<NUClear::LogLevel::WARN>("dt <= 0.0f");
                 return;
             }
 
             // Check for too long dt
             if (dt > kick_duration) {
-                NUClear::log<NUClear::WARN>("dt > kick_duration", dt, kick_duration);
+                NUClear::log<NUClear::LogLevel::WARN>("dt > kick_duration", dt, kick_duration);
                 return;
             }
 
@@ -244,4 +244,5 @@ namespace utility::skill {
         }
     };
 }  // namespace utility::skill
-#endif
+
+#endif  // MODULE_SKILL_KICKGENERATOR_HPP

@@ -32,7 +32,7 @@ from numpy.lib.function_base import _select_dispatcher
 
 from utility.nbs import Encoder, LinearDecoder, MessageTypes
 
-Say = MessageTypes["message.output.Say"].type
+Say = MessageTypes["message.skill.Say"].type
 
 
 class nbs_io(unittest.TestCase):

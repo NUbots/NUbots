@@ -28,6 +28,7 @@
 #include "SignalCatcher.hpp"
 
 #include <csignal>
+#include <iostream>
 
 namespace module::support {
 

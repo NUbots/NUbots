@@ -78,7 +78,7 @@ namespace module::strategy {
             // Hard timeout for start safely so it should never get the system stuck
             if (std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count()
                 > cfg.max_timeout) {
-                log<NUClear::INFO>("Start safely ended due to timeout.");
+                log<INFO>("Start safely ended due to timeout.");
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
@@ -88,7 +88,7 @@ namespace module::strategy {
             for (auto& servo : sensors.servo) {
                 double error = std::abs(servo.present_position - servo_targets[servo.id]);
                 if (error > cfg.servo_error) {
-                    log<NUClear::TRACE>("Servo", servo.id, "has not reached target position with error", error);
+                    log<TRACE>("Servo", servo.id, "has not reached target position with error", error);
                     all_servos_at_target = false;
                     break;
                 }
@@ -96,14 +96,14 @@ namespace module::strategy {
 
             // If they are at their positions, start safely can end
             if (all_servos_at_target) {
-                log<NUClear::INFO>("Start safely completed, servos at target positions.");
+                log<INFO>("Start safely completed, servos at target positions.");
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
 
             // This shouldn't happen as it is set on startup
             if (script == nullptr) {
-                log<NUClear::ERROR>("Script not loaded.");
+                log<ERROR>("Script not loaded.");
                 return;
             }
 

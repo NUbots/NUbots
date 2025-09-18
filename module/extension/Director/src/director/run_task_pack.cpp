@@ -32,7 +32,7 @@ namespace module::extension {
     using component::DirectorTask;
     using component::Provider;
     using component::ProviderGroup;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::RunReason;
 
     Director::RunResult Director::run_tasks(ProviderGroup& our_group,
                                             const TaskList& tasks,
@@ -97,7 +97,7 @@ namespace module::extension {
                         if (current_task != nullptr
                             && providers.at(current_task->requester_id)->type
                                    == providers.at(new_task->requester_id)->type) {
-                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
+                            run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
                         }
                         else {
                             if (current_task != nullptr) {
@@ -125,7 +125,7 @@ namespace module::extension {
                             }
 
                             // Run this specific task using this specific provider
-                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
+                            run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
                         }
                     }
                 }
@@ -160,44 +160,33 @@ namespace module::extension {
 
     void Director::run_task_pack(const TaskPack& pack) {
 
-        const auto& provider = pack.first;
-        auto& group          = provider->group;
+        const auto& provider        = pack.provider;
+        const auto& requested_tasks = pack.tasks;
+        auto& group                 = provider->group;
 
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
             return;
         }
 
-        // See if a Idle command was emitted
-        for (const auto& t : pack.second) {
-            if (t->type == typeid(::extension::behaviour::Idle)) {
-
-                if (pack.second.size() > 1) {
-                    log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
-                }
-
-                // We don't do anything else on idle
-                return;
-            }
-        }
-
         // See if a done command was emitted
-        for (const auto& t : pack.second) {
+        for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
                 auto parent_provider = providers.at(group.active_task->requester_id);
 
                 // Check if we are already done, and if so we don't want to pester the parent again
-                if (provider->group.done) {
+                if (group.done) {
                     // Running Done when already in a Done state shouldn't happen for a root task since it should
                     // already have been removed
                     if (parent_provider->classification == Provider::Classification::ROOT) {
-                        log<NUClear::ERROR>("Done task was emitted twice, this should never happen for a root task");
+                        log<ERROR>("Done task was emitted twice, this should never happen for a root task");
                     }
                     return;
                 }
 
                 // This provider is now in the done state
-                provider->group.done = true;
+                group.done = true;
+                group.update_data();
 
                 auto& parent_group = parent_provider->group;
 
@@ -212,11 +201,11 @@ namespace module::extension {
                     // TODO(thouliston) check somehow if this provider is equipped to handle done
                     run_task_on_provider(parent_group.active_task,
                                          parent_group.active_provider,
-                                         RunInfo::RunReason::SUBTASK_DONE);
+                                         RunReason::SUBTASK_DONE);
                 }
 
-                if (pack.second.size() > 1) {
-                    log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
+                if (requested_tasks.size() > 1) {
+                    log<WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 
                 // We don't do anything else on done
@@ -225,12 +214,53 @@ namespace module::extension {
         }
 
         // If we get here, the provider is not done and we are running new tasks
-        provider->group.done = false;
+        group.done = false;
+        group.update_data();
+
+        // Check if a Wait command was emitted and schedule to run the Provider again
+        // Other tasks can run with Wait
+        // Wait should be removed and then readded at the end
+        TaskList running_tasks;
+        TaskList non_running_tasks;
+        for (const auto& t : requested_tasks) {
+            if (t->type == typeid(::extension::behaviour::Wait)) {
+                non_running_tasks.push_back(t);
+
+                // Schedule the Provider to run again
+                // Get the time to wait for
+                auto wait_data                 = std::static_pointer_cast<::extension::behaviour::Wait>(t->data);
+                std::chrono::nanoseconds delay = std::chrono::nanoseconds(wait_data->time - NUClear::clock::now());
+
+                // If the delay is over, just run the provider
+                if (delay <= std::chrono::nanoseconds(0)) {
+                    run_task_on_provider(group.active_task, provider, RunReason::SUBTASK_DONE);
+                    continue;
+                }
+
+                // Otherwise, send it to the ChronoController to handle
+                // Make a weak pointer to the task so we can check if it still exists when the task is run
+                std::weak_ptr<component::DirectorTask> weak_task = t;
+                emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
+                    [this, provider, weak_task](const NUClear::clock::time_point&) {
+                        // Check if the task still exists
+                        if (weak_task.lock() != nullptr) {
+                            emit(std::make_unique<WaitFinished>(provider));
+                        }
+                        // Don't do anything else with this task
+                        return false;
+                    },
+                    NUClear::clock::now() + delay,
+                    -1));  // Our ID is -1 as we will remove ourselves
+            }
+            else {
+                running_tasks.push_back(t);
+            }
+        }
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(pack.second.size());
-        for (const auto& t : pack.second) {
+        tasks.reserve(running_tasks.size());
+        for (const auto& t : running_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
@@ -320,6 +350,10 @@ namespace module::extension {
 
         // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
         auto old_subtasks = group.subtasks;
+        // Add back in any waits
+        for (const auto& t : non_running_tasks) {
+            tasks.push_back(t);
+        }
         // Update the group's subtasks to the new subtasks
         group.subtasks = tasks;
 

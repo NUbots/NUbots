@@ -73,6 +73,7 @@ namespace module::planning {
             cfg.max_translational_velocity_y = config["max_translational_velocity_y"].as<double>();
             cfg.max_velocity_magnitude = std::max(cfg.max_translational_velocity_x, cfg.max_translational_velocity_y);
             cfg.max_angular_velocity   = config["max_angular_velocity"].as<double>();
+            cfg.starting_velocity      = config["starting_velocity"].as<double>();
             cfg.acceleration           = config["acceleration"].as<double>();
 
             cfg.max_align_radius = config["max_align_radius"].as<double>();
@@ -80,6 +81,13 @@ namespace module::planning {
             cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
             cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
             cfg.strafe_gain      = config["strafe_gain"].as<double>();
+
+            // Backwards tuning
+            cfg.max_strafe_angle        = config["max_strafe_angle"].as<Expression>();
+            cfg.backward_buffer         = config["backward_buffer"].as<Expression>();
+            cfg.max_aligned_angle       = config["max_aligned_angle"].as<Expression>();
+            cfg.acceleration_multiplier = config["acceleration_multiplier"].as<double>();
+            cfg.backwards_vector        = config["backwards_vector"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -121,29 +129,8 @@ namespace module::planning {
 
                     // If there are obstacles in the way, walk around them
                     if (!obstacles.empty()) {
-                        log<NUClear::DEBUG>("Path planning around", obstacles.size(), "obstacles.");
-
-                        // Calculate a perpendicular vector to the direction of the target point
-                        const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
-
-                        // Find leftmost and rightmost and see which is a better path
-                        Eigen::Vector2d leftmost  = obstacles[0];
-                        Eigen::Vector2d rightmost = obstacles[0];
-                        for (const auto& pos : obstacles) {
-                            leftmost  = pos.dot(perp_direction) < leftmost.dot(perp_direction) ? pos : leftmost;
-                            rightmost = pos.dot(perp_direction) > rightmost.dot(perp_direction) ? pos : rightmost;
-                        }
-
-                        // Add on the obstacle radius
-                        leftmost  = leftmost - perp_direction * cfg.obstacle_radius;
-                        rightmost = rightmost + perp_direction * cfg.obstacle_radius;
-
-                        // Determine if leftmost or rightmost position has a quicker path
-                        const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
-                        const double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
-
-                        // Scale the perpendicular vector by obstacle_radius to ensure clearance
-                        rDRr = left_distance < right_distance ? leftmost : rightmost;
+                        // Adjust the target direction to avoid obstacles
+                        rDRr = adjust_target_direction_for_obstacles(rDRr, obstacles);
 
                         // Override the heading when walking around obstacles
                         angle_to_final_heading = std::atan2(rDRr.y(), rDRr.x());
@@ -159,32 +146,37 @@ namespace module::planning {
                     (cfg.max_align_radius - translational_error) / (cfg.max_align_radius - cfg.min_align_radius),
                     0.0,
                     1.0);
-                const double desired_heading =
+
+                // Calculate the desired angle to go towards the target point
+                double desired_heading =
                     (1 - translation_progress) * angle_to_target + translation_progress * angle_to_final_heading;
 
                 double desired_velocity_magnitude = 0.0;
+
+                // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {
-                    // "Accelerate"
-                    velocity_magnitude += cfg.acceleration;
-                    // Limit the velocity magnitude to the maximum velocity
-                    velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
-                    // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
-                    // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
-                    const double angle_error_gain = std::clamp(
-                        (cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
-                        0.0,
-                        1.0);
-                    desired_velocity_magnitude = angle_error_gain * velocity_magnitude;
+                    // If we are walking backwards, change direction
+                    rDRr = is_walking_backwards ? walk_backwards(false) : rDRr;
+                    desired_velocity_magnitude =
+                        is_walking_backwards ? velocity_magnitude : accelerate_to_target(desired_heading);
                 }
                 else {
-                    // "Decelerate"
-                    velocity_magnitude -= cfg.acceleration;
-                    // Limit the velocity to zero
-                    velocity_magnitude = std::max(velocity_magnitude, 0.0);
                     // Normalise error between [0, 1] inside align radius
                     const double error = translational_error / cfg.max_align_radius;
-                    // "Proportional control" to strafe towards the target inside align radius
-                    desired_velocity_magnitude = cfg.strafe_gain * error;
+
+                    // Add a buffer to prevent oscillation between forwards and backwards movement
+                    const double max_strafe_angle = is_walking_backwards == true
+                                                        ? cfg.max_strafe_angle - cfg.backward_buffer
+                                                        : cfg.max_strafe_angle;
+
+                    bool aligned_large_angle = std::abs(angle_to_final_heading) < cfg.max_aligned_angle
+                                               && std::abs(angle_to_target) > max_strafe_angle;
+                    rDRr            = aligned_large_angle    ? walk_backwards(true)
+                                      : is_walking_backwards ? walk_backwards(false)
+                                                             : rDRr;
+                    desired_heading = aligned_large_angle ? 0.0 : desired_heading;
+                    desired_velocity_magnitude =
+                        aligned_large_angle || is_walking_backwards ? velocity_magnitude : strafe_to_target(error);
                 }
 
                 // Calculate the target velocity
@@ -232,6 +224,76 @@ namespace module::planning {
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
         });
+    }
+
+    double PlanWalkPath::strafe_to_target(const double error) {
+        // "Accelerate", assuring velocity is always positive
+        velocity_magnitude = std::max(velocity_magnitude, cfg.starting_velocity);
+        // "Proportional control" to strafe towards the target inside align radius
+        return cfg.strafe_gain * error;
+    }
+
+    Eigen::Vector2d PlanWalkPath::walk_backwards(bool desired_direction) {
+        if (desired_direction) {
+            // Start walking backwards slowly if not already walking backwards
+            velocity_magnitude   = !is_walking_backwards ? cfg.starting_velocity : velocity_magnitude;
+            is_walking_backwards = true;
+
+            // Walk on spot, then walk backwards
+            velocity_magnitude +=
+                std::min(velocity_magnitude * cfg.acceleration_multiplier, cfg.max_velocity_magnitude);
+
+            // Step backwards while keeping the forward direction
+            return cfg.backwards_vector;
+        }
+
+        // Slow down before changing direction
+        velocity_magnitude   = std::max(velocity_magnitude * cfg.acceleration_multiplier, cfg.starting_velocity);
+        is_walking_backwards = velocity_magnitude <= cfg.starting_velocity ? false : is_walking_backwards;
+
+        // Step backwards while keeping the forward direction
+        return cfg.backwards_vector;
+    }
+
+    double PlanWalkPath::accelerate_to_target(double desired_heading) {
+        // "Accelerate", assuring velocity is always positive
+        velocity_magnitude = std::max(velocity_magnitude + cfg.acceleration, 0.3);
+        // Limit the velocity magnitude to the maximum velocity
+        velocity_magnitude = std::min(velocity_magnitude, cfg.max_velocity_magnitude);
+        // Scale the velocity by angle error to have robot rotate on spot when far away and not facing
+        // target [0 at max_angle_error, linearly interpolate between, 1 at min_angle_error]
+        const double angle_error_gain =
+            std::clamp((cfg.max_angle_error - std::abs(desired_heading)) / (cfg.max_angle_error - cfg.min_angle_error),
+                       0.0,
+                       1.0);
+        return angle_error_gain * velocity_magnitude;
+    }
+
+    Eigen::Vector2d PlanWalkPath::adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
+                                                                        const std::vector<Eigen::Vector2d>& obstacles) {
+        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+
+        // Calculate a perpendicular vector to the direction of the target point
+        const Eigen::Vector2d perp_direction(rDRr.normalized().y(), -rDRr.normalized().x());
+
+        // Find leftmost and rightmost and see which is a better path
+        Eigen::Vector2d leftmost  = obstacles[0];
+        Eigen::Vector2d rightmost = obstacles[0];
+        for (const auto& pos : obstacles) {
+            leftmost  = pos.dot(perp_direction) < leftmost.dot(perp_direction) ? pos : leftmost;
+            rightmost = pos.dot(perp_direction) > rightmost.dot(perp_direction) ? pos : rightmost;
+        }
+
+        // Add on the obstacle radius
+        leftmost  = leftmost - perp_direction * cfg.obstacle_radius;
+        rightmost = rightmost + perp_direction * cfg.obstacle_radius;
+
+        // Determine if leftmost or rightmost position has a quicker path
+        const double left_distance  = (leftmost - rDRr).norm() + leftmost.norm();
+        const double right_distance = (rightmost - rDRr).norm() + rightmost.norm();
+
+        // Scale the perpendicular vector by obstacle_radius to ensure clearance
+        return left_distance < right_distance ? leftmost : rightmost;
     }
 
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
