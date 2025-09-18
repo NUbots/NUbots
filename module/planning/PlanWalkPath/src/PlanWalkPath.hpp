@@ -33,6 +33,8 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
+
 namespace module::planning {
 
     class PlanWalkPath : public ::extension::behaviour::BehaviourReactor {
@@ -40,9 +42,9 @@ namespace module::planning {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Maximum walk command velocity x for walking
-            double max_translational_velocity_x = 0.0;
+            double max_x_velocity = 0.0;
             /// @brief Maximum walk command velocity y for walking
-            double max_translational_velocity_y = 0.0;
+            double max_y_velocity = 0.0;
             /// @brief Maximum angular velocity command for walking
             double max_angular_velocity = 0.0;
             /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
@@ -76,10 +78,31 @@ namespace module::planning {
 
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
+
+            /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
+            /// @note  Set to [0, 0, 0] to functionally disable smoothing
+            Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);
+            /// @brief Exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d alpha = Eigen::Vector3d(1, 1, 1);
+            /// @brief Complementary exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
+
+            /// @brief Starting velocity for the walk command
+            Eigen::Vector3d starting_velocity = Eigen::Vector3d(0, 0, 0);
+
         } cfg;
+
+        /// @brief Previous walk command
+        Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
+
+        /// @brief Update frequency of the walk command smoothing
+        static constexpr int UPDATE_FREQUENCY = 10;
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
+
+        /// @brief Current stability of the robot
+        message::behaviour::state::Stability stability{};
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain

@@ -1,0 +1,103 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NUbots' TDP 2020
+%
+% Date: 24.11.2019
+%
+%
+\documentclass{llncs}
+%
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{verbatim}
+%
+\begin{document}
+%
+
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+\addtocmark{The NUbots Qualification Material for RoboCup 2020} % additional mark in the TOC
+%
+%
+\mainmatter              % start of the contributions
+%
+\title{The NUbots Team Extended Abstract 2020}
+%
+\titlerunning{The NUbots Extended Abstract for 2020}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+
+\author{Matthew Amos
+        \and Alex Biddulph
+        \and Stephan Chalup
+        \and Daniel Ginn
+		\and Alexandre Mendes
+        \and Timothy Mullen
+        \and Josephus Paye
+        \and Ysobel Sims
+        \and Anita Sugo
+        \and Peter Turner
+        \and Taylor Young
+        }
+       
+%
+\authorrunning{Amos et al.}   % abbreviated author list (for running head)
+%
+%%%% modified list of auther for the TOC (add the affiliations)
+\tocauthor{
+M. Amos,
+A. Biddulph,
+S. Chalup,
+D. Ginn,
+A. Mendes,
+T. Mullen,
+J. Paye,
+Y. Sims,
+A. Sugo,
+P. Turner,
+T. Young
+}
+
+%
+\institute{Newcastle Robotics Laboratory\\ School of Electrical Engineering and Computing\\
+Faculty of Engineering and Built Environment\\
+The University of Newcastle, Callaghan 2308, Australia\\
+Contact: \email{nubots@newcastle.edu.au}\\
+Homepage: \url{http://robots.newcastle.edu.au}}
+%
+
+\maketitle              % typeset the title of the contribution
+
+
+
+\section{History and Overview}
+
+The NUbots are the RoboCup team at the University of Newcastle, Australia. In 2020 they will participate in the Adult-Size Humanoid League, with their NUgus design based on the iGus platform\cite{Nimbro2018TDP}. In previous years, the NUbots participated in the Standard Platform League (2002-2011), the Kid-Size Humanoid League (2012-2017), and the Teen-Size Humanoid league (2018-2019).
+
+The NUbots' research addresses applications of machine learning, computer vision, sensor fusion and hardware. 
+In 2019 the NUbots team participated in the Teen-Size Humanoid League. The team faced issues with locomotion, hardware and sensors. This extended abstract outlines the solutions we have implemented and are working towards for the competition in 2020.
+
+\section{Developments}
+
+\noindent\textbf{Vision:} 
+
+Our Blender plugin for semi-synthetic image generation with fully-annotated  ground truth segmentation maps~\cite{nubotsNUpbrGit} has been further developed to have random robot positions, random obstacles, random grass and performance improvements. The Visual Mesh~\cite{Houliston2018VisualMR} has been improved to allow for multi-object tracking. This year a closed form solution to one of the visual mesh equations was found. The solution led to new equations to generate the mesh and it allows post processing and analysis of the mesh points. Research is being done to investigate alternate versions of the mesh and the effect they have on the performance of the network.\newline
+
+\noindent\textbf{Robotic Simulation:}
+A physics simulation, extending on the work of~\cite{gholami_simulation_2019}, of the NUgus robot has been created with \textit{Simulink} to aid in the development of motions, such as walking and balance controlling. Future work to be done before the 2020 competition involves creating a NUClearNet~\cite{HoulistonEtAl2016} client in MATLAB.\newline
+
+\noindent\textbf{Walk Engine:}
+Non-linear optimisation is being used to develop a quasi-static walk gait generator. An experimental method for determining the CoM of the robot was also used to verify the correctness of the analytical method originally used. % LUKE
+Force sensing studs are being developed for foot load and zero moment point estimation. % TIM
+Analysis of filtering of joint targets, torque-controlled feedback of the ankle and hip joints, and a reactive capture step informed by the Zero Moment Point have been investigated. The simulation previously described has been used to test these strategies. The team plans to implement these strategies before the 2020 competition.\newline % MATT
+
+\noindent\textbf{Protobuf Communication Protocol:}
+A new standard communication protocol~\cite{nubotsProtocolGit}, based on Protobuf messages, was proposed by NUbots to the TC. A prototype tool, based on the NUsight~\cite{nubotsNUsightGit} debugging utility, for monitoring network communications and displaying robot communications in a meaningful manner is currently being developed.\newline
+
+\noindent\textbf{High Level System Documentation:} 
+A new comprehensive documentation resource is being created in the form of a public website~\cite{nubotsNUbookGit}, providing detailed information about the hardware and software systems, as well as current and future projects. It is hoped that this resource will be useful not only for the NUbots team, but also the broader RoboCup community. \newline
+
+\bibliographystyle{plain}
+\bibliography{nubots}
+
+\end{document}

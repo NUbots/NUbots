@@ -151,22 +151,22 @@ export class LocalisationController {
     switch (field_type) {
       case "lab":
         model.field.dimensions = new FieldDimensions({
-          lineWidth: 0.07,
+          lineWidth: 0.05,
           markWidth: 0.1,
-          fieldLength: 6.4,
-          fieldWidth: 3.55,
+          fieldLength: 6.8,
+          fieldWidth: 5.0,
           goalDepth: 0.4,
-          goalWidth: 1.65,
-          goalAreaLength: 0.72,
-          goalAreaWidth: 2.3,
-          penaltyAreaLength: 0,
-          penaltyAreaWidth: 0,
+          goalWidth: 1.95,
+          goalAreaLength: 1.05,
+          goalAreaWidth: 2.62,
+          penaltyAreaLength: 1.55,
+          penaltyAreaWidth: 4.05,
           goalCrossbarHeight: 0.55,
           goalPostDiameter: 0.1,
           goalNetHeight: 1.0,
-          penaltyMarkDistance: 0,
-          centerCircleDiameter: 1.2,
-          borderStripMinWidth: 0.5,
+          penaltyMarkDistance: 1.27,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 0.38,
         });
         break;
       case "robocup":
@@ -375,4 +375,14 @@ export class LocalisationController {
   toggleBoundedBoxVisibility = (model: LocalisationModel) => {
     model.boundedBoxVisible = !model.boundedBoxVisible;
   };
+
+  @action
+  toggleOrientation(model: LocalisationModel) {
+    model.dashboardField.orientation = model.dashboardField.orientation === "left" ? "right" : "left";
+  }
+
+  @action
+  toggleDashboardVisibility(model: LocalisationModel) {
+    model.dashboard.visible = !model.dashboard.visible;
+  }
 }

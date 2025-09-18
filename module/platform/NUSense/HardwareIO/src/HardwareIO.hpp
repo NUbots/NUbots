@@ -53,16 +53,31 @@ namespace module::platform::NUSense {
                 /// @brief The baud rate to communication with the NUSense device
                 int baud = 0;
             } nusense{};
+            struct ServoConfiguration {
+                int32_t direction = 0;
+                double offset     = 0;
+            };
+            std::map<size_t, ServoConfiguration> servo_configurations;
         } cfg{};
-
         /// @brief Contains device information specific to the NUgus robot
         NUgus nugus{};
+        /// @brief Reaction handle for the lambda that catches ServoTargets messages
+        ReactionHandle servo_targets_catcher;
+        /// @brief Tracks the service state of the reactor
+        enum class ServiceState {
+            /// @brief  The reactor is in the initial state from boot, waiting for a handshake response from NUSense
+            INIT,
+            /// @brief  The state of HardwareIO when it allows processing of ServoTargets messages. This state is sent
+            /// to NUSense for reconnection purposes.
+            IN_SERVICE
+        };
+        ServiceState service_state = ServiceState::INIT;
 
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
         /// NUSense.
         /// @tparam T is the type of the protobuf message to be serialised. In NUSense's case, we expect this to be
-        /// SubcontrollerServoTargets.
+        /// SubcontrollerServoTargets and NUSense handshake messages.
         /// @param packet A const reference to a protobuf message of type T. This gets serialised and turned to a
         /// vector of bytes before sending to NUSense.
         template <typename T>
@@ -74,7 +89,8 @@ namespace module::platform::NUSense {
 
             // Get the timestamp of the emit if we can, otherwise use now
             const auto* task = NUClear::threading::ReactionTask::get_current_task();
-            auto timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+            auto timestamp   = task ? task->statistics ? task->statistics->created.nuclear_time : NUClear::clock::now()
+                                    : NUClear::clock::now();
             auto timestamp_us =
                 std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
             uint32_t size = uint32_t(payload.size() + sizeof(hash) + sizeof(timestamp_us));

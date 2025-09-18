@@ -1,9 +1,11 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
+import { action } from "mobx";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
+import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
@@ -120,6 +122,15 @@ export class FieldIntersection {
   }
 }
 
+export class Line {
+  @observable start: Vector3;
+  @observable end: Vector3;
+  constructor({ start, end }: { start: Vector3; end: Vector3 }) {
+    this.start = start;
+    this.end = end;
+  }
+}
+
 export class BoundingBox {
   @observable minX: number;
   @observable minY: number;
@@ -142,26 +153,39 @@ export class LocalisationRobotModel {
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
+  @observable Hwp: Matrix4; // Planted foot to world
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable particles: Vector3[]; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
-  @observable fieldIntersections?: FieldIntersection[];
+  @observable rIWw?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
-  @observable robots: { id: number; rRWw: Vector3 }[];
+  @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
-  @observable max_align_radius: number;
-  @observable min_align_radius: number;
-  @observable angle_to_final_heading: number;
-  @observable angle_to_target: number;
-  @observable translational_error: number;
-  @observable min_angle_error: number;
-  @observable max_angle_error: number;
-  @observable velocity_target: Vector3;
+  @observable associationLines?: Line[];
+  @observable maxAlignRadius: number;
+  @observable minAlignRadius: number;
+  @observable angleToFinalHeading: number;
+  @observable angleToTarget: number;
+  @observable translationalError: number;
+  @observable minAngleError: number;
+  @observable maxAngleError: number;
+  @observable velocityTarget: Vector3;
   @observable boundingBox?: BoundingBox;
-  @observable player_id: number;
+  @observable playerId: number;
+  @observable teamColour: "red" | "blue" = "blue";
+  @observable torsoTrajectory: Matrix4[];
+  @observable swingFootTrajectory: Matrix4[];
+  @observable walkPhase: message.behaviour.state.WalkState.Phase;
+  @observable trajectoryHistory: {
+    torso: Matrix4[];
+    swingFoot: Matrix4[];
+    color: string;
+    timestamp: number;
+    phase: message.behaviour.state.WalkState.Phase;
+  }[] = [];
 
   constructor({
     model,
@@ -171,25 +195,32 @@ export class LocalisationRobotModel {
     Hrw,
     Hfw,
     Hrd,
+    Hwp,
     Rwt,
     motors,
     fieldLinePoints,
     particles,
     ball,
-    fieldIntersections,
+    rIWw,
     goals,
     robots,
     purpose,
-    max_align_radius,
-    min_align_radius,
-    angle_to_final_heading,
-    angle_to_target,
-    translational_error,
-    min_angle_error,
-    max_angle_error,
-    velocity_target,
+    associationLines,
+    maxAlignRadius,
+    minAlignRadius,
+    angleToFinalHeading,
+    angleToTarget,
+    translationalError,
+    minAngleError,
+    maxAngleError,
+    velocityTarget,
     boundingBox,
-    player_id,
+    playerId,
+    teamColour,
+    torsoTrajectory,
+    swingFootTrajectory,
+    walkPhase,
+    trajectoryHistory,
   }: {
     model: RobotModel;
     name: string;
@@ -198,25 +229,38 @@ export class LocalisationRobotModel {
     Hrw: Matrix4;
     Hfw: Matrix4;
     Hrd?: Matrix4;
+    Hwp: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     particles: Vector3[];
     ball?: { rBWw: Vector3 };
-    fieldIntersections?: FieldIntersection[];
+    rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
-    robots: { id: number; rRWw: Vector3 }[];
+    robots: { id: number; rRWw: Vector3; color: string }[];
     purpose: string;
-    max_align_radius: number;
-    min_align_radius: number;
-    angle_to_final_heading: number;
-    angle_to_target: number;
-    translational_error: number;
-    min_angle_error: number;
-    max_angle_error: number;
-    velocity_target: Vector3;
+    associationLines?: Line[];
+    maxAlignRadius: number;
+    minAlignRadius: number;
+    angleToFinalHeading: number;
+    angleToTarget: number;
+    translationalError: number;
+    minAngleError: number;
+    maxAngleError: number;
+    velocityTarget: Vector3;
     boundingBox?: BoundingBox;
-    player_id: number;
+    playerId: number;
+    teamColour?: "red" | "blue";
+    torsoTrajectory: Matrix4[];
+    swingFootTrajectory: Matrix4[];
+    walkPhase: message.behaviour.state.WalkState.Phase;
+    trajectoryHistory: {
+      torso: Matrix4[];
+      swingFoot: Matrix4[];
+      color: string;
+      timestamp: number;
+      phase: message.behaviour.state.WalkState.Phase;
+    }[];
   }) {
     this.model = model;
     this.name = name;
@@ -225,25 +269,32 @@ export class LocalisationRobotModel {
     this.Hrw = Hrw;
     this.Hfw = Hfw;
     this.Hrd = Hrd;
+    this.Hwp = Hwp;
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.particles = particles;
     this.ball = ball;
-    this.fieldIntersections = fieldIntersections;
+    this.rIWw = rIWw;
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
-    this.max_align_radius = max_align_radius;
-    this.min_align_radius = min_align_radius;
-    this.angle_to_final_heading = angle_to_final_heading;
-    this.angle_to_target = angle_to_target;
-    this.translational_error = translational_error;
-    this.min_angle_error = min_angle_error;
-    this.max_angle_error = max_angle_error;
-    this.velocity_target = velocity_target;
+    this.teamColour = teamColour || "blue";
+    this.associationLines = associationLines;
+    this.maxAlignRadius = maxAlignRadius;
+    this.minAlignRadius = minAlignRadius;
+    this.angleToFinalHeading = angleToFinalHeading;
+    this.angleToTarget = angleToTarget;
+    this.translationalError = translationalError;
+    this.minAngleError = minAngleError;
+    this.maxAngleError = maxAngleError;
+    this.velocityTarget = velocityTarget;
     this.boundingBox = boundingBox;
-    this.player_id = player_id;
+    this.playerId = playerId;
+    this.torsoTrajectory = torsoTrajectory;
+    this.swingFootTrajectory = swingFootTrajectory;
+    this.walkPhase = walkPhase;
+    this.trajectoryHistory = trajectoryHistory;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -254,6 +305,7 @@ export class LocalisationRobotModel {
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
@@ -261,15 +313,21 @@ export class LocalisationRobotModel {
       goals: { points: [] },
       robots: [],
       purpose: "",
-      max_align_radius: 0,
-      min_align_radius: 0,
-      angle_to_final_heading: 0,
-      angle_to_target: 0,
-      translational_error: 0,
-      min_angle_error: 0,
-      max_angle_error: 0,
-      velocity_target: Vector3.of(),
-      player_id: -1,
+      associationLines: [],
+      maxAlignRadius: 0,
+      minAlignRadius: 0,
+      angleToFinalHeading: 0,
+      angleToTarget: 0,
+      translationalError: 0,
+      minAngleError: 0,
+      maxAngleError: 0,
+      velocityTarget: Vector3.of(),
+      playerId: -1,
+      teamColour: "blue",
+      torsoTrajectory: [],
+      swingFootTrajectory: [],
+      walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
+      trajectoryHistory: [],
     });
   });
 
@@ -325,18 +383,57 @@ export class LocalisationRobotModel {
 
   /** Robot positions in field space */
   @computed
-  get rRFf(): Vector3[] {
-    return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
+  get rRFf(): { position: Vector3; color: string }[] {
+    return this.robots?.map((robot) => ({
+      position: robot.rRWw.applyMatrix4(this.Hfw),
+      color: robot.color,
+    }));
   }
 
   /** Field intersections in field space */
   @computed
-  get fieldIntersectionsF(): FieldIntersection[] | undefined {
-    return this.fieldIntersections?.map((intersection) => {
+  get rIFf(): FieldIntersection[] | undefined {
+    return this.rIWw?.map((intersection) => {
       return new FieldIntersection({
         type: intersection.type,
         position: intersection.position.applyMatrix4(this.Hfw),
       });
     });
+  }
+
+  /** Torso trajectory (Hpt) in field space */
+  @computed
+  get torsoTrajectoryF(): Matrix4[] {
+    return this.torsoTrajectory.map((Hpt) => this.Hfw.multiply(this.Hwp).multiply(Hpt));
+  }
+
+  /** Swing foot trajectory (Hps) in field space */
+  @computed
+  get swingFootTrajectoryF(): Matrix4[] {
+    return this.swingFootTrajectory.map((Hps) => this.Hfw.multiply(this.Hwp).multiply(Hps));
+  }
+
+  @action
+  addToTrajectoryHistory(torso: Matrix4[], swingFoot: Matrix4[]) {
+    if (torso.length === 0 || swingFoot.length === 0) {
+      return;
+    }
+
+    this.trajectoryHistory.push({
+      torso: torso.map((m) => Matrix4.from(m)),
+      swingFoot: swingFoot.map((m) => Matrix4.from(m)),
+      color: "#ffa500",
+      timestamp: Date.now(),
+      phase: this.walkPhase,
+    });
+
+    const MAX_HISTORY = 10;
+    if (this.trajectoryHistory.length > MAX_HISTORY) {
+      this.trajectoryHistory.shift();
+    }
+
+    const MAX_AGE_MS = 10000;
+    const now = Date.now();
+    this.trajectoryHistory = this.trajectoryHistory.filter((t) => now - t.timestamp < MAX_AGE_MS);
   }
 }

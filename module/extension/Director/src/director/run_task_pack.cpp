@@ -32,7 +32,7 @@ namespace module::extension {
     using component::DirectorTask;
     using component::Provider;
     using component::ProviderGroup;
-    using ::extension::behaviour::RunInfo;
+    using ::extension::behaviour::RunReason;
 
     Director::RunResult Director::run_tasks(ProviderGroup& our_group,
                                             const TaskList& tasks,
@@ -44,160 +44,155 @@ namespace module::extension {
             return RunResult{RunLevel::OK, {}};
         }
 
-        // Create the solution tree for each of the tasks in the pack
-        // This Solution::Option would be the option that was executed by the parent of this task
-        std::vector<Solution> solutions;
-        for (const auto& task : tasks) {
-            solutions.push_back(solve_task(task));
-        }
-
-        if (run_level >= RunLevel::OK) {
-            // Try to find an ok solution for the pack
-            auto ok_solutions = find_ok_solutions(solutions, used);
-
-            // Loop through the solutions and add watches for the things we want
-            for (int i = 0; i < int(tasks.size()); ++i) {
-                auto& task = tasks[i];
-                auto& sol  = ok_solutions[i];
-
-                // Both the types we used and types we were blocked by are things we want to watch
-                std::set<std::type_index> w = sol.used;
-                w.insert(sol.blocking_groups.begin(), sol.blocking_groups.end());
-
-                for (const auto& type : w) {
-                    our_group.watch_handles.push_back(groups.at(type).add_watcher(task));
-                }
+        // Create solutions in a limited scope to ensure they're destroyed before any potential task removal
+        auto run_level_result = [&]() -> RunResult {
+            // Create the solution tree for each of the tasks in the pack
+            // This Solution::Option would be the option that was executed by the parent of this task
+            std::vector<Solution> solutions;
+            solutions.reserve(tasks.size());
+            for (const auto& task : tasks) {
+                solutions.push_back(solve_task(task));
             }
 
-            // Check if any of the solutions are blocked, in which case we can't run
-            bool blocked =
-                std::any_of(ok_solutions.begin(), ok_solutions.end(), [](const auto& s) { return s.blocked; });
+            if (run_level >= RunLevel::OK) {
+                // Try to find an ok solution for the pack
+                auto ok_solutions = find_ok_solutions(solutions, used);
 
-            // If we found an OK solution, run it
-            if (!blocked) {
-
-                // Tasks that we have kicked out replacing them with our own tasks
-                // We need to reevaluate the group that emitted these tasks when we are done
-                TaskList displaced_tasks;
-
-                // Loop through each pair of solutions and task
+                // Loop through the solutions and add watches for the things we want
                 for (int i = 0; i < int(tasks.size()); ++i) {
-                    auto& sol                    = ok_solutions[i];
-                    const auto& needed_providers = sol.requirements;
-                    const auto& main_provider    = sol.provider;
-                    auto& main_group             = main_provider->group;
-                    const auto& new_task         = tasks[i];
-                    auto& current_task           = main_group.active_task;
+                    auto& task = tasks[i];
+                    auto& sol  = ok_solutions[i];
 
-                    // If this is the same task we are already running we skip it
-                    if (new_task != current_task) {
+                    // Both the types we used and types we were blocked by are things we want to watch
+                    std::set<std::type_index> w = sol.used;
+                    w.insert(sol.blocking_groups.begin(), sol.blocking_groups.end());
 
-                        // If we emitted the last task that went here we can just run and do a replacement
-                        // No need to check any lower down providers as they'll already be handled from last time
-                        if (current_task != nullptr
-                            && providers.at(current_task->requester_id)->type
-                                   == providers.at(new_task->requester_id)->type) {
-                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
-                        }
-                        else {
-                            if (current_task != nullptr) {
-                                displaced_tasks.push_back(current_task);
-                            }
-
-                            // Loop through all but the first needed provider and set their task to this task
-                            // This is to reserve those tasks for when our child task executes
-                            // We skip this step however if we are a parent of the currently running task
-                            // That can happen if we just change providers within the same group (pushed etc)
-                            for (int j = 1; j < int(needed_providers.size()); ++j) {
-                                // TODO this happens after displacement?
-                                // TODO this also influences displacement in that if we displace a parent and a child
-                                // then we need to reevaluate them differently since challenge priority doesn't work
-                                // properly anymore
-                                // TODO probably need to do a displacement pass, followed by a reevaluation pass
-
-                                // TODO if we do this there is no way to clean it up later currently?
-
-                                // const auto& provider = needed_providers[j];
-                                // auto& g              = provider->group;
-
-                                // TODO if we are a parent of the currently running task, we can skip this
-                                // TODO what if the provider changes from active provider? (it shouldn't?)
-                            }
-
-                            // Run this specific task using this specific provider
-                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
-                        }
+                    for (const auto& type : w) {
+                        our_group.watch_handles.push_back(groups.at(type).add_watcher(task));
                     }
                 }
 
-                // Sort the tasks so we reevaluate them in priority order
-                std::sort(displaced_tasks.begin(), displaced_tasks.end(), [this](const auto& a, const auto& b) {
-                    return !challenge_priority(a, b);
-                });
+                // Check if any of the solutions are blocked, in which case we can't run
+                bool blocked =
+                    std::any_of(ok_solutions.begin(), ok_solutions.end(), [](const auto& s) { return s.blocked; });
 
-                for (const auto& t : displaced_tasks) {
-                    // Everyone we displaced needs to be reevaluated
-                    reevaluate_group(providers.at(t->requester_id)->group);
-                }
+                // If we found an OK solution, run it
+                if (!blocked) {
 
-                // Accumulate all the used types
-                std::set<std::type_index> used_types;
-                for (const auto& s : ok_solutions) {
-                    used_types.insert(s.used.begin(), s.used.end());
+                    // Tasks that we have kicked out replacing them with our own tasks
+                    // We need to reevaluate the group that emitted these tasks when we are done
+                    TaskList displaced_tasks;
+
+                    // Loop through each pair of solutions and task
+                    for (int i = 0; i < int(tasks.size()); ++i) {
+                        auto& sol                    = ok_solutions[i];
+                        const auto& needed_providers = sol.requirements;
+                        const auto& main_provider    = sol.provider;
+                        auto& main_group             = main_provider->group;
+                        const auto& new_task         = tasks[i];
+                        auto& current_task           = main_group.active_task;
+
+                        // If this is the same task we are already running we skip it
+                        if (new_task != current_task) {
+
+                            // If we emitted the last task that went here we can just run and do a replacement
+                            // No need to check any lower down providers as they'll already be handled from last time
+                            if (current_task != nullptr
+                                && providers.at(current_task->requester_id)->type
+                                       == providers.at(new_task->requester_id)->type) {
+                                run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
+                            }
+                            else {
+                                if (current_task != nullptr) {
+                                    displaced_tasks.push_back(current_task);
+                                }
+
+                                // Loop through all but the first needed provider and set their task to this task
+                                // This is to reserve those tasks for when our child task executes
+                                // We skip this step however if we are a parent of the currently running task
+                                // That can happen if we just change providers within the same group (pushed etc)
+                                for (int j = 1; j < int(needed_providers.size()); ++j) {
+                                    // TODO this happens after displacement?
+                                    // TODO this also influences displacement in that if we displace a parent and a
+                                    // child then we need to reevaluate them differently since challenge priority
+                                    // doesn't work properly anymore
+                                    // TODO probably need to do a displacement pass, followed by a reevaluation pass
+
+                                    // TODO if we do this there is no way to clean it up later currently?
+
+                                    // const auto& provider = needed_providers[j];
+                                    // auto& g              = provider->group;
+
+                                    // TODO if we are a parent of the currently running task, we can skip this
+                                    // TODO what if the provider changes from active provider? (it shouldn't?)
+                                }
+
+                                // Run this specific task using this specific provider
+                                run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
+                            }
+                        }
+                    }
+
+                    // Sort the tasks so we reevaluate them in priority order
+                    std::sort(displaced_tasks.begin(), displaced_tasks.end(), [this](const auto& a, const auto& b) {
+                        return !challenge_priority(a, b);
+                    });
+
+                    for (const auto& t : displaced_tasks) {
+                        // Everyone we displaced needs to be reevaluated
+                        reevaluate_group(providers.at(t->requester_id)->group);
+                    }
+
+                    // Accumulate all the used types
+                    std::set<std::type_index> used_types;
+                    for (const auto& s : ok_solutions) {
+                        used_types.insert(s.used.begin(), s.used.end());
+                    }
+                    return RunResult{RunLevel::OK, used_types};
                 }
-                return {RunLevel::OK, used_types};
             }
-        }
 
-        // We are able to push others
-        if (run_level >= RunLevel::PUSH) {
-            // TODO Queue everywhere, setup push providers
-        }
+            // We are able to push others
+            if (run_level >= RunLevel::PUSH) {
+                // TODO Queue everywhere, setup push providers
+            }
 
-        // If we reach here, we have already queued into everything that could possibly change our state
-        return RunResult{RunLevel::BLOCKED, {}};
+            // If we reach here, we have already queued into everything that could possibly change our state
+            return RunResult{RunLevel::BLOCKED, {}};
+        }();
+
+        return run_level_result;
     }
 
     void Director::run_task_pack(const TaskPack& pack) {
 
-        const auto& provider = pack.first;
-        auto& group          = provider->group;
+        const auto& provider        = pack.provider;
+        const auto& requested_tasks = pack.tasks;
+        auto& group                 = provider->group;
 
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
             return;
         }
 
-        // See if a Idle command was emitted
-        for (const auto& t : pack.second) {
-            if (t->type == typeid(::extension::behaviour::Idle)) {
-
-                if (pack.second.size() > 1) {
-                    log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
-                }
-
-                // We don't do anything else on idle
-                return;
-            }
-        }
-
         // See if a done command was emitted
-        for (const auto& t : pack.second) {
+        for (const auto& t : requested_tasks) {
             if (t->type == typeid(::extension::behaviour::Done)) {
                 auto parent_provider = providers.at(group.active_task->requester_id);
 
                 // Check if we are already done, and if so we don't want to pester the parent again
-                if (provider->group.done) {
+                if (group.done) {
                     // Running Done when already in a Done state shouldn't happen for a root task since it should
                     // already have been removed
                     if (parent_provider->classification == Provider::Classification::ROOT) {
-                        log<NUClear::ERROR>("Done task was emitted twice, this should never happen for a root task");
+                        log<ERROR>("Done task was emitted twice, this should never happen for a root task");
                     }
                     return;
                 }
 
                 // This provider is now in the done state
-                provider->group.done = true;
+                group.done = true;
+                group.update_data();
 
                 auto& parent_group = parent_provider->group;
 
@@ -212,11 +207,11 @@ namespace module::extension {
                     // TODO(thouliston) check somehow if this provider is equipped to handle done
                     run_task_on_provider(parent_group.active_task,
                                          parent_group.active_provider,
-                                         RunInfo::RunReason::SUBTASK_DONE);
+                                         RunReason::SUBTASK_DONE);
                 }
 
-                if (pack.second.size() > 1) {
-                    log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
+                if (requested_tasks.size() > 1) {
+                    log<WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
                 }
 
                 // We don't do anything else on done
@@ -225,12 +220,56 @@ namespace module::extension {
         }
 
         // If we get here, the provider is not done and we are running new tasks
-        provider->group.done = false;
+        group.done = false;
+        group.update_data();
+
+        // Check if a Wait command was emitted and schedule to run the Provider again
+        // Other tasks can run with Wait
+        // Wait should be removed and then readded at the end
+        TaskList running_tasks;
+        TaskList non_running_tasks;
+        for (const auto& t : requested_tasks) {
+            if (t->type == typeid(::extension::behaviour::Wait)) {
+                non_running_tasks.push_back(t);
+
+                // Don't wait if already waited (prevents double waiting)
+                if (std::find(group.subtasks.begin(), group.subtasks.end(), t) == group.subtasks.end()) {
+                    // Schedule the Provider to run again
+                    // Get the time to wait for
+                    auto now    = NUClear::clock::now();
+                    auto target = std::static_pointer_cast<::extension::behaviour::Wait>(t->data)->time;
+
+                    // Skip the chrono controller if we already passed the time and directly say the wait finished
+                    if (target <= now) {
+                        emit(std::make_unique<WaitFinished>(provider));
+                    }
+                    else {
+                        // Otherwise, send it to the ChronoController to handle
+                        // Make a weak pointer to the task so we can check if it still exists when the task is run
+                        std::weak_ptr<component::DirectorTask> weak_task = t;
+                        emit(std::make_unique<NUClear::dsl::operation::ChronoTask>(
+                            [this, provider, weak_task](const NUClear::clock::time_point&) {
+                                // Check if the task still exists
+                                if (weak_task.lock() != nullptr) {
+                                    emit(std::make_unique<WaitFinished>(provider));
+                                }
+                                // Don't do anything else with this task
+                                return false;
+                            },
+                            target,
+                            -1));  // Our ID is -1 as we will remove ourselves
+                    }
+                }
+            }
+            else {
+                running_tasks.push_back(t);
+            }
+        }
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
-        tasks.reserve(pack.second.size());
-        for (const auto& t : pack.second) {
+        tasks.reserve(running_tasks.size());
+        for (const auto& t : running_tasks) {
             if (t->data != nullptr) {
                 tasks.push_back(t);
             }
@@ -291,7 +330,8 @@ namespace module::extension {
         auto result         = run_tasks(group, TaskList(tasks.begin(), first_optional), RunLevel::OK, used);
         used.insert(result.used.begin(), result.used.end());
 
-        // If we are not running normally now and were previously we might still have active tasks that need removing
+        // If we are not running normally now and were previously we might still have active tasks that need
+        // removing
         if (result.run_level != RunLevel::OK) {
             for (auto& t : group.subtasks) {
                 remove_task(t);
@@ -320,12 +360,16 @@ namespace module::extension {
 
         // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
         auto old_subtasks = group.subtasks;
+        // Add back in any waits
+        for (const auto& t : non_running_tasks) {
+            tasks.push_back(t);
+        }
         // Update the group's subtasks to the new subtasks
         group.subtasks = tasks;
 
         // Remove any tasks that were marked as dying earlier
-        // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run other
-        // tasks with lower priority for a single cycle until this one runs
+        // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run
+        // other tasks with lower priority for a single cycle until this one runs
         for (const auto& t : old_subtasks) {
             if (t->dying) {
                 remove_task(t);

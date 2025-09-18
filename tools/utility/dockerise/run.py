@@ -51,7 +51,7 @@ def _is_wsl1():
         return False
 
     kernel_release = subprocess.check_output(["uname", "-r"]).decode("utf-8").strip()
-    search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
+    search = re.search(r"^(\d+)\.(\d+)\.\d+", kernel_release)
     major = search.group(1)
     minor = search.group(2)
 
@@ -91,7 +91,7 @@ def _setup_volume(volume_name, clean_volume):
     return volume
 
 
-def _setup_internal_image(image, rebuild, clean_volume):
+def _setup_internal_image(image, rebuild, clean_volume, clean_uv_cache):
     # Extract the repository and platform
     repository, target = image.split(":")
     _, repository = repository.split("/")
@@ -111,11 +111,18 @@ def _setup_internal_image(image, rebuild, clean_volume):
     nusight_volume_name = f"{repository}_{defaults.local_user}_node_modules"
     nusight_volume = _setup_volume(nusight_volume_name, clean_volume)
 
+    # Ensure the python volume exists (clean it only if explicitly requested)
+    # This volume persists Python package cache across clean builds
+    python_volume_name = f"{repository}_{defaults.local_user}_python"
+    python_volume = _setup_volume(python_volume_name, clean_uv_cache)
+
     mounts = [
         "--mount",
         f"type=volume,source={build_volume},target=/home/{defaults.image_user}/build,consistency=delegated",
         "--mount",
         f"type=volume,source={nusight_volume},target=/home/{defaults.image_user}/{defaults.directory}/nusight2/node_modules,consistency=delegated",
+        "--mount",
+        f"type=volume,source={python_volume},target=/home/{defaults.image_user}/python,consistency=delegated",
     ]
 
     # Get the path to the users ssh configuration folder
@@ -150,6 +157,9 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
                 docker_hostname = "webots"
+            # If "player_id" exists in kwargs, set the hostname to "webots" + player_id
+            if kwargs["player_id"] is not None:
+                docker_hostname = f"webots{kwargs['player_id']}"
 
         # Docker arguments
         docker_args = [
@@ -174,7 +184,16 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "audio",
             "--group-add",
             "dialout",
+            "--group-add",
+            "video_host",
+            "--group-add",
+            "render_host",
+            "--privileged",
         ]
+
+        # Set name from hostname to search for the container in the multi tool
+        # Add random number so they are unique
+        docker_args.extend(["--name", f"{docker_hostname}{os.getpid()}"])
 
         # Work out if we are using an internal image
         internal_image, image = defaults.internalise_image(requested_image)
@@ -209,6 +228,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
                     image=image,
                     rebuild=rebuild or not image_found,
                     clean_volume=kwargs["clean"],
+                    clean_uv_cache=kwargs["clean_uv_cache"],
                 )
             )
 

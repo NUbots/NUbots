@@ -27,8 +27,11 @@
 
 #include "NatNet.hpp"
 
+#include <algorithm>
 #include <arpa/inet.h>
+#include <chrono>
 #include <fmt/format.h>
+#include <numeric>
 
 #include "Parse.hpp"
 
@@ -43,6 +46,7 @@ namespace module::input {
     NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
             // We are updating to a new multicast address
             if (cfg.multicast_address != config["multicast_address"].as<std::string>()
                 || cfg.data_port != config["data_port"].as<uint32_t>()
@@ -61,7 +65,7 @@ namespace module::input {
                 cfg.data_port         = config["data_port"].as<uint16_t>();
                 cfg.command_port      = config["command_port"].as<uint16_t>();
 
-                log<NUClear::INFO>("Connecting to NatNet network", cfg.multicast_address);
+                log<INFO>("Connecting to NatNet network", cfg.multicast_address);
 
                 // Create a listening UDP port for commands
                 std::tie(command_handle, std::ignore, commandFd) =
@@ -69,32 +73,32 @@ namespace module::input {
 
                 // Create a listening UDP port for data
                 std::tie(data_handle, std::ignore, std::ignore) =
-                    on<UDP::Multicast>(cfg.multicast_address, cfg.data_port)
-                        .then("NatNet Data", [this](const UDP::Packet& packet) {
-                            // Test if we are "connected" to this remote
-                            // And if we are we can use the data
-                            std::string address = packet.remote.address;
-                            if (remote == address && version != 0) {
-                                process(packet.payload);
-                            }
-                            // We have started connecting but haven't received a return ping
-                            else if (remote == address && version == 0) {
-                                // TODO(HardwareTeam): maybe set a timeout here to try again
-                            }
-                            // We haven't connected to anything yet
-                            else if (remote.empty()) {
-                                // This is now our remote
-                                remote = address;
+                    on<UDP::Broadcast>(cfg.data_port).then("NatNet Data", [this](const UDP::Packet& packet) {
+                        // Test if we are "connected" to this remote
+                        // And if we are we can use the data
+                        std::string address = packet.remote.address;
+                        if (remote == address && version != 0) {
+                            process(packet.payload);
+                        }
+                        // We have started connecting but haven't received a return ping
+                        else if (remote == address && version == 0) {
+                            // TODO(HardwareTeam): maybe set a timeout here to try again
+                        }
+                        // We haven't connected to anything yet
+                        else if (remote.empty()) {
+                            // This is now our remote
+                            remote = address;
 
-                                // Send a ping command
-                                send_command(Packet::Type::PING);
-                            }
-                            else if (remote != address) {
-                                log<NUClear::WARN>("There is more than one NatNet server running on this network");
-                            }
-                        });
+                            // Send a ping command
+                            send_command(Packet::Type::PING);
+                        }
+                        else if (remote != address) {
+                            log<WARN>("There is more than one NatNet server running on this network");
+                        }
+                    });
             }
-            cfg.dump_packets = config["dump_packets"].as<bool>();
+            cfg.dump_packets      = config["dump_packets"].as<bool>();
+            cfg.MAX_DELAY_SAMPLES = config["max_delay_samples"].as<size_t>();
         });
     }
 
@@ -119,7 +123,7 @@ namespace module::input {
 
             // Convert IP address from string to binary form
             if (inet_pton(AF_INET, remote.c_str(), &address.sin_addr) <= 0) {
-                log<NUClear::ERROR>("Invalid remote IP address");
+                log<ERROR>("Invalid remote IP address");
                 return;
             }
 
@@ -132,11 +136,13 @@ namespace module::input {
                      sizeof(sockaddr));
         }
         else {
-            log<NUClear::WARN>("NatNet is not yet connected to a remote server");
+            log<WARN>("NatNet is not yet connected to a remote server");
         }
     }
 
     void NatNet::process_frame(const Packet& packet) {
+        // Record when we received this packet
+        auto receive_time = std::chrono::steady_clock::now();
 
         // Our output motion capture object
         auto mocap = std::make_unique<MotionCapture>();
@@ -200,6 +206,9 @@ namespace module::input {
             mocap->natnet_timestamp = ReadData<float>::read(ptr, version);
         }
 
+        // Estimate network delay
+        estimate_network_delay(receive_time, mocap->natnet_timestamp);
+
         // High res timestamps
         if (version >= 0x03000000) {
             mocap->mid_exposure_timestamp  = ReadData<double>::read(ptr, version);
@@ -214,7 +223,7 @@ namespace module::input {
         // TODO(HardwareTeam): there is an eod thing here
         uint32_t eod = ReadData<uint32_t>::read(ptr, version);
         if (eod != 0) {
-            log<NUClear::ERROR>("Packet not read correctly, Abandoning.");
+            log<ERROR>("Packet not read correctly, Abandoning.");
             return;
         }
 
@@ -229,7 +238,7 @@ namespace module::input {
             // We need to update our models
             else {
                 // Inform that we are updating our models
-                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                log<INFO>("NatNet models are out of date, updating before resuming data");
 
                 // Request model definitions
                 send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -263,7 +272,7 @@ namespace module::input {
             // We need to update our models
             else {
                 // Inform that we are updating our models
-                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                log<INFO>("NatNet models are out of date, updating before resuming data");
 
                 // Request model definitions
                 send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -309,7 +318,7 @@ namespace module::input {
                     // We need to update our models
                     else {
                         // Inform that we are updating our models
-                        log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                        log<INFO>("NatNet models are out of date, updating before resuming data");
 
                         // Request model definitions
                         send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -322,7 +331,7 @@ namespace module::input {
             // We need to update our models
             else {
                 // Inform that we are updating our models
-                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+                log<INFO>("NatNet models are out of date, updating before resuming data");
 
                 // Request model definitions
                 send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -344,9 +353,77 @@ namespace module::input {
         emit(std::move(mocap));
     }
 
+    void NatNet::estimate_network_delay(std::chrono::steady_clock::time_point receive_time, double natnet_timestamp) {
+        // Convert our receive time to seconds since epoch (matching NatNet timestamp format)
+        auto receive_time_seconds = std::chrono::duration<double>(receive_time.time_since_epoch()).count();
+
+        // If this is our first frame, initialize clock offset estimation
+        if (!clock_offset_initialized) {
+            // Assume the first frame has minimal delay and use it to estimate clock offset
+            estimated_clock_offset   = receive_time_seconds - natnet_timestamp;
+            clock_offset_initialized = true;
+            last_frame_receive_time  = receive_time;
+            last_natnet_timestamp    = natnet_timestamp;
+            log<INFO>("Initialized clock offset estimation: {} seconds", estimated_clock_offset);
+            return;
+        }
+
+        // Calculate expected receive time based on NatNet timestamp and estimated clock offset
+        double expected_receive_time = natnet_timestamp + estimated_clock_offset;
+
+        // Calculate delay as the difference between actual and expected receive time
+        double delay = receive_time_seconds - expected_receive_time;
+
+        // Only consider positive delays (negative would indicate clock drift or out-of-order packets)
+        if (delay >= 0) {
+            delay_samples.push_back(delay);
+
+            // Keep only the most recent samples
+            if (delay_samples.size() > cfg.MAX_DELAY_SAMPLES) {
+                delay_samples.erase(delay_samples.begin());
+            }
+
+            // Calculate statistics every 50 frames
+            if (delay_samples.size() % 50 == 0) {
+                double sum  = std::accumulate(delay_samples.begin(), delay_samples.end(), 0.0);
+                double mean = sum / delay_samples.size();
+
+                // Calculate standard deviation
+                double sq_sum =
+                    std::inner_product(delay_samples.begin(), delay_samples.end(), delay_samples.begin(), 0.0);
+                double stdev = std::sqrt(sq_sum / delay_samples.size() - mean * mean);
+
+                // Find min and max
+                auto minmax = std::minmax_element(delay_samples.begin(), delay_samples.end());
+
+                log<DEBUG>("Network delay stats - Mean: ",
+                           double(mean * 1000),
+                           " ms, StdDev: ",
+                           double(stdev * 1000),
+                           "ms, Min: ",
+                           double(*minmax.first * 1000),
+                           "ms, Max: ",
+                           double(*minmax.second * 1000));
+            }
+        }
+
+        // Update clock offset estimation using a simple low-pass filter
+        // This helps account for gradual clock drift between systems
+        double time_diff      = receive_time_seconds - last_frame_receive_time.time_since_epoch().count();
+        double timestamp_diff = natnet_timestamp - last_natnet_timestamp;
+
+        if (time_diff > 0 && timestamp_diff > 0) {
+            double instantaneous_offset = receive_time_seconds - natnet_timestamp;
+            estimated_clock_offset      = 0.99 * estimated_clock_offset + 0.01 * instantaneous_offset;
+        }
+
+        last_frame_receive_time = receive_time;
+        last_natnet_timestamp   = natnet_timestamp;
+    }
+
     void NatNet::process_model(const Packet& packet) {
 
-        log<NUClear::INFO>("Updating model definitions");
+        log<INFO>("Updating model definitions");
 
         // Our pointer as we move through the data
         const char* ptr = &packet.data;
@@ -399,7 +476,7 @@ namespace module::input {
 
                 // Bad packet
                 default: {
-                    log<NUClear::WARN>("NatNet received an unexpected model type", type);
+                    log<WARN>("NatNet received an unexpected model type", type);
                 } break;
             }
         }
@@ -426,7 +503,7 @@ namespace module::input {
                                       + (nat_net_version[2] == 0 ? "" : "." + std::to_string(nat_net_version[2]))
                                       + (nat_net_version[3] == 0 ? "" : "." + std::to_string(nat_net_version[3]));
 
-        log<NUClear::INFO>(
+        log<INFO>(
             fmt::format("Connected to {} ({} {}) over NatNet {}", remote, name, str_app_version, str_nat_version));
 
         // Request model definitions on startup
@@ -472,12 +549,12 @@ namespace module::input {
             case Packet::Type::FRAME_OF_DATA: process_frame(packet); break;
 
             case Packet::Type::UNRECOGNIZED_REQUEST:
-                log<NUClear::ERROR>("An unrecognized request was made to the NatNet server");
+                log<ERROR>("An unrecognized request was made to the NatNet server");
                 break;
 
             case Packet::Type::MESSAGE_STRING: process_string(packet); break;
 
-            default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
+            default: log<ERROR>("The NatNet server sent an unexpected packet type"); break;
         }
     }
 }  // namespace module::input

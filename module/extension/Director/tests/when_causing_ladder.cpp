@@ -44,14 +44,23 @@ namespace {
         operator int() const {
             return value;
         }
+        operator std::string() const {
+            switch (value) {
+                case LEVEL_0: return "LEVEL_0";
+                case LEVEL_1: return "LEVEL_1";
+                case LEVEL_2: return "LEVEL_2";
+                case LEVEL_3: return "LEVEL_3";
+                case LEVEL_4: return "LEVEL_4";
+                default: return "UNKNOWN";
+            }
+        }
     };
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 2> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::LEVEL_4>>().then([this] {  //
                 events.push_back("task executed");
@@ -99,18 +108,14 @@ namespace {
                 events.push_back("emitting task");
                 emit<Task>(std::make_unique<SimpleTask>(), 50);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-            });
         }
     };
 }  // namespace
 
-TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail]") {
+TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail][.]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

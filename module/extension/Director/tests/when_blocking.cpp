@@ -43,14 +43,20 @@ namespace {
         operator int() const {
             return value;
         }
+        operator std::string() const {
+            switch (value) {
+                case BLOCK: return "BLOCK";
+                case ALLOW: return "ALLOW";
+                default: return "UNKNOWN";
+            }
+        }
     };
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 6> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::ALLOW>>().then([this] {
                 // Task has been executed!
@@ -99,14 +105,6 @@ namespace {
                 events.push_back("emitting blocked condition #2");
                 emit(std::make_unique<Condition>(Condition::BLOCK));
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-                emit(std::make_unique<Step<4>>());
-                emit(std::make_unique<Step<5>>());
-                emit(std::make_unique<Step<6>>());
-            });
         }
     };
 }  // namespace
@@ -114,7 +112,7 @@ namespace {
 TEST_CASE("Test that the when keyword blocks and allows running as expected", "[director][when][blocking]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

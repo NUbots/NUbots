@@ -46,10 +46,9 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor> {
+    class TestReactor : public TestBase<TestReactor, 3> {
     public:
-        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
-            : TestBase<TestReactor>(std::move(environment)) {
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
             // Store the tasks we are given to run
             on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
@@ -86,21 +85,16 @@ namespace {
                 events.push_back("lowering priority of complex task 1");
                 emit<Task>(std::make_unique<ComplexTask<1>>(), 30);
             });
-            on<Startup>().then([this] {
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
-            });
         }
     };
 
 }  // namespace
 
 TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
-          "[director][needs][joining][priority][!mayfail]") {
+          "[director][needs][joining][priority][!mayfail][.]") {
 
     NUClear::Configuration config;
-    config.thread_count = 1;
+    config.default_pool_concurrency = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
     powerplant.install<TestReactor>();

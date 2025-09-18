@@ -22,29 +22,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 syntax = "proto3";
 
 package message.nuclear;
 
 import "google/protobuf/timestamp.proto";
+import "message/nuclear/LogLevel.proto";
 import "message/nuclear/ReactionStatistics.proto";
 
 /**
- * Replicates the LogLevel enum from NUClear
- */
-enum LogLevel {
-    UNKNOWN = 0;
-    TRACE   = 1;
-    DEBUG   = 2;
-    INFO    = 3;
-    WARN    = 4;
-    ERROR   = 5;
-    FATAL   = 6;
-}
-
-/**
- * Replicates a NUClear::LogMessage type as a protobuf message
+ * Replicates a NUClear::message::LogMessage type
  */
 message LogMessage {
 

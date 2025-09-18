@@ -55,9 +55,12 @@ namespace module::input {
         uint send_port;
         uint TEAM_ID;
         uint PLAYER_ID;
-        std::string BROADCAST_IP;
-        std::string udp_filter_address;
-        std::set<std::string> ignored_ip_addresses;
+
+        /// @brief The address to use to send reply packets back to game controller (unicast)
+        std::string game_controller_address = "";
+
+        std::string udp_filter_address = "";
+        std::set<std::string> ignored_ip_addresses{};
 
         bool self_penalised = true;
         ReactionHandle listen_handle;
@@ -73,7 +76,7 @@ namespace module::input {
         [[nodiscard]] const gamecontroller::Team& get_own_team(const gamecontroller::GameControllerPacket& state) const;
         [[nodiscard]] const gamecontroller::Team& get_opponent_team(
             const gamecontroller::GameControllerPacket& state) const;
-        [[nodiscard]] static message::input::GameState::Data::PenaltyReason get_penalty_reason(
+        [[nodiscard]] static message::input::GameState::PenaltyReason get_penalty_reason(
             const gamecontroller::PenaltyState& penalty_state);
 
         [[nodiscard]] static std::string ip_address_int_to_string(const uint32_t& ip_addr);

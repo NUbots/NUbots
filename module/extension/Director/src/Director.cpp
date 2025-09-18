@@ -35,17 +35,16 @@ namespace module::extension {
     using component::Provider;
     using component::ProviderGroup;
     using ::extension::Configuration;
-    using ::extension::behaviour::RunInfo;
-    using ::extension::behaviour::commands::BehaviourTask;
+    using ::extension::behaviour::GroupInfo;
+    using ::extension::behaviour::RunReason;
+    using ::extension::behaviour::commands::BehaviourTasks;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::NeedsExpression;
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
+    using message::behaviour::DirectorState;
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
-
-
-    thread_local RunInfo::RunReason Director::current_run_reason = RunInfo::RunReason::OTHER_TRIGGER;
 
     /**
      * This message gets emitted when a state we are monitoring is updated.
@@ -53,11 +52,11 @@ namespace module::extension {
      * When it updates we check to see if this would now satisfy the conditions and if it does we emit
      */
     struct StateUpdate {
-        StateUpdate(const uint64_t& provider_id_, const std::type_index& type_, const int& state_)
+        StateUpdate(const NUClear::id_t& provider_id_, const std::type_index& type_, const int& state_)
             : provider_id(provider_id_), type(type_), state(state_) {}
 
         /// The reaction id of the Provider which was waiting on this type
-        uint64_t provider_id;
+        NUClear::id_t provider_id;
         /// The enum type that this enum was listening for
         std::type_index type;
         /// The new value for the enum
@@ -68,7 +67,10 @@ namespace module::extension {
 
         // Create if it doesn't already exist
         if (!groups.contains(provide.type)) {
-            groups.emplace(provide.type, ProviderGroup(provide.type));
+            groups.emplace(provide.type, ProviderGroup(provide.type, provide.data_setter));
+
+            director_state.groups.emplace(provide.type.hash_code(), NUClear::util::demangle(provide.type.name()));
+            state_changed = true;
         }
         auto& group = groups.at(provide.type);
 
@@ -84,9 +86,18 @@ namespace module::extension {
                                                    provide.reaction);
         group.providers.push_back(provider);
         providers.emplace(provide.reaction->id, provider);
+
+        // Update the state message
+        DirectorState::Provider provider_state;
+        provider_state.id             = provider->id;
+        provider_state.group          = group.type.hash_code();
+        provider_state.classification = static_cast<int>(provider->classification);
+        director_state.providers.emplace(provider->id, provider_state);
+        director_state.groups.at(provide.type.hash_code()).provider_ids.push_back(provider->id);
+        state_changed = true;
     }
 
-    void Director::remove_provider(const uint64_t& id) {
+    void Director::remove_provider(const NUClear::id_t& id) {
 
         // If we can find it, erase it
         auto it = providers.find(id);
@@ -109,7 +120,7 @@ namespace module::extension {
             if (provider == group.active_provider) {
                 if (group.providers.empty()) {
                     // This is now an error, there are no Providers to service the task
-                    log<NUClear::ERROR>("The last Provider for a type was removed while there were still tasks for it");
+                    log<ERROR>("The last Provider for a type was removed while there were still tasks for it");
                 }
                 else {
                     // Reevaluate the group to see if the loss of this provider changes anything
@@ -121,27 +132,45 @@ namespace module::extension {
             // If there are no Providers left in this group erase it too
             if (group.providers.empty()) {
                 groups.erase(provider->type);
+                director_state.groups.erase(provider->type.hash_code());
+                state_changed = true;
             }
             // Erase from our list of Providers
             providers.erase(id);
+
+            // Update the state message
+            director_state.providers.erase(id);
+            state_changed = true;
         }
     }
 
     std::shared_ptr<component::Provider> Director::get_root_provider(const std::type_index& root_type) {
         // Create a root provider for this task if one doesn't already exist and use it
         if (!groups.contains(root_type)) {
-            groups.emplace(root_type, ProviderGroup(root_type));
+            /// Can leave the data_setter as nullptr as nobody should ever issue tasks to a root provider
+            groups.emplace(root_type, ProviderGroup(root_type, nullptr));
+
+            director_state.groups.emplace(root_type.hash_code(), NUClear::util::demangle(root_type.name()));
+            state_changed = true;
         }
         auto& group = groups.at(root_type);
         if (group.providers.empty()) {
             // We subtract from unique_id_source here so that we fill numbers from the top while regular
             // reaction_ids are filling from the bottom
-            uint64_t unique = --unique_id_source;
+            NUClear::id_t unique = --unique_id_source;
             auto provider =
                 std::make_shared<Provider>(group, unique, Provider::Classification::ROOT, root_type, nullptr);
             group.providers.push_back(provider);
             providers.emplace(unique, provider);
             group.active_provider = provider;
+
+            // Update the state message
+            director_state.providers.emplace(provider->id,
+                                             DirectorState::Provider(provider->id,
+                                                                     group.type.hash_code(),
+                                                                     static_cast<int>(provider->classification)));
+            director_state.groups.at(root_type.hash_code()).provider_ids.push_back(provider->id);
+            state_changed = true;
         }
         auto root_provider = group.providers.front();
 
@@ -178,12 +207,23 @@ namespace module::extension {
                 bool valid = w->validator(state);
                 if (valid != w->current) {
                     w->current = valid;
-                    emit<Scope::DIRECT>(std::make_unique<StateUpdate>(id, w->type, state));
+                    emit<Scope::INLINE>(std::make_unique<StateUpdate>(id, w->type, state));
                 }
             });
 
             // Add it to the list of when conditions
             provider->when.push_back(w);
+
+            DirectorState::Provider::WhenCondition when_condition;
+            when_condition.type       = NUClear::util::demangle(w->type.name());
+            when_condition.comparator = NUClear::util::demangle(when.comparator_type.name());
+            when_condition.expected_state =
+                DirectorState::EnumValue(when.expected_state_string, when.expected_state_value);
+            when_condition.current = w->current;
+
+            // Update the state message
+            director_state.providers.at(id).when.emplace_back(when_condition);
+            state_changed = true;
         }
         else {
             throw std::runtime_error("When statements must come after a Provide statement");
@@ -201,7 +241,14 @@ namespace module::extension {
                 throw std::runtime_error("You cannot use the 'Causing' DSL word with Start or Stop.");
             }
 
-            provider->causing.emplace(causing.type, causing.resulting_state);
+            provider->causing.emplace(causing.type, causing.resulting_state_value);
+
+            // Update the state message
+            auto& proto_provider = director_state.providers.at(causing.reaction->id);
+            proto_provider.causing.emplace(
+                NUClear::util::demangle(causing.type.name()),
+                DirectorState::EnumValue(causing.resulting_state_string, causing.resulting_state_value));
+            state_changed = true;
         }
         else {
             throw std::runtime_error("Causing statements must come after a Provide statement");
@@ -221,6 +268,10 @@ namespace module::extension {
             }
 
             provider->needs.emplace(needs.type);
+
+            // Update the state message
+            director_state.providers.at(needs.reaction->id).needs.push_back(needs.type.hash_code());
+            state_changed = true;
         }
         else {
             throw std::runtime_error("Needs statements must come after a Provide statement");
@@ -228,131 +279,81 @@ namespace module::extension {
     }
 
     Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        if (source != nullptr) {
-            throw std::runtime_error("Multiple behaviour directors are not allowed.");
-        }
-        source = this;
 
         on<Configuration>("Director.yaml").then("Configure", [this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
         // Removes all the Providers for a reaction when it is unbound
-        on<Trigger<Unbind>>().then("Remove Provider", [this](const Unbind& unbind) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<Unbind>, Sync<Director>>().then("Remove Provider", [this](const Unbind& unbind) {  //
             remove_provider(unbind.id);
         });
 
         // Add a Provider
-        on<Trigger<ProvideReaction>>().then("Add Provider", [this](const ProvideReaction& provide) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<ProvideReaction>, Sync<Director>>().then("Add Provider", [this](const ProvideReaction& provide) {
             add_provider(provide);
         });
 
         // Add a when expression to this Provider
-        on<Trigger<WhenExpression>>().then("Add When", [this](const WhenExpression& when) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<WhenExpression>, Sync<Director>>().then("Add When", [this](const WhenExpression& when) {  //
             add_when(when);
         });
 
         // Add a causing condition to this Provider
-        on<Trigger<CausingExpression>>().then("Add Causing", [this](const CausingExpression& causing) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<CausingExpression>, Sync<Director>>().then("Add Causing", [this](const CausingExpression& causing) {
             add_causing(causing);
         });
 
         // Add a needs relationship to this Provider
-        on<Trigger<NeedsExpression>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
+        on<Trigger<NeedsExpression>, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
             add_needs(needs);
         });
 
-        // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
-        // the Provider has finished executing
-        on<Trigger<BehaviourTask>>().then("Director Task", [this](const BehaviourTask& t) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
-            // Make our own mutable director task from the behaviour task
-            auto task = std::make_shared<DirectorTask>(t);
+        // A state that we were monitoring is updated, we might be able to run the task now
+        on<Trigger<StateUpdate>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
+            "State Updated",
+            [this](const StateUpdate& u) {
+                // Get the group that had a state update
+                auto p  = providers.at(u.provider_id);
+                auto& g = p->group;
 
-            // Root level task, make the pack immediately and send it off to be executed as a root task
-            if (!providers.contains(task->requester_id)) {
-                // Get the root provider from the task root type
-                auto root_provider = get_root_provider(t.root_type);
-
-                // Modify the task we received to look like it came from this provider
-                task->requester_id = root_provider->id;
-
-                emit(std::make_unique<TaskPack>(TaskPack(root_provider, {task})));
-            }
-            else {
-                auto& p = providers.at(task->requester_id);
-                auto id = p->reaction->identifiers.name;
-                if (p->classification == Provider::Classification::START) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a start provider.");
-                }
-                else if (p->classification == Provider::Classification::STOP) {
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as Provider",
-                                       id,
-                                       "is a stop provider.");
-                }
-                // Everything is fine
-                else {
-                    pack_builder.emplace(task->requester_task_id, task);
-                }
-            }
-        });
-
-        // This reaction runs when a Provider finishes to send off the task pack to the main director
-        on<Trigger<ProviderDone>>().then("Package Tasks", [this](const ProviderDone& done) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
-            // Get all the tasks that were emitted by this provider and send it as a task pack
-            auto range  = pack_builder.equal_range(done.requester_task_id);
-            auto pack   = std::make_unique<TaskPack>();
-            pack->first = providers.at(done.requester_id);
-            for (auto it = range.first; it != range.second; ++it) {
-                pack->second.push_back(it->second);
-            }
-
-            // Sort the task pack so highest priority tasks come first
-            // We sort by direct priority not challenge priority since they're all the same pack
-            std::stable_sort(pack->second.rbegin(), pack->second.rend(), [](const auto& a, const auto& b) {
-                return direct_priority(a, b);
+                // Go check if this state update has
+                // changed any of the tasks that are
+                // queued
+                reevaluate_group(g);
+                emit_state();
             });
 
-            // Emit the task pack
-            emit(pack);
-
-            // Erase the task pack builder for this id
-            pack_builder.erase(done.requester_task_id);
-        });
-
-        // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>>().then("State Updated", [this](const StateUpdate& update) {
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
-            // Get the group that had a state update
-            auto p  = providers.at(update.provider_id);
-            auto& g = p->group;
-
-            // Go check if this state update has changed any of the tasks that are queued
-            reevaluate_group(g);
-        });
+        on<Trigger<WaitFinished>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
+            "Wait Delay",
+            [this](const WaitFinished& w) {
+                // If the provider is still active, then we can run it
+                if (w.provider == w.provider->group.active_provider) {
+                    run_task_on_provider(w.provider->group.active_task, w.provider, RunReason::SUBTASK_DONE);
+                }
+                emit_state();
+            });
 
         // We have a new task pack to run
-        on<Trigger<TaskPack>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
-            std::lock_guard<std::recursive_mutex> lock(director_mutex);
-            run_task_pack(pack);
-        });
-    }
+        on<Trigger<BehaviourTasks>, Sync<Director>, Pool<Director>, Priority::REALTIME>().then(
+            "Run",
+            [this](const BehaviourTasks& p) {
+                // Convert the task pack to a Director task pack
+                TaskPack pack;
 
-    Director::~Director() {
-        // Remove this director as the information source
-        source = nullptr;
+                // Root providers are identified by being declared root and their requester type will be RootProvider<T>
+                pack.provider = p.root ? get_root_provider(p.requester_type)
+                                       : pack.provider = providers.at(p.requester_reaction_id);
+
+                // Convert the Behaviour tasks to Director tasks
+                for (auto& task : p.tasks) {
+                    pack.tasks.push_back(
+                        std::make_shared<DirectorTask>(pack.provider->id, p.requester_task_id, p.root, task));
+                }
+
+                run_task_pack(pack);
+                emit_state();
+            });
     }
 
 }  // namespace module::extension

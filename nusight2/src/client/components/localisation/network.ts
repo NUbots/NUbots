@@ -1,15 +1,20 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
+import { Matrix2 } from "../../../shared/math/matrix2";
+import { Matrix3 } from "../../../shared/math/matrix3";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
@@ -30,6 +35,8 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
+    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
+    this.network.on(message.support.nusight.Overview, this.onOverview);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -49,22 +56,32 @@ export class LocalisationNetwork {
   @action
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hfw = Matrix4.from(field.Hfw);
+
+    // Flip the field if the robot is on the red team
+    robot.Hfw =
+      robot.teamColour === "red"
+        ? (robot.Hfw = Matrix4.fromRotationZ(Math.PI).multiply(Matrix4.from(field.Hfw)))
+        : Matrix4.from(field.Hfw);
+
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
+    robot.associationLines = field.associationLines.map((line) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
   };
 
   @action
-  private onWalkToDebug = (robotModel: RobotModel, walk_to_debug: message.planning.WalkToDebug) => {
+  private onWalkToDebug = (robotModel: RobotModel, walkToDebug: message.planning.WalkToDebug) => {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.Hrd = Matrix4.from(walk_to_debug.Hrd);
-    robot.max_align_radius = walk_to_debug.maxAlignRadius;
-    robot.min_align_radius = walk_to_debug.minAlignRadius;
-    robot.angle_to_final_heading = walk_to_debug.angleToFinalHeading;
-    robot.angle_to_target = walk_to_debug.angleToTarget;
-    robot.translational_error = walk_to_debug.translationalError;
-    robot.min_angle_error = walk_to_debug.minAngleError;
-    robot.max_angle_error = walk_to_debug.maxAngleError;
-    robot.velocity_target = Vector3.from(walk_to_debug.velocityTarget);
+    robot.Hrd = Matrix4.from(walkToDebug.Hrd);
+    robot.maxAlignRadius = walkToDebug.maxAlignRadius;
+    robot.minAlignRadius = walkToDebug.minAlignRadius;
+    robot.angleToFinalHeading = walkToDebug.angleToFinalHeading;
+    robot.angleToTarget = walkToDebug.angleToTarget;
+    robot.translationalError = walkToDebug.translationalError;
+    robot.minAngleError = walkToDebug.minAngleError;
+    robot.maxAngleError = walkToDebug.maxAngleError;
+    robot.velocityTarget = Vector3.from(walkToDebug.velocityTarget);
   };
 
   @action.bound
@@ -84,22 +101,24 @@ export class LocalisationNetwork {
     const position = purpose.purpose;
     robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
 
-    robot.player_id = purpose.playerId!;
+    robot.playerId = purpose.playerId!;
 
     // Update colour based on player id
-    if (robot.player_id === 1) {
+    if (robot.playerId === 1) {
       robot.color = "blue";
-    } else if (robot.player_id === 2) {
+    } else if (robot.playerId === 2) {
       robot.color = "purple";
-    } else if (robot.player_id === 3) {
+    } else if (robot.playerId === 3) {
       robot.color = "red";
-    } else if (robot.player_id === 4) {
+    } else if (robot.playerId === 4) {
       robot.color = "orange";
-    } else if (robot.player_id === 5) {
+    } else if (robot.playerId === 5) {
       robot.color = "yellow";
     } else {
       robot.color = "black";
     }
+
+    robot.teamColour = purpose.teamColour == message.input.GameState.TeamColour.RED ? "red" : "blue";
   }
 
   @action.bound
@@ -117,17 +136,20 @@ export class LocalisationNetwork {
   @action.bound
   private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.robots = localisation_robots.robots.map((localisation_robot) => ({
-      id: localisation_robot.id!,
-      rRWw: Vector3.from(localisation_robot.rRWw),
-    }));
+    robot.robots = localisation_robots.robots.map((localisation_robot) => {
+      return {
+        id: localisation_robot.id!,
+        rRWw: Vector3.from(localisation_robot.rRWw),
+        color: localisation_robot.teammate ? robot.teamColour : robot.teamColour === "red" ? "blue" : "red",
+      };
+    });
   }
 
   @action.bound
   private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+    robot.rIWw = fieldIntersections.intersections.map((intersection) => {
       let intersection_type = "";
       if (intersection.type === 0) {
         intersection_type = "UNKNOWN";
@@ -189,6 +211,67 @@ export class LocalisationNetwork {
     robot.motors.leftAnkleRoll.angle = sensors.servo[17].presentPosition!;
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
+  };
+
+  @action.bound
+  private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // If phase changed, add current trajectories to history before updating
+    if (robot.walkPhase !== walk_state.phase && robot.torsoTrajectory.length > 0) {
+      robot.addToTrajectoryHistory(robot.torsoTrajectoryF, robot.swingFootTrajectoryF);
+    }
+
+    // Update current state
+    robot.torsoTrajectory = walk_state.torsoTrajectory.map((pose) => Matrix4.from(pose));
+    robot.swingFootTrajectory = walk_state.swingFootTrajectory.map((pose) => Matrix4.from(pose));
+    robot.Hwp = Matrix4.from(walk_state.Hwp);
+    robot.walkPhase = walk_state.phase;
+  }
+
+  @action
+  private onOverview = (robotModel: RobotModel, overview: message.support.nusight.Overview) => {
+    const robot = DashboardRobotModel.of(robotModel);
+
+    // Timestamp this message was sent (for comparison with last seen)
+    robot.time = TimestampObject.toSeconds(overview.timestamp);
+
+    // The id number of the robot
+    robot.playerId = overview.robotId;
+
+    // Name of the executing binary
+    robot.roleName = overview.roleName;
+
+    // Battery as a value between 0 and 1 (percentage)
+    robot.battery = overview.battery;
+
+    // Voltage (in volts!)
+    robot.voltage = overview.voltage;
+
+    // The position of the robot on the field in field coordinates
+    // overview.robotPosition is a 3 sized vector (x,y,heading)
+    robot.robotPosition = Vector3.from(overview.robotPosition);
+    robot.robotPositionCovariance = Matrix3.from(overview.robotPositionCovariance);
+
+    // The position of the ball in field coordinates
+    robot.ballPosition = Vector2.from(overview.ballPosition);
+    robot.ballCovariance = Matrix2.from(overview.ballPositionCovariance);
+
+    // The location on the field the robot wants to kick in field coordinates
+    robot.kickTarget = Vector2.from(overview.kickTarget);
+
+    // The game mode the robot thinks it is
+    robot.gameMode = overview.gameMode;
+    robot.gamePhase = overview.gamePhase;
+    robot.penaltyReason = overview.penaltyReason;
+
+    // The last time we had a camera image, saw a ball/goal
+    robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
+    robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
+    robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
+
+    // The walk command and
+    robot.walkCommand = Vector3.from(overview.walkCommand);
   };
 }
 

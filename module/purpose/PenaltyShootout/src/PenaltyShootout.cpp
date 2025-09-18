@@ -1,0 +1,112 @@
+#include "PenaltyShootout.hpp"
+
+#include "extension/Behaviour.hpp"
+#include "extension/Configuration.hpp"
+
+#include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Buttons.hpp"
+#include "message/input/GameState.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
+#include "message/planning/LookAround.hpp"
+#include "message/skill/Look.hpp"
+#include "message/skill/Walk.hpp"
+#include "message/strategy/FallRecovery.hpp"
+#include "message/strategy/LookAtFeature.hpp"
+#include "message/strategy/WalkToBall.hpp"
+#include "message/support/FieldDescription.hpp"
+
+namespace module::purpose {
+
+    using extension::Configuration;
+
+    using Phase = message::input::GameState::Phase;
+
+    using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
+    using message::input::GameState;
+    using message::localisation::Ball;
+    using message::localisation::PenaltyReset;
+    using message::output::Buzzer;
+    using message::planning::LookAround;
+    using message::skill::Look;
+    using message::skill::Walk;
+    using message::strategy::FallRecovery;
+    using message::strategy::LookAtBall;
+    using message::strategy::WalkToKickBall;
+    using message::support::FieldDescription;
+
+    struct StartPenalty {};
+    struct Play {};
+
+    PenaltyShootout::PenaltyShootout(std::unique_ptr<NUClear::Environment> environment)
+        : BehaviourReactor(std::move(environment)) {
+
+        on<Configuration>("PenaltyShootout.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file PenaltyShootout.yaml
+            this->log_level         = config["log_level"].as<NUClear::LogLevel>();
+            cfg.startup_delay       = config["startup_delay"].as<int>();
+            cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
+        });
+
+        on<Startup>().then([this] {
+            // At the start of the program, we should be standing
+            // Without these emits, modules that need a Stability and WalkState messages may not run
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+            // Stand idle
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
+            // Idle look forward if the head isn't doing anything else
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
+            // Startup delay to prevent issues with low servo gains at the start
+            emit<Scope::DELAY>(std::make_unique<StartPenalty>(), std::chrono::seconds(cfg.startup_delay));
+        });
+
+        on<Trigger<StartPenalty>>().then([this] {
+            // This emit starts the tree to play the penalty shootout
+            emit<Task>(std::make_unique<Play>(), 1);
+            // The robot should always try to recover from falling, if applicable, regardless of purpose
+            emit<Task>(std::make_unique<FallRecovery>(), 2);
+        });
+
+        on<Provide<Play>,
+           Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>,
+           With<GameState>,
+           Optional<With<Ball>>,
+           When<Phase, std::equal_to, Phase::PLAYING>>()
+            .then([this](const GameState& game_state, const std::shared_ptr<const Ball>& ball) {
+                // Find the ball first
+                if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                    emit<Task>(std::make_unique<LookAround>());
+                }
+
+                // If our kick off, walk the ball into the goal!
+                if (game_state.our_kick_off) {
+                    emit<Task>(std::make_unique<WalkToKickBall>());
+                    emit<Task>(std::make_unique<LookAtBall>());
+                }
+                // Else do nothing cause the goalie can't move off the line and we don't want to dive and break!
+                else {
+                    emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
+                }
+            });
+
+        // Middle button resumes the soccer scenario
+        on<Trigger<ButtonMiddleDown>, With<FieldDescription>, With<GameState>>().then(
+            [this](const FieldDescription& fd, const GameState& game_state) {
+                Eigen::Vector3d rRFf =
+                    game_state.our_kick_off
+                        ? Eigen::Vector3d(-fd.dimensions.field_length / 2 + fd.dimensions.penalty_mark_distance, 0, 0)
+                        : Eigen::Vector3d(fd.dimensions.field_length / 2, 0, 0);
+                emit(std::make_unique<PenaltyReset>(rRFf));
+            });
+
+        on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
+    }
+
+}  // namespace module::purpose

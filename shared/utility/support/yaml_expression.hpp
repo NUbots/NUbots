@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_SUPPORT_yaml_expression_HPP
-#define UTILITY_SUPPORT_yaml_expression_HPP
+#ifndef UTILITY_SUPPORT_YAML_EXPRESSION_HPP
+#define UTILITY_SUPPORT_YAML_EXPRESSION_HPP
 
 #include <Eigen/Core>
 #include <fmt/format.h>
@@ -289,7 +289,9 @@ namespace utility::support {
         for (auto& data : config.as<std::vector<Expression>>()) {
             result[i++] = U(data);
         }
+
         assert((fmt::format("We expected {} elements in the YAML file but {} were found", N, i), i == N));
+
         return result;
     }
 

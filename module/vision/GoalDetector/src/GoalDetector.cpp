@@ -88,7 +88,7 @@ namespace module::vision {
                 std::vector<std::vector<int>> clusters;
                 cluster_points(indices.begin(), indices.end(), neighbours, cfg.cluster_points, clusters);
 
-                log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+                log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
                 auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
                                                                                             horizon.horizon,
@@ -98,7 +98,7 @@ namespace module::vision {
                                                                                             true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
-                log<NUClear::DEBUG>(fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
+                log<DEBUG>(fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
 
                 // Find overlapping clusters and merge them
                 for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
@@ -133,7 +133,7 @@ namespace module::vision {
                     }
                 }
 
-                log<NUClear::DEBUG>(fmt::format("{} clusters remaining after merging overlaps", clusters.size()));
+                log<DEBUG>(fmt::format("{} clusters remaining after merging overlaps", clusters.size()));
 
                 if (!clusters.empty()) {
                     auto goals = std::make_unique<Goals>();
@@ -201,12 +201,11 @@ namespace module::vision {
                             const double disagreement = std::abs(width - actual_width) / std::max(width, actual_width);
 
                             // Check the width between the posts
-                            log<NUClear::DEBUG>(
+                            log<DEBUG>(
                                 fmt::format("Camera {}: Goal post 0 distance = {}", horizon.id, uGCc0->post.distance));
-                            log<NUClear::DEBUG>(
+                            log<DEBUG>(
                                 fmt::format("Camera {}: Goal post 1 distance = {}", horizon.id, uGCc1->post.distance));
-                            log<NUClear::DEBUG>(
-                                fmt::format("Camera {}: Goal width = {} ({})", horizon.id, width, disagreement));
+                            log<DEBUG>(fmt::format("Camera {}: Goal width = {} ({})", horizon.id, width, disagreement));
 
                             if (disagreement < cfg.disagreement_ratio) {
                                 auto it = pairs.find(uGCc0);
@@ -229,7 +228,7 @@ namespace module::vision {
                         pair.second.first->side = is_left ? Goal::Side::RIGHT : Goal::Side::LEFT;
                     }
 
-                    log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
+                    log<DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
 
                     emit(std::move(goals));
                 }

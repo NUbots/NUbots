@@ -44,7 +44,7 @@ namespace utility::math::angle {
      * @return the angle between -pi and pi
      */
     template <typename T>
-    inline T normalizeAngle(const T value) {
+    inline T normalise_angle(const T value) {
 
         T angle = std::fmod(value, static_cast<T>(2 * M_PI));
 
@@ -105,7 +105,7 @@ namespace utility::math::angle {
 
     /**
      * Calculates the signed angle with the smallest absolute value such
-     * that: normalizeAngle(b + signedDifference(a, b)) == normalizeAngle(a).
+     * that: normalise_angle(b + signedDifference(a, b)) == normalise_angle(a).
      * Method: http://stackoverflow.com/a/7869457
      */
     inline double signedDifference(const double a, const double b) {
@@ -126,8 +126,8 @@ namespace utility::math::angle {
      */
     template <typename Scalar>
     inline double angleDistance(const Scalar& angleSrc, const Scalar& angleDst) {
-        const Scalar source = normalizeAngle(angleSrc);
-        const Scalar dest   = normalizeAngle(angleDst);
+        const Scalar source = normalise_angle(angleSrc);
+        const Scalar dest   = normalise_angle(angleDst);
 
         const Scalar max = source > dest ? source : dest;
         const Scalar min = source > dest ? dest : source;
@@ -139,7 +139,7 @@ namespace utility::math::angle {
         return dist1 < dist2 ? (source > dest ? -dist1 : dist1) : (source > dest ? dist2 : -dist2);
     }
 
-    inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
+    inline double vector_to_bearing(const Eigen::Vector2d& dirVec) {
         return std::atan2(dirVec.y(), dirVec.x());
     }
 

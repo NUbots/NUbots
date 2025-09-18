@@ -60,9 +60,9 @@ namespace module::skill {
             }
         });
 
-        on<Provide<SayTask>>().then([this](const SayTask& say, const RunInfo& info) {
+        on<Provide<SayTask>>().then([this](const SayTask& say, const RunReason& run_reason) {
             // Only say text if it is a new task
-            if (info.run_reason == RunInfo::NEW_TASK) {
+            if (run_reason == RunReason::NEW_TASK) {
                 // Play the requested audio using python command-line tool mimic3 and aplay
                 // Sanitize the text to remove special characters which could break the command
                 std::string sanitized_text         = say.text;
@@ -71,7 +71,7 @@ namespace module::skill {
                     sanitized_text.erase(std::remove(sanitized_text.begin(), sanitized_text.end(), c),
                                          sanitized_text.end());
                 }
-                log<NUClear::DEBUG>("Saying: ", sanitized_text);
+                log<DEBUG>("Saying: ", sanitized_text);
                 system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
                                    + cfg.device_name)
                            .c_str());

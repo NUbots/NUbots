@@ -5,6 +5,8 @@ import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 
+import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
+import { DashboardFieldModel } from "./dashboard_components/field/model";
 import { FieldModel } from "./r3f_components/field/model";
 import { SkyboxModel } from "./r3f_components/skybox/model";
 import { LocalisationRobotModel } from "./robot_model";
@@ -51,9 +53,9 @@ class CameraModel {
 
   static of() {
     return new CameraModel({
-      position: new Vector3(-1, 0, 1),
-      yaw: 0,
-      pitch: -Math.PI / 4,
+      position: new Vector3(0, 0, 5), // Hawk-eye view: center field, 5 units high
+      yaw: Math.PI / 2, // Hawk-eye view yaw
+      pitch: -Math.PI / 2, // Hawk-eye view: looking straight down
       distance: 0.5,
     });
   }
@@ -88,9 +90,19 @@ export class ControlsModel {
       back: false,
       up: false,
       down: false,
-      pitch: 0,
-      yaw: 0,
+      pitch: -Math.PI / 2, // Hawk-eye view: looking straight down
+      yaw: Math.PI / 2, // Hawk-eye view yaw
     });
+  }
+}
+
+export class DashboardModel {
+  @observable visible = false;
+
+  constructor() {}
+
+  static of(): DashboardModel {
+    return new DashboardModel();
   }
 }
 
@@ -101,6 +113,7 @@ export class LocalisationModel {
   @observable camera: CameraModel;
   @observable locked: boolean;
   @observable controls: ControlsModel;
+  @observable dashboard: DashboardModel;
   @observable viewMode: ViewMode;
   @observable target?: LocalisationRobotModel;
   @observable time: TimeModel;
@@ -113,7 +126,7 @@ export class LocalisationModel {
   @observable goalsVisible = true;
   @observable fieldLinePointsVisible = true;
   @observable fieldIntersectionsVisible = true;
-  @observable walkToDebugVisible = true;
+  @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
 
   constructor(
@@ -124,6 +137,7 @@ export class LocalisationModel {
       camera,
       locked,
       controls,
+      dashboard,
       viewMode,
       target,
       time,
@@ -133,6 +147,7 @@ export class LocalisationModel {
       camera: CameraModel;
       locked: boolean;
       controls: ControlsModel;
+      dashboard: DashboardModel;
       viewMode: ViewMode;
       target?: LocalisationRobotModel;
       time: TimeModel;
@@ -144,6 +159,7 @@ export class LocalisationModel {
     this.camera = camera;
     this.locked = locked;
     this.controls = controls;
+    this.dashboard = dashboard;
     this.viewMode = viewMode;
     this.target = target;
     this.time = time;
@@ -156,6 +172,7 @@ export class LocalisationModel {
       camera: CameraModel.of(),
       locked: false,
       controls: ControlsModel.of(),
+      dashboard: DashboardModel.of(),
       viewMode: ViewMode.FreeCamera,
       time: TimeModel.of(),
     });
@@ -163,5 +180,13 @@ export class LocalisationModel {
 
   @computed get robots(): LocalisationRobotModel[] {
     return this.appModel.robots.map((robot) => LocalisationRobotModel.of(robot));
+  }
+
+  @computed get dashboardRobots(): DashboardRobotModel[] {
+    return this.appModel.robots.map((robot) => DashboardRobotModel.of(robot));
+  }
+
+  @computed get dashboardField(): DashboardFieldModel {
+    return DashboardFieldModel.of(this.dashboardRobots);
   }
 }
