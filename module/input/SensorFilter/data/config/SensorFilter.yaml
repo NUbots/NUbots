@@ -64,10 +64,10 @@ stella_config:
 sliding_window:
   enabled: true
   window_size: 10
-  smoothness_weight: 10.0
-  stella_base_weight: 50.0  # Increase to strongly prefer Stella
-  kinematic_base_weight: 0.5
-  measurement_filter_alpha: 0.6
+  smoothness_weight: 50.0
+  stella_base_weight: 25.0  # Increase to strongly prefer Stella
+  kinematic_base_weight: 5.0
+  measurement_filter_alpha: 0.5
   xtol_rel: 1e-12
   ftol_rel: 1e-12
   maxeval: 1000

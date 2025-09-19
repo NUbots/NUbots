@@ -457,6 +457,7 @@ void SensorFilter::update_odometry_sliding_window(
     // 0. Track Stella health for failure detection
     static bool previous_stella_healthy = false;
     static Eigen::Isometry3d last_stella_pose = Eigen::Isometry3d::Identity();
+    static double initialization_tilt_angle = 0.0;  // Add this line to track the tilt angle
 
     // 1. Compute kinematic estimate (always needed as potential measurement)
     if (planted_anchor_foot != sensors->planted_foot_phase && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
@@ -499,12 +500,17 @@ void SensorFilter::update_odometry_sliding_window(
                 Htw.translation().y() = 0;
                 Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
                 auto Hwc = Htw.inverse() * Htc;
-                auto Hcn = stella->Hnc.inverse(); // TODO: CHECK THIS IS FIXING THE OFFSET ISSUE
-                Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() *
-                               Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+
+                // Record the tilt angle at initialization
+                Eigen::Vector3d init_rpy = mat_to_rpy_intrinsic(Hwc.linear());
+                initialization_tilt_angle = init_rpy.y(); // Store the pitch angle (forward/backward tilt)
+
+                // Use the original Hnc without the hardcoded rotation override
+                auto Hcn = stella->Hnc.inverse();
                 Hwn = Hwc * Hcn;
                 stella_state = StellaState::INITIALIZED;
-                log<INFO>("Stella initialised");
+                log<INFO>("Stella initialised with tilt angle: ", initialization_tilt_angle, " rad (",
+                         initialization_tilt_angle * 180.0 / M_PI, " degrees)");
             }
         }
     }
@@ -522,8 +528,15 @@ void SensorFilter::update_odometry_sliding_window(
         std::vector<Eigen::Vector3d> rPCw_stella;
         std::vector<Eigen::Vector3d> rPWw_ground;
         std::vector<Eigen::Vector3d> rPCw_ground;
+
+        // Create tilt correction transform
+        Eigen::Isometry3d tilt_correction = Eigen::Isometry3d::Identity();
+        tilt_correction.linear() = Eigen::AngleAxisd(-initialization_tilt_angle, Eigen::Vector3d::UnitY()).toRotationMatrix();
+
         for (const auto& rPNn : rPNn_points) {
-            auto rPWw = Hwn * rPNn;
+            // Apply tilt correction to the map points before transforming to world frame
+            auto rPNn_corrected = tilt_correction * rPNn;
+            auto rPWw = Hwn * rPNn_corrected;
             rPWw_stella.push_back(rPWw);
             auto rPCw = rPWw - Hwc.translation();
             rPCw_stella.push_back(rPCw);
@@ -560,6 +573,7 @@ void SensorFilter::update_odometry_sliding_window(
         auto stella_map = std::make_unique<StellaMap>();
         std::vector<Eigen::Vector3d> rPWw_map;
         for (size_t i = 0; i < rPCw_stella.size(); i++) {
+            // Use the tilt-corrected points for the final map emission
             Eigen::Vector3d rPWw_scaled = Hwc.translation() + rPCw_stella[i] * scale_factor;
             rPWw_map.push_back(rPWw_scaled);
         }
@@ -773,12 +787,9 @@ void SensorFilter::update_odometry_sliding_window(
         // Update yaw filter with Stella's yaw to maintain continuity when Stella fails
         yaw_filter.update(sensors->gyroscope.z(), stella_yaw, dt);
 
-        log<INFO>("Using Stella yaw: " + std::to_string(stella_yaw) + " (kinematic yaw: " + std::to_string(kinematic_yaw) + ")");
     } else {
         // Fall back to fused yaw when Stella is not available
         fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
-
-        log<INFO>("Using fused yaw: " + std::to_string(fused_yaw) + " (kinematic yaw: " + std::to_string(kinematic_yaw) + ")");
     }
 
     Eigen::Vector3d rpy_final_orientation(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
@@ -814,13 +825,7 @@ void SensorFilter::update_odometry_sliding_window(
 
     // Debug output
     emit(graph("SW Optimization Cost", optimization_cost));
-    emit(graph("SW Window Size", static_cast<double>(pose_window_.size())));
     emit(graph("SW Smoothness Weight", cfg.sliding_window.smoothness_weight));
-
-    // Anchor frame tracking
-    emit(graph("SW Anchor Frame X", Hwp.translation().x()));
-    emit(graph("SW Anchor Frame Y", Hwp.translation().y()));
-    emit(graph("SW Anchor Frame Yaw", mat_to_rpy_intrinsic(Hwp.linear()).z()));
 
     // Position outputs
     emit(graph("SW Position X", Hwt_final.translation().x()));
@@ -840,21 +845,9 @@ void SensorFilter::update_odometry_sliding_window(
     emit(graph("SW Pitch", rpy_final_orientation.y()));
     emit(graph("SW Yaw", rpy_final_orientation.z()));
 
-    // Yaw source tracking
-    emit(graph("SW Yaw Source", (fault_status.stella_healthy && stella_available) ? 1.0 : 0.0));  // 1 = Stella, 0 = Fused
-    if (fault_status.stella_healthy && stella_available) {
-        emit(graph("SW Stella Yaw", mat_to_rpy_intrinsic(Hwt_stella.linear()).z()));
-    }
     emit(graph("SW Kinematic Yaw", kinematic_yaw));
     emit(graph("SW Fused Yaw", yaw_filter.get_yaw()));  // Current filter state
 
-    // Stella failure tracking
-    emit(graph("SW Stella Failure Event", stella_just_failed ? 1.0 : 0.0));
-
-    // Health status
-    emit(graph("SW Stella Health", fault_status.stella_confidence));
-    emit(graph("SW Kinematic Health", fault_status.kinematics_confidence));
-    emit(graph("SW Num Factors", static_cast<double>(all_factors.size())));
 
     // Compare with individual measurements
     if (fault_status.kinematics_healthy) {
@@ -866,36 +859,6 @@ void SensorFilter::update_odometry_sliding_window(
         emit(graph("SW Stella X", Hwt_stella.translation().x()));
         emit(graph("SW Stella Y", Hwt_stella.translation().y()));
     }
-
-    // // Optimization vs measurements comparison
-    // if (!all_factors.empty()) {
-    //     for (size_t i = 0; i < all_factors.size(); ++i) {
-    //         const auto& factor = all_factors[i];
-    //         std::string prefix = (factor.type == MeasurementFactor::STELLA) ? "SW Stella" : "SW Kinematic";
-    //         emit(graph(prefix + " Meas X " + std::to_string(i), factor.measurement.x()));
-    //         emit(graph(prefix + " Meas Y " + std::to_string(i), factor.measurement.y()));
-    //         emit(graph(prefix + " Weight " + std::to_string(i), factor.weight));
-    //     }
-    // }
-
-    // // Sliding window smoothness analysis
-    // if (pose_window_.size() > 1) {
-    //     // Velocity between last two poses
-    //     Eigen::Vector2d velocity = pose_window_.back() - pose_window_[pose_window_.size()-2];
-    //     emit(graph("SW Velocity X", velocity.x()));
-    //     emit(graph("SW Velocity Y", velocity.y()));
-    //     emit(graph("SW Velocity Magnitude", velocity.norm()));
-
-    //     // Average velocity over entire window
-    //     if (pose_window_.size() > 2) {
-    //         double total_distance = 0.0;
-    //         for (size_t i = 1; i < pose_window_.size(); ++i) {
-    //             total_distance += (pose_window_[i] - pose_window_[i-1]).norm();
-    //         }
-    //         double avg_velocity = total_distance / (pose_window_.size() - 1);
-    //         emit(graph("SW Avg Velocity", avg_velocity));
-    //     }
-    // }
 
 }
 

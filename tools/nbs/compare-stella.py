@@ -75,6 +75,9 @@ def run(nbs_file, output=None, **kwargs):
         os.makedirs(output, exist_ok=True)
         # Set matplotlib to non-interactive backend when saving
         plt.ioff()
+        print(f"Output directory created: {output}")
+    else:
+        print("No output directory specified - figures will be displayed only")
 
     print("Loading Sensor data...")
     # Load all sensor messages (contains Htw_gt, Htw_imukin, and Htw)
@@ -109,7 +112,7 @@ def run(nbs_file, output=None, **kwargs):
         timestamp_sec = packet.index_timestamp / 1e9
 
         # Skip first 8 seconds of data
-        if timestamp_sec - earliest_timestamp < 12.0:
+        if timestamp_sec - earliest_timestamp < 10.0:
             continue
 
         # Extract Ground Truth pose from Htw_gt
@@ -185,6 +188,14 @@ def run(nbs_file, output=None, **kwargs):
     stella_pitches_corrected = stella_pitches
     stella_yaws_corrected = stella_yaws
 
+    # Initialize IMU+Kinematics corrected arrays
+    imukin_xs_corrected = np.array(imukin_xs)
+    imukin_ys_corrected = np.array(imukin_ys)
+    imukin_zs_corrected = np.array(imukin_zs)
+    imukin_rolls_corrected = imukin_rolls
+    imukin_pitches_corrected = imukin_pitches
+    imukin_yaws_corrected = imukin_yaws
+
     if len(gt_xs) >= n_samples and len(stella_xs) >= n_samples:
         print(f"\nComputing offset from first {n_samples} samples (Stella vs Ground Truth) - after 8-second skip...")
 
@@ -222,13 +233,18 @@ def run(nbs_file, output=None, **kwargs):
         stella_pitches_corrected = stella_pitches + orientation_offset[1]
         stella_yaws_corrected = stella_yaws + orientation_offset[2]
 
+        # Apply the SAME offset to IMU+Kinematics data for fair comparison
+        if len(imukin_xs) > 0:
+            imukin_xs_corrected = np.array(imukin_xs) + position_offset[0]
+            imukin_ys_corrected = np.array(imukin_ys) + position_offset[1]
+            imukin_zs_corrected = np.array(imukin_zs) + position_offset[2]
+
+            imukin_rolls_corrected = imukin_rolls + orientation_offset[0]
+            imukin_pitches_corrected = imukin_pitches + orientation_offset[1]
+            imukin_yaws_corrected = imukin_yaws + orientation_offset[2]
+
     else:
         print(f"\nNot enough samples for Stella offset calculation (need {n_samples}, got GT:{len(gt_xs)}, Stella:{len(stella_xs)})")
-
-    # Convert IMU+Kinematics data to numpy arrays (no offset correction needed)
-    imukin_xs = np.array(imukin_xs)
-    imukin_ys = np.array(imukin_ys)
-    imukin_zs = np.array(imukin_zs)
 
     # Plot translations comparison
     plt.figure(figsize=(15, 10))
@@ -238,9 +254,10 @@ def run(nbs_file, output=None, **kwargs):
         plt.plot(gt_timestamps, gt_xs, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
         plt.plot(stella_timestamps, stella_xs_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
-        plt.plot(stella_timestamps, stella_xs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
+        # plt.plot(stella_timestamps, stella_xs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_xs, 'm-', label="IMU+Kinematics", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_xs_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        # plt.plot(imukin_timestamps, imukin_xs, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
     plt.ylabel("X Position [m]")
     plt.title("Position Comparison: Ground Truth vs Stella vs IMU+Kinematics")
     plt.legend()
@@ -251,9 +268,10 @@ def run(nbs_file, output=None, **kwargs):
         plt.plot(gt_timestamps, gt_ys, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
         plt.plot(stella_timestamps, stella_ys_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
-        plt.plot(stella_timestamps, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
+        # plt.plot(stella_timestamps, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_ys, 'm-', label="IMU+Kinematics", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_ys_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        # plt.plot(imukin_timestamps, imukin_ys, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
     plt.ylabel("Y Position [m]")
     plt.legend()
     plt.grid(True, alpha=0.3)
@@ -263,9 +281,10 @@ def run(nbs_file, output=None, **kwargs):
         plt.plot(gt_timestamps, gt_zs, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
         plt.plot(stella_timestamps, stella_zs_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
-        plt.plot(stella_timestamps, stella_zs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
+        # plt.plot(stella_timestamps, stella_zs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_zs, 'm-', label="IMU+Kinematics", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_zs_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        # plt.plot(imukin_timestamps, imukin_zs, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
     plt.ylabel("Z Position [m]")
     plt.xlabel("Time [s]")
     plt.legend()
@@ -274,9 +293,10 @@ def run(nbs_file, output=None, **kwargs):
     plt.tight_layout()
 
     if output:
-        plt.savefig(os.path.join(output, "position_comparison.png"), dpi=300, bbox_inches='tight')
+        position_fig_path = os.path.join(output, "01_position_comparison.png")
+        plt.savefig(position_fig_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
-        print(f"Saved position comparison plot to {os.path.join(output, 'position_comparison.png')}")
+        print(f"✓ Saved position comparison plot: {position_fig_path}")
     else:
         plt.show()
 
@@ -288,9 +308,10 @@ def run(nbs_file, output=None, **kwargs):
         plt.plot(gt_timestamps, gt_rolls, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
         plt.plot(stella_timestamps, stella_rolls_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
-        plt.plot(stella_timestamps, stella_rolls, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
+        # plt.plot(stella_timestamps, stella_rolls, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_rolls, 'm-', label="IMU+Kinematics", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_rolls_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        # plt.plot(imukin_timestamps, imukin_rolls, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
     plt.ylabel("Roll [degrees]")
     plt.title("Orientation Comparison: Ground Truth vs Stella vs IMU+Kinematics")
     plt.legend()
@@ -301,9 +322,10 @@ def run(nbs_file, output=None, **kwargs):
         plt.plot(gt_timestamps, gt_pitches, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
         plt.plot(stella_timestamps, stella_pitches_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
-        plt.plot(stella_timestamps, stella_pitches, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
+        # plt.plot(stella_timestamps, stella_pitches, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_pitches, 'm-', label="IMU+Kinematics", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_pitches_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        # plt.plot(imukin_timestamps, imukin_pitches, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
     plt.ylabel("Pitch [degrees]")
     plt.legend()
     plt.grid(True, alpha=0.3)
@@ -313,9 +335,10 @@ def run(nbs_file, output=None, **kwargs):
         plt.plot(gt_timestamps, gt_yaws, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
         plt.plot(stella_timestamps, stella_yaws_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
-        plt.plot(stella_timestamps, stella_yaws, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
+        # plt.plot(stella_timestamps, stella_yaws, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_yaws, 'm-', label="IMU+Kinematics", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_yaws_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        # plt.plot(imukin_timestamps, imukin_yaws, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
     plt.ylabel("Yaw [degrees]")
     plt.xlabel("Time [s]")
     plt.legend()
@@ -324,9 +347,10 @@ def run(nbs_file, output=None, **kwargs):
     plt.tight_layout()
 
     if output:
-        plt.savefig(os.path.join(output, "orientation_comparison.png"), dpi=300, bbox_inches='tight')
+        orientation_fig_path = os.path.join(output, "02_orientation_comparison.png")
+        plt.savefig(orientation_fig_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
-        print(f"Saved orientation comparison plot to {os.path.join(output, 'orientation_comparison.png')}")
+        print(f"✓ Saved orientation comparison plot: {orientation_fig_path}")
     else:
         plt.show()
 
@@ -338,11 +362,13 @@ def run(nbs_file, output=None, **kwargs):
     if len(stella_xs_corrected) > 0:
         plt.plot(stella_xs_corrected, stella_ys_corrected, 'b--', label="Stella (Corrected)", linewidth=2, alpha=0.8)
         plt.scatter(stella_xs_corrected[0], stella_ys_corrected[0], color='blue', s=100, label='Stella Start', zorder=5)
-    if len(stella_xs) > 0:
-        plt.plot(stella_xs, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.5)
-    if len(imukin_xs) > 0:
-        plt.plot(imukin_xs, imukin_ys, 'm-', label="IMU+Kinematics", linewidth=2, alpha=0.8)
-        plt.scatter(imukin_xs[0], imukin_ys[0], color='magenta', s=100, label='IMU+Kin Start', zorder=5)
+    # if len(stella_xs) > 0:
+    #     plt.plot(stella_xs, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.5)
+    if len(imukin_xs_corrected) > 0:
+        plt.plot(imukin_xs_corrected, imukin_ys_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2, alpha=0.8)
+        plt.scatter(imukin_xs_corrected[0], imukin_ys_corrected[0], color='magenta', s=100, label='IMU+Kin Start', zorder=5)
+    # if len(imukin_xs) > 0:
+    #     plt.plot(imukin_xs, imukin_ys, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.5)
     plt.xlabel('X Position [m]')
     plt.ylabel('Y Position [m]')
     plt.title('2D Trajectory Comparison: Ground Truth vs Stella vs IMU+Kinematics')
@@ -351,11 +377,35 @@ def run(nbs_file, output=None, **kwargs):
     plt.legend()
 
     if output:
-        plt.savefig(os.path.join(output, "trajectory_comparison.png"), dpi=300, bbox_inches='tight')
+        trajectory_fig_path = os.path.join(output, "03_trajectory_comparison.png")
+        plt.savefig(trajectory_fig_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
-        print(f"Saved trajectory comparison plot to {os.path.join(output, 'trajectory_comparison.png')}")
+        print(f"✓ Saved trajectory comparison plot: {trajectory_fig_path}")
     else:
         plt.show()
+
+    # Create a summary report
+    if output:
+        summary_path = os.path.join(output, "00_summary_report.txt")
+        with open(summary_path, 'w') as f:
+            f.write("Stella SLAM vs Ground Truth Comparison Report\n")
+            f.write("=" * 50 + "\n\n")
+            f.write(f"Data file: {nbs_file}\n")
+            f.write(f"Generated: {os.path.basename(output)}\n\n")
+
+            f.write("Generated Figures:\n")
+            f.write("- 01_position_comparison.png: X, Y, Z position over time\n")
+            f.write("- 02_orientation_comparison.png: Roll, Pitch, Yaw over time\n")
+            f.write("- 03_trajectory_comparison.png: 2D trajectory comparison\n\n")
+
+            f.write("Data Summary:\n")
+            f.write(f"Ground Truth: {len(gt_timestamps)} samples over {gt_timestamps[-1]:.2f} seconds\n" if len(gt_timestamps) > 0 else "Ground Truth: 0 samples\n")
+            f.write(f"Stella: {len(stella_timestamps)} samples over {stella_timestamps[-1]:.2f} seconds\n" if len(stella_timestamps) > 0 else "Stella: 0 samples\n")
+            f.write(f"IMU+Kinematics: {len(imukin_timestamps)} samples over {imukin_timestamps[-1]:.2f} seconds\n" if len(imukin_timestamps) > 0 else "IMU+Kinematics: 0 samples\n")
+
+        print(f"✓ Saved summary report: {summary_path}")
+        print(f"\n📁 All figures saved to: {output}")
+        print(f"📊 Generated {3} figures total")
 
     # Print comparison statistics
     print(f"\n=== Comparison Statistics ===")
@@ -409,7 +459,7 @@ def run(nbs_file, output=None, **kwargs):
             print("  Not enough overlapping data for Stella comparison")
 
     # Compare IMU+Kinematics vs Ground Truth
-    if len(gt_xs) > 0 and len(imukin_xs) > 0:
+    if len(gt_xs) > 0 and len(imukin_xs_corrected) > 0:
         print(f"\n--- IMU+Kinematics vs Ground Truth ---")
 
         # Only compare overlapping time periods
@@ -422,10 +472,10 @@ def run(nbs_file, output=None, **kwargs):
 
         if np.sum(gt_mask) > 1 and np.sum(imukin_mask) > 1:
             try:
-                # Interpolate IMU+Kinematics data to GT timestamps using numpy
-                imukin_x_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_xs[imukin_mask])
-                imukin_y_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_ys[imukin_mask])
-                imukin_z_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_zs[imukin_mask])
+                # Interpolate CORRECTED IMU+Kinematics data to GT timestamps using numpy
+                imukin_x_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_xs_corrected[imukin_mask])
+                imukin_y_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_ys_corrected[imukin_mask])
+                imukin_z_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_zs_corrected[imukin_mask])
 
                 # Calculate RMS errors
                 x_error = np.sqrt(np.mean((np.array(gt_xs)[gt_mask] - imukin_x_interp)**2))
@@ -438,9 +488,9 @@ def run(nbs_file, output=None, **kwargs):
                 print(f"  Z: {z_error:.3f} m")
 
                 # Also compute orientation errors
-                imukin_roll_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_rolls[imukin_mask])
-                imukin_pitch_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_pitches[imukin_mask])
-                imukin_yaw_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_yaws[imukin_mask])
+                imukin_roll_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_rolls_corrected[imukin_mask])
+                imukin_pitch_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_pitches_corrected[imukin_mask])
+                imukin_yaw_interp = np.interp(gt_timestamps[gt_mask], imukin_timestamps[imukin_mask], imukin_yaws_corrected[imukin_mask])
 
                 roll_error = np.sqrt(np.mean((gt_rolls[gt_mask] - imukin_roll_interp)**2))
                 pitch_error = np.sqrt(np.mean((gt_pitches[gt_mask] - imukin_pitch_interp)**2))
