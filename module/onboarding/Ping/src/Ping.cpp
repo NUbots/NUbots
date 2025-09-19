@@ -19,13 +19,10 @@ namespace module::onboarding {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Startup>().then([this] {
-            // Vibe
-        });
-
         on<Trigger<Pong>>().then([this](const Pong& pong_msg) {
+            message_count++;
+            log<INFO>("Ping message count: {}", message_count);
             auto ping_msg = std::make_unique<Ping>();
-            log<NUClear::INFO>("Ping");
             emit(ping_msg);
         });
     }
