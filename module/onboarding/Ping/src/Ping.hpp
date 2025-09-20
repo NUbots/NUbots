@@ -12,7 +12,7 @@ namespace module::onboarding {
         } cfg;
 
         /// @brief Counts the number of Pong messages received
-        std::size_t message_count = 0;
+        std::int32_t message_count = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the Ping reactor.
