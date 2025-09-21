@@ -248,139 +248,183 @@ def run(nbs_file, output=None, **kwargs):
 
     # Plot translations comparison
     plt.figure(figsize=(15, 10))
+    plt.suptitle("Position Comparison: Ground Truth vs Stella vs IMU+Kinematics", fontsize=18, fontweight='bold')
 
     plt.subplot(3, 1, 1)
     if len(gt_timestamps) > 0:
         plt.plot(gt_timestamps, gt_xs, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
-        plt.plot(stella_timestamps, stella_xs_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+        plt.plot(stella_timestamps, stella_xs_corrected, 'b--', label="Stella", linewidth=2)
         # plt.plot(stella_timestamps, stella_xs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_xs_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_xs_corrected, 'm-', label="IMU+Kinematics", linewidth=2)
         # plt.plot(imukin_timestamps, imukin_xs, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
-    plt.ylabel("X Position [m]")
-    plt.title("Position Comparison: Ground Truth vs Stella vs IMU+Kinematics")
-    plt.legend()
+    plt.ylabel("X Position [m]", fontsize=14, fontweight='bold')
+    plt.title("X-Axis Position Over Time", fontsize=14, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', which='major', labelsize=12)
 
     plt.subplot(3, 1, 2)
     if len(gt_timestamps) > 0:
         plt.plot(gt_timestamps, gt_ys, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
-        plt.plot(stella_timestamps, stella_ys_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+        plt.plot(stella_timestamps, stella_ys_corrected, 'b--', label="Stella", linewidth=2)
         # plt.plot(stella_timestamps, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_ys_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_ys_corrected, 'm-', label="IMU+Kinematics", linewidth=2)
         # plt.plot(imukin_timestamps, imukin_ys, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
-    plt.ylabel("Y Position [m]")
-    plt.legend()
+    plt.ylabel("Y Position [m]", fontsize=14, fontweight='bold')
+    plt.title("Y-Axis Position Over Time", fontsize=14, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', which='major', labelsize=12)
 
     plt.subplot(3, 1, 3)
     if len(gt_timestamps) > 0:
         plt.plot(gt_timestamps, gt_zs, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
-        plt.plot(stella_timestamps, stella_zs_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+        plt.plot(stella_timestamps, stella_zs_corrected, 'b--', label="Stella", linewidth=2)
         # plt.plot(stella_timestamps, stella_zs, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_zs_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_zs_corrected, 'm-', label="IMU+Kinematics", linewidth=2)
         # plt.plot(imukin_timestamps, imukin_zs, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
-    plt.ylabel("Z Position [m]")
-    plt.xlabel("Time [s]")
-    plt.legend()
+    plt.ylabel("Z Position [m]", fontsize=14, fontweight='bold')
+    plt.xlabel("Time [s]", fontsize=14, fontweight='bold')
+    plt.title("Z-Axis Position Over Time", fontsize=14, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', which='major', labelsize=12)
 
     plt.tight_layout()
 
     if output:
-        position_fig_path = os.path.join(output, "01_position_comparison.png")
-        plt.savefig(position_fig_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        # Save as PDF (vector format - best for publications)
+        position_fig_path_pdf = os.path.join(output, "01_position_comparison.pdf")
+        plt.savefig(position_fig_path_pdf, bbox_inches='tight', facecolor='white', edgecolor='none')
+
+        # Save as EPS (vector format - good for LaTeX)
+        position_fig_path_eps = os.path.join(output, "01_position_comparison.eps")
+        plt.savefig(position_fig_path_eps, bbox_inches='tight', facecolor='white', edgecolor='none')
+
+        # Save as PNG (raster format - good for presentations)
+        position_fig_path_png = os.path.join(output, "01_position_comparison.png")
+        plt.savefig(position_fig_path_png, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+
         plt.close()
-        print(f"✓ Saved position comparison plot: {position_fig_path}")
+        print(f"✓ Saved position comparison plot: {position_fig_path_pdf}, {position_fig_path_eps}, {position_fig_path_png}")
     else:
         plt.show()
 
     # Plot orientation comparison
     plt.figure(figsize=(15, 10))
+    plt.suptitle("Orientation Comparison: Ground Truth vs Stella vs IMU+Kinematics", fontsize=18, fontweight='bold')
 
     plt.subplot(3, 1, 1)
     if len(gt_timestamps) > 0:
         plt.plot(gt_timestamps, gt_rolls, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
-        plt.plot(stella_timestamps, stella_rolls_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+        plt.plot(stella_timestamps, stella_rolls_corrected, 'b--', label="Stella", linewidth=2)
         # plt.plot(stella_timestamps, stella_rolls, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_rolls_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_rolls_corrected, 'm-', label="IMU+Kinematics", linewidth=2)
         # plt.plot(imukin_timestamps, imukin_rolls, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
-    plt.ylabel("Roll [degrees]")
-    plt.title("Orientation Comparison: Ground Truth vs Stella vs IMU+Kinematics")
-    plt.legend()
+    plt.ylabel("Roll [°]", fontsize=14, fontweight='bold')
+    plt.title("Roll Angle Over Time", fontsize=14, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', which='major', labelsize=12)
 
     plt.subplot(3, 1, 2)
     if len(gt_timestamps) > 0:
         plt.plot(gt_timestamps, gt_pitches, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
-        plt.plot(stella_timestamps, stella_pitches_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+        plt.plot(stella_timestamps, stella_pitches_corrected, 'b--', label="Stella", linewidth=2)
         # plt.plot(stella_timestamps, stella_pitches, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_pitches_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_pitches_corrected, 'm-', label="IMU+Kinematics", linewidth=2)
         # plt.plot(imukin_timestamps, imukin_pitches, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
-    plt.ylabel("Pitch [degrees]")
-    plt.legend()
+    plt.ylabel("Pitch [°]", fontsize=14, fontweight='bold')
+    plt.title("Pitch Angle Over Time", fontsize=14, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', which='major', labelsize=12)
 
     plt.subplot(3, 1, 3)
     if len(gt_timestamps) > 0:
         plt.plot(gt_timestamps, gt_yaws, 'r-', label="Ground Truth", linewidth=2)
     if len(stella_timestamps) > 0:
-        plt.plot(stella_timestamps, stella_yaws_corrected, 'b--', label="Stella (Corrected)", linewidth=2)
+        plt.plot(stella_timestamps, stella_yaws_corrected, 'b--', label="Stella", linewidth=2)
         # plt.plot(stella_timestamps, stella_yaws, 'g:', label="Stella (Original)", linewidth=1, alpha=0.7)
     if len(imukin_timestamps) > 0:
-        plt.plot(imukin_timestamps, imukin_yaws_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2)
+        plt.plot(imukin_timestamps, imukin_yaws_corrected, 'm-', label="IMU+Kinematics", linewidth=2)
         # plt.plot(imukin_timestamps, imukin_yaws, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.7)
-    plt.ylabel("Yaw [degrees]")
-    plt.xlabel("Time [s]")
-    plt.legend()
+    plt.ylabel("Yaw [°]", fontsize=14, fontweight='bold')
+    plt.xlabel("Time [s]", fontsize=14, fontweight='bold')
+    plt.title("Yaw Angle Over Time", fontsize=14, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', which='major', labelsize=12)
 
     plt.tight_layout()
 
     if output:
-        orientation_fig_path = os.path.join(output, "02_orientation_comparison.png")
-        plt.savefig(orientation_fig_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        # Save as PDF (vector format - best for publications)
+        orientation_fig_path_pdf = os.path.join(output, "02_orientation_comparison.pdf")
+        plt.savefig(orientation_fig_path_pdf, bbox_inches='tight', facecolor='white', edgecolor='none')
+
+        # Save as EPS (vector format - good for LaTeX)
+        orientation_fig_path_eps = os.path.join(output, "02_orientation_comparison.eps")
+        plt.savefig(orientation_fig_path_eps, bbox_inches='tight', facecolor='white', edgecolor='none')
+
+        # Save as PNG (raster format - good for presentations)
+        orientation_fig_path_png = os.path.join(output, "02_orientation_comparison.png")
+        plt.savefig(orientation_fig_path_png, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+
         plt.close()
-        print(f"✓ Saved orientation comparison plot: {orientation_fig_path}")
+        print(f"✓ Saved orientation comparison plot: {orientation_fig_path_pdf}, {orientation_fig_path_eps}, {orientation_fig_path_png}")
     else:
         plt.show()
 
     # Plot 2D trajectory comparison
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(12, 10))
+    plt.suptitle('2D Trajectory Comparison: Ground Truth vs Stella vs IMU+Kinematics', fontsize=18, fontweight='bold')
+
     if len(gt_xs) > 0:
-        plt.plot(gt_xs, gt_ys, 'r-', label="Ground Truth", linewidth=2, alpha=0.8)
-        plt.scatter(gt_xs[0], gt_ys[0], color='red', s=100, label='GT Start', zorder=5)
+        plt.plot(gt_xs, gt_ys, 'r-', label="Ground Truth", linewidth=3, alpha=0.8)
+        plt.scatter(gt_xs[0], gt_ys[0], color='red', s=120, label='GT Start', zorder=5)
     if len(stella_xs_corrected) > 0:
-        plt.plot(stella_xs_corrected, stella_ys_corrected, 'b--', label="Stella (Corrected)", linewidth=2, alpha=0.8)
-        plt.scatter(stella_xs_corrected[0], stella_ys_corrected[0], color='blue', s=100, label='Stella Start', zorder=5)
+        plt.plot(stella_xs_corrected, stella_ys_corrected, 'b--', label="Stella", linewidth=3, alpha=0.8)
+        plt.scatter(stella_xs_corrected[0], stella_ys_corrected[0], color='blue', s=120, label='Stella Start', zorder=5)
     # if len(stella_xs) > 0:
     #     plt.plot(stella_xs, stella_ys, 'g:', label="Stella (Original)", linewidth=1, alpha=0.5)
     if len(imukin_xs_corrected) > 0:
-        plt.plot(imukin_xs_corrected, imukin_ys_corrected, 'm-', label="IMU+Kinematics (Corrected)", linewidth=2, alpha=0.8)
-        plt.scatter(imukin_xs_corrected[0], imukin_ys_corrected[0], color='magenta', s=100, label='IMU+Kin Start', zorder=5)
+        plt.plot(imukin_xs_corrected, imukin_ys_corrected, 'm-', label="IMU+Kinematics", linewidth=3, alpha=0.8)
+        plt.scatter(imukin_xs_corrected[0], imukin_ys_corrected[0], color='magenta', s=120, label='IMU+Kin Start', zorder=5)
     # if len(imukin_xs) > 0:
     #     plt.plot(imukin_xs, imukin_ys, 'c:', label="IMU+Kinematics (Original)", linewidth=1, alpha=0.5)
-    plt.xlabel('X Position [m]')
-    plt.ylabel('Y Position [m]')
-    plt.title('2D Trajectory Comparison: Ground Truth vs Stella vs IMU+Kinematics')
+    plt.xlabel('X Position [m]', fontsize=16, fontweight='bold')
+    plt.ylabel('Y Position [m]', fontsize=16, fontweight='bold')
     plt.grid(True, alpha=0.3)
     plt.axis('equal')
-    plt.legend()
+    plt.legend(fontsize=14)
+    plt.tick_params(axis='both', which='major', labelsize=14)
 
     if output:
-        trajectory_fig_path = os.path.join(output, "03_trajectory_comparison.png")
-        plt.savefig(trajectory_fig_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        # Save as PDF (vector format - best for publications)
+        trajectory_fig_path_pdf = os.path.join(output, "03_trajectory_comparison.pdf")
+        plt.savefig(trajectory_fig_path_pdf, bbox_inches='tight', facecolor='white', edgecolor='none')
+
+        # Save as EPS (vector format - good for LaTeX)
+        trajectory_fig_path_eps = os.path.join(output, "03_trajectory_comparison.eps")
+        plt.savefig(trajectory_fig_path_eps, bbox_inches='tight', facecolor='white', edgecolor='none')
+
+        # Save as PNG (raster format - good for presentations)
+        trajectory_fig_path_png = os.path.join(output, "03_trajectory_comparison.png")
+        plt.savefig(trajectory_fig_path_png, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+
         plt.close()
-        print(f"✓ Saved trajectory comparison plot: {trajectory_fig_path}")
+        print(f"✓ Saved trajectory comparison plot: {trajectory_fig_path_pdf}, {trajectory_fig_path_eps}, {trajectory_fig_path_png}")
     else:
         plt.show()
 
