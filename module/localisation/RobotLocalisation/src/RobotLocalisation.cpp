@@ -29,6 +29,7 @@
 #include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
+#include "utility/support/logging/JsonLogger.hpp"
 
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
@@ -62,8 +63,10 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    RobotLocalisation::~RobotLocalisation() = default;
+
     RobotLocalisation::RobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)), json_logger(std::make_unique<utility::support::logging::JsonLogger>(&log_level)) {
 
         on<Configuration>("RobotLocalisation.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RobotLocalisation.yaml
@@ -278,9 +281,12 @@ namespace module::localisation {
         tracked_robots = std::move(new_tracked_robots);
     }
 
-    void RobotLocalisation::debug_info() const {
+    void RobotLocalisation::debug_info() {
         // Print tracked_robots ids
         log<DEBUG>("Robots tracked:");
+
+
+
         for (const auto& tracked_robot : tracked_robots) {
             log<DEBUG>("\tID: ",
                        tracked_robot.id,
@@ -290,6 +296,29 @@ namespace module::localisation {
                        tracked_robot.purpose.player_id,
                        "position: ",
                        RobotModel<double>::StateVec(tracked_robot.ukf.get_state()).rRWw.transpose());
+        }
+
+        // Write to JSON file if enabled
+        if (json_logger && json_logger->is_enabled()) {
+            // Create a JSON object for this update
+            nlohmann::json update;
+            update["timestamp"] = std::chrono::system_clock::to_time_t(NUClear::clock::now());
+            update["robots"] = nlohmann::json::array();
+            
+            for (const auto& tracked_robot : tracked_robots) {
+                auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
+                nlohmann::json robot;
+                robot["id"] = tracked_robot.id;
+                robot["teammate"] = tracked_robot.teammate;
+                robot["player_id"] = tracked_robot.purpose.player_id;
+                robot["position"] = {
+                    {"x", state.rRWw.x()},
+                    {"y", state.rRWw.y()}
+                };
+                update["robots"].push_back(robot);
+            }
+
+            json_logger->log(update);
         }
     }
 

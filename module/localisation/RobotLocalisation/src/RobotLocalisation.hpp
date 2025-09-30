@@ -133,6 +133,9 @@ namespace module::localisation {
         /// As it is unbounded, an unsigned long is used to store it
         unsigned long next_id = 0;
 
+        /// @brief JSON logger for writing robot tracking data
+        std::unique_ptr<utility::support::logging::JsonLogger> json_logger;
+
         /// @brief How many times per second to run the maintenance step
         static constexpr int UPDATE_RATE = 15;
 
@@ -155,12 +158,22 @@ namespace module::localisation {
                          const message::localisation::Field& field,
                          const message::support::FieldDescription& field_desc);
 
-        /// @brief Print out the current state of the tracked robots
-        void debug_info() const;
+        /// @brief Print out the current state of the tracked robots and write to JSON if enabled
+        void debug_info();
+
+        /// @brief Initialize the JSON output file
+        /// @param file_path Path where the JSON file should be created/opened
+        void init_json_logging(const std::string& file_path);
+
+        /// @brief Close the JSON output file if it's open
+        void close_json_logging();
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Destructor to ensure proper cleanup of file resources
+        ~RobotLocalisation();
     };
 
 }  // namespace module::localisation
