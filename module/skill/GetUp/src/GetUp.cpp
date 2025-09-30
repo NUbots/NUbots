@@ -59,6 +59,7 @@ namespace module::skill {
             cfg.getup_back        = config["scripts"]["getup_back"].as<std::vector<std::string>>();
             cfg.getup_upright     = config["scripts"]["getup_upright"].as<std::vector<std::string>>();
             cfg.getup_upside_down = config["scripts"]["getup_upside_down"].as<std::vector<std::string>>();
+            cfg.getup_side        = config["scripts"]["getup_side"].as<std::vector<std::string>>();
         });
 
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then([this](const RunReason& run_reason,
@@ -98,6 +99,8 @@ namespace module::skill {
                 // torso z is mostly world -z
                 bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
 
+                emit(std::make_unique<Stability>(Stability::FALLEN));
+
                 if (on_front) {
                     log<INFO>("Getting up from front");
                     emit<Task>(load_script<BodySequence>(cfg.getup_front));
@@ -107,10 +110,8 @@ namespace module::skill {
                     emit<Task>(load_script<BodySequence>(cfg.getup_back));
                 }
                 else if (on_right || on_left) {
-                    log<INFO>("Landed on side, delaying...");
-                    // Delay
-                    emit<Task>(
-                        std::make_unique<Wait>(NUClear::clock::now() + std::chrono::milliseconds(cfg.delay_time)));
+                    log<INFO>("Landed on side, rolling");
+                    emit<Task>(load_script<BodySequence>(cfg.getup_side));
                 }
                 else if (upright) {
                     log<INFO>("Getting up from upright");

@@ -43,7 +43,6 @@
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/FindPurpose.hpp"
-#include "message/purpose/Goalie.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Look.hpp"
@@ -86,7 +85,6 @@ namespace module::purpose {
             this->log_level        = config["log_level"].as<NUClear::LogLevel>();
             cfg.force_playing      = config["force_playing"].as<bool>();
             cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
-            cfg.is_goalie          = config["is_goalie"].as<bool>();
             cfg.startup_delay      = config["startup_delay"].as<int>();
 
             if (cfg.force_playing) {
@@ -115,14 +113,17 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>, Every<1, Per<std::chrono::seconds>>>().then([this] {
-            if (cfg.is_goalie) {
-                emit<Task>(std::make_unique<Goalie>());
-            }
-            else {
-                emit<Task>(std::make_unique<FieldPlayer>());
-            }
-        });
+        on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                if (game_state.self.goalie) {
+                    log<DEBUG>("Playing as a goalie");
+                    emit<Task>(std::make_unique<Goalie>());
+                }
+                else {
+                    log<DEBUG>("Playing as a field player");
+                    emit<Task>(std::make_unique<FieldPlayer>());
+                }
+            });
 
         on<Trigger<Penalisation>, With<GlobalConfig>, With<GameState>>().then(
             [this](const Penalisation& self_penalisation,
@@ -144,8 +145,9 @@ namespace module::purpose {
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
-            if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
+            if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                emit<Task>(std::make_unique<FallRecovery>(), 2);
             }
         });
 
@@ -178,9 +180,9 @@ namespace module::purpose {
 
         on<Trigger<ButtonMiddleUp>>().then([this] { emit<Scope::INLINE>(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<DisableIdle>>().then([this] {
-            // If the robot is not idle, restart the Director graph for the soccer scenario!
-            if (!idle) {
+        on<Trigger<DisableIdle>, With<GameState>>().then([this](const GameState& game_state) {
+            // If the robot is not idle nor penalised, restart the Director graph for the soccer scenario!
+            if (!idle && game_state.self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 emit<Task>(std::make_unique<FallRecovery>(), 2);
                 log<INFO>("Idle mode disabled");
