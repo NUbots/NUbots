@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package message.onboarding;
 
-message Ping {
+message Pong {
     int32 value = 1;
     int32 iteration = 2;
 }
