@@ -6,10 +6,11 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   actuation::KinematicsConfiguration
-  platform::${SUBCONTROLLER}::HardwareIO
+  #platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   extension::Director
   actuation::Kinematics
   actuation::Servos
   onboarding::Ping
+  onboarding::Pong
 )
