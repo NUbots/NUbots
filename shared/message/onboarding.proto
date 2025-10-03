@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package message.onboarding;
+
+message new_n {
+    int32 n = 1;
+}
