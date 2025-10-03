@@ -19,7 +19,6 @@ namespace module {
         });
 
         on<Trigger<new_k>>().then([this](const new_k& k) {
-            log<INFO>("what the helly");
             cfg.running_total += k.k;
             log<INFO>("Received new_k with k =", k.k, "running total is now", cfg.running_total);
             auto message_check   = std::make_unique<check>();

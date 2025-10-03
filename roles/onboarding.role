@@ -1,8 +1,13 @@
 nuclear_role(
-  # FileWatcher, Signal Catcher and ConsoleLogHandler Must Go First
   extension::FileWatcher
-  support::SignalCatcher
   support::logging::ConsoleLogHandler
+  actuation::KinematicsConfiguration
+  platform::${SUBCONTROLLER}::HardwareIO
+  input::SensorFilter
+  extension::Director
+  actuation::Kinematics
+  actuation::Servos
   starter
   adder
+  checker
 )
