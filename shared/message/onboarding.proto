@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package message.onboarding;
 
-message new_n {
-    int32 n = 1;
+message new_k {
+    int32 k = 1;
+}
+
+message check {
+    int32 value = 1;
 }

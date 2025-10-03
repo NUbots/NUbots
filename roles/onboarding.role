@@ -4,4 +4,5 @@ nuclear_role(
   support::SignalCatcher
   support::logging::ConsoleLogHandler
   starter
+  adder
 )

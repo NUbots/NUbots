@@ -7,7 +7,7 @@
 namespace module {
 
     using extension::Configuration;
-    using message::onboarding::new_n;
+    using message::onboarding::new_k;
 
     starter::starter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
