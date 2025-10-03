@@ -1,4 +1,4 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
-k: 1
-n: 10
+k: 1 ## this one gets iterated, sent to adder
+n: 1 ## this one is the first value to iterate k from

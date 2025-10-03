@@ -20,10 +20,10 @@ namespace module {
         });
         on<Startup>().then([this] {
             for (int i = 1; i <= 10; ++i) {
-                NUClear::log<INFO>("Sending new_n with n =", i);
-                auto message_n = std::make_unique<message::onboarding::new_n>();
-                message_n->n   = i;
-                emit(message_n);
+                NUClear::log<INFO>("Sending new_k with k =", i);
+                auto message_k = std::make_unique<message::onboarding::new_k>();
+                message_k->k   = i;
+                emit(message_k);
             }
         });
     }
