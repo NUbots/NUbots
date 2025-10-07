@@ -34,7 +34,7 @@ use_hungarian: true
 out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
-reset_on_cost: true
+reset_on_cost: false
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
@@ -81,4 +81,4 @@ exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
   # [x, y, theta] - Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
-  alpha: [0.1, 0.1, 0.2]
+  alpha: [0.1, 0.1, 0.5]
