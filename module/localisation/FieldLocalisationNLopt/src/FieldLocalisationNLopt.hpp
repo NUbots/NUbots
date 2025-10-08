@@ -41,7 +41,6 @@
 
 #include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
-#include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -176,9 +175,7 @@ namespace module::localisation {
     class FieldLocalisationNLopt : public NUClear::Reactor {
     private:
         // Define the model dimensions
-        static constexpr size_t n_states       = 3;
-        static constexpr size_t n_inputs       = 0;
-        static constexpr size_t n_measurements = 3;
+        static constexpr size_t n_states = 3;
 
         /// @brief Stores configuration values
         struct Config {
@@ -236,24 +233,6 @@ namespace module::localisation {
             /// @brief Maximum number of evaluations for the optimization
             size_t maxeval = 0;
 
-            /// @brief Process model
-            Eigen::Matrix3d A = Eigen::Matrix3d::Identity();
-
-            /// @brief Input model
-            Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n_states, n_inputs);
-
-            /// @brief Measurement model
-            Eigen::MatrixXd C = Eigen::MatrixXd::Identity(n_measurements, n_states);
-
-            /// @brief Process noise covariance
-            Eigen::Matrix3d Q = Eigen::Matrix3d::Identity();
-
-            /// @brief Measurement noise covariance
-            Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
-
-            /// @brief initial covariance
-            Eigen::Matrix<double, n_states, n_states> P0 = Eigen::Matrix<double, n_states, n_states>::Identity();
-
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
 
@@ -277,13 +256,20 @@ namespace module::localisation {
             double window_size = 0.0;
             /// @brief Number of yaw angles to try during uncertainty reset
             int num_angles = 0;
-        } cfg;
 
-        // Kalman filter
-        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
+            /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
+            /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
+            Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
+        } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
+
+        /// @brief Filtered state vector using exponential filter
+        Eigen::Vector3d filtered_state = Eigen::Vector3d::Zero();
+
+        /// @brief Bool indicating if this is the first measurement
+        bool first_measurement = true;
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};

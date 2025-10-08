@@ -34,7 +34,7 @@ use_hungarian: true
 out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
-reset_on_cost: true
+reset_on_cost: false
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
@@ -49,7 +49,7 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 5.0
+field_line_distance_weight: 1.0
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 5.0
@@ -77,27 +77,8 @@ opt:
   # Maximum number of evaluations for the optimization
   maxeval: 1000
 
-kalman:
-  # Continuous time process model:
-  A:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-  # Continuous time input model: No inputs
-  B: []
-  # Continuous time measurement model:
-  C:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-
-  # Process model noise
-  Q:
-    - [1e-1, 0, 0]
-    - [0, 1e-1, 0]
-    - [0, 0, 1e-1]
-  # Measurement model noise
-  R:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
+exponential_filter:
+  # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
+  # [x, y, theta] - Higher values = more responsive to new measurements
+  # Lower values = more smoothed/filtered output
+  alpha: [0.1, 0.1, 0.5]

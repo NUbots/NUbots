@@ -32,6 +32,7 @@ import shutil  # For file operations
 import subprocess
 import sys
 
+import optuna
 from ruamel.yaml import YAML
 from termcolor import cprint
 
@@ -66,10 +67,9 @@ def modify_yaml(params, localisation_yaml_path):
     ]
     localisation_config["max_association_distance"] = params["max_association_distance"]
 
-    Q_values = [params["Q_x"], params["Q_y"], params["Q_theta"]]
-    R_values = [params["R_x"], params["R_y"], params["R_theta"]]
-    localisation_config["kalman"]["Q"] = [[Q_values[0], 0, 0], [0, Q_values[1], 0], [0, 0, Q_values[2]]]
-    localisation_config["kalman"]["R"] = [[R_values[0], 0, 0], [0, R_values[1], 0], [0, 0, R_values[2]]]
+    # Update exponential filter alpha values
+    alpha_values = [params["alpha_x"], params["alpha_y"], params["alpha_theta"]]
+    localisation_config["exponential_filter"]["alpha"] = alpha_values
 
     with open(localisation_yaml_path, "w") as file:
         yaml_parser.dump(localisation_config, file)
@@ -158,12 +158,9 @@ def objective(trial):
     change_limit_y = trial.suggest_float("change_limit_y", 1e-2, 1.0)
     change_limit_theta = trial.suggest_float("change_limit_theta", 1e-2, 1.0)
     max_association_distance = trial.suggest_float("max_association_distance", 1e-2, 10.0)
-    Q_x = trial.suggest_float("Q_x", 1e-6, 1e-2, log=True)
-    Q_y = trial.suggest_float("Q_y", 1e-6, 1e-2, log=True)
-    Q_theta = trial.suggest_float("Q_theta", 1e-6, 1e-2, log=True)
-    R_x = trial.suggest_float("R_x", 1e-2, 1e1)
-    R_y = trial.suggest_float("R_y", 1e-2, 1e1)
-    R_theta = trial.suggest_float("R_theta", 1e-2, 1e1)
+    alpha_x = trial.suggest_float("alpha_x", 1e-2, 1.0)
+    alpha_y = trial.suggest_float("alpha_y", 1e-2, 1.0)
+    alpha_theta = trial.suggest_float("alpha_theta", 1e-2, 1.0)
 
     params = {
         "field_line_distance_weight": field_line_distance_weight,
@@ -174,12 +171,9 @@ def objective(trial):
         "change_limit_y": change_limit_y,
         "change_limit_theta": change_limit_theta,
         "max_association_distance": max_association_distance,
-        "Q_x": Q_x,
-        "Q_y": Q_y,
-        "Q_theta": Q_theta,
-        "R_x": R_x,
-        "R_y": R_y,
-        "R_theta": R_theta,
+        "alpha_x": alpha_x,
+        "alpha_y": alpha_y,
+        "alpha_theta": alpha_theta,
     }
 
     modify_yaml(params, LOCALISATION_YAML_PATH)

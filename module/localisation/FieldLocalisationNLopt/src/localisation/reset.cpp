@@ -96,10 +96,10 @@ namespace module::localisation {
         if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
             log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
             // Set the state to the best hypothesis
-            state = hypotheses[0].first;
-            kf.set_state(state);
+            state              = hypotheses[0].first;
+            filtered_state     = state;
+            first_measurement  = true;
             last_certain_state = state;  // Update the last certain state
-            kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
             return;
         }
 
@@ -132,10 +132,10 @@ namespace module::localisation {
         });
 
         // Set the state to the best hypothesis
-        state = hypotheses[0].first;
-        kf.set_state(state);
+        state              = hypotheses[0].first;
+        filtered_state     = state;
+        first_measurement  = true;
         last_certain_state = state;  // Update the last certain state
-        kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
     }
 
 }  // namespace module::localisation
