@@ -68,6 +68,16 @@ Where:
 
 Optimisation is carried out using NLopt's COBYLA (Constrained Optimisation BY Linear Approximations) algorithm, respecting the constraints and bounds set on the changes allowed in the state to ensure plausible and robust field localisation.
 
+### Cost Threshold and Update Acceptance
+
+The module uses a cost threshold (`cost_threshold`) to determine whether to accept optimization results:
+
+- **Accepting Updates**: Optimization results are only applied if their cost is below `cost_threshold`. This prevents poor localizations from corrupting the state estimate.
+- **Rejecting Updates**: When the cost exceeds the threshold, the optimization result is rejected and the previous filtered state is maintained. A warning is logged and a counter is incremented.
+- **Triggering Resets**: If the cost exceeds the threshold for `max_over_cost` consecutive updates (and `reset_delay` has elapsed), an uncertainty reset is triggered.
+
+This mechanism provides robustness against temporary vision anomalies or ambiguous field features while maintaining accurate localization when observations are reliable.
+
 ### Reset
 
 A soft reset `ResetFieldLocalisation` is used when the robot is starting on the side of the field (or in a custom position specified in the configuration).

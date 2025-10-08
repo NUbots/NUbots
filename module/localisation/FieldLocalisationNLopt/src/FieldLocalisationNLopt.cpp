@@ -226,6 +226,7 @@ namespace module::localisation {
                     }
 
                     double chosen_state_cost = 0.0;
+                    Eigen::Vector3d proposed_state;
 
                     if (startup && cfg.starting_side == StartingSide::EITHER) {
                         // Find the best initial state to use based on the optimisation results of each
@@ -239,8 +240,10 @@ namespace module::localisation {
                             std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
                                 return a.second < b.second;
                             });
-                        state              = best_hypothesis->first;
-                        chosen_state_cost  = best_hypothesis->second;
+                        proposed_state    = best_hypothesis->first;
+                        chosen_state_cost = best_hypothesis->second;
+                        // For startup, always accept the best hypothesis
+                        state              = proposed_state;
                         last_certain_state = state;
                         filtered_state     = state;
                         first_measurement  = true;
@@ -250,43 +253,56 @@ namespace module::localisation {
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
                             run_field_line_optimisation(filtered_state, field_lines.rPWw, field_intersections, goals);
-                        state             = opt_results.first;
+                        proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
-                    }
 
-                    // Apply exponential filter to smooth the state estimate
-                    if (first_measurement) {
-                        filtered_state    = state;
-                        first_measurement = false;
-                    }
-                    else {
-                        filtered_state = cfg.alpha.cwiseProduct(state)
-                                         + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
-                    }
+                        // Only accept the optimization result if the cost is below the threshold
+                        if (chosen_state_cost < cfg.cost_threshold) {
+                            state = proposed_state;
 
-                    // Check if uncertainty is too high
-                    emit(graph("Cost", chosen_state_cost));
-                    if (cfg.reset_on_cost && (chosen_state_cost > cfg.cost_threshold)
-                        && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
-                        num_over_cost++;
-                        // Cost has been high too many times, reset the localisation
-                        if (num_over_cost > cfg.max_over_cost) {
-                            // Emit that we are resetting, eg for behaviour
-                            emit(std::make_unique<UncertaintyResetFieldLocalisation>());
-                            // Reset localisation by finding a new low cost state
-                            uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
-                            // Reset variables
-                            num_over_cost = 0;
-                            last_reset    = NUClear::clock::now();
-                            // Let other modules know that localisation has finished resetting
-                            emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
+                            // Apply exponential filter to smooth the state estimate
+                            if (first_measurement) {
+                                filtered_state    = state;
+                                first_measurement = false;
+                            }
+                            else {
+                                filtered_state = cfg.alpha.cwiseProduct(state)
+                                                 + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
+                            }
+
+                            // Update the last certain state and reset counter
+                            last_certain_state = filtered_state;
+                            num_over_cost      = 0;
+                        }
+                        else {
+                            // Reject the update, keep previous filtered state
+                            log<DEBUG>("Rejecting optimization result: cost ",
+                                       chosen_state_cost,
+                                       " exceeds threshold ",
+                                       cfg.cost_threshold);
+                            // Keep the current filtered_state unchanged
+                            // Increment the over-cost counter for potential reset
+                            num_over_cost++;
                         }
                     }
 
-                    else if ((chosen_state_cost < cfg.cost_threshold)) {
-                        // Update the last certain state
-                        num_over_cost      = 0;
-                        last_certain_state = filtered_state;
+                    // Check if uncertainty is too high and trigger reset if needed
+                    emit(graph("Cost", chosen_state_cost));
+                    if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
+                        && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
+                        // Cost has been high too many times, reset the localisation
+                        log<WARN>("Cost exceeded threshold ",
+                                  cfg.max_over_cost,
+                                  " times, triggering uncertainty reset");
+                        // Emit that we are resetting, eg for behaviour
+                        emit(std::make_unique<UncertaintyResetFieldLocalisation>());
+                        // Reset localisation by finding a new low cost state
+                        uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
+                        // Reset variables
+                        num_over_cost = 0;
+                        last_reset    = NUClear::clock::now();
+                        // Let other modules know that localisation has finished resetting
+                        emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
                     }
 
                     // Emit the field message
