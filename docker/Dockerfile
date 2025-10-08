@@ -130,7 +130,6 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     --build-system cmake \
     --configure-path "llvm" \
     --patch https://gist.githubusercontent.com/ZeoNyph/415e3cf6230c791e96d1451357781261/raw/1a014be3fad04de7a9286019948cfd367952f1da/llvm_patch.patch \
-    --jobs 16 \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
@@ -142,7 +141,6 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     -DLLVM_TARGETS_TO_BUILD=ARM
 # SPIRV LLVM Translator
 RUN install-from-source http://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/2d4f2e7a7968392de017fcd3e4b503a75f0c12d2.tar.gz\
-    --jobs 8 \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
@@ -174,7 +172,6 @@ RUN pip install pyyaml mako
 # Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/v2.11.7.tar.gz \
     --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch\
-    --jobs 16 \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \

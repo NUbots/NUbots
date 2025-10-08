@@ -187,7 +187,7 @@ def handle_cmake(archive, args, env):
             f"{build}",
             *args.extra_args,
             f"-DCMAKE_BUILD_TYPE=Release",
-            f"-DCMAKE_POLICY_MINIMUM_REQUIRED=3.5",
+            f"-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
             *(
                 [f"-DCMAKE_TOOLCHAIN_FILE={os.path.join(args.prefix, 'toolchain.cmake')}"]
                 if not args.no_toolchain
