@@ -277,6 +277,7 @@ RUN mkdir build && cd build && \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
     -DENABLE_CPPLINT:BOOL='OFF' \
     -DCMAKE_CXX_STANDARD='17' \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -Wno-dev && \
     make -j$(nproc) && make install
 
