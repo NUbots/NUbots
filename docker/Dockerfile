@@ -41,7 +41,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base-devel-20250511.0.348143
+FROM archlinux:base-devel-20251005.0.430597
 
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -130,7 +130,7 @@ RUN install-from-source https://github.com/llvm/llvm-project/releases/download/l
     --build-system cmake \
     --configure-path "llvm" \
     --patch https://gist.githubusercontent.com/ZeoNyph/415e3cf6230c791e96d1451357781261/raw/1a014be3fad04de7a9286019948cfd367952f1da/llvm_patch.patch \
-    --jobs 8\
+    --jobs 16 \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
@@ -174,7 +174,7 @@ RUN pip install pyyaml mako
 # Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/v2.11.7.tar.gz \
     --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch\
-    --jobs 12 \
+    --jobs 16 \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
@@ -220,10 +220,10 @@ RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/ta
     -DGMM_DIR=${prefix}
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
 
-    # OpenCL loader library
-    RUN install-package ruby
+# OpenCL loader library
+RUN install-package ruby
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
 
 # OpenCV
