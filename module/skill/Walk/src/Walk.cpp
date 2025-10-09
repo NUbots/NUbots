@@ -57,6 +57,7 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
+    using message::skill::SmoothWalk;
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
@@ -66,6 +67,11 @@ namespace module::skill {
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
+
+    // Same message with a new name!
+    struct CurrentWalkTask : WalkTask {
+        using WalkTask::WalkTask;
+    };
 
     Walk::Walk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -83,7 +89,9 @@ namespace module::skill {
             cfg.walk_generator_parameters.torso_position_offset =
                 config["walk"]["torso"]["position_offset"].as<Expression>();
             cfg.walk_generator_parameters.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
-            cfg.walk_generator_parameters.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
+            cfg.walk_generator_parameters.torso_start_sway_offset =
+                config["walk"]["torso"]["start_sway_offset"].as<Expression>();
+            cfg.walk_generator_parameters.torso_sway_ratio = config["walk"]["torso"]["sway_ratio"].as<double>();
             cfg.walk_generator_parameters.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
             walk_generator.set_parameters(cfg.walk_generator_parameters);
@@ -107,9 +115,13 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
-            cfg.kick_velocity_x    = config["kick"]["kick_velocity_x"].as<double>();
-            cfg.kick_velocity_y    = config["kick"]["kick_velocity_y"].as<double>();
-            cfg.kick_timing_offset = config["kick"]["kick_timing_offset"].as<double>();
+            cfg.kick_velocity_x     = config["kick"]["kick_velocity_x"].as<double>();
+            cfg.kick_velocity_y     = config["kick"]["kick_velocity_y"].as<double>();
+            cfg.kick_timing_offset  = config["kick"]["kick_timing_offset"].as<double>();
+            cfg.use_balance_control = config["walk"]["use_balance_control"].as<bool>();
+
+            // Max acceleration
+            cfg.acceleration = config["walk"]["acceleration"].as<Expression>();
 
             // Since walk needs a Stability message to run, emit one at the beginning
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -119,6 +131,9 @@ namespace module::skill {
         on<Start<WalkTask>>().then([this]() {
             // Reset the last update time
             last_update_time = NUClear::clock::now();
+
+            // Emit a zero current walk command
+            emit(std::make_unique<CurrentWalkTask>());
 
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
@@ -134,23 +149,32 @@ namespace module::skill {
         on<Provide<WalkTask>,
            Needs<ControlLeftFoot>,
            Needs<ControlRightFoot>,
+           With<CurrentWalkTask>,
            With<Sensors>,
            With<Stability>,
-           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
+           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Priority::HIGH>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
+            .then([this](const WalkTask& new_walk,
+                         const RunReason& run_reason,
+                         const CurrentWalkTask& current_walk,
+                         const Sensors& sensors,
+                         const Stability& stability) {
+                // Force the walk to run at a known rate
+                if (run_reason != RunReason::OTHER_TRIGGER)
+                    return;
+
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
                         .count();
                 last_update_time = NUClear::clock::now();
 
-                // Set the velocity target locally so the kick can modify it if needed
-                Eigen::Vector3d velocity_target = walk_task.velocity_target;
+                // Set the walk locally so the kick can modify it if needed
+                auto walk = new_walk;
 
                 // Always enter the kick if its a new kick, otherwise only enter if we're not done yet
-                if (walk_task.kick) {
+                if (walk.kick) {
                     double current_time    = walk_generator.get_time();
                     double full_period     = walk_generator.get_step_period();
                     WalkState::Phase phase = walk_generator.get_phase();
@@ -164,21 +188,21 @@ namespace module::skill {
                         bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
 
                         // If the leg we want to kick with is planted, we can kick at the end of the step
-                        bool other_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
-                                                                               : phase == WalkState::Phase::RIGHT;
+                        bool other_support = walk.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
+                                                                          : phase == WalkState::Phase::RIGHT;
                         // If its the end of the kick foot's support, we can kick
                         if (end_of && other_support) {
                             log<INFO>("Kick step started");
                             kick_step_in_progress = true;
-                            velocity_target       = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
+                            walk.velocity_target  = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
                         }
                     }
                     else {
                         // Check if the step can end
                         bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
                         // On the correct support foot, so can't be the beginning of the kick
-                        bool correct_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
-                                                                                 : phase == WalkState::Phase::LEFT;
+                        bool correct_support = walk.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
+                                                                            : phase == WalkState::Phase::LEFT;
                         // If its not the end of the kick and we're not on the right support, we shouldn't be kicking
                         if ((end_of && correct_support) || (!end_of && !correct_support)) {
                             kick_step_in_progress = false;
@@ -187,13 +211,24 @@ namespace module::skill {
                             return;
                         }
                         // Otherwise continue to kick
-                        velocity_target = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
+                        walk.velocity_target = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
                     }
                 }
 
+                if (!kick_step_in_progress) {
+                    // If the new walk command is larger than the current one, accelerate towards it
+                    auto dv = cfg.acceleration * std::min(time_delta, 1.0);  // never accelerate too much
+                    walk.velocity_target =
+                        current_walk.velocity_target
+                        + (new_walk.velocity_target - current_walk.velocity_target).cwiseMax(-dv).cwiseMin(dv);
+                }
+
+                // Update the state for next time
+                emit(std::make_unique<CurrentWalkTask>(walk));
+
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
-                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase).value) {
+                    switch (walk_generator.update(time_delta, walk.velocity_target, sensors.planted_foot_phase).value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
@@ -212,8 +247,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, cfg.use_balance_control));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, cfg.use_balance_control));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
@@ -231,7 +266,7 @@ namespace module::skill {
 
                 // Emit the walk state
                 auto walk_state = std::make_unique<WalkState>(walk_generator.get_state(),
-                                                              velocity_target,
+                                                              walk.velocity_target,
                                                               walk_generator.get_phase());
 
                 // Debugging
@@ -250,7 +285,14 @@ namespace module::skill {
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
                     emit(graph("Walk state", int(walk_state->state)));
-                    emit(graph("Walk velocity target", velocity_target.x(), velocity_target.y(), velocity_target.z()));
+                    emit(graph("Raw walk velocity target",
+                               new_walk.velocity_target.x(),
+                               new_walk.velocity_target.y(),
+                               new_walk.velocity_target.z()));
+                    emit(graph("Smooth walk velocity target",
+                               walk.velocity_target.x(),
+                               walk.velocity_target.y(),
+                               walk.velocity_target.z()));
                     emit(graph("Walk phase", int(walk_generator.get_phase())));
                     emit(graph("Walk time", walk_generator.get_time()));
                     emit(graph("Kick step in progress", kick_step_in_progress ? 1 : 0));

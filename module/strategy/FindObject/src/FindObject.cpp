@@ -3,7 +3,21 @@
  *
  * Copyright (c) 2023 NUbots
  *
- * This file is part of the NUbots codebase.
+ * This file is part of         //         // Initialise state machine when Search starts
+        on<Start<Search>>().then([this] {
+            log<DEBUG>("Starting Search - initialising state machine to TURNING_ON_SPOT");
+            current_state = SearchState::TURNING_ON_SPOT;
+            patrol_target = 0;  // Reset patrol target
+            state_start_time = NUClear::clock::now(); // Record when this state started
+            initial_heading_saved = false; // Reset heading tracking
+        });lize state machine when Search starts
+        on<Start<Search>>().then([this] {
+            log<DEBUG>("Starting Search - initializing state machine to TURNING_ON_SPOT");
+            current_state = SearchState::TURNING_ON_SPOT;
+            patrol_target = 0; // Reset patrol target
+            state_start_time = NUClear::clock::now(); // Record when this state started
+            initial_heading_saved = false; // Reset heading tracking
+        });bots codebase.
  * See https://github.com/NUbots/NUbots for further info.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

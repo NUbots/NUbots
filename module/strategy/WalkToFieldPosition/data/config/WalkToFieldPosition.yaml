@@ -1,5 +1,10 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-stop_threshold: 0.15
-stopped_threshold: 0.4
+# Basic hysteresis thresholds
+stop_threshold: 0.3
+stopped_threshold: 0.75
+
+# Time-based hysteresis to prevent rapid stopping/starting
+min_stop_time: 1 # Minimum time (seconds) robot must be within threshold before stopping
+min_resume_time: 5.0 # Minimum time (seconds) robot must be outside threshold before resuming

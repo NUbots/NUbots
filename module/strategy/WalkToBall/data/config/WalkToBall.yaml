@@ -16,6 +16,14 @@ ball_kick_distance: 0.0
 # Maximum angle error which indicates that robot is approaching from a "bad position"
 max_angle_error: 45 * pi / 180
 
+# Target further behind the ball when approaching from a "bad position"
+max_error_y: 0.5
+error_gain_perp: 0.4
+
+# Sideways offset when approaching from in front of the ball
+min_offset_y: 0.3
+max_offset_y: 1.0
+
 avoid_ball_offset: [0.25, 0.5, 0]
 
 distance_behind_ball: 0.4
@@ -26,3 +34,13 @@ avoid_opponent_offset: 0.15
 approach_offset: 0.6
 # While angle error is larger than this, apply the offset to position next to the ball when tackling
 tackle_angle_offset: 0.2
+
+infront_of_ball_radius: 0.8
+# Distance in front of the ball to check for obstacles
+infront_check_distance: 1.5
+
+# Radius to avoid obstacles when walking to the ball
+obstacle_radius: 0.8
+
+# Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
+goal_width_margin: 0.2

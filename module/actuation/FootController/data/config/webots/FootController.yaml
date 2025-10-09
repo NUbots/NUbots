@@ -1,3 +1,5 @@
+log_level: INFO
+
 startup:
   # Gain to use in startup phase
   servo_gain: 30
@@ -17,3 +19,18 @@ servo_gains:
   R_KNEE: 30
   R_ANKLE_PITCH: 30
   R_ANKLE_ROLL: 30
+
+balance:
+  roll_p_gain: 0.2
+  pitch_p_gain: 0.2
+
+  roll_i_gain: 0.0
+  pitch_i_gain: 0.0
+
+  roll_d_gain: 0.01
+  pitch_d_gain: 0.01
+
+  max_i_error: 0.0
+
+  max_pitch_error: 0.6
+  max_roll_error: 0.6

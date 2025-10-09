@@ -41,6 +41,9 @@ namespace module::localisation {
 
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
 
+        // Using max() or inf() will lead to instability so a finite number is used instead
+        constexpr double MAX_ANTIOVERFLOW_COST = 1e9;
+
         // Create cost matrix for the Hungarian algorithm
         // Note that the assignment is intersection index to landmark index
         Eigen::MatrixXd cost_matrix(field_intersections->intersections.size(), landmarks.size());
@@ -52,15 +55,10 @@ namespace module::localisation {
 
             for (size_t i = 0; i < landmarks.size(); ++i) {
                 const auto& landmark = landmarks[i];
-                // If the landmark is the same type as our measurement, calculate the loss when associating
-                // the intersection with the landmark
-                if (landmark.type == intersection.type) {
-                    // Calculate Euclidean distance between the detected intersection and the landmark
-                    cost_matrix(intersection_idx, i) = (landmark.rLFf - rIFf).norm();
-                }
-                else {
-                    cost_matrix(intersection_idx, i) = std::numeric_limits<double>::max();
-                }
+
+                // If the types match, check the distance
+                cost_matrix(intersection_idx, i) =
+                    (landmark.type == intersection.type) ? (landmark.rLFf - rIFf).norm() : MAX_ANTIOVERFLOW_COST;
             }
             intersection_idx++;
         }
@@ -71,14 +69,27 @@ namespace module::localisation {
         auto assignment = utility::algorithm::determine_assignment(cost_matrix);
 
         for (const auto& [intersection_index, landmark_index] : assignment) {
-            // Access the intersection and landmark using their indices because the result of determine_assignment()
-            // is index based
-            const auto& intersection = field_intersections->intersections.at(intersection_index);
-            const auto& landmark     = landmarks.at(landmark_index);
+            const double cost = cost_matrix(intersection_index, landmark_index);
+            if (cost < cfg.max_association_distance) {
+                // Access the intersection and landmark using their indices because the result of determine_assignment()
+                // is index based
+                const auto& intersection = field_intersections->intersections.at(intersection_index);
+                const auto& landmark     = landmarks.at(landmark_index);
 
-            // Transform the detected intersection from world to field coordinates
-            Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
-            associations.emplace_back(landmark.rLFf, rIFf);
+                Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
+                associations.emplace_back(landmark.rLFf, rIFf);
+            }
+            else {
+                log<DEBUG>("Rejected assignment due to excessive cost: intersection ",
+                           intersection_index,
+                           " ↔ landmark ",
+                           landmark_index,
+                           " (cost ",
+                           cost,
+                           " greater than ",
+                           cfg.max_association_distance,
+                           ")");
+            }
         }
 
         return associations;

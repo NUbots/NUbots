@@ -1,9 +1,21 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
- *
- * This file is part of the NUbots codebase.
+ * Copyright (c) 2023 NU        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Length of time before the ball detection is too old and we should search for the ball
+            NUClear::clock::duration ball_search_timeout{};
+            /// @brief Distance from field border that triggers moving to center
+            double border_threshold = 0.0;
+            /// @brief How far to move towards center
+            double center_move_ratio = 0.0;
+            /// @brief Distance from center to be considered "at center"
+            double center_reached_threshold = 1.0;
+            /// @brief Distance from patrol point to be considered "reached"
+            double patrol_reached_threshold = 0.5;
+            /// @brief Angular threshold for completing a turn (radians)
+            double turn_completion_threshold = 0.26; // ~15 degrees
+        } cfg;is file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
