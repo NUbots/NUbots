@@ -135,7 +135,7 @@ namespace module::purpose {
                                                    game_state.team.team_colour));
 
                     // Search for landmarks to localise
-                    emit<Task>(std::make_unique<Search>());
+                    emit<Task>(std::make_unique<FindBall>());
                     return;
                 }
 
