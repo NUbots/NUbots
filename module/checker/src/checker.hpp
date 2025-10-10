@@ -5,16 +5,19 @@
 
 namespace module {
 
-class checker : public NUClear::Reactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    class checker : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+        } cfg;
 
-public:
-    /// @brief Called by the powerplant to build and setup the checker reactor.
-    explicit checker(std::unique_ptr<NUClear::Environment> environment);
-};
+        /// @brief Flag to track if validation has been completed
+        bool validated = false;
+
+    public:
+        /// @brief Called by the powerplant to build and setup the checker reactor.
+        explicit checker(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module
 
