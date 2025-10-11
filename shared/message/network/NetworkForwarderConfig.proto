@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package message.network;
+
+/**
+ * Configuration for the `NetworkForwarder` module which provides the same options as its `NetworkForwarder.yaml`
+ * configuration file.
+ */
+message NetworkForwarderConfig {
+
+    /**
+     * Configuration for a specific message type.
+     */
+    message MessageConfig {
+        /// Whether to forward local messages to the network (outbound)
+        bool send = 1;
+
+        /// Whether to forward network messages locally (inbound)
+        bool recv = 2;
+
+        /// If true and send is true, local messages are forwarded as network messages using the reliable UDP protocol
+        bool reliable = 3;
+
+        /// The maximum rate at which to forward outbound messages in messages per second (0 means no limit)
+        double rate_limit = 4;
+    }
+
+    /**
+     * A NUClearNet client to forward messages to/from.
+     */
+    message Target {
+        /// Configuration for each message type mapped by fully qualified message name
+        map<string, MessageConfig> messages = 1;
+    }
+
+    /// The NUClearNet clients to forward messages to/from mapped by client name.
+    map<string, Target> targets = 1;
+}

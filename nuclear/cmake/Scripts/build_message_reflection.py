@@ -45,7 +45,7 @@ if __name__ == "__main__":
     sys.path.append(python_message_root)
     for dir_name, subdir, files in os.walk(python_message_root):
         modules = pkgutil.iter_modules(path=[dir_name])
-        for loader, module_name, ispkg in modules:
+        for _, module_name, ispkg in modules:
             if module_name.endswith("pb2"):
 
                 # Work out what header file this came from
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     cases_reflect = "\n".join(
         [
-            "case 0x{}: return std::make_unique<Reflector<{}>>();".format(
+            "case 0x{}: return std::make_unique<Reflector<{}>>(std::forward<Args>(args)...);".format(
                 xxhash.xxh64(m, seed=0x4E55436C).hexdigest(), "::".join(m.split("."))
             )
             for m in messages
@@ -106,6 +106,7 @@ if __name__ == "__main__":
         #include <memory>
         #include <string>
         #include <vector>
+        #include <nuclear>
 
         #include "utility/reflection/reflection_exceptions.hpp"
         #include "utility/type_traits/has_id.hpp"
@@ -115,12 +116,17 @@ if __name__ == "__main__":
         namespace message::reflection {{
             using utility::reflection::unknown_message;
 
-            template <template <typename> class Reflector>
-            std::unique_ptr<Reflector<void>> from_hash(const uint64_t& hash) {{
+            template <template <typename> class Reflector, typename... Args>
+            std::unique_ptr<Reflector<void>> from_hash(const uint64_t& hash, Args&&... args) {{
                 switch (hash) {{
         {cases}
                     default: throw unknown_message(hash);
                 }}
+            }}
+
+            template <template <typename> class Reflector, typename... Args>
+            std::unique_ptr<Reflector<void>> from_string(const std::string& name, Args&&... args) {{
+                return from_hash<Reflector>(NUClear::util::serialise::xxhash64(name.c_str(), name.size(), 0x4E55436C), std::forward<Args>(args)...);
             }}
 
             template <template <typename> class TypeTrait>
@@ -130,6 +136,7 @@ if __name__ == "__main__":
                 default: throw unknown_message(hash);
                 }}
             }}
+
 
         }}  // namespace message::reflection
 
