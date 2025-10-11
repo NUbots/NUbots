@@ -29,6 +29,8 @@
 
 #include <nuclear>
 
+#include "piper.hpp"
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -45,6 +47,12 @@ namespace module::skill {
             /// @brief Text to say on startup
             std::string startup_text = "";
         } cfg;
+
+        /// @brief Piper configuration
+        piper::PiperConfig piper_config;
+
+        // /// @brief Piper voice
+        piper::Voice voice;
 
     public:
         /// @brief Called by the powerplant to build and setup the Say reactor.
