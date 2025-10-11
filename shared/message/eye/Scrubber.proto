@@ -1,27 +1,3 @@
-// MIT License
-//
-// Copyright (c) 2023 NUbots
-//
-// This file is part of the NUbots codebase.
-// See https://github.com/NUbots/NUbots for further info.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
 syntax = "proto3";
 
 package message.eye;
@@ -30,12 +6,26 @@ import "google/protobuf/timestamp.proto";
 
 import "message/eye/Rpc.proto";
 
+/// A (type, subtype) pair that uniquely identifies a specific type of message
+message NbsTypeSubtype {
+    /// Name of the message type
+    string type = 1;
+    /// Subtype of the message
+    uint32 subtype = 2;
+}
+
 message ScrubberState {
     enum State {
         UNKNOWN = 0;
         PAUSED  = 1;
         PLAYING = 2;
         ENDED   = 3;
+    }
+
+    enum Mode {
+        REALTIME   = 0;
+        FAST       = 1;
+        SEQUENTIAL = 2;
     }
 
     /// The ID of the scrubber, unique across all scrubbers in a session
@@ -50,10 +40,54 @@ message ScrubberState {
     google.protobuf.Timestamp end = 5;
     /// The current playback state of the scrubber
     State playback_state = 6;
+    /// The playback mode of the scrubber
+    Mode playback_mode = 7;
     /// The playback speed of the scrubber. Used as a power of 2, so 0 is 1x, 1 is 2x, -1 is 0.5x, etc.
-    int32 playback_speed = 7;
+    int32 playback_speed = 8;
     /// Whether the scrubber restarts when it reaches the end of playback
-    bool playback_repeat = 8;
+    bool playback_repeat = 9;
+    /// Total messages in the loaded NBS files
+    uint32 total_messages = 10;
+    /// The current message index
+    uint32 current_message = 11;
+}
+
+message ScrubberIndex {
+    message TypeIndex {
+        /// Hash of the message type
+        string type_hash = 1;
+        /// Name of the message type
+        string type_name = 2;
+        /// Subtype of the message
+        uint32 subtype = 3;
+        /// Timestamps of this (type, subtype) pair in the scrubber's file(s)
+        repeated google.protobuf.Timestamp timestamps = 4;
+    }
+
+    /// Id of the scrubber this index belongs to
+    uint32 id = 1;
+    /// Index for each (type, subtype) pair in the message
+    repeated TypeIndex indices = 2;
+}
+
+message ScrubberPacketRequest {
+    message Response {
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
+        /// Payload of the message matching the request
+        bytes data = 2;
+    }
+
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
+    /// ID of the scrubber
+    uint32 id = 2;
+    /// Type hash of the message
+    string type_hash = 3;
+    /// Subtype of the message
+    uint32 subtype = 4;
+    /// Offset of the requested packet
+    uint32 offset = 5;
 }
 
 message ScrubberLoadRequest {
@@ -68,7 +102,27 @@ message ScrubberLoadRequest {
     string name = 2;
     /// The files to load into the scrubber. Must be a list of absolute paths to NBS files.
     repeated string files = 3;
+    /// Message types to playback
+    repeated string messages = 4;
 }
+
+
+message ScrubberSetModeRequest {
+
+    message Response {
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
+    /// The ID of the scrubber to set the mode of
+    uint32 id = 2;
+    /// The mode to set
+    ScrubberState.Mode mode = 3;
+}
+
+message ScrubberPlaybackFinished {}
 
 message ScrubberPlayRequest {
     message Response {
@@ -136,6 +190,22 @@ message ScrubberSeekRequest {
     google.protobuf.Timestamp timestamp = 3;
 }
 
+message ScrubberStepTimestampRequest {
+    message Response {
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
+    /// The ID of the scrubber to step
+    uint32 id = 2;
+    /// The number of steps
+    int32 steps = 3;
+    /// Type and subtype to step
+    NbsTypeSubtype typeSubtype = 4;
+}
+
 message ScrubberCloseRequest {
     message Response {
         /// Metadata for the RPC response
@@ -149,6 +219,48 @@ message ScrubberCloseRequest {
 }
 
 message ScrubberClosed {
+    enum Cause {
+        UNKNOWN        = 0;
+        CLIENT_REQUEST = 1;
+        FILES_DELETED  = 2;
+    }
+
     /// The ID of the scrubber that was closed
     uint32 id = 1;
+    /// Why the scrubber was closed, as an enum
+    Cause cause = 2;
+    /// Why the scrubber was closed, as a human-readable string
+    string reason = 3;
+}
+
+message ScrubberReloaded {
+    enum Cause {
+        UNKNOWN       = 0;
+        FILES_UPDATED = 1;
+    }
+
+    /// The ID of the scrubber that was reloaded
+    uint32 id = 1;
+    /// Why the scrubber was reloaded, as an enum
+    Cause cause = 2;
+    /// Why the scrubber was reloaded, as a human-readable string
+    string reason = 3;
+}
+
+message ScrubberSaveTrimRequest {
+    message Response {
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
+    /// The ID of the scrubber to save a trim from
+    uint32 id = 2;
+    /// Timestamp of the start of the section to trim
+    google.protobuf.Timestamp start_ts = 3;
+    /// Timestamp of the end of the section to trim
+    google.protobuf.Timestamp end_ts = 4;
+    /// Path to save the trimmed file
+    string output_path = 5;
 }
