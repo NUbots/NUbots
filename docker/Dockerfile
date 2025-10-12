@@ -391,6 +391,31 @@ RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
 
+# autodiff
+RUN install-from-source https://github.com/autodiff/autodiff/archive/refs/tags/v1.1.2.tar.gz \
+    -DAUTODIFF_BUILD_PYTHON=OFF \
+    -DAUTODIFF_BUILD_TESTS=OFF \
+    -DAUTODIFF_BUILD_EXAMPLES=OFF \
+    -DAUTODIFF_BUILD_DOCS=OFF
+
+# Static analysis
+RUN install-from-source https://github.com/danmar/cppcheck/archive/refs/tags/2.18.0.tar.gz
+
+# Boost + SuiteSparse (BLAS/LAPACK backends pull in automatically)
+RUN install-package boost boost-libs
+RUN install-package suitesparse openblas lapack tbb
+
+# VTK (+Qt6 etc. via pacman to save build time)
+RUN install-package vtk
+
+# doctest (header-only)
+RUN install-from-source https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz
+
+# nanobench (header-only)
+RUN install-from-source https://raw.githubusercontent.com/martinus/nanobench/v4.3.11/src/include/nanobench.h \
+    --header-path include/nanobench
+
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -398,7 +423,7 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
     doxygen \
-    gcc13
+    gcc
 
 
 # Node tools

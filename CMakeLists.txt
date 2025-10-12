@@ -28,8 +28,8 @@ cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
 # Set the compiler version of the project
-set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
-set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
+set(CMAKE_C_COMPILER "/usr/bin/gcc")
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)
@@ -131,8 +131,8 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)
 
-# We use C++20
-add_compile_options(-std=c++20)
+# We use C++23 for <print> header support
+add_compile_options(-std=c++23)
 
 # Make the compiler display colours always (even when we build with ninja)
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
