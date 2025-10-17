@@ -37,6 +37,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/Robot.hpp"
+#include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -51,6 +53,8 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::localisation::Robots;
+    using message::planning::WalkTo;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
@@ -135,6 +139,8 @@ namespace module::network {
 
                                 // Filter out messages from ourselves and from other teams
                                 if (!own_player_message && own_team_message) {
+                                    log<DEBUG>("Message received from teammate ID",
+                                               incoming_msg.current_pose.player_id);
                                     emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
                                 }
                             });
@@ -155,6 +161,8 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
+           Optional<With<WalkTo>>,
+           Optional<With<Robots>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -163,6 +171,8 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
+                         const std::shared_ptr<const WalkTo>& walk_to,
+                         const std::shared_ptr<const Robots>& robot_localisation,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -218,7 +228,21 @@ namespace module::network {
                     msg->walk_command = walk_state->velocity_target.cast<float>();
                 }
 
-                // TODO: target pose (Position and orientation of the players target on the field specified)
+                // Target pose (Position and orientation of the players target on the field specified)
+                if (walk_to && sensors && field) {
+                    // Get target pose in field coords (Hfr * Hrd = Hfd)
+                    Eigen::Isometry3d Hfd = (field->Hfw * sensors->Hrw.inverse()) * walk_to->Hrd;
+
+                    // Extract 3d translation
+                    Eigen::Vector3d rDFf = Hfd.translation();
+                    // Store position
+                    msg->target_pose.position = rDFf.cast<float>();
+                    // Extract yaw from rotation matrix
+                    msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfd.rotation()).z();
+                    // Copy team and player ID to target pose
+                    msg->target_pose.team      = msg->current_pose.team;
+                    msg->target_pose.player_id = config.player_id;
+                }
 
                 // Kick target
                 if (kick) {
@@ -248,7 +272,46 @@ namespace module::network {
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
-                // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
+                // Where the robot thinks the other robots are.
+                if (robot_localisation && field) {
+
+                    // Iterate through robots detected by localisation
+                    for (const auto& local_bot : robot_localisation->robots) {
+                        // Create new robot message
+                        message::input::Robot rc_robot;
+
+                        // Assign player ID from purpose
+                        rc_robot.player_id = local_bot.purpose.player_id;
+
+                        // Convert world to field coords
+                        Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
+
+                        // Store 2D position (x, y) and set (z) to 0
+                        rc_robot.position     = rRFf.cast<float>();
+                        rc_robot.position.z() = 0.0f;
+
+                        // Check if covariance matrix is valid
+                        // Initialise with zeros
+                        rc_robot.covariance = Eigen::Matrix3f::Zero();
+                        if (local_bot.covariance.rows() >= 2 && local_bot.covariance.cols() >= 2) {
+                            rc_robot.covariance.block<2, 2>(0, 0) =
+                                local_bot.covariance.block<2, 2>(0, 0).cast<float>();
+                        }
+
+                        if (local_bot.teammate) {
+                            rc_robot.team = msg->current_pose.team;
+                        }
+                        else {
+                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
+                                                ? message::input::Team::RED
+                                                : message::input::Team::BLUE;
+                        }
+
+                        // Add robot information to list of other robots in message
+                        msg->others.push_back(std::move(rc_robot));
+                    }
+                }
+
 
                 // Current purpose (soccer position) of the Robot
                 if (purpose) {

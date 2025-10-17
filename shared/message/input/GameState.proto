@@ -82,6 +82,8 @@ message GameState {
         PenaltyReason penalty_reason = 2;
         /// The timestamp when the robot will be playing again
         google.protobuf.Timestamp unpenalised = 3;
+        /// Whether this robot is a goalie
+        bool goalie = 4;
     }
 
     message Team {
@@ -92,9 +94,15 @@ message GameState {
         repeated Robot players       = 5;
     }
 
+    enum SubMode {
+        REF_PLACE      = 0;
+        ROBOT_POSITION = 1;
+        PRE_EXECUTE    = 2;
+    }
+
     message SecondaryState {
-        uint32 team_performing = 1;
-        uint32 sub_mode        = 2;
+        uint32  team_performing = 1;
+        SubMode sub_mode        = 2;
     }
 
     Phase                     phase            = 1;

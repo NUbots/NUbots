@@ -206,6 +206,9 @@ namespace module::localisation {
             /// @brief Bool to enable/disable using ground truth for localisation
             bool use_ground_truth_localisation;
 
+            /// @brief Bool to enable the use of Hungarian algorithm for landmark association
+            bool use_hungarian = false;
+
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
 
@@ -298,6 +301,15 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
+        /// @brief Bool indicating ground truth localisation (Hfw) computed
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
+    public:
+        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
+        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
         /// @brief The main field localisation loop
         ReactionHandle main_loop;
 
@@ -321,9 +333,8 @@ namespace module::localisation {
         /**
          * @brief Find error between computed Hfw and ground truth if available
          * @param Hfw Computed Hfw to be compared against ground truth
-         * @param raw_sensors The raw sensor data
          */
-        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
+        void debug_field_localisation(Eigen::Isometry3d Hfw);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
@@ -374,9 +385,30 @@ namespace module::localisation {
                                const std::shared_ptr<const Goals>& goals,
                                const Eigen::Isometry3d& Hrw);
 
-    public:
-        /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
-        explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using the Hungarian algorithm
+         *
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
+         * and landmarks
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> hungarian_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using nearest neighbour
+         *
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
+         * and landmarks
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
     };
 }  // namespace module::localisation
 
