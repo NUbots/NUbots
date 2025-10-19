@@ -83,7 +83,14 @@ def _setup_volume(volume_name, clean_volume):
 
     # If we don't have a volume, make one
     if volume is None:
-        if subprocess.call(["docker", "volume", "create", volume_name], stderr=DEVNULL, stdout=DEVNULL) == 0:
+        if (
+            subprocess.call(
+                ["docker", "volume", "create", volume_name],
+                stderr=DEVNULL,
+                stdout=DEVNULL,
+            )
+            == 0
+        ):
             volume = volume_name
         else:
             raise RuntimeError("Docker volume create returned a non-zero exit code")
@@ -189,6 +196,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "--group-add",
             "render_host",
             "--privileged",
+            "--gpus",
+            "all",
         ]
 
         # Set name from hostname to search for the container in the multi tool
