@@ -61,6 +61,9 @@ namespace module::vision {
             /// Path to camera calibration file
             std::string cameraCalibrationPath = "";
 
+            /// Initial camera height above ground plane (meters)
+            double initialCameraHeight = 0.58;
+
             /// Initial covariance scaling factors
             struct InitialCovariance {
                 double velocity        = 0.3;

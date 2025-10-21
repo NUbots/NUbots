@@ -414,12 +414,8 @@ export class LocalisationRobotModel {
   @computed
   get rNFf(): Vector3[] {
     // Transform from VSLAM world frame {n} to field frame {f}
-    // Hwn is defined as "NUbots world {w} to VSLAM world {n}"
-    // So to go from {n} to {w}, we need Hnw = Hwn.inverse()
-    // Then transform from NUbots world to field: Hfw * (Hnw * rNWn)
-    const Hnw = this.Hwn.invert();
     return this.vslamMapPoints.rNWn.map((rNWn) =>
-      rNWn.applyMatrix4(Hnw).applyMatrix4(this.Hfw)
+      rNWn.applyMatrix4(this.Hwn).applyMatrix4(this.Hfw)
     );
   }
 

@@ -69,6 +69,7 @@ namespace module::vision {
             // Load configuration parameters
             cfg.enableVisualization   = config["enable_visualization"].as<bool>(false);
             cfg.cameraCalibrationPath = config["camera_calibration"].as<std::string>();
+            cfg.initialCameraHeight   = config["initial_camera_height"].as<double>(0.58);
 
             // Load initial covariance parameters
             cfg.initialCovariance.velocity        = config["initial_covariance"]["velocity"].as<double>(0.3);
@@ -96,9 +97,9 @@ namespace module::vision {
             // Align frame of body to camera frame
             // b1 = c3, b2 = c1, b3 = c2
             Eigen::Matrix3d Rbc;
-            Rbc << 0, 0, 1,  // b1 = c3
-                1, 0, 0,     // b2 = c1
-                0, 1, 0;     // b3 = c2
+            Rbc << 1, 0, 0,  // b1 = c3
+                0, 1, 0,     // b2 = c1
+                0, 0, 1;     // b3 = c2
 
             camera_.Tbc.rotationMatrix    = Rbc;
             camera_.Tbc.translationVector = Eigen::Vector3d::Zero();
@@ -180,27 +181,36 @@ namespace module::vision {
             if (systemInitialized_ && system_) {
                 auto vslam = std::make_unique<VSLAMMsg>();
 
-                // Get camera pose from SLAM system
-                // Extract Hnc: VSLAM world frame {n} to camera {c}
+                // Get camera pose from SLAM system (in OpenCV conventions)
+                // SLAM uses OpenCV camera frame {k} internally (from cv::undistortPoints)
                 auto cameraDensity   = system_->cameraPositionDensity(camera_);
-                Eigen::Vector3d rCNn = cameraDensity.mean();  // Camera position in world frame
+                Eigen::Vector3d rCNk = cameraDensity.mean();  // Camera position in OpenCV frame
 
                 auto orientationDensity = system_->cameraOrientationEulerDensity(camera_);
-                Eigen::Vector3d Thetanc = orientationDensity.mean();  // Camera orientation (roll, pitch, yaw)
+                Eigen::Vector3d Thetank = orientationDensity.mean();  // Camera orientation in OpenCV
 
                 // Convert Euler angles to rotation matrix
-                Eigen::Matrix3d Rnc = utility::slam::rpy2rot(Thetanc);
+                Eigen::Matrix3d Rnk = utility::slam::rpy2rot(Thetank);
 
-                // Build Hnc transform (world {n} to camera {c})
-                Eigen::Isometry3d Hnc = Eigen::Isometry3d::Identity();
-                Hnc.linear()          = Rnc;
-                Hnc.translation()     = rCNn;
+                // Build Hnk transform (world {n} to OpenCV camera {k})
+                Eigen::Isometry3d Hnk = Eigen::Isometry3d::Identity();
+                Hnk.linear()          = Rnk;
+                Hnk.translation()     = rCNk;
+
+                // Transform from OpenCV camera {k} to NUbots camera {c}
+                // Same as Stella's Hkc
+                Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
+                Hkc.matrix() << 0, -1,  0, 0,
+                                0,  0, -1, 0,
+                                1,  0,  0, 0,
+                                0,  0,  0, 1;
+
+                // Compose: Hnc = Hnk * Hkc
+                Eigen::Isometry3d Hnc = Hnk * Hkc;
 
                 vslam->Hnc = Hnc;
 
                 // Get map points (landmarks) from SLAM system
-                // These are in the VSLAM world frame {n}
-                // The Hwn transform in SensorFilter will handle converting to NUbots world frame
                 size_t numLandmarks = system_->numberLandmarks();
                 for (size_t i = 0; i < numLandmarks; ++i) {
                     auto landmarkDensity = system_->landmarkPositionDensity(i);
@@ -214,11 +224,11 @@ namespace module::vision {
                 log<INFO>("Emitted VSLAM pose and",
                           numLandmarks,
                           "map points. Position: [",
-                          rCNn.x(),
+                          rCNk.x(),
                           ",",
-                          rCNn.y(),
+                          rCNk.y(),
                           ",",
-                          rCNn.z(),
+                          rCNk.z(),
                           "]");
             }
         });
@@ -236,7 +246,7 @@ namespace module::vision {
 
         // Create initial mean state
         Eigen::VectorXd initialMean = Eigen::VectorXd::Zero(stateDim);
-        initialMean(8)              = 0.7;  // Initial z position (depth)
+        initialMean(8)              = cfg.initialCameraHeight;  // Initial camera height above ground
 
         // Create initial covariance matrix from configuration
         Eigen::MatrixXd initialCov = Eigen::MatrixXd::Identity(stateDim, stateDim);

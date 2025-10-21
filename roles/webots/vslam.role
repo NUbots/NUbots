@@ -36,13 +36,13 @@ nuclear_role(
   # Skills
   skill::Walk
   skill::KickWalk
-  skill::GetUp
+  # skill::GetUp
   skill::Look
   # Planners
-  planning::GetUpPlanner
-  planning::FallingRelaxPlanner
+  # planning::GetUpPlanner
+  # planning::FallingRelaxPlanner
   # Strategies
-  strategy::FallRecovery
+  # strategy::FallRecovery
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk

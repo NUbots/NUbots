@@ -51,41 +51,45 @@ namespace module::input {
         // TEMPORARY: For initial testing, set Hwn to identity to visualize raw VSLAM map points
         // This treats VSLAM OpenCV frame {n} as if it were NUbots world frame {w}
         // Useful for sanity checking map point detection before full coordinate alignment
-        if (vslam) {
-            sensors->Hwn = Eigen::Isometry3d::Identity();
-        }
+        // if (vslam) {
+        //     sensors->Hwn = Eigen::Isometry3d::Identity();
+        // }
 
         // Initialize VSLAM coordinate frame alignment on first VSLAM message
         // Following the same pattern as Stella VSLAM integration
-        // if (!vslam_initialised) {
-        //     Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
-        //     // Remove y translation from Htf
-        //     auto Htw = Htf;
-        //     Htw.translation().y() = 0;
+        if (!vslam_initialised && vslam) {
+            // Wait for VSLAM to have enough landmarks for a good pose estimate
+            if (vslam->map_points.size() > 15) {  // ✅ Wait for stable estimate
+                Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
+                auto Htw = Htf;
+                Htw.translation().y() = 0;
 
-        //     Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
-        //     auto Hwc = Htw.inverse() * Htc;
+                Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
+                auto Hwc = Htw.inverse() * Htc;
 
-        //     // Transform from NUbots camera {c} to VSLAM OpenCV world {n}
-        //     // Same rotation as Stella: 90 degrees Y, then -90 degrees Z
-        //     auto Hcn = Eigen::Isometry3d::Identity();
-        //     Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix()
-        //                  * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        //     Hwn = Hwc * Hcn;
+                auto Hcn = Eigen::Isometry3d::Identity();
+                Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix()
+                             * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                Hwn = Hwc * Hcn;
 
-        //     vslam_initialised = true;
-        // }
+                vslam_initialised = true;
 
-        // if (vslam) {
-        //     auto Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
+                // ✅ Log to see when initialization happens
+                log<INFO>("VSLAM frame initialized at:",
+                          vslam->Hnc.translation().transpose());
+            }
+        }
 
-        //     auto Hnc = vslam->Hnc;
-        //     sensors->Htw = Htc * Hnc.inverse() * Hwn.inverse();
+        if (vslam) {
+            auto Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
 
-        //     // Set the Hwn transform in the sensors message
-        //     sensors->Hwn = Hwn;
-        //     return;
-        // }
+            auto Hnc = vslam->Hnc;
+            sensors->Htw = Htc * Hnc.inverse() * Hwn.inverse();
+
+            // Set the Hwn transform in the sensors message
+            sensors->Hwn = Hwn;
+            return;
+        }
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
             Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);

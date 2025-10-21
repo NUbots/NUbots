@@ -370,7 +370,7 @@ namespace utility::slam::measurement {
                 continue;
 
             // Initialize landmark at arbitrary depth
-            double arbitrary_depth = 1.0;  // meters
+            double arbitrary_depth = 8.0;  // meters
 
             cv::Vec2d pixel_cv(candidatePixel(0), candidatePixel(1));
             cv::Vec3d rPCc_cv = camera_.pixelToVector(pixel_cv);
@@ -382,7 +382,7 @@ namespace utility::slam::measurement {
 
             // Create new landmark with prior
             Eigen::VectorXd mu_new = rPNn;
-            double epsilon         = 5.0;  // Low confidence in initial position
+            double epsilon         = 1.0;  // Low confidence in initial position
             Eigen::MatrixXd Xi_new = epsilon * Eigen::MatrixXd::Identity(3, 3);
             Eigen::VectorXd nu_new = Xi_new * mu_new;
 
