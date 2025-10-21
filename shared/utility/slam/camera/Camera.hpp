@@ -60,19 +60,6 @@ namespace utility::slam::camera {
         std::vector<cv::Point3f> gridPoints() const;
         friend std::ostream& operator<<(std::ostream&, const Chessboard&);
     };
-
-    // Free functions for OpenCV serialization (required for operator>> to work)
-    inline void read(const cv::FileNode& node, Chessboard& value, const Chessboard& default_value = Chessboard()) {
-        if (node.empty())
-            value = default_value;
-        else
-            value.read(node);
-    }
-
-    inline void write(cv::FileStorage& fs, const std::string&, const Chessboard& value) {
-        value.write(fs);
-    }
-
     struct Camera;
 
     struct ChessboardImage {
@@ -206,7 +193,8 @@ namespace utility::slam::camera {
         rQOi(1) = fy * v_prime + cy;
         return rQOi;
     }
-
+    using utility::slam::read;
+    using utility::slam::write;
 }  // namespace utility::slam::camera
 
 #endif  // UTILITY_SLAM_CAMERA_CAMERA_HPP

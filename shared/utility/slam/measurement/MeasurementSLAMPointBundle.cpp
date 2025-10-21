@@ -1,33 +1,36 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "MeasurementSLAMPointBundle.hpp"
 
+#include <Eigen/Core>
 #include <algorithm>
+#include <autodiff/forward/dual.hpp>
+#include <autodiff/forward/dual/eigen.hpp>
 #include <cstddef>
 #include <iostream>
 #include <limits>
@@ -36,30 +39,25 @@
 #include <tuple>
 #include <vector>
 
-#include <Eigen/Core>
-
-#include <autodiff/forward/dual.hpp>
-#include <autodiff/forward/dual/eigen.hpp>
-
+#include "../association_util.hpp"
 #include "../camera/Camera.hpp"
 #include "../gaussian/GaussianInfo.hpp"
+#include "../rotation.hpp"
 #include "../system/SystemBase.hpp"
 #include "../system/SystemEstimator.hpp"
 #include "../system/SystemSLAM.hpp"
-#include "../association_util.hpp"
-#include "../rotation.hpp"
+#include "../system/SystemSLAMPointLandmarks.hpp"
 
 namespace utility::slam::measurement {
 
     MeasurementPointBundle::MeasurementPointBundle(double time,
-                                                const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-                                                const Camera& camera)
-        : MeasurementSLAM(time, camera), Y_(Y), sigma_(5.0)  // TODO: Assignment(s)
+                                                   const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+                                                   const camera::Camera& camera)
+        : MeasurementSLAM(time, camera)
+        , Y_(Y)
+        , sigma_(7.0)  // Measurement noise (pixels)
     {
-        // updateMethod_ = UpdateMethod::BFGSLMSQRT;
         updateMethod_ = UpdateMethod::BFGSTRUSTSQRT;
-        // updateMethod_ = UpdateMethod::SR1TRUSTEIG;
-        // updateMethod_ = UpdateMethod::NEWTONTRUSTEIG;
     }
 
     MeasurementSLAM* MeasurementPointBundle::clone() const {
@@ -73,65 +71,46 @@ namespace utility::slam::measurement {
     }
 
     double MeasurementPointBundle::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const {
-        const SystemSLAM& systemSLAM = dynamic_cast<const SystemSLAM&>(system);
+        const system::SystemSLAM& systemSLAM = dynamic_cast<const system::SystemSLAM&>(system);
         return logLikelihoodTemplated<double>(x, systemSLAM);
     }
 
-
-    // gradient version using GaussianInfo log function with chain rule
     double MeasurementPointBundle::logLikelihood(const Eigen::VectorXd& x,
-                                                const SystemEstimator& system,
-                                                Eigen::VectorXd& g) const {
-        const SystemSLAM& systemSLAM = dynamic_cast<const SystemSLAM&>(system);
+                                                 const SystemEstimator& system,
+                                                 Eigen::VectorXd& g) const {
+        const system::SystemSLAM& systemSLAM = dynamic_cast<const system::SystemSLAM&>(system);
 
-        // compute log-likelihood using the base function
         double logLik = logLikelihood(x, system);
+        g             = Eigen::VectorXd::Zero(x.size());
 
-        // initialize gradient
-        g = Eigen::VectorXd::Zero(x.size());
-
-        // create measurement noise model for a single point
-        Eigen::MatrixXd S                           = sigma_ * Eigen::MatrixXd::Identity(2, 2);
+        Eigen::MatrixXd S                               = sigma_ * Eigen::MatrixXd::Identity(2, 2);
         gaussian::GaussianInfo<double> measurementModel = gaussian::GaussianInfo<double>::fromSqrtMoment(S);
 
-        // compute gradient for all associated feature/landmark pairs
         for (std::size_t j = 0; j < idxFeatures_.size(); ++j) {
             if (idxFeatures_[j] >= 0) {
                 int detectionIdx   = idxFeatures_[j];
                 size_t landmarkIdx = visibleLandmarks_[j];
 
-                // predict single point with Jacobian
                 Eigen::MatrixXd J_h;
-                Eigen::Vector2d h_pred = predictFeature(x, J_h, systemSLAM, landmarkIdx);
-
-                // get measured point position
-                Eigen::Vector2d y_i = Y_.col(detectionIdx);
-
-                // compute residual
+                Eigen::Vector2d h_pred   = predictFeature(x, J_h, systemSLAM, landmarkIdx);
+                Eigen::Vector2d y_i      = Y_.col(detectionIdx);
                 Eigen::Vector2d residual = y_i - h_pred;
 
-                // use GaussianInfo log function to get gradient w.r.t. residual
                 Eigen::VectorXd g_residual;
                 measurementModel.log(residual, g_residual);
-
-                // chain rule
                 g += -J_h.transpose() * g_residual;
             }
         }
 
-        // no gradient contribution from penalty term (constant w.r.t. x)
-
         return logLik;
     }
 
-    // hessian version using forward-mode autodiff
     double MeasurementPointBundle::logLikelihood(const Eigen::VectorXd& x,
-                                                const SystemEstimator& system,
-                                                Eigen::VectorXd& g,
-                                                Eigen::MatrixXd& H) const {
-        const SystemSLAM& systemSLAM = dynamic_cast<const SystemSLAM&>(system);
+                                                 const SystemEstimator& system,
+                                                 Eigen::VectorXd& g,
+                                                 Eigen::MatrixXd& H) const {
+        const system::SystemSLAM& systemSLAM = dynamic_cast<const system::SystemSLAM&>(system);
 
-        // forward-mode autodifferentiation with dual2nd for Hessian
         autodiff::dual2nd logLik_dual;
         Eigen::VectorX<autodiff::dual2nd> x_dual = x.cast<autodiff::dual2nd>();
 
@@ -148,7 +127,14 @@ namespace utility::slam::measurement {
     }
 
     void MeasurementPointBundle::update(SystemBase& system) {
-        SystemSLAM& systemSLAM = dynamic_cast<SystemSLAM&>(system);
+        system::SystemSLAM& systemSLAM = dynamic_cast<system::SystemSLAM&>(system);
+        system::SystemSLAMPointLandmarks& systemPointLandmarks =
+            dynamic_cast<system::SystemSLAMPointLandmarks&>(system);
+
+        // Ensure consecutiveFailures_ is sized correctly
+        while (systemPointLandmarks.consecutiveFailures_.size() < systemSLAM.numberLandmarks()) {
+            systemPointLandmarks.consecutiveFailures_.push_back(0);
+        }
 
         // Get camera state for visibility checks
         Eigen::VectorXd x       = systemSLAM.density.mean();
@@ -156,18 +142,11 @@ namespace utility::slam::measurement {
         Eigen::Vector3d Thetanc = systemSLAM.cameraOrientationEulerDensity(camera_).mean();
         Eigen::Matrix3d Rnc     = rpy2rot(Thetanc);
 
-        // Initialize consecutive failures vector if needed
-        if (consecutiveFailures_.size() != systemSLAM.numberLandmarks()) {
-            consecutiveFailures_.resize(systemSLAM.numberLandmarks(), 0);
-        }
-
-        // Identify landmarks with matching features (FOV check + association)
+        // Identify visible landmarks (FOV check)
         visibleLandmarks_.clear();
         for (std::size_t i = 0; i < systemSLAM.numberLandmarks(); ++i) {
-            std::size_t idx         = systemSLAM.landmarkPositionIndex(i);
-            Eigen::Vector3d rPNn    = x.segment<3>(idx);
-
-            // Transform to camera frame
+            std::size_t idx      = systemSLAM.landmarkPositionIndex(i);
+            Eigen::Vector3d rPNn = x.segment<3>(idx);
             Eigen::Vector3d rPCc = Rnc.transpose() * (rPNn - rCNn);
 
             cv::Vec3d rPCc_cv(rPCc(0), rPCc(1), rPCc(2));
@@ -176,70 +155,82 @@ namespace utility::slam::measurement {
             }
         }
 
+        // Associate visible landmarks with detected features
         idxFeatures_ = associate(systemSLAM, visibleLandmarks_);
 
-        // Update consecutive failures: only for visible landmarks
+        // Update consecutive failures tracking
         for (std::size_t j = 0; j < visibleLandmarks_.size(); ++j) {
             std::size_t landmarkIdx = visibleLandmarks_[j];
             if (idxFeatures_[j] >= 0) {
-                // Successfully associated - reset failure count
-                consecutiveFailures_[landmarkIdx] = 0;
+                if (systemPointLandmarks.consecutiveFailures_[landmarkIdx] > 0) {
+                    std::cout << "  Landmark " << landmarkIdx << " SUCCESSFULLY associated after "
+                              << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << " failures (reset to 0)"
+                              << std::endl;
+                }
+                systemPointLandmarks.consecutiveFailures_[landmarkIdx] = 0;
             }
             else {
-                // Failed to associate - increment failure count
-                consecutiveFailures_[landmarkIdx]++;
+                int oldValue = systemPointLandmarks.consecutiveFailures_[landmarkIdx];
+                systemPointLandmarks.consecutiveFailures_[landmarkIdx]++;
+                int newValue = systemPointLandmarks.consecutiveFailures_[landmarkIdx];
+                std::cout << "  Landmark " << landmarkIdx << " failed association (was=" << oldValue
+                          << ", now=" << newValue << ")" << std::endl;
             }
         }
 
-        // Determine which landmarks to delete
+        // Collect landmarks to delete
         std::vector<std::size_t> landmarksToDelete;
+        int maxTotalLandmarks      = 60;
+        int maxConsecutiveFailures = 10;
 
-        // delete landmarks with >= 10 consecutive failures
+        // Criterion 1: Delete landmarks with too many consecutive failures
+        // std::cout << "Checking for deletion (threshold=" << maxConsecutiveFailures << "):" << std::endl;
         for (std::size_t i = 0; i < systemSLAM.numberLandmarks(); ++i) {
-            if (consecutiveFailures_[i] >= 10) {
+            std::cout << "  Landmark " << i << ": failures=" << systemPointLandmarks.consecutiveFailures_[i];
+            if (systemPointLandmarks.consecutiveFailures_[i] >= maxConsecutiveFailures) {
+                std::cout << " -> MARKED FOR DELETION";
                 landmarksToDelete.push_back(i);
             }
+            std::cout << std::endl;
         }
 
-        // if at capacity, prune worst performers to make room
-        int maxTotalLandmarks = 30;
-        int currentTotal      = systemSLAM.numberLandmarks();
-
+        // Criterion 2: If at capacity, delete worst performers to make room
+        int currentTotal = systemSLAM.numberLandmarks();
         if (currentTotal >= maxTotalLandmarks) {
-            // Find landmarks with highest failure counts (not already marked for deletion)
-            std::vector<std::pair<int, size_t>> failureRanking;  // (failures, landmarkIdx)
-            for (std::size_t i = 0; i < systemSLAM.numberLandmarks(); ++i) {
-                if (consecutiveFailures_[i] < 10) {
-                    failureRanking.push_back({consecutiveFailures_[i], i});
+            int spotsNeeded  = 1;  // Room for new landmarks
+            int needToDelete = (currentTotal + spotsNeeded) - maxTotalLandmarks;
+
+            if (needToDelete > 0) {
+                std::vector<std::pair<int, size_t>> failureRanking;
+                for (std::size_t i = 0; i < systemSLAM.numberLandmarks(); ++i) {
+                    if (std::find(landmarksToDelete.begin(), landmarksToDelete.end(), i) == landmarksToDelete.end()) {
+                        failureRanking.push_back({systemPointLandmarks.consecutiveFailures_[i], i});
+                    }
+                }
+
+                std::sort(failureRanking.begin(), failureRanking.end(), [](const auto& a, const auto& b) {
+                    return a.first > b.first;
+                });
+
+                for (int i = 0; i < std::min(needToDelete, (int) failureRanking.size()); ++i) {
+                    landmarksToDelete.push_back(failureRanking[i].second);
                 }
             }
-
-            // Sort by failures (descending - worst first)
-            std::sort(failureRanking.begin(), failureRanking.end(), [](const auto& a, const auto& b) {
-                return a.first > b.first;
-            });
-
-            // Delete worst performers to make room
-            int spotsNeeded  = 5;  // Make room for 5 new landmarks
-            int needToDelete = currentTotal - maxTotalLandmarks + spotsNeeded;
-            for (int i = 0; i < std::min(needToDelete, (int) failureRanking.size()); ++i) {
-                landmarksToDelete.push_back(failureRanking[i].second);
-            }
         }
 
-        // Sort deletion list and remove duplicates
+        // Sort and remove duplicates
         std::sort(landmarksToDelete.begin(), landmarksToDelete.end());
         landmarksToDelete.erase(std::unique(landmarksToDelete.begin(), landmarksToDelete.end()),
                                 landmarksToDelete.end());
 
-        // Delete landmarks in reverse order to maintain correct indices
+        // Delete in reverse order to maintain correct indices
         if (!landmarksToDelete.empty()) {
             std::cout << "Deleting " << landmarksToDelete.size() << " landmarks: ";
             for (auto it = landmarksToDelete.rbegin(); it != landmarksToDelete.rend(); ++it) {
                 std::size_t landmarkIdx = *it;
-                std::cout << landmarkIdx << "(f=" << consecutiveFailures_[landmarkIdx] << ") ";
+                std::cout << landmarkIdx << "(f=" << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << ") ";
 
-                // Get state indices to keep (all except this landmark's 3 DOF)
+                // Marginalize out landmark
                 std::size_t stateIdx = systemSLAM.landmarkPositionIndex(landmarkIdx);
                 std::vector<int> indicesToKeep;
                 indicesToKeep.reserve(systemSLAM.density.dim() - 3);
@@ -250,13 +241,11 @@ namespace utility::slam::measurement {
                     }
                 }
 
-                // Marginalize out this landmark from density
                 systemSLAM.density = systemSLAM.density.marginal(indicesToKeep);
+                systemPointLandmarks.consecutiveFailures_.erase(systemPointLandmarks.consecutiveFailures_.begin()
+                                                                + landmarkIdx);
 
-                // Remove from consecutive failures tracking
-                consecutiveFailures_.erase(consecutiveFailures_.begin() + landmarkIdx);
-
-                // Remove from visible landmarks and associations if present
+                // Update visible landmarks list
                 auto it_vis = std::find(visibleLandmarks_.begin(), visibleLandmarks_.end(), landmarkIdx);
                 if (it_vis != visibleLandmarks_.end()) {
                     size_t position = std::distance(visibleLandmarks_.begin(), it_vis);
@@ -264,17 +253,16 @@ namespace utility::slam::measurement {
                     idxFeatures_.erase(idxFeatures_.begin() + position);
                 }
 
-                // Decrement all landmark indices > landmarkIdx in visibleLandmarks_
+                // Decrement indices > landmarkIdx
                 for (size_t& idx : visibleLandmarks_) {
-                    if (idx > landmarkIdx) {
+                    if (idx > landmarkIdx)
                         idx--;
-                    }
                 }
             }
             std::cout << std::endl;
         }
 
-        // Identify surplus features that do not correspond to landmarks in the map
+        // Identify surplus features that do not correspond to landmarks
         std::vector<bool> detectionUsed(Y_.cols(), false);
         for (int idx : idxFeatures_) {
             if (idx >= 0) {
@@ -282,15 +270,14 @@ namespace utility::slam::measurement {
             }
         }
 
-        // Initialize up to Nmax - N new landmarks from best surplus features
-        int maxVisibleLandmarksPerFrame = 10;
-        currentTotal                    = systemSLAM.numberLandmarks();  // Recalculate after deletions
+        // Initialize new landmarks from best surplus features
+        int maxVisibleLandmarksPerFrame = 20;
+        currentTotal                    = systemSLAM.numberLandmarks();
         int currentVisible              = visibleLandmarks_.size();
 
-        // Calculate how many we can initialize
-        int spotsAvailableInFrame   = maxVisibleLandmarksPerFrame - currentVisible;
-        int spotsAvailableTotal     = maxTotalLandmarks - currentTotal;
-        int landmarksToInitialize   = std::min(spotsAvailableInFrame, spotsAvailableTotal);
+        int spotsAvailableInFrame = maxVisibleLandmarksPerFrame - currentVisible;
+        int spotsAvailableTotal   = maxTotalLandmarks - currentTotal;
+        int landmarksToInitialize = std::min(spotsAvailableInFrame, spotsAvailableTotal);
 
         if (landmarksToInitialize <= 0) {
             Measurement::update(system);
@@ -299,11 +286,10 @@ namespace utility::slam::measurement {
 
         int landmarksInitializedThisFrame = 0;
 
-        // Collect candidate detections: (detectionIdx, pixel, minDistToOthers)
+        // Collect candidate detections
         std::vector<std::tuple<size_t, Eigen::Vector2d, double>> candidates;
-
-        double borderMargin  = 100.0;  // pixels
-        double minSeparation = 150.0;  // pixels - minimum distance to existing landmarks
+        double borderMargin  = 0.0;  // pixels
+        double minSeparation = 0.0;  // pixels
 
         for (std::size_t detectionIdx = 0; detectionIdx < Y_.cols(); ++detectionIdx) {
             if (detectionUsed[detectionIdx])
@@ -311,18 +297,18 @@ namespace utility::slam::measurement {
 
             Eigen::Vector2d pixel = Y_.col(detectionIdx);
 
-            // is detection too close to image border?
+            // Check if too close to image border
             bool tooCloseToEdge = (pixel(0) < borderMargin || pixel(0) > camera_.imageSize.width - borderMargin
-                                || pixel(1) < borderMargin || pixel(1) > camera_.imageSize.height - borderMargin);
+                                   || pixel(1) < borderMargin || pixel(1) > camera_.imageSize.height - borderMargin);
             if (tooCloseToEdge)
                 continue;
 
-            // find minimum distance to existing landmarks
+            // Find minimum distance to existing landmarks
             double minDistToExisting = std::numeric_limits<double>::max();
             for (size_t i = 0; i < systemSLAM.numberLandmarks(); ++i) {
-                std::size_t idx                   = systemSLAM.landmarkPositionIndex(i);
-                Eigen::Vector3d rPNn_existing     = x.segment<3>(idx);
-                Eigen::Vector3d rPCc_existing     = Rnc.transpose() * (rPNn_existing - rCNn);
+                std::size_t idx               = systemSLAM.landmarkPositionIndex(i);
+                Eigen::Vector3d rPNn_existing = x.segment<3>(idx);
+                Eigen::Vector3d rPCc_existing = Rnc.transpose() * (rPNn_existing - rCNn);
 
                 if (rPCc_existing(2) > 0) {
                     Eigen::Vector2d projected_pixel = camera_.vectorToPixel(rPCc_existing);
@@ -334,7 +320,7 @@ namespace utility::slam::measurement {
             if (minDistToExisting < minSeparation)
                 continue;
 
-            // compute minimum distance to all other detections
+            // Compute minimum distance to all other detections
             double minDistToOtherDetections = std::numeric_limits<double>::max();
             for (std::size_t otherIdx = 0; otherIdx < Y_.cols(); ++otherIdx) {
                 if (otherIdx == detectionIdx)
@@ -347,7 +333,7 @@ namespace utility::slam::measurement {
             candidates.push_back(std::make_tuple(detectionIdx, pixel, minDistToOtherDetections));
         }
 
-        // Sort candidates by minimum distance to other detections (descending - furthest first)
+        // Sort candidates by minimum distance (descending - furthest first)
         std::sort(candidates.begin(), candidates.end(), [](const auto& a, const auto& b) {
             return std::get<2>(a) > std::get<2>(b);
         });
@@ -358,17 +344,17 @@ namespace utility::slam::measurement {
                 break;
             }
 
-            size_t candidateIdx          = std::get<0>(candidate);
+            size_t candidateIdx            = std::get<0>(candidate);
             Eigen::Vector2d candidatePixel = std::get<1>(candidate);
-            double candidateDist         = std::get<2>(candidate);
+            double candidateDist           = std::get<2>(candidate);
 
             // Check distance to already-initialized landmarks this frame
             bool tooCloseToNewLandmark = false;
             for (int alreadyInit = 0; alreadyInit < landmarksInitializedThisFrame; ++alreadyInit) {
-                size_t newLandmarkIdx     = systemSLAM.numberLandmarks() - 1 - alreadyInit;
-                std::size_t idx           = systemSLAM.landmarkPositionIndex(newLandmarkIdx);
-                Eigen::Vector3d rPNn_new  = systemSLAM.density.mean().segment<3>(idx);
-                Eigen::Vector3d rPCc_new  = Rnc.transpose() * (rPNn_new - rCNn);
+                size_t newLandmarkIdx    = systemSLAM.numberLandmarks() - 1 - alreadyInit;
+                std::size_t idx          = systemSLAM.landmarkPositionIndex(newLandmarkIdx);
+                Eigen::Vector3d rPNn_new = systemSLAM.density.mean().segment<3>(idx);
+                Eigen::Vector3d rPCc_new = Rnc.transpose() * (rPNn_new - rCNn);
 
                 if (rPCc_new(2) > 0) {
                     Eigen::Vector2d projected_pixel = camera_.vectorToPixel(rPCc_new);
@@ -383,12 +369,11 @@ namespace utility::slam::measurement {
             if (tooCloseToNewLandmark)
                 continue;
 
-            // All checks passed - initialize this landmark at arbitrary depth
-            double arbitrary_depth = 15.0;  // meters
+            // Initialize landmark at arbitrary depth
+            double arbitrary_depth = 1.0;  // meters
 
-            // Backproject pixel to 3D at arbitrary depth
             cv::Vec2d pixel_cv(candidatePixel(0), candidatePixel(1));
-            cv::Vec3d rPCc_cv        = camera_.pixelToVector(pixel_cv);
+            cv::Vec3d rPCc_cv = camera_.pixelToVector(pixel_cv);
             Eigen::Vector3d rPCc_unit(rPCc_cv[0], rPCc_cv[1], rPCc_cv[2]);
             Eigen::Vector3d rPCc = rPCc_unit.normalized() * arbitrary_depth;
 
@@ -397,95 +382,90 @@ namespace utility::slam::measurement {
 
             // Create new landmark with prior
             Eigen::VectorXd mu_new = rPNn;
-            double epsilon         = 1.0;  // Precision (low confidence in initial position)
+            double epsilon         = 5.0;  // Low confidence in initial position
             Eigen::MatrixXd Xi_new = epsilon * Eigen::MatrixXd::Identity(3, 3);
             Eigen::VectorXd nu_new = Xi_new * mu_new;
 
-            gaussian::GaussianInfo<double> newLandmarkDensity = gaussian::GaussianInfo<double>::fromSqrtInfo(nu_new, Xi_new);
+            gaussian::GaussianInfo<double> newLandmarkDensity =
+                gaussian::GaussianInfo<double>::fromSqrtInfo(nu_new, Xi_new);
             systemSLAM.density *= newLandmarkDensity;
             landmarksInitializedThisFrame++;
 
             size_t newLandmarkIdx = systemSLAM.numberLandmarks() - 1;
             std::cout << "  Initialized point landmark " << newLandmarkIdx << " (dist=" << candidateDist
-                    << ", depth=" << arbitrary_depth << "m)" << std::endl;
+                      << ", depth=" << arbitrary_depth << "m)" << std::endl;
 
-            // Add to visible landmarks and associate with detection for immediate update
+            // Add to visible landmarks and associate with detection
             visibleLandmarks_.push_back(newLandmarkIdx);
             idxFeatures_.push_back(static_cast<int>(candidateIdx));
-
-            // Initialize failure tracking for new landmark
-            consecutiveFailures_.push_back(0);
+            systemPointLandmarks.consecutiveFailures_.push_back(0);
         }
 
         // Perform measurement update
         Measurement::update(system);
     }
 
-    // Image feature location for a given landmark and Jacobian
     Eigen::Vector2d MeasurementPointBundle::predictFeature(const Eigen::VectorXd& x,
-                                                        Eigen::MatrixXd& J,
-                                                        const SystemSLAM& system,
-                                                        std::size_t idxLandmark) const {
+                                                           Eigen::MatrixXd& J,
+                                                           const system::SystemSLAM& system,
+                                                           std::size_t idxLandmark) const {
         // Get camera pose from state
         Pose<double> Tnc;
-        Tnc.translationVector = system.cameraPosition(camera_, x);     // rCNn
-        Tnc.rotationMatrix    = system.cameraOrientation(camera_, x);  // Rnc
+        Tnc.translationVector = system.cameraPosition(camera_, x);
+        Tnc.rotationMatrix    = system.cameraOrientation(camera_, x);
 
         // Get landmark position from state
-        std::size_t idx         = system.landmarkPositionIndex(idxLandmark);
+        std::size_t idx      = system.landmarkPositionIndex(idxLandmark);
         Eigen::Vector3d rPNn = x.segment<3>(idx);
 
         // Transform to camera coordinates
         Eigen::Vector3d rPCc = Tnc.rotationMatrix.transpose() * (rPNn - Tnc.translationVector);
 
-        // Get pixel coordinates with Jacobian w.r.t. camera coordinates
-        Eigen::Matrix23d J_camera;  // Fixed: Different name from parameter
+        // Get pixel coordinates with Jacobian
+        Eigen::Matrix23d J_camera;
         Eigen::Vector2d rQOi = camera_.vectorToPixel(rPCc, J_camera);
 
-        // Compute full Jacobian ∂h/∂x using chain rule and Appendix B expressions
+        // Compute full Jacobian using chain rule
         J.resize(2, x.size());
         J.setZero();
 
-        // Extract state components
         Eigen::Vector3d rBNn    = x.segment<3>(6);
         Eigen::Vector3d Thetanb = x.segment<3>(9);
 
-        // Get body pose
         Pose<double> Tnb;
         Tnb.rotationMatrix    = rpy2rot(Thetanb);
         Tnb.translationVector = rBNn;
 
-        // Get camera-to-body transformation
         Pose<double> Tbc    = camera_.Tbc;
         Eigen::Matrix3d Rnb = Tnb.rotationMatrix;
         Eigen::Matrix3d Rbc = Tbc.rotationMatrix;
 
-        // Equation (27a):
+        // Equation (27a): ∂h/∂rPNn
         Eigen::Matrix<double, 2, 3> dhj_drPNn = J_camera * Rbc.transpose() * Rnb.transpose();
         J.block<2, 3>(0, idx)                 = dhj_drPNn;
 
-        // Equation (27b):
+        // Equation (27b): ∂h/∂rBNn
         Eigen::Matrix<double, 2, 3> dhj_drBNn = -J_camera * Rbc.transpose() * Rnb.transpose();
         J.block<2, 3>(0, 6)                   = dhj_drBNn;
 
         Eigen::Vector3d rPNn_minus_rBNn = rPNn - rBNn;
 
-        // roll
+        // Roll
         Eigen::Matrix3d dRx_dphi;
         rotx(Thetanb(0), dRx_dphi);
         Eigen::Matrix3d dRnb_dphi = rotz(Thetanb(2)) * roty(Thetanb(1)) * dRx_dphi;
 
-        // pitch
+        // Pitch
         Eigen::Matrix3d dRy_dtheta;
         roty(Thetanb(1), dRy_dtheta);
         Eigen::Matrix3d dRnb_dtheta = rotz(Thetanb(2)) * dRy_dtheta * rotx(Thetanb(0));
 
-        // yaw
+        // Yaw
         Eigen::Matrix3d dRz_dpsi;
         rotz(Thetanb(2), dRz_dpsi);
         Eigen::Matrix3d dRnb_dpsi = dRz_dpsi * roty(Thetanb(1)) * rotx(Thetanb(0));
 
-        // Apply equation (27c) for each Euler angle
+        // Apply equation (27c)
         J.col(9)  = J_camera * Rbc.transpose() * dRnb_dphi.transpose() * rPNn_minus_rBNn;
         J.col(10) = J_camera * Rbc.transpose() * dRnb_dtheta.transpose() * rPNn_minus_rBNn;
         J.col(11) = J_camera * Rbc.transpose() * dRnb_dpsi.transpose() * rPNn_minus_rBNn;
@@ -493,17 +473,11 @@ namespace utility::slam::measurement {
         return rQOi;
     }
 
-    // Density of image feature location for a given landmark
-    gaussian::GaussianInfo<double> MeasurementPointBundle::predictFeatureDensity(const SystemSLAM& system,
-                                                                                  std::size_t idxLandmark) const {
+    gaussian::GaussianInfo<double> MeasurementPointBundle::predictFeatureDensity(const system::SystemSLAM& system,
+                                                                                 std::size_t idxLandmark) const {
         const std::size_t& nx = system.density.dim();
         const std::size_t ny  = 2;
 
-        //   y   =   h(x) + v
-        // \___/   \__________/
-        //   ya  =   ha(x, v)
-        //
-        // Helper function to evaluate ha(x, v) and its Jacobian Ja = [dha/dx, dha/dv]
         const auto func = [&](const Eigen::VectorXd& xv, Eigen::MatrixXd& Ja) {
             assert(xv.size() == nx + ny);
             Eigen::VectorXd x = xv.head(nx);
@@ -516,14 +490,13 @@ namespace utility::slam::measurement {
         };
 
         auto pv  = gaussian::GaussianInfo<double>::fromSqrtMoment(sigma_ * Eigen::MatrixXd::Identity(ny, ny));
-        auto pxv = system.density * pv;  // p(x, v) = p(x)*p(v)
+        auto pxv = system.density * pv;
         return pxv.affineTransform(func);
     }
 
-    // Image feature locations for a bundle of landmarks
     Eigen::VectorXd MeasurementPointBundle::predictFeatureBundle(const Eigen::VectorXd& x,
                                                                  Eigen::MatrixXd& J,
-                                                                 const SystemSLAM& system,
+                                                                 const system::SystemSLAM& system,
                                                                  const std::vector<std::size_t>& idxLandmarks) const {
         const std::size_t& nL = idxLandmarks.size();
         const std::size_t& nx = system.density.dim();
@@ -533,27 +506,19 @@ namespace utility::slam::measurement {
         J.resize(2 * nL, nx);
         for (std::size_t i = 0; i < nL; ++i) {
             Eigen::MatrixXd Jfeature;
-            Eigen::Vector2d rQOi = predictFeature(x, Jfeature, system, idxLandmarks[i]);
-            // Set pair of elements of h
-            h.segment<2>(2 * i) = rQOi;
-            // Set pair of rows of J
+            Eigen::Vector2d rQOi                        = predictFeature(x, Jfeature, system, idxLandmarks[i]);
+            h.segment<2>(2 * i)                         = rQOi;
             J.block<2, Eigen::Dynamic>(2 * i, 0, 2, nx) = Jfeature;
         }
         return h;
     }
 
-    // Density of image features for a set of landmarks
     gaussian::GaussianInfo<double> MeasurementPointBundle::predictFeatureBundleDensity(
-        const SystemSLAM& system,
+        const system::SystemSLAM& system,
         const std::vector<std::size_t>& idxLandmarks) const {
         const std::size_t& nx = system.density.dim();
         const std::size_t ny  = 2 * idxLandmarks.size();
 
-        //   y   =   h(x) + v
-        // \___/   \__________/
-        //   ya  =   ha(x, v)
-        //
-        // Helper function to evaluate ha(x, v) and its Jacobian Ja = [dha/dx, dha/dv]
         const auto func = [&](const Eigen::VectorXd& xv, Eigen::MatrixXd& Ja) {
             assert(xv.size() == nx + ny);
             Eigen::VectorXd x = xv.head(nx);
@@ -566,13 +531,12 @@ namespace utility::slam::measurement {
         };
 
         auto pv  = gaussian::GaussianInfo<double>::fromSqrtMoment(sigma_ * Eigen::MatrixXd::Identity(ny, ny));
-        auto pxv = system.density * pv;  // p(x, v) = p(x)*p(v)
+        auto pxv = system.density * pv;
         return pxv.affineTransform(func);
     }
 
-    const std::vector<int>& MeasurementPointBundle::associate(const SystemSLAM& system,
+    const std::vector<int>& MeasurementPointBundle::associate(const system::SystemSLAM& system,
                                                               const std::vector<std::size_t>& idxLandmarks) {
-        // guard to prevent snn being called with an empty idxLandmarks
         if (idxLandmarks.empty()) {
             idxFeatures_.clear();
             return idxFeatures_;

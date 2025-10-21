@@ -186,6 +186,8 @@ export class LocalisationRobotModel {
     timestamp: number;
     phase: message.behaviour.state.WalkState.Phase;
   }[] = [];
+  @observable vslamMapPoints: { rNWn: Vector3[] } = { rNWn: [] };
+  @observable Hwn: Matrix4 = Matrix4.of();  // Add this line to store Hwn transform
 
   constructor({
     model,
@@ -221,6 +223,8 @@ export class LocalisationRobotModel {
     swingFootTrajectory,
     walkPhase,
     trajectoryHistory,
+    vslamMapPoints,
+    Hwn,
   }: {
     model: RobotModel;
     name: string;
@@ -261,6 +265,8 @@ export class LocalisationRobotModel {
       timestamp: number;
       phase: message.behaviour.state.WalkState.Phase;
     }[];
+    vslamMapPoints: { rNWn: Vector3[] };
+    Hwn: Matrix4;
   }) {
     this.model = model;
     this.name = name;
@@ -295,6 +301,8 @@ export class LocalisationRobotModel {
     this.swingFootTrajectory = swingFootTrajectory;
     this.walkPhase = walkPhase;
     this.trajectoryHistory = trajectoryHistory;
+    this.vslamMapPoints = vslamMapPoints;
+    this.Hwn = Hwn;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -328,6 +336,8 @@ export class LocalisationRobotModel {
       swingFootTrajectory: [],
       walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
       trajectoryHistory: [],
+      vslamMapPoints: { rNWn: [] },
+      Hwn: Matrix4.of(),
     });
   });
 
@@ -399,6 +409,18 @@ export class LocalisationRobotModel {
         position: intersection.position.applyMatrix4(this.Hfw),
       });
     });
+  }
+
+  @computed
+  get rNFf(): Vector3[] {
+    // Transform from VSLAM world frame {n} to field frame {f}
+    // Hwn is defined as "NUbots world {w} to VSLAM world {n}"
+    // So to go from {n} to {w}, we need Hnw = Hwn.inverse()
+    // Then transform from NUbots world to field: Hfw * (Hnw * rNWn)
+    const Hnw = this.Hwn.invert();
+    return this.vslamMapPoints.rNWn.map((rNWn) =>
+      rNWn.applyMatrix4(Hnw).applyMatrix4(this.Hfw)
+    );
   }
 
   /** Torso trajectory (Hpt) in field space */

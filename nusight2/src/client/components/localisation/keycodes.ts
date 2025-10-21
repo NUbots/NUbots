@@ -5,6 +5,7 @@ export enum KeyCode {
   D = 68,
   R = 82,
   F = 70,
+  V = 86,
   Space = 32,
   Enter = 13,
 }

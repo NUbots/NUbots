@@ -405,17 +405,6 @@ RUN install-from-source https://github.com/danmar/cppcheck/archive/refs/tags/2.1
 RUN install-package boost boost-libs
 RUN install-package suitesparse openblas lapack tbb
 
-# VTK (+Qt6 etc. via pacman to save build time)
-RUN install-package vtk
-
-# doctest (header-only)
-RUN install-from-source https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz
-
-# nanobench (header-only)
-RUN install-from-source https://raw.githubusercontent.com/martinus/nanobench/v4.3.11/src/include/nanobench.h \
-    --header-path include/nanobench
-
-
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################

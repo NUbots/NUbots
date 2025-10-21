@@ -39,6 +39,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/input/VSLAM.hpp"
 
 #include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/math/filter/YawFilter.hpp"
@@ -51,6 +52,7 @@ namespace module::input {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using VSLAMMsg = message::input::VSLAM;
     using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
 
@@ -117,6 +119,11 @@ namespace module::input {
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
 
+        /// @brief Fixed transform from nubots world to vslam world frame
+        Eigen::Isometry3d Hwn = Eigen::Isometry3d::Identity();
+
+        bool vslam_initialised = false;
+
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
         /// @param sensors The sensors message to update
@@ -145,7 +152,8 @@ namespace module::input {
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
                              const message::behaviour::state::Stability& stability,
-                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                             const std::shared_ptr<const VSLAMMsg>& vslam);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
