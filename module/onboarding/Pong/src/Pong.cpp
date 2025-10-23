@@ -32,6 +32,7 @@ namespace module::onboarding {
 
             // TODO: Emit a Pong message
             emit(pong_msg);
+            //change after pull test
         });
     }
 
