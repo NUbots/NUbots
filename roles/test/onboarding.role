@@ -13,10 +13,7 @@ nuclear_role(
   actuation::Servos
   # onboarding::Ping
   # onboarding::Pong
-  skill::Say
-  onboarding::Judge
-  onboarding::Accumulator
   onboarding::Starter
-
-
+  onboarding::Accumulator
+  onboarding::Judge
 )

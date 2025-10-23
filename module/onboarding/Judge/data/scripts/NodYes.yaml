@@ -1,0 +1,14 @@
+# Head nodding sequence - nod down and back up
+frames:
+  - duration: 0.5
+    servos:
+      HEAD_PITCH:
+        position: -0.4 # Look down (negative pitch)
+        gain: 30
+        torque: 100
+  - duration: 0.5
+    servos:
+      HEAD_PITCH:
+        position: 0.0 # Return to neutral
+        gain: 30
+        torque: 100
