@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message.onboarding;
+
+message ComputeIteration{
+    // Current iteration number (k in the summation)
+    uint32 k = 1;
+
+    // Running sum accumulated so far
+    uint32 sum = 2;
+}

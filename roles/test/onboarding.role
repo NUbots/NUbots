@@ -11,6 +11,12 @@ nuclear_role(
   extension::Director
   actuation::Kinematics
   actuation::Servos
-  onboarding::Ping
-  onboarding::Pong
+  # onboarding::Ping
+  # onboarding::Pong
+  skill::Say
+  onboarding::Judge
+  onboarding::Accumulator
+  onboarding::Starter
+
+
 )
