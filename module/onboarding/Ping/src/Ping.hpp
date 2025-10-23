@@ -14,6 +14,8 @@ private:
 public:
     /// @brief Called by the powerplant to build and setup the Ping reactor.
     explicit Ping(std::unique_ptr<NUClear::Environment> environment);
+    uint32_t counter = 0;
+
 };
 
 }  // namespace module::onboarding
