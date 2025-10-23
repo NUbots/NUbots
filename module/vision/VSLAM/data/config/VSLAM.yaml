@@ -9,7 +9,7 @@ enable_visualization: true
 # Initial camera height above ground plane (meters)
 # Set this to match your robot's kinematic camera height (Hwt_kinematic * Htc).z
 # For NUgus standing: typically ~0.58m
-initial_camera_height: 0.58
+initial_camera_height: 0.0
 
 # Initial state uncertainty (scaling factors)
 initial_covariance:
@@ -17,7 +17,3 @@ initial_covariance:
   angular_velocity: 0.4   # wx, wy, wz
   position: 0.01          # x, y, z
   orientation: 0.01       # roll, pitch, yaw
-
-# Feature detection parameters
-features:
-  max_features: 100              # Maximum features to detect per frame

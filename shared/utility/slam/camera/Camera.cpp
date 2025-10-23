@@ -490,12 +490,7 @@ namespace utility::slam::camera {
         Eigen::Vector2d rQOi;
         rQOi[0] = fx * u_prime + cx;  // u coordinate
         rQOi[1] = fy * v_prime + cy;  // v coordinate
-
-        // Compute analytical Jacobian ∂r'Q/O,i/∂rPCc (equation 26 from Appendix A)
-
         // First compute intermediate derivatives (equations 15-25)
-
-        // ∂u/∂rPCc and ∂v/∂rPCc (equations 15-16)
         double du_dx = 1.0 / z;
         double du_dy = 0.0;
         double du_dz = -x / (z * z);
@@ -504,36 +499,30 @@ namespace utility::slam::camera {
         double dv_dy = 1.0 / z;
         double dv_dz = -y / (z * z);
 
-        // ∂r/∂u and ∂r/∂v (equations 17-18)
         double r     = std::sqrt(r2);
         double dr_du = (r > 0) ? u / r : 0.0;  // Handle r = 0 case
         double dr_dv = (r > 0) ? v / r : 0.0;
 
-        // ∂α/∂r and ∂β/∂r (equations 19-20)
         double dalpha_dr = 2 * k1 * r + 4 * k2 * r * r2 + 6 * k3 * r * r4;
         double dbeta_dr  = 2 * k4 * r + 4 * k5 * r * r2 + 6 * k6 * r * r4;
 
-        // ∂c/∂r (equation 21)
         double dc_dr = (dalpha_dr * (1 + beta) - (1 + alpha) * dbeta_dr) / ((1 + beta) * (1 + beta));
 
-        // ∂u'/∂u and ∂u'/∂v (equations 22-23)
         double du_prime_du =
             (dc_dr * dr_du) * u + c + 2 * p1 * v + p2 * (2 * dr_du * r + 4 * u) + 2 * s1 * dr_du * r + 4 * s2 * r * r2 * dr_du;
         double du_prime_dv = (dc_dr * dr_dv) * u + 2 * p1 * u + p2 * (2 * dr_dv * r) + 2 * s1 * dr_dv * r + 4 * s2 * r * r2 * dr_dv;
 
-        // ∂v'/∂u and ∂v'/∂v (equations 24-25)
         double dv_prime_du = (dc_dr * dr_du) * v + p1 * (2 * dr_du * r) + 2 * p2 * v + 2 * s3 * dr_du * r + 4 * s4 * r * r2 * dr_du;
         double dv_prime_dv =
             (dc_dr * dr_dv) * v + c + p1 * (2 * dr_dv * r + 4 * v) + 2 * p2 * u + 2 * s3 * dr_dv * r + 4 * s4 * r * r2 * dr_dv;
 
-        // Final Jacobian ∂r'Q/O,i/∂rPCc (equation 26)
-        J(0, 0) = fx * (du_prime_du * du_dx + du_prime_dv * dv_dx);  // ∂u'/∂x
-        J(0, 1) = fx * (du_prime_du * du_dy + du_prime_dv * dv_dy);  // ∂u'/∂y
-        J(0, 2) = fx * (du_prime_du * du_dz + du_prime_dv * dv_dz);  // ∂u'/∂z
+        J(0, 0) = fx * (du_prime_du * du_dx + du_prime_dv * dv_dx);
+        J(0, 1) = fx * (du_prime_du * du_dy + du_prime_dv * dv_dy);
+        J(0, 2) = fx * (du_prime_du * du_dz + du_prime_dv * dv_dz);
 
-        J(1, 0) = fy * (dv_prime_du * du_dx + dv_prime_dv * dv_dx);  // ∂v'/∂x
-        J(1, 1) = fy * (dv_prime_du * du_dy + dv_prime_dv * dv_dy);  // ∂v'/∂y
-        J(1, 2) = fy * (dv_prime_du * du_dz + dv_prime_dv * dv_dz);  // ∂v'/∂z
+        J(1, 0) = fy * (dv_prime_du * du_dx + dv_prime_dv * dv_dx);
+        J(1, 1) = fy * (dv_prime_du * du_dy + dv_prime_dv * dv_dy);
+        J(1, 2) = fy * (dv_prime_du * du_dz + dv_prime_dv * dv_dz);
 
         return rQOi;
     }

@@ -22,6 +22,7 @@ nuclear_role(
   network::RobotCommunication
   platform::Webots
   # Vision
+  vision::Yolo
   vision::VSLAM
   # Localisation
 #   localisation::BallLocalisation

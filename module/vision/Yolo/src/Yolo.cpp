@@ -342,6 +342,15 @@ namespace module::vision {
                         }
 
                         i.rIWw = rIWw;
+
+                        // ====== MODIFICATION FOR VSLAM: Store pixel centre coordinates ======
+                        // Calculate the bounding box centre in pixel coordinates
+                        i.pixel_centre = Eigen::Vector2d(
+                            boxes[idx].x + boxes[idx].width / 2.0,
+                            boxes[idx].y + boxes[idx].height / 2.0
+                        );
+                        // ====================================================================
+
                         if (objects[class_id].name == "L-intersection") {
                             i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
                             bbox->colour = objects[class_id].colour;
