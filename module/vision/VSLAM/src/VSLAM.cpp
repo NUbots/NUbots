@@ -34,10 +34,12 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/input/VSLAM.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/vision/FieldIntersections.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/slam/camera/Camera.hpp"
 #include "utility/slam/camera/Pose.hpp"
 #include "utility/slam/gaussian/GaussianInfo.hpp"
@@ -50,9 +52,11 @@ namespace module::vision {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
     using message::output::CompressedImage;
     using VSLAMMsg = message::input::VSLAM;
     using message::vision::FieldIntersections;
+    using utility::input::FrameID;
 
     using utility::slam::camera::Camera;
     using utility::slam::camera::Pose;
@@ -69,7 +73,6 @@ namespace module::vision {
             // Load configuration parameters
             cfg.enableVisualization   = config["enable_visualization"].as<bool>(false);
             cfg.cameraCalibrationPath = config["camera_calibration"].as<std::string>();
-            cfg.initialCameraHeight   = config["initial_camera_height"].as<double>(0.58);
 
             // Load initial covariance parameters
             cfg.initialCovariance.velocity        = config["initial_covariance"]["velocity"].as<double>(0.3);
@@ -94,9 +97,9 @@ namespace module::vision {
             // Align frame of body to camera frame
             // b1 = c3, b2 = c1, b3 = c2
             // Eigen::Matrix3d Rbc;
-            // Rbc << 1, 0, 0,  // b1 = c3
-            //     0, 1, 0,     // b2 = c1
-            //     0, 0, 1;     // b3 = c2
+            // Rbc << 0, -1,  0,
+            //         0,  0, -1,
+            //         1,  0,  0;
 
             // camera_.Tbc.rotationMatrix    = Rbc;
             // camera_.Tbc.translationVector = Eigen::Vector3d::Zero();
@@ -104,8 +107,8 @@ namespace module::vision {
         });
 
         // Subscribe to Image with FieldIntersections from YOLO
-        on<Trigger<Image>, With<FieldIntersections>, Single, MainThread>().then(
-            [this](const Image& image, const FieldIntersections& field_intersections) {
+        on<Trigger<Image>, With<FieldIntersections>, With<Sensors>, Single, MainThread>().then(
+            [this](const Image& image, const FieldIntersections& field_intersections, const Sensors& sensors) {
                 // Convert NUClear Image to cv::Mat based on image format
                 int width  = image.dimensions.x();
                 int height = image.dimensions.y();
@@ -138,8 +141,12 @@ namespace module::vision {
                 // Calculate timestamp from NUClear clock
                 double timestamp = NUClear::clock::now().time_since_epoch().count() / 1e9;
 
+                // Get camera transform from kinematics (world-to-camera)
+                Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors.Htx[FrameID::L_CAMERA]);
+                Eigen::Isometry3d Hwc = sensors.Htw.inverse() * Htc;
+
                 // Process YOLO field intersections through SLAM pipeline
-                cv::Mat debug_frame = processSLAMFrame(img_rgb, timestamp, field_intersections);
+                cv::Mat debug_frame = processSLAMFrame(img_rgb, timestamp, field_intersections, Hwc);
 
                 // Emit debug frame as CompressedImage for visualization in NUsight
                 if (!debug_frame.empty() && cfg.enableVisualization) {
@@ -196,7 +203,7 @@ namespace module::vision {
                     Hnk.linear() = Rnk;
                     Hnk.translation() = rCNk;
 
-                    //  USE STELLA'S EXACT TRANSFORM (not the Rkn we discussed earlier!)
+                    //  TRANSFORM CAMERA TO NUBOTS FRAME
                     Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
                     Hkc.matrix() << 0, -1,  0, 0,
                                     0,  0, -1, 0,
@@ -224,7 +231,7 @@ namespace module::vision {
             });
      }
 
-     void VSLAM::initializeSystem() {
+     void VSLAM::initializeSystem(const Eigen::Isometry3d& Hwc) {
          // Only initialize once
          if (systemInitialized_) {
              return;
@@ -235,8 +242,12 @@ namespace module::vision {
 
          // Create initial mean state
          Eigen::VectorXd initialMean = Eigen::VectorXd::Zero(stateDim);
-         initialMean(8)              = cfg.initialCameraHeight;  // Initial camera height above ground
-
+         initialMean(6) = -Hwc.translation().y();
+        initialMean(7) = -Hwc.translation().z();
+         initialMean(8) = Hwc.translation().x();
+        initialMean(9) = -0.178; // pitch
+        // initialMean(10) = 0.0; // yaw
+        // initialMean(11) = 0.0; // roll
          // Create initial covariance matrix from configuration
          Eigen::MatrixXd initialCov = Eigen::MatrixXd::Identity(stateDim, stateDim);
 
@@ -273,10 +284,11 @@ namespace module::vision {
 
      cv::Mat VSLAM::processSLAMFrame(const cv::Mat& img_rgb,
                                      double timestamp,
-                                     const FieldIntersections& field_intersections) {
+                                     const FieldIntersections& field_intersections,
+                                     const Eigen::Isometry3d& Hwc) {
          // Initialize system on first frame
          if (!systemInitialized_) {
-             initializeSystem();
+             initializeSystem(Hwc);
          }
 
          // Clone image for visualization

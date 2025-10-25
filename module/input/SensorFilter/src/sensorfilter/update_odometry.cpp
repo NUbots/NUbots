@@ -51,17 +51,8 @@ namespace module::input {
 
         // Initialize VSLAM coordinate frame alignment on first VSLAM message
         if (!vslam_initialised && vslam) {
-            Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]);
-            auto Htw = Htf;
-            Htw.translation().y() = 0;
-
-            Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
-            Eigen::Isometry3d Hwc = Htw.inverse() * Htc;
-
-            auto Hcn = Eigen::Isometry3d::Identity();
-            Hcn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-
-            Hwn = Hwc * Hcn;
+            Hwn = Eigen::Isometry3d::Identity();
+            Hwn.linear() = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
 
             vslam_initialised = true;
             log<INFO>("VSLAM initialized. Hwn translation:", Hwn.translation().transpose());
@@ -147,30 +138,30 @@ namespace module::input {
     //         return;
     //     }
 
-    //     // If sensors detected a new foot phase, update the anchor frame
-    //     if (planted_anchor_foot != sensors->planted_foot_phase
-    //         && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
-    //         switch (planted_anchor_foot.value) {
-    //             case WalkState::Phase::RIGHT:
-    //                 Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
-    //                 break;
-    //             case WalkState::Phase::LEFT:
-    //                 Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
-    //                 break;
-    //             default: log<WARN>("Anchor frame should not be updated in double support phase"); break;
-    //         }
-    //         planted_anchor_foot = sensors->planted_foot_phase;
-    //         // Set the z translation, roll and pitch of the anchor frame to 0 as known to be on field plane
-    //         Hwp.translation().z() = 0;
-    //         Hwp.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
-    //     }
-    //     sensors->Hwp = Hwp;
+        // If sensors detected a new foot phase, update the anchor frame
+        if (planted_anchor_foot != sensors->planted_foot_phase
+            && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
+            switch (planted_anchor_foot.value) {
+                case WalkState::Phase::RIGHT:
+                    Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                    break;
+                case WalkState::Phase::LEFT:
+                    Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                    break;
+                default: log<WARN>("Anchor frame should not be updated in double support phase"); break;
+            }
+            planted_anchor_foot = sensors->planted_foot_phase;
+            // Set the z translation, roll and pitch of the anchor frame to 0 as known to be on field plane
+            Hwp.translation().z() = 0;
+            Hwp.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
+        }
+        sensors->Hwp = Hwp;
 
-    //     // Compute torso pose using kinematics from anchor frame (current planted foot)
-    //     const Eigen::Isometry3d Hpt        = planted_anchor_foot.value == WalkState::Phase::RIGHT
-    //                                              ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
-    //                                              : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
-    //     const Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
+        // Compute torso pose using kinematics from anchor frame (current planted foot)
+        const Eigen::Isometry3d Hpt        = planted_anchor_foot.value == WalkState::Phase::RIGHT
+                                                 ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
+                                                 : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
+        const Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
 
     //     // Extract yaw from kinematic estimate
     //     const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_anchor.linear()).z();
@@ -178,14 +169,14 @@ namespace module::input {
     //     // Fuse yaw estimates using yaw filter
     //     const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
 
-    //     // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, anchor translation)
-    //     Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
-    //     Hwt.translation()     = Hwt_anchor.translation();
+        // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, anchor translation)
+        Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+        Hwt.translation()     = Hwt_anchor.translation();
 
     //     // Combine Mahony roll/pitch with fused yaw
     //     Eigen::Vector3d rpy_fused(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
     //     Hwt.linear() = rpy_intrinsic_to_mat(rpy_fused);
-    //     sensors->Htw = Hwt.inverse();
+        sensors->Htw = Hwt.inverse();
 
     //     // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
     //     Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();

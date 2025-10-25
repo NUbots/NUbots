@@ -55,7 +55,7 @@ namespace utility::slam::measurement {
                                                    const camera::Camera& camera)
         : MeasurementSLAM(time, camera)
         , Y_(Y)
-        , sigma_(4.0)  // Measurement noise (pixels)
+        , sigma_(2.0)  // Measurement noise (pixels)
     {
         updateMethod_ = UpdateMethod::BFGSTRUSTSQRT;
     }
@@ -180,7 +180,7 @@ namespace utility::slam::measurement {
 
         // Collect landmarks to delete
         std::vector<std::size_t> landmarksToDelete;
-        int maxTotalLandmarks      = 60;
+        int maxTotalLandmarks      = 20;
         int maxConsecutiveFailures = 10;
 
         // Criterion 1: Delete landmarks with too many consecutive failures
@@ -370,19 +370,28 @@ namespace utility::slam::measurement {
                 continue;
 
             // Initialize landmark at arbitrary depth
-            double arbitrary_depth = 2.0;  // meters
 
             cv::Vec2d pixel_cv(candidatePixel(0), candidatePixel(1));
             cv::Vec3d rPCc_cv = camera_.pixelToVector(pixel_cv);
             Eigen::Vector3d rPCc_unit(rPCc_cv[0], rPCc_cv[1], rPCc_cv[2]);
-            Eigen::Vector3d rPCc = rPCc_unit.normalized() * arbitrary_depth;
+            Eigen::Vector3d rPCc_normalized = rPCc_unit.normalized();
 
-            // Transform to world frame
-            Eigen::Vector3d rPNn = Rnc * rPCc + rCNn;
+            // Transform ray from camera frame to SLAM world frame (both OpenCV convention)
+            Eigen::Vector3d ray_slam = Rnc * rPCc_normalized;
+
+            // Camera height above ground: In OpenCV, Y-down is positive down
+            double camera_height = -rCNn(1);
+
+            // Compute depth to ground plane intersection
+            double depth = (-rCNn(1)) / ray_slam(1);
+
+            // Compute landmark position on ground plane
+            Eigen::Vector3d rPNn = rCNn + depth * ray_slam;
+            rPNn(1) = 0.0;
 
             // Create new landmark with prior
             Eigen::VectorXd mu_new = rPNn;
-            double epsilon         = 5.0;  // Low confidence in initial position
+            double epsilon         = 50.0;  // Low confidence in initial position
             Eigen::MatrixXd Xi_new = epsilon * Eigen::MatrixXd::Identity(3, 3);
             Eigen::VectorXd nu_new = Xi_new * mu_new;
 
@@ -393,7 +402,7 @@ namespace utility::slam::measurement {
 
             size_t newLandmarkIdx = systemSLAM.numberLandmarks() - 1;
             std::cout << "  Initialized point landmark " << newLandmarkIdx << " (dist=" << candidateDist
-                      << ", depth=" << arbitrary_depth << "m)" << std::endl;
+                      << ", depth=" << depth << "m)" << std::endl;
 
             // Add to visible landmarks and associate with detection
             visibleLandmarks_.push_back(newLandmarkIdx);

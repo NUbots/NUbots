@@ -28,14 +28,16 @@
  #ifndef MODULE_VISION_VSLAM_HPP
  #define MODULE_VISION_VSLAM_HPP
 
- #include <memory>
- #include <nuclear>
- #include <string>
+#include <memory>
+#include <nuclear>
+#include <string>
 
- #include "message/vision/FieldIntersections.hpp"
- #include "utility/slam/camera/Camera.hpp"
- #include "utility/slam/rotation.hpp"
- #include "utility/slam/system/SystemSLAM.hpp"
+#include <Eigen/Geometry>
+
+#include "message/vision/FieldIntersections.hpp"
+#include "utility/slam/camera/Camera.hpp"
+#include "utility/slam/rotation.hpp"
+#include "utility/slam/system/SystemSLAM.hpp"
 
  namespace module::vision {
 
@@ -54,9 +56,6 @@
 
              /// Path to camera calibration file
              std::string cameraCalibrationPath = "";
-
-             /// Initial camera height above ground plane (meters)
-             double initialCameraHeight = 0.58;
 
              /// Initial covariance scaling factors
              struct InitialCovariance {
@@ -77,18 +76,21 @@
          /// Flag indicating whether the system has been initialized
          bool systemInitialized_ = false;
 
-         /**
-          * @brief Initialize the SLAM system
-          *
-          * Creates the initial state density and constructs the SystemSLAMPointLandmarks.
-          */
-         void initializeSystem();
+        /**
+         * @brief Initialize the SLAM system aligned with the world frame
+         *
+         * Creates the initial state density with pose from kinematics, aligning the SLAM
+         * coordinate frame with the world frame so that ground plane is at Z=0.
+         *
+         * @param Hwc World-to-camera transform from kinematics
+         */
+        void initializeSystem(const Eigen::Isometry3d& Hwc);
 
          /**
           * @brief Process an image frame with field intersections through the SLAM pipeline
           *
           * Steps:
-          * 1. Initialize system on first frame
+          * 1. Initialize system on first frame (aligned with world frame)
           * 2. Extract pixel centres from field intersections
           * 3. Create MeasurementPointBundle measurement
           * 4. Update system state with measurement
@@ -97,11 +99,13 @@
           * @param img_rgb The input image frame
           * @param timestamp Timestamp of the frame in seconds
           * @param field_intersections Field intersections detected by YOLO
+          * @param Hwc World-to-camera transform from kinematics
           * @return cv::Mat Debug image with field intersections drawn
           */
          cv::Mat processSLAMFrame(const cv::Mat& img_rgb,
                                   double timestamp,
-                                  const message::vision::FieldIntersections& field_intersections);
+                                  const message::vision::FieldIntersections& field_intersections,
+                                  const Eigen::Isometry3d& Hwc);
 
      public:
          /**
