@@ -34,6 +34,7 @@
 
 #include <Eigen/Geometry>
 
+#include "message/input/Sensors.hpp"
 #include "message/vision/FieldIntersections.hpp"
 #include "utility/slam/camera/Camera.hpp"
 #include "utility/slam/rotation.hpp"
@@ -46,6 +47,8 @@
       *
       * This reactor implements visual SLAM using YOLO-detected field intersections
       * (L, T, X intersections) as point landmarks for localization and mapping.
+      * It integrates both visual measurements and gyroscope measurements for improved
+      * orientation estimation.
       */
      class VSLAM : public NUClear::Reactor {
      private:
@@ -91,21 +94,24 @@
           *
           * Steps:
           * 1. Initialize system on first frame (aligned with world frame)
-          * 2. Extract pixel centres from field intersections
-          * 3. Create MeasurementPointBundle measurement
-          * 4. Update system state with measurement
-          * 5. Return debug visualization image
+          * 2. Process gyroscope measurement (transformed to SLAM frame)
+          * 3. Extract pixel centres from field intersections
+          * 4. Create MeasurementPointBundle measurement
+          * 5. Update system state with measurement
+          * 6. Return debug visualization image
           *
           * @param img_rgb The input image frame
           * @param timestamp Timestamp of the frame in seconds
           * @param field_intersections Field intersections detected by YOLO
           * @param Hwc World-to-camera transform from kinematics
+          * @param sensors Sensor data including gyroscope measurements
           * @return cv::Mat Debug image with field intersections drawn
           */
          cv::Mat processSLAMFrame(const cv::Mat& img_rgb,
                                   double timestamp,
                                   const message::vision::FieldIntersections& field_intersections,
-                                  const Eigen::Isometry3d& Hwc);
+                                  const Eigen::Isometry3d& Hwc,
+                                  const message::input::Sensors& sensors);
 
      public:
          /**

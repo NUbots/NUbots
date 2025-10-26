@@ -163,9 +163,9 @@ namespace utility::slam::measurement {
             std::size_t landmarkIdx = visibleLandmarks_[j];
             if (idxFeatures_[j] >= 0) {
                 if (systemPointLandmarks.consecutiveFailures_[landmarkIdx] > 0) {
-                    std::cout << "  Landmark " << landmarkIdx << " SUCCESSFULLY associated after "
-                              << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << " failures (reset to 0)"
-                              << std::endl;
+                    // std::cout << "  Landmark " << landmarkIdx << " SUCCESSFULLY associated after "
+                            //   << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << " failures (reset to 0)"
+                            //   << std::endl;
                 }
                 systemPointLandmarks.consecutiveFailures_[landmarkIdx] = 0;
             }
@@ -173,8 +173,8 @@ namespace utility::slam::measurement {
                 int oldValue = systemPointLandmarks.consecutiveFailures_[landmarkIdx];
                 systemPointLandmarks.consecutiveFailures_[landmarkIdx]++;
                 int newValue = systemPointLandmarks.consecutiveFailures_[landmarkIdx];
-                std::cout << "  Landmark " << landmarkIdx << " failed association (was=" << oldValue
-                          << ", now=" << newValue << ")" << std::endl;
+                // std::cout << "  Landmark " << landmarkIdx << " failed association (was=" << oldValue
+                        //   << ", now=" << newValue << ")" << std::endl;
             }
         }
 
@@ -186,9 +186,9 @@ namespace utility::slam::measurement {
         // Criterion 1: Delete landmarks with too many consecutive failures
         // std::cout << "Checking for deletion (threshold=" << maxConsecutiveFailures << "):" << std::endl;
         for (std::size_t i = 0; i < systemSLAM.numberLandmarks(); ++i) {
-            std::cout << "  Landmark " << i << ": failures=" << systemPointLandmarks.consecutiveFailures_[i];
+            // std::cout << "  Landmark " << i << ": failures=" << systemPointLandmarks.consecutiveFailures_[i];
             if (systemPointLandmarks.consecutiveFailures_[i] >= maxConsecutiveFailures) {
-                std::cout << " -> MARKED FOR DELETION";
+                // std::cout << " -> MARKED FOR DELETION";
                 landmarksToDelete.push_back(i);
             }
             std::cout << std::endl;
@@ -225,10 +225,10 @@ namespace utility::slam::measurement {
 
         // Delete in reverse order to maintain correct indices
         if (!landmarksToDelete.empty()) {
-            std::cout << "Deleting " << landmarksToDelete.size() << " landmarks: ";
+            // std::cout << "Deleting " << landmarksToDelete.size() << " landmarks: ";
             for (auto it = landmarksToDelete.rbegin(); it != landmarksToDelete.rend(); ++it) {
                 std::size_t landmarkIdx = *it;
-                std::cout << landmarkIdx << "(f=" << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << ") ";
+                // std::cout << landmarkIdx << "(f=" << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << ") ";
 
                 // Marginalize out landmark
                 std::size_t stateIdx = systemSLAM.landmarkPositionIndex(landmarkIdx);
