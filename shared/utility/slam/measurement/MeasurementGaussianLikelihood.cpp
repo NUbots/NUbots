@@ -11,14 +11,14 @@ namespace utility::slam::measurement {
         : Measurement(time)
         , y_(y)
     {
-        updateMethod_= UpdateMethod::BFGSTRUSTSQRT;
+        updateMethod_= UpdateMethod::AFFINE;
     }
 
     MeasurementGaussianLikelihood::MeasurementGaussianLikelihood(double time, const Eigen::VectorXd & y, int verbosity)
         : Measurement(time, verbosity)
         , y_(y)
     {
-        updateMethod_= UpdateMethod::BFGSTRUSTSQRT;
+        updateMethod_= UpdateMethod::AFFINE;
     }
 
     MeasurementGaussianLikelihood::~MeasurementGaussianLikelihood() = default;
@@ -83,7 +83,7 @@ namespace utility::slam::measurement {
             case UpdateMethod::AFFINE:  // Update using affine transformation
             {
                 const Eigen::Index & ny = y_.size();
-                auto pxv = system.density*noiseDensity(system);    // p(x, v) = p(x)*p(v)
+                auto pxv = system.density*noiseDensity(system);
                 auto func = [&](const Eigen::VectorXd & x, Eigen::MatrixXd & J){ return augmentedPredict(x, J, system); };
                 auto pyx = pxv.affineTransform(func);
                 system.density = pyx.conditional(Eigen::lastN(nx), Eigen::seqN(0, ny), y_);

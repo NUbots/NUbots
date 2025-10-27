@@ -1,74 +1,72 @@
-#include "MeasurementGyroscope.hpp"
+#include "MeasurementAnchor.hpp"
 #include <cmath>
 
 namespace utility::slam::measurement {
 
-    MeasurementGyroscope::MeasurementGyroscope(double time, const Eigen::VectorXd& y)
+    MeasurementAnchor::MeasurementAnchor(double time, const Eigen::VectorXd& y)
         : MeasurementGaussianLikelihood(time, y) {
         updateMethod_ = UpdateMethod::AFFINE;
     }
 
-    MeasurementGyroscope::MeasurementGyroscope(double time, const Eigen::VectorXd& y, int verbosity)
+    MeasurementAnchor::MeasurementAnchor(double time, const Eigen::VectorXd& y, int verbosity)
         : MeasurementGaussianLikelihood(time, y, verbosity) {
         updateMethod_ = UpdateMethod::AFFINE;
     }
 
-    MeasurementGyroscope::~MeasurementGyroscope() = default;
+    MeasurementAnchor::~MeasurementAnchor() = default;
 
-    std::string MeasurementGyroscope::getProcessString() const {
-        return "Gyroscope measurement update:";
+    std::string MeasurementAnchor::getProcessString() const {
+        return "Anchor measurement update:";
     }
 
     // Evaluate h(x) from the measurement model y = h(x) + v
-    // For gyroscope: h(x) = ω (angular velocity from state)
-    Eigen::VectorXd MeasurementGyroscope::predict(const Eigen::VectorXd& x,
+    // For anchor: h(x) = -e3^T*rCNn (anchor position from state)
+    Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x,
                                                   const system::SystemEstimator& system) const {
-        // Extract angular velocity from state
-        Eigen::VectorXd h(3);
-        h = x.segment<3>(3);
+        // Extract anchor position from state
+        Eigen::VectorXd rBNn = x.segment<3>(6);
+        Eigen::VectorXd rCNn = rBNn;
+        Eigen::VectorXd h(1);
+        h(0) = rCNn(2);
         return h;
     }
 
     // Evaluate h(x) and its Jacobian J = dh/dx
-    Eigen::VectorXd MeasurementGyroscope::predict(const Eigen::VectorXd& x,
+    Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x,
                                                   const system::SystemEstimator& system,
                                                   Eigen::MatrixXd& dhdx) const {
         Eigen::VectorXd h = predict(x, system);
 
-        // Jacobian for gyroscope measurement
-        dhdx.resize(3, x.size());
+        // Jacobian for anchor measurement
+        dhdx.resize(1, x.size());
         dhdx.setZero();
 
-        // Set identity block where angular velocity is in state
-        dhdx(0, 3) = 1.0;  // dωx/dωx = 1
-        dhdx(1, 4) = 1.0;  // dωy/dωy = 1
-        dhdx(2, 5) = 1.0;  // dωz/dωz = 1
-
+        dhdx(0, 8) = 1.0;  // down component of state
         return h;
     }
 
     // Evaluate h(x), Jacobian, and Hessian
-    Eigen::VectorXd MeasurementGyroscope::predict(const Eigen::VectorXd& x,
+    Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x,
                                                   const system::SystemEstimator& system,
                                                   Eigen::MatrixXd& dhdx,
                                                   Eigen::Tensor<double, 3>& d2hdx2) const {
         Eigen::VectorXd h = predict(x, system, dhdx);
 
-        // Hessian for gyroscope measurement
+        // Hessian for anchor measurement
         // Since h(x) is linear (identity mapping), all second derivatives are zero
-        d2hdx2.resize(3, x.size(), x.size());
+        d2hdx2.resize(1, x.size(), x.size());
         d2hdx2.setZero();
 
         return h;
     }
 
     // Define measurement noise covariance
-    gaussian::GaussianInfo<double> MeasurementGyroscope::noiseDensity(
+    gaussian::GaussianInfo<double> MeasurementAnchor::noiseDensity(
         const system::SystemEstimator& system) const {
 
         // SR is an upper triangular matrix such that SR^T * SR = R
         // where R is the measurement noise covariance
-        Eigen::MatrixXd SR = sigma_gyro_ * Eigen::MatrixXd::Identity(3, 3);
+        Eigen::MatrixXd SR = sigma_anchor_ * Eigen::MatrixXd::Identity(1, 1);
 
         return gaussian::GaussianInfo<double>::fromSqrtMoment(SR);
     }

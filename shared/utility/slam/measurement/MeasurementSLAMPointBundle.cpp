@@ -374,20 +374,25 @@ namespace utility::slam::measurement {
             cv::Vec2d pixel_cv(candidatePixel(0), candidatePixel(1));
             cv::Vec3d rPCc_cv = camera_.pixelToVector(pixel_cv);
             Eigen::Vector3d rPCc_unit(rPCc_cv[0], rPCc_cv[1], rPCc_cv[2]);
-            Eigen::Vector3d rPCc_normalized = rPCc_unit.normalized();
+            Eigen::Vector3d uPCc_normalized = rPCc_unit.normalized();
 
             // Transform ray from camera frame to SLAM world frame (both OpenCV convention)
-            Eigen::Vector3d ray_slam = Rnc * rPCc_normalized;
+            Eigen::Vector3d uPCn = Rnc * uPCc_normalized;
 
             // Camera height above ground: In OpenCV, Y-down is positive down
-            double camera_height = -rCNn(1);
+            double camera_height = rCNn(2);
 
             // Compute depth to ground plane intersection
-            double depth = (-rCNn(1)) / ray_slam(1);
+            double depth = std::abs((rCNn(2)) / uPCn(2));
 
             // Compute landmark position on ground plane
-            Eigen::Vector3d rPNn = rCNn + depth * ray_slam;
-            rPNn(1) = 0.0;
+            Eigen::Vector3d rPNn = rCNn + depth * uPCn;
+
+
+            // Only consider landmarks that are on the ground plane
+            if (std::abs(rPNn(2)) > 1e-3) {
+                continue;
+            }
 
             // Create new landmark with prior
             Eigen::VectorXd mu_new = rPNn;

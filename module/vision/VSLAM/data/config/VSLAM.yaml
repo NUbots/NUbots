@@ -8,7 +8,7 @@ enable_visualization: true
 
 # Initial state uncertainty (scaling factors)
 initial_covariance:
-  velocity: 0.3           # vx, vy, vz
-  angular_velocity: 0.4   # wx, wy, wz
-  position: 0.01          # x, y, z
-  orientation: 0.01       # roll, pitch, yaw
+  velocity: 0.3 # vx, vy, vz
+  angular_velocity: 0.4 # wx, wy, wz
+  position: 0.01 # x, y, z
+  orientation: 0.01 # roll, pitch, yaw

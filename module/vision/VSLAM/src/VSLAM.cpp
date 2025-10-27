@@ -43,11 +43,13 @@
  #include "utility/slam/camera/Camera.hpp"
  #include "utility/slam/camera/Pose.hpp"
  #include "utility/slam/gaussian/GaussianInfo.hpp"
- #include "utility/slam/measurement/MeasurementGyroscope.hpp"  // ADD THIS
+ #include "utility/slam/measurement/MeasurementGyroscope.hpp"
  #include "utility/slam/measurement/MeasurementSLAMPointBundle.hpp"
+ #include "utility/slam/measurement/MeasurementAnchor.hpp"
  #include "utility/slam/system/SystemSLAMPointLandmarks.hpp"
  #include "utility/vision/Vision.hpp"
  #include "utility/vision/fourcc.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
  namespace module::vision {
 
@@ -58,13 +60,15 @@
      using VSLAMMsg = message::input::VSLAM;
      using message::vision::FieldIntersections;
      using utility::input::FrameID;
+     using utility::nusight::graph;
 
      using utility::slam::camera::Camera;
      using utility::slam::camera::Pose;
      using utility::slam::gaussian::GaussianInfo;
-     using utility::slam::measurement::MeasurementGyroscope;  // ADD THIS
+     using utility::slam::measurement::MeasurementGyroscope;
      using utility::slam::measurement::MeasurementPointBundle;
      using utility::slam::system::SystemSLAMPointLandmarks;
+     using utility::slam::measurement::MeasurementAnchor;
 
      VSLAM::VSLAM(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -237,13 +241,27 @@
           // Create initial mean state
           Eigen::VectorXd initialMean = Eigen::VectorXd::Zero(stateDim);
 
-          // Position initialization: Transform from NUbots to OpenCV frame
-          // NUbots: X=forward, Y=left, Z=up
-          // OpenCV: X=right, Y=down, Z=forward
-          initialMean(6) = -Hwc.translation().y();  // X_opencv = -Y_nubots
-          initialMean(7) = -Hwc.translation().z();  // Y_opencv = -Z_nubots
-          initialMean(8) = Hwc.translation().x();   // Z_opencv = X_nubots
-          initialMean(9) = -0.178; // pitch
+         // Hnk = Hnw * Hwc * Hck
+         Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
+         Hkc.matrix() << 0, -1,  0, 0,
+                         0,  0, -1, 0,
+                         1,  0,  0, 0,
+                         0,  0,  0, 1;
+          Eigen::Isometry3d Hck = Hkc.inverse();
+          Eigen::Isometry3d Hwn = Eigen::Isometry3d::Identity();
+          Hwn.linear() = Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+          Eigen::Isometry3d Hnw = Hwn.inverse();
+          Eigen::Isometry3d Hnk = Hnw * Hwc * Hck;
+
+          initialMean(6) = Hnk.translation().x();
+          initialMean(7) = Hnk.translation().y();
+          initialMean(8) = Hnk.translation().z();
+          initialMean(9) =  utility::slam::rot2rpy(Hnk.linear()).x();
+          initialMean(10) = utility::slam::rot2rpy(Hnk.linear()).y();
+          initialMean(11) = utility::slam::rot2rpy(Hnk.linear()).z();
+          log<INFO>("Initial mean:", initialMean.transpose());
+
+        //   powerplant.shutdown();
 
           // Create initial covariance matrix from configuration
           Eigen::MatrixXd initialCov = Eigen::MatrixXd::Identity(stateDim, stateDim);
@@ -269,7 +287,7 @@
           initialCov.diagonal()(11) *= cfg.initialCovariance.orientation;
 
           // Create initial density
-          auto initialDensity = GaussianInfo<double>::fromMoment(initialMean, initialCov);
+          auto initialDensity = GaussianInfo<double>::fromSqrtMoment(initialMean, initialCov);
 
           // Create system
           system_ = std::make_unique<SystemSLAMPointLandmarks>(initialDensity);
@@ -292,14 +310,59 @@
           // Clone image for visualization
           cv::Mat debug_img = img_rgb.clone();
 
-          Eigen::Vector3d gyro = sensors.gyroscope;
+          Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
+          Hkc.matrix() << 0, -1,  0, 0,
+                          0,  0, -1, 0,
+                          1,  0,  0, 0,
+                          0,  0,  0, 1;
+          Eigen::Isometry3d Hck = Hkc.inverse();
 
-          // Create gyroscope measurement and process it
-          auto gyro_measurement = std::make_unique<MeasurementGyroscope>(timestamp, gyro);
+          Eigen::Isometry3d Hwn = Eigen::Isometry3d::Identity();
+          Hwn.linear() = Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()).toRotationMatrix() * Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+          Eigen::Isometry3d Hnw = Hwn.inverse();
+
+          // Transform camera from {w} to VSLAM frame {n} with OpenCV convention
+          Eigen::Isometry3d Hnk = Hnw * Hwc * Hck;
+
+          // Extract height (matching your prediction model)
+          Eigen::VectorXd height_measurement(1);
+          height_measurement(0) = Hnk.translation()(2); // + 1e-12;  // Matches h(0) = -state(8)
+
+          log<INFO>("Height measurement:", height_measurement(0));
+          auto anchor_measurement = std::make_unique<MeasurementAnchor>(timestamp, height_measurement);
+          anchor_measurement->process(*system_);
+
+        // log<INFO>("Kinematic height:", height_measurement(0), "m");
+        // emit(graph("Kinematic Height", height_measurement(0)));
+        // emit(graph("SLAM Height", system_->density.mean()(8)));
+        log<INFO>("SLAM Height:", system_->density.mean()(8));
+        // powerplant.shutdown();
+
+        // Loop throguh each landmark and emit graph of landmark position
+        for (size_t i = 0; i < system_->numberLandmarks(); ++i) {
+            auto landmarkDensity = system_->landmarkPositionDensity(i);
+            Eigen::Vector3d rLNn = landmarkDensity.mean();
+            emit(graph("Landmark " + std::to_string(i), rLNn(0), rLNn(1), rLNn(2)));
+        }
+
+
+
+        //   Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors.Htx[FrameID::L_CAMERA]);
+        //   Eigen::Matrix3d Rtc = Htc.linear();
+
+        //   // Transform gyroscope from torso to camera frame
+        //   Eigen::Vector3d gyro_torso = sensors.gyroscope;    // ω_t (IMU measurement)
+        //   // plot gyroscope in plotjuggler
+        //   emit(graph("Measured Angular Velocity", gyro_torso.x(), gyro_torso.y(), gyro_torso.z()));
+        //   Eigen::Vector3d gyro_camera = Rtc.transpose() * gyro_torso;    // ω_c = R_tc^T * ω_t - torso to camera frame
+
+        //   // Create gyroscope measurement and process it
+        //   auto gyro_measurement = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera);
         //   gyro_measurement->process(*system_);
-
-          log<INFO>("Processed gyroscope measurement: [",
-                    gyro(0), ", ", gyro(1), ", ", gyro(2), "]");
+          //log estimated angular velocity in plotjuggler
+        //   emit(graph("Estimated Angular Velocity", system_->density.mean()(3), system_->density.mean()(4), system_->density.mean()(5)));
+        //   // log orientation states after measurement update
+        //   emit(graph("Orientation", system_->density.mean()(9), system_->density.mean()(10), system_->density.mean()(11)));
 
           // Check if we have field intersections
           if (field_intersections.intersections.empty()) {
@@ -354,8 +417,8 @@
            // Create and process measurement using MeasurementPointBundle
            auto measurement = std::make_unique<MeasurementPointBundle>(timestamp, Y, camera_);
            measurement->process(*system_);
-
-           log<INFO>("Processed field intersection measurement with", numIntersections, "landmarks");
+           // emit in plotjuggler our estimated angular velocity
+           emit(graph("Estimated Angular Velocity", system_->density.mean()(3), system_->density.mean()(4), system_->density.mean()(5)));
 
            // Keep measurement pointer for visualization
            MeasurementPointBundle* measurement_ptr = measurement.get();
