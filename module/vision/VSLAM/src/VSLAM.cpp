@@ -316,6 +316,66 @@ namespace module::vision {
                        * Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Eigen::Isometry3d Hnw = Hwn.inverse();
 
+
+        // Check if we have field intersections
+        if (field_intersections.intersections.empty()) {
+            log<INFO>("No field intersections detected in frame");
+            return debug_img;
+        }
+
+        const int numIntersections = field_intersections.intersections.size();
+        log<INFO>("Processing", numIntersections, "field intersections from YOLO");
+
+        // Create measurement matrix from field intersection pixel centres
+        Eigen::Matrix<double, 2, Eigen::Dynamic> Y(2, numIntersections);
+
+        for (int i = 0; i < numIntersections; ++i) {
+            const auto& intersection = field_intersections.intersections[i];
+
+            // Extract pixel centre coordinates (computed by YOLO)
+            Y(0, i) = intersection.pixel_centre.x();  // u coordinate
+            Y(1, i) = intersection.pixel_centre.y();  // v coordinate
+
+            // Draw on debug image for visualization
+            cv::Point2f centre(intersection.pixel_centre.x(), intersection.pixel_centre.y());
+
+            // Choose color and label based on intersection type
+            cv::Scalar color;
+            std::string label;
+            switch (static_cast<int>(intersection.type)) {
+                case static_cast<int>(message::vision::FieldIntersection::IntersectionType::L_INTERSECTION):
+                    color = cv::Scalar(0, 0, 255);  // Red (BGR format)
+                    label = "L";
+                    break;
+                case static_cast<int>(message::vision::FieldIntersection::IntersectionType::T_INTERSECTION):
+                    color = cv::Scalar(0, 255, 0);  // Green
+                    label = "T";
+                    break;
+                case static_cast<int>(message::vision::FieldIntersection::IntersectionType::X_INTERSECTION):
+                    color = cv::Scalar(255, 0, 0);  // Blue
+                    label = "X";
+                    break;
+                default:
+                    color = cv::Scalar(255, 255, 255);  // White
+                    label = "?";
+                    break;
+            }
+
+            // Draw circle at intersection centre
+            cv::circle(debug_img, centre, 6, color, 2);
+            // Draw label
+            cv::putText(debug_img, label, centre + cv::Point2f(10, -10), cv::FONT_HERSHEY_SIMPLEX, 0.6, color, 2);
+        }
+
+        // Create and process measurement using MeasurementPointBundle
+        auto measurement = std::make_unique<MeasurementPointBundle>(timestamp, Y, camera_);
+        measurement->process(*system_);
+        // emit in plotjuggler our estimated angular velocity
+        emit(graph("Estimated Angular Velocity",
+                   system_->density.mean()(3),
+                   system_->density.mean()(4),
+                   system_->density.mean()(5)));
+
         // Transform camera from {w} to VSLAM frame {n} with OpenCV convention
         Eigen::Isometry3d Hnk = Hnw * Hwc * Hck;
 
@@ -403,65 +463,6 @@ namespace module::vision {
         emit(graph("Estimated Roll", system_->density.mean()(9)));
         emit(graph("Estimated Pitch", system_->density.mean()(10)));
         emit(graph("Estimated Yaw", system_->density.mean()(11)));
-
-        // Check if we have field intersections
-        if (field_intersections.intersections.empty()) {
-            log<INFO>("No field intersections detected in frame");
-            return debug_img;
-        }
-
-        const int numIntersections = field_intersections.intersections.size();
-        log<INFO>("Processing", numIntersections, "field intersections from YOLO");
-
-        // Create measurement matrix from field intersection pixel centres
-        Eigen::Matrix<double, 2, Eigen::Dynamic> Y(2, numIntersections);
-
-        for (int i = 0; i < numIntersections; ++i) {
-            const auto& intersection = field_intersections.intersections[i];
-
-            // Extract pixel centre coordinates (computed by YOLO)
-            Y(0, i) = intersection.pixel_centre.x();  // u coordinate
-            Y(1, i) = intersection.pixel_centre.y();  // v coordinate
-
-            // Draw on debug image for visualization
-            cv::Point2f centre(intersection.pixel_centre.x(), intersection.pixel_centre.y());
-
-            // Choose color and label based on intersection type
-            cv::Scalar color;
-            std::string label;
-            switch (static_cast<int>(intersection.type)) {
-                case static_cast<int>(message::vision::FieldIntersection::IntersectionType::L_INTERSECTION):
-                    color = cv::Scalar(0, 0, 255);  // Red (BGR format)
-                    label = "L";
-                    break;
-                case static_cast<int>(message::vision::FieldIntersection::IntersectionType::T_INTERSECTION):
-                    color = cv::Scalar(0, 255, 0);  // Green
-                    label = "T";
-                    break;
-                case static_cast<int>(message::vision::FieldIntersection::IntersectionType::X_INTERSECTION):
-                    color = cv::Scalar(255, 0, 0);  // Blue
-                    label = "X";
-                    break;
-                default:
-                    color = cv::Scalar(255, 255, 255);  // White
-                    label = "?";
-                    break;
-            }
-
-            // Draw circle at intersection centre
-            cv::circle(debug_img, centre, 6, color, 2);
-            // Draw label
-            cv::putText(debug_img, label, centre + cv::Point2f(10, -10), cv::FONT_HERSHEY_SIMPLEX, 0.6, color, 2);
-        }
-
-        // Create and process measurement using MeasurementPointBundle
-        auto measurement = std::make_unique<MeasurementPointBundle>(timestamp, Y, camera_);
-        measurement->process(*system_);
-        // emit in plotjuggler our estimated angular velocity
-        emit(graph("Estimated Angular Velocity",
-                   system_->density.mean()(3),
-                   system_->density.mean()(4),
-                   system_->density.mean()(5)));
 
         // Keep measurement pointer for visualization
         MeasurementPointBundle* measurement_ptr = measurement.get();
