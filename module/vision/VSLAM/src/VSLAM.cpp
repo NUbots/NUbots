@@ -380,26 +380,24 @@ namespace module::vision {
             emit(graph("Landmark " + std::to_string(i), rLNn(0), rLNn(1), rLNn(2)));
         }
 
+        // Transform gyroscope from torso to camera frame
+        Eigen::Vector3d gyro_torso = sensors.gyroscope;  // ω_t (IMU measurement)
+        // plot gyroscope in plotjuggler
+        emit(graph("Measured Angular Velocity", gyro_torso.x(), gyro_torso.y(), gyro_torso.z()));
+        Eigen::Vector3d gyro_camera = Rtc.transpose() * gyro_torso;  // ω_c = R_tc^T * ω_t - torso to camera frame
 
-        //   Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors.Htx[FrameID::L_CAMERA]);
-        //   Eigen::Matrix3d Rtc = Htc.linear();
+        // Temp measurement
+        auto gyro_measurement_temp     = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera);
+        Eigen::VectorXd predicted_gyro = gyro_measurement_temp->predict(system_->density.mean(), *system_);
+        emit(graph("Predicted Angular Velocity", predicted_gyro(0), predicted_gyro(1), predicted_gyro(2)));
 
-        //   // Transform gyroscope from torso to camera frame
-        //   Eigen::Vector3d gyro_torso = sensors.gyroscope;    // ω_t (IMU measurement)
-        //   // plot gyroscope in plotjuggler
-        //   emit(graph("Measured Angular Velocity", gyro_torso.x(), gyro_torso.y(), gyro_torso.z()));
-        //   Eigen::Vector3d gyro_camera = Rtc.transpose() * gyro_torso;    // ω_c = R_tc^T * ω_t - torso to camera
-        //   frame
-
-        //   // Create gyroscope measurement and process it
-        //   auto gyro_measurement = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera);
-        //   gyro_measurement->process(*system_);
-        // log estimated angular velocity in plotjuggler
-        //   emit(graph("Estimated Angular Velocity", system_->density.mean()(3), system_->density.mean()(4),
-        //   system_->density.mean()(5)));
-        //   // log orientation states after measurement update
-        //   emit(graph("Orientation", system_->density.mean()(9), system_->density.mean()(10),
-        //   system_->density.mean()(11)));
+        // Create gyroscope measurement and process it
+        auto gyro_measurement = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera);
+        gyro_measurement->process(*system_);
+        // Emit estimated roll, pitch, yaw in plotjuggler
+        emit(graph("Estimated Roll", system_->density.mean()(9)));
+        emit(graph("Estimated Pitch", system_->density.mean()(10)));
+        emit(graph("Estimated Yaw", system_->density.mean()(11)));
 
         // Check if we have field intersections
         if (field_intersections.intersections.empty()) {
