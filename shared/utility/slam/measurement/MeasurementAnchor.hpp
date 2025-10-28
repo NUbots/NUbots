@@ -7,6 +7,7 @@
 
 #include <Eigen/Core>
 #include <unsupported/Eigen/CXX11/Tensor>
+
 #include "../gaussian/GaussianInfo.hpp"
 #include "../system/SystemEstimator.hpp"
 #include "MeasurementGaussianLikelihood.hpp"
@@ -43,20 +44,18 @@ namespace utility::slam::measurement {
         virtual ~MeasurementAnchor() override;
 
         // Inherited virtual functions
-        virtual Eigen::VectorXd predict(const Eigen::VectorXd& x,
-                                       const system::SystemEstimator& system) const override;
+        virtual Eigen::VectorXd predict(const Eigen::VectorXd& x, const system::SystemEstimator& system) const override;
 
         virtual Eigen::VectorXd predict(const Eigen::VectorXd& x,
-                                       const system::SystemEstimator& system,
-                                       Eigen::MatrixXd& J) const override;
+                                        const system::SystemEstimator& system,
+                                        Eigen::MatrixXd& J) const override;
 
         virtual Eigen::VectorXd predict(const Eigen::VectorXd& x,
-                                       const system::SystemEstimator& system,
-                                       Eigen::MatrixXd& J,
-                                       Eigen::Tensor<double, 3>& H) const override;
+                                        const system::SystemEstimator& system,
+                                        Eigen::MatrixXd& J,
+                                        Eigen::Tensor<double, 3>& H) const override;
 
-        virtual gaussian::GaussianInfo<double> noiseDensity(
-            const system::SystemEstimator& system) const override;
+        virtual gaussian::GaussianInfo<double> noiseDensity(const system::SystemEstimator& system) const override;
 
     protected:
         /**
@@ -66,9 +65,9 @@ namespace utility::slam::measurement {
         virtual std::string getProcessString() const override;
 
     private:
-        static constexpr double sigma_anchor_ = 0.01;  ///< Anchor noise std dev [meters]
+        static constexpr double sigma_anchor_ = 0.001;  ///< Anchor noise std dev [meters]
     };
 
-} // namespace utility::slam::measurement
+}  // namespace utility::slam::measurement
 
-#endif // UTILITY_SLAM_MEASUREMENT_MEASUREMENT_ANCHOR_HPP
+#endif  // UTILITY_SLAM_MEASUREMENT_MEASUREMENT_ANCHOR_HPP
