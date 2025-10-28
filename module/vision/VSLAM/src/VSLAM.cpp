@@ -383,17 +383,22 @@ namespace module::vision {
         // Transform gyroscope from torso to camera frame
         Eigen::Vector3d gyro_torso = sensors.gyroscope;  // ω_t (IMU measurement)
         // plot gyroscope in plotjuggler
-        emit(graph("Measured Angular Velocity", gyro_torso.x(), gyro_torso.y(), gyro_torso.z()));
         Eigen::Vector3d gyro_camera = Rtc.transpose() * gyro_torso;  // ω_c = R_tc^T * ω_t - torso to camera frame
+        // Rotate in camera frame to OpenCV convention
+        Eigen::Vector3d gyro_camera_opencv = Hkc * gyro_camera;
+        emit(graph("Measured Angular Velocity (OpenCV)",
+                   gyro_camera_opencv.x(),
+                   gyro_camera_opencv.y(),
+                   gyro_camera_opencv.z()));
 
         // Temp measurement
-        auto gyro_measurement_temp     = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera);
+        auto gyro_measurement_temp     = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera_opencv);
         Eigen::VectorXd predicted_gyro = gyro_measurement_temp->predict(system_->density.mean(), *system_);
         emit(graph("Predicted Angular Velocity", predicted_gyro(0), predicted_gyro(1), predicted_gyro(2)));
 
         // Create gyroscope measurement and process it
         auto gyro_measurement = std::make_unique<MeasurementGyroscope>(timestamp, gyro_camera);
-        gyro_measurement->process(*system_);
+        // gyro_measurement->process(*system_);
         // Emit estimated roll, pitch, yaw in plotjuggler
         emit(graph("Estimated Roll", system_->density.mean()(9)));
         emit(graph("Estimated Pitch", system_->density.mean()(10)));
