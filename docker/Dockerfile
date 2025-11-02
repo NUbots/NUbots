@@ -148,6 +148,7 @@ RUN install-from-source http://github.com/KhronosGroup/SPIRV-LLVM-Translator/arc
 # opencl-clang
 RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v15.0.1.tar.gz \
     --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/0ce9b1513ad424dd1cca804413acda7417832640/resource_linker_skip_cross.patch \
+    --jobs 12 \
     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
     -DSPIRV_TRANSLATOR_DIR=${prefix} \
     -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
@@ -171,7 +172,8 @@ RUN pip install pyyaml mako
 
 # Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/v2.11.7.tar.gz \
-    --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch\
+    --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch \
+    --jobs 12 \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
@@ -217,11 +219,11 @@ RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/ta
     -DGMM_DIR=${prefix}
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2025.07.22.tar.gz
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.4.tar.gz
 
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
@@ -248,18 +250,30 @@ RUN install-package opencl-clhpp \
     snappy
 
 # Clone OpenVINO repository
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch releases/2025/3 && \
     cd openvino && \
     git submodule update --init --recursive
 
 # Download AUR patches
 WORKDIR /openvino
-RUN curl -L -o openvino_patch.patch \
-    https://gist.github.com/ZeoNyph/cf8216bc1ffa15b0e44b17899f355c07/raw/42a6a040f41c03714507b86cf257546ebbb6a0cc/openvino_patch.patch
+RUN curl -L -o 010-openvino-change-install-paths.patch \
+    "https://aur.archlinux.org/cgit/aur.git/plain/010-openvino-change-install-paths.patch?h=openvino" && \
+    curl -L -o 020-openvino-disable-werror.patch \
+    "https://aur.archlinux.org/cgit/aur.git/plain/020-openvino-disable-werror.patch?h=openvino" && \
+    curl -L -o 030-openvino-protobuf23-fix.patch \
+    "https://aur.archlinux.org/cgit/aur.git/plain/030-openvino-protobuf23-fix.patch?h=openvino" && \
+    curl -L -o 040-openvino-fix-version-check.patch \
+    "https://aur.archlinux.org/cgit/aur.git/plain/040-openvino-fix-version-check.patch?h=openvino" && \
+    curl -L -o 050-openvino-gcc15-fix.patch \
+    "https://github.com/openvinotoolkit/openvino/commit/29fb5d01e58b614f7eb2c3919f737f7f050e8051.patch"
 
 # Apply patches
 RUN cd /openvino && \
-    patch -d . -p1 -i openvino_patch.patch
+    patch -d . -p1 -i 010-openvino-change-install-paths.patch && \
+    patch -d . -p1 -i 020-openvino-disable-werror.patch && \
+    patch -d . -p1 -i 030-openvino-protobuf23-fix.patch && \
+    patch -d . -p1 -i 040-openvino-fix-version-check.patch && \
+    patch -d . -p1 -i 050-openvino-gcc15-fix.patch
 
 # Build OpenVINO
 RUN mkdir build && cd build && \
@@ -273,16 +287,16 @@ RUN mkdir build && cd build && \
     -DENABLE_INTEL_NPU:BOOL='OFF' \
     -DENABLE_SYSTEM_TBB:BOOL='ON' \
     -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
-    -DENABLE_SYSTEM_PROTOBUF:BOOL='OFF' \
+    -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
     -DENABLE_CPPLINT:BOOL='OFF' \
-    -DCMAKE_CXX_STANDARD='17' \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -Wno-dev && \
-    make -j$(nproc) && make install
+    make -j12 && make install
 
 # Move OpenVino libraries to our library path
-RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r
+# RUN sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r (this failed and I have no idea where these files are so I skip lol)
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -308,7 +322,8 @@ RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/r
     -DFLOATTEST="sse"
 
 # yaml-cpp
-RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.tar.gz \
+RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz \
+    --patch https://gist.githubusercontent.com/ZeoNyph/49ae9c71de50fed39d00f814ea090328/raw/5c86c4b4a374efa85b4a5ca539fb89da82cd638b/yaml-cpp-patch.patch \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
 
@@ -392,7 +407,7 @@ RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
 
 # NLopt
-RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.10.0.tar.gz
 
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
@@ -410,9 +425,7 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
-    doxygen \
-    gcc13
-
+    doxygen
 
 # Node tools
 RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O - \
