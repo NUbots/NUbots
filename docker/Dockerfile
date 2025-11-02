@@ -148,7 +148,6 @@ RUN install-from-source http://github.com/KhronosGroup/SPIRV-LLVM-Translator/arc
 # opencl-clang
 RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v15.0.1.tar.gz \
     --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/0ce9b1513ad424dd1cca804413acda7417832640/resource_linker_skip_cross.patch \
-    --jobs 12 \
     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
     -DSPIRV_TRANSLATOR_DIR=${prefix} \
     -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
@@ -173,7 +172,6 @@ RUN pip install pyyaml mako
 # Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/v2.11.7.tar.gz \
     --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch \
-    --jobs 12 \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
@@ -292,7 +290,7 @@ RUN mkdir build && cd build && \
     -DENABLE_CPPLINT:BOOL='OFF' \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -Wno-dev && \
-    make -j12 && make install
+    make -j$(nproc) && make install
 
 # Move OpenVino libraries to our library path
 RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r
