@@ -27,7 +27,6 @@ SOFTWARE.
 cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
-
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)
 
