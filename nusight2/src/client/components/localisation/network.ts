@@ -209,6 +209,10 @@ export class LocalisationNetwork {
     robot.Hwp = Matrix4.from(walk_state.Hwp);
     robot.walk_phase = walk_state.phase;
   }
+
+  @action
+  private onMujoco = (robotModel: RobotModel, mujoco: message.output.Mujoco) => {
+  }
 }
 
 function decompose(m: THREE.Matrix4): {
