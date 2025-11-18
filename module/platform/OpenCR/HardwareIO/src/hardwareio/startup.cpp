@@ -51,7 +51,7 @@ namespace module::platform::OpenCR {
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
         // Set all dynamixels to not return a status packet when written to (to allow consecutive writes)
-        dynamixel::v2::SyncWriteData<uint8_t> data[20];
+        std::array<dynamixel::v2::SyncWriteData<uint8_t>, 20> data;
         for (int i = 0; i < 20; ++i) {
             // ensure write command targets the ID (ID != i)
             data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 1);
@@ -76,7 +76,7 @@ namespace module::platform::OpenCR {
         opencr.write(dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::DRIVE_MODE), data));
 
         // Set up indirect addressing for read addresses for each dynamixel
-        dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>> read_data[20];
+        std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>, 20> read_data;
 
         for (int i = 0; i < 20; ++i) {
             read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>(
@@ -105,8 +105,8 @@ namespace module::platform::OpenCR {
                                                                           read_data));
 
         // Set up indirect addressing for write addresses
-        dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>> write_data1[20];
-        dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>> write_data2[20];
+        std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>, 20> write_data1;
+        std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>, 20> write_data2;
 
         for (int i = 0; i < 20; ++i) {
             write_data1[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>(
