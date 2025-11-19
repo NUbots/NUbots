@@ -58,7 +58,8 @@ namespace utility::reactor {
     class StreamReactor : public NUClear::Reactor {
     public:
         /// @brief Called by the powerplant to build and setup the StreamReactor.
-        explicit StreamReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        explicit StreamReactor(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), connection(std::monostate{}), remote(std::monostate{}), fd(-1) {
 
             /**************************
              *   USER TRIGGER HOOKS   *
@@ -122,7 +123,7 @@ namespace utility::reactor {
                     bytes_written += written;
                 }
                 if (log_level <= TRACE) {
-                    std::stringstream debug_string{};
+                    std::stringstream debug_string;
                     for (const auto& byte : t.data) {
                         debug_string << std::isprint(byte) ? std::string(1, char(byte))
                                                            : fmt::format("\\{:#04x} ", byte);
@@ -413,13 +414,9 @@ namespace utility::reactor {
          * Holds the information about a serial connection
          */
         struct SerialConnection {
-            explicit SerialConnection(std::string device, const int& baud_rate)
-                : device(std::move(device)), baud_rate(baud_rate) {}
-            /// The path to the serial device
+            SerialConnection(std::string device_, int baud_rate_) : device(std::move(device_)), baud_rate(baud_rate_) {}
             std::string device{};
-            /// The baud rate to connect at
             int baud_rate{};
-            /// The uart object that is connected to the serial device
             utility::io::uart uart{};
         };
 
@@ -427,12 +424,9 @@ namespace utility::reactor {
          * Holds the information about a TCP connection
          */
         struct TCPConnection {
-            explicit TCPConnection(std::string host, const uint16_t& port) : host(std::move(host)), port(port) {}
-            /// The host to connect to
+            TCPConnection(std::string host_, const uint16_t& port_) : host(std::move(host_)), port(port_) {}
             std::string host{};
-            /// The port to connect to
             uint16_t port{};
-            /// The file descriptor connected to the TCP socket
             utility::file::FileDescriptor fd{};
         };
 
