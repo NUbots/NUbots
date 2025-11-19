@@ -58,8 +58,7 @@ namespace utility::reactor {
     class StreamReactor : public NUClear::Reactor {
     public:
         /// @brief Called by the powerplant to build and setup the StreamReactor.
-        explicit StreamReactor(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), connection(std::monostate{}), remote(std::monostate{}), fd(-1) {
+        explicit StreamReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             /**************************
              *   USER TRIGGER HOOKS   *
