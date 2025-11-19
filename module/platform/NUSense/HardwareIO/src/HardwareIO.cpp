@@ -134,7 +134,7 @@ namespace module::platform::NUSense {
             log<INFO>("Received ServoIDStates from NUSense:");
             bool id_fault_detected = false;
             for (const auto& state : states.servo_id_states) {
-                std::string state_str;
+                std::string state_str{""};
                 switch (state.state.value) {
                     case ServoIDStates::IDState::PRESENT: state_str = "PRESENT"; break;
                     case ServoIDStates::IDState::MISSING:
