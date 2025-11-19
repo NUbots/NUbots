@@ -255,13 +255,13 @@ RUN git clone https://github.com/openvinotoolkit/openvino.git --branch releases/
 # Download AUR patches
 WORKDIR /openvino
 RUN curl -L -o 010-openvino-change-install-paths.patch \
-    "https://aur.archlinux.org/cgit/aur.git/plain/010-openvino-change-install-paths.patch?h=openvino" && \
+    "https://gist.github.com/ZeoNyph/3ffc640de3649478eebec818fd9f246c/raw/306ae37375932538b29e306f90c66babaeb44a6c/010-openvino-change-install-paths.patch" && \
     curl -L -o 020-openvino-disable-werror.patch \
-    "https://aur.archlinux.org/cgit/aur.git/plain/020-openvino-disable-werror.patch?h=openvino" && \
+    "https://gist.github.com/ZeoNyph/1d0a17ede668e9a4a68a85a550d47a5e/raw/ffe9a8d3b249f212e08711b49649a5ec8cbcccca/020-openvino-disable-werror.patch" && \
     curl -L -o 030-openvino-protobuf23-fix.patch \
-    "https://aur.archlinux.org/cgit/aur.git/plain/030-openvino-protobuf23-fix.patch?h=openvino" && \
+    "https://gist.github.com/ZeoNyph/bd53cb81e711d43898ef2ab5d80e1f0c/raw/c38d150ebe5d462652e47ee60b36edc58f0224ca/030-openvino-protobuf23-fix.patch" && \
     curl -L -o 040-openvino-fix-version-check.patch \
-    "https://aur.archlinux.org/cgit/aur.git/plain/040-openvino-fix-version-check.patch?h=openvino" && \
+    "https://gist.github.com/ZeoNyph/22d77d4527332cfde944cb23993243d5/raw/6ec9bdecdff0963d92cd03c357b4a105d94853fb/040-openvino-fix-version-check.patch" && \
     curl -L -o 050-openvino-gcc15-fix.patch \
     "https://github.com/openvinotoolkit/openvino/commit/29fb5d01e58b614f7eb2c3919f737f7f050e8051.patch"
 
