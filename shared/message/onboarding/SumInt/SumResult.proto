@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package message.onboarding;
+
+message SumResult {
+    uint32 result = 1;
+}
