@@ -107,7 +107,7 @@ namespace module::strategy {
 
         } cfg;
 
-        std::optional<Eigen::Vector3d> robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
+        std::optional<Eigen::Vector3d> dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,
                                                              const Eigen::Vector3d& rBFf,
                                                              const Eigen::Vector3d& rGFf);
 

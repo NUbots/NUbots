@@ -175,7 +175,7 @@ namespace module::strategy {
                         return (Hfr.inverse() * rOFf).squaredNorm();
                     });
 
-                    auto obstacle = robot_infront_of_path(all_obstacles, rBFf, rTFf);
+                    auto obstacle = dribble_path_obstacle(all_obstacles, rBFf, rTFf);
 
                     if (obstacle.has_value()) {
                         log<DEBUG>("Avoiding obstacle in the way of kick path");
@@ -301,7 +301,7 @@ namespace module::strategy {
             });
     }
 
-    std::optional<Eigen::Vector3d> WalkToBall::robot_infront_of_path(const std::vector<Eigen::Vector3d>& all_obstacles,
+    std::optional<Eigen::Vector3d> WalkToBall::dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,
                                                                      const Eigen::Vector3d& rBFf,
                                                                      const Eigen::Vector3d& rGFf) {
         for (const auto& rOFf : all_obstacles) {
