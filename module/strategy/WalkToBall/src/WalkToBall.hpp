@@ -67,7 +67,49 @@ namespace module::strategy {
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
 
+            /// @brief Maximum perpendicular translation error for scaling walk approach
+            double max_translation_perpendicular = 0.0;
+
+            /// @brief Maximum parallel translation error for scaling walk approach
+            double max_translation_parallel = 0.0;
+
+            /// @brief Maximum error in the y direction for scaling walk approach
+            double max_error_y = 0.0;
+
+            /// @brief Gain for the perpendicular error when approaching the ball
+            double error_gain_perp = 0.0;
+
+            /// @brief Minimum sideways offset when approaching from in front of the ball
+            double min_offset_y = 0.0;
+
+            /// @brief Maximum sideways offset when approaching from in front of the ball
+            double max_offset_y = 0.0;
+
+            /// @brief Radius of circle around ball where an opponent robot is considered to be in front of the ball
+            double infront_of_ball_radius = 0.0;
+            /// @brief Distance in front of the ball to check for obstacles
+            double infront_check_distance = 0.0;
+
+            /// @brief Radius to avoid obstacles when dribbling the ball
+            double obstacle_radius = 0.0;
+
+            /// @brief Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
+            double goal_width_margin = 0.0;
+
+            /// @brief Acceptable error threshold in x direction (parallel to ball-target vector) for kicking
+            double err_x_ok = 0.0;
+
+            /// @brief Acceptable error threshold in y direction (perpendicular to ball-target vector) for kicking
+            double err_y_ok = 0.0;
+
+            /// @brief Acceptable heading error threshold for kicking
+            double err_z_ok = 0.0;
+
         } cfg;
+
+        std::optional<Eigen::Vector3d> dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,
+                                                             const Eigen::Vector3d& rBFf,
+                                                             const Eigen::Vector3d& rGFf);
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();

@@ -34,7 +34,6 @@
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/strategy/WalkToBall.hpp"
-#include "message/strategy/Who.hpp"
 #include "message/support/FieldDescription.hpp"
 
 namespace module::purpose {
@@ -47,7 +46,6 @@ namespace module::purpose {
     using message::planning::KickTo;
     using message::strategy::TackleBall;
     using message::strategy::WalkToKickBall;
-    using message::strategy::Who;
     using message::support::FieldDescription;
 
     Attack::Attack(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -59,7 +57,7 @@ namespace module::purpose {
         });
 
         on<Provide<AttackMsg>, With<Ball>, With<Field>, With<FieldDescription>>().then(
-            [this](const AttackMsg& attack, const Ball& ball, const Field& field, const FieldDescription& fd) {
+            [this](const Ball& ball, const Field& field, const FieldDescription& fd) {
                 // Always request a kick task
                 if (cfg.kick_when == "Always") {
                     emit<Task>(std::make_unique<KickTo>(), 1);
@@ -74,21 +72,8 @@ namespace module::purpose {
                         emit<Task>(std::make_unique<KickTo>(), 1);  // kick the ball towards the goal
                     }
                 }
-                // If kick_when is never, do not request the kick task
 
-                // In this state, either we have the ball or we are the closest to getting the ball and should go for it
-                // If the opponent has the ball, we need to tackle it from them
-                if (attack.ball_pos == message::strategy::Who::OPPONENT) {
-                    // Tackle the ball from the opponent
-                    log<DEBUG>("Opponent has the ball, tackle it!");
-                    emit<Task>(std::make_unique<TackleBall>());
-                    return;
-                }
-                else {
-                    log<DEBUG>("We have the ball or it is free, walk to the goal!");
-                    // Try to walk to the ball and align towards opponents goal
-                    emit<Task>(std::make_unique<WalkToKickBall>());
-                }
+                emit<Task>(std::make_unique<WalkToKickBall>());
             });
     }
 
