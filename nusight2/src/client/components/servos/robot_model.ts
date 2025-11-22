@@ -112,7 +112,7 @@ export class ServoMotorSet {
   }
 }
 
-export class KinematicsRobotModel {
+export class ServosRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
   @observable Htw: Matrix4; // World to torso
@@ -145,8 +145,8 @@ export class KinematicsRobotModel {
     this.motors = motors;
   }
 
-  static of = memoize((model: RobotModel): KinematicsRobotModel => {
-    return new KinematicsRobotModel({
+  static of = memoize((model: RobotModel): ServosRobotModel => {
+    return new ServosRobotModel({
       model,
       name: model.name,
       Htw: Matrix4.of(),

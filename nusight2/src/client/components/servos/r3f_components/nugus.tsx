@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { KinematicsRobotModel } from "../robot_model";
+import { ServosRobotModel } from "../robot_model";
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
@@ -31,7 +31,7 @@ const jointToServoId: { [key: string]: number } = {
   right_shoulder_roll: 2, // R_SHOULDER_ROLL
 };
 
-export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
+export const Nugus = observer(({ model }: { model: ServosRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once

@@ -5,7 +5,7 @@ import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
 
-import { KinematicsRobotModel } from "./robot_model";
+import { ServosRobotModel } from "./robot_model";
 
 export const ServoNames: { [key: number]: string } = {
   0: "R_SHOULDER_PITCH",
@@ -65,13 +65,13 @@ export const getErrorDescription = (errorCode: number): string[] => {
   return errors.length > 0 ? errors : ["Unknown Error"];
 };
 
-export class KinematicsModel {
-  @observable selectedRobot?: KinematicsRobotModel;
+export class ServosModel {
+  @observable selectedRobot?: ServosRobotModel;
 
-  constructor(private appModel: AppModel) {}
+  constructor(private appModel: AppModel) { }
 
   static of = memoize((appModel: AppModel) => {
-    return new KinematicsModel(appModel);
+    return new ServosModel(appModel);
   });
 
   @computed

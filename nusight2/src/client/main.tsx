@@ -11,7 +11,7 @@ import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
 import { installDirector } from "./components/director/install";
-import { installKinematics } from "./components/kinematics/install";
+import { installServos } from "./components/servos/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
 import { withRobotSelectorMenuBar } from "./components/menu_bar/view";
@@ -36,7 +36,7 @@ installOdometry({ nav, appModel, nusightNetwork, Menu });
 installChart({ nav, appModel, nusightNetwork, Menu });
 installVision({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
-installKinematics({ nav, appModel, nusightNetwork, Menu });
+installServos({ nav, appModel, nusightNetwork, Menu });
 installDirector({ nav, appModel, nusightNetwork, Menu });
 
 configure({ enforceActions: "observed" });

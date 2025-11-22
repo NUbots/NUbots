@@ -7,7 +7,7 @@ import { AppModel } from "../app/model";
 
 import Icon from "./icon";
 
-export function installKinematics({
+export function installServos({
   nav,
   appModel,
   nusightNetwork,
@@ -19,13 +19,13 @@ export function installKinematics({
   Menu: ComponentType;
 }) {
   nav.addRoute({
-    path: "/kinematics",
+    path: "/servos",
     Icon,
     label: "Servos",
     Content: React.lazy(async () => {
-      const { createKinematicsView } = await import("./create");
+      const { createServosView } = await import("./create");
       return {
-        default: createKinematicsView({ appModel, nusightNetwork, Menu }),
+        default: createServosView({ appModel, nusightNetwork, Menu }),
       };
     }),
   });

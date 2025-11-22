@@ -9,16 +9,16 @@ import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
-import { KinematicsRobotModel } from "./robot_model";
+import { ServosRobotModel } from "./robot_model";
 
-export class KinematicsNetwork {
+export class ServosNetwork {
   constructor(private network: Network) {
     this.network.on(message.input.Sensors, this.onSensors);
   }
 
-  static of(nusightNetwork: NUsightNetwork): KinematicsNetwork {
+  static of(nusightNetwork: NUsightNetwork): ServosNetwork {
     const network = Network.of(nusightNetwork);
-    return new KinematicsNetwork(network);
+    return new ServosNetwork(network);
   }
 
   destroy = () => {
@@ -33,7 +33,7 @@ export class KinematicsNetwork {
       return;
     }
 
-    const robot = KinematicsRobotModel.of(robotModel);
+    const robot = ServosRobotModel.of(robotModel);
 
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
