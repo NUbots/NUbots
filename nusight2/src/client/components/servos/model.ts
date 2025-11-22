@@ -68,7 +68,7 @@ export const getErrorDescription = (errorCode: number): string[] => {
 export class ServosModel {
   @observable selectedRobot?: ServosRobotModel;
 
-  constructor(private appModel: AppModel) { }
+  constructor(private appModel: AppModel) {}
 
   static of = memoize((appModel: AppModel) => {
     return new ServosModel(appModel);

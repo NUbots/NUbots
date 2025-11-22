@@ -9,26 +9,26 @@ const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
 // Mapping from joint names to servo IDs
 const jointToServoId: { [key: string]: number } = {
-  head_pitch: 19, // HEAD_PITCH
-  left_ankle_pitch: 15, // L_ANKLE_PITCH
-  left_ankle_roll: 17, // L_ANKLE_ROLL
-  left_elbow_pitch: 5, // L_ELBOW
-  left_hip_pitch: 11, // L_HIP_PITCH
-  left_hip_roll: 9, // L_HIP_ROLL
-  left_hip_yaw: 7, // L_HIP_YAW
-  left_knee_pitch: 13, // L_KNEE
-  left_shoulder_pitch: 1, // L_SHOULDER_PITCH
-  left_shoulder_roll: 3, // L_SHOULDER_ROLL
-  neck_yaw: 18, // HEAD_YAW
-  right_ankle_pitch: 14, // R_ANKLE_PITCH
-  right_ankle_roll: 16, // R_ANKLE_ROLL
-  right_elbow_pitch: 4, // R_ELBOW
-  right_hip_pitch: 10, // R_HIP_PITCH
-  right_hip_roll: 8, // R_HIP_ROLL
-  right_hip_yaw: 6, // R_HIP_YAW
-  right_knee_pitch: 12, // R_KNEE
   right_shoulder_pitch: 0, // R_SHOULDER_PITCH
+  left_shoulder_pitch: 1, // L_SHOULDER_PITCH
   right_shoulder_roll: 2, // R_SHOULDER_ROLL
+  left_shoulder_roll: 3, // L_SHOULDER_ROLL
+  right_elbow_pitch: 4, // R_ELBOW
+  left_elbow_pitch: 5, // L_ELBOW
+  right_hip_yaw: 6, // R_HIP_YAW
+  left_hip_yaw: 7, // L_HIP_YAW
+  right_hip_roll: 8, // R_HIP_ROLL
+  left_hip_roll: 9, // L_HIP_ROLL
+  right_hip_pitch: 10, // R_HIP_PITCH
+  left_hip_pitch: 11, // L_HIP_PITCH
+  right_knee_pitch: 12, // R_KNEE
+  left_knee_pitch: 13, // L_KNEE
+  right_ankle_pitch: 14, // R_ANKLE_PITCH
+  left_ankle_pitch: 15, // L_ANKLE_PITCH
+  right_ankle_roll: 16, // R_ANKLE_ROLL
+  left_ankle_roll: 17, // L_ANKLE_ROLL
+  neck_yaw: 18, // HEAD_YAW
+  head_pitch: 19, // HEAD_PITCH
 };
 
 export const Nugus = observer(({ model }: { model: ServosRobotModel }) => {

@@ -6,7 +6,7 @@ import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { ServosController } from "./controller";
-import { getErrorDescription, ServosModel, ServoNames } from "./model";
+import { getErrorDescription, ServoNames, ServosModel } from "./model";
 import { CanvasWrapper } from "./r3f_components/canvas_wrapper";
 import { ServosRobotModel } from "./robot_model";
 
@@ -328,8 +328,9 @@ const ServoDataDisplay: React.FC<{ robot: ServosRobotModel }> = observer(({ robo
           <div className="text-xs text-gray-500 hidden sm:block">{audioStatus}</div>
           <button
             onClick={toggleAlarm}
-            className={`text-xs px-2 py-1 rounded ${alarmEnabled ? "bg-red-600 text-white hover:bg-red-700" : "bg-gray-400 text-white hover:bg-gray-500"
-              }`}
+            className={`text-xs px-2 py-1 rounded ${
+              alarmEnabled ? "bg-red-600 text-white hover:bg-red-700" : "bg-gray-400 text-white hover:bg-gray-500"
+            }`}
           >
             {alarmEnabled ? "Disable" : "Enable"}
           </button>
@@ -398,8 +399,9 @@ const ServoDataDisplay: React.FC<{ robot: ServosRobotModel }> = observer(({ robo
                 return (
                   <tr
                     key={jointName}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${isOverLimit || hasError ? "bg-red-50 dark:bg-red-900/20" : ""
-                      }`}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                      isOverLimit || hasError ? "bg-red-50 dark:bg-red-900/20" : ""
+                    }`}
                   >
                     <td className="p-1 sm:p-2 font-medium truncate max-w-[120px] sm:max-w-none">
                       <span className="block truncate text-xs" title={servoName}>
