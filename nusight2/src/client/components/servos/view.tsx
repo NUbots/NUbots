@@ -23,9 +23,9 @@ const ServoDataDisplay: React.FC<{ robot: ServosRobotModel }> = observer(({ robo
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const alarmIntervalRef = useRef<number | null>(null);
 
-  // Initialize multiple audio methods
+  // Initialise multiple audio methods
   useEffect(() => {
-    let audioInitialized = false;
+    let audioInitialised = false;
 
     const initWebAudio = async () => {
       try {
@@ -36,8 +36,8 @@ const ServoDataDisplay: React.FC<{ robot: ServosRobotModel }> = observer(({ robo
           await audioContextRef.current.resume();
         }
 
-        console.log("Web Audio API initialized successfully");
-        audioInitialized = true;
+        console.log("Web Audio API initialised successfully");
+        audioInitialised = true;
         setAudioStatus("Audio Ready");
         return true;
       } catch (error) {
@@ -57,8 +57,8 @@ const ServoDataDisplay: React.FC<{ robot: ServosRobotModel }> = observer(({ robo
         audio.preload = "auto";
 
         audioElementRef.current = audio;
-        console.log("HTML5 Audio initialized successfully");
-        audioInitialized = true;
+        console.log("HTML5 Audio initialised successfully");
+        audioInitialised = true;
         setAudioStatus("Audio Ready");
         return true;
       } catch (error) {
@@ -77,12 +77,12 @@ const ServoDataDisplay: React.FC<{ robot: ServosRobotModel }> = observer(({ robo
       }
     };
 
-    // Initialize on mount
+    // Initialise on mount
     initAudio();
 
     // Set up user interaction handlers to resume audio
     const handleUserInteraction = async () => {
-      if (!audioInitialized) {
+      if (!audioInitialised) {
         await initAudio();
       }
 
