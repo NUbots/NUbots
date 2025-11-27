@@ -13,7 +13,7 @@ namespace module {
 
     using extension::Configuration;
     using extension::behaviour::Task;
-    using message::actuation::HeadSequence;
+    using message::actuation::BodySequence;
     using message::onboarding::check;
     using utility::skill::load_script;
     using utility::support::Expression;
@@ -23,6 +23,7 @@ namespace module {
         on<Configuration>("checker.yaml").then([this](const Configuration& config) {
             // Use configuration here from file checker.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            emit<Task>(load_script<BodySequence>("Clap.yaml"));
         });
 
         on<Trigger<check>>().then([this](const check& c) {
@@ -30,7 +31,7 @@ namespace module {
             if (c.value == 55 && !validated) {
                 validated = true;
                 log<INFO>("The value is correct!");
-                emit<Task>(load_script<HeadSequence>("NodYes.yaml"));
+                // emit<Task>(load_script<BodySequence>("Stand.yaml"));
             }
             else if (!validated) {
                 log<ERROR>("The value is incorrect!");
