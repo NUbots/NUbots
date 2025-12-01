@@ -3,5 +3,6 @@ syntax = "proto3";
 package message.onboarding;
 
 message SumInput {
-    uint32 input = 1;
+    uint32 x = 1;
+    uint32 y = 2;
 }
