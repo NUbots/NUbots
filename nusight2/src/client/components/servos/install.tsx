@@ -7,7 +7,7 @@ import { AppModel } from "../app/model";
 
 import Icon from "./icon";
 
-export function installTempMonitor({
+export function installServos({
   nav,
   appModel,
   nusightNetwork,
@@ -19,13 +19,13 @@ export function installTempMonitor({
   Menu: ComponentType;
 }) {
   nav.addRoute({
-    path: "/temperature_monitor",
+    path: "/servos",
     Icon,
-    label: "Temperature Monitor",
+    label: "Servos",
     Content: React.lazy(async () => {
-      const { createTempMonitorView } = await import("./create");
+      const { createServosView } = await import("./create");
       return {
-        default: createTempMonitorView({ appModel, nusightNetwork, Menu }),
+        default: createServosView({ appModel, nusightNetwork, Menu }),
       };
     }),
   });

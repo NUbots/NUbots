@@ -3,11 +3,35 @@ import { observer } from "mobx-react";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
-import { KinematicsRobotModel } from "../robot_model";
+import { ServosRobotModel } from "../robot_model";
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
-export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
+// Mapping from joint names to servo IDs
+const jointToServoId: { [key: string]: number } = {
+  right_shoulder_pitch: 0, // R_SHOULDER_PITCH
+  left_shoulder_pitch: 1, // L_SHOULDER_PITCH
+  right_shoulder_roll: 2, // R_SHOULDER_ROLL
+  left_shoulder_roll: 3, // L_SHOULDER_ROLL
+  right_elbow_pitch: 4, // R_ELBOW
+  left_elbow_pitch: 5, // L_ELBOW
+  right_hip_yaw: 6, // R_HIP_YAW
+  left_hip_yaw: 7, // L_HIP_YAW
+  right_hip_roll: 8, // R_HIP_ROLL
+  left_hip_roll: 9, // L_HIP_ROLL
+  right_hip_pitch: 10, // R_HIP_PITCH
+  left_hip_pitch: 11, // L_HIP_PITCH
+  right_knee_pitch: 12, // R_KNEE
+  left_knee_pitch: 13, // L_KNEE
+  right_ankle_pitch: 14, // R_ANKLE_PITCH
+  left_ankle_pitch: 15, // L_ANKLE_PITCH
+  right_ankle_roll: 16, // R_ANKLE_ROLL
+  left_ankle_roll: 17, // L_ANKLE_ROLL
+  neck_yaw: 18, // HEAD_YAW
+  head_pitch: 19, // HEAD_PITCH
+};
+
+export const Nugus = observer(({ model }: { model: ServosRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
 
   // Load the URDF model only once
@@ -54,17 +78,68 @@ export const Nugus = observer(({ model }: { model: KinematicsRobotModel }) => {
     }
   }, [rotation, motors]);
 
-  // Update the material of the robot
-  const material = new THREE.MeshStandardMaterial({
-    color: "#A2A2A2",
+  // Update materials based on temperature - apply on every render like localisation version
+  const normalMaterial = new THREE.MeshStandardMaterial({
+    color: "#666666",
     roughness: 0.5,
     metalness: 0.2,
   });
+
+  const hotMaterial = new THREE.MeshStandardMaterial({
+    color: "#FF4444",
+    roughness: 0.5,
+    metalness: 0.2,
+    emissive: "#440000",
+    emissiveIntensity: 0.2,
+  });
+
+  const errorMaterial = new THREE.MeshStandardMaterial({
+    color: "#FF8800",
+    roughness: 0.5,
+    metalness: 0.2,
+    emissive: "#442200",
+    emissiveIntensity: 0.3,
+  });
+
   if (robotRef.current) {
     robotRef.current.traverse((child) => {
       if (child.type === "URDFVisual" && child.children.length > 0) {
         const mesh = child.children[0] as THREE.Mesh;
-        mesh.material = material;
+
+        // Traverse up the hierarchy to find the joint
+        let current = child.parent;
+        let jointName = null;
+
+        while (current) {
+          if (current.type === "URDFJoint") {
+            jointName = current.name;
+            break;
+          }
+          current = current.parent;
+        }
+
+        if (jointName && jointToServoId[jointName] !== undefined) {
+          const servoId = jointToServoId[jointName];
+          const temperature = model.servoTemperatures.get(servoId);
+          const error = model.servoErrors.get(servoId);
+          const isOverLimit = temperature !== undefined && temperature > 50;
+          const hasError = error !== undefined && error !== 0;
+
+          // Priority: Error > Temperature > Normal
+          if (hasError) {
+            mesh.material = errorMaterial;
+          } else if (isOverLimit) {
+            mesh.material = hotMaterial;
+          } else {
+            mesh.material = normalMaterial;
+          }
+        } else {
+          // Default material for non-joint parts
+          mesh.material = normalMaterial;
+        }
+
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
       }
     });
   }
