@@ -41,7 +41,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM --platform=linux/amd64 archlinux:base-devel-20241117.0.280007
+FROM archlinux:base-devel-20251005.0.430597
 
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
@@ -126,29 +126,38 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-project-15.0.7.src.tar.xz \
     --build-system cmake \
     --configure-path "llvm" \
+    --patch https://gist.githubusercontent.com/ZeoNyph/415e3cf6230c791e96d1451357781261/raw/1a014be3fad04de7a9286019948cfd367952f1da/llvm_patch.patch \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON
-
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_INSTALL_PREFIX=${prefix} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_HOST_TRIPLE=arm-linux-gnueabihf \
+    -DLLVM_TARGETS_TO_BUILD=ARM
 # SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
+RUN install-from-source http://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/2d4f2e7a7968392de017fcd3e4b503a75f0c12d2.tar.gz\
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
-RUN install-from-source https://github.com/intel/opencl-clang/archive/470cf0018e1ef6fc92eda1356f5f31f7da452abc.tar.gz \
-    --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
+RUN install-from-source https://github.com/intel/opencl-clang/archive/refs/tags/v15.0.1.tar.gz \
+    --patch https://gist.githubusercontent.com/ZeoNyph/76fb4fd6f045b7975f71debddbc4cea4/raw/0ce9b1513ad424dd1cca804413acda7417832640/resource_linker_skip_cross.patch \
+    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DSPIRV_TRANSLATOR_DIR=${prefix} \
+    -DCMAKE_MODULE_PATH="${prefix}/lib/cmake/llvm"
 
 # Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.22.1.tar.gz \
+    --build-system cmake \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/0e71067.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2025.1.rc1.tar.gz \
     -DSPIRV_WERROR=Off \
     -DBUILD_SHARED_LIBS=ON \
     -DSPIRV_TOOLS_BUILD_STATIC=OFF \
@@ -161,12 +170,12 @@ RUN install-package ncurses
 RUN pip install pyyaml mako
 
 # Intel graphics compiler
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
-    --patch https://gist.githubusercontent.com/ysims/3775531601b210507c478bca083b768d/raw/fa435e70c2870f2539c0da973a161ad7968d4696/built_tools_target.patch \
+RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/v2.11.7.tar.gz \
+    --patch https://gist.githubusercontent.com/ZeoNyph/6dd6dbb8dc715353fceee60174a7546d/raw/da748ec9ee8a5365c4212de013bde77cd5f6e2ff/built_tools_target.patch \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
     -DIGC_OPTION__LLD_MODE=Prebuilds \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.5' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='15.0.7' \
     -DIGC_OPTION__LLVM_MODE=Prebuilds \
     -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
     -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
@@ -176,7 +185,7 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
     -DINSTALL_GENX_IR=ON
 
 # gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.8.1.tar.gz \
     --build-system cmake \
     -DRUN_TEST_SUITE=OFF
 
@@ -189,7 +198,7 @@ RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz
 
 # Libva and the iHD driver for hardware compression
 RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
-RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
+RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-25.1.4.tar.gz \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
@@ -197,19 +206,22 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
     -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON
+    -DENABLE_NONFREE_KERNELS=ON \
+    -DCMAKE_C_FLAGS="-w" \
+    -DCMAKE_CXX_FLAGS="-w"
 
 # Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
+RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/25.31.34666.3.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
-    -DIGC_DIR=${prefix}
+    -DIGC_DIR=${prefix} \
+    -DGMM_DIR=${prefix}
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2025.07.22.tar.gz
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.4.tar.gz
 
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
@@ -236,18 +248,30 @@ RUN install-package opencl-clhpp \
     snappy
 
 # Clone OpenVINO repository
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch releases/2025/3 && \
     cd openvino && \
     git submodule update --init --recursive
 
 # Download AUR patches
 WORKDIR /openvino
-RUN curl -L -o openvino_patch.patch \
-    https://gist.github.com/ZeoNyph/cf8216bc1ffa15b0e44b17899f355c07/raw/42a6a040f41c03714507b86cf257546ebbb6a0cc/openvino_patch.patch
+RUN curl -L -o 010-openvino-change-install-paths.patch \
+    "https://gist.github.com/ZeoNyph/3ffc640de3649478eebec818fd9f246c/raw/306ae37375932538b29e306f90c66babaeb44a6c/010-openvino-change-install-paths.patch" && \
+    curl -L -o 020-openvino-disable-werror.patch \
+    "https://gist.github.com/ZeoNyph/1d0a17ede668e9a4a68a85a550d47a5e/raw/ffe9a8d3b249f212e08711b49649a5ec8cbcccca/020-openvino-disable-werror.patch" && \
+    curl -L -o 030-openvino-protobuf23-fix.patch \
+    "https://gist.github.com/ZeoNyph/bd53cb81e711d43898ef2ab5d80e1f0c/raw/c38d150ebe5d462652e47ee60b36edc58f0224ca/030-openvino-protobuf23-fix.patch" && \
+    curl -L -o 040-openvino-fix-version-check.patch \
+    "https://gist.github.com/ZeoNyph/22d77d4527332cfde944cb23993243d5/raw/6ec9bdecdff0963d92cd03c357b4a105d94853fb/040-openvino-fix-version-check.patch" && \
+    curl -L -o 050-openvino-gcc15-fix.patch \
+    "https://github.com/openvinotoolkit/openvino/commit/29fb5d01e58b614f7eb2c3919f737f7f050e8051.patch"
 
 # Apply patches
 RUN cd /openvino && \
-    patch -d . -p1 -i openvino_patch.patch
+    patch -d . -p1 -i 010-openvino-change-install-paths.patch && \
+    patch -d . -p1 -i 020-openvino-disable-werror.patch && \
+    patch -d . -p1 -i 030-openvino-protobuf23-fix.patch && \
+    patch -d . -p1 -i 040-openvino-fix-version-check.patch && \
+    patch -d . -p1 -i 050-openvino-gcc15-fix.patch
 
 # Build OpenVINO
 RUN mkdir build && cd build && \
@@ -261,15 +285,16 @@ RUN mkdir build && cd build && \
     -DENABLE_INTEL_NPU:BOOL='OFF' \
     -DENABLE_SYSTEM_TBB:BOOL='ON' \
     -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
-    -DENABLE_SYSTEM_PROTOBUF:BOOL='OFF' \
+    -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
     -DENABLE_CPPLINT:BOOL='OFF' \
-    -DCMAKE_CXX_STANDARD='17' \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -Wno-dev && \
     make -j$(nproc) && make install
 
 # Move OpenVino libraries to our library path
-RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r
+# RUN sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r (this failed and I have no idea where these files are so I skip lol)
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -295,7 +320,8 @@ RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/r
     -DFLOATTEST="sse"
 
 # yaml-cpp
-RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.tar.gz \
+RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz \
+    --patch https://gist.githubusercontent.com/ZeoNyph/49ae9c71de50fed39d00f814ea090328/raw/5c86c4b4a374efa85b4a5ca539fb89da82cd638b/yaml-cpp-patch.patch \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
 
@@ -379,7 +405,7 @@ RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
 
 # NLopt
-RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.10.0.tar.gz
 
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
@@ -397,9 +423,7 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
-    doxygen \
-    gcc13
-
+    doxygen
 
 # Node tools
 RUN wget -nv https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-x64.tar.xz -O - \

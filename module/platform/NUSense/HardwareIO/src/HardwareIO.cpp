@@ -43,6 +43,8 @@
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 
 namespace module::platform::NUSense {
 
@@ -83,12 +85,12 @@ namespace module::platform::NUSense {
         : utility::reactor::StreamReactor<HardwareIO, NUSenseParser, 5>(std::move(environment)) {
 
         on<Configuration>("NUSense.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            auto device     = config["nusense"]["device"].as<std::string>();
-            auto baud       = config["nusense"]["baud"].as<int>();
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            std::string device = config["nusense"]["device"].as<std::string>();
+            int baud           = config["nusense"]["baud"].as<int>();
 
             // Tell the stream reactor to connect to the device
-            emit(std::make_unique<ConnectSerial>(device, baud));
+            emit(std::make_unique<ConnectSerial>(std::move(device), baud));
         });
 
         on<PostConnect>().then("Sending handshake message to NUSense", [this] {
@@ -318,5 +320,6 @@ namespace module::platform::NUSense {
                                     })
                                     .disable();
     }
+#pragma GCC diagnostic pop
 
 }  // namespace module::platform::NUSense

@@ -27,10 +27,6 @@ SOFTWARE.
 cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
-# Set the compiler version of the project
-set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
-set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
-
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)
 
