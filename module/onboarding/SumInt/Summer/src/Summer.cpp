@@ -5,7 +5,7 @@
 #include "message/onboarding/SumInt/SumInput.hpp"
 #include "message/onboarding/SumInt/SumResult.hpp"
 
-namespace module::onboarding {
+namespace module::onboarding::SumInt {
 
     using extension::Configuration;
     using message::onboarding::SumInt::SumInput;
@@ -18,15 +18,20 @@ namespace module::onboarding {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-    on<Trigger<SumInput>>().then([this](const SumInput& input_msg) {
+        on<Trigger<SumInput>>().then([this](const SumInput& input_msg) {
             auto x = input_msg.x;
             auto y = input_msg.y;
+
+            log<INFO>("Received SumInput{", x, ",", y, "}");
 
             auto result_msg    = std::make_unique<SumResult>();
             result_msg->result = x + y;
 
+            log<INFO>("Calculated", x, "+", y, "=", x + y);
+            log<INFO>("Emitting SumResult{", result_msg->result, "}");
+
             emit(result_msg);
-    }
+        });
     }
 
-}  // namespace module::onboarding
+}  // namespace module::onboarding::SumInt
