@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package message.onboarding;
+package message.onboarding.SumInt;
 
 message SumInput {
     uint32 x = 1;
