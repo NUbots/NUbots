@@ -3,19 +3,19 @@
 
 #include <nuclear>
 
-namespace module::onboarding {
+namespace module::onboarding::SumInt {
 
-class Summer : public NUClear::Reactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    class Summer : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+        } cfg;
 
-public:
-    /// @brief Called by the powerplant to build and setup the Summer reactor.
-    explicit Summer(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the Summer reactor.
+        explicit Summer(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-}  // namespace module::onboarding
+}  // namespace module::onboarding::SumInt
 
 #endif  // MODULE_ONBOARDING_SUMMER_HPP
