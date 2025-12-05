@@ -1,0 +1,6 @@
+nuclear_role(
+  support::logging::ConsoleLogHandler
+  onboarding::SumInt::Summer
+  onboarding::SumInt::Actuator
+  onboarding::SumInt::Comparator
+)
