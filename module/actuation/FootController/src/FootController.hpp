@@ -270,7 +270,6 @@ namespace module::actuation {
         }
     };
 
-
 }  // namespace module::actuation
 
 #endif  // MODULE_ACTUATION_FOOTCONTROLLER_HPP
