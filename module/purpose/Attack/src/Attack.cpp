@@ -44,7 +44,6 @@ namespace module::purpose {
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::planning::KickTo;
-    using message::strategy::TackleBall;
     using message::strategy::WalkToKickBall;
     using message::support::FieldDescription;
 

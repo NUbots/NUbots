@@ -56,7 +56,6 @@ namespace module::strategy {
     using message::localisation::Robots;
     using message::planning::WalkTo;
     using message::strategy::PositionBehindBall;
-    using message::strategy::TackleBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
 
@@ -79,9 +78,6 @@ namespace module::strategy {
             cfg.goal_target_offset     = config["goal_target_offset"].as<double>();
             cfg.max_angle_error        = config["max_angle_error"].as<Expression>();
             cfg.avoid_ball_offset      = Eigen::Vector3d(config["avoid_ball_offset"].as<Expression>());
-            cfg.avoid_opponent_offset  = config["avoid_opponent_offset"].as<double>();
-            cfg.approach_offset        = config["approach_offset"].as<double>();
-            cfg.tackle_angle_offset    = config["tackle_angle_offset"].as<double>();
             cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
             cfg.max_error_y            = config["max_error_y"].as<double>();
             cfg.error_gain_perp        = config["error_gain_perp"].as<double>();
