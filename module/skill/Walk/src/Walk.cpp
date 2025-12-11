@@ -57,7 +57,6 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
-    using message::skill::SmoothWalk;
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
