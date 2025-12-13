@@ -283,7 +283,7 @@ RUN mkdir build && cd build && \
     -DENABLE_NCC_STYLE:BOOL='OFF' \
     -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
     -DENABLE_INTEL_NPU:BOOL='OFF' \
-    -DENABLE_SYSTEM_TBB:BOOL='ON' \
+    -DENABLE_SYSTEM_TBB:BOOL='OFF' \
     -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
     -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
@@ -293,9 +293,7 @@ RUN mkdir build && cd build && \
     make -j$(nproc) && make install
 
 # Move OpenVino libraries to our library path
-RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r
-# RUN sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r (this failed and I have no idea where these files are so I skip lol)
-
+RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && RUN sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
