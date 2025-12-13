@@ -293,7 +293,7 @@ RUN mkdir build && cd build && \
     make -j$(nproc) && make install
 
 # Move OpenVino libraries to our library path
-RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && RUN sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
