@@ -1,5 +1,17 @@
 nuclear_role(
-  support::logging::ConsoleLogHandler
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::logging::ConsoleLogHandler # Provides logging output
+  support::SignalCatcher # Allows for graceful shutdown
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  # Director
+  extension::Director
+  # Servos
+  actuation::Servos
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
+
   onboarding::SumInt::Summer
   onboarding::SumInt::Actuator
   onboarding::SumInt::Comparator
