@@ -27,6 +27,8 @@ namespace module::onboarding::SumInt {
             auto result_msg    = std::make_unique<SumResult>();
             result_msg->result = x + y;
 
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
             log<INFO>("Calculated", x, "+", y, "=", x + y);
             log<INFO>("Emitting SumResult{", result_msg->result, "}");
 
