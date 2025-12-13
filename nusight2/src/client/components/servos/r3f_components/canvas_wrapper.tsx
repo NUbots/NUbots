@@ -1,14 +1,14 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
 
-import { KinematicsRobotModel } from "../robot_model";
+import { ServosRobotModel } from "../robot_model";
 
 import { Axes } from "./axes";
 import { CameraControls } from "./camera";
 import { Grid } from "./grid";
 import { Nugus } from "./nugus";
 
-const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = ({ robot }) => {
+const RobotComponents: React.FC<{ robot: ServosRobotModel }> = ({ robot }) => {
   if (!robot.visible) return null;
 
   return (
@@ -18,7 +18,7 @@ const RobotComponents: React.FC<{ robot: KinematicsRobotModel }> = ({ robot }) =
   );
 };
 
-export const CanvasWrapper: React.FC<{ selectedRobot?: KinematicsRobotModel }> = ({ selectedRobot }) => {
+export const CanvasWrapper: React.FC<{ selectedRobot?: ServosRobotModel }> = ({ selectedRobot }) => {
   return (
     <Canvas camera={{ position: [10, 10, 10], fov: 60 }}>
       <CameraControls />
