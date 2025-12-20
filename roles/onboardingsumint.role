@@ -11,7 +11,7 @@ nuclear_role(
   actuation::Servos
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
-
+  # SumInt roles
   onboarding::SumInt::Summer
   onboarding::SumInt::Actuator
   onboarding::SumInt::Comparator
