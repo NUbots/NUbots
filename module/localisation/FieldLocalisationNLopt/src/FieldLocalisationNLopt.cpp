@@ -256,7 +256,7 @@ namespace module::localisation {
                         proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
 
-                        // Only accept the optimization result if the cost is below the threshold
+                        // Only accept the optimisation result if the cost is below the threshold
                         if (chosen_state_cost < cfg.cost_threshold) {
                             state = proposed_state;
 

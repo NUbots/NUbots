@@ -70,13 +70,13 @@ Optimisation is carried out using NLopt's COBYLA (Constrained Optimisation BY Li
 
 ### Cost Threshold and Update Acceptance
 
-The module uses a cost threshold (`cost_threshold`) to determine whether to accept optimization results:
+The module uses a cost threshold (`cost_threshold`) to determine whether to accept optimisation results:
 
-- **Accepting Updates**: Optimization results are only applied if their cost is below `cost_threshold`. This prevents poor localizations from corrupting the state estimate.
-- **Rejecting Updates**: When the cost exceeds the threshold, the optimization result is rejected and the previous filtered state is maintained. A warning is logged and a counter is incremented.
+- **Accepting Updates**: Optimisation results are only applied if their cost is below `cost_threshold`. This prevents poor localisations from corrupting the state estimate.
+- **Rejecting Updates**: When the cost exceeds the threshold, the optimisation result is rejected and the previous filtered state is maintained. A warning is logged and a counter is incremented.
 - **Triggering Resets**: If the cost exceeds the threshold for `max_over_cost` consecutive updates (and `reset_delay` has elapsed), an uncertainty reset is triggered.
 
-This mechanism provides robustness against temporary vision anomalies or ambiguous field features while maintaining accurate localization when observations are reliable.
+This mechanism provides robustness against temporary vision anomalies or ambiguous field features while maintaining accurate localisation when observations are reliable.
 
 ### Reset
 
