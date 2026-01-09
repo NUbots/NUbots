@@ -70,11 +70,11 @@ change_limit: [0.5, 0.5, 0.5]
 goal_post_error_tolerance: 0.5
 
 opt:
-  # Relative tolerance on the optimization parameters
+  # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
-  # Relative tolerance on the optimization function value
+  # Relative tolerance on the optimisation function value
   ftol_rel: 1e-6
-  # Maximum number of evaluations for the optimization
+  # Maximum number of evaluations for the optimisation
   maxeval: 1000
 
 exponential_filter:

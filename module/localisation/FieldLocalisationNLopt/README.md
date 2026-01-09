@@ -27,7 +27,7 @@ The optimisation framework integrates several cost components and constraints to
 $$J_{\text{fi}} = \frac{w_{\text{fi}} \sum_{j=1}^{M} \left( \text{dist}(r_{\text{int},j}, r_{\text{obs},j}) \right)^2}{M}$$
 
 3. **State Change Cost ($J_{\text{sc}}$)**:
-   - Penalizes large deviations from the initial state estimate to ensure temporal consistency.
+   - Penalises large deviations from the initial state estimate to ensure temporal consistency.
    - Expressed as:
 
 $$J_{\text{sc}} = w_{\text{sc}} \|\textbf{x} - \textbf{x}\_{\text{init}}\|^2$$
@@ -57,7 +57,7 @@ $$\text{stability} > \text{FALLING}$$
 
 ### Optimisation Algorithm
 
-- The overall cost function optimized is:
+- The overall cost function optimised is:
 
 $$J(\textbf{x}) = J_{\text{fl}} + J_{\text{fi}} + J_{\text{sc}}$$
 

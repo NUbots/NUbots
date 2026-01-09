@@ -276,7 +276,7 @@ namespace module::localisation {
                         }
                         else {
                             // Reject the update, keep previous filtered state
-                            log<DEBUG>("Rejecting optimization result: cost ",
+                            log<DEBUG>("Rejecting optimisation result: cost ",
                                        chosen_state_cost,
                                        " exceeds threshold ",
                                        cfg.cost_threshold);

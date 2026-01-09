@@ -193,7 +193,7 @@ def objective(trial):
 @run_on_docker
 def register(parser):
     """
-    Register command-line arguments for the optimization tool.
+    Register command-line arguments for the optimisation tool.
     """
     parser.description = "Optimises YAML configuration parameters for the LocalisationBenchmark using Optuna."
     parser.add_argument("--nbs_file", type=str, required=True, help="Path to the .nbs file with ground truth data.")

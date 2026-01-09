@@ -224,13 +224,13 @@ namespace module::localisation {
             /// @brief Constraint on the maximum change in state
             Eigen::Vector3d change_limit = Eigen::Vector3d::Zero();
 
-            /// @brief Relative tolerance on the optimization parameters
+            /// @brief Relative tolerance on the optimisation parameters
             double xtol_rel = 0.0;
 
-            /// @brief Relative tolerance on the optimization function value
+            /// @brief Relative tolerance on the optimisation function value
             double ftol_rel = 0.0;
 
-            /// @brief Maximum number of evaluations for the optimization
+            /// @brief Maximum number of evaluations for the optimisation
             size_t maxeval = 0;
 
             /// @brief Goal error tolerance [m]
