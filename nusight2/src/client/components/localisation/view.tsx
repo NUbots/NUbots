@@ -23,6 +23,7 @@ import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections";
 import { FieldObjects } from "./r3f_components/field_objects";
 import { FieldPoints } from "./r3f_components/field_points";
+import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
 import { PurposeLabel } from "./r3f_components/purpose_label";
@@ -53,24 +54,31 @@ interface FieldDimensionSelectorProps {
 
 @observer
 export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
-  private dropdownToggle = (<Button>Field Type</Button>);
+  private dropdownToggle = (
+    <button className="inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]">
+      <Icon size={24} className="mt-1 -ml-5">
+        tune
+      </Icon>
+      <span className="text-[0.7rem]">Field Type</span>
+    </button>
+  );
 
   render(): JSX.Element {
     return (
       <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
-        <div className="bg-auto-surface-2">
+        <div className="bg-auto-surface-2 shadow-md text-auto-primary">
           {FieldDimensionOptions.map((option) => (
             <div
               key={option.value}
-              className="flex items-center p-2 cursor-pointer hover:bg-auto-contrast-1"
+              className="flex items-center p-3 cursor-pointer hover:bg-auto-contrast-1 transition-colors"
               role="menuitem"
               tabIndex={0}
               onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
             >
-              <Icon size={24}>
-                {this.props.model.field.fieldType === option.value ? "check_box" : "check_box_outline_blank"}
-              </Icon>{" "}
-              <span>{option.label}</span>
+              <Icon size={20} className="mr-3">
+                {this.props.model.field.fieldType === option.value ? "check_circle" : "radio_button_unchecked"}
+              </Icon>
+              <span className="text-sm font-medium">{option.label}</span>
             </div>
           ))}
         </div>
@@ -140,6 +148,24 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
           <StatusBar model={this.props.model} />
+
+          {/* Right-side visibility controls panel */}
+          <VisibilityPanel
+            model={this.props.model}
+            controller={this.props.controller}
+            onHawkEyeClick={this.onHawkEyeClick}
+            toggleGridVisibility={this.toggleGridVisibility}
+            toggleFieldVisibility={this.toggleFieldVisibility}
+            toggleRobotVisibility={this.toggleRobotVisibility}
+            toggleBallVisibility={this.toggleBallVisibility}
+            toggleParticleVisibility={this.toggleParticleVisibility}
+            toggleGoalVisibility={this.toggleGoalVisibility}
+            toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+            toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+            toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
+            toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+            toggleDashboardVisibility={this.toggleDashboardVisibility}
+          />
         </div>
 
         {this.props.model.dashboard.visible && (
@@ -267,50 +293,170 @@ interface LocalisationMenuBarProps {
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
-    <li className="flex m-0 p-0">
-      <button className="px-4" onClick={props.onClick}>
-        <div className="flex items-center justify-center">
-          <div className="flex items-center rounded">
-            <span className="mx-2">{props.label}</span>
-            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
-          </div>
-        </div>
-      </button>
-    </li>
+    <button
+      className={`
+        w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm font-medium
+        transition-all duration-150 ease-out
+        ${
+          props.isVisible
+            ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
+            : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
+        }
+        focus:outline-none focus:ring-1 focus:ring-auto-primary
+        active:scale-[0.98]
+      `}
+      onClick={props.onClick}
+    >
+      <div
+        className={`
+        flex items-center justify-center w-3.5 h-3.5 rounded
+        ${props.isVisible ? "bg-auto-primary/30 text-auto-primary" : "bg-auto-surface-3 text-auto-on-surface/60"}
+      `}
+      >
+        <Icon size={20}>{props.isVisible ? "visibility" : "visibility_off"}</Icon>
+      </div>
+      <span className="flex-1 text-left">{props.label}</span>
+      <div
+        className={`
+        w-1 h-1 rounded-full transition-colors
+        ${props.isVisible ? "bg-auto-primary" : "bg-auto-on-surface/40"}
+      `}
+      />
+    </button>
   );
 };
 
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model, controller } = props;
+
   return (
     <Menu>
-      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-[5rem] gap-y-4 px-3 py-3 w-full items-center">
-        <div className="flex gap-5 items-center w-fit">
-          <Button onClick={props.onHawkEyeClick}>Hawk Eye</Button>
-          <FieldDimensionSelector controller={controller} model={model} />
-        </div>
+      <div className="flex min-h-[60px] h-auto flex-wrap items-center bg-auto-surface-1">
+        <div className="flex-1 pr-4">
+          <div className="flex items-center gap-4">
+            {/* Hawk Eye Button - styled like robot selector */}
+            <div className="flex relative">
+              <button
+                className="inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]"
+                onClick={props.onHawkEyeClick}
+              >
+                <Icon size={24} className="mt-1 -ml-5 text-blue-500">
+                  visibility
+                </Icon>
+                <span className="text-[0.7rem]">Hawk Eye</span>
+              </button>
+            </div>
 
-        <div className="flex flex-wrap w-fit gap-x-4 gap-y-4">
-          {[
-            ["Grid", model.gridVisible, props.toggleGridVisibility],
-            ["Field", model.fieldVisible, props.toggleFieldVisibility],
-            ["Robots", model.robotVisible, props.toggleRobotVisibility],
-            ["Balls", model.ballVisible, props.toggleBallVisibility],
-            ["Particles", model.particlesVisible, props.toggleParticleVisibility],
-            ["Goals", model.goalsVisible, props.toggleGoalVisibility],
-            ["Field Line Points", model.fieldLinePointsVisible, props.toggleFieldLinePointsVisibility],
-            ["Field Intersections", model.fieldIntersectionsVisible, props.toggleFieldIntersectionsVisibility],
-            ["Walk Path", model.walkToDebugVisible, props.toggleWalkToDebugVisibility],
-            ["Bounded Box", model.boundedBoxVisible, props.toggleBoundedBoxVisibility],
-            ["Dashboard", model.dashboard.visible, props.toggleDashboardVisibility],
-          ].map(([label, isVisible, onClick]) => (
-            <div key={label as string} className="w-fit max-w-[13rem]">
-              <MenuItem label={label as string} isVisible={isVisible as boolean} onClick={onClick as () => void} />
+            {/* Field Type Selector - styled like robot selector */}
+            <FieldDimensionSelector controller={controller} model={model} />
+
+            {/* Dashboard Toggle - styled like NBS scrubber */}
+            <div className="flex relative">
+              <button
+                className={`
+                  inline-flex flex-col items-center justify-center bg-transparent px-3 h-[60px]
+                  ${model.dashboard.visible ? "text-green-600" : "text-gray-600"}
+                `}
+                onClick={props.toggleDashboardVisibility}
+              >
+                <Icon size={24} className="mt-1 -ml-5">
+                  dashboard
+                </Icon>
+                <span className="text-[0.7rem]">Dashboard</span>
+              </button>
+              <button
+                className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:bg-auto-contrast-1 h-8 rounded inline-flex items-center"
+                onClick={props.toggleDashboardVisibility}
+              >
+                <Icon size={20} weight="500" className="transition-transform">
+                  {model.dashboard.visible ? "expand_less" : "expand_more"}
+                </Icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <VisibilityPanel
+        model={model}
+        controller={controller}
+        onHawkEyeClick={props.onHawkEyeClick}
+        toggleGridVisibility={props.toggleGridVisibility}
+        toggleFieldVisibility={props.toggleFieldVisibility}
+        toggleRobotVisibility={props.toggleRobotVisibility}
+        toggleBallVisibility={props.toggleBallVisibility}
+        toggleParticleVisibility={props.toggleParticleVisibility}
+        toggleGoalVisibility={props.toggleGoalVisibility}
+        toggleFieldLinePointsVisibility={props.toggleFieldLinePointsVisibility}
+        toggleFieldIntersectionsVisibility={props.toggleFieldIntersectionsVisibility}
+        toggleWalkToDebugVisibility={props.toggleWalkToDebugVisibility}
+        toggleBoundedBoxVisibility={props.toggleBoundedBoxVisibility}
+        toggleDashboardVisibility={props.toggleDashboardVisibility}
+      />
+    </Menu>
+  );
+});
+
+// Right-side visibility toggle panel
+const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">) => {
+  const { model } = props;
+
+  const toggleGroups = [
+    {
+      title: "Field",
+      buttons: [
+        { label: "Field", isVisible: model.fieldVisible, onClick: props.toggleFieldVisibility },
+        { label: "Grid", isVisible: model.gridVisible, onClick: props.toggleGridVisibility },
+        { label: "Lines", isVisible: model.fieldLinePointsVisible, onClick: props.toggleFieldLinePointsVisibility },
+        {
+          label: "Intersections",
+          isVisible: model.fieldIntersectionsVisible,
+          onClick: props.toggleFieldIntersectionsVisibility,
+        },
+      ],
+    },
+    {
+      title: "Objects",
+      buttons: [
+        { label: "Robots", isVisible: model.robotVisible, onClick: props.toggleRobotVisibility },
+        { label: "Balls", isVisible: model.ballVisible, onClick: props.toggleBallVisibility },
+        { label: "Goals", isVisible: model.goalsVisible, onClick: props.toggleGoalVisibility },
+      ],
+    },
+    {
+      title: "Debug",
+      buttons: [
+        { label: "Particles", isVisible: model.particlesVisible, onClick: props.toggleParticleVisibility },
+        { label: "Walk Path", isVisible: model.walkToDebugVisible, onClick: props.toggleWalkToDebugVisibility },
+        { label: "Bounding Box", isVisible: model.boundedBoxVisible, onClick: props.toggleBoundedBoxVisibility },
+      ],
+    },
+  ];
+
+  return (
+    <div className="fixed top-32 right-4 w-56 bg-auto-surface-1 rounded-lg shadow-lg border border-auto-outline z-40">
+      <div className="p-3">
+        <h3 className="text-sm font-semibold text-auto-on-surface mb-2">Visibility Controls</h3>
+        <div className="space-y-3">
+          {toggleGroups.map((group) => (
+            <div key={group.title}>
+              <h4 className="text-xs font-semibold text-auto-on-surface/70 uppercase tracking-wider mb-1.5">
+                {group.title}
+              </h4>
+              <div className="space-y-1">
+                {group.buttons.map((button) => (
+                  <MenuItem
+                    key={button.label}
+                    label={button.label}
+                    isVisible={button.isVisible}
+                    onClick={button.onClick}
+                  />
+                ))}
+              </div>
             </div>
           ))}
         </div>
       </div>
-    </Menu>
+    </div>
   );
 });
 
@@ -324,7 +470,7 @@ const StatusBar = observer((props: StatusBarProps) => {
   return (
     <div
       className={
-        "bg-black/30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 text-lg font-bold flex flex-col gap-2 w-fit"
+        "bg-black/30 rounded-md text-white p-2 text-center absolute bottom-6 left-6 text-sm font-medium flex flex-col gap-1 w-fit"
       }
     >
       <span>{target}</span>
@@ -481,6 +627,16 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
 
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
+
+    {/* Goal labels - default to blue team if no robots available */}
+    {model.goalsVisible && (
+      <GoalLabels
+        fieldModel={model.field}
+        teamColour={model.robots.length > 0 ? (model.target || model.robots[0]).teamColour : "blue"}
+        cameraPitch={model.camera.pitch}
+        cameraYaw={model.camera.yaw}
+      />
+    )}
 
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
   </object3D>
