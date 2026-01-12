@@ -260,15 +260,15 @@ namespace module::localisation {
                         if (chosen_state_cost < cfg.cost_threshold) {
                             state = proposed_state;
 
-                            // Apply exponential filter to smooth the state estimate
-                            if (first_measurement) {
-                                filtered_state    = state;
-                                first_measurement = false;
-                            }
-                            else {
-                                filtered_state = cfg.alpha.cwiseProduct(state)
-                                                 + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
-                            }
+                            // Apply exponential filter to smooth the state estimate unless it is the first measurement.
+                            filtered_state =
+                                first_measurement
+                                    ? state
+                                    : cfg.alpha.cwiseProduct(state)
+                                          + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
+
+                            // Reset the flag.
+                            first_measurement = false;
 
                             // Update the last certain state and reset counter
                             last_certain_state = filtered_state;
@@ -320,7 +320,7 @@ namespace module::localisation {
                     }
 
                     // Add cost, covariance, and uncertainty to the field message
-                    field->cost        = chosen_state_cost;
+                    field->cost = chosen_state_cost;
                     field->covariance  = Eigen::Matrix3d::Zero();
                     field->uncertainty = 0.0;
 
