@@ -321,8 +321,6 @@ namespace module::localisation {
 
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost = chosen_state_cost;
-                    field->covariance  = Eigen::Matrix3d::Zero();
-                    field->uncertainty = 0.0;
 
                     emit(field);
                 });
