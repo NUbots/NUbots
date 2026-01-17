@@ -191,13 +191,12 @@ Collaboration diagram for module::localisation::FieldLocalisationNLopt:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1localisation_1_1FieldLocalisationNLopt__coll__graph.png" border="0" usemap="#amodule_1_1localisation_1_1FieldLocalisationNLopt_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1localisation_1_1FieldLocalisationNLopt_coll__map" id="amodule_1_1localisation_1_1FieldLocalisationNLopt_coll__map">
-<area shape="rect" title=" " alt="" coords="703,159,880,201"/>
+<area shape="rect" title=" " alt="" coords="703,101,880,142"/>
 <area shape="rect" title=" " alt="" coords="331,5,466,32"/>
-<area shape="rect" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html" title=" " alt="" coords="311,57,487,127"/>
-<area shape="rect" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html" title="Stores configuration values." alt="" coords="310,152,487,208"/>
-<area shape="rect" href="structmodule_1_1localisation_1_1StartingSide.html" title=" " alt="" coords="5,159,160,201"/>
-<area shape="rect" href="structmodule_1_1localisation_1_1GoalPost.html" title=" " alt="" coords="321,233,476,274"/>
-<area shape="rect" href="classutility_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,298,500,339"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html" title="Stores configuration values." alt="" coords="310,56,487,112"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1StartingSide.html" title=" " alt="" coords="5,63,160,105"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1GoalPost.html" title=" " alt="" coords="321,137,476,178"/>
+<area shape="rect" href="classutility_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,202,500,243"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -270,6 +269,14 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 <a class="el" href="classutility_1_1localisation_1_1OccupancyMap.html">OccupancyMap</a>&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e9d7249be471dc74ffe9828208b7e89">fieldline_distance_map</a> {}</td></tr>
 <tr class="memdesc:a4e9d7249be471dc74ffe9828208b7e89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Field line distance map (encodes the minimum distance to a field line) <br /></td></tr>
 <tr class="separator:a4e9d7249be471dc74ffe9828208b7e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc89671522ac2ae991013e83d534d232"><td class="memItemLeft" align="right" valign="top"><a id="abc89671522ac2ae991013e83d534d232"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#abc89671522ac2ae991013e83d534d232">filtered_state</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:abc89671522ac2ae991013e83d534d232"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filtered state vector using exponential filter. <br /></td></tr>
+<tr class="separator:abc89671522ac2ae991013e83d534d232"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d7a83f43a7825e4d2d29c0576c5c3d4"><td class="memItemLeft" align="right" valign="top"><a id="a5d7a83f43a7825e4d2d29c0576c5c3d4"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a5d7a83f43a7825e4d2d29c0576c5c3d4">first_measurement</a> = true</td></tr>
+<tr class="memdesc:a5d7a83f43a7825e4d2d29c0576c5c3d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool indicating if this is the first measurement. <br /></td></tr>
+<tr class="separator:a5d7a83f43a7825e4d2d29c0576c5c3d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe4f092ad9b81323cf6d21312308c688"><td class="memItemLeft" align="right" valign="top"><a id="abe4f092ad9b81323cf6d21312308c688"></a>
 Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#abe4f092ad9b81323cf6d21312308c688">ground_truth_Hfw</a> = Eigen::Isometry3d::Identity()</td></tr>
 <tr class="memdesc:abe4f092ad9b81323cf6d21312308c688"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ground truth Hfw. <br /></td></tr>
@@ -278,9 +285,6 @@ Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#ac8cf0e6d9ee943d1f8e2f0fb3b0878db">ground_truth_initialised</a> = false</td></tr>
 <tr class="memdesc:ac8cf0e6d9ee943d1f8e2f0fb3b0878db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool indicating ground truth localisation (Hfw) computed. <br /></td></tr>
 <tr class="separator:ac8cf0e6d9ee943d1f8e2f0fb3b0878db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbe3f8adbfb70f6ef57c5a7384f677f4"><td class="memItemLeft" align="right" valign="top"><a id="afbe3f8adbfb70f6ef57c5a7384f677f4"></a>
-<a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html">utility::math::filter::KalmanFilter</a>&lt; double, n_states, n_inputs, n_measurements &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>kf</b> {}</td></tr>
-<tr class="separator:afbe3f8adbfb70f6ef57c5a7384f677f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d929cfe1f495eeceb7d24a098ce1c6b"><td class="memItemLeft" align="right" valign="top"><a id="a3d929cfe1f495eeceb7d24a098ce1c6b"></a>
 std::vector&lt; <a class="el" href="structutility_1_1localisation_1_1Landmark.html">Landmark</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3d929cfe1f495eeceb7d24a098ce1c6b">landmarks</a> {}</td></tr>
 <tr class="memdesc:a3d929cfe1f495eeceb7d24a098ce1c6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of landmarks (field intersections rLFf) in field space. <br /></td></tr>
@@ -303,12 +307,6 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
-<tr class="memitem:a49c0988431a8a2e45d33c0746cc5984e"><td class="memItemLeft" align="right" valign="top"><a id="a49c0988431a8a2e45d33c0746cc5984e"></a>
-static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_inputs</b> = 0</td></tr>
-<tr class="separator:a49c0988431a8a2e45d33c0746cc5984e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bf6e80f8e1f173cb8e6778b3c54ecfb"><td class="memItemLeft" align="right" valign="top"><a id="a9bf6e80f8e1f173cb8e6778b3c54ecfb"></a>
-static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_measurements</b> = 3</td></tr>
-<tr class="separator:a9bf6e80f8e1f173cb8e6778b3c54ecfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0ee6e821e52a556243e6cfbc73a0cf1"><td class="memItemLeft" align="right" valign="top"><a id="ae0ee6e821e52a556243e6cfbc73a0cf1"></a>
 static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_states</b> = 3</td></tr>
 <tr class="separator:ae0ee6e821e52a556243e6cfbc73a0cf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -641,7 +639,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li>
-    <li class="footer">Generated on Sat Dec 13 2025 01:11:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jan 17 2026 01:12:41 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -64,7 +64,6 @@ var hierarchy =
     ] ],
     [ "Joystick", "classJoystick.html", null ],
     [ "JoystickEvent", "classJoystickEvent.html", null ],
-    [ "utility::math::filter::KalmanFilter< double, n_states, n_inputs, n_measurements >", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", null ],
     [ "utility::skill::KickGenerator< double >", "classutility_1_1skill_1_1KickGenerator.html", null ],
     [ "utility::math::filter::MahonyFilter< double >", "classutility_1_1math_1_1filter_1_1MahonyFilter.html", null ],
     [ "module::actuation::FootController::Config", "structmodule_1_1actuation_1_1FootController_1_1Config.html", null ],

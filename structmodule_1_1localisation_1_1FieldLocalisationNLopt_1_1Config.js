@@ -1,8 +1,6 @@
 var structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config =
 [
-    [ "A", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a6e08ec4809c93d7aefdfc919d9b54747", null ],
-    [ "B", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9c81221c49452df8bca9e66a68183e45", null ],
-    [ "C", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#acf075f6084b8af2bf556948c1ad6f654", null ],
+    [ "alpha", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a07f2838ca4be750c02ca62611654d969", null ],
     [ "change_limit", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8705595937f1a6653520bb4d06a13bd2", null ],
     [ "cost_threshold", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ab53b609b24616aeb15b5191120a51f44", null ],
     [ "field_line_distance_weight", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a83ad66418e7e75a60da171186d77d46c", null ],
@@ -20,9 +18,6 @@ var structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config =
     [ "min_field_line_points", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a39f2469ba1fdb2a7dd474f9517b19115", null ],
     [ "num_angles", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8ff55616ba6c719421e305662dc17096", null ],
     [ "out_of_field_cost", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#afa77b1afb2752b935715221cd3a7b2b9", null ],
-    [ "P0", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a96efdd7693b9224d986d2fc3b016b41d", null ],
-    [ "Q", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a619bd8150b1ea6427378191de34e66b7", null ],
-    [ "R", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af49a556ddbcb861d7c72f80da2caca4c", null ],
     [ "reset_delay", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aa5db03240271953109116f0688b0bbba", null ],
     [ "reset_on_cost", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a05f5c6ebb82b4f1d68fe2c3a4a961ac3", null ],
     [ "save_map", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae8183337d3f7078e13d0fab2b9040108", null ],

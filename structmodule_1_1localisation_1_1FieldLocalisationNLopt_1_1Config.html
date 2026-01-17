@@ -188,18 +188,9 @@ Collaboration diagram for module::localisation::FieldLocalisationNLopt::Config:<
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a6e08ec4809c93d7aefdfc919d9b54747"><td class="memItemLeft" align="right" valign="top"><a id="a6e08ec4809c93d7aefdfc919d9b54747"></a>
-Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a6e08ec4809c93d7aefdfc919d9b54747">A</a> = Eigen::Matrix3d::Identity()</td></tr>
-<tr class="memdesc:a6e08ec4809c93d7aefdfc919d9b54747"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process model. <br /></td></tr>
-<tr class="separator:a6e08ec4809c93d7aefdfc919d9b54747"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c81221c49452df8bca9e66a68183e45"><td class="memItemLeft" align="right" valign="top"><a id="a9c81221c49452df8bca9e66a68183e45"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9c81221c49452df8bca9e66a68183e45">B</a> = Eigen::MatrixXd::Zero(n_states, n_inputs)</td></tr>
-<tr class="memdesc:a9c81221c49452df8bca9e66a68183e45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input model. <br /></td></tr>
-<tr class="separator:a9c81221c49452df8bca9e66a68183e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf075f6084b8af2bf556948c1ad6f654"><td class="memItemLeft" align="right" valign="top"><a id="acf075f6084b8af2bf556948c1ad6f654"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#acf075f6084b8af2bf556948c1ad6f654">C</a> = Eigen::MatrixXd::Identity(n_measurements, n_states)</td></tr>
-<tr class="memdesc:acf075f6084b8af2bf556948c1ad6f654"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement model. <br /></td></tr>
-<tr class="separator:acf075f6084b8af2bf556948c1ad6f654"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07f2838ca4be750c02ca62611654d969"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a07f2838ca4be750c02ca62611654d969">alpha</a> = Eigen::Vector3d(0.1, 0.1, 0.1)</td></tr>
+<tr class="memdesc:a07f2838ca4be750c02ca62611654d969"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exponential filter smoothing factor for each state component (0 &lt; alpha &lt;= 1)  <a href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a07f2838ca4be750c02ca62611654d969">More...</a><br /></td></tr>
+<tr class="separator:a07f2838ca4be750c02ca62611654d969"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8705595937f1a6653520bb4d06a13bd2"><td class="memItemLeft" align="right" valign="top"><a id="a8705595937f1a6653520bb4d06a13bd2"></a>
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8705595937f1a6653520bb4d06a13bd2">change_limit</a> = Eigen::Vector3d::Zero()</td></tr>
 <tr class="memdesc:a8705595937f1a6653520bb4d06a13bd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constraint on the maximum change in state. <br /></td></tr>
@@ -218,7 +209,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <tr class="separator:a8e4ba2c9310cc9d312337c4cbf4ac8a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a885cd2105bf9ef4c3f87f336509bce7d"><td class="memItemLeft" align="right" valign="top"><a id="a885cd2105bf9ef4c3f87f336509bce7d"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a885cd2105bf9ef4c3f87f336509bce7d">ftol_rel</a> = 0.0</td></tr>
-<tr class="memdesc:a885cd2105bf9ef4c3f87f336509bce7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimization function value. <br /></td></tr>
+<tr class="memdesc:a885cd2105bf9ef4c3f87f336509bce7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimisation function value. <br /></td></tr>
 <tr class="separator:a885cd2105bf9ef4c3f87f336509bce7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8bf51b10d8a072fa5844fd1c77ede4ad"><td class="memItemLeft" align="right" valign="top"><a id="a8bf51b10d8a072fa5844fd1c77ede4ad"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8bf51b10d8a072fa5844fd1c77ede4ad">goal_post_distance_weight</a> = 0.0</td></tr>
@@ -250,7 +241,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struc
 <tr class="separator:a25ca04207717bf42c0bdcd5a9c88c8df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada3d1d390296b78dc421530278ed1313"><td class="memItemLeft" align="right" valign="top"><a id="ada3d1d390296b78dc421530278ed1313"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ada3d1d390296b78dc421530278ed1313">maxeval</a> = 0</td></tr>
-<tr class="memdesc:ada3d1d390296b78dc421530278ed1313"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of evaluations for the optimization. <br /></td></tr>
+<tr class="memdesc:ada3d1d390296b78dc421530278ed1313"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of evaluations for the optimisation. <br /></td></tr>
 <tr class="separator:ada3d1d390296b78dc421530278ed1313"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae33dccc610078b9c69675a27e5b02c51"><td class="memItemLeft" align="right" valign="top"><a id="ae33dccc610078b9c69675a27e5b02c51"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae33dccc610078b9c69675a27e5b02c51">min_field_line_intersections</a> = 0</td></tr>
@@ -268,18 +259,6 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struc
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#afa77b1afb2752b935715221cd3a7b2b9">out_of_field_cost</a> = 0.0</td></tr>
 <tr class="memdesc:afa77b1afb2752b935715221cd3a7b2b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cost for a point being outside of the field. <br /></td></tr>
 <tr class="separator:afa77b1afb2752b935715221cd3a7b2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96efdd7693b9224d986d2fc3b016b41d"><td class="memItemLeft" align="right" valign="top"><a id="a96efdd7693b9224d986d2fc3b016b41d"></a>
-Eigen::Matrix&lt; double, n_states, n_states &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a96efdd7693b9224d986d2fc3b016b41d">P0</a> = Eigen::Matrix&lt;double, n_states, n_states&gt;::Identity()</td></tr>
-<tr class="memdesc:a96efdd7693b9224d986d2fc3b016b41d"><td class="mdescLeft">&#160;</td><td class="mdescRight">initial covariance <br /></td></tr>
-<tr class="separator:a96efdd7693b9224d986d2fc3b016b41d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a619bd8150b1ea6427378191de34e66b7"><td class="memItemLeft" align="right" valign="top"><a id="a619bd8150b1ea6427378191de34e66b7"></a>
-Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a619bd8150b1ea6427378191de34e66b7">Q</a> = Eigen::Matrix3d::Identity()</td></tr>
-<tr class="memdesc:a619bd8150b1ea6427378191de34e66b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process noise covariance. <br /></td></tr>
-<tr class="separator:a619bd8150b1ea6427378191de34e66b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af49a556ddbcb861d7c72f80da2caca4c"><td class="memItemLeft" align="right" valign="top"><a id="af49a556ddbcb861d7c72f80da2caca4c"></a>
-Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af49a556ddbcb861d7c72f80da2caca4c">R</a> = Eigen::Matrix3d::Identity()</td></tr>
-<tr class="memdesc:af49a556ddbcb861d7c72f80da2caca4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement noise covariance. <br /></td></tr>
-<tr class="separator:af49a556ddbcb861d7c72f80da2caca4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5db03240271953109116f0688b0bbba"><td class="memItemLeft" align="right" valign="top"><a id="aa5db03240271953109116f0688b0bbba"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aa5db03240271953109116f0688b0bbba">reset_delay</a> = 0</td></tr>
 <tr class="memdesc:aa5db03240271953109116f0688b0bbba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset delay in seconds. <br /></td></tr>
@@ -322,12 +301,30 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <tr class="separator:a3000b4348c1c4df7135398c0925f4c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a15457bdf13245bd8f816e5a80e836a"><td class="memItemLeft" align="right" valign="top"><a id="a7a15457bdf13245bd8f816e5a80e836a"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a7a15457bdf13245bd8f816e5a80e836a">xtol_rel</a> = 0.0</td></tr>
-<tr class="memdesc:a7a15457bdf13245bd8f816e5a80e836a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimization parameters. <br /></td></tr>
+<tr class="memdesc:a7a15457bdf13245bd8f816e5a80e836a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimisation parameters. <br /></td></tr>
 <tr class="separator:a7a15457bdf13245bd8f816e5a80e836a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a07f2838ca4be750c02ca62611654d969"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07f2838ca4be750c02ca62611654d969">&#9670;&nbsp;</a></span>alpha</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3d module::localisation::FieldLocalisationNLopt::Config::alpha = Eigen::Vector3d(0.1, 0.1, 0.1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Exponential filter smoothing factor for each state component (0 &lt; alpha &lt;= 1) </p>
+<p>[x, y, theta] - Higher values = more responsive, Lower values = more smoothed </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/localisation/FieldLocalisationNLopt/src/<a class="el" href="FieldLocalisationNLopt_8hpp_source.html">FieldLocalisationNLopt.hpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -336,7 +333,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Dec 13 2025 01:11:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jan 17 2026 01:12:41 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
