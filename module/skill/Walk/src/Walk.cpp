@@ -86,6 +86,16 @@ namespace module::skill {
             cfg.walk_generator_parameters.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
             cfg.walk_generator_parameters.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
+
+            // Configure kick parameters
+            cfg.walk_generator_parameters.kick_height           = config["kick"]["kick_height"].as<double>();
+            cfg.walk_generator_parameters.kick_forward_distance = config["kick"]["kick_forward_distance"].as<double>();
+            cfg.walk_generator_parameters.kick_backward_distance =
+                config["kick"]["kick_backward_distance"].as<double>();
+            cfg.walk_generator_parameters.kick_apex_ratio   = config["kick"]["kick_apex_ratio"].as<double>();
+            cfg.walk_generator_parameters.kick_timing_ratio = config["kick"]["kick_timing_ratio"].as<double>();
+            cfg.walk_generator_parameters.kick_windup_ratio = config["kick"]["kick_windup_ratio"].as<double>();
+
             walk_generator.set_parameters(cfg.walk_generator_parameters);
             cfg.walk_generator_parameters.only_switch_when_planted =
                 config["walk"]["only_switch_when_planted"].as<bool>();
@@ -161,7 +171,7 @@ namespace module::skill {
                     if (!kick_step_in_progress) {
                         // Check if the conditions allow for the kick to start
                         // Todo maybe set offset based on the frequency
-                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
+                        bool end_of = (current_time + time_delta) >= full_period;
 
                         // If the leg we want to kick with is planted, we can kick at the end of the step
                         bool other_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::LEFT
@@ -170,12 +180,11 @@ namespace module::skill {
                         if (end_of && other_support) {
                             log<INFO>("Kick step started");
                             kick_step_in_progress = true;
-                            velocity_target       = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
                         }
                     }
                     else {
                         // Check if the step can end
-                        bool end_of = (current_time + cfg.kick_timing_offset) >= full_period;
+                        bool end_of = (current_time + time_delta) >= full_period;
                         // On the correct support foot, so can't be the beginning of the kick
                         bool correct_support = walk_task.leg == LimbID::LEFT_LEG ? phase == WalkState::Phase::RIGHT
                                                                                  : phase == WalkState::Phase::LEFT;
@@ -184,18 +193,19 @@ namespace module::skill {
                             kick_step_in_progress = false;
                             emit<Task>(std::make_unique<Done>());
                             log<INFO>("Kick step ended");
-                            return;
                         }
                         // Otherwise continue to kick
-                        velocity_target = Eigen::Vector3d(cfg.kick_velocity_x, cfg.kick_velocity_y, 0.0);
                     }
                 }
 
                 // Update the walk engine and emit the stability state, only if not falling/fallen
                 if (stability != Stability::FALLEN) {
-                    switch (walk_generator.update(time_delta, velocity_target, sensors.planted_foot_phase).value) {
+                    switch (walk_generator
+                                .update(time_delta, velocity_target, sensors.planted_foot_phase, kick_step_in_progress)
+                                .value) {
                         case WalkState::State::STARTING:
                         case WalkState::State::WALKING:
+                        case WalkState::State::KICKING:
                         case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                         case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                         case WalkState::State::UNKNOWN:
