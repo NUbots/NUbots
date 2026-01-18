@@ -59,7 +59,7 @@ namespace module::purpose {
         });
 
         on<Provide<AttackMsg>, With<Ball>, With<Field>, With<FieldDescription>>().then(
-            [this](const AttackMsg& attack, const Ball& ball, const Field& field, const FieldDescription& fd) {
+            [this](const Ball& ball, const Field& field, const FieldDescription& fd) {
                 // Always request a kick task
                 if (cfg.kick_when == "Always") {
                     emit<Task>(std::make_unique<KickTo>(), 1);
