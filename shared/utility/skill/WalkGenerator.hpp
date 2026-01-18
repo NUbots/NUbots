@@ -381,7 +381,6 @@ namespace utility::skill {
 
             // ******************************** Swing Foot Trajectory ********************************
             swing_foot_trajectory.clear();
-
             // Start waypoint: Current swing foot position
             wp.time_point       = 0.0;
             wp.position         = Hps_start.translation();
