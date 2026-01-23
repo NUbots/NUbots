@@ -31,6 +31,7 @@ import "Vector.proto";
 import "Matrix.proto";
 import "Transform.proto";
 import "google/protobuf/timestamp.proto";
+import "message/purpose/Purpose.proto";
 
 message Robot {
     /// Robot id
@@ -50,6 +51,11 @@ message Robot {
 
     /// Homogeneous transformation matrix from world to camera space
     iso3 Hcw = 6;
+
+    /// Whether this robot is a teammate or an opponent
+    bool teammate = 7;
+    /// For teammates, the Purpose information (ID, purpose, dynamic, active, team_colour)
+    purpose.Purpose purpose = 8;
 }
 
 message Robots {

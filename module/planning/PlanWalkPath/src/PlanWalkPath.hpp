@@ -33,6 +33,8 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
+
 namespace module::planning {
 
     class PlanWalkPath : public ::extension::behaviour::BehaviourReactor {
@@ -40,9 +42,9 @@ namespace module::planning {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Maximum walk command velocity x for walking
-            double max_translational_velocity_x = 0.0;
+            double max_x_velocity = 0.0;
             /// @brief Maximum walk command velocity y for walking
-            double max_translational_velocity_y = 0.0;
+            double max_y_velocity = 0.0;
             /// @brief Maximum angular velocity command for walking
             double max_angular_velocity = 0.0;
             /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
@@ -60,19 +62,6 @@ namespace module::planning {
             // Proportional gain for strafing to target point
             double strafe_gain = 0.0;
 
-            /// @brief Maximum angle to target for strafing backwards
-            double max_strafe_angle = 0.0;
-            /// @brief Buffer to prevent oscillation between forwards and backwards movement
-            double backward_buffer = 0.0;
-            /// @brief Maximum angle that we are considered to be aligned with the final heading
-            double max_aligned_angle = 0.0;
-            /// @brief Starting velocity when walking backwards
-            double starting_velocity = 0.0;
-            /// @brief Multiplier for acceleration/deceleration when walking backwards
-            double acceleration_multiplier = 0.0;
-            /// @brief Backwards walk vector
-            Eigen::Vector2d backwards_vector = Eigen::Vector2d::Zero();
-
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
             /// @brief Rotate on spot walk command forward velocity
@@ -89,31 +78,36 @@ namespace module::planning {
 
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
+
+            /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
+            /// @note  Set to [0, 0, 0] to functionally disable smoothing
+            Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);
+            /// @brief Exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d alpha = Eigen::Vector3d(1, 1, 1);
+            /// @brief Complementary exponential smoothing factor for the velocity command [x, y, theta]
+            Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
+
+            /// @brief Starting velocity for the walk command
+            Eigen::Vector3d starting_velocity = Eigen::Vector3d(0, 0, 0);
+
         } cfg;
+
+        /// @brief Previous walk command
+        Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
+
+        /// @brief Update frequency of the walk command smoothing
+        static constexpr int UPDATE_FREQUENCY = 10;
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
 
-        /// @brief Boolean value to determine if the robot is walking backwards
-        bool is_walking_backwards = false;
+        /// @brief Current stability of the robot
+        message::behaviour::state::Stability stability{};
 
         /// @brief Constrain a velocity vector to ensure it is within the limits
         /// @param v velocity vector to constrain
         /// @return Constrained velocity vector
         Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v);
-
-        /// @brief Head towards the target point without rotation
-        /// @return desired velocity magnitude
-        double strafe_to_target(const double error);
-
-        /// @brief Walk straight backwards when the robot is next to the target
-        /// @param desired_direction desired direction to walk- true for backwards, false for forwards
-        /// @return adjusted target direction
-        Eigen::Vector2d walk_backwards(bool desired_direction);
-
-        /// @brief Accelerate and rotate the robot towards the target point
-        /// @return desired velocity magnitude
-        double accelerate_to_target(double desired_heading);
 
         /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
         /// @param all_obstacles vector of all obstacles in the world
@@ -121,14 +115,6 @@ namespace module::planning {
         /// @return vector of closest obstacle in the path to avoid and its neighbours
         const std::vector<Eigen::Vector2d> get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                          const Eigen::Vector2d& rDRr);
-
-        /// @brief Adjust the target direction to avoid obstacles
-        /// @param robots vector of all robots in the world
-        /// @param rDRr vector from robot to final target
-        /// @param obstacles vector of obstacles in the path to avoid
-        /// @return adjusted target direction
-        Eigen::Vector2d adjust_target_direction_for_obstacles(Eigen::Vector2d rDRr,
-                                                              const std::vector<Eigen::Vector2d>& obstacles);
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.

@@ -191,8 +191,9 @@ namespace module::support::logging {
             // Get the current reaction statistics to get the time the log message was created
             auto log_stats = NUClear::threading::ReactionTask::get_current_task()->statistics;
 
-            auto msg           = std::make_unique<MessageLog>();
-            msg->timestamp     = log_stats->created.nuclear_time;
+            auto msg = std::make_unique<MessageLog>();
+            // Use default timestamp if log_stats is not available
+            msg->timestamp     = log_stats ? log_stats->created.nuclear_time : msg->timestamp;
             msg->level         = to_message(log_msg.level);
             msg->display_level = to_message(log_msg.display_level);
             msg->message       = log_msg.message;

@@ -189,7 +189,7 @@ namespace utility::math::transform {
     inline Eigen::Isometry2d lookAt(const Eigen::Vector2d& from, const Eigen::Vector2d& to) {
         Eigen::Isometry2d result;
         result.translation() = from;
-        result.linear()      = Eigen::Rotation2Dd(utility::math::angle::vectorToBearing(to - from)).toRotationMatrix();
+        result.linear() = Eigen::Rotation2Dd(utility::math::angle::vector_to_bearing(to - from)).toRotationMatrix();
         return result;
     }
 }  // namespace utility::math::transform

@@ -15,6 +15,7 @@ export const ThreeFiber = React.forwardRef<HTMLCanvasElement, Props>(({ children
       frameloop="demand"
       linear
       flat
+      shadows
       gl={{ antialias: true }}
       style={{ background: "black" }}
       {...props}

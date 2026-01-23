@@ -1,9 +1,6 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# How long to wait until the ball is lost and we should walk in a search pattern
-ball_search_timeout: 2
-
 # Y - Offset for ball position such that ball is approached with foot behind ball
 ball_y_offset: 0.1
 
@@ -11,7 +8,7 @@ ball_y_offset: 0.1
 goal_target_offset: 0.5
 
 # Distance from ball to walk to if approaching from a "bad" position
-ball_approach_distance: 0.3
+ball_approach_distance: 0.4
 
 # Distance from ball to walk to if approaching from a "good" position
 ball_kick_distance: 0.0
@@ -20,3 +17,10 @@ ball_kick_distance: 0.0
 max_angle_error: 45 * pi / 180
 
 avoid_ball_offset: [0.15, 0.5, 0]
+
+# Offset to prevent walking into the opponent when tackling
+avoid_opponent_offset: 0.15
+# Offset to approach the side of the ball when tackling
+approach_offset: 0.6
+# While angle error is larger than this, apply the offset to position next to the ball when tackling
+tackle_angle_offset: 0.2

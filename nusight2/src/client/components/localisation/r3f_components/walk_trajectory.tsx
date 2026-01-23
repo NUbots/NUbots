@@ -33,22 +33,22 @@ export const TrajectoryLine: React.FC<TrajectoryLineProps> = ({ poses, color, li
 };
 
 interface WalkTrajectoryProps {
-  torso_trajectory: Matrix4[];
-  swing_foot_trajectory: Matrix4[];
+  torsoTrajectory: Matrix4[];
+  swingFootTrajectory: Matrix4[];
   color?: string;
   lineWidth?: number;
 }
 
 export const WalkTrajectory: React.FC<WalkTrajectoryProps> = ({
-  torso_trajectory,
-  swing_foot_trajectory,
+  torsoTrajectory,
+  swingFootTrajectory,
   color = "#ffa500",
   lineWidth = 5,
 }) => {
   return (
     <group>
-      <TrajectoryLine poses={torso_trajectory} color={color} lineWidth={lineWidth} />
-      <TrajectoryLine poses={swing_foot_trajectory} color={color} lineWidth={lineWidth} />
+      <TrajectoryLine poses={torsoTrajectory} color={color} lineWidth={lineWidth} />
+      <TrajectoryLine poses={swingFootTrajectory} color={color} lineWidth={lineWidth} />
     </group>
   );
 };

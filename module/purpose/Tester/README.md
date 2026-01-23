@@ -20,7 +20,6 @@ If enabled in the config the module emits the following.
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
 - `message::strategy::WalkToBall` a Task requesting to walk to a known ball
-- `message::strategy::AlignBallToGoal` a Task requesting to align the robot to face the goal with the ball infront of it
 - `message::planning::KickToGoal` a Task requesting to kick the ball towards the goal
 - `message::planning::KickTo` a Task requesting to kick the ball if close
 - `message::strategy::StandStill` a Task requesting the robot to stand still

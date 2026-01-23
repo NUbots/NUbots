@@ -31,6 +31,7 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <unordered_map>
 
 #include "Joystick.hpp"
 
@@ -76,6 +77,10 @@ namespace module::purpose {
         struct Config {
             double maximum_forward_velocity    = 0;
             double maximum_rotational_velocity = 0;
+            /// @brief Maximum allowed acceleration per second (in m/s²)
+            double max_acceleration = 0.5;
+            /// @brief Maps button names to script filenames
+            std::unordered_map<std::string, std::string> button_scripts;
         } cfg;
 
         /// @brief Controls interactions with the PS3 controller
@@ -88,13 +93,22 @@ namespace module::purpose {
         bool moving = false;
 
         /// @brief Stores whether the robot will change its head direction or not
-        bool head_locked = false;
+        bool head_locked = true;
+
+        /// @brief Stores whether scripts are enabled or not
+        bool scripts_enabled = false;
 
         /// @brief stores the head pitch value
         double head_pitch = 0.0;
 
         /// @brief stores the head yaw value
         double head_yaw = 0.0;
+
+        /// @brief Stores the previous walk command for acceleration limiting
+        Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
+
+        /// @brief The frequency at which the PS3Walk commands are updated
+        static constexpr size_t UPDATE_FREQUENCY = 20;
     };
 }  // namespace module::purpose
 

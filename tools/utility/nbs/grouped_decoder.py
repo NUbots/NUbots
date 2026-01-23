@@ -28,7 +28,7 @@
 
 import numpy as np
 import xxhash
-from numpy.lib.npyio import load
+from numpy import load
 
 from .load_nbs import load_nbs
 from .nbs_packet import MappedNBSPacket

@@ -406,18 +406,6 @@
       position: 0.0445408002
       gain: 6.63999987
       torque: 100
-    - id: R_HIP_PITCH
-      position: -2.70508528
-      gain: 6.63999987
-      torque: 100
-    - id: R_KNEE
-      position: 1.74072158
-      gain: 6.63999987
-      torque: 100
-    - id: L_KNEE
-      position: 1.74532926
-      gain: 6.63999987
-      torque: 100
     - id: R_ANKLE_PITCH
       position: 0.786375523
       gain: 6.63999987
@@ -434,14 +422,26 @@
       position: -0.0614355877
       gain: 6.63999987
       torque: 100
-    - id: L_HIP_PITCH
-      position: -2.66634774
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: -2.73600006
       gain: 6.63999987
       torque: 0
+    - id: L_KNEE
+      position: 1.6027
+      gain: 6.63999987
+      torque: 100
+    - id: R_KNEE
+      position: 1.68753481
+      gain: 6.63999987
+      torque: 100
+    - id: L_HIP_PITCH
+      position: -2.54036164
+      gain: 6.63999987
+      torque: 100
+    - id: R_HIP_PITCH
+      position: -2.56135201
+      gain: 6.63999987
+      torque: 100
 - duration: 500
   targets:
     - id: L_ELBOW
@@ -480,22 +480,6 @@
       position: 0.190450326
       gain: 6.63999987
       torque: 100
-    - id: R_HIP_PITCH
-      position: -2.79723859
-      gain: 6.63999987
-      torque: 100
-    - id: L_HIP_PITCH
-      position: -2.78153944
-      gain: 6.63999987
-      torque: 100
-    - id: R_KNEE
-      position: 2.68836546
-      gain: 6.63999987
-      torque: 100
-    - id: L_KNEE
-      position: 2.68375778
-      gain: 6.63999987
-      torque: 100
     - id: R_ANKLE_PITCH
       position: 0.130550623
       gain: 6.63999987
@@ -514,6 +498,22 @@
       torque: 100
     - id: R_SHOULDER_PITCH
       position: 2.65611172
+      gain: 6.63999987
+      torque: 100
+    - id: L_KNEE
+      position: 2.44052768
+      gain: 6.63999987
+      torque: 100
+    - id: R_KNEE
+      position: 2.50501204
+      gain: 6.63999987
+      torque: 100
+    - id: L_HIP_PITCH
+      position: -2.55572033
+      gain: 6.63999987
+      torque: 100
+    - id: R_HIP_PITCH
+      position: -2.55111289
       gain: 6.63999987
       torque: 100
 - duration: 500
@@ -558,14 +558,6 @@
       position: 2.73751402
       gain: 6.63999987
       torque: 100
-    - id: L_HIP_PITCH
-      position: -2.79229069
-      gain: 6.63999987
-      torque: 100
-    - id: R_HIP_PITCH
-      position: -2.80338216
-      gain: 6.63999987
-      torque: 100
     - id: L_SHOULDER_ROLL
       position: 0.0497069731
       gain: 6.63999987
@@ -588,6 +580,14 @@
       torque: 100
     - id: L_ELBOW
       position: -0.408546656
+      gain: 6.63999987
+      torque: 100
+    - id: L_HIP_PITCH
+      position: -2.55264878
+      gain: 6.63999987
+      torque: 100
+    - id: R_HIP_PITCH
+      position: -2.55725622
       gain: 6.63999987
       torque: 100
 - duration: 100
@@ -632,14 +632,6 @@
       position: 2.73751402
       gain: 6.63999987
       torque: 100
-    - id: L_HIP_PITCH
-      position: -2.79229069
-      gain: 6.63999987
-      torque: 100
-    - id: R_HIP_PITCH
-      position: -2.80338216
-      gain: 6.63999987
-      torque: 100
     - id: L_SHOULDER_PITCH
       position: 1.92042065
       gain: 6.63999987
@@ -662,6 +654,14 @@
       torque: 100
     - id: L_ELBOW
       position: -0.184306771
+      gain: 6.63999987
+      torque: 100
+    - id: R_HIP_PITCH
+      position: -2.53153038
+      gain: 6.63999987
+      torque: 100
+    - id: L_HIP_PITCH
+      position: -2.54650521
       gain: 6.63999987
       torque: 100
 - duration: 100
@@ -702,14 +702,6 @@
       position: 2.73751402
       gain: 6.63999987
       torque: 100
-    - id: L_HIP_PITCH
-      position: -2.79229069
-      gain: 6.63999987
-      torque: 100
-    - id: R_HIP_PITCH
-      position: -2.80338216
-      gain: 6.63999987
-      torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.6961807
       gain: 6.63999987
@@ -736,6 +728,14 @@
       torque: 100
     - id: R_ELBOW
       position: -1.05208445
+      gain: 6.63999987
+      torque: 100
+    - id: R_HIP_PITCH
+      position: -2.54650521
+      gain: 6.63999987
+      torque: 100
+    - id: L_HIP_PITCH
+      position: -2.549577
       gain: 6.63999987
       torque: 100
 - duration: 600

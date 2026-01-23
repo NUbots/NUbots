@@ -41,7 +41,6 @@
 
 #include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
-#include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -51,6 +50,7 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
+    using message::vision::FieldLines;
     using message::vision::Goals;
 
     using utility::localisation::Landmark;
@@ -175,9 +175,7 @@ namespace module::localisation {
     class FieldLocalisationNLopt : public NUClear::Reactor {
     private:
         // Define the model dimensions
-        static constexpr size_t n_states       = 3;
-        static constexpr size_t n_inputs       = 0;
-        static constexpr size_t n_measurements = 3;
+        static constexpr size_t n_states = 3;
 
         /// @brief Stores configuration values
         struct Config {
@@ -205,6 +203,9 @@ namespace module::localisation {
             /// @brief Bool to enable/disable using ground truth for localisation
             bool use_ground_truth_localisation;
 
+            /// @brief Bool to enable the use of Hungarian algorithm for landmark association
+            bool use_hungarian = false;
+
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
 
@@ -223,46 +224,52 @@ namespace module::localisation {
             /// @brief Constraint on the maximum change in state
             Eigen::Vector3d change_limit = Eigen::Vector3d::Zero();
 
-            /// @brief Relative tolerance on the optimization parameters
+            /// @brief Relative tolerance on the optimisation parameters
             double xtol_rel = 0.0;
 
-            /// @brief Relative tolerance on the optimization function value
+            /// @brief Relative tolerance on the optimisation function value
             double ftol_rel = 0.0;
 
-            /// @brief Maximum number of evaluations for the optimization
+            /// @brief Maximum number of evaluations for the optimisation
             size_t maxeval = 0;
-
-            /// @brief Process model
-            Eigen::Matrix3d A = Eigen::Matrix3d::Identity();
-
-            /// @brief Input model
-            Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n_states, n_inputs);
-
-            /// @brief Measurement model
-            Eigen::MatrixXd C = Eigen::MatrixXd::Identity(n_measurements, n_states);
-
-            /// @brief Process noise covariance
-            Eigen::Matrix3d Q = Eigen::Matrix3d::Identity();
-
-            /// @brief Measurement noise covariance
-            Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
-
-            /// @brief initial covariance
-            Eigen::Matrix<double, n_states, n_states> P0 = Eigen::Matrix<double, n_states, n_states>::Identity();
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
 
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
+
+            /// @brief Cost for a point being outside of the field
+            double out_of_field_cost = 0.0;
+
+            /// @brief When this is enabled, the field localisation will reset if the cost is too high
+            bool reset_on_cost = false;
+            /// @brief Cost threshold for resetting the filter
+            double cost_threshold = 0.0;
+            /// @brief Reset delay in seconds
+            int reset_delay = 0;
+            /// @brief Maximum number of times the cost can be over the threshold before resetting
+            int max_over_cost = 0;
+            /// @brief Step size for the grid search during uncertainty reset
+            double step_size = 0.0;
+            /// @brief The window size for the local search during uncertainty reset
+            double window_size = 0.0;
+            /// @brief Number of yaw angles to try during uncertainty reset
+            int num_angles = 0;
+
+            /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
+            /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
+            Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
         } cfg;
-
-
-        // Kalman filter
-        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
+
+        /// @brief Filtered state vector using exponential filter
+        Eigen::Vector3d filtered_state = Eigen::Vector3d::Zero();
+
+        /// @brief Bool indicating if this is the first measurement
+        bool first_measurement = true;
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};
@@ -280,9 +287,27 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
+        /// @brief Bool indicating ground truth localisation (Hfw) computed
+        bool ground_truth_initialised = false;
+
+        /// @brief Ground truth Hfw
+        Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
         explicit FieldLocalisationNLopt(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief The main field localisation loop
+        ReactionHandle main_loop;
+
+        /// @brief The last time the field localisation was reset
+        NUClear::clock::time_point last_reset = NUClear::clock::now();
+
+        /// @brief The last certain state of the robot (used for uncertainty reset)
+        Eigen::Vector3d last_certain_state = Eigen::Vector3d::Zero();
+
+        /// @brief Number of times the cost has been over the threshold
+        int num_over_cost = 0;
+
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
@@ -294,9 +319,8 @@ namespace module::localisation {
         /**
          * @brief Find error between computed Hfw and ground truth if available
          * @param Hfw Computed Hfw to be compared against ground truth
-         * @param raw_sensors The raw sensor data
          */
-        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
+        void debug_field_localisation(Eigen::Isometry3d Hfw);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
@@ -320,24 +344,55 @@ namespace module::localisation {
             const std::shared_ptr<const Goals>& goals);
 
         /**
-         * @brief Setup field line distance map
-         * @param fd The field dimensions
-         */
-        void setup_fieldline_distance_map(const FieldDescription& fd);
-
-        /**
-         * @brief Setup field landmarks
-         * @param fd The field dimensions
-         */
-        void setup_field_landmarks(const FieldDescription& fd);
-
-        /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
          * @return Pairs of landmarks and corresponding field intersections (known landmark, intersection
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief Determines a new state by running a grid search and checking the cost of each hypothesis.
+         * First, a local search is performed around the last certain state. If this does not find a low cost
+         * hypothesis, a global search is performed on the half of the field that the robot is currently on, to reduce
+         * computation and avoid the mirror field problem.
+         *
+         * @param fd The field description containing the field dimensions, in particular the field length and width.
+         * @param field_lines Field lines, used to find the cost of hypotheses.
+         * @param field_intersections Field intersections, used to find the cost of hypotheses.
+         * @param goals Goals, used to find the cost of hypotheses.
+         * @param Hrw The homogenous transformation from world {w} to robot {r} space.
+         */
+        void uncertainty_reset(const FieldDescription& fd,
+                               const FieldLines& field_lines,
+                               const std::shared_ptr<const FieldIntersections>& field_intersections,
+                               const std::shared_ptr<const Goals>& goals,
+                               const Eigen::Isometry3d& Hrw);
+
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using the Hungarian algorithm
+         *
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
+         * and landmarks
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> hungarian_association(
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief Perform data association between intersection observations and landmarks using nearest neighbour
+         *
+         * @param field_intersections The field intersections
+         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
+         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
+         * and landmarks
+         */
+        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
     };

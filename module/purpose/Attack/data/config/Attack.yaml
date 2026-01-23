@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# When to kick the ball - "Never", "Always", "AttackingThird"
+kick_when: "AttackingThird"

@@ -8,6 +8,8 @@ nuclear_role(
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
+  network::NUClearNet
+  network::NetworkForwarder
   network::PlotJuggler
   # Sensors
   input::SensorFilter
@@ -19,7 +21,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::SplineKick
+  skill::KickWalk
   skill::GetUp
   skill::Look
   # Planners

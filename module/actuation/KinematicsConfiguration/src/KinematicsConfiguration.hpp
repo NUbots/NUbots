@@ -30,7 +30,6 @@
 
 #include <Eigen/Core>
 #include <nuclear>
-#include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.hpp"
 
@@ -45,13 +44,36 @@ namespace module::actuation {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        /// @brief Figures the kinematics model values by calling subfunctions for each part of the robot
+        /// @param model The KinematicsModel message to populate
+        /// @param nugus_model The configuration of the NUgus model
         static void configure(message::actuation::KinematicsModel& model,
-                              const ::extension::Configuration& objNugusModel);
-        static void configureLeg(message::actuation::KinematicsModel& model, const YAML::Node& objLeg);
-        static void configureHead(message::actuation::KinematicsModel& model, const YAML::Node& objHead);
-        static void configureArm(message::actuation::KinematicsModel& model, const YAML::Node& objArm);
-        static void configureMassModel(message::actuation::KinematicsModel& model, const YAML::Node& objMassModel);
-        static void configureTensorModel(message::actuation::KinematicsModel& model, const YAML::Node& objTensorModel);
+                              const ::extension::Configuration& nugus_model);
+
+        /// @brief Figures the leg kinematics model values
+        /// @param model The KinematicsModel message to populate
+        /// @param leg The configuration of the leg
+        static void configure_leg(message::actuation::KinematicsModel& model, const YAML::Node& leg);
+
+        /// @brief Figures the head kinematics model values
+        /// @param model The KinematicsModel message to populate
+        /// @param head The configuration of the head
+        static void configure_head(message::actuation::KinematicsModel& model, const YAML::Node& head);
+
+        /// @brief Figures the arm kinematics model values
+        /// @param model The KinematicsModel message to populate
+        /// @param arm The configuration of the arm
+        static void configure_arm(message::actuation::KinematicsModel& model, const YAML::Node& arm);
+
+        /// @brief Figures the mass model values
+        /// @param model The KinematicsModel message to populate
+        /// @param mass_model The configuration of the mass model
+        static void configure_mass_model(message::actuation::KinematicsModel& model, const YAML::Node& mass_model);
+
+        /// @brief Figures the tensor model values
+        /// @param model The KinematicsModel message to populate
+        /// @param tensor_model The configuration of the tensor model
+        static void configure_tensor_model(message::actuation::KinematicsModel& model, const YAML::Node& tensor_model);
     };
 }  // namespace module::actuation
 

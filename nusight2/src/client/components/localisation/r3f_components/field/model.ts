@@ -7,12 +7,16 @@ export class FieldModel {
   @observable fieldColor: string;
   @observable lineColor: string;
   @observable fieldType: string;
+  @observable blueGoalColor: string;
+  @observable yellowGoalColor: string;
 
-  constructor({ dimensions, fieldColor, lineColor, fieldType }: FieldModelOpts) {
+  constructor({ dimensions, fieldColor, lineColor, fieldType, blueGoalColor, yellowGoalColor }: FieldModelOpts) {
     this.dimensions = dimensions;
     this.fieldColor = fieldColor;
     this.lineColor = lineColor;
     this.fieldType = fieldType;
+    this.blueGoalColor = blueGoalColor;
+    this.yellowGoalColor = yellowGoalColor;
   }
 
   static of() {
@@ -21,6 +25,8 @@ export class FieldModel {
       fieldColor: "#00cc00",
       lineColor: "#ffffff",
       fieldType: "robocup",
+      blueGoalColor: "#0000ff",
+      yellowGoalColor: "#ffff00",
     });
   }
 }
@@ -30,4 +36,6 @@ interface FieldModelOpts {
   fieldColor: string;
   lineColor: string;
   fieldType: string;
+  blueGoalColor: string;
+  yellowGoalColor: string;
 }

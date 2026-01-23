@@ -51,7 +51,7 @@ These dependencies are:
 - Python3 with the following packages
   - argparse
   - Pillow
-  - stringcase
+  - casefy
 - Optional dependencies:
   - [pybind11](https://github.com/pybind/pybind11) for Python module support
   - [Google Protobuf 3](https://developers.google.com/protocol-buffers/) (both c++ and python libraries) for Neutron messaging
@@ -241,7 +241,7 @@ An `nbs` file has the following frames repeated continuously.
 
 | Name      | Type    | Description                                                                       |
 | --------- | ------- | --------------------------------------------------------------------------------- |
-| header    | char[3] | the header sequence 0xE2, 0x98, 0xA2 (the radioactive symbol ☢ in utf-8)          |
+| header    | char[3] | the header sequence 0xE2, 0x98, 0xA2 (the radioactive symbol ☢ in utf-8)         |
 | size      | uint32  | the size of the frame after this byte in bytes                                    |
 | timestamp | uint64  | the timestamp of this frame in microseconds. Does not have to be a utc timestamp. |
 | hash      | uint64  | a 64 bit hash that identifies the type of the message                             |
