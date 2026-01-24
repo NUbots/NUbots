@@ -592,6 +592,9 @@ var hierarchy =
     [ "utility::vision::Mosaic", "classutility_1_1vision_1_1Mosaic.html", null ],
     [ "utility::vision::Pixel", "structutility_1_1vision_1_1Pixel.html", null ],
     [ "utility::skill::WalkGenerator< double >", "classutility_1_1skill_1_1WalkGenerator.html", null ],
+    [ "WalkTask", null, [
+      [ "module::skill::CurrentWalkTask", "structmodule_1_1skill_1_1CurrentWalkTask.html", null ]
+    ] ],
     [ "YAML::convert< Eigen::Matrix< double, Rows, Cols > >", "structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4.html", null ],
     [ "YAML::convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", null ],
     [ "YAML::convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", null ],

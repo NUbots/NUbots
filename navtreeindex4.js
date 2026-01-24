@@ -1,5 +1,8 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a70d30843b39895654a1c4246b7865324":[3,0,3,8,1,6,14],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a7e620f883e4f08dd9a3c1a6a1c0f84eb":[3,0,3,8,1,6,29],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a80be5675965277ccb3d6a20811fc3487":[3,0,3,8,1,6,19],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a862aebba2af2a4c3964f7c5dfc60fc1f":[3,0,3,8,1,6,16],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8672cf92d6e9ee88186ac42699bf3a46":[3,0,3,8,1,6,23],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8dd9766a7dbc52d06a062a07692dc90e":[3,0,3,8,1,6,18],
@@ -246,8 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1purpose_1_1ScriptTuner.html#a1bebb7648a33300bab7ac42397f5e444":[3,0,3,9,13,28],
 "classmodule_1_1purpose_1_1ScriptTuner.html#a29227d70415becb4fb99d039b2a0f224":[3,0,3,9,13,35],
 "classmodule_1_1purpose_1_1ScriptTuner.html#a30c73d39c7867eb4a5daac3978ef5c32":[3,0,3,9,13,30],
-"classmodule_1_1purpose_1_1ScriptTuner.html#a3112afbb9fef917cffe73a2a07e0f891":[3,0,3,9,13,4],
-"classmodule_1_1purpose_1_1ScriptTuner.html#a31600ca9b917d01fd56a34e0cdae152f":[3,0,3,9,13,31],
-"classmodule_1_1purpose_1_1ScriptTuner.html#a34a806909e93abdce689276139956126":[3,0,3,9,13,7],
-"classmodule_1_1purpose_1_1ScriptTuner.html#a535cb85088f3e46e64e098ff7bd21165":[3,0,3,9,13,3]
+"classmodule_1_1purpose_1_1ScriptTuner.html#a3112afbb9fef917cffe73a2a07e0f891":[3,0,3,9,13,4]
 };

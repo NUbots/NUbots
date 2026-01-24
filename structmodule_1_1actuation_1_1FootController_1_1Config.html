@@ -183,10 +183,46 @@ Public Attributes</h2></td></tr>
 std::map&lt; std::string, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a7f93660d9b76865b7a39544e38707847">desired_gains</a> {}</td></tr>
 <tr class="memdesc:a7f93660d9b76865b7a39544e38707847"><td class="mdescLeft">&#160;</td><td class="mdescRight">Desired gains for each servo. <br /></td></tr>
 <tr class="separator:a7f93660d9b76865b7a39544e38707847"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6c24e2c3d73a91e23e6324c70b531ba"><td class="memItemLeft" align="right" valign="top"><a id="af6c24e2c3d73a91e23e6324c70b531ba"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#af6c24e2c3d73a91e23e6324c70b531ba">max_i_error</a> = 0.0</td></tr>
+<tr class="memdesc:af6c24e2c3d73a91e23e6324c70b531ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Antiwindup max I error. <br /></td></tr>
+<tr class="separator:af6c24e2c3d73a91e23e6324c70b531ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9eedb6dacc1dbfa1e3960e925f0f4da"><td class="memItemLeft" align="right" valign="top"><a id="ae9eedb6dacc1dbfa1e3960e925f0f4da"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#ae9eedb6dacc1dbfa1e3960e925f0f4da">max_pitch_error</a> = 0.0</td></tr>
+<tr class="memdesc:ae9eedb6dacc1dbfa1e3960e925f0f4da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowed pitch error before disabling correction. <br /></td></tr>
+<tr class="separator:ae9eedb6dacc1dbfa1e3960e925f0f4da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46b29cdde23abc6bde37f0f77abac6b4"><td class="memItemLeft" align="right" valign="top"><a id="a46b29cdde23abc6bde37f0f77abac6b4"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a46b29cdde23abc6bde37f0f77abac6b4">max_roll_error</a> = 0.0</td></tr>
+<tr class="memdesc:a46b29cdde23abc6bde37f0f77abac6b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowed roll error before disabling correction. <br /></td></tr>
+<tr class="separator:a46b29cdde23abc6bde37f0f77abac6b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7ffbc157832192edf8ac52b55d965a1"><td class="memItemLeft" align="right" valign="top"><a id="ae7ffbc157832192edf8ac52b55d965a1"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#ae7ffbc157832192edf8ac52b55d965a1">mode</a> = &quot;IK&quot;</td></tr>
 <tr class="memdesc:ae7ffbc157832192edf8ac52b55d965a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Foot controller mode. <br /></td></tr>
 <tr class="separator:ae7ffbc157832192edf8ac52b55d965a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a246fffca7e5e69fba80da1775e7b2f"><td class="memItemLeft" align="right" valign="top"><a id="a1a246fffca7e5e69fba80da1775e7b2f"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a1a246fffca7e5e69fba80da1775e7b2f">pitch_d_gain</a> = 0.0</td></tr>
+<tr class="memdesc:a1a246fffca7e5e69fba80da1775e7b2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative gain for torso orientation pitch correction. <br /></td></tr>
+<tr class="separator:a1a246fffca7e5e69fba80da1775e7b2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab225d25e8072fe7ee39aff94a490be4f"><td class="memItemLeft" align="right" valign="top"><a id="ab225d25e8072fe7ee39aff94a490be4f"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#ab225d25e8072fe7ee39aff94a490be4f">pitch_i_gain</a> = 0.0</td></tr>
+<tr class="memdesc:ab225d25e8072fe7ee39aff94a490be4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain for torso orientation pitch correction. <br /></td></tr>
+<tr class="separator:ab225d25e8072fe7ee39aff94a490be4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a099c6c5096e2dc9f7d058f998b46eb2d"><td class="memItemLeft" align="right" valign="top"><a id="a099c6c5096e2dc9f7d058f998b46eb2d"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a099c6c5096e2dc9f7d058f998b46eb2d">pitch_p_gain</a> = 0.0</td></tr>
+<tr class="memdesc:a099c6c5096e2dc9f7d058f998b46eb2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Proportional gain for torso orientation pitch correction. <br /></td></tr>
+<tr class="separator:a099c6c5096e2dc9f7d058f998b46eb2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c1fd6fd3aae502a0fdbfae12c553eff"><td class="memItemLeft" align="right" valign="top"><a id="a4c1fd6fd3aae502a0fdbfae12c553eff"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a4c1fd6fd3aae502a0fdbfae12c553eff">roll_d_gain</a> = 0.0</td></tr>
+<tr class="memdesc:a4c1fd6fd3aae502a0fdbfae12c553eff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative gain for torso orientation roll correction. <br /></td></tr>
+<tr class="separator:a4c1fd6fd3aae502a0fdbfae12c553eff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a929945bc2f2fb8a87010fac0e85b2a77"><td class="memItemLeft" align="right" valign="top"><a id="a929945bc2f2fb8a87010fac0e85b2a77"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a929945bc2f2fb8a87010fac0e85b2a77">roll_i_gain</a> = 0.0</td></tr>
+<tr class="memdesc:a929945bc2f2fb8a87010fac0e85b2a77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain for torso orientation roll correction. <br /></td></tr>
+<tr class="separator:a929945bc2f2fb8a87010fac0e85b2a77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8401cabffd0b99ccf8142b09b51aef3"><td class="memItemLeft" align="right" valign="top"><a id="ac8401cabffd0b99ccf8142b09b51aef3"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#ac8401cabffd0b99ccf8142b09b51aef3">roll_p_gain</a> = 0.0</td></tr>
+<tr class="memdesc:ac8401cabffd0b99ccf8142b09b51aef3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Proportional gain for torso orientation roll correction. <br /></td></tr>
+<tr class="separator:ac8401cabffd0b99ccf8142b09b51aef3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07556dda5f5cb0cd8c23c2b4c9714b61"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>, ServoState &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a07556dda5f5cb0cd8c23c2b4c9714b61">servo_states</a></td></tr>
 <tr class="memdesc:a07556dda5f5cb0cd8c23c2b4c9714b61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map between ServoID and ServoState.  <a href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a07556dda5f5cb0cd8c23c2b4c9714b61">More...</a><br /></td></tr>
 <tr class="separator:a07556dda5f5cb0cd8c23c2b4c9714b61"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -241,7 +277,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>actuation</b></li><li class="navelem"><a class="el" href="classmodule_1_1actuation_1_1FootController.html">FootController</a></li><li class="navelem"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Jan 24 2026 01:35:21 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jan 24 2026 04:02:10 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

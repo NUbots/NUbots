@@ -241,6 +241,7 @@ var annotated_dup =
       ] ],
       [ "skill", null, [
         [ "Animator", "classmodule_1_1skill_1_1Animator.html", "classmodule_1_1skill_1_1Animator" ],
+        [ "CurrentWalkTask", "structmodule_1_1skill_1_1CurrentWalkTask.html", null ],
         [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],

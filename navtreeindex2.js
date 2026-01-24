@@ -33,6 +33,9 @@ var NAVTREEINDEX2 =
 "classextension_1_1behaviour_1_1Lock.html#a8bdcfe043e0dcfc045605b36e0b04673":[3,0,1,0,7,7],
 "classmodule_1_1actuation_1_1FootController.html":[3,0,3,0,0],
 "classmodule_1_1actuation_1_1FootController.html#a140fee33039e44546f260968fd9d2269":[3,0,3,0,0,2],
+"classmodule_1_1actuation_1_1FootController.html#a1c7f0454402777bff157ef8d88286fe5":[3,0,3,0,0,6],
+"classmodule_1_1actuation_1_1FootController.html#a4fd581a723510ac3932ea193ab61c0ef":[3,0,3,0,0,4],
+"classmodule_1_1actuation_1_1FootController.html#ac3248c1c3ea998f16d65f1bf67edc82c":[3,0,3,0,0,5],
 "classmodule_1_1actuation_1_1FootController.html#ad0346a7f6c09509f58b61be629230bab":[3,0,3,0,0,3],
 "classmodule_1_1actuation_1_1FootController.html#af234ad3a8333c0e6ba6696bfc0454a7a":[3,0,3,0,0,1],
 "classmodule_1_1actuation_1_1Kinematics.html":[3,0,3,0,1],
@@ -246,8 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1BallModel.html#a7b0ee2decd288abef7ed5d9da5af9f02":[3,0,3,3,2,7],
 "classmodule_1_1localisation_1_1BallModel.html#a9d1e2a3577c4936762aafde10aaa9870":[3,0,3,3,2,2],
 "classmodule_1_1localisation_1_1BallModel.html#abcde4d2070a49eaac2748d33689f9ffd":[3,0,3,3,2,1],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html":[3,0,3,3,3],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145":[3,0,3,3,3,24],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1a6706c7b7ada33db9fe0c3e016aea5a":[3,0,3,3,3,4],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1c69156bf32af42aa9f6d01088fc98c2":[3,0,3,3,3,22]
+"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html":[3,0,3,3,3]
 };

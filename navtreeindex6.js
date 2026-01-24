@@ -1,5 +1,8 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a56449097454e9589521a78af68bc28da":[3,0,3,12,2,1,2],
+"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a6c0cd7db53e32d4f9f682e3e3b4dd702":[3,0,3,12,2,1,3],
+"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a9e8240d97e5f6ea905b9f24cc633b3dc":[3,0,3,12,2,1,1],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#aaa3b4d64f1b5d9532b09d2deadbd2880":[3,0,3,12,2,1,0],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#ad18e8ab6f4bd5158c881145d3dfdbac3":[3,0,3,12,2,1,6],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#af6640a2fe24857c1d58409d6e23a9c03":[3,0,3,12,2,1,7],
@@ -246,8 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1Yolo.html#a4ce7b2c2301535b1f56f46efe9c6d4a7":[3,0,3,14,7,2],
 "classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79":[3,0,3,14,7,6],
 "classmodule_1_1vision_1_1Yolo.html#a66ed7bc23d9a80df95239954e50d3a80":[3,0,3,14,7,4],
-"classmodule_1_1vision_1_1Yolo.html#a781036abd1a72254c14918c54039764e":[3,0,3,14,7,3],
-"classmodule_1_1vision_1_1YoloCoco.html":[3,0,3,14,8],
-"classmodule_1_1vision_1_1YoloCoco.html#a318ff2c28353f99794d78d11ae7477ae":[3,0,3,14,8,3],
-"classmodule_1_1vision_1_1YoloCoco.html#a8284476a8495f9a661b1a6c27c4386b5":[3,0,3,14,8,4]
+"classmodule_1_1vision_1_1Yolo.html#a781036abd1a72254c14918c54039764e":[3,0,3,14,7,3]
 };

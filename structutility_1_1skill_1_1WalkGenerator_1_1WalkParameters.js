@@ -10,6 +10,7 @@ var structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters =
     [ "torso_height", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#ab7468f2caeb3a4fff86faa1f679680df", null ],
     [ "torso_pitch", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a14383a773021e3261f3e5310a25a9afd", null ],
     [ "torso_position_offset", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a221c8ac294293f7a20063df8c6b51780", null ],
+    [ "torso_start_sway_offset", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a093622ee402747dbec2bf30c2ae82d39", null ],
     [ "torso_sway_offset", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a9e806bea5b90847fe446d9662119c101", null ],
     [ "torso_sway_ratio", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a4426c8ac9636ab7af6fea8dde9faea16", null ]
 ];

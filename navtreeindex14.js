@@ -1,5 +1,17 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html":[3,0,3,3,6,0,0,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html#ad3e66b86c41b4e2260790cf627f2d023":[3,0,3,3,6,0,0,1,3],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html#af6796a27433b5de88a069c366b30f887":[3,0,3,3,6,0,0,1,2],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html":[3,0,3,3,6,0,0,1,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html#a6c230250c19c6c9236dc493907205c32":[3,0,3,3,6,0,0,1,0,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html":[3,0,3,3,6,0,0,1,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html#a347cd5acc9ab34da3b45691254c4dc5c":[3,0,3,3,6,0,0,1,1,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html#a3edc698f67ca9fba21234fa8b9fd22d9":[3,0,3,3,6,0,0,1,1,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html":[3,0,3,3,6,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76":[3,0,3,3,6,1,8],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a230ba1374f5367c4976b771b25a39b88":[3,0,3,3,6,1,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8":[3,0,3,3,6,1,4],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef":[3,0,3,3,6,1,3],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6edc2d1948e44ce1d1d2f785ed20d27e":[3,0,3,3,6,1,2],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e":[3,0,3,3,6,1,6],
@@ -237,17 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html#a017925976b949017a096b342367e8173":[3,0,3,8,0,2,0,0,1],
 "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html#a0f01406fa80fd4f261d9e457410ac8a5":[3,0,3,8,0,2,0,0,0],
 "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html":[3,0,3,8,0,4],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a52549bae4e1626fa2f77c5a657e98fe1":[3,0,3,8,0,4,4],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a6169502c3fccd70da3cb08bf02909ebc":[3,0,3,8,0,4,2],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a73be48c88bf9858741b0ba076038fd02":[3,0,3,8,0,4,1],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a7d698e656a77a59834bfea018b45602a":[3,0,3,8,0,4,0],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#aca422fe14c513a885e470412f1aba2fc":[3,0,3,8,0,4,3],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html":[3,0,3,8,0,5],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a3f4148a9db6a47d73961d418783904cc":[3,0,3,8,0,5,3],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a54ccb2195783aaaf68b60792ada5c23f":[3,0,3,8,0,5,1],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a96b09da54316217b1e7ca39fc896c481":[3,0,3,8,0,5,4],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#a9aff86bc6e653bcdc1e774b15420a7fc":[3,0,3,8,0,5,2],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87c":[3,0,3,8,0,5,0],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87ca0e7305e9260382a4c1e2d5290b4c22ab":[3,0,3,8,0,5,0,1],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html#af157ed3dbadec7b8a46f3d93f87ca87ca3d515bdfb605645c9d32e22f5d1512d9":[3,0,3,8,0,5,0,2]
+"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html#a52549bae4e1626fa2f77c5a657e98fe1":[3,0,3,8,0,4,4]
 };
