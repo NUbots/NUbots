@@ -71,8 +71,8 @@ namespace module::purpose {
                         emit<Task>(std::make_unique<KickTo>(), 1);  // kick the ball towards the goal
                     }
                 }
-
-                emit<Task>(std::make_unique<WalkToKickBall>());
+                // If kick_when is never, do not request the kick task
+                emit<Task>(std::make_unique<WalkToKickBall>(), 1);
             });
     }
 
