@@ -309,6 +309,7 @@ namespace module::purpose {
         for (auto& target : script.frames[frame].targets) {
             waypoints->targets.emplace_back(NUClear::clock::now() + std::chrono::milliseconds(1000),
                                             target.id,
+                                            std::string(""),
                                             target.position,
                                             target.gain,
                                             target.torque);
