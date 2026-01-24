@@ -73,6 +73,13 @@ namespace module::purpose {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
+    std::map<uint32_t, std::string> id_to_joint_name = {
+        {0, "right_shoulder_pitch"}, {1, "left_shoulder_pitch"}, {2, "right_shoulder_roll"}, {3, "left_shoulder_roll"},
+        {4, "right_elbow_pitch"},    {5, "left_elbow_pitch"},    {6, "right_hip_yaw"},       {7, "left_hip_yaw"},
+        {8, "right_hip_roll"},       {9, "left_hip_roll"},       {10, "right_hip_pitch"},    {11, "left_hip_pitch"},
+        {12, "right_knee_pitch"},    {13, "left_knee_pitch"},    {14, "right_ankle_pitch"},  {15, "left_ankle_pitch"},
+        {16, "right_ankle_roll"},    {17, "left_ankle_roll"},    {18, "neck_yaw"},           {19, "head_pitch"}};
+
     struct LockServo {};
 
     ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
@@ -309,7 +316,7 @@ namespace module::purpose {
         for (auto& target : script.frames[frame].targets) {
             waypoints->targets.emplace_back(NUClear::clock::now() + std::chrono::milliseconds(1000),
                                             target.id,
-                                            std::string(""),
+                                            id_to_joint_name[target.id],
                                             target.position,
                                             target.gain,
                                             target.torque);
@@ -575,6 +582,7 @@ namespace module::purpose {
             auto waypoint      = std::make_unique<ServoTarget>();
             waypoint->time     = NUClear::clock::now();
             waypoint->id       = selection < 2 ? 18 + selection : selection - 2;
+            waypoint->name     = id_to_joint_name[static_cast<uint32_t>(waypoint->id)];
             waypoint->gain     = 0;
             waypoint->position = std::numeric_limits<float>::quiet_NaN();
             waypoint->torque   = 0;
