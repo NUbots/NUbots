@@ -33,6 +33,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Player.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/support/FieldDescription.hpp"
 
@@ -44,6 +45,7 @@ namespace module::purpose {
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::planning::KickTo;
+    using message::strategy::FindBall;
     using message::strategy::WalkToKickBall;
     using message::support::FieldDescription;
 
@@ -57,6 +59,9 @@ namespace module::purpose {
 
         on<Provide<AttackMsg>, With<Ball>, With<Field>, With<FieldDescription>>().then(
             [this](const Ball& ball, const Field& field, const FieldDescription& fd) {
+                // Tag:FindBall, included in robocup2025 originally
+                // // Find the ball if we don't have it
+                // emit<Task>(std::make_unique<FindBall>(), 4);  // Need to know where the ball is
                 // Always request a kick task
                 if (cfg.kick_when == "Always") {
                     emit<Task>(std::make_unique<KickTo>(), 1);

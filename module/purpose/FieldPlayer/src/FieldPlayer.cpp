@@ -140,6 +140,7 @@ namespace module::purpose {
                 }
 
                 // General tasks
+                // Tag:FindBall, included in main originally
                 emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
 
