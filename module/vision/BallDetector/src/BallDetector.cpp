@@ -28,9 +28,11 @@
 #include "BallDetector.hpp"
 
 #include <Eigen/Geometry>
+#include <cstddef>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <numeric>
+#include <set>
 
 #include "extension/Configuration.hpp"
 
@@ -68,6 +70,7 @@ namespace module::vision {
 
             cfg.confidence_threshold  = config["confidence_threshold"].as<double>();
             cfg.cluster_points        = config["cluster_points"].as<int>();
+            cfg.merge_buffer_scalar   = config["merge_buffer_scalar"].as<double>();
             cfg.minimum_ball_distance = config["minimum_ball_distance"].as<double>();
             cfg.distance_disagreement = config["distance_disagreement"].as<double>();
             cfg.maximum_deviation     = config["maximum_deviation"].as<double>();
@@ -106,15 +109,22 @@ namespace module::vision {
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
-                // Clustering is down in two steps
+                // Clustering is done in three steps
                 // 1) Take the set of ball points found above and partition them into potential clusters by
                 //    a) Add the first point and its ball neighbours to a cluster
                 //    b) Find all other ball points who are neighbours of the points in the cluster
                 //    c) Partition all of the indices that are in the cluster
                 //    d) Repeat a-c for all points that were not partitioned
                 //    e) Delete all partitions smaller than a given threshold
-                // 2) Discard all clusters are entirely above the green horizon
+                // 2) Create additional clusters when multiple clusters are likely on the same ball by
+                //    a) Precompute central axis and angular radius of each cluster
+                //    b) Create an adjacency table with connections being minimal angular offset between clusters
+                //    c) Find connected components to use as candidates for merging through depth first search
+                //    d) For each connected component, add as a new cluster if it creates a more spherical cluster
+                // 3) Discard all clusters are entirely above the green horizon
+
                 std::vector<std::vector<int>> clusters;
+
                 utility::vision::visualmesh::cluster_points(indices.begin(),
                                                             indices.end(),
                                                             neighbours,
@@ -122,6 +132,115 @@ namespace module::vision {
                                                             clusters);
 
                 log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+
+                const size_t num_unmerged_clusters{clusters.size()};
+
+                // FIND CENTRAL AXIS OF EACH CLUSTER
+                // list of unit vectors from camera to cluster central axis in world space
+                std::vector<Eigen::Vector3d> cluster_unit_vectors(num_unmerged_clusters);
+                for (size_t i{}; i < num_unmerged_clusters; ++i) {
+                    const auto& cluster = clusters[i];
+
+                    cluster_unit_vectors[i] = utility::vision::visualmesh::find_cluster_central_axis(cluster, uPCw);
+                }
+
+                // FIND ANGULAR RADIUS OF EACH CLUSTER
+                // Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
+                // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
+                // is the angle between the central ball axis (uBCw) and the edge of the ball.
+                std::vector<double> cluster_radiuses(num_unmerged_clusters);
+                for (size_t i{}; i < num_unmerged_clusters; ++i) {
+                    const auto& cluster         = clusters[i];
+                    const Eigen::Vector3d& uBCw = cluster_unit_vectors[i];
+
+                    cluster_radiuses[i] = utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw);
+                }
+
+                // Create a adjacency matrix of potentially valid cluster merges
+                std::vector<std::vector<size_t>> adj_matrix(num_unmerged_clusters);
+                for (size_t i{}; i < num_unmerged_clusters; ++i) {
+                    // convert cluster radius stored as cos(theta) to angles
+                    double r_i_angle = std::acos(cluster_radiuses[i]);
+                    for (size_t j{i + 1}; j < num_unmerged_clusters; ++j) {
+                        double r_j_angle = std::acos(cluster_radiuses[j]);
+
+                        // If angular separation of 2 cluster axes < sum of their angular radii, from the camera's view
+                        // they overlap. Sum of radii is multiplied by merge_buffer_scalar, to give cluster's an extra
+                        // buffer, allowing merging of close clusters. If buffers overlap, they are mergeable.
+
+                        // Find angular offset between axis of cluster using the dot product formula
+                        double angular_offset{std::acos(cluster_unit_vectors[i].dot(cluster_unit_vectors[j]))};
+                        double offset_allowance{(r_i_angle + r_j_angle) * (cfg.merge_buffer_scalar)};
+
+                        if (angular_offset < offset_allowance) {
+                            adj_matrix[i].push_back(j);
+                            adj_matrix[j].push_back(i);
+                        }
+                    }
+                }
+
+                // Find connected components (merge candidates) through depth first search
+                std::vector<char> visited(num_unmerged_clusters, false);
+                std::vector<char> merged(num_unmerged_clusters, false);
+
+                // Reuse vectors in each loop
+                std::vector<size_t> stack;
+                stack.reserve(num_unmerged_clusters);
+                std::vector<size_t> mergeable_cluster_indices;
+                mergeable_cluster_indices.reserve(num_unmerged_clusters);
+                for (size_t i{}; i < num_unmerged_clusters; ++i) {
+
+                    if (visited[i]) {
+                        continue;
+                    }
+
+                    visited[i] = true;
+                    stack.push_back(i);
+
+                    // Clear indices again to allow reuse of the mergeable indices vector
+                    // The stack is effectively cleared each loop as DFS can only end with the stack empty
+                    mergeable_cluster_indices.clear();
+
+                    while (!stack.empty()) {
+                        size_t current = stack.back();
+                        stack.pop_back();
+
+                        mergeable_cluster_indices.push_back(current);
+
+                        for (size_t neighbour : adj_matrix[current]) {
+                            if (!visited[neighbour]) {
+                                stack.push_back(neighbour);
+                                visited[neighbour] = true;
+                            }
+                        }
+                    }
+
+                    // Validate whether this cluster should be merged and added to clusters
+                    if (mergeable_cluster_indices.size() > 1) {
+
+                        if (true /*should merge placeholder logic*/) {
+                            clusters.emplace_back();
+                            std::vector<int>& cluster = clusters.back();
+
+                            // Reserve memory in advance, and note those indices as used for merging
+                            size_t num_points{};
+                            for (size_t i : mergeable_cluster_indices) {
+                                num_points += clusters[i].size();
+                                merged[i] = true;
+                            }
+                            cluster.reserve(num_points);
+
+                            // Create a new cluster by merging in points from other clusters
+                            for (size_t i : mergeable_cluster_indices) {
+                                cluster.insert(cluster.end(), clusters[i].begin(), clusters[i].end());
+                            }
+                        }
+                    }
+                }
+
+                log<DEBUG>(fmt::format("Created {} additional clusters through merging {} clusters",
+                                       clusters.size() - num_unmerged_clusters,
+                                       std::count(merged.begin(), merged.end(), true)));
 
                 // Partition the clusters such that clusters above the green horizons are removed,
                 // and then resize the vector to remove them
@@ -157,32 +276,20 @@ namespace module::vision {
                 const Eigen::Isometry3d Hcw(horizon.Hcw.cast<double>());
 
                 // CHECK EACH CLUSTER FOR VALID BALL
-                for (auto& cluster : clusters) {
+                for (size_t i{}; i < clusters.size(); ++i) {
+                    const auto& cluster = clusters[i];
                     Ball b;
 
-                    // FIND CENTRAL AXIS OF BALL
-                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
-                    // an average vector, which represents the central cone axis
+                    // Find central axis of ball, using precomputed measurements if available
                     // uBCw: unit vector from camera to ball central axis in world space
-                    Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
-                    for (const auto& idx : cluster) {
-                        uBCw += uPCw.col(idx);
-                    }
-                    uBCw.normalize();  // get cone axis as a unit vector
+                    Eigen::Vector3d uBCw{i < cluster_unit_vectors.size()
+                                             ? cluster_unit_vectors[i]
+                                             : utility::vision::visualmesh::find_cluster_central_axis(cluster, uPCw)};
 
-                    // FIND ANGULAR RADIUS OF BALL
-                    // Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
-                    // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
-                    // is the angle between the central ball axis (uBCw) and the edge of the ball. This helps to find
-                    // the approximate distance to the ball.
-                    double radius = 1.0;
-                    for (const auto& idx : cluster) {
-                        // Unit vector from the camera to the ball edge, in world space
-                        const Eigen::Vector3d& uECw(uPCw.col(idx));
-                        // Find the vector that gives the largest angle between the central axis and ball edge
-                        // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
-                        radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
-                    }
+                    // Find angular radius of ball from camera, where radius is cos(theta)
+                    double radius{i < cluster_radiuses.size()
+                                      ? cluster_radiuses[i]
+                                      : utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw)};
 
                     // The vectors are in world space, multiply by Rcw to get the central axis in camera space
                     b.uBCc = Hcw.rotation() * uBCw;
@@ -241,6 +348,20 @@ namespace module::vision {
                     log<DEBUG>("**************************************************");
                     bool keep = true;
                     b.colour.fill(1.0);  // a valid ball has a white colour in NUsight
+
+                    // DISCARD IF CLUSTER WAS USED FOR MERGING
+                    // Merged is the same size as number of unmerged clusters and merged clusters are placed after
+                    // unmerged, so if i >= merged.size() it was made not used in merging, and the check prevents a
+                    // out of bounds read in the case a merge has been made making clusters.size() > merged.size()
+
+                    if (i < merged.size() && merged[i]) {
+
+                        log<DEBUG>("Ball discarded: merged with another detection to create another ball");
+                        log<DEBUG>("--------------------------------------------------");
+                        // Clusters that were used for merging will show up as orange in NUsight
+                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.65, 0.0, 1.0) : b.colour;
+                        keep     = false;
+                    }
 
                     // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
@@ -328,11 +449,15 @@ namespace module::vision {
                                            b.measurements[1].rBCc.transpose()));
                     log<DEBUG>(fmt::format("Distance Throwout {}",
                                            std::abs(projection_distance - angular_distance) / max_distance));
+                    // If the index of the cluster is larger than the number of unmerged clusters
+                    // It was made by merging as combined clusters are appended after unmerged ones
+                    log<DEBUG>(fmt::format("Created through merging clusters: {}", i >= num_unmerged_clusters));
                     log<DEBUG>("**************************************************");
 
-                    if (!keep) {
+                    if (!keep && log_level > DEBUG) {
                         b.measurements.clear();
                     }
+
                     // If the ball passed the checks, add it to the Balls message to be emitted
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
                     if (keep || log_level <= DEBUG) {

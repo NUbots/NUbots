@@ -193,6 +193,50 @@ namespace utility::vision::visualmesh {
             return success(out, in);
         });
     }
+
+    /**
+     * @brief Finds central axis of a cluster
+     * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
+     * vector, which represents the central cone axis
+     * @param cluster A collection of points
+     * @param uPCw Unit vector from camera to a point in the mesh in world space
+     * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
+     */
+    Eigen::Vector3d find_cluster_central_axis(const std::vector<int>& cluster,
+                                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
+        Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
+        for (const auto& idx : cluster) {
+            uBCw += uPCw.col(idx);
+        }
+        uBCw.normalize();
+        return uBCw;
+    }
+
+    /**
+     * @brief Finds the angular radius of the cluster from the camera
+     * Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
+     * largest angular radius possible from the edge points available. Equal to cos(theta), where theta
+     * is the angle between the central ball axis (uBCw) and the edge of the ball.
+     * @param cluster A collection of points
+     * @param uPCw Unit vector from camera to a point in the mesh in world space
+     * @param uBCw Unit vector from camera to ball central axis in world space
+     * @return double, angular radius of cluster equal to cos(theta)
+     */
+    double find_cluster_angular_radius(const std::vector<int>& cluster,
+                                       const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
+                                       const Eigen::Vector3d& uBCw) {
+        double radius{1.0};
+        for (const auto& idx : cluster) {
+            // Unit vector from the camera to the ball edge, in world space
+            const Eigen::Vector3d& uECw(uPCw.col(idx));
+            // Find the vector that gives the largest angle between the central axis and ball edge
+            // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
+            radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
+        }
+
+        return radius;
+    }
+
 }  // namespace utility::vision::visualmesh
 
 #endif  // UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP

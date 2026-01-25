@@ -41,6 +41,9 @@ namespace module::vision {
             double confidence_threshold = 0.0f;
             /// @brief Minimum number of points for a cluster to be a viable ball
             int cluster_points = 0;
+            /// @brief When considered if overlapping for merging, its buffer is used which has a radius of the
+            /// cluster's radius * merge_buffer_scalar
+            double merge_buffer_scalar = 0.0f;
             /// @brief Minimum distance for a cluster to be a viable ball
             double minimum_ball_distance = 0.0f;
             /// @brief Percentage difference between width and projection based distances. 0.0 means that the distance
@@ -57,6 +60,5 @@ namespace module::vision {
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::vision
-
 
 #endif
