@@ -32,6 +32,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <numeric>
+#include <optional>
 #include <set>
 
 #include "extension/Configuration.hpp"
@@ -214,26 +215,185 @@ namespace module::vision {
                             }
                         }
                     }
-
                     // Validate whether this cluster should be merged and added to clusters
                     if (mergeable_cluster_indices.size() > 1) {
 
-                        if (true /*should merge placeholder logic*/) {
-                            clusters.emplace_back();
-                            std::vector<int>& cluster = clusters.back();
+                        // Look at the combination of balls with the closest fit to a circle to avoid merging a ball
+                        // with a nearby false detection. Greedily look at only the combinations nCn and nCn-1 to
+                        // minimise checked cases as multiple nearby false detections are unlikely.
 
-                            // Reserve memory in advance, and note those indices as used for merging
-                            size_t num_points{};
-                            for (size_t i : mergeable_cluster_indices) {
-                                num_points += clusters[i].size();
-                                merged[i] = true;
+                        // vector from camera to centre of the merged cluster
+                        Eigen::Vector3d rBCw = Eigen::Vector3d::Zero();
+                        for (size_t i : mergeable_cluster_indices) {
+                            std::vector<int>& cluster = clusters[i];
+                            for (int j : cluster) {
+                                rBCw += uPCw.col(j);
                             }
-                            cluster.reserve(num_points);
+                        }
 
-                            // Create a new cluster by merging in points from other clusters
-                            for (size_t i : mergeable_cluster_indices) {
-                                cluster.insert(cluster.end(), clusters[i].begin(), clusters[i].end());
+                        // It is a list of unit vectors uBCw from camera to centre of the ball in world space, where
+                        // this ball is composed of a cluster made from all mergeable_cluster_indices except
+                        // mergeable_cluster_indices[n] where n is the index in this vector
+                        std::vector<Eigen::Vector3d> skipped_cluster_axis;
+                        skipped_cluster_axis.reserve(mergeable_cluster_indices.size());
+
+                        for (size_t i{}; i < mergeable_cluster_indices.size(); ++i) {
+                            // this is the case where clusters[mergeable_cluster_indices[i]] is skipped
+
+                            // the central axis of this cluster can be found through copying rBCw, then removing all of
+                            // the vectors this cluster added to it consists of to reuse calculations
+                            Eigen::Vector3d nBCw_skipped = rBCw;
+                            std::vector<int>& cluster    = clusters[mergeable_cluster_indices[i]];
+                            for (int idx : cluster) {
+                                nBCw_skipped -= uPCw.col(idx);
                             }
+                            nBCw_skipped.normalize();
+                            skipped_cluster_axis[i] = nBCw_skipped;
+                        }
+
+                        // Equal to cos(theta), where theta is the angle between the central ball axis (uBCw) and the
+                        // edge of the ball. The ball is a cluster made from all mergeable_cluster_indices except
+                        // mergeable_cluster_indices[n] where n is the index in this vector
+                        std::vector<double> skipped_cluster_radius;
+                        skipped_cluster_radius.reserve(mergeable_cluster_indices.size());
+                        for (size_t i{}; i < mergeable_cluster_indices.size(); ++i) {
+                            // radius is the max angular offset between any detected point (uPCw) and the axis (uBCw)
+                            double radius{1.0};
+                            for (size_t j{}; j < mergeable_cluster_indices.size(); ++j) {
+                                if (i == j) {
+                                    // this cluster is skipped
+                                    continue;
+                                }
+                                std::vector<int>& cluster = clusters[mergeable_cluster_indices[j]];
+
+                                // get the maximum angular radius for this cluster
+                                double new_radius =
+                                    utility::vision::visualmesh::find_cluster_angular_radius(cluster,
+                                                                                             uPCw,
+                                                                                             skipped_cluster_axis[i]);
+
+                                // a smaller radius is a larger angular offset as radius is cos(theta)
+                                radius = new_radius < radius ? new_radius : radius;
+                            }
+                            skipped_cluster_radius[i] = radius;
+                        }
+
+                        std::vector<double> skipped_cluster_circular_fit;
+                        skipped_cluster_circular_fit.reserve(mergeable_cluster_indices.size());
+                        for (size_t i{}; i < mergeable_cluster_indices.size(); ++i) {
+                            // Calculate degree of fit to a circle. Degree of fit defined as the standard deviation of
+                            // angle between every rays on the cluster / and the cone axis (uBCw).
+                            std::vector<double> angles;
+                            size_t number_angles{};
+                            for (size_t j{}; j < mergeable_cluster_indices.size(); ++j) {
+                                if (i == j) {
+                                    continue;
+                                }
+                                number_angles += clusters[mergeable_cluster_indices[j]].size();
+                            }
+
+                            angles.reserve(number_angles);
+
+                            double mean = 0.0;
+                            // largest angle between vectors
+                            const double max_radius = std::acos(skipped_cluster_radius[i]);
+
+                            for (size_t j{}; j < mergeable_cluster_indices.size(); ++j) {
+                                if (i == j) {
+                                    // cluster not used if so
+                                    continue;
+                                }
+
+                                std::vector<int>& cluster = clusters[mergeable_cluster_indices[j]];
+
+                                // Get mean of all the angles in the cluster to then find the standard deviation
+                                for (const auto& idx : cluster) {
+                                    const Eigen::Vector3d uBCw = skipped_cluster_axis[i];
+                                    const double angle         = std::acos(uBCw.dot(uPCw.col(idx))) / max_radius;
+                                    angles.emplace_back(angle);
+                                    mean += angle;
+                                }
+                            }
+                            mean /= angles.size();
+                            // Calculate standard deviation of angles in cluster
+                            double deviation = 0.0;
+                            for (const auto& angle : angles) {
+                                deviation += (mean - angle) * (mean - angle);
+                            }
+                            deviation                       = std::sqrt(deviation / (angles.size() - 1));
+                            skipped_cluster_circular_fit[i] = deviation;
+                        }
+
+                        // Calculations for the nCn clusters option
+                        Eigen::Vector3d uBCw = rBCw.normalized();
+                        double radius{1.0};
+                        for (size_t index : mergeable_cluster_indices) {
+                            std::vector<int>& cluster = clusters[index];
+                            double new_radius{
+                                utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw)};
+
+                            radius = new_radius < radius ? new_radius : radius;
+                        }
+
+                        // Calculate degree of fit to a circle. Degree of fit defined as the standard deviation of
+                        // angle between every rays on the cluster / and the cone axis (uBCw).
+                        std::vector<double> angles;
+                        size_t number_angles{};
+                        for (int index : mergeable_cluster_indices) {
+                            number_angles += clusters[index].size();
+                        }
+                        angles.reserve(number_angles);
+
+                        double mean{};
+                        const double angular_radius = std::acos(radius);
+
+                        for (int index : mergeable_cluster_indices) {
+                            std::vector<int>& cluster = clusters[index];
+                            for (const auto& idx : cluster) {
+                                const double angle = std::acos(uBCw.dot(uPCw.col(idx))) / angular_radius;
+                                angles.emplace_back(angle);
+                                mean += angle;
+                            }
+                        }
+
+                        mean /= angles.size();
+                        // Calculate standard deviation of angles in cluster
+                        double deviation = 0.0;
+                        for (const auto& angle : angles) {
+                            deviation += (mean - angle) * (mean - angle);
+                        }
+                        deviation = std::sqrt(deviation / (angles.size() - 1));
+
+                        double lowest_deviation{deviation};  // placeholder
+                        std::optional<size_t> removed_item{std::nullopt};
+
+                        for (size_t i{}; i < skipped_cluster_circular_fit.size(); ++i) {
+                            double cluster_deviation = skipped_cluster_circular_fit[i];
+                            if (cluster_deviation < deviation && cluster_deviation < lowest_deviation) {
+                                // if this has lower deviation than the current lowest deviation then removing the
+                                // cluster corresponding to this index improves the fit to circle the most
+                                lowest_deviation = cluster_deviation;
+                                removed_item     = i;
+                            }
+                        }
+                        if (removed_item.has_value()) {
+                            mergeable_cluster_indices.erase(mergeable_cluster_indices.begin() + removed_item.value());
+                        }
+
+                        clusters.emplace_back();
+                        std::vector<int>& cluster = clusters.back();
+
+                        // Reserve memory in advance, and note those indices as used for merging
+                        size_t num_points{};
+                        for (size_t i : mergeable_cluster_indices) {
+                            num_points += clusters[i].size();
+                            merged[i] = true;
+                        }
+                        cluster.reserve(num_points);
+
+                        // Copy points from other clusters into the merged one
+                        for (size_t i : mergeable_cluster_indices) {
+                            cluster.insert(cluster.end(), clusters[i].begin(), clusters[i].end());
                         }
                     }
                 }
@@ -286,7 +446,7 @@ namespace module::vision {
                                              ? cluster_unit_vectors[i]
                                              : utility::vision::visualmesh::find_cluster_central_axis(cluster, uPCw)};
 
-                    // Find angular radius of ball from camera, where radius is cos(theta)
+                    // Find angular radius of ball from camera, where radius is = cos(theta)
                     double radius{i < cluster_radiuses.size()
                                       ? cluster_radiuses[i]
                                       : utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw)};
@@ -368,6 +528,7 @@ namespace module::vision {
                     // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
                     // it is a bad fit
                     std::vector<double> angles;
+                    angles.reserve(cluster.size());
                     double mean             = 0.0;
                     const double max_radius = std::acos(radius);  // largest angle between vectors
                     // Get mean of all the angles in the cluster to then find the standard deviation
