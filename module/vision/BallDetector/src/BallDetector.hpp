@@ -44,6 +44,9 @@ namespace module::vision {
             /// @brief When considered if overlapping for merging, its buffer is used which has a radius of the
             /// cluster's radius * merge_buffer_scalar
             double merge_buffer_scalar = 0.0f;
+            /// @brief Percentage multiplier to the circular degree of fit to fully combined clusters. Decreasing
+            /// encourages fully merging clusters together rather than having partial merges.
+            double separation_preference = 0.0f;
             /// @brief Minimum distance for a cluster to be a viable ball
             double minimum_ball_distance = 0.0f;
             /// @brief Percentage difference between width and projection based distances. 0.0 means that the distance

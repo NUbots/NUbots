@@ -72,6 +72,7 @@ namespace module::vision {
             cfg.confidence_threshold  = config["confidence_threshold"].as<double>();
             cfg.cluster_points        = config["cluster_points"].as<int>();
             cfg.merge_buffer_scalar   = config["merge_buffer_scalar"].as<double>();
+            cfg.separation_preference = config["separation_preference"].as<double>();
             cfg.minimum_ball_distance = config["minimum_ball_distance"].as<double>();
             cfg.distance_disagreement = config["distance_disagreement"].as<double>();
             cfg.maximum_deviation     = config["maximum_deviation"].as<double>();
@@ -248,7 +249,7 @@ namespace module::vision {
                                 nBCw_skipped -= uPCw.col(idx);
                             }
                             nBCw_skipped.normalize();
-                            skipped_cluster_axis[i] = nBCw_skipped;
+                            skipped_cluster_axis.push_back(nBCw_skipped);
                         }
 
                         // Equal to cos(theta), where theta is the angle between the central ball axis (uBCw) and the
@@ -275,7 +276,7 @@ namespace module::vision {
                                 // a smaller radius is a larger angular offset as radius is cos(theta)
                                 radius = new_radius < radius ? new_radius : radius;
                             }
-                            skipped_cluster_radius[i] = radius;
+                            skipped_cluster_radius.push_back(radius);
                         }
 
                         std::vector<double> skipped_cluster_circular_fit;
@@ -320,8 +321,8 @@ namespace module::vision {
                             for (const auto& angle : angles) {
                                 deviation += (mean - angle) * (mean - angle);
                             }
-                            deviation                       = std::sqrt(deviation / (angles.size() - 1));
-                            skipped_cluster_circular_fit[i] = deviation;
+                            deviation = std::sqrt(deviation / (angles.size() - 1));
+                            skipped_cluster_circular_fit.push_back(deviation);
                         }
 
                         // Calculations for the nCn clusters option
@@ -369,31 +370,39 @@ namespace module::vision {
 
                         for (size_t i{}; i < skipped_cluster_circular_fit.size(); ++i) {
                             double cluster_deviation = skipped_cluster_circular_fit[i];
-                            if (cluster_deviation < deviation && cluster_deviation < lowest_deviation) {
+                            if (cluster_deviation < deviation * cfg.separation_preference
+                                && cluster_deviation < lowest_deviation) {
                                 // if this has lower deviation than the current lowest deviation then removing the
                                 // cluster corresponding to this index improves the fit to circle the most
                                 lowest_deviation = cluster_deviation;
                                 removed_item     = i;
                             }
                         }
+
                         if (removed_item.has_value()) {
                             mergeable_cluster_indices.erase(mergeable_cluster_indices.begin() + removed_item.value());
                         }
 
-                        clusters.emplace_back();
-                        std::vector<int>& cluster = clusters.back();
+                        if (mergeable_cluster_indices.size() > 1) {
+                            clusters.emplace_back();
+                            std::vector<int>& cluster = clusters.back();
 
-                        // Reserve memory in advance, and note those indices as used for merging
-                        size_t num_points{};
-                        for (size_t i : mergeable_cluster_indices) {
-                            num_points += clusters[i].size();
-                            merged[i] = true;
+                            // Reserve memory in advance, and note those indices as used for merging
+                            size_t num_points{};
+                            for (size_t i : mergeable_cluster_indices) {
+                                num_points += clusters[i].size();
+                                merged[i] = true;
+                            }
+                            cluster.reserve(num_points);
+
+                            // Copy points from other clusters into the merged one
+                            for (size_t i : mergeable_cluster_indices) {
+                                cluster.insert(cluster.end(), clusters[i].begin(), clusters[i].end());
+                            }
                         }
-                        cluster.reserve(num_points);
-
-                        // Copy points from other clusters into the merged one
-                        for (size_t i : mergeable_cluster_indices) {
-                            cluster.insert(cluster.end(), clusters[i].begin(), clusters[i].end());
+                        else {
+                            // avoid making a duplicate ball, if its decided out of 2 balls its best to not merge
+                            mergeable_cluster_indices.clear();
                         }
                     }
                 }
