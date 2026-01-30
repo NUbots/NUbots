@@ -61,7 +61,7 @@ namespace module::purpose {
 
         on<Provide<AttackMsg>, With<Ball>, With<Field>, With<FieldDescription>>().then(
             [this](const Ball& ball, const Field& field, const FieldDescription& fd) {
-                // // Find the ball if we don't have it
+                // Find the ball if we don't have it
                 emit<Task>(std::make_unique<FindBall>(), 4);  // Need to know where the ball is
                 // Always request a kick task
                 if (cfg.kick_when == "Always") {
