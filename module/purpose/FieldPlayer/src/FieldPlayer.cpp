@@ -140,8 +140,6 @@ namespace module::purpose {
                 }
 
                 // General tasks
-                // Tag:FindBall, included in main originally
-                emit<Task>(std::make_unique<FindBall>(), 2);    // Need to know where the ball is
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
 
                 // If there's no ball message, we can't play, just look for the ball
@@ -213,6 +211,7 @@ namespace module::purpose {
                                                    true,
                                                    true,
                                                    game_state.team.team_colour));
+                                                   // Emit attack task with ball position information
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
