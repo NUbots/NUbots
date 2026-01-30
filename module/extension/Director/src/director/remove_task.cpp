@@ -89,7 +89,11 @@ namespace module::extension {
                 }
                 group.pushing_task = nullptr;
 
-                // Recursively remove all subtasks
+                auto subtasks = group.subtasks;
+                group.subtasks.clear();
+                group.watch_handles.clear();
+
+                // Remove any subtasks this group had recursively
                 for (const auto& t : subtasks) {
                     remove_task(t);
                 }

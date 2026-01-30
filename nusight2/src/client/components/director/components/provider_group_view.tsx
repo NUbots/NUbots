@@ -26,6 +26,7 @@ export const ProviderGroupView = observer(
     const isRoot = group.providers.some((p) => p.classification === ProviderClassification.ROOT);
     const isRunning = !!group.activeProvider && !isRoot;
     const hasFailed = group.failed;
+    const isOrphan = !hasParent && !isRoot;
 
     return (
       <div
@@ -35,7 +36,7 @@ export const ProviderGroupView = observer(
           if (isRoot) return "border-2 border-blue-500";
           // Orphan: dashed border with default colour
           return "border-2 border-dashed";
-        })()}`}
+        })()} ${isOrphan ? "opacity-25" : ""}`}
         style={{ minWidth: "16rem" }}
         data-testid="provider-group"
       >

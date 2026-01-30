@@ -113,7 +113,7 @@ namespace utility::strategy {
         double c_rad = field_desc.dimensions.center_circle_diameter / 2.0;
         if (is_kickoff_robot) {
             Eigen::Vector3d p = kick_off ? Eigen::Vector3d(c_rad / 2 + center_offset, 0.0, 0.0)
-                                         : Eigen::Vector3d(c_rad + center_offset, 0.0, M_PI);
+                                         : Eigen::Vector3d(c_rad + center_offset, 0.0, 0.0);
             return utility::math::euler::pos_rpy_to_transform(p, Eigen::Vector3d(0, 0, -M_PI));
         }
 

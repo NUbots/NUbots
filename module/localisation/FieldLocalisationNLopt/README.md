@@ -27,7 +27,7 @@ The optimisation framework integrates several cost components and constraints to
 $$J_{\text{fi}} = \frac{w_{\text{fi}} \sum_{j=1}^{M} \left( \text{dist}(r_{\text{int},j}, r_{\text{obs},j}) \right)^2}{M}$$
 
 3. **State Change Cost ($J_{\text{sc}}$)**:
-   - Penalizes large deviations from the initial state estimate to ensure temporal consistency.
+   - Penalises large deviations from the initial state estimate to ensure temporal consistency.
    - Expressed as:
 
 $$J_{\text{sc}} = w_{\text{sc}} \|\textbf{x} - \textbf{x}\_{\text{init}}\|^2$$
@@ -57,7 +57,7 @@ $$\text{stability} > \text{FALLING}$$
 
 ### Optimisation Algorithm
 
-- The overall cost function optimized is:
+- The overall cost function optimised is:
 
 $$J(\textbf{x}) = J_{\text{fl}} + J_{\text{fi}} + J_{\text{sc}}$$
 
@@ -67,6 +67,16 @@ Where:
 - $w_{\text{fl}}$, $w_{\text{fi}}$, and $w_{\text{sc}}$ are weights controlling the relative importance of each cost component.
 
 Optimisation is carried out using NLopt's COBYLA (Constrained Optimisation BY Linear Approximations) algorithm, respecting the constraints and bounds set on the changes allowed in the state to ensure plausible and robust field localisation.
+
+### Cost Threshold and Update Acceptance
+
+The module uses a cost threshold (`cost_threshold`) to determine whether to accept optimisation results:
+
+- **Accepting Updates**: Optimisation results are only applied if their cost is below `cost_threshold`. This prevents poor localisations from corrupting the state estimate.
+- **Rejecting Updates**: When the cost exceeds the threshold, the optimisation result is rejected and the previous filtered state is maintained. A warning is logged and a counter is incremented.
+- **Triggering Resets**: If the cost exceeds the threshold for `max_over_cost` consecutive updates (and `reset_delay` has elapsed), an uncertainty reset is triggered.
+
+This mechanism provides robustness against temporary vision anomalies or ambiguous field features while maintaining accurate localisation when observations are reliable.
 
 ### Reset
 

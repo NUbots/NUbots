@@ -162,8 +162,8 @@ function ProviderGroupNode({ data }: { data: GroupModel }) {
   return (
     <div className="relative">
       {/* handles for reactflow connections */}
-      <Handle type="target" id="t" position={Position.Top} style={{ opacity: 0 }} />
-      <Handle type="source" id="b" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle type="target" id="l" position={Position.Left} style={{ opacity: 0 }} />
+      <Handle type="source" id="r" position={Position.Right} style={{ opacity: 0 }} />
       <ProviderGroupView group={data} />
     </div>
   );
@@ -227,7 +227,7 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
   // ---------------------------------------------------------------------------
 
   function LayoutUpdater() {
-    const { getNodes } = useReactFlow();
+    const { getNodes } = useReactFlow<GroupModel>();
 
     React.useLayoutEffect(() => {
       const rfNodes = getNodes();
@@ -238,10 +238,10 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
 
       // Dagre layout with real sizes
       const gDagre = new dagre.graphlib.Graph();
-      gDagre.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 80 });
+      gDagre.setGraph({ rankdir: "LR", nodesep: 40, ranksep: 80 });
       gDagre.setDefaultEdgeLabel(() => ({}));
 
-      rfNodes.forEach((n: Node) => {
+      rfNodes.forEach((n: Node<GroupModel>) => {
         gDagre.setNode(n.id, { width: n.width!, height: n.height! });
       });
       edges.forEach((e) => gDagre.setEdge(e.source, e.target));
