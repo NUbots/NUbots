@@ -31,5 +31,5 @@ initial_joint_positions:
   left_ankle_pitch: -0.512
   right_ankle_roll: 0.168
   left_ankle_roll: -0.167
-  neck_yaw: 0.0
+  head_yaw: 0.0
   head_pitch: 0.0

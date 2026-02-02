@@ -27,7 +27,7 @@ const jointToServoId: { [key: string]: number } = {
   left_ankle_pitch: 15, // L_ANKLE_PITCH
   right_ankle_roll: 16, // R_ANKLE_ROLL
   left_ankle_roll: 17, // L_ANKLE_ROLL
-  neck_yaw: 18, // HEAD_YAW
+  head_yaw: 18, // HEAD_YAW
   head_pitch: 19, // HEAD_PITCH
 };
 
@@ -64,7 +64,7 @@ export const Nugus = observer(({ model }: { model: ServosRobotModel }) => {
         joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
         joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
         joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
-        joints?.neck_yaw.setJointValue(motors.headPan.angle);
+        joints?.head_yaw.setJointValue(motors.headPan.angle);
         joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
         joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
         joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);

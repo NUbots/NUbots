@@ -74,7 +74,7 @@
     <position joint="right_ankle_pitch" name="right_ankle_pitch"/>
     <position joint="right_ankle_roll" name="right_ankle_roll"/>
 
-    <position joint="neck_yaw" name="neck_yaw"/>
+    <position joint="head_yaw" name="head_yaw"/>
     <position joint="head_pitch" name="head_pitch"/>
 
     <position joint="left_shoulder_pitch" name="left_shoulder_pitch"/>
@@ -123,7 +123,7 @@
     <jointpos joint="left_ankle_pitch" name="left_ankle_pitch_pos"/>
     <jointpos joint="right_ankle_roll" name="right_ankle_roll_pos"/>
     <jointpos joint="left_ankle_roll" name="left_ankle_roll_pos"/>
-    <jointpos joint="neck_yaw" name="neck_yaw_pos"/>
+    <jointpos joint="head_yaw" name="head_yaw_pos"/>
     <jointpos joint="head_pitch" name="head_pitch_pos"/>
   </sensor>
 
@@ -213,7 +213,7 @@
       </body>
       <body name="neck" pos="-0.008 0 0.20825" quat="1.32679e-06 0 0 -1">
         <inertial pos="-0.000244686 -0.000118134 0.0329091" quat="0.998443 0.0557737 1.07166e-07 -1.91845e-06" mass="0.165011" diaginertia="6.78379e-05 5.68579e-05 3.82813e-05"/>
-        <joint name="neck_yaw" pos="-0.008 0 0.20825" axis="0 0 1" limited="true" range="-3.14159 3.14159" class="MX64"/>
+        <joint name="head_yaw" pos="-0.008 0 0.20825" axis="0 0 1" limited="true" range="-3.14159 3.14159" class="MX64"/>
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.286275 0.286275 0.286275 1" mesh="neck_visual"/>
         <geom size="0.0201 0.025 0.0314176" pos="-0.000244711 -0.00275529 0.0306824" type="box" rgba="0.286275 0.286275 0.286275 0"/>
         <body name="head" pos="-0.00024471 -0.000255294 0.0481" quat="0.499998 0.5 0.5 -0.500002">

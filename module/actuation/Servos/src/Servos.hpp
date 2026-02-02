@@ -49,7 +49,7 @@ namespace module::actuation {
         {4, "right_elbow_pitch"},    {5, "left_elbow_pitch"},    {6, "right_hip_yaw"},       {7, "left_hip_yaw"},
         {8, "right_hip_roll"},       {9, "left_hip_roll"},       {10, "right_hip_pitch"},    {11, "left_hip_pitch"},
         {12, "right_knee_pitch"},    {13, "left_knee_pitch"},    {14, "right_ankle_pitch"},  {15, "left_ankle_pitch"},
-        {16, "right_ankle_roll"},    {17, "left_ankle_roll"},    {18, "neck_yaw"},           {19, "head_pitch"}};
+        {16, "right_ankle_roll"},    {17, "left_ankle_roll"},    {18, "head_yaw"},           {19, "head_pitch"}};
 
     class Servos : public ::extension::behaviour::BehaviourReactor {
     private:

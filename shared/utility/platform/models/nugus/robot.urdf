@@ -627,7 +627,7 @@
 <joint_properties friction="0.0" />
 </joint>
 
-<joint name="neck_yaw" type="revolute">
+<joint name="head_yaw" type="revolute">
 <origin xyz="-0.008 2.09034e-16 0.20825" rpy="-1.1045e-15 2.10942e-15 -3.14159" />
 <parent link="torso" />
 <child link="neck" />

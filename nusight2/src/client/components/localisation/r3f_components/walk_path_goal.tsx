@@ -66,7 +66,7 @@ export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) 
         joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
         joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
         joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
-        joints?.neck_yaw.setJointValue(motors.headPan.angle);
+        joints?.head_yaw.setJointValue(motors.headPan.angle);
         joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
         joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
         joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
