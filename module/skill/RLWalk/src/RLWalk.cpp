@@ -75,6 +75,7 @@ namespace module::skill {
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
             // Initialize the model
+            log<DEBUG>("Calling RLWalk model initialization");
             initialize_model();
         });
 
@@ -100,26 +101,29 @@ namespace module::skill {
             .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
                 // Only run if we're in a stable state
                 if (stability >= Stability::DYNAMIC) {
+                    // Attempt to initialise the model again TODO: remove me
+                    log<DEBUG>("=====Re-initializing model at runtime======");
+                    initialize_model();
                     // Construct observation vector
                     ObservationVector observation;
                     int idx = 0;
 
                     // Gyro data (3)
                     observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;
-                    log<INFO>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
+                    log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
                     idx += GYRO_SIZE;
 
                     // Gravity/Accelerometer data in world frame (3)
                     Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
-                    log<INFO>("Gravity: ", gravity.transpose());
-                    log<INFO>("Gravity magnitude: ", gravity.norm());
+                    log<DEBUG>("Gravity: ", gravity.transpose());
+                    log<DEBUG>("Gravity magnitude: ", gravity.norm());
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
-                    log<INFO>("Accelerometer: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
+                    log<DEBUG>("Accelerometer: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
                     idx += GRAVITY_SIZE;
 
                     // Command (3)
                     observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
-                    log<INFO>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
+                    log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
                     idx += COMMAND_SIZE;
 
                     // Joint positions relative to default pose (20)
@@ -137,7 +141,7 @@ namespace module::skill {
 
                     // Run inference
                     JointVector joint_angles = run_inference(observation);
-                    log<INFO>("Joint angles: ", joint_angles.transpose());
+                    log<DEBUG>("Joint angles: ", joint_angles.transpose());
 
                     // Save example data to file
                     std::ofstream data_file("recordings/example_data.json");
@@ -159,7 +163,7 @@ namespace module::skill {
                     data_file << "]\n";
                     data_file << "}\n";
                     data_file.close();
-                    log<INFO>("Saved example data to example_data.json");
+                    log<DEBUG>("Saved example data to example_data.json");
 
                     // Store the last action
                     last_action = joint_angles;
@@ -194,6 +198,16 @@ namespace module::skill {
 
     void RLWalk::initialize_model() {
         try {
+            log<DEBUG>("Attempting to Initialize RLWalk model");
+            log<INFO>("Current working directory: ", std::filesystem::current_path().string());
+
+            // Check if model file exists
+            if (!std::filesystem::exists(cfg.model_path)) {
+                log<ERROR>("Model file not found at: ", cfg.model_path);
+                model_initialized = false;
+                return;
+            }
+
             // Create OpenVINO Core
             ov::Core core;
 
@@ -201,27 +215,27 @@ namespace module::skill {
             auto model = core.read_model(cfg.model_path);
 
             // Log model information
-            log<INFO>("Model loaded from: ", cfg.model_path);
-            log<INFO>("Model device: ", cfg.device);
+            log<DEBUG>("Model loaded from: ", cfg.model_path);
+            log<DEBUG>("Model device: ", cfg.device);
 
             // Log input information
             for (const auto& input : model->inputs()) {
-                log<INFO>("Input: ", input.get_any_name());
-                log<INFO>("  Shape: ", input.get_shape());
-                log<INFO>("  Type: ", input.get_element_type());
+                log<DEBUG>("Input: ", input.get_any_name());
+                log<DEBUG>("  Shape: ", input.get_shape());
+                log<DEBUG>("  Type: ", input.get_element_type());
             }
 
             // Log output information
             for (const auto& output : model->outputs()) {
-                log<INFO>("Output: ", output.get_any_name());
-                log<INFO>("  Shape: ", output.get_shape());
-                log<INFO>("  Type: ", output.get_element_type());
+                log<DEBUG>("Output: ", output.get_any_name());
+                log<DEBUG>("  Shape: ", output.get_shape());
+                log<DEBUG>("  Type: ", output.get_element_type());
             }
 
             // Log available devices
-            log<INFO>("Available devices:");
+            log<DEBUG>("Available devices:");
             for (const auto& device : core.get_available_devices()) {
-                log<INFO>("  ", device);
+                log<DEBUG>("  ", device);
             }
 
             // Compile the model
