@@ -740,7 +740,7 @@ EXTERNPROTO "JerseyBack.proto" EXTERNPROTO "JerseyFront.proto" PROTO nugus
              [RotationalMotor {
                  name "head_yaw" maxVelocity IS MX106 - vel   minPosition -
                      3.14159 maxPosition 3.14159 maxTorque IS MX106 - torque
-             } PositionSensor{ resolution IS DYNAMIXEL - RESOLUTION name "neck_yaw_sensor" }] endPoint Solid {
+             } PositionSensor{ resolution IS DYNAMIXEL - RESOLUTION name "head_yaw_sensor" }] endPoint Solid {
                  translation - 0.008000 0.000000 0.208250 rotation 0.000000 0.000000 -
                      1.000000 3.141590 children
                      [Shape {

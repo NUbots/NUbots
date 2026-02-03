@@ -200,7 +200,7 @@ namespace module::platform {
                                  {"left_shoulder_pitch_sensor", sensor_timestep},
                                  {"right_shoulder_roll_sensor", sensor_timestep},
                                  {"right_shoulder_pitch_sensor", sensor_timestep},
-                                 {"neck_yaw_sensor", sensor_timestep},
+                                 {"head_yaw_sensor", sensor_timestep},
                                  {"head_pitch_sensor", sensor_timestep},
                                  {"accelerometer", sensor_timestep},
                                  {"gyroscope", sensor_timestep},
