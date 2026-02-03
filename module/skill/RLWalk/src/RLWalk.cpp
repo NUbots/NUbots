@@ -42,7 +42,7 @@ namespace module::skill {
         {3, ServoID::L_KNEE},           {4, ServoID::L_ANKLE_PITCH},  {5, ServoID::L_ANKLE_ROLL},
         {6, ServoID::R_HIP_YAW},        {7, ServoID::R_HIP_ROLL},     {8, ServoID::R_HIP_PITCH},
         {9, ServoID::R_KNEE},           {10, ServoID::R_ANKLE_PITCH}, {11, ServoID::R_ANKLE_ROLL},
-        {12, ServoID::HEAD_YAW},        {13, ServoID::HEAD_PITCH},    {14, ServoID::L_SHOULDER_PITCH},
+        {12, ServoID::NECK_YAW},        {13, ServoID::HEAD_PITCH},    {14, ServoID::L_SHOULDER_PITCH},
         {15, ServoID::L_SHOULDER_ROLL}, {16, ServoID::L_ELBOW},       {17, ServoID::R_SHOULDER_PITCH},
         {18, ServoID::R_SHOULDER_ROLL}, {19, ServoID::R_ELBOW}};
 

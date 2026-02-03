@@ -325,14 +325,14 @@ namespace module::purpose {
     }
 
     void KeyboardWalk::look_left() {
-        head_yaw_target += HEAD_DIFF;
+        neck_yaw_target += HEAD_DIFF;
         update_command();
         print_status();
         log<INFO>("look left");
     }
 
     void KeyboardWalk::look_right() {
-        head_yaw_target -= HEAD_DIFF;
+        neck_yaw_target -= HEAD_DIFF;
         update_command();
         print_status();
         log<INFO>("look right");
@@ -366,7 +366,7 @@ namespace module::purpose {
 
     void KeyboardWalk::reset() {
         walk_command      = Eigen::Vector3d::Zero();
-        head_yaw_target   = 0.0f;
+        neck_yaw_target   = 0.0f;
         head_pitch_target = 0.0f;
         update_command();
         print_status();
@@ -386,7 +386,7 @@ namespace module::purpose {
         }
 
         // Create a unit vector in the direction the head should be pointing
-        Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw_target, Eigen::Vector3d::UnitZ())
+        Eigen::Vector3d uPCt = (Eigen::AngleAxisd(neck_yaw_target, Eigen::Vector3d::UnitZ())
                                 * Eigen::AngleAxisd(-head_pitch_target, Eigen::Vector3d::UnitY()))
                                    .toRotationMatrix()
                                * Eigen::Vector3d::UnitX();
@@ -406,7 +406,7 @@ namespace module::purpose {
             walk_command.y(),
             walk_command.z(),
             walk_enabled,
-            head_yaw_target * 180.0f / float(M_PI),
+            neck_yaw_target * 180.0f / float(M_PI),
             head_pitch_target * 180.0f / float(M_PI));
 
         // Update the command window

@@ -124,7 +124,7 @@ namespace module::platform {
         if (name == "right_shoulder_roll_sensor") { return servos.r_shoulder_roll; }
         if (name == "right_shoulder_pitch_sensor") { return servos.r_shoulder_pitch; }
         // Neck and head
-        if (name == "head_yaw_sensor") { return servos.head_yaw; }
+        if (name == "neck_yaw_sensor") { return servos.neck_yaw; }
         if (name == "head_pitch_sensor") { return servos.head_pitch; }
         // clang-format on
 
@@ -150,7 +150,7 @@ namespace module::platform {
                                                         {15, "left_ankle_pitch"},
                                                         {16, "right_ankle_roll"},
                                                         {17, "left_ankle_roll"},
-                                                        {18, "head_yaw"},
+                                                        {18, "neck_yaw"},
                                                         {19, "head_pitch"}};
 
 
@@ -174,7 +174,7 @@ namespace module::platform {
         {"left_ankle_pitch_sensor", 15},
         {"right_ankle_roll_sensor", 16},
         {"left_ankle_roll_sensor", 17},
-        {"head_yaw_sensor", 18},
+        {"neck_yaw_sensor", 18},
         {"head_pitch_sensor", 19},
     };
 
@@ -200,7 +200,7 @@ namespace module::platform {
                                  {"left_shoulder_pitch_sensor", sensor_timestep},
                                  {"right_shoulder_roll_sensor", sensor_timestep},
                                  {"right_shoulder_pitch_sensor", sensor_timestep},
-                                 {"head_yaw_sensor", sensor_timestep},
+                                 {"neck_yaw_sensor", sensor_timestep},
                                  {"head_pitch_sensor", sensor_timestep},
                                  {"accelerometer", sensor_timestep},
                                  {"gyroscope", sensor_timestep},

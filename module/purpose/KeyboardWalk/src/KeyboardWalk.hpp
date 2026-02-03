@@ -73,7 +73,7 @@ namespace module::purpose {
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Desired head yaw
-        double head_yaw_target = 0.0f;
+        double neck_yaw_target = 0.0f;
 
         /// @brief Desired head pitch
         double head_pitch_target = 0.0f;
