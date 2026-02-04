@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 walk:
   # Time for one complete step (in seconds).

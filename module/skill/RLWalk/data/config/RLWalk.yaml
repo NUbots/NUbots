@@ -1,8 +1,8 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 model:
-  path: module/skill/RLWalk/data/model.xml
+  path: model.onnx
   device: CPU
   input_name: input
   output_name: output
