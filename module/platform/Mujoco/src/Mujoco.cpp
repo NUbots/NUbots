@@ -228,21 +228,12 @@ namespace module::platform {
         });
 
         on<Trigger<Render>, Single, MainThread>().then("Render Mujoco", [this] {
-            static bool initialized       = false;
-            static bool rendering_enabled = true;
+            static bool initialized = false;
             if (!initialized) {
                 // init GLFW
                 XInitThreads();
                 if (!glfwInit()) {
-                    const char* description;
-                    int error_code = glfwGetError(&description);
-                    log<ERROR>("Could not initialize GLFW. Error code: ", error_code);
-                    log<ERROR>("Error description: ", description ? description : "No description available");
-                    // mju_error("Could not initialize GLFW");
-                    rendering_enabled = false;
-                    initialized       = true;
-                    return;  // Early return if GLFW initialization fails (don't call mju_error here to avoid
-                             // termination)
+                    mju_error("Could not initialize GLFW");
                 }
 
                 glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -260,10 +251,7 @@ namespace module::platform {
                     const char* description;
                     int code = glfwGetError(&description);
                     log<ERROR>("Could not create GLFW window: ", description, " (error code: ", code, ")");
-                    log<WARN>("Rendering disabled");
                     glfwTerminate();
-                    rendering_enabled = false;
-                    initialized       = true;
                     return;
                 }
 
@@ -311,11 +299,7 @@ namespace module::platform {
 
                 initialized = true;
             }
-
-            // Only render if GLFW is available
-            if (rendering_enabled) {
-                render();
-            }
+            render();
         });
 
         on<Shutdown>().then("Shutdown Mujoco", [this] {
