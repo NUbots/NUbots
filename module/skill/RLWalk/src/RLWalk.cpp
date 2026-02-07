@@ -167,13 +167,14 @@ namespace module::skill {
                     // Emit servo commands
                     auto body = std::make_unique<Body>();
                     for (int i = 0; i < cfg.num_joints; ++i) {
-                        auto servo      = std::make_unique<ServoCommand>();
-                        servo->time     = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-                        servo->position = default_pose[i];       // + joint_angles[i];
-                        servo->state    = ServoState(1.0, 100);  // Default gains
+                        auto servo  = std::make_unique<ServoCommand>();
+                        servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+                        // Apply the joint angles from the policy as offsets to the default pose
+                        servo->position                   = default_pose[i] + joint_angles[i];
+                        servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
-                    emit<Task>(body);
+                    emit<Task>(body);  // TODO: find where this is being consumed
 
                     // Emit walk state
                     auto walk_state = std::make_unique<WalkState>(WalkState::State::WALKING,

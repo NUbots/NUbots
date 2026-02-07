@@ -46,17 +46,20 @@ namespace module::platform {
             cfg.world_path  = config["world_path"].as<std::string>();
 
             // load and compile
+            log<INFO>("Loading MuJoCo world model from:", cfg.world_path);
             char error[1000] = "Could not load binary model";
             if (std::strlen(cfg.world_path.c_str()) > 4
                 && !std::strcmp(cfg.world_path.c_str() + std::strlen(cfg.world_path.c_str()) - 4, ".mjb")) {
                 m = mj_loadModel(cfg.world_path.c_str(), 0);
             }
             else {
+                log<INFO>("Loading world from XML");
                 m = mj_loadXML(cfg.world_path.c_str(), 0, error, 1000);
             }
             if (!m) {
                 mju_error("Load model error: %s", error);
             }
+            log<INFO>("Scene loaded successfully");
 
             // make data, run one computation to initialize all fields
             d = mj_makeData(m);
