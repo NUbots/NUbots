@@ -194,8 +194,19 @@ namespace utility::vision::visualmesh {
         });
     }
 
+    /**
+     * @brief Count number of mesh points bounded in cone from camera using DFS.
+     *
+     * @tparam collection of ints, held as a vector of values or pointers to another vector of ints
+     * @param indice_collection Collection of indices known to be bounded in the cone
+     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
+     * @param uBCw The centre of the bounded cone represented as a unit vector from ball to camera in world space
+     * @param radius Angular radius of the cone, equal to cos(theta)
+     * @param uPCw Unit vectors from camera to a point in the mesh in world space
+     * @return number of bounded points the mesh has in this cone
+     */
     template <typename T>
-        requires std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<std::vector<int>>>
+        requires std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<std::vector<int>*>>
     size_t find_number_bounded_points(const T& indice_collection,
                                       const Eigen::MatrixXi& neighbours,
                                       const Eigen::Vector3d uBCw,
@@ -206,28 +217,33 @@ namespace utility::vision::visualmesh {
         std::vector<int> stack;
         size_t num_visited{};
 
-        // add indices to stack
+        // indice_collection is known to be bounded in the cone so they are added to the stack
         if constexpr (std::same_as<T, std::vector<int>>) {
             stack.insert(stack.end(), indice_collection.begin(), indice_collection.end());
         }
-        else if constexpr (std::same_as<T, std::vector<std::vector<int>>>) {
-            for (const std::vector<int>& indices : indice_collection) {
-                stack.insert(stack.end(), indices.begin(), indices.end());
+        else if constexpr (std::same_as<T, std::vector<std::vector<int>*>>) {
+            for (const std::vector<int>* indices : indice_collection) {
+                stack.insert(stack.end(), indices->begin(), indices->end());
             }
         }
 
+        // indices in the stack have been visited
         for (int index : stack) {
             visited[index] = true;
         }
         num_visited += stack.size();
 
+        // depth first search where if a points neighbours are bounded by the cone they are connected
         while (!stack.empty()) {
             int current = stack.back();
             stack.pop_back();
 
-            for (size_t i{}; i < neighbours.rows(); ++i) {
+            for (int i{}; i < neighbours.rows(); ++i) {
                 int neigh = neighbours(i, current);
-                if (neigh >= 0 && neigh < visited.size() && !visited[neigh] && uPCw.col(neigh).dot(uBCw) < radius) {
+                // radius and uPCw.col(neigh).dot(uBCw) are in cos(theta), so being larger than radius bounds it inside
+                // the cone. Neighbour >= 0 so can be type cast into size_t.
+                if (neigh >= 0 && static_cast<size_t>(neigh) < visited.size() && !visited[neigh]
+                    && uPCw.col(neigh).dot(uBCw) >= radius) {
                     stack.push_back(neigh);
                     visited[neigh] = true;
                     ++num_visited;

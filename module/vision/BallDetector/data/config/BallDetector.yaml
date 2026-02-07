@@ -6,9 +6,9 @@ cluster_points: 20 # Minimum number of points for a cluster to be a viable ball
 merge_buffer_scalar:
   1.4 # When considered if overlapping for merging, its buffer is used which has a radius of
   # the cluster's radius * merge_buffer_scalar
-separation_preference:
-  0.6 # Percentage multiplier to the circular degree of fit to fully combined clusters.
-  # Decreasing  encourages fully merging clusters together rather than having partial merges.
+fill_requirement:
+  0.7 # Percentage threshold of n. observed point detections divided by
+  # n. of expected detections the ball would have
 minimum_ball_distance: 2.5 # Minimum distance for a cluster to be a viable ball
 distance_disagreement:
   1.0 # Percentage difference between width and projection based distances. 0.0 means
