@@ -194,6 +194,50 @@ namespace utility::vision::visualmesh {
         });
     }
 
+    template <typename T>
+        requires std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<std::vector<int>>>
+    size_t find_number_bounded_points(const T& indice_collection,
+                                      const Eigen::MatrixXi& neighbours,
+                                      const Eigen::Vector3d uBCw,
+                                      const double radius,
+                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
+        // track visited points
+        std::vector<char> visited(neighbours.cols(), false);
+        std::vector<int> stack;
+        size_t num_visited{};
+
+        // add indices to stack
+        if constexpr (std::same_as<T, std::vector<int>>) {
+            stack.insert(stack.end(), indice_collection.begin(), indice_collection.end());
+        }
+        else if constexpr (std::same_as<T, std::vector<std::vector<int>>>) {
+            for (const std::vector<int>& indices : indice_collection) {
+                stack.insert(stack.end(), indices.begin(), indices.end());
+            }
+        }
+
+        for (int index : stack) {
+            visited[index] = true;
+        }
+        num_visited += stack.size();
+
+        while (!stack.empty()) {
+            int current = stack.back();
+            stack.pop_back();
+
+            for (size_t i{}; i < neighbours.rows(); ++i) {
+                int neigh = neighbours(i, current);
+                if (neigh >= 0 && neigh < visited.size() && !visited[neigh] && uPCw.col(neigh).dot(uBCw) < radius) {
+                    stack.push_back(neigh);
+                    visited[neigh] = true;
+                    ++num_visited;
+                }
+            }
+        }
+
+        return num_visited;
+    }
+
     /**
      * @brief Finds central axis of a cluster
      * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
