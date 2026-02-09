@@ -2,6 +2,7 @@
 #define MODULE_SKILL_RLWALK_HPP
 
 #include <Eigen/Core>
+#include <atomic>
 #include <nuclear>
 #include <openvino/openvino.hpp>
 
@@ -10,11 +11,13 @@
 namespace module::skill {
 
     /// @brief Observation vector sizes
+    static constexpr int ACC_SIZE       = 3;
     static constexpr int GYRO_SIZE      = 3;
     static constexpr int GRAVITY_SIZE   = 3;
-    static constexpr int COMMAND_SIZE   = 3;
     static constexpr int JOINT_POS_SIZE = 20;
-    static constexpr int TOTAL_OBS_SIZE = GYRO_SIZE + GRAVITY_SIZE + COMMAND_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE;
+    static constexpr int COMMAND_SIZE   = 3;
+    static constexpr int TOTAL_OBS_SIZE =
+        ACC_SIZE + GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE;  // 72
 
     /// @brief Fixed-size observation vector type
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;
@@ -60,6 +63,11 @@ namespace module::skill {
 
         /// @brief Default pose for the robot
         JointVector default_pose;
+
+        /// @brief Last joint positions for velocity estimation
+        JointVector previous_pose;
+        bool have_previous_pose = false;
+        NUClear::clock::time_point last_update_time;
 
     public:
         /// @brief Called by the powerplant to build and setup the RLWalk reactor.

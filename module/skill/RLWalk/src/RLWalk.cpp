@@ -74,6 +74,10 @@ namespace module::skill {
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
+            previous_pose      = JointVector(config["previous_pose"].as<Expression>());
+            have_previous_pose = false;
+            last_update_time   = NUClear::clock::now();
+
             // Initialize the model
             initialize_model();
         });
@@ -104,6 +108,11 @@ namespace module::skill {
                     ObservationVector observation;
                     int idx = 0;
 
+                    // Accelerometer data in body frame (3)
+                    observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
+                    log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
+                    idx += ACC_SIZE;
+
                     // Gyro data (3)
                     observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;
                     log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
@@ -117,23 +126,45 @@ namespace module::skill {
                     log<DEBUG>("Accelerometer: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
                     idx += GRAVITY_SIZE;
 
-                    // Command (3)
-                    observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
-                    log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
-                    idx += COMMAND_SIZE;
-
                     // Joint positions relative to default pose (20)
                     // Note: We need to map the joint positions from sensors to the correct order
-                    // This is a placeholder - you'll need to map the actual joint positions
+                    // This is a placeholder - you'll need to map the actual joint positions TODO
                     auto temp_sensors                        = std::make_unique<Sensors>();
                     temp_sensors->servo                      = sensors.servo;
                     JointVector current_joints               = sensors_to_configuration(temp_sensors);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
                     idx += JOINT_POS_SIZE;
 
+                    // Joint velocities relative to default pose (20)
+                    // Estimate using finite differences. TODO: Improve
+                    const auto now        = NUClear::clock::now();
+                    JointVector joint_vel = JointVector::Zero();
+
+                    if (have_previous_pose) {
+                        std::chrono::duration<double> elapsed = now - last_update_time;
+                        double dt                             = elapsed.count();
+                        if (dt > 0.0) {
+                            joint_vel = (current_joints - previous_pose) / dt;
+                        }
+                        else if (dt < 0.0) {
+                            log<ERROR>("Negative dt for joint velocity estimation: ", dt, ". Assuming zero velocity");
+                        }
+                    }
+                    else {
+                        have_previous_pose = true;
+                    }
+                    previous_pose                            = current_joints;
+                    last_update_time                         = now;
+                    observation.segment<JOINT_POS_SIZE>(idx) = joint_vel;
+
                     // Last action (20)
                     observation.segment<JOINT_POS_SIZE>(idx) = last_action;
                     idx += JOINT_POS_SIZE;
+
+                    // Command (3)
+                    observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
+                    log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
+                    idx += COMMAND_SIZE;
 
                     // Run inference
                     JointVector joint_angles = run_inference(observation);
@@ -262,6 +293,8 @@ namespace module::skill {
     JointVector RLWalk::run_inference(const ObservationVector& observation) {
         if (!model_initialized) {
             log<ERROR>("Cannot run inference: model not initialized");
+            log<INFO>("Attempting to reinitialize model...");
+            initialize_model();
             return JointVector::Zero();
         }
 

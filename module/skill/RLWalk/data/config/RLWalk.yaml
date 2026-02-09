@@ -2,12 +2,12 @@
 log_level: DEBUG
 
 model:
-  path: model.onnx
+  path: /home/nubots/build/model.onnx
   device: CPU
   input_name: input
   output_name: output
   num_joints: 20
-  obs_size: 49
+  obs_size: 72
 
 default_pose:
   - -3.39000e-02
