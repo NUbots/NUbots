@@ -129,8 +129,14 @@ namespace module::skill {
                     // Joint positions relative to default pose (20)
                     // Note: We need to map the joint positions from sensors to the correct order
                     // This is a placeholder - you'll need to map the actual joint positions TODO
-                    auto temp_sensors                        = std::make_unique<Sensors>();
-                    temp_sensors->servo                      = sensors.servo;
+                    auto temp_sensors   = std::make_unique<Sensors>();
+                    temp_sensors->servo = sensors.servo;
+                    // Do a test print to see the ids in the servo message from sensors
+                    std::cout << "Servo IDs (ints) in sensors: ";
+                    for (const auto& servo : sensors.servo) {
+                        std::cout << servo.id << " ";
+                    }
+                    std::cout << std::endl;
                     JointVector current_joints               = sensors_to_configuration(temp_sensors);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
                     idx += JOINT_POS_SIZE;
