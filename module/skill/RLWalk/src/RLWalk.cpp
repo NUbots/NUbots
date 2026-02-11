@@ -38,13 +38,13 @@ namespace module::skill {
     using utility::nusight::graph;
 
     std::vector<std::pair<int, ServoID>> joint_map = {
-        {0, ServoID::L_HIP_YAW},        {1, ServoID::L_HIP_ROLL},     {2, ServoID::L_HIP_PITCH},
-        {3, ServoID::L_KNEE},           {4, ServoID::L_ANKLE_PITCH},  {5, ServoID::L_ANKLE_ROLL},
-        {6, ServoID::R_HIP_YAW},        {7, ServoID::R_HIP_ROLL},     {8, ServoID::R_HIP_PITCH},
-        {9, ServoID::R_KNEE},           {10, ServoID::R_ANKLE_PITCH}, {11, ServoID::R_ANKLE_ROLL},
-        {12, ServoID::NECK_YAW},        {13, ServoID::HEAD_PITCH},    {14, ServoID::L_SHOULDER_PITCH},
-        {15, ServoID::L_SHOULDER_ROLL}, {16, ServoID::L_ELBOW},       {17, ServoID::R_SHOULDER_PITCH},
-        {18, ServoID::R_SHOULDER_ROLL}, {19, ServoID::R_ELBOW}};
+        {0, ServoID::R_SHOULDER_PITCH}, {1, ServoID::L_SHOULDER_PITCH}, {2, ServoID::R_SHOULDER_ROLL},
+        {3, ServoID::L_SHOULDER_ROLL},  {4, ServoID::R_ELBOW},          {5, ServoID::L_ELBOW},
+        {6, ServoID::R_HIP_YAW},        {7, ServoID::L_HIP_YAW},        {8, ServoID::R_HIP_ROLL},
+        {9, ServoID::L_HIP_ROLL},       {10, ServoID::R_HIP_PITCH},     {11, ServoID::L_HIP_PITCH},
+        {12, ServoID::R_KNEE},          {13, ServoID::L_KNEE},          {14, ServoID::R_ANKLE_PITCH},
+        {15, ServoID::L_ANKLE_PITCH},   {16, ServoID::R_ANKLE_ROLL},    {17, ServoID::L_ANKLE_ROLL},
+        {18, ServoID::NECK_YAW},        {19, ServoID::HEAD_PITCH}};
 
     inline Eigen::Matrix<double, 20, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
         Eigen::Matrix<double, 20, 1> q = Eigen::Matrix<double, 20, 1>::Zero();
@@ -110,20 +110,38 @@ namespace module::skill {
 
                     // Accelerometer data in body frame (3)
                     observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
-                    log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
+                    // log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Sensors accelerometer values",
+                                   sensors.accelerometer.x(),
+                                   sensors.accelerometer.y(),
+                                   sensors.accelerometer.z()));
+                    };
                     idx += ACC_SIZE;
 
                     // Gyro data (3)
                     observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;
-                    log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
+                    // log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Sensors gyroscope values",
+                                   sensors.gyroscope.x(),
+                                   sensors.gyroscope.y(),
+                                   sensors.gyroscope.z()));
+                    };
                     idx += GYRO_SIZE;
 
                     // Gravity/Accelerometer data in world frame (3)
                     Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
-                    log<DEBUG>("Gravity: ", gravity.transpose());
-                    log<DEBUG>("Gravity magnitude: ", gravity.norm());
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Sensors accelerometer in world frame values",
+                                   gravity.x(),
+                                   gravity.y(),
+                                   gravity.z()));
+                    };
+                    // log<DEBUG>("Gravity: ", gravity.transpose());
+                    // log<DEBUG>("Gravity magnitude: ", gravity.norm());
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
-                    log<DEBUG>("Accelerometer: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
+                    // log<DEBUG>("Accelerometer in worldframe: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
                     idx += GRAVITY_SIZE;
 
                     // Joint positions relative to default pose (20)
@@ -132,14 +150,17 @@ namespace module::skill {
                     auto temp_sensors                        = std::make_unique<Sensors>();
                     temp_sensors->servo                      = sensors.servo;
                     JointVector current_joints               = sensors_to_configuration(temp_sensors);
-                    observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
+                    observation.segment<JOINT_POS_SIZE>(idx) = /*current_joints - */ default_pose;
                     idx += JOINT_POS_SIZE;
+                    JointVector joints_debug = current_joints - default_pose;
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Joint current positions", current_joints.transpose()));
+                    };
 
                     // Joint velocities relative to default pose (20)
                     // Estimate using finite differences. TODO: Improve
                     const auto now        = NUClear::clock::now();
                     JointVector joint_vel = JointVector::Zero();
-
                     if (have_previous_pose) {
                         std::chrono::duration<double> elapsed = now - last_update_time;
                         double dt                             = elapsed.count();
@@ -153,6 +174,7 @@ namespace module::skill {
                     else {
                         have_previous_pose = true;
                     }
+                    joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
                     previous_pose                            = current_joints;
                     last_update_time                         = now;
                     observation.segment<JOINT_POS_SIZE>(idx) = joint_vel;
@@ -163,12 +185,15 @@ namespace module::skill {
 
                     // Command (3)
                     observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
-                    log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
+                    // log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
                     idx += COMMAND_SIZE;
 
                     // Run inference
                     JointVector joint_angles = run_inference(observation);
-                    log<DEBUG>("Joint angles: ", joint_angles.transpose());
+                    // log<DEBUG>("Joint angles: ", joint_angles.transpose());
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Joint current positions from inference", joint_angles.transpose()));
+                    };
 
                     // Save example data to file
                     std::ofstream data_file("recordings/example_data.json");
@@ -190,7 +215,7 @@ namespace module::skill {
                     data_file << "]\n";
                     data_file << "}\n";
                     data_file.close();
-                    log<DEBUG>("Saved example data to example_data.json");
+                    // log<DEBUG>("Saved example data to example_data.json");
 
                     // Store the last action
                     last_action = joint_angles;
@@ -201,7 +226,7 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_angles[i];
+                        servo->position                   = /*default_pose[i] + */ joint_angles[i];
                         servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
