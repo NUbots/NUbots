@@ -65,6 +65,21 @@ namespace module::vision {
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    namespace {
+        struct BallCandidate {
+            // indices of the clusters used to make this cluster
+            std::vector<size_t> cluster_indices;
+
+            // central axis of the ball
+            Eigen::Vector3d uBCw;
+
+            // radius is = cos(theta), where theta is angle between uBCw and the furthest point on the ball
+            double radius;
+
+            bool used_in_merge{false};
+        };
+    }  // namespace
+
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
@@ -136,44 +151,41 @@ namespace module::vision {
 
                 log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-                const size_t num_unmerged_clusters{clusters.size()};
-
-                // FIND CENTRAL AXIS OF EACH CLUSTER
-                // list of unit vectors from camera to cluster central axis in world space
-                std::vector<Eigen::Vector3d> cluster_axes(num_unmerged_clusters);
-                for (size_t i{}; i < num_unmerged_clusters; ++i) {
-                    const auto& cluster = clusters[i];
-
-                    cluster_axes[i] = utility::vision::visualmesh::find_cluster_central_axis(cluster, uPCw);
+                // Create ball candidates for each cluster
+                std::vector<BallCandidate> ball_candidates(clusters.size());
+                for (size_t i{}; i < clusters.size(); ++i) {
+                    ball_candidates[i].cluster_indices.push_back(i);
                 }
 
-                // FIND ANGULAR RADIUS OF EACH CLUSTER
-                // Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
-                // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
-                // is the angle between the central ball axis (uBCw) and the edge of the ball.
-                std::vector<double> cluster_radii(num_unmerged_clusters);
-                for (size_t i{}; i < num_unmerged_clusters; ++i) {
-                    const auto& cluster         = clusters[i];
-                    const Eigen::Vector3d& uBCw = cluster_axes[i];
+                // FIND CENTRAL AXIS OF EACH BALL CANDIDATE
+                for (BallCandidate& ball : ball_candidates) {
+                    // Each candidate corresponds to a cluster currently
+                    const std::vector<int>& cluster = clusters[ball.cluster_indices[0]];
+                    ball.uBCw = utility::vision::visualmesh::find_cluster_central_axis(cluster, uPCw);
+                }
 
-                    cluster_radii[i] = utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw);
+                // FIND ANGULAR RADIUS OF EACH BALL CANDIDATE
+                for (BallCandidate& ball : ball_candidates) {
+                    // Each candidate corresponds to a cluster currently
+                    const std::vector<int>& cluster = clusters[ball.cluster_indices[0]];
+                    ball.radius = utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, ball.uBCw);
                 }
 
                 // Create a adjacency matrix of potentially valid cluster merges
-                std::vector<std::vector<size_t>> adj_matrix(num_unmerged_clusters);
-                for (size_t i{}; i < num_unmerged_clusters; ++i) {
+                std::vector<std::vector<size_t>> adj_matrix(ball_candidates.size());
+                for (size_t i{}; i < ball_candidates.size(); ++i) {
                     // convert cluster radius stored as cos(theta) to angles
-                    double r_i_angle = std::acos(cluster_radii[i]);
-                    for (size_t j{i + 1}; j < num_unmerged_clusters; ++j) {
-                        double r_j_angle = std::acos(cluster_radii[j]);
+                    const double r_i_angle       = std::acos(ball_candidates[i].radius);
+                    const Eigen::Vector3d uBCw_i = ball_candidates[i].uBCw;
+                    for (size_t j{i + 1}; j < ball_candidates.size(); ++j) {
+                        const double r_j_angle       = std::acos(ball_candidates[j].radius);
+                        const Eigen::Vector3d uBCw_j = ball_candidates[j].uBCw;
 
                         // If angular separation of 2 cluster axes < sum of their angular radii, from the camera's view
                         // they overlap and can be merged. In use, sum of radii is multiplied by merge_buffer_scalar
                         // and this new combined radius is used for checking the overlap. A merge_buffer_scalar of 1.2
                         // allows merging of clusters with a gap of < 0.2 * sum of radii between their original circles
-
-                        // Find angular offset between axis of cluster using the dot product formula
-                        double angular_offset{std::acos(cluster_axes[i].dot(cluster_axes[j]))};
+                        double angular_offset{std::acos(uBCw_i.dot(uBCw_j))};
                         double offset_allowance{(r_i_angle + r_j_angle) * (cfg.merge_buffer_scalar)};
 
                         if (angular_offset < offset_allowance) {
@@ -183,20 +195,17 @@ namespace module::vision {
                     }
                 }
 
-                // keep vector of sphericality scores for reuse, these are only of merged clusters
-                std::vector<double> merged_cluster_circular_fit;
-
-                // Find connected components (merge candidates) through depth first search
-                std::vector<char> visited(num_unmerged_clusters, false);
-                std::vector<char> merged(num_unmerged_clusters, false);
+                // Find connected components (potential merges) through depth first search of the ball candidates
+                std::vector<char> visited(ball_candidates.size(), false);
 
                 // Reuse vectors in each loop
                 std::vector<size_t> stack;
-                stack.reserve(num_unmerged_clusters);
-                std::vector<size_t> mergeable_cluster_indices;
-                mergeable_cluster_indices.reserve(num_unmerged_clusters);
-                for (size_t i{}; i < num_unmerged_clusters; ++i) {
+                stack.reserve(ball_candidates.size());
+                std::vector<size_t> proposed_merge_indices;
+                proposed_merge_indices.reserve(clusters.size());
 
+                size_t num_candidates{ball_candidates.size()};
+                for (size_t i{}; i < num_candidates; ++i) {
                     if (visited[i]) {
                         continue;
                     }
@@ -204,15 +213,14 @@ namespace module::vision {
                     visited[i] = true;
                     stack.push_back(i);
 
-                    // Clear indices again to allow reuse of the mergeable indices vector
-                    // The stack is effectively cleared each loop as DFS can only end with the stack empty
-                    mergeable_cluster_indices.clear();
+                    // empty for reuse
+                    proposed_merge_indices.clear();
 
                     while (!stack.empty()) {
                         size_t current = stack.back();
                         stack.pop_back();
 
-                        mergeable_cluster_indices.push_back(current);
+                        proposed_merge_indices.push_back(current);
 
                         for (size_t neighbour : adj_matrix[current]) {
                             if (!visited[neighbour]) {
@@ -223,202 +231,182 @@ namespace module::vision {
                     }
 
                     // End early if there aren't multiple clusters to merge
-                    if (mergeable_cluster_indices.size() <= 1) {
+                    if (proposed_merge_indices.size() <= 1) {
                         continue;
                     }
 
-                    // Look at the combination of balls with the closest fit to a circle to avoid merging a ball with a
-                    // nearby false detection. Greedily look at only the cases nCn and nCn-1 to minimise checked cases
-                    // as multiple nearby false detections are unlikely.
+                    // This is a possible merge
+                    BallCandidate ball;
+                    ball.cluster_indices = std::move(proposed_merge_indices);
 
-                    // vector from camera to centre of the merged cluster
+                    // Look at the combination of balls with the closest fit to a circle to avoid merging a ball
+                    // with a nearby false detection. Greedily look at only the cases nCn and nCn-1 to minimise
+                    // checked cases as multiple nearby false detections are unlikely.
+
+                    // Adds up unit vectors of each point in the cluster to find a vector with the direction of camera
+                    // to centre of the merged cluster
                     Eigen::Vector3d rBCw = Eigen::Vector3d::Zero();
-                    for (size_t i : mergeable_cluster_indices) {
-                        std::vector<int>& cluster = clusters[i];
-                        for (int j : cluster) {
-                            rBCw += uPCw.col(j);
-                        }
-                    }
-
-                    // It is a list of unit vectors uBCw from camera to centre of the ball in world space, where
-                    // this ball is composed of a cluster made from all mergeable_cluster_indices except
-                    // mergeable_cluster_indices[n] where n is the index in this vector
-                    std::vector<Eigen::Vector3d> skipped_cluster_axes;
-                    skipped_cluster_axes.reserve(mergeable_cluster_indices.size());
-
-                    for (size_t i{}; i < mergeable_cluster_indices.size(); ++i) {
-                        // this is the case where clusters[mergeable_cluster_indices[i]] is skipped
-
-                        // the central axis of this cluster can be found through copying rBCw, then removing all of
-                        // the vectors this cluster added to it consists of to reuse calculations
-                        Eigen::Vector3d nBCw_skipped = rBCw;
-                        std::vector<int>& cluster    = clusters[mergeable_cluster_indices[i]];
+                    for (size_t cluster_index : ball.cluster_indices) {
+                        const std::vector<int>& cluster = clusters[cluster_index];
                         for (int idx : cluster) {
-                            nBCw_skipped -= uPCw.col(idx);
+                            rBCw += uPCw.col(idx);
                         }
-                        nBCw_skipped.normalize();
-                        skipped_cluster_axes.push_back(nBCw_skipped);
                     }
 
-                    // Equal to cos(theta), where theta is the angle between the central ball axis (uBCw) and the
-                    // edge of the ball. The ball is a cluster made from all mergeable_cluster_indices except
-                    // mergeable_cluster_indices[n] where n is the index in this vector
-                    std::vector<double> skipped_cluster_radii;
-                    skipped_cluster_radii.reserve(mergeable_cluster_indices.size());
-                    for (size_t i{}; i < mergeable_cluster_indices.size(); ++i) {
-                        // radius is the max angular offset between any detected point (uPCw) and the axis (uBCw)
-                        double radius{1.0};
-                        for (size_t j{}; j < mergeable_cluster_indices.size(); ++j) {
-                            if (i == j) {
-                                // this cluster is skipped
-                                continue;
-                            }
-                            std::vector<int>& cluster = clusters[mergeable_cluster_indices[j]];
-
-                            // get the maximum angular radius for this cluster
-                            double new_radius =
-                                utility::vision::visualmesh::find_cluster_angular_radius(cluster,
-                                                                                         uPCw,
-                                                                                         skipped_cluster_axes[i]);
-
-                            // a smaller radius is a larger angular offset as radius is cos(theta)
-                            radius = new_radius < radius ? new_radius : radius;
-                        }
-                        skipped_cluster_radii.push_back(radius);
-                    }
-
-                    std::vector<double> skipped_cluster_circular_fit;
-                    skipped_cluster_circular_fit.reserve(mergeable_cluster_indices.size());
-                    for (size_t i{}; i < mergeable_cluster_indices.size(); ++i) {
-
-                        // temp thing for now testing
-
-                        // Goodness of fit to a ball is measured in number of points observed divided by the number of
-                        // expected points the proposed ball would contain
-                        std::vector<std::vector<int>*> points;
-                        size_t observed_bounded{};
-                        for (size_t j{}; j < mergeable_cluster_indices.size(); ++j) {
-                            if (i == j) {
-                                continue;
-                            }
-
-                            points.push_back(&clusters[mergeable_cluster_indices[j]]);
-                            observed_bounded += clusters[mergeable_cluster_indices[j]].size();
-                        }
-
-                        const size_t expected_bounded{
-                            utility::vision::visualmesh::find_number_bounded_points(points,
-                                                                                    neighbours,
-                                                                                    skipped_cluster_axes[i],
-                                                                                    skipped_cluster_radii[i],
-                                                                                    uPCw)};
-                        const double filled_amount{static_cast<double>(observed_bounded) / expected_bounded};
-
-                        skipped_cluster_circular_fit.push_back(filled_amount);
-                    }
-
-                    // Calculations for the nCn clusters option
-                    Eigen::Vector3d uBCw = rBCw.normalized();
+                    ball.uBCw = rBCw.normalized();
                     double radius{1.0};
-                    for (size_t index : mergeable_cluster_indices) {
+                    for (size_t index : ball.cluster_indices) {
                         std::vector<int>& cluster = clusters[index];
-                        double new_radius{
-                            utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw)};
-
+                        double new_radius =
+                            utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, ball.uBCw);
+                        // a smaller radius is a larger angular offset as radius is cos(theta)
                         radius = new_radius < radius ? new_radius : radius;
                     }
+                    ball.radius = radius;
 
-                    std::vector<std::vector<int>*> points;
-                    size_t observed_bounded{};
-                    for (size_t index : mergeable_cluster_indices) {
-                        points.push_back(&clusters[index]);
-                        observed_bounded += clusters[index].size();
-                    }
+                    // looking for the option which is most circular, measured as % fill
+                    auto find_circularity = [&neighbours, &uPCw, &clusters](const std::vector<size_t>& cluster_indices,
+                                                                            std::optional<size_t> removed_pos,
+                                                                            Eigen::Vector3d uBCw,
+                                                                            double radius) -> double {
+                        std::vector<std::vector<int>*> used_clusters;
+                        used_clusters.reserve(cluster_indices.size() - removed_pos.has_value());
+                        for (size_t i{}; i < cluster_indices.size(); ++i) {
+                            if (removed_pos.has_value() && i == removed_pos.value()) {
+                                continue;
+                            }
+                            used_clusters.push_back(&clusters[cluster_indices[i]]);
+                        }
 
-                    const size_t expected_bounded{utility::vision::visualmesh::find_number_bounded_points(points,
+                        size_t observed_bounded{};
+                        for (auto cluster : used_clusters) {
+                            observed_bounded += cluster->size();
+                        }
+
+                        size_t expected_bounded = utility::vision::visualmesh::find_number_bounded_points(used_clusters,
                                                                                                           neighbours,
                                                                                                           uBCw,
                                                                                                           radius,
-                                                                                                          uPCw)};
-                    const double filled_amount{static_cast<double>(observed_bounded) / expected_bounded};
+                                                                                                          uPCw);
 
-                    std::optional<size_t> removed_indice{std::nullopt};
+                        return static_cast<double>(observed_bounded) / expected_bounded;
+                    };
 
-                    // keep best fill as the unmerged option at the start
-                    double best_fill{filled_amount};
-                    for (size_t i{}; i < skipped_cluster_circular_fit.size(); ++i) {
-                        if (skipped_cluster_circular_fit[i] > best_fill) {
-                            best_fill      = skipped_cluster_circular_fit[i];
-                            removed_indice = i;
+                    // the best index to remove to maximise sphericality score, no value is no removal
+                    std::optional<size_t> best_removed_index{std::nullopt};
+                    // highest measured circularity score so far, first entry being the ncn ball
+                    double top_circularity =
+                        find_circularity(ball.cluster_indices, std::nullopt, ball.uBCw, ball.radius);
+                    // cache radius and uBCw associated with the circle with best circularity
+                    double associated_radius;
+                    Eigen::Vector3d associated_uBCw;
+
+                    // iterate through the nCn-1 options, removed index is just the unused index from ball indices
+                    for (size_t removed_i{}; removed_i < ball.cluster_indices.size(); ++removed_i) {
+                        // the central axis of the clusters can be found through copying rBCw, then removing all of
+                        // the vectors the skipped cluster would have added to it
+                        Eigen::Vector3d uBCw = rBCw;
+                        for (int idx : clusters[ball.cluster_indices[removed_i]]) {
+                            uBCw -= uPCw.col(idx);
+                        }
+                        uBCw.normalize();
+
+                        double radius{1.0};
+                        for (size_t i{}; i < ball.cluster_indices.size(); ++i) {
+                            if (i == removed_i) {
+                                continue;
+                            }
+
+                            std::vector<int>& cluster = clusters[ball.cluster_indices[i]];
+                            double new_radius =
+                                utility::vision::visualmesh::find_cluster_angular_radius(cluster, uPCw, uBCw);
+                            // a smaller radius is a larger angular offset as radius is cos(theta)
+                            radius = new_radius < radius ? new_radius : radius;
+                        }
+
+                        double circularity = find_circularity(ball.cluster_indices, removed_i, uBCw, radius);
+                        if (circularity > top_circularity) {
+                            best_removed_index = removed_i;
+                            top_circularity    = circularity;
+                            associated_uBCw    = uBCw;
+                            associated_radius  = radius;
                         }
                     }
 
-                    // remove the indice if its going to give a better spherical fit
-                    if (removed_indice.has_value()) {
-                        mergeable_cluster_indices.erase(mergeable_cluster_indices.begin() + removed_indice.value());
-
+                    // remove the index if its going to give a better spherical fit
+                    if (best_removed_index.has_value()) {
+                        ball.cluster_indices.erase(ball.cluster_indices.begin() + best_removed_index.value());
+                        ball.uBCw   = associated_uBCw;
+                        ball.radius = associated_radius;
                         // skip merging if its better to do no merges
-                        if (mergeable_cluster_indices.size() <= 1) {
-                            log<DEBUG>("Merge rejected due to worse sphericality");
+                        if (ball.cluster_indices.size() <= 1) {
+                            log<DEBUG>("No merging done due to worse circularity");
                             continue;
                         }
 
-                        // TODO maybe have this show on nusight
                         log<DEBUG>("Merged ball created and one possible cluster was removed when making it");
                     }
 
-                    clusters.emplace_back();
-                    std::vector<int>& cluster = clusters.back();
-
-                    // Reserve memory in advance, and note those indices as used for merging
-                    size_t num_points{};
-                    for (size_t i : mergeable_cluster_indices) {
-                        num_points += clusters[i].size();
-                        merged[i] = true;
-                    }
-                    cluster.reserve(num_points);
-
-                    // Copy points from other clusters into the merged one
-                    for (size_t i : mergeable_cluster_indices) {
-                        cluster.insert(cluster.end(), clusters[i].begin(), clusters[i].end());
+                    // note the ball candidates used in merging
+                    for (size_t index : ball.cluster_indices) {
+                        // Each cluster corresponds to a ball candidate, e.g. index n cluster will have a index n ball
+                        // candidate where candidate uses that index as a cluster_index
+                        ball_candidates[index].used_in_merge = true;
                     }
 
-                    cluster_axes.push_back(removed_indice.has_value() ? skipped_cluster_axes[removed_indice.value()]
-                                                                      : uBCw);
-                    cluster_radii.push_back(removed_indice.has_value() ? skipped_cluster_radii[removed_indice.value()]
-                                                                       : radius);
-                    merged_cluster_circular_fit.push_back(best_fill);
+                    // the ball as been made and is now used in merging
+                    ball_candidates.push_back(std::move(ball));
                 }
 
-                log<DEBUG>(fmt::format("Created {} additional clusters through merging {} clusters",
-                                       clusters.size() - num_unmerged_clusters,
-                                       std::count(merged.begin(), merged.end(), true)));
+                log<DEBUG>(fmt::format(
+                    "Created {} additional ball candidates through merging {} clusters",
+                    ball_candidates.size() - clusters.size(),
+                    std::count_if(ball_candidates.begin(), ball_candidates.end(), [](const BallCandidate& candidate) {
+                        return candidate.used_in_merge;
+                    })));
 
-                // Partition the clusters such that clusters above the green horizons are removed,
-                // and then resize the vector to remove them
-                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
-                                                                                            horizon.horizon,
-                                                                                            rPWw,
-                                                                                            false,
-                                                                                            true,
-                                                                                            true);
-                clusters.resize(std::distance(clusters.begin(), green_boundary));
+                // Get a mask for whether a cluster is inside or intersecting the green horizon
+                std::vector<char> accepted_cluster_mask =
+                    utility::vision::visualmesh::get_green_horizon_side_mask(clusters,
+                                                                             horizon.horizon,
+                                                                             rPWw,
+                                                                             false,
+                                                                             true,
+                                                                             true);
 
-                log<DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+
+                log<DEBUG>(fmt::format("Found {} clusters below green horizon",
+                                       std::count(accepted_cluster_mask.begin(), accepted_cluster_mask.end(), true)));
+
+                // throw out ball candidates where all clusters making it are above the green horizon
+                auto cutoff = std::partition(ball_candidates.begin(),
+                                             ball_candidates.end(),
+                                             [&accepted_cluster_mask](const BallCandidate& ball_candidate) {
+                                                 bool kept{false};
+                                                 for (const size_t cluster_idx : ball_candidate.cluster_indices) {
+                                                     if (accepted_cluster_mask[cluster_idx]) {
+                                                         kept = true;
+                                                         break;
+                                                     }
+                                                 }
+                                                 return kept;
+                                             });
+
+                ball_candidates.resize(std::distance(ball_candidates.begin(), cutoff));
 
                 // Create the Balls message, which will contain a Ball for every cluster that is a valid ball
                 auto balls = std::make_unique<Balls>();
 
                 // Balls is still emitted even if there are no balls, to indicate to other modules that no balls are
                 // currently visible
-                if (clusters.empty()) {
+                if (ball_candidates.empty()) {
                     log<DEBUG>("Found no balls.");
                     emit(std::move(balls));
                     return;
                 }
 
                 // Reserve the memory in advance for efficiency
-                balls->balls.reserve(clusters.size());
+                balls->balls.reserve(ball_candidates.size());
 
                 balls->id        = horizon.id;         // camera id
                 balls->timestamp = horizon.timestamp;  // time when the image was taken
@@ -427,22 +415,17 @@ namespace module::vision {
                 // World to camera transform, to be used in for loop below
                 const Eigen::Isometry3d Hcw(horizon.Hcw.cast<double>());
 
-                // CHECK EACH CLUSTER FOR VALID BALL
-                for (size_t i{}; i < clusters.size(); ++i) {
-                    const auto& cluster = clusters[i];
+                // ADD BALL FOR EACH VALID BALL CANDIDATE
+                for (BallCandidate& candidate : ball_candidates) {
                     Ball b;
 
                     // Find central axis of ball, using precomputed measurements from merge logic
                     // uBCw: unit vector from camera to ball central axis in world space
-                    Eigen::Vector3d uBCw{cluster_axes[i]};
-
-                    // Find angular radius of ball from camera, where radius is = cos(theta)
-                    double radius{cluster_radii[i]};
-
                     // The vectors are in world space, multiply by Rcw to get the central axis in camera space
-                    b.uBCc = Hcw.rotation() * uBCw;
+                    b.uBCc = Hcw.rotation() * candidate.uBCw;
+
                     // Angular radius, or cos(theta) where theta is the angle between central axis and ball edge
-                    b.radius = radius;
+                    b.radius = candidate.radius;
 
                     // CALCULATE DISTANCE TO BALL WITH TWO METHODS
                     // 1. Angular-based distance
@@ -459,7 +442,7 @@ namespace module::vision {
                     //      distance = (field.ball_radius) / (sin(arccos(radius)))
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
                     //      distance = field.ball_radius / sqrt(1 - radius^2)
-                    const double angular_distance = field.ball_radius / std::sqrt(1.0 - radius * radius);
+                    const double angular_distance = field.ball_radius / std::sqrt(1.0 - b.radius * b.radius);
                     // Convert uBCc into a position vector (rBCc) and then convert it into Spherical Reciprocal
                     // Coordinates (1/distance, phi, theta)
                     b.measurements.emplace_back();
@@ -477,7 +460,8 @@ namespace module::vision {
                     //      Point on line: (0, 0, 0)
                     // Since the plane normal zeros out x and y, only consider z
                     // rWCw = -Hcw.inverse().translation().z()
-                    const double projection_distance = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
+                    const double projection_distance =
+                        (field.ball_radius - Hcw.inverse().translation().z()) / candidate.uBCw.z();
                     // Create a ball measurement message for this calculation
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
@@ -498,12 +482,7 @@ namespace module::vision {
                     b.colour.fill(1.0);  // a valid ball has a white colour in NUsight
 
                     // DISCARD IF CLUSTER WAS USED FOR MERGING
-                    // Merged is the same size as number of unmerged clusters and merged clusters are placed after
-                    // unmerged, so if i >= merged.size() it was made not used in merging, and the check prevents a
-                    // out of bounds read in the case a merge has been made making clusters.size() > merged.size()
-
-                    if (i < merged.size() && merged[i]) {
-
+                    if (candidate.used_in_merge) {
                         log<DEBUG>("Ball discarded: merged with another detection to create another ball");
                         log<DEBUG>("--------------------------------------------------");
                         // Clusters that were used for merging will show up as orange in NUsight
@@ -511,27 +490,43 @@ namespace module::vision {
                         keep     = false;
                     }
 
-                    // DISCARD IF FILL IS LOWER THAN FILL REQUIREMENT - CALCULATE DEGREE OF FIT TO CIRCLE
-                    // Degree of fit to a circle is defined as n. observed points on the ball / n. expected
-                    // ball points on the visual mesh, for a ball of that centre and radius
-                    double fill_amount;
-                    if (i >= num_unmerged_clusters) {
-                        // use precomputed circular fit from merging logic
-                        fill_amount = merged_cluster_circular_fit[i - num_unmerged_clusters];
-                    }
-                    else {
-                        fill_amount = static_cast<double>(cluster.size())
-                                      / utility::vision::visualmesh::find_number_bounded_points(cluster,
-                                                                                                neighbours,
-                                                                                                uBCw,
-                                                                                                radius,
-                                                                                                uPCw);
+                    // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
+                    // Degree of fit defined as the standard deviation of angle between every rays on the
+                    // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
+                    // it is a bad fit
+                    std::vector<double> angles;
+                    const size_t num_angles = std::accumulate(candidate.cluster_indices.begin(),
+                                                              candidate.cluster_indices.end(),
+                                                              0,
+                                                              [&clusters](size_t count, size_t cluster_index) {
+                                                                  return count + clusters[cluster_index].size();
+                                                              });
+
+                    double mean             = 0.0;
+                    const double max_radius = std::acos(b.radius);  // largest angle between vectors
+                    // Get mean of all the angles in the cluster to then find the standard deviation
+                    for (size_t cluster_idx : candidate.cluster_indices) {
+                        for (int idx : clusters[cluster_idx]) {
+                            const double angle = std::acos(candidate.uBCw.dot(uPCw.col(idx))) / max_radius;
+                            angles.emplace_back(angle);
+                            mean += angle;
+                        }
                     }
 
-                    if (fill_amount < cfg.fill_requirement) {
-                        log<DEBUG>(fmt::format("Ball discarded: fill_amount ({}) < fill_requirement ({})",
-                                               fill_amount,
-                                               cfg.fill_requirement));
+                    mean /= num_angles;
+                    // Calculate standard deviation of angles in cluster
+                    double deviation = 0.0;
+                    for (const auto& angle : angles) {
+                        deviation += (mean - angle) * (mean - angle);
+                    }
+                    deviation = std::sqrt(deviation / (num_angles - 1));
+
+                    // Check if standard deviation is low enough
+                    if (deviation > cfg.maximum_deviation) {
+
+                        log<DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
+                                               deviation,
+                                               cfg.maximum_deviation));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate degree of fit will show as green in NUsight
                         b.colour = keep ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
@@ -591,9 +586,10 @@ namespace module::vision {
                                            b.measurements[1].rBCc.transpose()));
                     log<DEBUG>(fmt::format("Distance Throwout {}",
                                            std::abs(projection_distance - angular_distance) / max_distance));
-                    // If the index of the cluster is larger than the number of unmerged clusters
-                    // It was made by merging as combined clusters are appended after unmerged ones
-                    log<DEBUG>(fmt::format("Created through merging clusters: {}", i >= num_unmerged_clusters));
+                    size_t num_clusters_used{candidate.cluster_indices.size()};
+                    if (num_clusters_used > 1) {
+                        log<DEBUG>(fmt::format("Created through merging {} clusters", num_clusters_used));
+                    }
                     log<DEBUG>("**************************************************");
 
                     if (!keep && log_level > DEBUG) {
@@ -612,8 +608,8 @@ namespace module::vision {
                         const Eigen::Vector3d rBCc = Hcw * horizon.vision_ground_truth.rBWw.cast<double>();
                         const Eigen::Vector3d rBWw = horizon.vision_ground_truth.rBWw.cast<double>();
 
-                        Eigen::Vector3d ball_position_projection = uBCw * projection_distance;
-                        Eigen::Vector3d ball_position_angular    = uBCw * angular_distance;
+                        Eigen::Vector3d ball_position_projection = candidate.uBCw * projection_distance;
+                        Eigen::Vector3d ball_position_angular    = candidate.uBCw * angular_distance;
                         Eigen::Vector3d ball_error_projection    = (ball_position_projection - rBCc).cwiseAbs();
                         Eigen::Vector3d ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
 

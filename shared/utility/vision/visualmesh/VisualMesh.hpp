@@ -151,12 +151,65 @@ namespace utility::vision::visualmesh {
         }
     }
 
+    std::vector<char> get_green_horizon_side_mask(
+        const std::vector<std::vector<int>>& clusters,
+        const std::vector<Eigen::Vector3d>& horizon,
+        const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
+        const bool outside   = true,    // accept clusters completely outside
+        const bool inside    = true,    // accept clusters completely inside
+        const bool intersect = true) {  // accept clusters that go over the boundary)
+
+        auto success = [&](const bool cluster_outside, const bool cluster_inside) {
+            // Cluster is completely outside
+            if (cluster_outside && !cluster_inside) {
+                return outside;
+            }
+            // Cluster is completely inside
+            if (!cluster_outside && cluster_inside) {
+                return inside;
+            }
+            // Cluster intersects the boundary
+            if (cluster_outside && cluster_inside) {
+                return intersect;
+            }
+            // Last option is it's neither in or out
+            NUClear::log<NUClear::LogLevel::ERROR>(
+                "Cluster is neither inside or outside the green horizon. This is bad.");
+            return false;
+        };
+
+        std::vector<char> is_accepted;
+        is_accepted.reserve(clusters.size());
+
+        for (const auto& cluster : clusters) {
+            bool out = false;
+            bool in  = false;
+
+            for (size_t idx{}; idx < cluster.size(); ++idx) {
+                bool position =
+                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));
+                // Only set if it is in or out as we want to find across the cluster
+                in  = position ? true : in;
+                out = !position ? true : out;
+
+                if (out && in) {
+                    // known to be an intersection case
+                    break;
+                }
+            }
+
+            is_accepted.push_back(success(out, in));
+        }
+
+        return is_accepted;
+    }
+
     auto check_green_horizon_side(std::vector<std::vector<int>>& clusters,
                                   const std::vector<Eigen::Vector3d>& horizon,
                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
-                                  const bool& outside   = true,    // accept clusters completely outside
-                                  const bool& inside    = true,    // accept clusters completely inside
-                                  const bool& intersect = true) {  // accept clusters that go over the boundary
+                                  const bool outside   = true,    // accept clusters completely outside
+                                  const bool inside    = true,    // accept clusters completely inside
+                                  const bool intersect = true) {  // accept clusters that go over the boundary
 
         auto success = [&](const bool& cluster_outside, const bool& cluster_inside) {
             // Cluster is completely outside
@@ -189,6 +242,11 @@ namespace utility::vision::visualmesh {
                 // Only set if it is in or out as we want to find across the cluster
                 in  = position ? true : in;
                 out = !position ? true : out;
+
+                if (out && in) {
+                    // known to be an intersection case
+                    break;
+                }
             }
             return success(out, in);
         });
@@ -258,6 +316,7 @@ namespace utility::vision::visualmesh {
      * @brief Finds central axis of a cluster
      * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
      * vector, which represents the central cone axis
+     * @tparam collection of ints, held as a vector of values or pointers to another vector of ints
      * @param cluster A collection of points
      * @param uPCw Unit vector from camera to a point in the mesh in world space
      * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
