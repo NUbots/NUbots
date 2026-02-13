@@ -157,7 +157,7 @@ namespace utility::vision::visualmesh {
         const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
         const bool outside   = true,    // accept clusters completely outside
         const bool inside    = true,    // accept clusters completely inside
-        const bool intersect = true) {  // accept clusters that go over the boundary)
+        const bool intersect = true) {  // accept clusters that go over the boundary
 
         auto success = [&](const bool cluster_outside, const bool cluster_inside) {
             // Cluster is completely outside
@@ -230,8 +230,8 @@ namespace utility::vision::visualmesh {
             return false;
         };
 
-        // Move any clusters that don't intersect the green horizon to the end of the list
-        // We need to find one point above the green horizon and one below it
+        // Move any clusters that don't meet success criterion to the end of the list
+        // We need to find if there are points above the green horizon and/or one below it
         return std::partition(clusters.begin(), clusters.end(), [&](const std::vector<int>& cluster) {
             bool out = false;
             bool in  = false;
@@ -255,17 +255,13 @@ namespace utility::vision::visualmesh {
     /**
      * @brief Count number of mesh points bounded in cone from camera using DFS.
      *
-     * @tparam collection of ints, held as a vector of values or pointers to another vector of ints
-     * @param indice_collection Collection of indices known to be bounded in the cone
      * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
-     * @param uBCw The centre of the bounded cone represented as a unit vector from ball to camera in world space
+     * @param uBCw The centre of the bounded cone represented as a unit vector from camera to ball in world space
      * @param radius Angular radius of the cone, equal to cos(theta)
      * @param uPCw Unit vectors from camera to a point in the mesh in world space
      * @return number of bounded points the mesh has in this cone
      */
-    template <typename T>
-        requires std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<std::vector<int>*>>
-    size_t find_number_bounded_points(const T& indice_collection,
+    size_t find_number_bounded_points(const std::vector<std::vector<int>*>& indice_collection,
                                       const Eigen::MatrixXi& neighbours,
                                       const Eigen::Vector3d uBCw,
                                       const double radius,
@@ -276,13 +272,8 @@ namespace utility::vision::visualmesh {
         size_t num_visited{};
 
         // indice_collection is known to be bounded in the cone so they are added to the stack
-        if constexpr (std::same_as<T, std::vector<int>>) {
-            stack.insert(stack.end(), indice_collection.begin(), indice_collection.end());
-        }
-        else if constexpr (std::same_as<T, std::vector<std::vector<int>*>>) {
-            for (const std::vector<int>* indices : indice_collection) {
-                stack.insert(stack.end(), indices->begin(), indices->end());
-            }
+        for (const std::vector<int>* indices : indice_collection) {
+            stack.insert(stack.end(), indices->begin(), indices->end());
         }
 
         // indices in the stack have been visited
@@ -316,7 +307,6 @@ namespace utility::vision::visualmesh {
      * @brief Finds central axis of a cluster
      * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
      * vector, which represents the central cone axis
-     * @tparam collection of ints, held as a vector of values or pointers to another vector of ints
      * @param cluster A collection of points
      * @param uPCw Unit vector from camera to a point in the mesh in world space
      * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space

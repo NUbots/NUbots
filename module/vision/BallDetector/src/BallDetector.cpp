@@ -88,7 +88,7 @@ namespace module::vision {
             cfg.confidence_threshold  = config["confidence_threshold"].as<double>();
             cfg.cluster_points        = config["cluster_points"].as<int>();
             cfg.merge_buffer_scalar   = config["merge_buffer_scalar"].as<double>();
-            cfg.fill_requirement      = config["fill_requirement"].as<double>();
+            cfg.merge_preference      = config["merge_preference"].as<double>();
             cfg.minimum_ball_distance = config["minimum_ball_distance"].as<double>();
             cfg.distance_disagreement = config["distance_disagreement"].as<double>();
             cfg.maximum_deviation     = config["maximum_deviation"].as<double>();
@@ -134,12 +134,14 @@ namespace module::vision {
                 //    c) Partition all of the indices that are in the cluster
                 //    d) Repeat a-c for all points that were not partitioned
                 //    e) Delete all partitions smaller than a given threshold
-                // 2) Create additional clusters when multiple clusters are likely on the same ball by
-                //    a) Precompute central axis and angular radius of each cluster
-                //    b) Create an adjacency table with connections being minimal angular offset between clusters
-                //    c) Find connected components to use as candidates for merging through depth first search
-                //    d) For each connected component, add as a new cluster if it creates a more spherical cluster
-                // 3) Discard all clusters are entirely above the green horizon
+                // 2) Create BallCandidates from clusters, considering opportunities to merge clusters by
+                //    a) Create a ball candidate for each each cluster
+                //    b) Compute central axis and angular radius of each ball candidate
+                //    c) Create an adjacency table with connections being minimal angular offset between ball candidates
+                //    d) For each connected component, check if merging nCn or nCn-1 ball candidates is preferred
+                //    e) Create a new ball candidate from the merged candidates, then compute its radius and axis
+                //    f) Mark candidates used for merging as used in merging
+                // 3) Discard all ball candidates who's points are entirely above the green horizon
 
                 std::vector<std::vector<int>> clusters;
 
@@ -296,7 +298,8 @@ namespace module::vision {
                     std::optional<size_t> best_removed_index{std::nullopt};
                     // highest measured circularity score so far, first entry being the ncn ball
                     double top_circularity =
-                        find_circularity(ball.cluster_indices, std::nullopt, ball.uBCw, ball.radius);
+                        find_circularity(ball.cluster_indices, std::nullopt, ball.uBCw, ball.radius)
+                        * cfg.merge_preference;
                     // cache radius and uBCw associated with the circle with best circularity
                     double associated_radius;
                     Eigen::Vector3d associated_uBCw;
@@ -483,7 +486,7 @@ namespace module::vision {
 
                     // DISCARD IF CLUSTER WAS USED FOR MERGING
                     if (candidate.used_in_merge) {
-                        log<DEBUG>("Ball discarded: merged with another detection to create another ball");
+                        log<DEBUG>("Ball candidate discarded: merged with another detection to create another ball");
                         log<DEBUG>("--------------------------------------------------");
                         // Clusters that were used for merging will show up as orange in NUsight
                         b.colour = keep ? message::conversion::math::vec4(1.0, 0.65, 0.0, 1.0) : b.colour;
