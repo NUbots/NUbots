@@ -109,29 +109,32 @@ namespace module::skill {
                     int idx = 0;
 
                     // Accelerometer data in body frame (3)
-                    observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
+                    Eigen::Vector3d accelerometer_val = sensors.accelerometer;
+                    Eigen::Vector3d accelerometer_ms2 = (accelerometer_val - 512 * (Eigen::Vector3d::Constant(1, 1, 1)))
+                                                        * 0.0078125 * 9.81;  // Convert from raw to m/s^2
+                    observation.segment<ACC_SIZE>(idx) = accelerometer_ms2;
                     // log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Sensors accelerometer values",
-                                   sensors.accelerometer.x(),
-                                   sensors.accelerometer.y(),
-                                   sensors.accelerometer.z()));
+                                   accelerometer_ms2.x(),
+                                   accelerometer_ms2.y(),
+                                   accelerometer_ms2.z()));
                     };
                     idx += ACC_SIZE;
 
                     // Gyro data (3)
-                    observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;
+                    Eigen::Vector3d gyro_val = sensors.gyroscope;
+                    Eigen::Vector3d gyro_rads =
+                        (gyro_val - 512 * (Eigen::Vector3d::Constant(1, 1, 1))) * (1000.0 / 1024.0) * (M_PI / 180.0);
+                    observation.segment<GYRO_SIZE>(idx) = gyro_rads;  // Convert to radians/s
                     // log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors gyroscope values",
-                                   sensors.gyroscope.x(),
-                                   sensors.gyroscope.y(),
-                                   sensors.gyroscope.z()));
+                        emit(graph("DEBUG: Sensors gyroscope values", gyro_rads.x(), gyro_rads.y(), gyro_rads.z()));
                     };
                     idx += GYRO_SIZE;
 
                     // Gravity/Accelerometer data in world frame (3)
-                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
+                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * accelerometer_ms2;
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Sensors accelerometer in world frame values",
                                    gravity.x(),
@@ -150,7 +153,7 @@ namespace module::skill {
                     auto temp_sensors                        = std::make_unique<Sensors>();
                     temp_sensors->servo                      = sensors.servo;
                     JointVector current_joints               = sensors_to_configuration(temp_sensors);
-                    observation.segment<JOINT_POS_SIZE>(idx) = /*current_joints - */ default_pose;
+                    observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
                     idx += JOINT_POS_SIZE;
                     JointVector joints_debug = current_joints - default_pose;
                     if (log_level <= DEBUG) {
@@ -226,7 +229,7 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = /*default_pose[i] + */ joint_angles[i];
+                        servo->position                   = default_pose[i] + joint_angles[i];
                         servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
@@ -324,6 +327,9 @@ namespace module::skill {
         }
 
         try {
+            // Normalise observation
+            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
+
             // Convert observation to float array
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {

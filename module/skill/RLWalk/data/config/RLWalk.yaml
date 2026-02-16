@@ -9,24 +9,24 @@ model:
   num_joints: 20
   obs_size: 72
 
-default_pose:
-  - -3.39000e-02
-  - 1.63000e-01
-  - -9.04000e-01
-  - 1.20000e+00
-  - -5.10000e-01
-  - -1.66000e-01
-  - -3.29000e-02
-  - -1.62000e-01
-  - -9.04000e-01
-  - 1.20000e+00
-  - -5.08000e-01
-  - 1.67000e-01
-  - -2.22000e-08
-  - 6.45000e-05
-  - 1.71000e+00
-  - 1.97000e-01
-  - -7.13000e-01
-  - 1.71000e+00
-  - -1.97000e-01
-  - -7.18000e-01
+default_pose: # Same as in Mujoco.yaml
+  - 1.71400e+00 # Right shoulder pitch
+  - 1.71600e+00 # Left shoulder pitch
+  - -1.98000e-01 # Right shoulder roll
+  - 1.98000e-01 # Left shoulder roll
+  - -7.20000e-01 # Right elbow pitch
+  - -7.15000e-01 # Left elbow pitch
+  - -3.30000e-02 # Right hip yaw
+  - 3.40000e-02 # Left hip yaw
+  - -1.62000e-01 # Right hip roll
+  - 1.63000e-01 # Left hip roll
+  - -9.05000e-01 # Right hip pitch
+  - -9.05000e-01 # Left hip pitch
+  - 1.20600e+00 # Right knee pitch
+  - 1.20600e+00 # Left knee pitch
+  - -5.10000e-01 # Right ankle pitch
+  - -5.12000e-01 # Left ankle pitch
+  - 1.68000e-01 # Right ankle roll
+  - -1.67000e-01 # Left ankle roll
+  - 0.00000e+00 # Neck yaw
+  - 0.00000e+00 # Head pitch
