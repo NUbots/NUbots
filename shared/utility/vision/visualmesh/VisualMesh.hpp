@@ -102,7 +102,7 @@ namespace utility::vision::visualmesh {
         std::vector<value_type> values(first, last);
 
         // Lookup table: which indices are in the input set
-        std::vector<bool> is_in_input(neighbours.cols(), false);
+        std::vector<char> is_in_input(neighbours.cols(), false);
         for (int idx : values) {
             if (idx >= 0 && idx < int(is_in_input.size())) {
                 is_in_input[idx] = true;
@@ -110,7 +110,7 @@ namespace utility::vision::visualmesh {
         }
 
         // Track visited status of all points
-        std::vector<bool> visited(neighbours.cols(), false);
+        std::vector<char> visited(neighbours.cols(), false);
 
         // Iterate through each index and form clusters via DFS
         for (int i = 0; i < N; ++i) {
@@ -122,23 +122,19 @@ namespace utility::vision::visualmesh {
             std::vector<int> cluster;
             std::vector<int> stack;
             stack.push_back(seed);
+            visited[seed] = true;
 
             // Perform DFS to find all connected points in the cluster
             while (!stack.empty()) {
                 int current = stack.back();
                 stack.pop_back();
-
-                // If already visited, skip
-                if (visited[current]) {
-                    continue;
-                }
-                visited[current] = true;
                 cluster.push_back(current);
 
                 // Push unvisited neighbours that are also in the input set
                 for (int n = 0; n < neighbours.rows(); ++n) {
                     int neigh = neighbours(n, current);
                     if (neigh >= 0 && neigh < int(visited.size()) && !visited[neigh] && is_in_input[neigh]) {
+                        visited[neigh] = true;
                         stack.push_back(neigh);
                     }
                 }
