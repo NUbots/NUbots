@@ -109,32 +109,29 @@ namespace module::skill {
                     int idx = 0;
 
                     // Accelerometer data in body frame (3)
-                    Eigen::Vector3d accelerometer_val = sensors.accelerometer;
-                    Eigen::Vector3d accelerometer_ms2 = (accelerometer_val - 512 * (Eigen::Vector3d::Constant(1, 1, 1)))
-                                                        * 0.0078125 * 9.81;  // Convert from raw to m/s^2
-                    observation.segment<ACC_SIZE>(idx) = accelerometer_ms2;
+                    observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
                     // log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Sensors accelerometer values",
-                                   accelerometer_ms2.x(),
-                                   accelerometer_ms2.y(),
-                                   accelerometer_ms2.z()));
+                                   sensors.accelerometer.x(),
+                                   sensors.accelerometer.y(),
+                                   sensors.accelerometer.z()));
                     };
                     idx += ACC_SIZE;
 
                     // Gyro data (3)
-                    Eigen::Vector3d gyro_val = sensors.gyroscope;
-                    Eigen::Vector3d gyro_rads =
-                        (gyro_val - 512 * (Eigen::Vector3d::Constant(1, 1, 1))) * (1000.0 / 1024.0) * (M_PI / 180.0);
-                    observation.segment<GYRO_SIZE>(idx) = gyro_rads;  // Convert to radians/s
+                    observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;  // Convert to radians/s
                     // log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors gyroscope values", gyro_rads.x(), gyro_rads.y(), gyro_rads.z()));
+                        emit(graph("DEBUG: Sensors gyroscope values",
+                                   sensors.gyroscope.x(),
+                                   sensors.gyroscope.y(),
+                                   sensors.gyroscope.z()));
                     };
                     idx += GYRO_SIZE;
 
                     // Gravity/Accelerometer data in world frame (3)
-                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * accelerometer_ms2;
+                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Sensors accelerometer in world frame values",
                                    gravity.x(),
@@ -159,6 +156,9 @@ namespace module::skill {
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Joint current positions", current_joints.transpose()));
                     };
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Servo default pose", default_pose.transpose()));
+                    };
 
                     // Joint velocities relative to default pose (20)
                     // Estimate using finite differences. TODO: Improve
@@ -177,10 +177,14 @@ namespace module::skill {
                     else {
                         have_previous_pose = true;
                     }
-                    joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
+                    // joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
                     previous_pose                            = current_joints;
                     last_update_time                         = now;
                     observation.segment<JOINT_POS_SIZE>(idx) = joint_vel;
+                    if (log_level <= DEBUG) {
+                        emit(graph("DEBUG: Joint velocity", joint_vel.transpose()));
+                    };
+                    idx += JOINT_POS_SIZE;
 
                     // Last action (20)
                     observation.segment<JOINT_POS_SIZE>(idx) = last_action;
@@ -193,9 +197,11 @@ namespace module::skill {
 
                     // Run inference
                     JointVector joint_angles = run_inference(observation);
+                    // Assume output is in degrees, convert to radians
+                    joint_angles = joint_angles * (M_PI / 180.0);
                     // log<DEBUG>("Joint angles: ", joint_angles.transpose());
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint current positions from inference", joint_angles.transpose()));
+                        emit(graph("DEBUG: Joint offset goal positions from inference", joint_angles.transpose()));
                     };
 
                     // Save example data to file
@@ -233,7 +239,7 @@ namespace module::skill {
                         servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
-                    emit<Task>(body);  // TODO: find where this is being consumed
+                    emit<Task>(body);
 
                     // Emit walk state
                     auto walk_state = std::make_unique<WalkState>(WalkState::State::WALKING,
