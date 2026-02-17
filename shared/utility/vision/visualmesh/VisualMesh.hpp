@@ -251,6 +251,7 @@ namespace utility::vision::visualmesh {
     /**
      * @brief Count number of mesh points bounded in cone from camera using DFS.
      *
+     * @param indice_collection Collection of unique indices that are known to be bounded in the cone
      * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
      * @param uBCw The centre of the bounded cone represented as a unit vector from camera to ball in world space
      * @param radius Angular radius of the cone, equal to cos(theta)
@@ -267,7 +268,7 @@ namespace utility::vision::visualmesh {
         std::vector<int> stack;
         size_t num_visited{};
 
-        // indice_collection is known to be bounded in the cone so they are added to the stack
+        // indices are known to be unique and bounded in the cone so they are added to the stack without checks
         for (const std::vector<int>* indices : indice_collection) {
             stack.insert(stack.end(), indices->begin(), indices->end());
         }
@@ -286,7 +287,7 @@ namespace utility::vision::visualmesh {
             for (int i{}; i < neighbours.rows(); ++i) {
                 int neigh = neighbours(i, current);
                 // radius and uPCw.col(neigh).dot(uBCw) are in cos(theta), so being larger than radius bounds it inside
-                // the cone. Neighbour >= 0 so can be type cast into size_t.
+                // the cone. Neighbour >= 0 so can be safely type cast into size_t.
                 if (neigh >= 0 && static_cast<size_t>(neigh) < visited.size() && !visited[neigh]
                     && uPCw.col(neigh).dot(uBCw) >= radius) {
                     stack.push_back(neigh);

@@ -7,7 +7,7 @@ merge_buffer_scalar:
   1.4 # When considered if overlapping for merging, its buffer is used which has a radius of
   # the cluster's radius * merge_buffer_scalar
 merge_preference:
-  1.5 # Increases the effective circularity score of the totally merged cluster,
+  1.8 # Increases the effective circularity score of the totally merged cluster,
   # encouraging full merges
 minimum_ball_distance: 0.4 # Minimum distance for a cluster to be a viable ball
 distance_disagreement:

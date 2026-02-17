@@ -42,7 +42,6 @@
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
-#include "utility/math/geometry/ConvexHull.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
