@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2023 NUbots
+# Copyright (c) 2019 NUbots
 #
 # This file is part of the NUbots codebase.
 # See https://github.com/NUbots/NUbots for further info.
@@ -32,25 +32,12 @@ import os
 import generate_toolchains
 
 target = {
-    "flags": [
-        "-march=alderlake",
-        "-mtune=alderlake",
-        "-mabm",
-        "-mshstk",
-        "-mno-cldemote",
-        "-mno-kl",
-        "-mno-pconfig",
-        "-mno-widekl",
-        "-fPIC",
-        "--param l1-cache-size=48",
-        "--param l1-cache-line-size=64",
-        "--param l2-cache-size=18432",
-    ],
+    "flags": ["-fPIC", "-mtune=cortex-a78ae", "-march=armv8.2-a"],
     "release_flags": ["-O3", "-DNDEBUG"],
-    "asm_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
+    "asm_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
     "asm_object": "elf64",
+    "arch": "aarch64",
 }
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate toolchain files for the docker images")
@@ -60,4 +47,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    generate_toolchains.generate(args.prefix, "nuc12wshi7", target)
+    generate_toolchains.generate(args.prefix, "orinnx", target)

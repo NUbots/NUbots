@@ -35,7 +35,7 @@ def generate_cmake_toolchain(target, prefix):
     template = dedent(
         """\
         set(CMAKE_SYSTEM_NAME Linux)
-        set(CMAKE_SYSTEM_PROCESSOR x86_64)
+        set(CMAKE_SYSTEM_PROCESSOR {arch})
         set(CMAKE_C_COMPILER /usr/bin/gcc)
         set(CMAKE_CXX_COMPILER /usr/bin/g++)
         set(CMAKE_FIND_ROOT_PATH
@@ -80,6 +80,7 @@ def generate_cmake_toolchain(target, prefix):
         ),
         asm_object=target["asm_object"],
         prefix=prefix,
+        arch=target["arch"]
     )
 
 
@@ -88,8 +89,8 @@ def generate_meson_cross_file(target):
         """\
         [host_machine]
         system = 'linux'
-        cpu_family = 'x86_64'
-        cpu = 'x86_64'
+        cpu_family = '{arch}'
+        cpu = '{arch}'
         endian = 'little'
 
         [properties]
@@ -113,7 +114,8 @@ def generate_meson_cross_file(target):
             [
                 "'{}'".format(flag)
                 for flag in target["release_flags"] + [param.replace(" ", "', '") for param in target["flags"]]
-            ]
+            ],
+        arch=target["arch"]
         )
     )
 
