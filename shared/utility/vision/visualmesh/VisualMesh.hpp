@@ -30,6 +30,7 @@
 
 #include <Eigen/Core>
 #include <iterator>
+#include <optional>
 #include <queue>
 #include <vector>
 
@@ -147,13 +148,23 @@ namespace utility::vision::visualmesh {
         }
     }
 
-    std::vector<char> get_green_horizon_side_mask(
-        const std::vector<std::vector<int>>& clusters,
-        const std::vector<Eigen::Vector3d>& horizon,
-        const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
-        const bool outside   = true,    // accept clusters completely outside
-        const bool inside    = true,    // accept clusters completely inside
-        const bool intersect = true) {  // accept clusters that go over the boundary
+    /**
+     * @brief Get the green horizon side mask object
+     *
+     * @param clusters Vector of clusters, each a vector of indices.
+     * @param horizon Rays making up the green horizon
+     * @param rays Vectors @p clusters indices index into
+     * @param outside Accept clusters completely outside the green horizon.
+     * @param inside Accept clusters completely inside the green horizon.
+     * @param intersect Accept clusters that intersect the green horizon
+     * @return std::vector<char> mask for accepted clusters
+     */
+    std::vector<char> get_green_horizon_side_mask(const std::vector<std::vector<int>>& clusters,
+                                                  const std::vector<Eigen::Vector3d>& horizon,
+                                                  const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
+                                                  const bool outside   = true,
+                                                  const bool inside    = true,
+                                                  const bool intersect = true) {
 
         auto success = [&](const bool cluster_outside, const bool cluster_inside) {
             // Cluster is completely outside
@@ -189,7 +200,7 @@ namespace utility::vision::visualmesh {
                 out = !position ? true : out;
 
                 if (out && in) {
-                    // known to be an intersection case
+                    // Known to be an intersection case
                     break;
                 }
             }
@@ -200,12 +211,23 @@ namespace utility::vision::visualmesh {
         return is_accepted;
     }
 
+    /**
+     * @brief
+     *
+     * @param clusters Vector of clusters, each a vector of indices.
+     * @param horizon Rays making up the green horizon
+     * @param rays Vectors @p clusters indices index into
+     * @param outside Accept clusters completely outside the green horizon.
+     * @param inside Accept clusters completely inside the green horizon.
+     * @param intersect Accept clusters that intersect the green horizon
+     * @return auto
+     */
     auto check_green_horizon_side(std::vector<std::vector<int>>& clusters,
                                   const std::vector<Eigen::Vector3d>& horizon,
                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
-                                  const bool outside   = true,    // accept clusters completely outside
-                                  const bool inside    = true,    // accept clusters completely inside
-                                  const bool intersect = true) {  // accept clusters that go over the boundary
+                                  const bool outside   = true,
+                                  const bool inside    = true,
+                                  const bool intersect = true) {
 
         auto success = [&](const bool& cluster_outside, const bool& cluster_inside) {
             // Cluster is completely outside
@@ -240,7 +262,7 @@ namespace utility::vision::visualmesh {
                 out = !position ? true : out;
 
                 if (out && in) {
-                    // known to be an intersection case
+                    // Known to be an intersection case
                     break;
                 }
             }
@@ -249,61 +271,78 @@ namespace utility::vision::visualmesh {
     }
 
     /**
-     * @brief Count number of mesh points bounded in cone from camera using DFS.
+     * @brief Calculates circularity score for one merge option as observed/expected bounded points.
      *
-     * @param indice_collection Collection of unique indices that are known to be bounded in the cone
+     * @param clusters Collection of all candidate clusters.
+     * @param cluster_indices Indices into @p clusters that form this merge candidate.
+     * @param removed_pos Optional position in @p cluster_indices to skip.
      * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
-     * @param uBCw The centre of the bounded cone represented as a unit vector from camera to ball in world space
-     * @param radius Angular radius of the cone, equal to cos(theta)
-     * @param uPCw Unit vectors from camera to a point in the mesh in world space
-     * @return number of bounded points the mesh has in this cone
+     * @param uBCw The centre axis of the cone represented as a unit vector in world space.
+     * @param radius Angular radius of the cone, equal to cos(theta).
+     * @param uPCw Unit vectors from camera to a point in the mesh in world space.
+     * @return Circularity score measured as observed bounded points divided by expected bounded points.
      */
-    size_t find_number_bounded_points(const std::vector<std::vector<int>*>& indice_collection,
-                                      const Eigen::MatrixXi& neighbours,
-                                      const Eigen::Vector3d uBCw,
-                                      const double radius,
-                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
-        // track visited points
+    double find_cluster_circularity(const std::vector<std::vector<int>>& clusters,
+                                    const std::vector<size_t>& cluster_indices,
+                                    const std::optional<size_t>& removed_pos,
+                                    const Eigen::MatrixXi& neighbours,
+                                    const Eigen::Vector3d& uBCw,
+                                    const double radius,
+                                    const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
+
+        std::vector<const std::vector<int>*> used_clusters;
+        used_clusters.reserve(cluster_indices.size() - removed_pos.has_value());
+        for (size_t i{}; i < cluster_indices.size(); ++i) {
+            if (removed_pos.has_value() && i == removed_pos.value()) {
+                continue;
+            }
+            used_clusters.push_back(&clusters[cluster_indices[i]]);
+        }
+
+        size_t observed_bounded{};
+        for (const auto* cluster : used_clusters) {
+            observed_bounded += cluster->size();
+        }
+
+        // Count number of mesh points bounded in cone from camera using DFS for expected number of bounded points
         std::vector<char> visited(neighbours.cols(), false);
         std::vector<int> stack;
-        size_t num_visited{};
+        size_t expected_bounded{};
 
-        // indices are known to be unique and bounded in the cone so they are added to the stack without checks
-        for (const std::vector<int>* indices : indice_collection) {
+        // Indices are known to be unique and bounded in the cone so they are added to the stack without checks
+        for (const std::vector<int>* indices : used_clusters) {
             stack.insert(stack.end(), indices->begin(), indices->end());
         }
 
-        // indices in the stack have been visited
         for (int index : stack) {
             visited[index] = true;
         }
-        num_visited += stack.size();
+        expected_bounded += stack.size();
 
-        // depth first search where if a points neighbours are bounded by the cone they are connected
+        // Depth first search where if a points neighbours are bounded by the cone they are connected
         while (!stack.empty()) {
             int current = stack.back();
             stack.pop_back();
 
-            for (int i{}; i < neighbours.rows(); ++i) {
+            for (int i = 0; i < neighbours.rows(); ++i) {
                 int neigh = neighbours(i, current);
-                // radius and uPCw.col(neigh).dot(uBCw) are in cos(theta), so being larger than radius bounds it inside
-                // the cone. Neighbour >= 0 so can be safely type cast into size_t.
+                // When uPCw.col(neigh).dot(uBCw) > radius it is bounded inside as both are in cos(theta)
                 if (neigh >= 0 && static_cast<size_t>(neigh) < visited.size() && !visited[neigh]
                     && uPCw.col(neigh).dot(uBCw) >= radius) {
                     stack.push_back(neigh);
                     visited[neigh] = true;
-                    ++num_visited;
+                    ++expected_bounded;
                 }
             }
         }
 
-        return num_visited;
+        return static_cast<double>(observed_bounded) / expected_bounded;
     }
 
     /**
      * @brief Finds central axis of a cluster
      * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
-     * vector, which represents the central cone axis
+     * vector, which represents the central axis
      * @param cluster A collection of points
      * @param uPCw Unit vector from camera to a point in the mesh in world space
      * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
@@ -331,7 +370,7 @@ namespace utility::vision::visualmesh {
     double find_cluster_angular_radius(const std::vector<int>& cluster,
                                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
                                        const Eigen::Vector3d& uBCw) {
-        double radius{1.0};
+        double radius = 1.0;
         for (const auto& idx : cluster) {
             // Unit vector from the camera to the ball edge, in world space
             const Eigen::Vector3d& uECw(uPCw.col(idx));
