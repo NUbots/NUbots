@@ -82,6 +82,28 @@ namespace module::skill {
             initialize_model();
         });
 
+        // Load normalisation parameters from YAML
+        on<Configuration>("normalisation_params.yaml").then([this](const Configuration& norm_config) {
+            auto mean_vec = norm_config["obs_mean"].as<std::vector<double>>();
+            auto std_vec  = norm_config["obs_std"].as<std::vector<double>>();
+
+            if (mean_vec.size() != TOTAL_OBS_SIZE || std_vec.size() != TOTAL_OBS_SIZE) {
+                log<ERROR>("Normalization params size mismatch! Expected: ",
+                           TOTAL_OBS_SIZE,
+                           " Got mean: ",
+                           mean_vec.size(),
+                           " std: ",
+                           std_vec.size());
+            }
+            else {
+                for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
+                    _mean[i] = mean_vec[i];
+                    _std[i]  = std_vec[i];
+                }
+                log<INFO>("Loaded normalization parameters from normalisation_params.yaml");
+            }
+        });
+
         // Start - Runs every time the Walk provider starts
         on<Start<WalkTask>>().then([this]() {
             // Emit a stopped state as we are not yet walking
@@ -141,7 +163,8 @@ namespace module::skill {
                     // log<DEBUG>("Gravity: ", gravity.transpose());
                     // log<DEBUG>("Gravity magnitude: ", gravity.norm());
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
-                    // log<DEBUG>("Accelerometer in worldframe: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
+                    // log<DEBUG>("Accelerometer in worldframe: ",
+                    // observation.segment<GRAVITY_SIZE>(idx).transpose());
                     idx += GRAVITY_SIZE;
 
                     // Joint positions relative to default pose (20)
@@ -152,7 +175,6 @@ namespace module::skill {
                     JointVector current_joints               = sensors_to_configuration(temp_sensors);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
                     idx += JOINT_POS_SIZE;
-                    JointVector joints_debug = current_joints - default_pose;
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Joint current positions", current_joints.transpose()));
                     };
@@ -335,11 +357,13 @@ namespace module::skill {
         try {
             // Normalise observation
             emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
+            ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std);
+            emit(graph("DEBUG: Normalized observation", norm_observation.transpose()));
 
-            // Convert observation to float array
+            // Convert normalised observation to float array
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                input_data[i] = static_cast<float>(observation[i]);
+                input_data[i] = static_cast<float>(norm_observation[i]);
             }
 
             // Create input tensor

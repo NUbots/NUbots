@@ -32,6 +32,8 @@ namespace module::skill {
         struct Config {
             /// @brief Path to the ONNX model file
             std::string model_path;
+            /// @brief Path to the PyTorch model file for normalisation
+            std::string pt_model_path;
             /// @brief Device to run inference on (CPU, GPU, etc.)
             std::string device;
             /// @brief Input tensor name in the ONNX model
@@ -63,6 +65,10 @@ namespace module::skill {
 
         /// @brief Default pose for the robot
         JointVector default_pose;
+
+        /// @brief Normalisation parameters
+        ObservationVector _mean;
+        ObservationVector _std;
 
         /// @brief Last joint positions for velocity estimation
         JointVector previous_pose;
