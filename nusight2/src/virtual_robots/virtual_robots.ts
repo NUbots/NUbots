@@ -6,6 +6,7 @@ import { OverviewSimulator } from "./simulators/overview_simulator";
 import { ScriptDataSimulator } from "./simulators/script_data_simulator";
 import { SensorsSimulator } from "./simulators/sensors_simulator";
 import { VisionSimulator } from "./simulators/vision_simulator";
+import { DirectorSimulator } from "./simulators/director_simulator";
 import { VirtualRobot } from "./virtual_robot";
 
 export class VirtualRobots {
@@ -36,6 +37,7 @@ export class VirtualRobots {
           ChartSimulator.of({ nuclearnetClient }),
           VisionSimulator.of({ nuclearnetClient }),
           ScriptDataSimulator.of({ nuclearnetClient }),
+          DirectorSimulator.of({ nuclearnetClient, robotIndex: i, numRobots }),
         ],
       });
     });
