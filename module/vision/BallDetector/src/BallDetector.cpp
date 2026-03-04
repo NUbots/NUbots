@@ -202,7 +202,7 @@ namespace module::vision {
                 }
 
                 // Find connected components (potential merges) through depth first search of the ball candidates
-                std::vector<char> visited(ball_candidates.size(), false);
+                std::vector<bool> visited(ball_candidates.size(), false);
 
                 // Reuse vectors in each loop
                 std::vector<size_t> stack;
@@ -357,7 +357,7 @@ namespace module::vision {
                     })));
 
                 // Get a mask for whether a cluster is inside or intersecting the green horizon
-                std::vector<char> accepted_cluster_mask =
+                std::vector<bool> accepted_cluster_mask =
                     utility::vision::visualmesh::get_green_horizon_side_mask(clusters,
                                                                              horizon.horizon,
                                                                              rPWw,
@@ -480,14 +480,10 @@ namespace module::vision {
                         keep     = false;
                     }
 
-                    // DISCARD IF DEGREE TO FIT TO CIRCLE TOO LOW
-
-
                     // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
                     // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
                     // it is a bad fit
-
                     std::vector<double> angles;
                     const size_t num_angles = std::accumulate(candidate.cluster_indices.begin(),
                                                               candidate.cluster_indices.end(),

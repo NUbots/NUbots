@@ -103,7 +103,7 @@ namespace utility::vision::visualmesh {
         std::vector<value_type> values(first, last);
 
         // Lookup table: which indices are in the input set
-        std::vector<char> is_in_input(neighbours.cols(), false);
+        std::vector<bool> is_in_input(neighbours.cols(), false);
         for (int idx : values) {
             if (idx >= 0 && idx < int(is_in_input.size())) {
                 is_in_input[idx] = true;
@@ -111,7 +111,7 @@ namespace utility::vision::visualmesh {
         }
 
         // Track visited status of all points
-        std::vector<char> visited(neighbours.cols(), false);
+        std::vector<bool> visited(neighbours.cols(), false);
 
         // Iterate through each index and form clusters via DFS
         for (int i = 0; i < N; ++i) {
@@ -157,9 +157,9 @@ namespace utility::vision::visualmesh {
      * @param outside Accept clusters completely outside the green horizon.
      * @param inside Accept clusters completely inside the green horizon.
      * @param intersect Accept clusters that intersect the green horizon
-     * @return std::vector<char> mask for accepted clusters
+     * @return std::vector<bool> mask for accepted clusters
      */
-    std::vector<char> get_green_horizon_side_mask(const std::vector<std::vector<int>>& clusters,
+    std::vector<bool> get_green_horizon_side_mask(const std::vector<std::vector<int>>& clusters,
                                                   const std::vector<Eigen::Vector3d>& horizon,
                                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
                                                   const bool outside   = true,
@@ -185,14 +185,14 @@ namespace utility::vision::visualmesh {
             return false;
         };
 
-        std::vector<char> is_accepted;
+        std::vector<bool> is_accepted;
         is_accepted.reserve(clusters.size());
 
         for (const auto& cluster : clusters) {
             bool out = false;
             bool in  = false;
 
-            for (size_t idx{}; idx < cluster.size(); ++idx) {
+            for (size_t idx = 0; idx < cluster.size(); ++idx) {
                 bool position =
                     utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));
                 // Only set if it is in or out as we want to find across the cluster
@@ -272,42 +272,37 @@ namespace utility::vision::visualmesh {
 
     /**
      * @brief Calculates circularity score for one merge option as observed/expected bounded points.
+     * The ball detection can be thought of a cone from the camera, with center of @p uBCw and angular radius of @p
+     * radius, this finds points on the mesh bounded inside that cone through a DFS.
      *
      * @param clusters Collection of all candidate clusters.
      * @param cluster_indices Indices into @p clusters that form this merge candidate.
      * @param removed_pos Optional position in @p cluster_indices to skip.
      * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
-     * @param uBCw The centre axis of the cone represented as a unit vector in world space.
-     * @param radius Angular radius of the cone, equal to cos(theta).
+     * @param uBCw The centre axis of the ball represented as a unit vector in world space.
+     * @param radius Angular radius of the ball, equal to cos(theta).
      * @param uPCw Unit vectors from camera to a point in the mesh in world space.
      * @return Circularity score measured as observed bounded points divided by expected bounded points.
      */
     double find_cluster_circularity(const std::vector<std::vector<int>>& clusters,
                                     const std::vector<size_t>& cluster_indices,
-                                    const std::optional<size_t>& removed_pos,
+                                    const std::optional<size_t> removed_pos,
                                     const Eigen::MatrixXi& neighbours,
-                                    const Eigen::Vector3d& uBCw,
+                                    const Eigen::Vector3d uBCw,
                                     const double radius,
                                     const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
 
-        std::vector<const std::vector<int>*> used_clusters;
-        used_clusters.reserve(cluster_indices.size() - removed_pos.has_value());
-        for (size_t i{}; i < cluster_indices.size(); ++i) {
-            if (removed_pos.has_value() && i == removed_pos.value()) {
-                continue;
+        size_t observed_bounded = 0;
+        for (size_t i = 0; i < clusters.size(); ++i) {
+            if (removed_pos.has_value() && i != removed_pos.value()) {
+                observed_bounded += clusters[i]->size();
             }
-            used_clusters.push_back(&clusters[cluster_indices[i]]);
-        }
-
-        size_t observed_bounded{};
-        for (const auto* cluster : used_clusters) {
-            observed_bounded += cluster->size();
         }
 
         // Count number of mesh points bounded in cone from camera using DFS for expected number of bounded points
-        std::vector<char> visited(neighbours.cols(), false);
+        std::vector<bool> visited(neighbours.cols(), false);
         std::vector<int> stack;
-        size_t expected_bounded{};
+        size_t expected_bounded = 0;
 
         // Indices are known to be unique and bounded in the cone so they are added to the stack without checks
         for (const std::vector<int>* indices : used_clusters) {
@@ -350,7 +345,7 @@ namespace utility::vision::visualmesh {
     Eigen::Vector3d find_cluster_central_axis(const std::vector<int>& cluster,
                                               const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
         Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
-        for (const auto& idx : cluster) {
+        for (int idx : cluster) {
             uBCw += uPCw.col(idx);
         }
         uBCw.normalize();
@@ -371,7 +366,7 @@ namespace utility::vision::visualmesh {
                                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
                                        const Eigen::Vector3d& uBCw) {
         double radius = 1.0;
-        for (const auto& idx : cluster) {
+        for (int idx : cluster) {
             // Unit vector from the camera to the ball edge, in world space
             const Eigen::Vector3d& uECw(uPCw.col(idx));
             // Find the vector that gives the largest angle between the central axis and ball edge
