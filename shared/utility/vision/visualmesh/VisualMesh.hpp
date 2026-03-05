@@ -29,6 +29,7 @@
 #define UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP
 
 #include <Eigen/Core>
+#include <concepts>
 #include <iterator>
 #include <optional>
 #include <queue>
@@ -275,44 +276,41 @@ namespace utility::vision::visualmesh {
      * The ball detection can be thought of a cone from the camera, with center of @p uBCw and angular radius of @p
      * radius, this finds points on the mesh bounded inside that cone through a DFS.
      *
-     * @param clusters Collection of all candidate clusters.
-     * @param cluster_indices Indices into @p clusters that form this merge candidate.
-     * @param removed_pos Optional position in @p cluster_indices to skip.
+     * @tparam Iterator An input iterator over mesh point indices (column index into @p uPCw)
+     * @param first Iterator at beginning of the cluster's mesh point indices
+     * @param last Iterator at end of the cluster's mesh point indices
      * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
      * @param uBCw The centre axis of the ball represented as a unit vector in world space.
      * @param radius Angular radius of the ball, equal to cos(theta).
      * @param uPCw Unit vectors from camera to a point in the mesh in world space.
      * @return Circularity score measured as observed bounded points divided by expected bounded points.
      */
-    double find_cluster_circularity(const std::vector<std::vector<int>>& clusters,
-                                    const std::vector<size_t>& cluster_indices,
-                                    const std::optional<size_t> removed_pos,
+    template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
+        requires std::same_as<std::iter_value_t<Iterator>, int>
+    double find_cluster_circularity(Iterator first,
+                                    Sentinel last,
                                     const Eigen::MatrixXi& neighbours,
                                     const Eigen::Vector3d uBCw,
                                     const double radius,
                                     const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
-
-        size_t observed_bounded = 0;
-        for (size_t i = 0; i < clusters.size(); ++i) {
-            if (removed_pos.has_value() && i != removed_pos.value()) {
-                observed_bounded += clusters[i]->size();
-            }
-        }
-
-        // Count number of mesh points bounded in cone from camera using DFS for expected number of bounded points
+        // Count number of mesh points bounded in cone from camera using DFS to get expected number of bounded points
         std::vector<bool> visited(neighbours.cols(), false);
-        std::vector<int> stack;
-        size_t expected_bounded = 0;
+        std::vector<int> stack{};
 
-        // Indices are known to be unique and bounded in the cone so they are added to the stack without checks
-        for (const std::vector<int>* indices : used_clusters) {
-            stack.insert(stack.end(), indices->begin(), indices->end());
+        // Indices are known to be unique and are bounded in the cone so they are added to the stack without checks
+        while (first != last) {
+            const int idx = *first;
+            stack.push_back(idx);
+            visited[idx] = true;
+            ++first;
         }
 
-        for (int index : stack) {
-            visited[index] = true;
+        const size_t observed_bounded = stack.size();
+        size_t expected_bounded       = stack.size();
+
+        if (expected_bounded == 0) {
+            return 0.0;
         }
-        expected_bounded += stack.size();
 
         // Depth first search where if a points neighbours are bounded by the cone they are connected
         while (!stack.empty()) {
@@ -321,7 +319,7 @@ namespace utility::vision::visualmesh {
 
             for (int i = 0; i < neighbours.rows(); ++i) {
                 int neigh = neighbours(i, current);
-                // When uPCw.col(neigh).dot(uBCw) > radius it is bounded inside as both are in cos(theta)
+                // When uPCw.col(neigh).dot(uBCw) >= radius it is bounded inside as both are in cos(theta)
                 if (neigh >= 0 && static_cast<size_t>(neigh) < visited.size() && !visited[neigh]
                     && uPCw.col(neigh).dot(uBCw) >= radius) {
                     stack.push_back(neigh);
@@ -337,18 +335,28 @@ namespace utility::vision::visualmesh {
     /**
      * @brief Finds central axis of a cluster
      * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
-     * vector, which represents the central axis
-     * @param cluster A collection of points
-     * @param uPCw Unit vector from camera to a point in the mesh in world space
+     * vector. This represents the central axis.
+     *
+     * @tparam Iterator An iterator over mesh point indexes, (column index into @p uPCw)
+     * @param first Iterator at beginning of the cluster's mesh point indices
+     * @param last Iterator at end of the cluster's mesh point indices
+     * @param uPCw Unit vectors from the camera to a point in the mesh in world space
      * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
      */
-    Eigen::Vector3d find_cluster_central_axis(const std::vector<int>& cluster,
+    template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
+        requires std::same_as<std::iter_value_t<Iterator>, int>
+    Eigen::Vector3d find_cluster_central_axis(Iterator first,
+                                              Sentinel last,
                                               const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
         Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
-        for (int idx : cluster) {
+        while (first != last) {
+            const int idx = *first;
+            ++first;
             uBCw += uPCw.col(idx);
         }
-        uBCw.normalize();
+        if (uBCw.squaredNorm() > 0.0) {
+            uBCw.normalize();
+        }
         return uBCw;
     }
 
@@ -357,16 +365,24 @@ namespace utility::vision::visualmesh {
      * Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
      * largest angular radius possible from the edge points available. Equal to cos(theta), where theta
      * is the angle between the central ball axis (uBCw) and the edge of the ball.
-     * @param cluster A collection of points
+     *
+     * @tparam Iterator An iterator over mesh point indexes, (column index into @p uPCw)
+     * @param first Iterator at beginning of the cluster's mesh point indices
+     * @param last Iterator at end of the cluster's mesh point indices
      * @param uPCw Unit vector from camera to a point in the mesh in world space
      * @param uBCw Unit vector from camera to ball central axis in world space
      * @return double, angular radius of cluster equal to cos(theta)
      */
-    double find_cluster_angular_radius(const std::vector<int>& cluster,
+    template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
+        requires std::same_as<std::iter_value_t<Iterator>, int>
+    double find_cluster_angular_radius(Iterator first,
+                                       Sentinel last,
                                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
                                        const Eigen::Vector3d& uBCw) {
         double radius = 1.0;
-        for (int idx : cluster) {
+        while (first != last) {
+            const int idx = *first;
+            ++first;
             // Unit vector from the camera to the ball edge, in world space
             const Eigen::Vector3d& uECw(uPCw.col(idx));
             // Find the vector that gives the largest angle between the central axis and ball edge
