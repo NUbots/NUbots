@@ -65,3 +65,24 @@ message PenaltyReset {
     /// The penalty kick position in field space
     vec3 penalty_kick_position = 1;
 }
+
+/// Emitted when a teammate's RoboCup broadcast reports this robot's position in field space.
+/// Used to constrain field localisation with collaborative observations.
+message TeammateObservedSelf {
+    /// This robot's position in field space [x, y, 0] as reported by the teammate
+    fvec3 position = 1;
+    /// Localisation cost of the reporting teammate (lower = better localised)
+    float sender_cost = 2;
+}
+
+/// Emitted when a vision detection matches a known teammate with a broadcast field position.
+/// Provides a robot-as-landmark constraint for field localisation — the camera ray to the
+/// teammate plus the teammate's known field position directly constrains our own Hfw.
+message TeammateVisionLandmark {
+    /// Position of the teammate in camera frame {c}
+    fvec3 rRCc = 1;
+    /// Teammate's known field position from their last broadcast [x, y, 0]
+    fvec3 rRFf = 2;
+    /// Transform from camera {c} to world {w} at time of sighting
+    iso3 Hcw = 3;
+}

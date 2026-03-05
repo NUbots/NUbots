@@ -23,7 +23,7 @@ min_field_line_intersections: 3
 start_time_delay: 1
 
 # Bool to use ground truth for localisation
-use_ground_truth_localisation: false
+use_ground_truth_localisation: true
 
 # Bool to use the Hungarian algorithm for data association
 use_hungarian: true
@@ -80,3 +80,16 @@ exponential_filter:
   # [x, y, theta] - Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
   alpha: [0.1, 0.1, 0.5]
+
+# Team-assisted localisation: use teammate observations of this robot as a position constraint
+# Weight applied to the teammate-reported position cost term (0 to disable)
+teammate_position_weight: 5.0
+# Seconds after which a teammate observation is considered stale and ignored
+teammate_position_timeout: 5.0
+
+# Robot-as-landmark: when a teammate is seen visually and their field position is known from their
+# broadcast, use the discrepancy to constrain our own Hfw. Only active when localisation is uncertain.
+# Weight for the landmark cost term (0 to disable)
+teammate_landmark_weight: 10.0
+# Seconds after which a vision landmark sighting is discarded
+teammate_landmark_timeout: 2.0

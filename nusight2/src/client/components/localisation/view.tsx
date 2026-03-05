@@ -27,6 +27,7 @@ import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
 import { PurposeLabel } from "./r3f_components/purpose_label";
+import { TextBillboard } from "./r3f_components/text_billboard";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
@@ -297,10 +298,9 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
       className={`
         w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm font-medium
         transition-all duration-150 ease-out
-        ${
-          props.isVisible
-            ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
-            : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
+        ${props.isVisible
+          ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
+          : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
         }
         focus:outline-none focus:ring-1 focus:ring-auto-primary
         active:scale-[0.98]
@@ -521,15 +521,25 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       )}
 
       <FieldObjects
-        objects={robot.rRFf.map((r) => {
-          return {
-            position: r.position,
-            color: r.color,
-          };
-        })}
+        objects={robot.rRFf.map((r) => ({
+          position: r.position,
+          color: r.color,
+        }))}
         defaultHeight={0.8}
         defaultRadius={0.1}
       />
+
+      {robot.rRFf.map((r, index) => (
+        <TextBillboard
+          key={index}
+          position={[r.position.x, r.position.y, 0.9]}
+          text={r.label}
+          textColor="white"
+          backgroundColor={r.color}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
+        />
+      ))}
 
       {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
 
@@ -555,6 +565,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           playerId={robot.playerId}
           backgroundColor={robot.color}
           purpose={robot.purpose}
+          localisationCost={robot.localisationCost}
           cameraPitch={model.camera.pitch}
           cameraYaw={model.camera.yaw}
         />

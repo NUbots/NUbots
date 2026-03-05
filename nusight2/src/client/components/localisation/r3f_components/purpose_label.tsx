@@ -8,6 +8,7 @@ interface PurposeLabelProps {
   Hft: Matrix4;
   playerId: number;
   purpose: string;
+  localisationCost?: number;
   textColor?: string;
   backgroundColor: string;
   cameraPitch: number;
@@ -18,13 +19,15 @@ export const PurposeLabel: React.FC<PurposeLabelProps> = ({
   Hft,
   playerId,
   purpose,
+  localisationCost,
   textColor = "white",
   backgroundColor = "black",
   cameraPitch,
   cameraYaw,
 }) => {
   const rTFf = Hft.decompose().translation;
-  const label = playerId == -1 ? purpose : "N" + playerId + " " + purpose;
+  const costStr = localisationCost !== undefined ? " c=" + localisationCost.toFixed(2) : "";
+  const label = (playerId == -1 ? purpose : "N" + playerId + " " + purpose) + costStr;
 
   return (
     <TextBillboard

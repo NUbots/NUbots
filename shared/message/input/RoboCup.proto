@@ -58,6 +58,11 @@ message Robot {
 
     // Cost of localisation
     float cost = 5;
+
+    /// Internal tracking ID assigned by the reporting robot's RobotLocalisation
+    /// Used to correlate opponent sightings across teammates for consistent labelling
+    /// 0 for teammates (they have player_id instead)
+    uint32 tracking_id = 6;
 }
 
 message Ball {

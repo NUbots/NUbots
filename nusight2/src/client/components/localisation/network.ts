@@ -68,6 +68,7 @@ export class LocalisationNetwork {
       start: Vector3.from(line.start),
       end: Vector3.from(line.end),
     }));
+    robot.localisationCost = field.cost ?? 0;
   };
 
   @action
@@ -137,10 +138,18 @@ export class LocalisationNetwork {
   private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.robots = localisation_robots.robots.map((localisation_robot) => {
+      const id = localisation_robot.id!;
+      const teammate = localisation_robot.teammate ?? false;
+      const cov = localisation_robot.covariance;
+      const sigma = cov ? Math.sqrt((cov.x?.x ?? 0) + (cov.y?.y ?? 0)).toFixed(2) : "?";
+      const baseLabel = teammate ? "T" + (localisation_robot.purpose?.playerId ?? id) : "O" + id;
+      const label = baseLabel + " σ=" + sigma;
       return {
-        id: localisation_robot.id!,
+        id,
         rRWw: Vector3.from(localisation_robot.rRWw),
-        color: localisation_robot.teammate ? robot.teamColour : robot.teamColour === "red" ? "blue" : "red",
+        teammate,
+        label,
+        color: teammate ? robot.teamColour : robot.teamColour === "red" ? "blue" : "red",
       };
     });
   }

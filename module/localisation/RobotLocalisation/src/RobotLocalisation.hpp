@@ -47,7 +47,12 @@ namespace module::localisation {
             struct UKF {
                 struct Noise {
                     struct Measurement {
-                        Eigen::Matrix2d position = Eigen::Matrix2d::Zero();
+                        /// @brief Vision measurement noise (high trust)
+                        Eigen::Matrix2d position          = Eigen::Matrix2d::Zero();
+                        /// @brief RoboCup broadcast measurement noise (medium trust — remote self-localisation)
+                        Eigen::Matrix2d position_robocup  = Eigen::Matrix2d::Zero();
+                        /// @brief Indirect sighting noise — teammate reports another robot (lower trust)
+                        Eigen::Matrix2d position_indirect = Eigen::Matrix2d::Zero();
                     } measurement{};
                     struct Process {
                         Eigen::Vector2d position = Eigen::Vector2d::Zero();
@@ -62,12 +67,17 @@ namespace module::localisation {
 
             /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
             double association_distance = 0.0;
+            /// @brief Looser distance threshold used when checking if a vision detection could be a known teammate
+            /// for landmark emission. Larger than association_distance to tolerate our own localisation being off.
+            double landmark_association_distance = 1.0;
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
             /// @brief The maximum distance a robot can be outside the field before it is ignored
             double max_distance_from_field = 0.0;
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
+            /// @brief Maximum number of opponent tracks to keep (weakest removed first)
+            int max_opponent_count = 5;
 
         } cfg;
 
@@ -82,11 +92,19 @@ namespace module::localisation {
             long missed_count = 0;
             /// @brief A unique identifier for the robot
             unsigned long id;
+            /// @brief Canonical ID used for display in NUsight — may be set from a teammate's tracking_id
+            /// Defaults to id; overridden when a teammate reports this opponent with its own tracking_id
+            uint32_t canonical_id = 0;
 
             /// @brief The unique identifier of the robot if it is a teammate
             /// If it is not a teammate, this will be 0
             bool teammate                     = false;
             message::purpose::Purpose purpose = message::purpose::Purpose();
+
+            /// @brief Last known field position from the teammate's own broadcast [x, y, 0]
+            /// Used as a landmark to constrain the observing robot's field localisation
+            Eigen::Vector3d last_broadcast_rRFf = Eigen::Vector3d::Zero();
+            bool has_broadcast_rRFf             = false;
 
             /// @brief Constructor that sets the state for the UKF
             /// @param initial_rRWw The initial position of the robot in world coordinates
@@ -97,7 +115,7 @@ namespace module::localisation {
                          const Config::UKF& cfg_ukf,
                          const unsigned long next_id,
                          const std::unique_ptr<message::purpose::Purpose>& p = nullptr)
-                : id(next_id) {
+                : id(next_id), canonical_id(static_cast<uint32_t>(next_id)) {
                 NUClear::log<NUClear::LogLevel::DEBUG>("Making robot with id: ", id);
                 RobotModel<double>::StateVec initial_state;
                 initial_state.rRWw = initial_rRWw.head<2>();
@@ -143,8 +161,10 @@ namespace module::localisation {
         /// Creates a new tracked robot if the measurement is not associated with an existing robot
         /// @param robots_rRWw The new robot measurements in world coordinates
         /// @param purpose An optional purpose message that can be used to associate the robot with teammate
+        /// @param measurement_noise Optional noise override. If zero matrix, uses default noise from cfg.
         void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
-                              const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr);
+                              const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr,
+                              const Eigen::Matrix2d& measurement_noise                 = Eigen::Matrix2d::Zero());
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot

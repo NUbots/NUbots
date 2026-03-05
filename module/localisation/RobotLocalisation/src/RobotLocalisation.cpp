@@ -32,7 +32,9 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
+#include "message/support/GlobalConfig.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
@@ -53,9 +55,12 @@ namespace module::localisation {
     using message::input::GameState;
     using message::input::RoboCup;
     using message::localisation::Field;
+    using message::localisation::TeammateObservedSelf;
+    using message::localisation::TeammateVisionLandmark;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::support::FieldDescription;
+    using message::support::GlobalConfig;
     using message::vision::GreenHorizon;
 
     using utility::math::geometry::point_in_convex_hull;
@@ -72,14 +77,22 @@ namespace module::localisation {
             // Set our UKF filter parameters
             cfg.ukf.noise.measurement.position =
                 Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["robot_position"].as<Expression>()).asDiagonal();
+            cfg.ukf.noise.measurement.position_robocup =
+                Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["robot_position_robocup"].as<Expression>())
+                    .asDiagonal();
+            cfg.ukf.noise.measurement.position_indirect =
+                Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["robot_position_indirect"].as<Expression>())
+                    .asDiagonal();
             cfg.ukf.noise.process.position      = config["ukf"]["noise"]["process"]["position"].as<Expression>();
             cfg.ukf.noise.process.velocity      = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
             cfg.ukf.initial_covariance.position = config["ukf"]["initial_covariance"]["position"].as<Expression>();
             cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
-            cfg.association_distance            = config["association_distance"].as<double>();
+            cfg.association_distance             = config["association_distance"].as<double>();
+            cfg.landmark_association_distance    = config["landmark_association_distance"].as<double>();
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
             cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
+            cfg.max_opponent_count              = config["max_opponent_count"].as<int>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -99,7 +112,7 @@ namespace module::localisation {
                 for (const auto& tracked_robot : tracked_robots) {
                     auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
                     LocalisationRobot localisation_robot;
-                    localisation_robot.id                  = tracked_robot.id;
+                    localisation_robot.id                  = tracked_robot.canonical_id;
                     localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
                     localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
                     localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
@@ -114,8 +127,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
-            [this](const RoboCup& robocup, const Field& field) {
+        on<Trigger<RoboCup>, With<Field>, With<GlobalConfig>, Sync<RobotLocalisation>>().then(
+            [this](const RoboCup& robocup, const Field& field, const GlobalConfig& global_config) {
                 // Do not consider a teammate's localisation if their cost is too high
                 if (robocup.current_pose.cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Teammate's localisation cost is too high, not processing.");
@@ -125,13 +138,61 @@ namespace module::localisation {
                 // **Run prediction step**
                 prediction();
 
-                // **Data association**
+                // **Data association — sender's own position**
                 // RoboCup messages come from teammates. Their position is in field space, so convert to world.
-                std::vector<Eigen::Vector3d> robots_rRWw{
-                    (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
+                Eigen::Vector3d sender_rRFf = robocup.current_pose.position.cast<double>();
+                Eigen::Vector3d sender_rRWw = field.Hfw.inverse() * sender_rRFf;
+                std::vector<Eigen::Vector3d> robots_rRWw{sender_rRWw};
                 auto purpose = std::make_unique<Purpose>(robocup.purpose);
-                // Run data association step
                 data_association(robots_rRWw, purpose);
+
+                // Store the sender's broadcast field position on their track for use as a vision landmark
+                auto sender_itr = std::find_if(tracked_robots.begin(),
+                                               tracked_robots.end(),
+                                               [&purpose](const TrackedRobot& r) {
+                                                   return r.purpose.player_id == purpose->player_id;
+                                               });
+                if (sender_itr != tracked_robots.end()) {
+                    sender_itr->last_broadcast_rRFf = sender_rRFf;
+                    sender_itr->has_broadcast_rRFf  = true;
+                }
+
+                // **Data association — robots the teammate has detected**
+                // Each entry is a robot the sender has seen; positions are in field space.
+                for (const auto& rc_robot : robocup.others) {
+                    // If this entry refers to ourselves, use it to constrain our own field localisation
+                    if (rc_robot.player_id > 0 && rc_robot.player_id == global_config.player_id) {
+                        auto obs          = std::make_unique<TeammateObservedSelf>();
+                        obs->position     = rc_robot.position;
+                        obs->sender_cost  = static_cast<float>(robocup.current_pose.cost);
+                        emit(std::move(obs));
+                        continue;
+                    }
+                    Eigen::Vector3d rRWw = field.Hfw.inverse() * rc_robot.position.cast<double>();
+
+                    std::unique_ptr<Purpose> p = nullptr;
+                    if (rc_robot.player_id > 0) {
+                        p              = std::make_unique<Purpose>();
+                        p->player_id   = rc_robot.player_id;
+                    }
+
+                    data_association({rRWw}, p, cfg.ukf.noise.measurement.position_indirect);
+
+                    // For opponent sightings, propagate the sender's tracking_id as a canonical display ID.
+                    // "First reporter wins": only set if this robot hasn't been given a canonical_id yet.
+                    if (rc_robot.tracking_id > 0 && rc_robot.player_id == 0) {
+                        auto itr = std::min_element(tracked_robots.begin(),
+                                                    tracked_robots.end(),
+                                                    [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
+                                                        return (rRWw.head<2>() - a.get_rRWw()).norm()
+                                                               < (rRWw.head<2>() - b.get_rRWw()).norm();
+                                                    });
+                        if (itr != tracked_robots.end() && !itr->teammate
+                            && itr->canonical_id == static_cast<uint32_t>(itr->id)) {
+                            itr->canonical_id = rc_robot.tracking_id;
+                        }
+                    }
+                }
             });
 
         on<Trigger<VisionRobots>, Sync<RobotLocalisation>>().then([this](const VisionRobots& vision_robots) {
@@ -141,11 +202,30 @@ namespace module::localisation {
             // **Data association**
             // Transform the robot positions from camera coordinates to world coordinates
             Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
-            // Make a vector with the transformed position
             std::vector<Eigen::Vector3d> robots_rRWw{};
             for (const auto& vision_robot : vision_robots.robots) {
                 Eigen::Vector3d rRWw = Hwc * vision_robot.rRCc;
                 robots_rRWw.push_back(rRWw);
+
+                // If this vision detection matches a known teammate with a broadcast position,
+                // emit a landmark message so FieldLocalisationNLopt can use it to constrain our Hfw
+                if (!tracked_robots.empty()) {
+                    auto closest =
+                        std::min_element(tracked_robots.begin(),
+                                         tracked_robots.end(),
+                                         [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
+                                             return (rRWw.head<2>() - a.get_rRWw()).norm()
+                                                    < (rRWw.head<2>() - b.get_rRWw()).norm();
+                                         });
+                    if (closest != tracked_robots.end() && closest->teammate && closest->has_broadcast_rRFf
+                        && (rRWw.head<2>() - closest->get_rRWw()).norm() < cfg.landmark_association_distance) {
+                        auto landmark  = std::make_unique<TeammateVisionLandmark>();
+                        landmark->rRCc = vision_robot.rRCc.cast<float>();
+                        landmark->rRFf = closest->last_broadcast_rRFf.cast<float>();
+                        landmark->Hcw  = vision_robots.Hcw;
+                        emit(std::move(landmark));
+                    }
+                }
             }
             // Run data association step
             data_association(robots_rRWw);
@@ -165,7 +245,9 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
-                                             const std::unique_ptr<Purpose>& purpose) {
+                                             const std::unique_ptr<Purpose>& purpose,
+                                             const Eigen::Matrix2d& measurement_noise) {
+        const bool use_noise_override = !measurement_noise.isZero();
         for (const auto& rRWw : robots_rRWw) {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
@@ -182,15 +264,34 @@ namespace module::localisation {
                         return robot.purpose.player_id == purpose->player_id;
                     });
 
-                // If the robot is not in the list, add it
+                // If the robot is not in the list, check if a vision-detected robot is nearby to promote
                 if (teammate_itr == tracked_robots.end()) {
-                    tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
+                    // Find the closest non-teammate robot to the broadcast position
+                    auto closest_itr =
+                        std::min_element(tracked_robots.begin(),
+                                         tracked_robots.end(),
+                                         [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
+                                             return (rRWw.head<2>() - a.get_rRWw()).norm()
+                                                    < (rRWw.head<2>() - b.get_rRWw()).norm();
+                                         });
+
+                    // If a vision-detected robot is close enough, promote it to teammate
+                    if (closest_itr != tracked_robots.end() && !closest_itr->teammate
+                        && (rRWw.head<2>() - closest_itr->get_rRWw()).norm() < cfg.association_distance) {
+                        closest_itr->teammate = true;
+                        closest_itr->purpose  = *purpose;
+                        closest_itr->seen     = true;
+                    }
+                    else {
+                        tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
+                    }
                     continue;
                 }
                 // If the robot is in the list, update it with the new position
-                teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                          cfg.ukf.noise.measurement.position,
-                                          MeasurementType::ROBOT_POSITION());
+                teammate_itr->ukf.measure(
+                    Eigen::Vector2d(rRWw.head<2>()),
+                    use_noise_override ? measurement_noise : cfg.ukf.noise.measurement.position_robocup,
+                    MeasurementType::ROBOT_POSITION());
                 teammate_itr->seen    = true;
                 teammate_itr->purpose = *purpose;
 
@@ -210,16 +311,28 @@ namespace module::localisation {
                                  });
             double closest_distance = (rRWw.head<2>() - closest_robot_itr->get_rRWw()).norm();
 
-            // If the closest robot is far enough away, add this as a new robot
+            // If the closest robot is far enough away, add this as a new robot.
+            // Indirect sightings (noise override) never create new robots — they only update existing ones.
             if (closest_distance > cfg.association_distance) {
-                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
+                if (!use_noise_override) {
+                    tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
+                }
+                continue;
+            }
+
+            // For known teammates, skip the vision UKF update — their own broadcast is more accurate
+            // than our visual sighting (which has our localisation error compounded in). Just mark
+            // as seen so the track stays alive until the next broadcast arrives.
+            if (closest_robot_itr->teammate && !use_noise_override) {
+                closest_robot_itr->seen = true;
                 continue;
             }
 
             // Otherwise update matched robot with the vision measurement
-            closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                           cfg.ukf.noise.measurement.position,
-                                           MeasurementType::ROBOT_POSITION());
+            closest_robot_itr->ukf.measure(
+                Eigen::Vector2d(rRWw.head<2>()),
+                use_noise_override ? measurement_noise : cfg.ukf.noise.measurement.position,
+                MeasurementType::ROBOT_POSITION());
             closest_robot_itr->seen = true;
         }
     }
@@ -273,6 +386,47 @@ namespace module::localisation {
 
             // If removal conditions not met, keep the robot
             new_tracked_robots.push_back(tracked_robot);
+        }
+
+        // Deduplicate teammates by player_id — if two tracks share the same player_id, keep the stronger one
+        std::vector<TrackedRobot> deduplicated{};
+        for (auto& robot : new_tracked_robots) {
+            if (!robot.teammate || robot.purpose.player_id == 0) {
+                deduplicated.push_back(std::move(robot));
+                continue;
+            }
+            auto existing = std::find_if(deduplicated.begin(), deduplicated.end(), [&robot](const TrackedRobot& r) {
+                return r.teammate && r.purpose.player_id == robot.purpose.player_id;
+            });
+            if (existing == deduplicated.end()) {
+                deduplicated.push_back(std::move(robot));
+            }
+            else if (robot.missed_count < existing->missed_count) {
+                *existing = std::move(robot);
+            }
+        }
+        new_tracked_robots = std::move(deduplicated);
+
+        // Enforce max opponent count — sort opponents by missed_count ascending, remove weakest from tail
+        int opponent_count =
+            std::count_if(new_tracked_robots.begin(), new_tracked_robots.end(), [](const TrackedRobot& r) {
+                return !r.teammate;
+            });
+        if (opponent_count > cfg.max_opponent_count) {
+            // Stable sort: teammates first, then opponents strongest (lowest missed_count) first
+            std::stable_sort(new_tracked_robots.begin(),
+                             new_tracked_robots.end(),
+                             [](const TrackedRobot& a, const TrackedRobot& b) {
+                                 if (a.teammate != b.teammate) {
+                                     return a.teammate > b.teammate;
+                                 }
+                                 return a.missed_count < b.missed_count;
+                             });
+            int excess = opponent_count - cfg.max_opponent_count;
+            while (excess-- > 0 && !new_tracked_robots.empty() && !new_tracked_robots.back().teammate) {
+                log<DEBUG>(fmt::format("Removing robot {} due to opponent count limit", new_tracked_robots.back().id));
+                new_tracked_robots.pop_back();
+            }
         }
 
         tracked_robots = std::move(new_tracked_robots);

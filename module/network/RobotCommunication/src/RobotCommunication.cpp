@@ -283,6 +283,9 @@ namespace module::network {
                         // Assign player ID from purpose
                         rc_robot.player_id = local_bot.purpose.player_id;
 
+                        // Broadcast internal tracking ID so teammates can correlate opponent sightings
+                        rc_robot.tracking_id = static_cast<uint32_t>(local_bot.id);
+
                         // Convert world to field coords
                         Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
 

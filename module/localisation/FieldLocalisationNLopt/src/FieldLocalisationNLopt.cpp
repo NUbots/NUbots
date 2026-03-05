@@ -48,6 +48,8 @@ namespace module::localisation {
     using message::localisation::PenaltyReset;
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::RobotPoseGroundTruth;
+    using message::localisation::TeammateObservedSelf;
+    using message::localisation::TeammateVisionLandmark;
     using message::localisation::UncertaintyResetFieldLocalisation;
     using message::vision::FieldLines;
 
@@ -103,6 +105,12 @@ namespace module::localisation {
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
+
+            // Team-assisted localisation parameters
+            cfg.teammate_position_weight  = config["teammate_position_weight"].as<double>();
+            cfg.teammate_position_timeout = config["teammate_position_timeout"].as<double>();
+            cfg.teammate_landmark_weight  = config["teammate_landmark_weight"].as<double>();
+            cfg.teammate_landmark_timeout = config["teammate_landmark_timeout"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -180,6 +188,26 @@ namespace module::localisation {
             first_measurement  = true;
             last_reset         = NUClear::clock::now();
             last_certain_state = state;  // Update the last certain state
+        });
+
+        on<Trigger<TeammateVisionLandmark>>().then([this](const TeammateVisionLandmark& lm) {
+            Eigen::Isometry3d Hwc = Eigen::Isometry3d(lm.Hcw).inverse();
+            TeammateVisionLandmarkStored stored;
+            stored.rRWw = Hwc * lm.rRCc.cast<double>();
+            stored.rRFf = lm.rRFf.cast<double>();
+            stored.time = NUClear::clock::now();
+            teammate_landmarks.push_back(stored);
+            // Keep only the most recent 10 observations
+            if (teammate_landmarks.size() > 10) {
+                teammate_landmarks.erase(teammate_landmarks.begin());
+            }
+        });
+
+        on<Trigger<TeammateObservedSelf>>().then([this](const TeammateObservedSelf& obs) {
+            has_teammate_obs        = true;
+            teammate_obs_position_f = Eigen::Vector2d(obs.position.x(), obs.position.y());
+            teammate_obs_cost       = obs.sender_cost > 0.0f ? obs.sender_cost : 1.0f;
+            teammate_obs_time       = NUClear::clock::now();
         });
 
         on<Trigger<FieldLines>,
@@ -441,6 +469,38 @@ namespace module::localisation {
                     // Add the cost of the distance between the goal posts
                     cost += cfg.goal_post_distance_weight * std::pow(left_distance, 2);
                     cost += cfg.goal_post_distance_weight * std::pow(right_distance, 2);
+                }
+            }
+
+            // --- Teammate-observed position cost ---
+            // A well-localised teammate has reported where they see us on the field.
+            // Weight is inversely proportional to the sender's localisation cost.
+            if (has_teammate_obs && cfg.teammate_position_weight > 0.0) {
+                double age = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                 NUClear::clock::now() - teammate_obs_time)
+                                 .count();
+                if (age < cfg.teammate_position_timeout) {
+                    Eigen::Vector2d rTFf_estimated(x[0], x[1]);
+                    double weight = cfg.teammate_position_weight / (1.0 + teammate_obs_cost);
+                    cost += weight * (rTFf_estimated - teammate_obs_position_f).squaredNorm();
+                }
+            }
+
+            // --- Robot-as-landmark cost (only when localisation is uncertain) ---
+            // When we see a teammate visually and know their field position from their broadcast,
+            // the discrepancy between where our candidate Hfw places them vs their known position
+            // directly constrains our own field transform. Only active when num_over_cost > 0.
+            if (cfg.teammate_landmark_weight > 0.0 && !teammate_landmarks.empty()) {
+                auto Hfw_candidate = compute_Hfw(x);
+                for (const auto& lm : teammate_landmarks) {
+                    double age = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                     NUClear::clock::now() - lm.time)
+                                     .count();
+                    if (age < cfg.teammate_landmark_timeout) {
+                        Eigen::Vector3d rRFf_estimated = Hfw_candidate * lm.rRWw;
+                        cost += cfg.teammate_landmark_weight
+                                * (rRFf_estimated.head<2>() - lm.rRFf.head<2>()).squaredNorm();
+                    }
                 }
             }
 

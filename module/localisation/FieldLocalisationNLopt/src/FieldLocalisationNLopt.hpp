@@ -260,6 +260,16 @@ namespace module::localisation {
             /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
             /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
             Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
+
+            /// @brief Weight for the teammate-observed position cost term
+            double teammate_position_weight = 0.0;
+            /// @brief Age (seconds) after which a teammate observation is discarded
+            double teammate_position_timeout = 5.0;
+
+            /// @brief Weight for the robot-as-landmark cost term (only active when num_over_cost > 0)
+            double teammate_landmark_weight = 0.0;
+            /// @brief Age (seconds) after which a vision landmark is discarded
+            double teammate_landmark_timeout = 2.0;
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
@@ -292,6 +302,24 @@ namespace module::localisation {
 
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
+        /// @brief A paired (world position from camera, known field position) landmark from a teammate sighting
+        struct TeammateVisionLandmarkStored {
+            Eigen::Vector3d rRWw;  ///< Teammate's position in world frame (from camera + odometry)
+            Eigen::Vector3d rRFf;  ///< Teammate's known field position (from their broadcast)
+            NUClear::clock::time_point time;
+        };
+        /// @brief Recent teammate-as-landmark observations (bounded list)
+        std::vector<TeammateVisionLandmarkStored> teammate_landmarks{};
+
+        /// @brief Latest teammate-reported position of this robot in field space [x, y]
+        Eigen::Vector2d teammate_obs_position_f = Eigen::Vector2d::Zero();
+        /// @brief Localisation cost of the teammate that reported our position
+        float teammate_obs_cost = 1.0f;
+        /// @brief When the latest teammate observation arrived
+        NUClear::clock::time_point teammate_obs_time{};
+        /// @brief Whether a teammate observation has ever been received
+        bool has_teammate_obs = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
