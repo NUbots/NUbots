@@ -68,6 +68,26 @@ export class LocalisationNetwork {
       start: Vector3.from(line.start),
       end: Vector3.from(line.end),
     }));
+    robot.goalPostLines = (field as any).goalPostLines?.map((line: any) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
+
+    // Swarm debug fields — cast to any since the generated index.d.ts predates these proto additions.
+    // Once the NUsight build regenerates the types, the casts can be removed.
+    const f = field as any;
+
+    // Swarm debug: raw teammate self-reported positions (field space, direct from RoboCup)
+    robot.swarmTeammatePositions = (f.swarmTeammatePositionsFf ?? []).map((p: any) => Vector3.from(p));
+
+    // Swarm debug: disagreement lines (start = UKF-tracked teammate, end = self-reported)
+    robot.swarmDisagreementLines = (f.swarmDisagreementLines ?? []).map((line: any) => ({
+      start: Vector3.from(line.start),
+      end: Vector3.from(line.end),
+    }));
+
+    // Confidence ellipse: 2x2 observation covariance of field line points in field space
+    robot.observationCovarianceFf = Matrix2.from(f.observationCovarianceFf);
   };
 
   @action

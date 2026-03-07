@@ -272,11 +272,19 @@ namespace module::network {
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
-                // Where the robot thinks the other robots are.
+                // Where the robot thinks the other robots (opponents only) are.
+                // Teammates are already identified by their own current_pose + player_id in each
+                // RoboCup broadcast, so including them here would cause false opponent tracks
+                // in SwarmLocalisation on receiving robots.
                 if (robot_localisation && field) {
 
                     // Iterate through robots detected by localisation
                     for (const auto& local_bot : robot_localisation->robots) {
+                        // Skip teammates — they have their own RoboCup broadcasts
+                        if (local_bot.teammate) {
+                            continue;
+                        }
+
                         // Create new robot message
                         message::input::Robot rc_robot;
 
@@ -298,14 +306,10 @@ namespace module::network {
                                 local_bot.covariance.block<2, 2>(0, 0).cast<float>();
                         }
 
-                        if (local_bot.teammate) {
-                            rc_robot.team = msg->current_pose.team;
-                        }
-                        else {
-                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
-                                                ? message::input::Team::RED
-                                                : message::input::Team::BLUE;
-                        }
+                        // All entries in others are opponents (teammates are skipped above)
+                        rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
+                                            ? message::input::Team::RED
+                                            : message::input::Team::BLUE;
 
                         // Add robot information to list of other robots in message
                         msg->others.push_back(std::move(rc_robot));

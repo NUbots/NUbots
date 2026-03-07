@@ -128,6 +128,8 @@ export class LocalisationModel {
   @observable fieldIntersectionsVisible = true;
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
+  @observable swarmDebugVisible = true;
+  @observable confidenceEllipseVisible = true;
 
   constructor(
     appModel: AppModel,

@@ -19,6 +19,7 @@ import { LocalisationNetwork } from "./network";
 import { AssociationLines } from "./r3f_components/association_lines";
 import { Ball } from "./r3f_components/ball";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
+import { ConfidenceEllipse } from "./r3f_components/confidence_ellipse";
 import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections";
 import { FieldObjects } from "./r3f_components/field_objects";
@@ -28,6 +29,7 @@ import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
+import { SwarmDisagreementLines, SwarmTeammateMarkers } from "./r3f_components/swarm_debug";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
@@ -137,6 +139,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+            toggleSwarmDebugVisibility={this.toggleSwarmDebugVisibility}
+            toggleConfidenceEllipseVisibility={this.toggleConfidenceEllipseVisibility}
             toggleDashboardVisibility={this.toggleDashboardVisibility}
           ></LocalisationMenuBar>
         </div>
@@ -164,6 +168,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+            toggleSwarmDebugVisibility={this.toggleSwarmDebugVisibility}
+            toggleConfidenceEllipseVisibility={this.toggleConfidenceEllipseVisibility}
             toggleDashboardVisibility={this.toggleDashboardVisibility}
           />
         </div>
@@ -265,6 +271,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleBoundedBoxVisibility(this.props.model);
   };
 
+  private toggleSwarmDebugVisibility = () => {
+    this.props.controller.toggleSwarmDebugVisibility(this.props.model);
+  };
+
+  private toggleConfidenceEllipseVisibility = () => {
+    this.props.controller.toggleConfidenceEllipseVisibility(this.props.model);
+  };
+
   private toggleDashboardVisibility = () => {
     this.props.controller.toggleDashboardVisibility(this.props.model);
   };
@@ -288,6 +302,8 @@ interface LocalisationMenuBarProps {
   toggleFieldIntersectionsVisibility(): void;
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
+  toggleSwarmDebugVisibility(): void;
+  toggleConfidenceEllipseVisibility(): void;
   toggleDashboardVisibility(): void;
 }
 
@@ -390,6 +406,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         toggleFieldIntersectionsVisibility={props.toggleFieldIntersectionsVisibility}
         toggleWalkToDebugVisibility={props.toggleWalkToDebugVisibility}
         toggleBoundedBoxVisibility={props.toggleBoundedBoxVisibility}
+        toggleSwarmDebugVisibility={props.toggleSwarmDebugVisibility}
+        toggleConfidenceEllipseVisibility={props.toggleConfidenceEllipseVisibility}
         toggleDashboardVisibility={props.toggleDashboardVisibility}
       />
     </Menu>
@@ -428,6 +446,12 @@ const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">)
         { label: "Particles", isVisible: model.particlesVisible, onClick: props.toggleParticleVisibility },
         { label: "Walk Path", isVisible: model.walkToDebugVisible, onClick: props.toggleWalkToDebugVisibility },
         { label: "Bounding Box", isVisible: model.boundedBoxVisible, onClick: props.toggleBoundedBoxVisibility },
+        { label: "Swarm Debug", isVisible: model.swarmDebugVisible, onClick: props.toggleSwarmDebugVisibility },
+        {
+          label: "Confidence Ellipse",
+          isVisible: model.confidenceEllipseVisible,
+          onClick: props.toggleConfidenceEllipseVisibility,
+        },
       ],
     },
   ];
@@ -534,6 +558,9 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
 
       {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
+      {model.fieldIntersectionsVisible && robot.goalPostLines && (
+        <AssociationLines lines={robot.goalPostLines} color="purple" />
+      )}
 
       {model.walkToDebugVisible && robot.Hfd && robot.Hfr && robot.Hft && (
         <WalkPathVisualiser
@@ -579,6 +606,15 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           minY={robot.boundingBox.minY}
           maxY={robot.boundingBox.maxY}
           color={robot.color}
+        />
+      )}
+
+      {model.swarmDebugVisible && <SwarmTeammateMarkers positions={robot.swarmTeammatePositions} />}
+      {model.swarmDebugVisible && <SwarmDisagreementLines lines={robot.swarmDisagreementLines} />}
+      {model.confidenceEllipseVisible && robot.Hft && (
+        <ConfidenceEllipse
+          center={robot.Hft.decompose().translation}
+          covariance={robot.observationCovarianceFf}
         />
       )}
     </object3D>

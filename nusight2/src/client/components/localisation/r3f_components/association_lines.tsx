@@ -5,9 +5,10 @@ import { Line } from "../robot_model"; // Adjust this path to the correct tapest
 
 interface AssociationLinesProps {
   lines?: Line[];
+  color?: string;
 }
 
-export const AssociationLines: React.FC<AssociationLinesProps> = ({ lines }) => {
+export const AssociationLines: React.FC<AssociationLinesProps> = ({ lines, color = "red" }) => {
   return (
     <>
       <group>
@@ -20,7 +21,7 @@ export const AssociationLines: React.FC<AssociationLinesProps> = ({ lines }) => 
           return (
             <line key={index}>
               <bufferGeometry attach="geometry" {...geometry} />
-              <lineBasicMaterial attach="material" color="red" linewidth={4} />
+              <lineBasicMaterial attach="material" color={color} linewidth={4} />
             </line>
           );
         })}

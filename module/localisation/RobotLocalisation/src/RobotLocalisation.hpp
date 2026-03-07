@@ -68,6 +68,8 @@ namespace module::localisation {
             double max_distance_from_field = 0.0;
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
+            /// @brief Hard cap on the number of tracked opponents (teammates are always kept)
+            int max_opponents = 5;
 
         } cfg;
 
@@ -143,8 +145,11 @@ namespace module::localisation {
         /// Creates a new tracked robot if the measurement is not associated with an existing robot
         /// @param robots_rRWw The new robot measurements in world coordinates
         /// @param purpose An optional purpose message that can be used to associate the robot with teammate
+        /// @param refresh_seen If false, matched robots are NOT marked seen — maintenance can still prune them.
+        ///                     Use false for swarm-sourced positions so they don't keep robots alive indefinitely.
         void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
-                              const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr);
+                              const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr,
+                              bool refresh_seen                                         = true);
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot

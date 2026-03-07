@@ -19,6 +19,18 @@ min_field_line_points: 20
 # Minimum number of field line intersections for an update
 min_field_line_intersections: 3
 
+# Number of FieldLines frames to accumulate before committing to a startup hypothesis.
+# More frames = more robust initial localisation. At ~15 Hz, 8 frames ≈ 0.5 s.
+startup_frames: 8
+
+# Search bounds [m, m, rad] for NLopt during startup.
+# Wider than change_limit so the optimizer can search freely from each hypothesis seed.
+startup_change_limit: [2.5, 1.5, 1.5]
+
+# Maximum NLopt evaluations per hypothesis during startup.
+# Higher than maxeval so each of the 6 sideline positions is searched thoroughly.
+startup_maxeval: 5000
+
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 1
 
@@ -66,6 +78,16 @@ change_limit: [0.5, 0.5, 0.5]
 
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
+
+# Minimum YOLO detector confidence [0, 1] for a goal post to contribute to the cost.
+# Posts with confidence below this are ignored.
+goal_post_min_confidence: 0.5
+
+# Maximum field-space separation [m] between the best (highest-confidence) post and a
+# candidate second post. Only the best post is used unless a second is within this distance.
+# This prevents pairing posts from two different goals (~7-9 m apart).
+# A standard goal is ~1.5 m wide, so 3 m cleanly separates same-goal from different-goal pairs.
+goal_post_pair_max_separation: 3.0
 
 opt:
   # Relative tolerance on the optimisation parameters

@@ -2,6 +2,7 @@ import { observable } from "mobx";
 import { computed } from "mobx";
 import { action } from "mobx";
 
+import { Matrix2 } from "../../../shared/math/matrix2";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
@@ -165,6 +166,7 @@ export class LocalisationRobotModel {
   @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
   @observable associationLines?: Line[];
+  @observable goalPostLines?: Line[];
   @observable maxAlignRadius: number;
   @observable minAlignRadius: number;
   @observable angleToFinalHeading: number;
@@ -177,6 +179,12 @@ export class LocalisationRobotModel {
   @observable playerId: number;
   @observable teamColour: "red" | "blue" = "blue";
   @observable torsoTrajectory: Matrix4[];
+  /// Swarm debug: raw self-reported field positions of teammates (from RoboCup broadcasts)
+  @observable swarmTeammatePositions: Vector3[] = [];
+  /// Swarm debug: lines between UKF-tracked teammate position and their self-reported position
+  @observable swarmDisagreementLines: Line[] = [];
+  /// Confidence ellipse: 2x2 covariance of field line observations projected to field space
+  @observable observationCovarianceFf: Matrix2 = Matrix2.of();
   @observable swingFootTrajectory: Matrix4[];
   @observable walkPhase: message.behaviour.state.WalkState.Phase;
   @observable trajectoryHistory: {

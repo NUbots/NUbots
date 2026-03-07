@@ -69,6 +69,8 @@ message Goal {
     repeated Measurement measurements   = 4;
     vec2                 screen_angular = 5;
     vec2                 angular_size   = 6;
+    /// Detector confidence score [0, 1]
+    double               confidence     = 7;
 }
 
 message Goals {

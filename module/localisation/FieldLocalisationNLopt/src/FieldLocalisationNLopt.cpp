@@ -27,11 +27,14 @@
 #include "FieldLocalisationNLopt.hpp"
 
 #include <fstream>
+#include <numeric>
 
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Robot.hpp"
+#include "message/localisation/Swarm.hpp"
 
 #include "utility/algorithm/assignment.hpp"
 #include "utility/math/euler.hpp"
@@ -48,6 +51,8 @@ namespace module::localisation {
     using message::localisation::PenaltyReset;
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::RobotPoseGroundTruth;
+    using message::localisation::Robots;
+    using message::localisation::SwarmState;
     using message::localisation::UncertaintyResetFieldLocalisation;
     using message::vision::FieldLines;
 
@@ -93,8 +98,10 @@ namespace module::localisation {
             cfg.change_limit        = Eigen::Vector3d(config["change_limit"].as<Expression>());
             cfg.state_change_weight = config["state_change_weight"].as<double>();
 
-            cfg.goal_post_distance_weight = config["goal_post_distance_weight"].as<double>();
-            cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
+            cfg.goal_post_distance_weight        = config["goal_post_distance_weight"].as<double>();
+            cfg.goal_post_error_tolerance        = config["goal_post_error_tolerance"].as<double>();
+            cfg.goal_post_min_confidence         = config["goal_post_min_confidence"].as<double>();
+            cfg.goal_post_pair_max_separation    = config["goal_post_pair_max_separation"].as<double>();
 
             // Optimisation parameters
             cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
@@ -103,6 +110,11 @@ namespace module::localisation {
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
+
+            // Startup: number of frames to accumulate before committing to a hypothesis
+            cfg.startup_frames        = config["startup_frames"].as<int>();
+            cfg.startup_change_limit  = Eigen::Vector3d(config["startup_change_limit"].as<Expression>());
+            cfg.startup_maxeval       = config["startup_maxeval"].as<int>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -166,11 +178,13 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
-            state             = cfg.initial_hypotheses[0];
-            filtered_state    = state;
-            first_measurement = true;
-            startup           = true;
-            last_reset        = NUClear::clock::now();
+            state                      = cfg.initial_hypotheses[0];
+            filtered_state             = state;
+            first_measurement          = true;
+            startup                    = true;
+            startup_field_lines_buf.clear();
+            startup_frames_accumulated = 0;
+            last_reset                 = NUClear::clock::now();
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
@@ -189,6 +203,7 @@ namespace module::localisation {
            Optional<With<RobotPoseGroundTruth>>,
            With<FieldDescription>,
            With<Sensors>,
+           Optional<With<SwarmState>>,
            Single>()
             .then(
                 "NLopt field localisation",
@@ -198,7 +213,8 @@ namespace module::localisation {
                        const Stability& stability,
                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
                        const FieldDescription& fd,
-                       const Sensors& sensors) {
+                       const Sensors& sensors,
+                       const std::shared_ptr<const SwarmState>& swarm) {
                     // Emit field message using ground truth if available
                     if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
                         auto field(std::make_unique<Field>());
@@ -230,25 +246,140 @@ namespace module::localisation {
                     Eigen::Vector3d proposed_state;
 
                     if (startup && cfg.starting_side == StartingSide::EITHER) {
-                        // Find the best initial state to use based on the optimisation results of each
-                        // hypothesis
-                        std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
-                        for (auto& hypothesis : cfg.initial_hypotheses) {
-                            opt_results.push_back(
-                                run_field_line_optimisation(hypothesis, field_lines.rPWw, field_intersections, goals));
+                        // Accumulate field line observations across multiple frames before
+                        // committing to a hypothesis — more data = more reliable choice.
+                        startup_field_lines_buf.insert(startup_field_lines_buf.end(),
+                                                       field_lines.rPWw.begin(),
+                                                       field_lines.rPWw.end());
+                        ++startup_frames_accumulated;
+
+                        log<INFO>("Startup: accumulated frame ",
+                                  startup_frames_accumulated,
+                                  "/",
+                                  cfg.startup_frames,
+                                  " (",
+                                  startup_field_lines_buf.size(),
+                                  " points total)");
+
+                        if (startup_frames_accumulated < cfg.startup_frames) {
+                            // Not enough frames yet.
+                            // Emit a high-cost sentinel so that: (a) downstream modules
+                            // that need a Field message get one, and (b) RobotCommunication
+                            // broadcasts an obviously-unreliable cost so teammates' SwarmLocalisation
+                            // will gate us out until we actually commit.
+                            auto field   = std::make_unique<Field>();
+                            field->Hfw   = compute_Hfw(filtered_state);
+                            field->cost  = 99.9;
+                            emit(field);
+                            return;
                         }
+
+                        // NLopt each of the 6 startup hypotheses with wider bounds and more iterations.
+                        const auto saved_change_limit = cfg.change_limit;
+                        const size_t saved_maxeval    = cfg.maxeval;
+                        cfg.change_limit              = cfg.startup_change_limit;
+                        cfg.maxeval                   = cfg.startup_maxeval;
+
+                        std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
+                        for (size_t hi = 0; hi < cfg.initial_hypotheses.size(); ++hi) {
+                            auto result = run_field_line_optimisation(cfg.initial_hypotheses[hi],
+                                                                      startup_field_lines_buf,
+                                                                      field_intersections,
+                                                                      goals);
+                            opt_results.push_back(result);
+                            emit(graph("Startup/candidate_" + std::to_string(hi) + "_cost", result.second));
+                            log<INFO>("Startup hypothesis ",
+                                      hi,
+                                      " init=(",
+                                      cfg.initial_hypotheses[hi].x(),
+                                      ",",
+                                      cfg.initial_hypotheses[hi].y(),
+                                      ") → optimised (",
+                                      result.first.x(),
+                                      ",",
+                                      result.first.y(),
+                                      ",",
+                                      result.first.z(),
+                                      ") cost=",
+                                      result.second);
+                        }
+
+                        // Restore normal tracking parameters
+                        cfg.change_limit = saved_change_limit;
+                        cfg.maxeval      = saved_maxeval;
+
+                        // Sort a copy to find best and second-best for margin analysis
+                        auto sorted = opt_results;
+                        std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+                            return a.second < b.second;
+                        });
+
                         auto best_hypothesis =
                             std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
                                 return a.second < b.second;
                             });
                         proposed_state    = best_hypothesis->first;
                         chosen_state_cost = best_hypothesis->second;
-                        // For startup, always accept the best hypothesis
+
+                        // Cost margin: ratio of best to second-best cost.
+                        // Low ratio (e.g. 0.3) → clear winner, confident choice.
+                        // High ratio (e.g. 0.9) → costs are clustered, choice is unreliable.
+                        const double second_best_cost = sorted.size() > 1 ? sorted[1].second : chosen_state_cost;
+                        const double cost_margin      = chosen_state_cost / std::max(second_best_cost, 1e-9);
+                        emit(graph("Startup/best_cost", chosen_state_cost));
+                        emit(graph("Startup/cost_margin_ratio", cost_margin));
+
+                        size_t best_idx = static_cast<size_t>(best_hypothesis - opt_results.begin());
+                        log<INFO>("Startup: chose hypothesis ",
+                                  best_idx,
+                                  " with cost=",
+                                  chosen_state_cost,
+                                  " margin_ratio=",
+                                  cost_margin,
+                                  " (second_best=",
+                                  second_best_cost,
+                                  ") pos=(",
+                                  proposed_state.x(),
+                                  ", ",
+                                  proposed_state.y(),
+                                  ", ",
+                                  proposed_state.z(),
+                                  ") from ",
+                                  startup_field_lines_buf.size(),
+                                  " points over ",
+                                  startup_frames_accumulated,
+                                  " frames");
+
+                        // Warn when the choice is uncertain: either all costs are high
+                        // (robot may not match any hypothesis well) or the margin is small
+                        // (the top two hypotheses are nearly indistinguishable).
+                        if (chosen_state_cost > cfg.cost_threshold) {
+                            log<WARN>("Startup: best cost=",
+                                      chosen_state_cost,
+                                      " exceeds cost_threshold=",
+                                      cfg.cost_threshold,
+                                      " — localisation may be unreliable. "
+                                      "Uncertainty reset will fire if cost stays high.");
+                        }
+                        if (cost_margin > 0.7) {
+                            log<WARN>("Startup: margin_ratio=",
+                                      cost_margin,
+                                      " is high — hypothesis choice is uncertain "
+                                      "(best=",
+                                      chosen_state_cost,
+                                      " second=",
+                                      second_best_cost,
+                                      "). Consider adding more startup_frames.");
+                        }
+
+                        // Commit to the best hypothesis
                         state              = proposed_state;
                         last_certain_state = state;
                         filtered_state     = state;
                         first_measurement  = true;
                         startup            = false;
+                        startup_field_lines_buf.clear();
+                        startup_frames_accumulated = 0;
                     }
                     else {
                         // Run the optimisation routine
@@ -320,8 +451,138 @@ namespace module::localisation {
                         field->association_lines.push_back({association.first, association.second});
                     }
 
+                    // Goal post association lines for NUsight (purple) — mirrors cost function logic
+                    if (goals && !goals->goals.empty()) {
+                        auto Hwc = Eigen::Isometry3d(goals->Hcw).inverse();
+                        const std::array<Eigen::Vector3d, 4> known_posts = {
+                            own_goal_posts.left,
+                            own_goal_posts.right,
+                            opp_goal_posts.left,
+                            opp_goal_posts.right,
+                        };
+
+                        std::vector<size_t> valid;
+                        for (size_t i = 0; i < goals->goals.size(); ++i) {
+                            if (goals->goals[i].confidence >= cfg.goal_post_min_confidence) {
+                                valid.push_back(i);
+                            }
+                        }
+                        std::sort(valid.begin(), valid.end(), [&](size_t a, size_t b) {
+                            return goals->goals[a].confidence > goals->goals[b].confidence;
+                        });
+
+                        if (!valid.empty()) {
+                            const auto& g0      = goals->goals[valid[0]];
+                            auto rG0Ff          = field->Hfw * (Hwc * (g0.post.bottom * g0.post.distance));
+                            Eigen::Vector3d cl0 = known_posts[0];
+                            double min_d0       = std::numeric_limits<double>::max();
+                            for (const auto& kp : known_posts) {
+                                double d = (rG0Ff - kp).norm();
+                                if (d < min_d0) {
+                                    min_d0 = d;
+                                    cl0    = kp;
+                                }
+                            }
+                            field->goal_post_lines.push_back({rG0Ff, cl0});
+
+                            for (size_t i = 1; i < valid.size(); ++i) {
+                                const auto& gi = goals->goals[valid[i]];
+                                auto rGiFf     = field->Hfw * (Hwc * (gi.post.bottom * gi.post.distance));
+                                if ((rGiFf - rG0Ff).norm() < cfg.goal_post_pair_max_separation) {
+                                    Eigen::Vector3d cli = known_posts[0];
+                                    double min_di       = std::numeric_limits<double>::max();
+                                    for (const auto& kp : known_posts) {
+                                        double d = (rGiFf - kp).norm();
+                                        if (d < min_di) {
+                                            min_di = d;
+                                            cli    = kp;
+                                        }
+                                    }
+                                    field->goal_post_lines.push_back({rGiFf, cli});
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost = chosen_state_cost;
+
+                    // --- Swarm: populate debug overlays and check for flip ---
+                    if (swarm) {
+                        int num_confident  = 0;
+                        int flip_votes     = 0;
+                        constexpr double flip_ratio = 0.5;  // antipodal_dist < direct_dist * ratio
+
+                        for (const auto& ts : swarm->teammates) {
+                            Eigen::Vector3d pos_Ff(ts.position_Ff.x(), ts.position_Ff.y(), ts.position_Ff.z());
+                            field->swarm_teammate_positions_Ff.push_back(pos_Ff);
+
+                            if (ts.confident) {
+                                ++num_confident;
+
+                                // Check for flip: confident teammate is approximately antipodal to us
+                                double antipodal_dist = (filtered_state.head<2>() + pos_Ff.head<2>()).norm();
+                                double direct_dist    = (filtered_state.head<2>() - pos_Ff.head<2>()).norm();
+                                emit(graph("Swarm/teammate_" + std::to_string(ts.player_id) + "/antipodal_dist",
+                                           antipodal_dist));
+                                emit(graph("Swarm/teammate_" + std::to_string(ts.player_id) + "/direct_dist",
+                                           direct_dist));
+
+                                if (direct_dist > 1.0 && antipodal_dist < direct_dist * flip_ratio) {
+                                    ++flip_votes;
+                                    log<WARN>("Swarm: teammate ",
+                                              ts.player_id,
+                                              " is antipodal — possible flip! "
+                                              "antipodal=",
+                                              antipodal_dist,
+                                              " direct=",
+                                              direct_dist);
+                                }
+                            }
+                        }
+
+                        // Flip correction: if enough confident teammates agree we are flipped,
+                        // apply the deterministic 180° correction: (-x, -y, θ+π)
+                        constexpr int flip_vote_threshold = 2;
+                        if (flip_votes >= flip_vote_threshold) {
+                            log<WARN>("Swarm: ",
+                                      flip_votes,
+                                      " teammates agree we are flipped — applying (-x,-y,θ+π) correction");
+                            filtered_state.x() = -filtered_state.x();
+                            filtered_state.y() = -filtered_state.y();
+                            filtered_state.z() = filtered_state.z() + M_PI;
+                            state              = filtered_state;
+                            last_certain_state = filtered_state;
+                        }
+
+                        emit(graph("Swarm/num_confident_teammates", num_confident));
+                        emit(graph("Swarm/num_known_teammates", static_cast<int>(swarm->teammates.size())));
+                        emit(graph("Swarm/flip_votes", flip_votes));
+                    }
+
+                    // --- Confidence ellipse: 2x2 covariance of field line observations ---
+                    // Project field line points to field space using the current pose estimate,
+                    // then compute the 2D (x, y) covariance. Shape encodes localisation quality:
+                    // a thin ellipse = poor constraint in that direction.
+                    if (field_lines.rPWw.size() >= 3) {
+                        Eigen::Vector2d mean = Eigen::Vector2d::Zero();
+                        for (const auto& rPWw : field_lines.rPWw) {
+                            Eigen::Vector3d rPFf = field->Hfw * rPWw;
+                            mean += rPFf.head<2>();
+                        }
+                        mean /= static_cast<double>(field_lines.rPWw.size());
+
+                        Eigen::Matrix2d cov = Eigen::Matrix2d::Zero();
+                        for (const auto& rPWw : field_lines.rPWw) {
+                            Eigen::Vector3d rPFf = field->Hfw * rPWw;
+                            Eigen::Vector2d diff = rPFf.head<2>() - mean;
+                            cov += diff * diff.transpose();
+                        }
+                        cov /= static_cast<double>(field_lines.rPWw.size());
+
+                        field->observation_covariance_Ff = cov;
+                    }
 
                     emit(field);
                 });
@@ -418,29 +679,52 @@ namespace module::localisation {
             }
 
             // --- Goal post cost ---
-            // Only consider goal post cost if there are two goals
-            if (goals && goals->goals.size() == 2) {
-                // Ensure the goal posts are roughly correct distance apart
-                auto Hwc              = Eigen::Isometry3d(goals->Hcw).inverse();
-                auto rGWw_1           = Hwc * (goals->goals[0].post.bottom * goals->goals[0].post.distance);
-                auto rGWw_2           = Hwc * (goals->goals[1].post.bottom * goals->goals[1].post.distance);
-                double distance_apart = (rGWw_1 - rGWw_2).norm();
-                if (std::abs(distance_apart - expected_goal_post_distance) < cfg.goal_post_error_tolerance) {
+            // Use at most 2 goal posts: the highest-confidence one, plus a second only if
+            // it is within goal_post_pair_max_separation of the first in field space.
+            // This avoids accidentally pairing posts from two different goals.
+            if (goals && !goals->goals.empty()) {
+                auto Hwc = Eigen::Isometry3d(goals->Hcw).inverse();
+                const std::array<Eigen::Vector3d, 4> known_posts = {
+                    own_goal_posts.left,
+                    own_goal_posts.right,
+                    opp_goal_posts.left,
+                    opp_goal_posts.right,
+                };
 
-                    auto rGFf_left  = Hfw * rGWw_1;
-                    auto rGFf_right = Hfw * rGWw_2;
-                    if (rGFf_left.y() < rGFf_right.y()) {
-                        std::swap(rGFf_left, rGFf_right);
+                // Collect indices of posts that pass the confidence gate, sorted best-first
+                std::vector<size_t> valid;
+                for (size_t i = 0; i < goals->goals.size(); ++i) {
+                    if (goals->goals[i].confidence >= cfg.goal_post_min_confidence) {
+                        valid.push_back(i);
                     }
-                    auto expected_goal_post_postions = rGFf_left.x() > 0 ? own_goal_posts : opp_goal_posts;
+                }
+                std::sort(valid.begin(), valid.end(), [&](size_t a, size_t b) {
+                    return goals->goals[a].confidence > goals->goals[b].confidence;
+                });
 
-                    // Calculate the distance between the goal posts
-                    double left_distance  = (rGFf_left - expected_goal_post_postions.left).norm();
-                    double right_distance = (rGFf_right - expected_goal_post_postions.right).norm();
+                if (!valid.empty()) {
+                    // Best post — always contribute to cost
+                    const auto& g0  = goals->goals[valid[0]];
+                    auto rG0Ff      = Hfw * (Hwc * (g0.post.bottom * g0.post.distance));
+                    double min_d0   = std::numeric_limits<double>::max();
+                    for (const auto& kp : known_posts) {
+                        min_d0 = std::min(min_d0, (rG0Ff - kp).norm());
+                    }
+                    cost += cfg.goal_post_distance_weight * std::pow(min_d0, 2);
 
-                    // Add the cost of the distance between the goal posts
-                    cost += cfg.goal_post_distance_weight * std::pow(left_distance, 2);
-                    cost += cfg.goal_post_distance_weight * std::pow(right_distance, 2);
+                    // Second post — only if close enough to be from the same goal
+                    for (size_t i = 1; i < valid.size(); ++i) {
+                        const auto& gi = goals->goals[valid[i]];
+                        auto rGiFf     = Hfw * (Hwc * (gi.post.bottom * gi.post.distance));
+                        if ((rGiFf - rG0Ff).norm() < cfg.goal_post_pair_max_separation) {
+                            double min_di = std::numeric_limits<double>::max();
+                            for (const auto& kp : known_posts) {
+                                min_di = std::min(min_di, (rGiFf - kp).norm());
+                            }
+                            cost += cfg.goal_post_distance_weight * std::pow(min_di, 2);
+                            break;
+                        }
+                    }
                 }
             }
 

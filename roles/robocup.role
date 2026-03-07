@@ -28,6 +28,7 @@ nuclear_role(
   vision::FieldLineDetector
   vision::Yolo
   # Localisation
+  localisation::SwarmLocalisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
   localisation::RobotLocalisation

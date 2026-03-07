@@ -33,6 +33,7 @@
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Robot.hpp"
+#include "message/localisation/Swarm.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
@@ -53,6 +54,7 @@ namespace module::localisation {
     using message::input::GameState;
     using message::input::RoboCup;
     using message::localisation::Field;
+    using message::localisation::SwarmState;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::support::FieldDescription;
@@ -80,6 +82,7 @@ namespace module::localisation {
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
             cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
+            cfg.max_opponents                   = config["max_opponents"].as<int>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -150,6 +153,36 @@ namespace module::localisation {
             // Run data association step
             data_association(robots_rRWw);
         });
+
+        // Shared opponent tracking: process opponent positions reported by teammates via SwarmState.
+        // This allows tracking of opponents that are outside our own field of view.
+        on<Trigger<SwarmState>, With<Field>, Sync<RobotLocalisation>>().then(
+            [this](const SwarmState& swarm, const Field& field) {
+                if (swarm.opponent_positions_Ff.empty()) {
+                    return;
+                }
+
+                // **Run prediction step**
+                prediction();
+
+                // **Data association**
+                // Opponent positions in SwarmState are in field frame (x, y, 0).
+                // Convert to world frame using the inverse of Hfw.
+                std::vector<Eigen::Vector3d> opponents_rRWw{};
+                for (const auto& opp_Ff : swarm.opponent_positions_Ff) {
+                    Eigen::Vector3d rOFf(opp_Ff.x(), opp_Ff.y(), 0.0);
+                    Eigen::Vector3d rOWw = field.Hfw.inverse() * rOFf;
+                    opponents_rRWw.push_back(rOWw);
+                }
+
+                log<DEBUG>("Swarm: fusing ",
+                           opponents_rRWw.size(),
+                           " teammate-reported opponent positions");
+
+                // refresh_seen=false: swarm positions update UKF estimates but do NOT mark robots as
+                // seen, so the maintenance step can still prune them when they truly disappear.
+                data_association(opponents_rRWw, nullptr, false);
+            });
     }
 
     void RobotLocalisation::prediction() {
@@ -165,7 +198,8 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
-                                             const std::unique_ptr<Purpose>& purpose) {
+                                             const std::unique_ptr<Purpose>& purpose,
+                                             bool refresh_seen) {
         for (const auto& rRWw : robots_rRWw) {
             if (tracked_robots.empty()) {
                 // If there are no tracked robots, add this as a new robot
@@ -191,7 +225,7 @@ namespace module::localisation {
                 teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                           cfg.ukf.noise.measurement.position,
                                           MeasurementType::ROBOT_POSITION());
-                teammate_itr->seen    = true;
+                teammate_itr->seen    = teammate_itr->seen || refresh_seen;
                 teammate_itr->purpose = *purpose;
 
                 continue;
@@ -220,7 +254,7 @@ namespace module::localisation {
             closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                            cfg.ukf.noise.measurement.position,
                                            MeasurementType::ROBOT_POSITION());
-            closest_robot_itr->seen = true;
+            closest_robot_itr->seen = closest_robot_itr->seen || refresh_seen;
         }
     }
 
@@ -273,6 +307,35 @@ namespace module::localisation {
 
             // If removal conditions not met, keep the robot
             new_tracked_robots.push_back(tracked_robot);
+        }
+
+        // Hard cap on the number of tracked opponents. Keep the most recently seen ones
+        // (lowest missed_count). Teammates are always kept regardless of the cap.
+        int opponent_count = static_cast<int>(
+            std::count_if(new_tracked_robots.begin(), new_tracked_robots.end(), [](const TrackedRobot& r) {
+                return !r.teammate;
+            }));
+
+        if (opponent_count > cfg.max_opponents) {
+            // Stable-sort so teammates float to the front, opponents sorted by missed_count ascending
+            std::stable_sort(new_tracked_robots.begin(), new_tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
+                if (a.teammate != b.teammate) {
+                    return a.teammate > b.teammate;  // teammates first
+                }
+                return a.missed_count < b.missed_count;  // then lowest missed_count first
+            });
+
+            // Erase excess opponents from the back
+            int to_remove = opponent_count - cfg.max_opponents;
+            int removed   = 0;
+            for (auto it = new_tracked_robots.end(); it != new_tracked_robots.begin() && removed < to_remove;) {
+                --it;
+                if (!it->teammate) {
+                    log<DEBUG>(fmt::format("Removing robot {} due to opponent cap", it->id));
+                    it = new_tracked_robots.erase(it);
+                    ++removed;
+                }
+            }
         }
 
         tracked_robots = std::move(new_tracked_robots);

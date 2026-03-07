@@ -308,6 +308,7 @@ namespace module::vision {
                         g.post.distance            = ray_to_camera_space(bottom_centre_ray).norm();
                         g.side                     = Goal::Side::UNKNOWN_SIDE;
                         g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
+                        g.confidence               = class_confidences[idx];
                         goals->goals.push_back(std::move(g));
                         bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);

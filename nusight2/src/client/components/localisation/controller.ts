@@ -377,6 +377,16 @@ export class LocalisationController {
   };
 
   @action
+  toggleSwarmDebugVisibility = (model: LocalisationModel) => {
+    model.swarmDebugVisible = !model.swarmDebugVisible;
+  };
+
+  @action
+  toggleConfidenceEllipseVisibility = (model: LocalisationModel) => {
+    model.confidenceEllipseVisible = !model.confidenceEllipseVisible;
+  };
+
+  @action
   toggleOrientation(model: LocalisationModel) {
     model.dashboardField.orientation = model.dashboardField.orientation === "left" ? "right" : "left";
   }

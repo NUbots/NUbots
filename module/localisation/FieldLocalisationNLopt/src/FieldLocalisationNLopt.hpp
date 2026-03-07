@@ -236,6 +236,14 @@ namespace module::localisation {
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
 
+            /// @brief Minimum YOLO detector confidence [0, 1] for a goal post to contribute to the cost.
+            double goal_post_min_confidence = 0.5;
+
+            /// @brief Maximum field-space separation [m] between the best post and a candidate second post.
+            /// Posts farther apart than this are assumed to be from different goals and the second is ignored.
+            /// A standard goal is ~1.5 m wide; two different goals are ~7-9 m apart, so 3 m cleanly separates them.
+            double goal_post_pair_max_separation = 3.0;
+
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
 
@@ -260,6 +268,19 @@ namespace module::localisation {
             /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
             /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
             Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
+
+            /// @brief Number of frames to accumulate field line observations before committing
+            /// to a startup hypothesis. More frames = more robust but slower to start.
+            int startup_frames = 5;
+
+            /// @brief Box constraint for NLopt refinement during startup [m, m, rad].
+            /// Wider than change_limit so the optimizer can search freely from each hypothesis seed.
+            /// The state_change_weight penalty is disabled during startup.
+            Eigen::Vector3d startup_change_limit = Eigen::Vector3d(2.5, 1.5, 1.5);
+
+            /// @brief Maximum NLopt evaluations per hypothesis during startup.
+            /// Higher than the normal maxeval so each of the 6 positions is searched thoroughly.
+            size_t startup_maxeval = 5000;
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
@@ -270,6 +291,12 @@ namespace module::localisation {
 
         /// @brief Bool indicating if this is the first measurement
         bool first_measurement = true;
+
+        /// @brief Accumulated field line points across startup frames (cleared after commit)
+        std::vector<Eigen::Vector3d> startup_field_lines_buf{};
+
+        /// @brief Number of frames accumulated so far during startup
+        int startup_frames_accumulated = 0;
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};
