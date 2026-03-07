@@ -1,0 +1,7 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+# Allowed threshold between robot to another robot to start avoidance
+min_distance_threshold: 0.5
+threshold_margin: 0.1 # Margin beyond which avoidance can be stopped
+avoidance_walk_speed: 0.25
+min_valid_obstacle_distance: 0.000001 # Guard against normalising near-zero vectors when obstacle estimate is effectively at robot origin
