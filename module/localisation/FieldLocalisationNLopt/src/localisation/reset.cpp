@@ -41,10 +41,6 @@ namespace module::localisation {
                                                    const std::shared_ptr<const FieldIntersections>& field_intersections,
                                                    const std::shared_ptr<const Goals>& goals,
                                                    const Eigen::Isometry3d& Hrw) {
-        // Get robot position in field space
-        Eigen::Isometry3d Hrf = Hrw * compute_Hfw(last_certain_state).inverse();
-        Eigen::Vector3d rRFf  = Hrf.inverse().translation();
-
         Eigen::Vector3d rRWf = compute_Hfw(last_certain_state).rotation() * Hrw.inverse().translation();
 
         // How much distance from the robot to each side of the field
@@ -54,10 +50,10 @@ namespace module::localisation {
         double y_min = -(fd.dimensions.field_width / 2 + 0.2) + rRWf.y();
         double y_max = (fd.dimensions.field_width / 2 + 0.2) + rRWf.y();
 
-        // Handle the mirror field problem by halving the x boundary to the robot's current side
-        // This also avoids unnecessary computations
-        x_max = rRFf.x() < 0 ? rRWf.x() : x_max;
-        x_min = rRFf.x() > 0 ? rRWf.x() : x_min;
+        // Search the full field during global reset. With TeammateObservedSelf in the NLopt objective,
+        // the correct half naturally wins (mirror position incurs a large teammate-cost penalty).
+        // Constraining to one half based on a potentially-wrong last_certain_state was causing
+        // robots that committed to the wrong half at startup to be permanently stuck there.
 
         std::vector<double> angles{};
         for (int i = 0; i < cfg.num_angles; ++i) {
@@ -65,42 +61,49 @@ namespace module::localisation {
         }
 
         std::vector<std::pair<Eigen::Vector3d, double>> hypotheses;
-        for (double dx = -cfg.window_size; dx <= cfg.window_size; dx += cfg.step_size) {
-            for (double dy = -cfg.window_size; dy <= cfg.window_size; dy += cfg.step_size) {
-                // Try hypotheses around the last certain state (state is world position)
-                double x = last_certain_state.x() + dx;
-                double y = last_certain_state.y() + dy;
 
-                // Skip hypotheses outside the field boundaries
-                if (x < x_min || x > x_max || y < y_min || y > y_max) {
-                    continue;
-                }
+        if (force_global_reset) {
+            log<WARN>("Uncertainty reset: force_global_reset=true — skipping local search, going straight to global");
+            force_global_reset = false;
+        }
+        else {
+            for (double dx = -cfg.window_size; dx <= cfg.window_size; dx += cfg.step_size) {
+                for (double dy = -cfg.window_size; dy <= cfg.window_size; dy += cfg.step_size) {
+                    // Try hypotheses around the last certain state (state is world position)
+                    double x = last_certain_state.x() + dx;
+                    double y = last_certain_state.y() + dy;
 
-                // Add hypotheses for each position with all compass and diagonal headings
-                // Calculate cost using NLopt
-                for (const auto& angle : angles) {
-                    hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
-                                                                        field_lines.rPWw,
-                                                                        field_intersections,
-                                                                        goals));
+                    // Skip hypotheses outside the field boundaries
+                    if (x < x_min || x > x_max || y < y_min || y > y_max) {
+                        continue;
+                    }
+
+                    // Add hypotheses for each position with all compass and diagonal headings
+                    // Calculate cost using NLopt
+                    for (const auto& angle : angles) {
+                        hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
+                                                                            field_lines.rPWw,
+                                                                            field_intersections,
+                                                                            goals));
+                    }
                 }
             }
-        }
 
-        // Sort hypotheses by cost (ascending)
-        std::sort(hypotheses.begin(), hypotheses.end(), [](const auto& a, const auto& b) {
-            return a.second < b.second;
-        });
+            // Sort hypotheses by cost (ascending)
+            std::sort(hypotheses.begin(), hypotheses.end(), [](const auto& a, const auto& b) {
+                return a.second < b.second;
+            });
 
-        // If local search is valid, use the lowest cost hypothesis
-        if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
-            log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
-            // Set the state to the best hypothesis
-            state              = hypotheses[0].first;
-            filtered_state     = state;
-            first_measurement  = true;
-            last_certain_state = state;  // Update the last certain state
-            return;
+            // If local search is valid, use the lowest cost hypothesis
+            if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
+                log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
+                // Set the state to the best hypothesis
+                state              = hypotheses[0].first;
+                filtered_state     = state;
+                first_measurement  = true;
+                last_certain_state = state;  // Update the last certain state
+                return;
+            }
         }
 
         // The local search did not yield a valid hypothesis, use a global search

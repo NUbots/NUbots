@@ -106,6 +106,11 @@ namespace module::localisation {
             Eigen::Vector3d last_broadcast_rRFf = Eigen::Vector3d::Zero();
             bool has_broadcast_rRFf             = false;
 
+            /// @brief Last known localisation cost from the robot's own broadcast
+            /// Used to filter TeammateObservedSelf: if a robot was in startup (cost=999) when
+            /// a teammate tracked it, we should not relay that position back as TeammateObservedSelf.
+            float last_broadcast_cost = 999.0f;
+
             /// @brief Constructor that sets the state for the UKF
             /// @param initial_rRWw The initial position of the robot in world coordinates
             /// @param cfg_ukf The UKF configuration to use for the robot

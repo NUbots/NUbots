@@ -246,6 +246,10 @@ namespace module::localisation {
             bool reset_on_cost = false;
             /// @brief Cost threshold for resetting the filter
             double cost_threshold = 0.0;
+            /// @brief Cost threshold for committing to a startup hypothesis (more lenient than cost_threshold)
+            double startup_cost_threshold = 0.0;
+            /// @brief Seconds to wait for a teammate observation before committing at startup regardless
+            double startup_teammate_wait_s = 15.0;
             /// @brief Reset delay in seconds
             int reset_delay = 0;
             /// @brief Maximum number of times the cost can be over the threshold before resetting
@@ -297,6 +301,13 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
+        /// @brief When startup mode began (used to time out teammate-wait at startup)
+        NUClear::clock::time_point startup_start_time = NUClear::clock::now();
+
+        /// @brief Best hypothesis seen across ALL startup frames (committed at timeout)
+        Eigen::Vector3d startup_best_state = Eigen::Vector3d::Zero();
+        double startup_best_cost           = std::numeric_limits<double>::max();
+
         /// @brief Bool indicating ground truth localisation (Hfw) computed
         bool ground_truth_initialised = false;
 
@@ -335,6 +346,9 @@ namespace module::localisation {
 
         /// @brief Number of times the cost has been over the threshold
         int num_over_cost = 0;
+
+        /// @brief When true, the next uncertainty_reset skips local search and goes straight to global
+        bool force_global_reset = false;
 
 
         /**

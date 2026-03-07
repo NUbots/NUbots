@@ -118,8 +118,9 @@ namespace module::localisation {
                     localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
                     localisation_robot.time_of_measurement = tracked_robot.last_time_update;
 
-                    localisation_robot.teammate = tracked_robot.teammate;
-                    localisation_robot.purpose  = tracked_robot.purpose;
+                    localisation_robot.teammate           = tracked_robot.teammate;
+                    localisation_robot.purpose            = tracked_robot.purpose;
+                    localisation_robot.last_broadcast_cost = tracked_robot.last_broadcast_cost;
 
                     localisation_robots->robots.push_back(localisation_robot);
                 }
@@ -153,19 +154,24 @@ namespace module::localisation {
                                                    return r.purpose.player_id == purpose->player_id;
                                                });
                 if (sender_itr != tracked_robots.end()) {
-                    sender_itr->last_broadcast_rRFf = sender_rRFf;
-                    sender_itr->has_broadcast_rRFf  = true;
+                    sender_itr->last_broadcast_rRFf  = sender_rRFf;
+                    sender_itr->has_broadcast_rRFf   = true;
+                    sender_itr->last_broadcast_cost  = static_cast<float>(robocup.current_pose.cost);
                 }
 
                 // **Data association — robots the teammate has detected**
                 // Each entry is a robot the sender has seen; positions are in field space.
                 for (const auto& rc_robot : robocup.others) {
-                    // If this entry refers to ourselves, use it to constrain our own field localisation
+                    // If this entry refers to ourselves, use it to constrain our own field localisation.
+                    // Skip if the relayed cost indicates the robot was in startup (cost=999): that position
+                    // was unconfident and should not be echoed back as a constraint.
                     if (rc_robot.player_id > 0 && rc_robot.player_id == global_config.player_id) {
-                        auto obs          = std::make_unique<TeammateObservedSelf>();
-                        obs->position     = rc_robot.position;
-                        obs->sender_cost  = static_cast<float>(robocup.current_pose.cost);
-                        emit(std::move(obs));
+                        if (rc_robot.cost < 100.0f) {
+                            auto obs         = std::make_unique<TeammateObservedSelf>();
+                            obs->position    = rc_robot.position;
+                            obs->sender_cost = static_cast<float>(robocup.current_pose.cost);
+                            emit(std::move(obs));
+                        }
                         continue;
                     }
                     Eigen::Vector3d rRWw = field.Hfw.inverse() * rc_robot.position.cast<double>();

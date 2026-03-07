@@ -74,8 +74,10 @@ namespace module::localisation {
             cfg.out_of_field_cost             = config["out_of_field_cost"].as<double>();
 
             // Uncertainty reset parameters
-            cfg.reset_on_cost  = config["reset_on_cost"].as<bool>();
-            cfg.cost_threshold = config["cost_threshold"].as<double>();
+            cfg.reset_on_cost             = config["reset_on_cost"].as<bool>();
+            cfg.cost_threshold            = config["cost_threshold"].as<double>();
+            cfg.startup_cost_threshold    = config["startup_cost_threshold"].as<double>();
+            cfg.startup_teammate_wait_s   = config["startup_teammate_wait_s"].as<double>();
             cfg.reset_delay    = config["reset_delay"].as<int>();
             cfg.max_over_cost  = config["max_over_cost"].as<int>();
             cfg.step_size      = config["step_size"].as<double>();
@@ -174,11 +176,14 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
-            state             = cfg.initial_hypotheses[0];
-            filtered_state    = state;
-            first_measurement = true;
-            startup           = true;
-            last_reset        = NUClear::clock::now();
+            state               = cfg.initial_hypotheses[0];
+            filtered_state      = state;
+            first_measurement   = true;
+            startup             = true;
+            startup_start_time  = NUClear::clock::now();
+            startup_best_cost   = std::numeric_limits<double>::max();
+            startup_best_state  = Eigen::Vector3d::Zero();
+            last_reset          = NUClear::clock::now();
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
@@ -204,10 +209,70 @@ namespace module::localisation {
         });
 
         on<Trigger<TeammateObservedSelf>>().then([this](const TeammateObservedSelf& obs) {
+            if (!std::isfinite(obs.position.x()) || !std::isfinite(obs.position.y())) {
+                log<WARN>("TeammateObservedSelf: ignoring NaN/inf position from teammate");
+                return;
+            }
             has_teammate_obs        = true;
             teammate_obs_position_f = Eigen::Vector2d(obs.position.x(), obs.position.y());
             teammate_obs_cost       = obs.sender_cost > 0.0f ? obs.sender_cost : 1.0f;
             teammate_obs_time       = NUClear::clock::now();
+
+            Eigen::Vector2d current_pos(filtered_state.x(), filtered_state.y());
+            double disagreement = (current_pos - teammate_obs_position_f).norm();
+
+            log<INFO>("TeammateObservedSelf: teammate reports us at (",
+                      obs.position.x(),
+                      ", ",
+                      obs.position.y(),
+                      ") sender_cost=",
+                      teammate_obs_cost,
+                      " | our pos=(",
+                      filtered_state.x(),
+                      ", ",
+                      filtered_state.y(),
+                      ") disagreement=",
+                      disagreement,
+                      "m | startup=",
+                      startup,
+                      " | will_use_in_cost=",
+                      !startup);
+
+            if (!startup && obs.sender_cost < 0.5f && disagreement > 3.0) {
+                // Check if the teammate's report matches our mirror position (-x, -y, θ+π).
+                // If so, we're on the wrong half of the field — flip directly rather than doing
+                // a full global reset. This is the "choose a side" mechanism.
+                Eigen::Vector2d mirror_pos(-filtered_state.x(), -filtered_state.y());
+                double mirror_agreement = (mirror_pos - teammate_obs_position_f).norm();
+
+                if (mirror_agreement < 2.0) {
+                    double mirror_theta = filtered_state.z() + M_PI;
+                    log<WARN>("TeammateObservedSelf: MIRROR DETECTED — teammate places us at (",
+                              teammate_obs_position_f.x(),
+                              ", ",
+                              teammate_obs_position_f.y(),
+                              ") which is ",
+                              mirror_agreement,
+                              "m from our mirror (",
+                              mirror_pos.x(),
+                              ", ",
+                              mirror_pos.y(),
+                              ") — flipping directly");
+                    state              = Eigen::Vector3d(mirror_pos.x(), mirror_pos.y(), mirror_theta);
+                    filtered_state     = state;
+                    last_certain_state = state;
+                    num_over_cost      = 0;
+                }
+                else {
+                    log<WARN>("TeammateObservedSelf: STRONG DISAGREEMENT of ",
+                              disagreement,
+                              "m (mirror also off by ",
+                              mirror_agreement,
+                              "m) — forcing global reset");
+                    force_global_reset = true;
+                    num_over_cost      = cfg.max_over_cost + 1;
+                }
+            }
         });
 
         on<Trigger<FieldLines>,
@@ -258,25 +323,151 @@ namespace module::localisation {
                     Eigen::Vector3d proposed_state;
 
                     if (startup && cfg.starting_side == StartingSide::EITHER) {
-                        // Find the best initial state to use based on the optimisation results of each
-                        // hypothesis
+                        // Startup search: sweep both sidelines in x at step_size intervals,
+                        // using only inward-facing headings. Robots always spawn on a sideline
+                        // facing the field, so no other headings need to be evaluated.
+                        // Top sideline (y=+half_width) faces inward at heading = -π/2 (toward -y).
+                        // Bottom sideline (y=-half_width) faces inward at heading = +π/2 (toward +y).
+                        // The NLopt optimizer refines heading from these seeds within ±change_limit.z().
+                        double half_length = fd.dimensions.field_length / 2.0;
+                        double half_width  = fd.dimensions.field_width / 2.0;
+
+                        double startup_elapsed =
+                            std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
+                                                                                      - startup_start_time)
+                                .count();
+
+                        int num_x_steps   = static_cast<int>(2.0 * half_length / cfg.step_size) + 1;
+                        int total_hyps    = num_x_steps * 2;  // top + bottom sideline
+
+                        log<INFO>("--- Startup search frame ---");
+                        log<INFO>("  Field: length=",
+                                  2.0 * half_length,
+                                  "m width=",
+                                  2.0 * half_width,
+                                  "m | step_size=",
+                                  cfg.step_size,
+                                  " | evaluating ",
+                                  total_hyps,
+                                  " hypotheses (sidelines only, inward-facing)");
+                        log<INFO>("  Elapsed in startup: ",
+                                  startup_elapsed,
+                                  "s / teammate_wait=",
+                                  cfg.startup_teammate_wait_s,
+                                  "s | has_teammate_obs=",
+                                  has_teammate_obs,
+                                  " | field_line_pts=",
+                                  field_lines.rPWw.size());
+
                         std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
-                        for (auto& hypothesis : cfg.initial_hypotheses) {
-                            opt_results.push_back(
-                                run_field_line_optimisation(hypothesis, field_lines.rPWw, field_intersections, goals));
+                        for (double x = -half_length; x <= half_length; x += cfg.step_size) {
+                            // Top sideline: face inward (toward -y = heading -π/2)
+                            opt_results.push_back(run_field_line_optimisation(
+                                Eigen::Vector3d(x, half_width, -M_PI_2),
+                                field_lines.rPWw,
+                                field_intersections,
+                                goals));
+                            // Bottom sideline: face inward (toward +y = heading +π/2)
+                            opt_results.push_back(run_field_line_optimisation(
+                                Eigen::Vector3d(x, -half_width, M_PI_2),
+                                field_lines.rPWw,
+                                field_intersections,
+                                goals));
                         }
+
                         auto best_hypothesis =
                             std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
                                 return a.second < b.second;
                             });
                         proposed_state    = best_hypothesis->first;
                         chosen_state_cost = best_hypothesis->second;
-                        // For startup, always accept the best hypothesis
-                        state              = proposed_state;
-                        last_certain_state = state;
-                        filtered_state     = state;
-                        first_measurement  = true;
-                        startup            = false;
+
+                        // Count how many hypotheses are below the commit threshold (gives confidence signal)
+                        int good_hyp_count =
+                            static_cast<int>(std::count_if(opt_results.begin(),
+                                                           opt_results.end(),
+                                                           [this](const auto& h) {
+                                                               return h.second < cfg.startup_cost_threshold;
+                                                           }));
+
+                        log<INFO>("  Best hypothesis: cost=",
+                                  chosen_state_cost,
+                                  " at (x=",
+                                  proposed_state.x(),
+                                  " y=",
+                                  proposed_state.y(),
+                                  " θ=",
+                                  proposed_state.z(),
+                                  "rad) | hypotheses below threshold: ",
+                                  good_hyp_count,
+                                  "/",
+                                  total_hyps);
+
+                        // Track the best hypothesis seen across ALL startup frames.
+                        // At timeout we commit to this rather than whatever the current frame shows,
+                        // since the timeout frame may coincidentally have worse field line visibility.
+                        if (chosen_state_cost < startup_best_cost) {
+                            startup_best_cost  = chosen_state_cost;
+                            startup_best_state = proposed_state;
+                            log<INFO>("  New all-time best: cost=",
+                                      startup_best_cost,
+                                      " at (x=",
+                                      startup_best_state.x(),
+                                      " y=",
+                                      startup_best_state.y(),
+                                      " θ=",
+                                      startup_best_state.z(),
+                                      "rad)");
+                        }
+
+                        // Always update state to the best candidate so the emitted field position is
+                        // meaningful (not zero). Broadcasted with cost=999 so teammates ignore it.
+                        state          = proposed_state;
+                        filtered_state = proposed_state;
+
+                        // Commit once confident: cost is low AND either a teammate has confirmed
+                        // our position (breaking mirror ambiguity) or we've waited long enough.
+                        bool teammate_confirmed = has_teammate_obs;
+                        bool timed_out          = startup_elapsed > cfg.startup_teammate_wait_s;
+                        bool cost_ok            = chosen_state_cost < cfg.startup_cost_threshold;
+
+                        if (cost_ok && (teammate_confirmed || timed_out)) {
+                            // At timeout, use the all-time best — not the current (possibly poor) frame.
+                            Eigen::Vector3d commit_state =
+                                timed_out ? startup_best_state : proposed_state;
+                            double commit_cost = timed_out ? startup_best_cost : chosen_state_cost;
+
+                            state          = commit_state;
+                            filtered_state = commit_state;
+
+                            log<INFO>("  COMMITTING: cost=",
+                                      commit_cost,
+                                      " at (x=",
+                                      state.x(),
+                                      " y=",
+                                      state.y(),
+                                      " θ=",
+                                      state.z(),
+                                      "rad) | reason: ",
+                                      teammate_confirmed ? "teammate_confirmed" : "timed_out",
+                                      " | all-time best cost=",
+                                      startup_best_cost);
+                            last_certain_state = state;
+                            first_measurement  = true;
+                            startup            = false;
+                        }
+                        else {
+                            log<INFO>("  Not committing: cost_ok=",
+                                      cost_ok,
+                                      " teammate_confirmed=",
+                                      teammate_confirmed,
+                                      " timed_out=",
+                                      timed_out,
+                                      " | all-time best so far: cost=",
+                                      startup_best_cost,
+                                      " | waiting for ",
+                                      teammate_confirmed ? "lower cost" : "teammate or timeout");
+                        }
                     }
                     else {
                         // Run the optimisation routine
@@ -348,8 +539,10 @@ namespace module::localisation {
                         field->association_lines.push_back({association.first, association.second});
                     }
 
-                    // Add cost, covariance, and uncertainty to the field message
-                    field->cost = chosen_state_cost;
+                    // During startup, broadcast a very high cost so teammates know not to trust
+                    // this robot's position yet. This prevents stale startup positions from being
+                    // relayed back via TeammateObservedSelf and corrupting subsequent startup attempts.
+                    field->cost = startup ? 999.0 : chosen_state_cost;
 
                     emit(field);
                 });
@@ -475,7 +668,9 @@ namespace module::localisation {
             // --- Teammate-observed position cost ---
             // A well-localised teammate has reported where they see us on the field.
             // Weight is inversely proportional to the sender's localisation cost.
-            if (has_teammate_obs && cfg.teammate_position_weight > 0.0) {
+            // Skipped during startup: stale observations from a wrong pre-reset broadcast would
+            // corrupt the clean field-line-only startup evaluation.
+            if (has_teammate_obs && !startup && cfg.teammate_position_weight > 0.0) {
                 double age = std::chrono::duration_cast<std::chrono::duration<double>>(
                                  NUClear::clock::now() - teammate_obs_time)
                                  .count();

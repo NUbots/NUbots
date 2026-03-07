@@ -286,8 +286,14 @@ namespace module::network {
                         // Broadcast internal tracking ID so teammates can correlate opponent sightings
                         rc_robot.tracking_id = static_cast<uint32_t>(local_bot.id);
 
-                        // Convert world to field coords
+                        // Convert world to field coords — skip if UKF state is invalid
+                        if (!local_bot.rRWw.allFinite()) {
+                            continue;
+                        }
                         Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
+                        if (!rRFf.allFinite()) {
+                            continue;
+                        }
 
                         // Store 2D position (x, y) and set (z) to 0
                         rc_robot.position     = rRFf.cast<float>();
@@ -309,6 +315,11 @@ namespace module::network {
                                                 ? message::input::Team::RED
                                                 : message::input::Team::BLUE;
                         }
+
+                        // Relay the last known field-localisation cost of this robot.
+                        // Receivers use this to gate TeammateObservedSelf: if a robot was in startup
+                        // (cost=999) when tracked, its position should not be relayed back to it.
+                        rc_robot.cost = local_bot.last_broadcast_cost;
 
                         // Add robot information to list of other robots in message
                         msg->others.push_back(std::move(rc_robot));

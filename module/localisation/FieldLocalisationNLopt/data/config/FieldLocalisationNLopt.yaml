@@ -35,6 +35,10 @@ out_of_field_cost: 3.0
 reset_on_cost: true
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
+# Cost threshold for committing to a startup hypothesis (more lenient — robot may see fewer lines at spawn)
+startup_cost_threshold: 4.0
+# Seconds to wait for a teammate observation before committing at startup regardless
+startup_teammate_wait_s: 15.0
 # Time (s) to wait before allowing a localisation reset again
 reset_delay: 3
 # Maximum number of times the cost can be over threshold before a reset is triggered

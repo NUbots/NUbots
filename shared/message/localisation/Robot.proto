@@ -56,6 +56,10 @@ message Robot {
     bool teammate = 7;
     /// For teammates, the Purpose information (ID, purpose, dynamic, active, team_colour)
     purpose.Purpose purpose = 8;
+    /// Last known field-localisation cost from this robot's own broadcast.
+    /// Set to 999 when the robot was in startup (unconfident) at the time it was tracked.
+    /// Used by RobotCommunication to populate rc_robot.cost so receivers can gate TeammateObservedSelf.
+    float last_broadcast_cost = 9;
 }
 
 message Robots {
