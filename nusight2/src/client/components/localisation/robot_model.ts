@@ -163,7 +163,7 @@ export class LocalisationRobotModel {
   @observable rIWw?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
-  @observable robots: { id: number; rRWw: Vector3; color: string }[];
+  @observable robots: { id: number; rRWw: Vector3; color: string; fromSwarm: boolean }[];
   @observable purpose: string;
   @observable associationLines?: Line[];
   @observable goalPostLines?: Line[];
@@ -179,12 +179,20 @@ export class LocalisationRobotModel {
   @observable playerId: number;
   @observable teamColour: "red" | "blue" = "blue";
   @observable torsoTrajectory: Matrix4[];
-  /// Swarm debug: raw self-reported field positions of teammates (from RoboCup broadcasts)
+  /// Swarm debug: confirmed opponent KF tracks with covariance (from SwarmDebug)
+  @observable swarmOpponents: { position: Vector3; covariance: Matrix2 }[] = [];
+  /// Swarm debug: teammate self-reported positions (from SwarmDebug)
   @observable swarmTeammatePositions: Vector3[] = [];
-  /// Swarm debug: lines between UKF-tracked teammate position and their self-reported position
-  @observable swarmDisagreementLines: Line[] = [];
-  /// Confidence ellipse: 2x2 covariance of field line observations projected to field space
-  @observable observationCovarianceFf: Matrix2 = Matrix2.of();
+  /// Swarm debug: teammate localisation costs, parallel to swarmTeammatePositions
+  @observable swarmTeammateCosts: number[] = [];
+  /// Swarm debug: ball KF fused position (from SwarmDebug)
+  @observable swarmBallPosition: Vector3 = Vector3.of();
+  /// Swarm debug: ball KF 2x2 position covariance
+  @observable swarmBallCovariance: Matrix2 = Matrix2.of();
+  /// Swarm debug: true when the swarm has a confirmed ball estimate
+  @observable swarmBallSeen: boolean = false;
+  /// Confidence ellipse: isotropic 2x2 uncertainty derived from localisation cost
+  @observable positionUncertaintyFf: Matrix2 = Matrix2.of();
   @observable swingFootTrajectory: Matrix4[];
   @observable walkPhase: message.behaviour.state.WalkState.Phase;
   @observable trajectoryHistory: {
@@ -245,7 +253,7 @@ export class LocalisationRobotModel {
     ball?: { rBWw: Vector3 };
     rIWw?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
-    robots: { id: number; rRWw: Vector3; color: string }[];
+    robots: { id: number; rRWw: Vector3; color: string; fromSwarm: boolean }[];
     purpose: string;
     associationLines?: Line[];
     maxAlignRadius: number;
@@ -391,10 +399,11 @@ export class LocalisationRobotModel {
 
   /** Robot positions in field space */
   @computed
-  get rRFf(): { position: Vector3; color: string }[] {
+  get rRFf(): { position: Vector3; color: string; fromSwarm: boolean }[] {
     return this.robots?.map((robot) => ({
       position: robot.rRWw.applyMatrix4(this.Hfw),
       color: robot.color,
+      fromSwarm: robot.fromSwarm,
     }));
   }
 

@@ -146,7 +146,6 @@ namespace module::localisation {
         /// @param robots_rRWw The new robot measurements in world coordinates
         /// @param purpose An optional purpose message that can be used to associate the robot with teammate
         /// @param refresh_seen If false, matched robots are NOT marked seen — maintenance can still prune them.
-        ///                     Use false for swarm-sourced positions so they don't keep robots alive indefinitely.
         void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
                               const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr,
                               bool refresh_seen                                         = true);

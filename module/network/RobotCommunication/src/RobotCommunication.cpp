@@ -284,6 +284,12 @@ namespace module::network {
                         if (local_bot.teammate) {
                             continue;
                         }
+                        // Skip swarm-injected robots — these come from the swarm and
+                        // re-broadcasting them would create a feedback loop where
+                        // SwarmLocalisation ingests its own output as new detections.
+                        if (local_bot.from_swarm) {
+                            continue;
+                        }
 
                         // Create new robot message
                         message::input::Robot rc_robot;

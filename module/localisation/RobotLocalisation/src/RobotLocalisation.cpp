@@ -89,8 +89,12 @@ namespace module::localisation {
            With<GreenHorizon>,
            With<Field>,
            With<FieldDescription>,
+           Optional<With<SwarmState>>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
+            .then([this](const GreenHorizon& horizon,
+                         const Field& field,
+                         const FieldDescription& field_desc,
+                         const std::shared_ptr<const SwarmState>& swarm_state) {
                 // **Run maintenance step**
                 maintenance(horizon, field, field_desc);
 
@@ -107,11 +111,27 @@ namespace module::localisation {
                     localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
                     localisation_robot.covariance          = tracked_robot.ukf.get_covariance();
                     localisation_robot.time_of_measurement = tracked_robot.last_time_update;
-
-                    localisation_robot.teammate = tracked_robot.teammate;
-                    localisation_robot.purpose  = tracked_robot.purpose;
-
+                    localisation_robot.teammate            = tracked_robot.teammate;
+                    localisation_robot.purpose             = tracked_robot.purpose;
+                    localisation_robot.from_swarm          = false;
                     localisation_robots->robots.push_back(localisation_robot);
+                }
+
+                // Append swarm-fused opponents for positions outside this robot's field of view.
+                // Anything inside the green horizon is already handled by this robot's own vision —
+                // swarm entries only fill blind spots, avoiding any association ambiguity.
+                if (swarm_state && !horizon.horizon.empty()) {
+                    for (const auto& opp_Ff : swarm_state->opponent_positions_Ff) {
+                        Eigen::Vector3d rOFf(opp_Ff.x(), opp_Ff.y(), 0.0);
+                        Eigen::Vector3d rOWw = field.Hfw.inverse() * rOFf;
+                        if (!point_in_convex_hull(horizon.horizon, rOWw)) {
+                            LocalisationRobot swarm_robot;
+                            swarm_robot.rRWw       = rOWw;
+                            swarm_robot.teammate   = false;
+                            swarm_robot.from_swarm = true;
+                            localisation_robots->robots.push_back(swarm_robot);
+                        }
+                    }
                 }
 
                 emit(std::move(localisation_robots));
@@ -154,35 +174,6 @@ namespace module::localisation {
             data_association(robots_rRWw);
         });
 
-        // Shared opponent tracking: process opponent positions reported by teammates via SwarmState.
-        // This allows tracking of opponents that are outside our own field of view.
-        on<Trigger<SwarmState>, With<Field>, Sync<RobotLocalisation>>().then(
-            [this](const SwarmState& swarm, const Field& field) {
-                if (swarm.opponent_positions_Ff.empty()) {
-                    return;
-                }
-
-                // **Run prediction step**
-                prediction();
-
-                // **Data association**
-                // Opponent positions in SwarmState are in field frame (x, y, 0).
-                // Convert to world frame using the inverse of Hfw.
-                std::vector<Eigen::Vector3d> opponents_rRWw{};
-                for (const auto& opp_Ff : swarm.opponent_positions_Ff) {
-                    Eigen::Vector3d rOFf(opp_Ff.x(), opp_Ff.y(), 0.0);
-                    Eigen::Vector3d rOWw = field.Hfw.inverse() * rOFf;
-                    opponents_rRWw.push_back(rOWw);
-                }
-
-                log<DEBUG>("Swarm: fusing ",
-                           opponents_rRWw.size(),
-                           " teammate-reported opponent positions");
-
-                // refresh_seen=false: swarm positions update UKF estimates but do NOT mark robots as
-                // seen, so the maintenance step can still prune them when they truly disappear.
-                data_association(opponents_rRWw, nullptr, false);
-            });
     }
 
     void RobotLocalisation::prediction() {

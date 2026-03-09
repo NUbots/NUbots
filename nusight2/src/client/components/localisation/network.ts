@@ -37,6 +37,7 @@ export class LocalisationNetwork {
     this.network.on(message.purpose.Purpose, this.onPurpose);
     this.network.on(message.behaviour.state.WalkState, this.onWalkState);
     this.network.on(message.support.nusight.Overview, this.onOverview);
+    this.network.on(message.localisation.SwarmDebug, this.onSwarmDebug);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -73,21 +74,32 @@ export class LocalisationNetwork {
       end: Vector3.from(line.end),
     }));
 
-    // Swarm debug fields — cast to any since the generated index.d.ts predates these proto additions.
-    // Once the NUsight build regenerates the types, the casts can be removed.
+    // Confidence ellipse: protobufjs preserves the underscore before uppercase Ff,
+    // so position_uncertainty_Ff decodes as positionUncertainty_Ff (not positionUncertaintyFf).
     const f = field as any;
+    robot.positionUncertaintyFf = Matrix2.from(f.positionUncertainty_Ff);
+  };
 
-    // Swarm debug: raw teammate self-reported positions (field space, direct from RoboCup)
-    robot.swarmTeammatePositions = (f.swarmTeammatePositionsFf ?? []).map((p: any) => Vector3.from(p));
+  @action
+  private onSwarmDebug = (robotModel: RobotModel, swarmDebug: any) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+    console.log("[SwarmDebug]", robotModel.name, "opponents:", swarmDebug.opponents?.length, "ballSeen:", swarmDebug.ballSeen, "teammates:", swarmDebug.teammatePositions_Ff?.length);
 
-    // Swarm debug: disagreement lines (start = UKF-tracked teammate, end = self-reported)
-    robot.swarmDisagreementLines = (f.swarmDisagreementLines ?? []).map((line: any) => ({
-      start: Vector3.from(line.start),
-      end: Vector3.from(line.end),
+    // Confirmed opponent KF tracks with covariance
+    // (proto: position_Ff → JS: position_Ff, protobufjs keeps _F underscore)
+    robot.swarmOpponents = (swarmDebug.opponents ?? []).map((opp: any) => ({
+      position: Vector3.from(opp.position_Ff),
+      covariance: Matrix2.from(opp.covariance),
     }));
 
-    // Confidence ellipse: 2x2 observation covariance of field line points in field space
-    robot.observationCovarianceFf = Matrix2.from(f.observationCovarianceFf);
+    // Raw self-reported teammate positions + costs
+    robot.swarmTeammatePositions = (swarmDebug.teammatePositions_Ff ?? []).map((p: any) => Vector3.from(p));
+    robot.swarmTeammateCosts = (swarmDebug.teammateCosts ?? []).map((c: any) => Number(c));
+
+    // Ball KF estimate
+    robot.swarmBallPosition = Vector3.from(swarmDebug.ballPosition_Ff);
+    robot.swarmBallCovariance = Matrix2.from(swarmDebug.ballCovariance);
+    robot.swarmBallSeen = swarmDebug.ballSeen ?? false;
   };
 
   @action
@@ -161,6 +173,7 @@ export class LocalisationNetwork {
         id: localisation_robot.id!,
         rRWw: Vector3.from(localisation_robot.rRWw),
         color: localisation_robot.teammate ? robot.teamColour : robot.teamColour === "red" ? "blue" : "red",
+        fromSwarm: localisation_robot.fromSwarm ?? false,
       };
     });
   }

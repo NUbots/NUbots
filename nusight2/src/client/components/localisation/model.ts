@@ -128,7 +128,7 @@ export class LocalisationModel {
   @observable fieldIntersectionsVisible = true;
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
-  @observable swarmDebugVisible = true;
+  @observable swarmDebugVisible = false;
   @observable confidenceEllipseVisible = true;
 
   constructor(

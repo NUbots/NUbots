@@ -56,6 +56,9 @@ message Robot {
     bool teammate = 7;
     /// For teammates, the Purpose information (ID, purpose, dynamic, active, team_colour)
     purpose.Purpose purpose = 8;
+
+    /// True if this track has only ever been updated by swarm data, never confirmed by own vision.
+    bool from_swarm = 9;
 }
 
 message Robots {

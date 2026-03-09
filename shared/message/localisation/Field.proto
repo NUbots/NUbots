@@ -57,20 +57,13 @@ message Field {
     /// Association lines between observations and landmarks
     repeated Line association_lines = 6;
 
-    /// Swarm debug: raw self-reported positions of teammates in field space (from RoboCup broadcasts).
-    /// These are unfiltered — compare visually to the UKF-tracked robot cylinders to spot disagreements.
-    repeated vec3 swarm_teammate_positions_Ff = 7;
+    /// Reserved for removed swarm debug fields (moved to SwarmDebug.proto)
+    reserved 7, 8;
 
-    /// Swarm debug: lines connecting the UKF-tracked teammate position (start, field space)
-    /// to that teammate's self-reported position (end, field space).
-    /// Long lines = large disagreement; antipodal lines across the field centre = likely flip.
-    repeated Line swarm_disagreement_lines = 8;
-
-    /// Confidence ellipse: 2x2 covariance of field line observations projected to field space.
-    /// Computed from the spatial spread of rPWw points transformed by the current pose estimate.
-    /// Shape encodes localisation quality: a thin ellipse means poor constraint in that direction,
-    /// a round ellipse means good multi-directional coverage.
-    mat2 observation_covariance_Ff = 9;
+    /// Confidence ellipse: 2x2 isotropic position uncertainty derived from localisation cost.
+    /// sigma = sqrt(cost) * scale, cov = sigma² * I.
+    /// Shrinks when the robot is well-localised (low cost), grows when uncertain (high cost).
+    mat2 position_uncertainty_Ff = 9;
 
     /// Goal post association lines: start = detected post in field space, end = matched known post position.
     /// Rendered purple in NUsight to distinguish from intersection association lines (red).

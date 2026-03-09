@@ -89,6 +89,9 @@ goal_post_min_confidence: 0.5
 # A standard goal is ~1.5 m wide, so 3 m cleanly separates same-goal from different-goal pairs.
 goal_post_pair_max_separation: 3.0
 
+# Scale factor for the confidence ellipse: radius = sqrt(cost) * cost_to_sigma_scale [m].
+cost_to_sigma_scale: 1.0
+
 opt:
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6

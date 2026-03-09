@@ -102,6 +102,7 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance        = config["goal_post_error_tolerance"].as<double>();
             cfg.goal_post_min_confidence         = config["goal_post_min_confidence"].as<double>();
             cfg.goal_post_pair_max_separation    = config["goal_post_pair_max_separation"].as<double>();
+            cfg.cost_to_sigma_scale              = config["cost_to_sigma_scale"].as<double>();
 
             // Optimisation parameters
             cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
@@ -238,7 +239,6 @@ namespace module::localisation {
                     // unstable
                     bool unstable = stability <= Stability::FALLING;
                     if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
-                        log<DEBUG>("Not enough field line points or robot is unstable");
                         return;
                     }
 
@@ -253,23 +253,23 @@ namespace module::localisation {
                                                        field_lines.rPWw.end());
                         ++startup_frames_accumulated;
 
-                        log<INFO>("Startup: accumulated frame ",
-                                  startup_frames_accumulated,
-                                  "/",
-                                  cfg.startup_frames,
-                                  " (",
-                                  startup_field_lines_buf.size(),
-                                  " points total)");
-
                         if (startup_frames_accumulated < cfg.startup_frames) {
+                            log<DEBUG>("Startup: accumulated frame ",
+                                       startup_frames_accumulated,
+                                       "/",
+                                       cfg.startup_frames,
+                                       " (",
+                                       startup_field_lines_buf.size(),
+                                       " points)");
+
                             // Not enough frames yet.
                             // Emit a high-cost sentinel so that: (a) downstream modules
                             // that need a Field message get one, and (b) RobotCommunication
                             // broadcasts an obviously-unreliable cost so teammates' SwarmLocalisation
                             // will gate us out until we actually commit.
-                            auto field   = std::make_unique<Field>();
-                            field->Hfw   = compute_Hfw(filtered_state);
-                            field->cost  = 99.9;
+                            auto field  = std::make_unique<Field>();
+                            field->Hfw  = compute_Hfw(filtered_state);
+                            field->cost = 99.9;
                             emit(field);
                             return;
                         }
@@ -288,20 +288,17 @@ namespace module::localisation {
                                                                       goals);
                             opt_results.push_back(result);
                             emit(graph("Startup/candidate_" + std::to_string(hi) + "_cost", result.second));
-                            log<INFO>("Startup hypothesis ",
-                                      hi,
-                                      " init=(",
-                                      cfg.initial_hypotheses[hi].x(),
-                                      ",",
-                                      cfg.initial_hypotheses[hi].y(),
-                                      ") → optimised (",
-                                      result.first.x(),
-                                      ",",
-                                      result.first.y(),
-                                      ",",
-                                      result.first.z(),
-                                      ") cost=",
-                                      result.second);
+                            log<DEBUG>("Startup candidate ",
+                                       hi,
+                                       ": cost=",
+                                       result.second,
+                                       " pos=(",
+                                       result.first.x(),
+                                       ", ",
+                                       result.first.y(),
+                                       ", ",
+                                       result.first.z() * 180.0 / M_PI,
+                                       "°)");
                         }
 
                         // Restore normal tracking parameters
@@ -330,46 +327,37 @@ namespace module::localisation {
                         emit(graph("Startup/cost_margin_ratio", cost_margin));
 
                         size_t best_idx = static_cast<size_t>(best_hypothesis - opt_results.begin());
-                        log<INFO>("Startup: chose hypothesis ",
+                        log<INFO>("Startup: hypothesis ",
                                   best_idx,
-                                  " with cost=",
-                                  chosen_state_cost,
-                                  " margin_ratio=",
-                                  cost_margin,
-                                  " (second_best=",
-                                  second_best_cost,
-                                  ") pos=(",
+                                  " → pos=(",
                                   proposed_state.x(),
                                   ", ",
                                   proposed_state.y(),
                                   ", ",
-                                  proposed_state.z(),
-                                  ") from ",
-                                  startup_field_lines_buf.size(),
-                                  " points over ",
-                                  startup_frames_accumulated,
-                                  " frames");
+                                  proposed_state.z() * 180.0 / M_PI,
+                                  "°) cost=",
+                                  chosen_state_cost,
+                                  " margin=",
+                                  cost_margin);
 
                         // Warn when the choice is uncertain: either all costs are high
                         // (robot may not match any hypothesis well) or the margin is small
                         // (the top two hypotheses are nearly indistinguishable).
                         if (chosen_state_cost > cfg.cost_threshold) {
-                            log<WARN>("Startup: best cost=",
+                            log<WARN>("Startup: cost=",
                                       chosen_state_cost,
-                                      " exceeds cost_threshold=",
+                                      " exceeds threshold=",
                                       cfg.cost_threshold,
-                                      " — localisation may be unreliable. "
-                                      "Uncertainty reset will fire if cost stays high.");
+                                      " — localisation may be unreliable");
                         }
                         if (cost_margin > 0.7) {
-                            log<WARN>("Startup: margin_ratio=",
+                            log<WARN>("Startup: margin=",
                                       cost_margin,
-                                      " is high — hypothesis choice is uncertain "
-                                      "(best=",
+                                      " — hypothesis choice is ambiguous (best=",
                                       chosen_state_cost,
                                       " second=",
                                       second_best_cost,
-                                      "). Consider adding more startup_frames.");
+                                      ")");
                         }
 
                         // Commit to the best hypothesis
@@ -423,9 +411,9 @@ namespace module::localisation {
                     if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                         // Cost has been high too many times, reset the localisation
-                        log<WARN>("Cost exceeded threshold ",
-                                  cfg.max_over_cost,
-                                  " times, triggering uncertainty reset");
+                        log<WARN>("Cost exceeded threshold for ",
+                                  num_over_cost,
+                                  " consecutive frames — triggering uncertainty reset");
                         // Emit that we are resetting, eg for behaviour
                         emit(std::make_unique<UncertaintyResetFieldLocalisation>());
                         // Reset localisation by finding a new low cost state
@@ -508,22 +496,20 @@ namespace module::localisation {
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost = chosen_state_cost;
 
-                    // --- Swarm: populate debug overlays and check for flip ---
+                    // --- Swarm: flip detection (debug visualisation moved to SwarmLocalisation) ---
                     if (swarm) {
-                        int num_confident  = 0;
-                        int flip_votes     = 0;
+                        int num_confident        = 0;
+                        int flip_votes           = 0;
                         constexpr double flip_ratio = 0.5;  // antipodal_dist < direct_dist * ratio
 
                         for (const auto& ts : swarm->teammates) {
-                            Eigen::Vector3d pos_Ff(ts.position_Ff.x(), ts.position_Ff.y(), ts.position_Ff.z());
-                            field->swarm_teammate_positions_Ff.push_back(pos_Ff);
-
                             if (ts.confident) {
                                 ++num_confident;
+                                Eigen::Vector2d pos_Ff(ts.position_Ff.x(), ts.position_Ff.y());
 
                                 // Check for flip: confident teammate is approximately antipodal to us
-                                double antipodal_dist = (filtered_state.head<2>() + pos_Ff.head<2>()).norm();
-                                double direct_dist    = (filtered_state.head<2>() - pos_Ff.head<2>()).norm();
+                                double antipodal_dist = (filtered_state.head<2>() + pos_Ff).norm();
+                                double direct_dist    = (filtered_state.head<2>() - pos_Ff).norm();
                                 emit(graph("Swarm/teammate_" + std::to_string(ts.player_id) + "/antipodal_dist",
                                            antipodal_dist));
                                 emit(graph("Swarm/teammate_" + std::to_string(ts.player_id) + "/direct_dist",
@@ -531,13 +517,13 @@ namespace module::localisation {
 
                                 if (direct_dist > 1.0 && antipodal_dist < direct_dist * flip_ratio) {
                                     ++flip_votes;
-                                    log<WARN>("Swarm: teammate ",
-                                              ts.player_id,
-                                              " is antipodal — possible flip! "
-                                              "antipodal=",
-                                              antipodal_dist,
-                                              " direct=",
-                                              direct_dist);
+                                    log<DEBUG>("Swarm: teammate ",
+                                               ts.player_id,
+                                               " is antipodal (antipodal=",
+                                               antipodal_dist,
+                                               " direct=",
+                                               direct_dist,
+                                               ")");
                                 }
                             }
                         }
@@ -561,27 +547,16 @@ namespace module::localisation {
                         emit(graph("Swarm/flip_votes", flip_votes));
                     }
 
-                    // --- Confidence ellipse: 2x2 covariance of field line observations ---
-                    // Project field line points to field space using the current pose estimate,
-                    // then compute the 2D (x, y) covariance. Shape encodes localisation quality:
-                    // a thin ellipse = poor constraint in that direction.
-                    if (field_lines.rPWw.size() >= 3) {
-                        Eigen::Vector2d mean = Eigen::Vector2d::Zero();
-                        for (const auto& rPWw : field_lines.rPWw) {
-                            Eigen::Vector3d rPFf = field->Hfw * rPWw;
-                            mean += rPFf.head<2>();
-                        }
-                        mean /= static_cast<double>(field_lines.rPWw.size());
-
+                    // --- Position uncertainty ellipse ---
+                    // Isotropic 2x2 covariance derived from localisation cost.
+                    // sigma = sqrt(cost) * scale → small circle when confident, large when uncertain.
+                    {
+                        const double sigma = std::sqrt(chosen_state_cost) * cfg.cost_to_sigma_scale;
+                        const double var   = sigma * sigma;
                         Eigen::Matrix2d cov = Eigen::Matrix2d::Zero();
-                        for (const auto& rPWw : field_lines.rPWw) {
-                            Eigen::Vector3d rPFf = field->Hfw * rPWw;
-                            Eigen::Vector2d diff = rPFf.head<2>() - mean;
-                            cov += diff * diff.transpose();
-                        }
-                        cov /= static_cast<double>(field_lines.rPWw.size());
-
-                        field->observation_covariance_Ff = cov;
+                        cov(0, 0)           = var;
+                        cov(1, 1)           = var;
+                        field->position_uncertainty_Ff = cov;
                     }
 
                     emit(field);

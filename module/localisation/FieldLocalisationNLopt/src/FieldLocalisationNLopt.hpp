@@ -244,6 +244,11 @@ namespace module::localisation {
             /// A standard goal is ~1.5 m wide; two different goals are ~7-9 m apart, so 3 m cleanly separates them.
             double goal_post_pair_max_separation = 3.0;
 
+            /// @brief Scale factor converting sqrt(cost) to position uncertainty sigma [m].
+            /// Confidence ellipse radius = sqrt(cost) * cost_to_sigma_scale.
+            /// At cost=1.0 the ellipse radius equals this value in metres.
+            double cost_to_sigma_scale = 1.0;
+
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
 

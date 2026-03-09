@@ -29,7 +29,7 @@ import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
-import { SwarmDisagreementLines, SwarmTeammateMarkers } from "./r3f_components/swarm_debug";
+import { SwarmTeammateMarkers } from "./r3f_components/swarm_debug";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
@@ -528,12 +528,21 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
     <object3D key={robot.id}>
       <Nugus model={robot} />
 
-      {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
-      {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
+      {!model.swarmDebugVisible && model.fieldLinePointsVisible && (
+        <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />
+      )}
+      {!model.swarmDebugVisible && model.particlesVisible && (
+        <FieldPoints points={robot.particles} color={"blue"} size={0.02} />
+      )}
 
-      {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
+      {!model.swarmDebugVisible && model.ballVisible && robot.rBFf && (
+        <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />
+      )}
+      {!model.swarmDebugVisible && model.ballVisible && !robot.rBFf && robot.swarmBallSeen && (
+        <Ball position={robot.swarmBallPosition.toArray()} scale={0.1} />
+      )}
 
-      {model.goalsVisible && (
+      {!model.swarmDebugVisible && model.goalsVisible && (
         <FieldObjects
           objects={robot.rGFf.map((goal) => ({
             position: goal.bottom,
@@ -544,21 +553,17 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         />
       )}
 
-      <FieldObjects
-        objects={robot.rRFf.map((r) => {
-          return {
-            position: r.position,
-            color: r.color,
-          };
-        })}
-        defaultHeight={0.8}
-        defaultRadius={0.1}
-      />
+      {!model.swarmDebugVisible && (
+        <FieldObjects objects={robot.rRFf.filter((r: { fromSwarm: boolean }) => !r.fromSwarm)} defaultHeight={0.8} defaultRadius={0.1} />
+      )}
 
-      {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
-
-      {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}
-      {model.fieldIntersectionsVisible && robot.goalPostLines && (
+      {!model.swarmDebugVisible && model.fieldIntersectionsVisible && robot.rIFf && (
+        <FieldIntersections intersections={robot.rIFf} />
+      )}
+      {!model.swarmDebugVisible && model.fieldIntersectionsVisible && robot.associationLines && (
+        <AssociationLines lines={robot.associationLines} />
+      )}
+      {!model.swarmDebugVisible && model.fieldIntersectionsVisible && robot.goalPostLines && (
         <AssociationLines lines={robot.goalPostLines} color="purple" />
       )}
 
@@ -609,12 +614,23 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         />
       )}
 
-      {model.swarmDebugVisible && <SwarmTeammateMarkers positions={robot.swarmTeammatePositions} />}
-      {model.swarmDebugVisible && <SwarmDisagreementLines lines={robot.swarmDisagreementLines} />}
+      {model.swarmDebugVisible && (
+        <SwarmTeammateMarkers positions={robot.swarmTeammatePositions} costs={robot.swarmTeammateCosts} />
+      )}
+      {model.swarmDebugVisible && robot.swarmOpponents.length > 0 && (
+        <FieldObjects
+          objects={robot.swarmOpponents.map((o: { position: any; covariance: any }) => ({ position: o.position, color: "red" }))}
+          defaultHeight={0.8}
+          defaultRadius={0.1}
+        />
+      )}
+      {model.swarmDebugVisible && robot.swarmBallSeen && (
+        <Ball position={robot.swarmBallPosition.toArray()} scale={0.1} />
+      )}
       {model.confidenceEllipseVisible && robot.Hft && (
         <ConfidenceEllipse
           center={robot.Hft.decompose().translation}
-          covariance={robot.observationCovarianceFf}
+          covariance={robot.positionUncertaintyFf}
         />
       )}
     </object3D>
