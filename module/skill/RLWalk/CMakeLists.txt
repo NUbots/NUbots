@@ -4,7 +4,7 @@ find_package(TBB REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # Extracting normalisation parameters from pytorch model at build-time
-set(PT_MODEL_PATH "/home/nubots/NUbots/module/skill/RLWalk/data/model_standing_normalisation.pt")
+set(PT_MODEL_PATH "/home/nubots/NUbots/module/skill/RLWalk/data/model.pt")
 set(OUTPUT_PATH "/home/nubots/NUbots/module/skill/RLWalk/data/config/normalisation_params.yaml")
 set(EXTRACT_SCRIPT "/home/nubots/NUbots/module/skill/RLWalk/src/extract_normalisation.py")
 

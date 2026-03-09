@@ -18,13 +18,13 @@ print("Available keys in checkpoint:")
 for key in checkpoint.keys():
     print(f"  - {key}")
 
-model_dict = checkpoint['model_state_dict']
+model_dict = checkpoint['actor_state_dict']
 
 try:
     # Access the actor_obs_normalizer attributes
-    obs_mean = model_dict['actor_obs_normalizer._mean'].cpu().numpy()
-    obs_std = model_dict['actor_obs_normalizer._std'].cpu().numpy()
-    obs_var = model_dict['actor_obs_normalizer._var'].cpu().numpy()
+    obs_mean = model_dict['obs_normalizer._mean'].cpu().numpy()
+    obs_std = model_dict['obs_normalizer._std'].cpu().numpy()
+    obs_var = model_dict['obs_normalizer._var'].cpu().numpy()
 
     # Save to YAML
     stats = {

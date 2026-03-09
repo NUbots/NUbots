@@ -55,6 +55,8 @@ namespace module::skill {
 
         /// @brief Whether the model is initialized
         bool model_initialized;
+        /// @brief Guard against uninitialised model parameters
+        bool normalisation_loaded = false;
 
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;

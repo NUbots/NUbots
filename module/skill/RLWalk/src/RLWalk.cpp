@@ -105,6 +105,7 @@ namespace module::skill {
                     _std[i]  = std_vec[i];
                     _var[i]  = var_vec[i];
                 }
+                normalisation_loaded = true;
                 log<INFO>("Loaded normalization parameters from normalisation_params.yaml");
             }
         });
@@ -359,10 +360,15 @@ namespace module::skill {
             return JointVector::Zero();
         }
 
+        if (!normalisation_loaded) {
+            log<ERROR>("Cannot run inference: normalisation parameters not loaded");
+            return JointVector::Zero();
+        }
+
         try {
             // Normalise observation
             emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
-            ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std);
+            ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std + EPS);
             emit(graph("DEBUG: Normalized observation", norm_observation.transpose()));
 
             // Convert normalised observation to float array
