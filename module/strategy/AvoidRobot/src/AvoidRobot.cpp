@@ -63,7 +63,7 @@ namespace module::strategy {
         });
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const Sensors& sensors, const std::shared_ptr<const Robots>& robots) {
+            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
 
             const auto& Hrw = sensors.Hrw;
             if (!robots || robots->robots.empty()) {
