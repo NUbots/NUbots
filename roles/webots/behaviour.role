@@ -48,12 +48,12 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
+  strategy::AvoidRobot #TODO: REmove this temp hack
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
-  strategy::AvoidRobot
   # Purposes
   purpose::Tester
 )

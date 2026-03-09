@@ -53,13 +53,7 @@ private:
 
     } cfg;
 
-    /// @brief To cache the latest WalkTo message that is received
-    std::optional<message::planning::WalkTo> latest_walk_to;
-
-    /// @brief Timestamp to discern that latest_walk_to is the latest version
-    NUClear::clock::time_point latest_walk_to_time = NUClear::clock::time_point::min();
-
-    /// @brief
+    /// @brief Whether avoidance mode is currently active
     bool avoid_active = false;
 
 public:
