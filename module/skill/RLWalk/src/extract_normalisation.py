@@ -24,11 +24,13 @@ try:
     # Access the actor_obs_normalizer attributes
     obs_mean = model_dict['actor_obs_normalizer._mean'].cpu().numpy()
     obs_std = model_dict['actor_obs_normalizer._std'].cpu().numpy()
+    obs_var = model_dict['actor_obs_normalizer._var'].cpu().numpy()
 
     # Save to YAML
     stats = {
-        'obs_mean': obs_mean.tolist(),
-        'obs_std': obs_std.tolist()
+        'obs_mean': obs_mean.flatten().tolist(),
+        'obs_std': obs_std.flatten().tolist(),
+        'obs_var': obs_var.flatten().tolist()
     }
 
     with open(output_path, 'w') as f:

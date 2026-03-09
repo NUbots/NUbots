@@ -86,19 +86,24 @@ namespace module::skill {
         on<Configuration>("normalisation_params.yaml").then([this](const Configuration& norm_config) {
             auto mean_vec = norm_config["obs_mean"].as<std::vector<double>>();
             auto std_vec  = norm_config["obs_std"].as<std::vector<double>>();
+            auto var_vec  = norm_config["obs_var"].as<std::vector<double>>();
 
-            if (mean_vec.size() != TOTAL_OBS_SIZE || std_vec.size() != TOTAL_OBS_SIZE) {
+            if (mean_vec.size() != TOTAL_OBS_SIZE || std_vec.size() != TOTAL_OBS_SIZE
+                || var_vec.size() != TOTAL_OBS_SIZE) {
                 log<ERROR>("Normalization params size mismatch! Expected: ",
                            TOTAL_OBS_SIZE,
                            " Got mean: ",
                            mean_vec.size(),
                            " std: ",
-                           std_vec.size());
+                           std_vec.size(),
+                           " var: ",
+                           var_vec.size());
             }
             else {
                 for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
                     _mean[i] = mean_vec[i];
                     _std[i]  = std_vec[i];
+                    _var[i]  = var_vec[i];
                 }
                 log<INFO>("Loaded normalization parameters from normalisation_params.yaml");
             }

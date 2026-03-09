@@ -69,6 +69,7 @@ namespace module::skill {
         /// @brief Normalisation parameters
         ObservationVector _mean;
         ObservationVector _std;
+        ObservationVector _var;
 
         /// @brief Last joint positions for velocity estimation
         JointVector previous_pose;
