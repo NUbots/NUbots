@@ -1,0 +1,73 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+package message.localisation;
+
+import "Matrix.proto";
+import "Vector.proto";
+
+/// A single confirmed opponent track maintained by the swarm KF.
+/// Emitted by SwarmLocalisation for debug visualisation in NUsight.
+message SwarmTrackedOpponent {
+    /// Position in field frame [m] (x, y; z unused)
+    fvec3 position_Ff = 1;
+    /// 2x2 position covariance from the KF [m²]
+    fmat2 covariance  = 2;
+}
+
+/// Swarm-level debug visualisation data emitted by SwarmLocalisation.
+///
+/// Intended for NUsight only — not for robot logic.
+/// Separates visualisation concerns from SwarmState (which drives logic).
+///
+/// Each robot emits its own SwarmDebug showing its local view of the shared
+/// swarm state: what opponents it has confirmed, where the ball is, and
+/// what positions its teammates have self-reported.
+message SwarmDebug {
+    /// Confirmed opponent tracks — passed min_observations and min_sources gates.
+    /// Each entry has a KF-fused position and its uncertainty covariance.
+    repeated SwarmTrackedOpponent opponents = 1;
+
+    /// Raw self-reported field positions of teammates (from RoboCup broadcasts).
+    /// Rendered as diamond markers in NUsight. Not KF-filtered — compare to
+    /// UKF-tracked robot cylinders to spot disagreements.
+    repeated fvec3 teammate_positions_Ff = 2;
+
+    /// Localisation cost of each teammate (parallel to teammate_positions_Ff).
+    /// Used to size the uncertainty ring around each teammate diamond.
+    repeated float teammate_costs = 3;
+
+    /// Ball position from the KF fused over all confident teammates' ball reports.
+    /// Only valid when ball_seen = true.
+    fvec3 ball_position_Ff = 4;
+
+    /// 2x2 ball position covariance [m²]
+    fmat2 ball_covariance = 5;
+
+    /// True when at least one confident teammate has recently reported a ball.
+    bool ball_seen = 6;
+}

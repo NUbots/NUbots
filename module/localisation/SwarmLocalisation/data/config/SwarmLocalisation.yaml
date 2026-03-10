@@ -1,0 +1,69 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# Localisation cost below which a teammate is considered confident enough
+# to be used as a landmark or to vote for a flip (lower cost = better localisation)
+confidence_cost_threshold: 1.0
+
+# Seconds after which a teammate entry is considered stale and pruned
+stale_timeout_s: 5.0
+
+# Minimum ball confidence (0.0-1.0) for a teammate's ball report to be accepted
+min_ball_confidence: 0.3
+
+# Distance threshold [m] for classifying a robot in robocup.others as a teammate.
+# Any detection within this radius of a known teammate's self-reported position is
+# excluded from the opponent list (robocup.others contains ALL detected robots).
+teammate_filter_radius: 1.0
+
+# --- Opponent KF track parameters ---
+
+# Mahalanobis distance gate for track-detection association.
+# Detections further than this (in sigma units) from every track are unmatched
+# and will spawn a new tentative track.
+gate_distance: 3.0
+
+# Continuous-time position process noise [m²/s].
+# Higher = assume opponents can change direction quickly (looser tracking).
+process_noise_pos: 0.5
+
+# Continuous-time velocity process noise [m²/s³].
+process_noise_vel: 2.0
+
+# Position measurement noise [m²].
+# Represents how accurately a teammate localises an opponent in field frame.
+# 0.25 = 0.5 m standard deviation, typical for RoboCup vision at field distances.
+measurement_noise: 0.25
+
+# Minimum observations (from any source) before a track is reported in SwarmState.
+# Filters out spurious single-frame ghost detections.
+min_observations: 3
+
+# Minimum number of distinct robots that must have updated a track before it is reported.
+# This is the primary defence against fake opponents: a single robot reporting N detections
+# could just be seeing its own teammates (who haven't broadcast yet and weren't filtered).
+# Two independent robots agreeing on a position is strong evidence of a real opponent.
+# Set to 1 to disable (not recommended for multi-robot use).
+min_sources: 2
+
+# Seconds without any update before a track is deleted.
+max_missed_s: 3.0
+
+# Minimum seconds between updates from the same source robot to the same track.
+# Prevents one well-placed robot from over-weighting the filter.
+min_source_interval_s: 0.2
+
+# Maximum confirmed opponents to report (sorted by observation count, most-seen first).
+# In RoboCup there are at most 3 opponents on field; set to 0 for unlimited.
+max_opponents: 3
+
+# Euclidean distance [m] below which an unmatched detection is NOT allowed to spawn a new track.
+# If a detection falls within this radius of any existing track, it is silently absorbed rather
+# than creating a duplicate. Prevents the same physical robot generating multiple tentative tracks.
+merge_radius: 1.0
+
+# --- Ball KF parameters ---
+ball_process_noise: 1.0
+ball_vel_process_noise: 2.0
+ball_measurement_noise: 0.5
+ball_max_missed_s: 2.0

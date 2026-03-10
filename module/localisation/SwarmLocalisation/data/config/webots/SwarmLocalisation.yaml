@@ -1,0 +1,50 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# Localisation cost below which a teammate is considered confident enough
+# to be used as a landmark or to vote for a flip (lower cost = better localisation)
+confidence_cost_threshold: 1.0
+
+# Seconds after which a teammate entry is considered stale and pruned
+stale_timeout_s: 5.0
+
+# Minimum ball confidence (0.0-1.0) for a teammate's ball report to be accepted
+min_ball_confidence: 0.3
+
+# Distance threshold [m] for classifying a robot in robocup.others as a teammate.
+# Any detection within this radius of a known teammate's self-reported position is
+# excluded from the opponent list (robocup.others contains ALL detected robots).
+teammate_filter_radius: 1.0
+
+# --- Opponent KF track parameters ---
+
+# Mahalanobis gate: tighter gating reduces false associations between distant tracks
+gate_distance: 2.5
+# Position process noise [m²/s]: how much position can drift between updates
+process_noise_pos: 0.3
+# Velocity process noise [m²/s³]: low = opponents don't suddenly change speed
+process_noise_vel: 0.5
+# Measurement noise [m²]: 0.5m standard deviation for vision-based detection
+measurement_noise: 0.5
+# Require more observations before confirming — filters single-frame noise bursts
+min_observations: 8
+# One source sufficient in Webots — opponents may only be in one robot's FOV at a time.
+# Teammate filtering guards against ghost tracks from misidentified teammates.
+min_sources: 1
+# Prune tracks quickly — real opponents are visible consistently
+max_missed_s: 2.0
+# Rate-limit same source: prevents one robot flooding the filter
+min_source_interval_s: 0.1
+
+# Maximum confirmed opponents to report (sorted by observation count, most-seen first).
+# In RoboCup there are at most 3 opponents on field; set to 0 for unlimited.
+max_opponents: 5
+
+# Euclidean distance [m] below which an unmatched detection is NOT allowed to spawn a new track.
+merge_radius: 1.0
+
+# --- Ball KF parameters ---
+ball_process_noise: 1.0
+ball_vel_process_noise: 2.0
+ball_measurement_noise: 0.5
+ball_max_missed_s: 2.0
