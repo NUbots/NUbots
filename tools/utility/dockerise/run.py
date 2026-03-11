@@ -214,7 +214,16 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
 
         # Check if we can find the image, and if not try to either build it or pull it
         rebuild = kwargs["rebuild"]
-        image_found = subprocess.call(["docker", "image", "inspect", image], stderr=DEVNULL, stdout=DEVNULL) == 0
+        try:
+            image_found = subprocess.call(["docker", "image", "inspect", image], stderr=DEVNULL, stdout=DEVNULL) == 0
+        except FileNotFoundError:
+            cprint("ERROR: 'docker' was not found on PATH.", "red", attrs=["bold"])
+            cprint("Install Docker Engine (with buildx) and ensure the 'docker' CLI is available.", "red")
+            cprint("On Fedora, one common setup is:", "red")
+            cprint("  sudo dnf install -y moby-engine docker-compose-plugin", "red")
+            cprint("  sudo systemctl enable --now docker", "red")
+            cprint("  sudo usermod -aG docker $USER  # then log out/in", "red")
+            exit(127)
 
         # Perform the tasks that we only perform on the internal image and add on any extra arguments needed
         if internal_image:
