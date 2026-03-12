@@ -382,6 +382,8 @@ namespace module::skill {
 
         try {
             // Normalise observation
+            const float epsilon         = 1e-2f;
+            const ObservationVector EPS = ObservationVector::Constant(epsilon);
             emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
             ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std + EPS);
             emit(graph("DEBUG: Normalized observation", norm_observation.transpose()));
