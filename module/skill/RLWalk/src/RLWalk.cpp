@@ -189,21 +189,36 @@ namespace module::skill {
                     };
 
                     // Joint velocities relative to default pose (20)
-                    // Estimate using finite differences. TODO: Improve
-                    const auto now        = NUClear::clock::now();
-                    JointVector joint_vel = JointVector::Zero();
+                    // Estimate using finite differences with exponential smoothing to reduce noise
+                    const auto now                   = NUClear::clock::now();
+                    JointVector joint_vel            = JointVector::Zero();
+                    static const double alpha        = 0.1;
+                    static JointVector filtered_vel  = JointVector::Zero();
+                    static bool filtered_initialised = false;
+
                     if (have_previous_pose) {
                         std::chrono::duration<double> elapsed = now - last_update_time;
                         double dt                             = elapsed.count();
                         if (dt > 0.0) {
-                            joint_vel = (current_joints - previous_pose) / dt;
+                            JointVector raw_vel = (current_joints - previous_pose) / dt;
+                            // Convert to degrees/s for the inference
+                            raw_vel = raw_vel * (180.0 / M_PI);
+                            if (!filtered_initialised) {
+                                filtered_vel         = raw_vel;
+                                filtered_initialised = true;
+                            }
+                            else {
+                                filtered_vel = alpha * raw_vel + (1 - alpha) * filtered_vel;
+                            }
+                            joint_vel = filtered_vel;
                         }
                         else if (dt < 0.0) {
                             log<ERROR>("Negative dt for joint velocity estimation: ", dt, ". Assuming zero velocity");
                         }
                     }
                     else {
-                        have_previous_pose = true;
+                        have_previous_pose   = true;
+                        filtered_initialised = false;
                     }
                     // joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
                     previous_pose                            = current_joints;
@@ -224,12 +239,12 @@ namespace module::skill {
                     idx += COMMAND_SIZE;
 
                     // Run inference
-                    JointVector joint_angles = run_inference(observation);
+                    JointVector joint_angles_deg = run_inference(observation);
                     // Assume output is in degrees, convert to radians
-                    joint_angles = joint_angles * (M_PI / 180.0);
+                    JointVector joint_angles_rad = joint_angles_deg * (M_PI / 180.0);
                     // log<DEBUG>("Joint angles: ", joint_angles.transpose());
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint offset goal positions from inference", joint_angles.transpose()));
+                        emit(graph("DEBUG: Joint offset goal positions from inference", joint_angles_rad.transpose()));
                     };
 
                     // Save example data to file
@@ -245,7 +260,7 @@ namespace module::skill {
                     data_file << "],\n";
                     data_file << "  \"action\": [";
                     for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                        data_file << joint_angles[i];
+                        data_file << joint_angles_rad[i];
                         if (i < JOINT_POS_SIZE - 1)
                             data_file << ", ";
                     }
@@ -255,7 +270,7 @@ namespace module::skill {
                     // log<DEBUG>("Saved example data to example_data.json");
 
                     // Store the last action
-                    last_action = joint_angles;
+                    last_action = joint_angles_deg;
 
                     // Emit servo commands
                     auto body = std::make_unique<Body>();
@@ -263,7 +278,7 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_angles[i];
+                        servo->position                   = default_pose[i] + joint_angles_rad[i];
                         servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
@@ -392,12 +407,12 @@ namespace module::skill {
             float* output_data = output_tensor.data<float>();
 
             // Convert output to Eigen vector
-            JointVector joint_angles;
+            JointVector joint_angles_deg_out;
             for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                joint_angles[i] = static_cast<double>(output_data[i]);
+                joint_angles_deg_out[i] = static_cast<double>(output_data[i]);
             }
 
-            return joint_angles;
+            return joint_angles_deg_out;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
