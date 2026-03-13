@@ -32,6 +32,8 @@ namespace module::skill {
         struct Config {
             /// @brief Path to the ONNX model file
             std::string model_path;
+            /// @brief Path to the PyTorch model file for normalisation
+            std::string pt_model_path;
             /// @brief Device to run inference on (CPU, GPU, etc.)
             std::string device;
             /// @brief Input tensor name in the ONNX model
@@ -53,6 +55,8 @@ namespace module::skill {
 
         /// @brief Whether the model is initialized
         bool model_initialized;
+        /// @brief Guard against uninitialised model parameters
+        bool normalisation_loaded = false;
 
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;
@@ -63,6 +67,11 @@ namespace module::skill {
 
         /// @brief Default pose for the robot
         JointVector default_pose;
+
+        /// @brief Normalisation parameters
+        ObservationVector _mean;
+        ObservationVector _std;
+        ObservationVector _var;
 
         /// @brief Last joint positions for velocity estimation
         JointVector previous_pose;
