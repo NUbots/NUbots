@@ -82,34 +82,6 @@ namespace module::skill {
             initialize_model();
         });
 
-        // Load normalisation parameters from YAML
-        on<Configuration>("normalisation_params.yaml").then([this](const Configuration& norm_config) {
-            auto mean_vec = norm_config["obs_mean"].as<std::vector<double>>();
-            auto std_vec  = norm_config["obs_std"].as<std::vector<double>>();
-            auto var_vec  = norm_config["obs_var"].as<std::vector<double>>();
-
-            if (mean_vec.size() != TOTAL_OBS_SIZE || std_vec.size() != TOTAL_OBS_SIZE
-                || var_vec.size() != TOTAL_OBS_SIZE) {
-                log<ERROR>("Normalization params size mismatch! Expected: ",
-                           TOTAL_OBS_SIZE,
-                           " Got mean: ",
-                           mean_vec.size(),
-                           " std: ",
-                           std_vec.size(),
-                           " var: ",
-                           var_vec.size());
-            }
-            else {
-                for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                    _mean[i] = mean_vec[i];
-                    _std[i]  = std_vec[i];
-                    _var[i]  = var_vec[i];
-                }
-                normalisation_loaded = true;
-                log<INFO>("Loaded normalization parameters from normalisation_params.yaml");
-            }
-        });
-
         // Start - Runs every time the Walk provider starts
         on<Start<WalkTask>>().then([this]() {
             // Emit a stopped state as we are not yet walking
@@ -339,23 +311,14 @@ namespace module::skill {
             return JointVector::Zero();
         }
 
-        if (!normalisation_loaded) {
-            log<ERROR>("Cannot run inference: normalisation parameters not loaded");
-            return JointVector::Zero();
-        }
-
         try {
-            // Normalise observation
-            const float epsilon         = 1e-2f;
-            const ObservationVector EPS = ObservationVector::Constant(epsilon);
-            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
-            ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std + EPS);
-            emit(graph("DEBUG: Normalized observation", norm_observation.transpose()));
+            if (log_level <= DEBUG) {
+                emit(graph("Inference input observation:", observation.transpose()));
+            }
 
-            // Convert normalised observation to float array
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                input_data[i] = static_cast<float>(norm_observation[i]);
+                input_data[i] = static_cast<float>(observation[i]);
             }
 
             // Create & set input tensor
