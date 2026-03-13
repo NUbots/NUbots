@@ -130,10 +130,11 @@ namespace module::skill {
                     };
                     idx += GYRO_SIZE;
 
-                    // Gravity/Accelerometer data in world frame (3)
-                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
+                    // Gravity/Accelerometer data in body frame (3)
+                    const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
+                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * g_world;
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors accelerometer in world frame values",
+                        emit(graph("DEBUG: Sensors accelerometer in body frame values",
                                    gravity.x(),
                                    gravity.y(),
                                    gravity.z()));
@@ -161,21 +162,34 @@ namespace module::skill {
                     };
 
                     // Joint velocities relative to default pose (20)
-                    // Estimate using finite differences. TODO: Improve
-                    const auto now        = NUClear::clock::now();
-                    JointVector joint_vel = JointVector::Zero();
+                    // Estimate using finite differences with exponential smoothing to reduce noise
+                    const auto now                   = NUClear::clock::now();
+                    JointVector joint_vel            = JointVector::Zero();
+                    static const double alpha        = 0.1;
+                    static JointVector filtered_vel  = JointVector::Zero();
+                    static bool filtered_initialised = false;
+
                     if (have_previous_pose) {
                         std::chrono::duration<double> elapsed = now - last_update_time;
                         double dt                             = elapsed.count();
                         if (dt > 0.0) {
-                            joint_vel = (current_joints - previous_pose) / dt;
+                            JointVector raw_vel = (current_joints - previous_pose) / dt;
+                            if (!filtered_initialised) {
+                                filtered_vel         = raw_vel;
+                                filtered_initialised = true;
+                            }
+                            else {
+                                filtered_vel = alpha * raw_vel + (1 - alpha) * filtered_vel;
+                            }
+                            joint_vel = filtered_vel;
                         }
                         else if (dt < 0.0) {
                             log<ERROR>("Negative dt for joint velocity estimation: ", dt, ". Assuming zero velocity");
                         }
                     }
                     else {
-                        have_previous_pose = true;
+                        have_previous_pose   = true;
+                        filtered_initialised = false;
                     }
                     // joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
                     previous_pose                            = current_joints;
@@ -197,8 +211,6 @@ namespace module::skill {
 
                     // Run inference
                     JointVector joint_angles = run_inference(observation);
-                    // Assume output is in degrees, convert to radians
-                    joint_angles = joint_angles * (M_PI / 180.0);
                     // log<DEBUG>("Joint angles: ", joint_angles.transpose());
                     if (log_level <= DEBUG) {
                         emit(graph("DEBUG: Joint offset goal positions from inference", joint_angles.transpose()));
@@ -362,7 +374,19 @@ namespace module::skill {
                 joint_angles[i] = static_cast<double>(output_data[i]);
             }
 
-            return joint_angles;
+            // Log raw output values
+            if (log_level <= DEBUG) {
+                emit(graph("DEBUG: Raw action output values from inference", joint_angles.transpose()));
+            }
+
+            // Log supposed action being applied in mjlab
+            float action_scale       = 0.049445848912000656f;
+            JointVector mjlab_action = joint_angles * action_scale + default_pose;
+            JointVector mjlab_offset = joint_angles * action_scale;
+            emit(graph("DEBUG: Action being applied in mjlab", mjlab_action.transpose()));
+            emit(graph("DEBUG: mjlab action offset", (mjlab_offset).transpose()));
+
+            return mjlab_offset;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
