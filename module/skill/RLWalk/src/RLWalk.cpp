@@ -110,9 +110,8 @@ namespace module::skill {
 
                     // Accelerometer data in body frame (3)
                     observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
-                    // log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors accelerometer values",
+                        emit(graph("Sensors accelerometer values",
                                    sensors.accelerometer.x(),
                                    sensors.accelerometer.y(),
                                    sensors.accelerometer.z()));
@@ -120,10 +119,9 @@ namespace module::skill {
                     idx += ACC_SIZE;
 
                     // Gyro data (3)
-                    observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;  // Convert to radians/s
-                    // log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
+                    observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors gyroscope values",
+                        emit(graph("Sensors gyroscope values",
                                    sensors.gyroscope.x(),
                                    sensors.gyroscope.y(),
                                    sensors.gyroscope.z()));
@@ -132,34 +130,23 @@ namespace module::skill {
 
                     // Gravity/Accelerometer data in body frame (3)
                     const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
-                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * g_world;
-                    if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors accelerometer in body frame values",
-                                   gravity.x(),
-                                   gravity.y(),
-                                   gravity.z()));
-                    };
-                    // log<DEBUG>("Gravity: ", gravity.transpose());
-                    // log<DEBUG>("Gravity magnitude: ", gravity.norm());
+                    Eigen::Vector3d gravity                = sensors.Htw.inverse().rotation() * g_world;
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
-                    // log<DEBUG>("Accelerometer in worldframe: ", observation.segment<GRAVITY_SIZE>(idx).transpose());
+                    if (log_level <= DEBUG) {
+                        emit(
+                            graph("Sensors accelerometer in body frame values", gravity.x(), gravity.y(), gravity.z()));
+                    };
                     idx += GRAVITY_SIZE;
 
                     // Joint positions relative to default pose (20)
-                    // Note: We need to map the joint positions from sensors to the correct order
-                    // This is a placeholder - you'll need to map the actual joint positions TODO
                     auto temp_sensors                        = std::make_unique<Sensors>();
                     temp_sensors->servo                      = sensors.servo;
                     JointVector current_joints               = sensors_to_configuration(temp_sensors);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
+                    if (log_level <= DEBUG) {
+                        emit(graph("Joint current positions", current_joints.transpose()));
+                    };
                     idx += JOINT_POS_SIZE;
-                    JointVector joints_debug = current_joints - default_pose;
-                    if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint current positions", current_joints.transpose()));
-                    };
-                    if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Servo default pose", default_pose.transpose()));
-                    };
 
                     // Joint velocities relative to default pose (20)
                     // Estimate using finite differences with exponential smoothing to reduce noise
@@ -191,12 +178,11 @@ namespace module::skill {
                         have_previous_pose   = true;
                         filtered_initialised = false;
                     }
-                    // joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
                     previous_pose                            = current_joints;
                     last_update_time                         = now;
                     observation.segment<JOINT_POS_SIZE>(idx) = joint_vel;
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint velocity", joint_vel.transpose()));
+                        emit(graph("Joint velocity", joint_vel.transpose()));
                     };
                     idx += JOINT_POS_SIZE;
 
@@ -206,40 +192,22 @@ namespace module::skill {
 
                     // Command (3)
                     observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
-                    // log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
+                    if (log_level <= DEBUG) {
+                        emit(graph("Walk velocity target",
+                                   walk_task.velocity_target.x(),
+                                   walk_task.velocity_target.y(),
+                                   walk_task.velocity_target.z()));
+                    }
                     idx += COMMAND_SIZE;
 
                     // Run inference
-                    JointVector joint_angles = run_inference(observation);
-                    // log<DEBUG>("Joint angles: ", joint_angles.transpose());
+                    JointVector joint_offsets_action = run_inference(observation);
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint offset goal positions from inference", joint_angles.transpose()));
+                        emit(graph("Joint offset action from inference", joint_offsets_action.transpose()));
                     };
 
-                    // Save example data to file
-                    std::ofstream data_file("recordings/example_data.json");
-                    data_file << std::fixed << std::setprecision(6);
-                    data_file << "{\n";
-                    data_file << "  \"observation\": [";
-                    for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                        data_file << observation[i];
-                        if (i < TOTAL_OBS_SIZE - 1)
-                            data_file << ", ";
-                    }
-                    data_file << "],\n";
-                    data_file << "  \"action\": [";
-                    for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                        data_file << joint_angles[i];
-                        if (i < JOINT_POS_SIZE - 1)
-                            data_file << ", ";
-                    }
-                    data_file << "]\n";
-                    data_file << "}\n";
-                    data_file.close();
-                    // log<DEBUG>("Saved example data to example_data.json");
-
                     // Store the last action
-                    last_action = joint_angles;
+                    last_action = joint_offsets_action;
 
                     // Emit servo commands
                     auto body = std::make_unique<Body>();
@@ -247,7 +215,7 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_angles[i];
+                        servo->position                   = default_pose[i] + joint_offsets_action[i];
                         servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
@@ -259,7 +227,6 @@ namespace module::skill {
                                                                   0.0);  // Phase not used
                     emit(walk_state);
 
-                    // Debug output
                     if (log_level <= DEBUG) {
                         emit(graph("Walk velocity target",
                                    walk_task.velocity_target.x(),
@@ -345,20 +312,18 @@ namespace module::skill {
         }
 
         try {
-            // Normalise observation
-            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
+            if (log_level <= DEBUG) {
+                emit(graph("Inference input observation:", observation.transpose()));
+            }
 
-            // Convert observation to float array
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
                 input_data[i] = static_cast<float>(observation[i]);
             }
 
-            // Create input tensor
+            // Create & set input tensor
             ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
             ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
-
-            // Set input tensor
             infer_request.set_input_tensor(input_tensor);
 
             // Run inference
@@ -368,25 +333,20 @@ namespace module::skill {
             auto output_tensor = infer_request.get_output_tensor();
             float* output_data = output_tensor.data<float>();
 
-            // Convert output to Eigen vector
-            JointVector joint_angles;
+            JointVector joint_angles_raw;
             for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                joint_angles[i] = static_cast<double>(output_data[i]);
+                joint_angles_raw[i] = static_cast<double>(output_data[i]);
             }
 
-            // Log raw output values
             if (log_level <= DEBUG) {
-                emit(graph("DEBUG: Raw action output values from inference", joint_angles.transpose()));
+                emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
             }
 
-            // Log supposed action being applied in mjlab
-            float action_scale       = 0.049445848912000656f;
-            JointVector mjlab_action = joint_angles * action_scale + default_pose;
-            JointVector mjlab_offset = joint_angles * action_scale;
-            emit(graph("DEBUG: Action being applied in mjlab", mjlab_action.transpose()));
-            emit(graph("DEBUG: mjlab action offset", (mjlab_offset).transpose()));
+            // Convert output values to joint angle offsets
+            float action_scale        = 0.049445848912000656f;  // From mjlab
+            JointVector joint_offsets = joint_angles_raw * action_scale;
 
-            return mjlab_offset;
+            return joint_offsets;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());

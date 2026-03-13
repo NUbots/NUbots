@@ -22,7 +22,7 @@ nuclear_role(
   # Skills
   skill::RLWalk
   skill::SplineKick
-  skill::GetUp
+  # skill::GetUp
   skill::Look
   # Planners
   # Purpose
