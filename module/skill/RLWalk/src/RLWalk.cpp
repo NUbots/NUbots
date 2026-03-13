@@ -354,7 +354,7 @@ namespace module::skill {
 
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                input_data[i] = static_cast<float>(norm_observation[i]);
+                input_data[i] = static_cast<float>(observation[i]);
             }
 
             // Create & set input tensor
