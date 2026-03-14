@@ -42,7 +42,7 @@ namespace utility::vision::visualmesh {
     Iterator partition_points(Iterator first,
                               Iterator last,
                               const Eigen::MatrixXi& neighbours,
-                              Func&& pred,  // function determining if the index has a high enough confidence to use
+                              Func&& pred,  // Function determining if the index has a high enough confidence to use
                               const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
@@ -63,7 +63,7 @@ namespace utility::vision::visualmesh {
     Iterator boundary_points(Iterator first,
                              Iterator last,
                              const Eigen::MatrixXi& neighbours,
-                             Func&& pred,  // function determining if the index has a high enough confidence to use
+                             Func&& pred,  // Function determining if the index has a high enough confidence to use
                              const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 

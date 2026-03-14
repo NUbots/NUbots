@@ -79,9 +79,9 @@ namespace module::vision {
             // Radius is = cos(theta), where theta is angle between uBCw and the furthest point on the ball
             double radius = 0.0;
 
-            bool used_in_merge{false};
+            bool used_in_merge = false;
 
-            std::optional<double> circularity{std::nullopt};
+            std::optional<double> circularity = std::nullopt;
         };
     }  // namespace
 
@@ -166,15 +166,15 @@ namespace module::vision {
                 // Find central axis of each ball candidate
                 for (BallCandidate& ball : ball_candidates) {
                     // Each candidate corresponds to a cluster currently
-                    const std::vector<int>& cluster = clusters[ball.cluster_indices[0]];
-                    ball.uBCw                       = find_cluster_central_axis(cluster.begin(), cluster.end(), uPCw);
+                    const auto& cluster = clusters[ball.cluster_indices[0]];
+                    ball.uBCw           = find_cluster_central_axis(cluster.begin(), cluster.end(), uPCw);
                 }
 
                 // Find the angular radius of each ball candidate
                 for (BallCandidate& ball : ball_candidates) {
                     // Each candidate corresponds to a cluster currently
-                    const std::vector<int>& cluster = clusters[ball.cluster_indices[0]];
-                    ball.radius = find_cluster_angular_radius(cluster.begin(), cluster.end(), uPCw, ball.uBCw);
+                    const auto& cluster = clusters[ball.cluster_indices[0]];
+                    ball.radius         = find_cluster_angular_radius(cluster.begin(), cluster.end(), uPCw, ball.uBCw);
                 }
 
                 // Create a adjacency matrix of potentially valid cluster merges
@@ -203,7 +203,6 @@ namespace module::vision {
 
                 // Find connected components (potential merges) through depth first search of the ball candidates
                 std::vector<bool> visited(ball_candidates.size(), false);
-
                 size_t num_candidates = ball_candidates.size();
                 for (size_t i = 0; i < num_candidates; ++i) {
                     if (visited[i]) {
@@ -290,14 +289,12 @@ namespace module::vision {
                         uBCw.normalize();
                         double radius =
                             find_cluster_angular_radius(proposed_ball.begin(), proposed_ball.end(), uPCw, uBCw);
-
                         double circularity = find_cluster_circularity(proposed_ball.begin(),
                                                                       proposed_ball.end(),
                                                                       neighbours,
                                                                       uBCw,
                                                                       radius,
                                                                       uPCw);
-
                         if (circularity > top_circularity) {
                             best_removed_index = removed_i;
                             top_circularity    = circularity;
@@ -390,7 +387,7 @@ namespace module::vision {
 
                 // Add ball for each valid ball candidate
                 for (BallCandidate& candidate : ball_candidates) {
-                    Ball b;
+                    Ball b{};
 
                     // Find central axis of ball, using precomputed measurements from merge logic
                     // uBCw: unit vector from camera to ball central axis in world space
@@ -451,16 +448,35 @@ namespace module::vision {
                     log<DEBUG>("**************************************************");
                     log<DEBUG>("*                    THROWOUTS                   *");
                     log<DEBUG>("**************************************************");
-                    bool keep = true;
-                    b.colour.fill(1.0);  // a valid ball has a white colour in NUsight
+                    b.colour.fill(1.0);  // A valid ball has a white colour in NUsight
 
                     // Discard if cluster was used for merging
                     if (candidate.used_in_merge) {
                         log<DEBUG>("Ball candidate discarded: merged with another detection to create another ball");
                         log<DEBUG>("--------------------------------------------------");
-                        // Clusters that were used for merging will show up as orange in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.65, 0.0, 1.0) : b.colour;
-                        keep     = false;
+                        // Balls that were used in merging will show up as orange in NUsight
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(1.0, 0.65, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
+                    }
+
+                    // Discard if fill of the ball is too low
+                    if (!candidate.circularity.has_value()) {
+                        auto points =
+                            candidate.cluster_indices
+                            | std::views::transform([&](size_t idx) { return std::views::all(clusters[idx]); })
+                            | std::views::join;
+                        candidate.circularity = find_cluster_circularity(points.begin(),
+                                                                         points.end(),
+                                                                         neighbours,
+                                                                         candidate.uBCw,
+                                                                         candidate.radius,
+                                                                         uPCw);
+                    }
+
+                    if (candidate.circularity.value() < 0.15) {  // temp holder for now
+                        // Balls that have too low circularity will show up as purple in NUsight
+                        b.colour = !b.is_invalid ? message::conversion::math::vec4(0.62, 0.13, 0.94, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
@@ -476,7 +492,7 @@ namespace module::vision {
                                                               });
 
                     double mean             = 0.0;
-                    const double max_radius = std::acos(b.radius);  // largest angle between vectors
+                    const double max_radius = std::acos(b.radius);  // Largest angle between vectors
                     // Get mean of all the angles in the cluster to then find the standard deviation
                     for (const size_t cluster_idx : candidate.cluster_indices) {
                         for (const int idx : clusters[cluster_idx]) {
@@ -502,8 +518,8 @@ namespace module::vision {
                                                cfg.maximum_deviation));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate degree of fit will show as green in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
@@ -518,8 +534,8 @@ namespace module::vision {
                                         projection_distance));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as blue in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(0.0, 0.0, 1.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(0.0, 0.0, 1.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
@@ -531,8 +547,8 @@ namespace module::vision {
                                                cfg.minimum_ball_distance));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as red in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 0.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(1.0, 0.0, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -545,8 +561,8 @@ namespace module::vision {
                                         field.dimensions.field_length));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as yellow in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 1.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(1.0, 1.0, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     log<DEBUG>(fmt::format("Camera {}", balls->id));
@@ -565,13 +581,9 @@ namespace module::vision {
                     }
                     log<DEBUG>("**************************************************");
 
-                    if (!keep && log_level > DEBUG) {
-                        b.measurements.clear();
-                    }
-
                     // If the ball passed the checks, add it to the Balls message to be emitted
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
-                    if (keep || log_level <= DEBUG) {
+                    if (!b.is_invalid || log_level <= DEBUG) {
                         balls->balls.push_back(std::move(b));
                     }
 
