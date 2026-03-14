@@ -79,35 +79,23 @@ namespace module::skill {
             last_update_time   = NUClear::clock::now();
 
             // Initialize the model
-            initialize_model();
+            initialise_model_locked();
         });
 
-        // Load normalisation parameters from YAML
-        on<Configuration>("normalisation_params.yaml").then([this](const Configuration& norm_config) {
-            auto mean_vec = norm_config["obs_mean"].as<std::vector<double>>();
-            auto std_vec  = norm_config["obs_std"].as<std::vector<double>>();
-            auto var_vec  = norm_config["obs_var"].as<std::vector<double>>();
+        on<Every<1000, Per<std::chrono::milliseconds>>, Single>().then([this] {
+            std::scoped_lock lock(model_mutex);
+            if (model_state == ModelState::READY)
+                return;
 
-            if (mean_vec.size() != TOTAL_OBS_SIZE || std_vec.size() != TOTAL_OBS_SIZE
-                || var_vec.size() != TOTAL_OBS_SIZE) {
-                log<ERROR>("Normalization params size mismatch! Expected: ",
-                           TOTAL_OBS_SIZE,
-                           " Got mean: ",
-                           mean_vec.size(),
-                           " std: ",
-                           std_vec.size(),
-                           " var: ",
-                           var_vec.size());
+            const auto now = std::chrono::steady_clock::now();
+            if (now < next_retry) {
+                return;
             }
-            else {
-                for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                    _mean[i] = mean_vec[i];
-                    _std[i]  = std_vec[i];
-                    _var[i]  = var_vec[i];
-                }
-                normalisation_loaded = true;
-                log<INFO>("Loaded normalization parameters from normalisation_params.yaml");
+
+            if (initialise_model_locked()) {
+                log<INFO>("RLWalk inference model initialised successfully");
             }
+            log<DEBUG>("Model state after retry: ", (model_state == ModelState::READY ? "READY" : "FAILED"));
         });
 
         // Start - Runs every time the Walk provider starts
@@ -265,92 +253,91 @@ namespace module::skill {
             });
     }
 
-    void RLWalk::initialize_model() {
+    void RLWalk::invalidate_model_locked() {
+        compiled_model = ov::CompiledModel{};
+        infer_request  = ov::InferRequest{};
+        model_state    = ModelState::FAILED;
+    }
+
+    bool RLWalk::initialise_model_locked() {
+        auto shape_to_string = [](const ov::Shape& s) {
+            std::ostringstream oss;
+            oss << "[";
+            for (size_t i = 0; i < s.size(); ++i) {
+                if (i > 0)
+                    oss << ", ";
+                oss << s[i];
+            }
+            oss << "]";
+            return oss.str();
+        };
+
         try {
-            // Create OpenVINO Core
-            ov::Core core;
+            const std::filesystem::path p(cfg.model_path);
+            const auto abs = std::filesystem::absolute(p).string();
 
-            // Read the model
-            auto model = core.read_model(cfg.model_path);
-
-            // Log model information
-            log<INFO>("Model loaded from: ", cfg.model_path);
-            log<INFO>("Model device: ", cfg.device);
-
-            // Log input information
-            for (const auto& input : model->inputs()) {
-                log<INFO>("Input: ", input.get_any_name());
-                log<INFO>("  Shape: ", input.get_shape());
-                log<INFO>("  Type: ", input.get_element_type());
+            if (!std::filesystem::exists(p)) {
+                throw std::runtime_error("Model file not found: " + abs);
             }
 
-            // Log output information
-            for (const auto& output : model->outputs()) {
-                log<INFO>("Output: ", output.get_any_name());
-                log<INFO>("  Shape: ", output.get_shape());
-                log<INFO>("  Type: ", output.get_element_type());
+            log<INFO>("RLWalk init model_path=",
+                      abs,
+                      " device=",
+                      cfg.device,
+                      " input_name=",
+                      cfg.input_name,
+                      " output_name=",
+                      cfg.output_name);
+
+            std::string last_error = "unknown";
+
+            auto model = core.read_model(abs);
+            auto cm    = core.compile_model(model, cfg.device);
+            auto req   = cm.create_infer_request();
+
+            // Validate configured ports and shapes once
+            const auto in  = cfg.input_name.empty() ? cm.input() : cm.input(cfg.input_name);
+            const auto out = cfg.output_name.empty() ? cm.output() : cm.output(cfg.output_name);
+
+            const auto in_shape  = in.get_shape();
+            const auto out_shape = out.get_shape();
+            if (in_shape.size() != 2 || in_shape[1] != static_cast<size_t>(TOTAL_OBS_SIZE)) {
+                throw std::runtime_error("Unexpected input shape");
+            }
+            if (out_shape.size() != 2 || out_shape[1] != static_cast<size_t>(JOINT_POS_SIZE)) {
+                throw std::runtime_error("Unexpected output shape");
             }
 
-            // Log available devices
-            log<INFO>("Available devices:");
-            for (const auto& device : core.get_available_devices()) {
-                log<INFO>("  ", device);
-            }
+            // Commit only after full success
+            compiled_model = std::move(cm);
+            infer_request  = std::move(req);
+            model_state    = ModelState::READY;
+            retry_backoff  = std::chrono::milliseconds(1000);
 
-            // Compile the model
-            compiled_model = core.compile_model(model, cfg.device);
+            log<INFO>("Initialisation success");
 
-            // Create inference request
-            infer_request = compiled_model.create_infer_request();
-
-            // Log compilation info
-            log<INFO>("Model compiled successfully");
-
-            // Validate input shape
-            auto input_shape = model->input().get_shape();
-            if (input_shape[1] != TOTAL_OBS_SIZE) {
-                log<ERROR>("Model input size mismatch. Expected: ", TOTAL_OBS_SIZE, " Got: ", input_shape[1]);
-                model_initialized = false;
-                return;
-            }
-
-            // Validate output shape
-            auto output_shape = model->output().get_shape();
-            if (output_shape[1] != JOINT_POS_SIZE) {
-                log<ERROR>("Model output size mismatch. Expected: ", JOINT_POS_SIZE, " Got: ", output_shape[1]);
-                model_initialized = false;
-                return;
-            }
-
-            model_initialized = true;
-            log<INFO>("RLWalk model initialized successfully");
+            return true;
         }
         catch (const std::exception& e) {
-            log<ERROR>("Failed to initialize RLWalk model: ", e.what());
-            model_initialized = false;
+            log<ERROR>("RLWalk model init failed: ", e.what());
+            invalidate_model_locked();
+            next_retry    = std::chrono::steady_clock::now() + retry_backoff;
+            retry_backoff = std::min(retry_backoff * 2, std::chrono::milliseconds(5000));
+            return false;
         }
     }
 
     JointVector RLWalk::run_inference(const ObservationVector& observation) {
-        if (!model_initialized) {
-            log<ERROR>("Cannot run inference: model not initialized");
-            log<INFO>("Attempting to reinitialize model...");
-            initialize_model();
-            return JointVector::Zero();
+        if (log_level <= DEBUG) {
+            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
         }
+        std::scoped_lock lock(model_mutex);
 
-        if (!normalisation_loaded) {
-            log<ERROR>("Cannot run inference: normalisation parameters not loaded");
+        if (model_state != ModelState::READY) {
             return JointVector::Zero();
         }
 
         try {
-            // Normalise observation
-            const float epsilon         = 1e-2f;
-            const ObservationVector EPS = ObservationVector::Constant(epsilon);
-            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
-            ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std + EPS);
-            emit(graph("DEBUG: Normalized observation", norm_observation.transpose()));
 
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
@@ -386,6 +373,8 @@ namespace module::skill {
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
+            invalidate_model_locked();
+            next_retry = std::chrono::steady_clock::now() + retry_backoff;
             return JointVector::Zero();
         }
     }

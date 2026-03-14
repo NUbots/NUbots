@@ -3,6 +3,8 @@
 
 #include <Eigen/Core>
 #include <atomic>
+#include <chrono>
+#include <mutex>
 #include <nuclear>
 #include <openvino/openvino.hpp>
 
@@ -47,16 +49,25 @@ namespace module::skill {
         } cfg;
 
         /// @brief OpenVINO model and inference request
-        ov::CompiledModel compiled_model;
-        ov::InferRequest infer_request;
+        enum class ModelState { UNINITIALISED, READY, FAILED };
+        mutable std::mutex model_mutex{};
+        ov::Core core{};
+
+        ov::CompiledModel compiled_model{};
+        ov::InferRequest infer_request{};
+        ModelState model_state = ModelState::UNINITIALISED;
+
+        std::chrono::steady_clock::time_point next_retry{};
+        std::chrono::milliseconds retry_backoff{1000};
+
+        bool initialise_model_locked();
+        void invalidate_model_locked();
 
         /// @brief Current phase of the walk (0-1)
         double phase;
 
         /// @brief Whether the model is initialized
         bool model_initialized;
-        /// @brief Guard against uninitialised model parameters
-        bool normalisation_loaded = false;
 
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;
@@ -67,11 +78,6 @@ namespace module::skill {
 
         /// @brief Default pose for the robot
         JointVector default_pose;
-
-        /// @brief Normalisation parameters
-        ObservationVector _mean;
-        ObservationVector _std;
-        ObservationVector _var;
 
         /// @brief Last joint positions for velocity estimation
         JointVector previous_pose;

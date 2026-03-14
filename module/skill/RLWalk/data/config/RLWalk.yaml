@@ -4,8 +4,8 @@ log_level: DEBUG
 model:
   path: /home/nubots/build/model.onnx
   device: CPU
-  input_name: input
-  output_name: output
+  input_name: obs
+  output_name: actions
   num_joints: 20
   obs_size: 72
 
