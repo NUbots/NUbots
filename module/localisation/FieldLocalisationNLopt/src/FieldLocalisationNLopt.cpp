@@ -103,6 +103,9 @@ namespace module::localisation {
             cfg.goal_post_min_confidence         = config["goal_post_min_confidence"].as<double>();
             cfg.goal_post_pair_max_separation    = config["goal_post_pair_max_separation"].as<double>();
             cfg.cost_to_sigma_scale              = config["cost_to_sigma_scale"].as<double>();
+            cfg.centre_flip_threshold            = config["centre_flip_threshold"].as<double>();
+            cfg.teammate_landmark_weight         = config["teammate_landmark_weight"].as<double>();
+            cfg.teammate_association_distance    = config["teammate_association_distance"].as<double>();
 
             // Optimisation parameters
             cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
@@ -186,6 +189,7 @@ namespace module::localisation {
             startup_field_lines_buf.clear();
             startup_frames_accumulated = 0;
             last_reset                 = NUClear::clock::now();
+            post_fall_uncertain        = false;
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
@@ -205,6 +209,7 @@ namespace module::localisation {
            With<FieldDescription>,
            With<Sensors>,
            Optional<With<SwarmState>>,
+           Optional<With<Robots>>,
            Single>()
             .then(
                 "NLopt field localisation",
@@ -215,7 +220,8 @@ namespace module::localisation {
                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
                        const FieldDescription& fd,
                        const Sensors& sensors,
-                       const std::shared_ptr<const SwarmState>& swarm) {
+                       const std::shared_ptr<const SwarmState>& swarm,
+                       const std::shared_ptr<const Robots>& robots) {
                     // Emit field message using ground truth if available
                     if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
                         auto field(std::make_unique<Field>());
@@ -235,11 +241,25 @@ namespace module::localisation {
                         return;
                     }
 
+                    // Detect FALLEN/FALLING → standing transition for post-fall uncertainty handling.
+                    // prev_stability is updated every frame so the transition fires on the first
+                    // stable frame after a fall.
+                    bool just_got_up = (prev_stability <= Stability::FALLING)
+                                    && (stability > Stability::FALLING);
+                    prev_stability = stability;
+
                     // Don't run an update if there are not enough field line points or the robot is
                     // unstable
                     bool unstable = stability <= Stability::FALLING;
                     if (unstable || field_lines.rPWw.size() < cfg.min_field_line_points) {
                         return;
+                    }
+
+                    // If the robot just got up from a fall near the centre line, unlock full-field
+                    // search on the next uncertainty_reset() to allow flip correction.
+                    if (just_got_up && std::abs(filtered_state.x()) < cfg.centre_flip_threshold) {
+                        post_fall_uncertain = true;
+                        log<INFO>("Post-fall: fell near centre line, enabling full-field search");
                     }
 
                     double chosen_state_cost = 0.0;
@@ -370,9 +390,35 @@ namespace module::localisation {
                         startup_frames_accumulated = 0;
                     }
                     else {
+                        // Build confident teammate positions (field frame) for landmark cost term
+                        std::vector<Eigen::Vector2d> confident_teammate_positions_Ff;
+                        if (swarm) {
+                            for (const auto& ts : swarm->teammates) {
+                                if (ts.confident) {
+                                    confident_teammate_positions_Ff.emplace_back(ts.position_Ff.x(),
+                                                                                 ts.position_Ff.y());
+                                }
+                            }
+                        }
+
+                        // Build detected robot world positions (exclude swarm-injected to avoid feedback)
+                        std::vector<Eigen::Vector3d> detected_robots_Ww;
+                        if (robots) {
+                            for (const auto& r : robots->robots) {
+                                if (!r.from_swarm) {
+                                    detected_robots_Ww.push_back(r.rRWw);
+                                }
+                            }
+                        }
+
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(filtered_state, field_lines.rPWw, field_intersections, goals);
+                            run_field_line_optimisation(filtered_state,
+                                                        field_lines.rPWw,
+                                                        field_intersections,
+                                                        goals,
+                                                        confident_teammate_positions_Ff,
+                                                        detected_robots_Ww);
                         proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
 
@@ -496,55 +542,16 @@ namespace module::localisation {
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost = chosen_state_cost;
 
-                    // --- Swarm: flip detection (debug visualisation moved to SwarmLocalisation) ---
+                    // --- Swarm: debug graphs ---
                     if (swarm) {
-                        int num_confident        = 0;
-                        int flip_votes           = 0;
-                        constexpr double flip_ratio = 0.5;  // antipodal_dist < direct_dist * ratio
-
+                        int num_confident = 0;
                         for (const auto& ts : swarm->teammates) {
                             if (ts.confident) {
                                 ++num_confident;
-                                Eigen::Vector2d pos_Ff(ts.position_Ff.x(), ts.position_Ff.y());
-
-                                // Check for flip: confident teammate is approximately antipodal to us
-                                double antipodal_dist = (filtered_state.head<2>() + pos_Ff).norm();
-                                double direct_dist    = (filtered_state.head<2>() - pos_Ff).norm();
-                                emit(graph("Swarm/teammate_" + std::to_string(ts.player_id) + "/antipodal_dist",
-                                           antipodal_dist));
-                                emit(graph("Swarm/teammate_" + std::to_string(ts.player_id) + "/direct_dist",
-                                           direct_dist));
-
-                                if (direct_dist > 1.0 && antipodal_dist < direct_dist * flip_ratio) {
-                                    ++flip_votes;
-                                    log<DEBUG>("Swarm: teammate ",
-                                               ts.player_id,
-                                               " is antipodal (antipodal=",
-                                               antipodal_dist,
-                                               " direct=",
-                                               direct_dist,
-                                               ")");
-                                }
                             }
                         }
-
-                        // Flip correction: if enough confident teammates agree we are flipped,
-                        // apply the deterministic 180° correction: (-x, -y, θ+π)
-                        constexpr int flip_vote_threshold = 2;
-                        if (flip_votes >= flip_vote_threshold) {
-                            log<WARN>("Swarm: ",
-                                      flip_votes,
-                                      " teammates agree we are flipped — applying (-x,-y,θ+π) correction");
-                            filtered_state.x() = -filtered_state.x();
-                            filtered_state.y() = -filtered_state.y();
-                            filtered_state.z() = filtered_state.z() + M_PI;
-                            state              = filtered_state;
-                            last_certain_state = filtered_state;
-                        }
-
                         emit(graph("Swarm/num_confident_teammates", num_confident));
                         emit(graph("Swarm/num_known_teammates", static_cast<int>(swarm->teammates.size())));
-                        emit(graph("Swarm/flip_votes", flip_votes));
                     }
 
                     // --- Position uncertainty ellipse ---
@@ -618,7 +625,9 @@ namespace module::localisation {
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
-        const std::shared_ptr<const Goals>& goals) {
+        const std::shared_ptr<const Goals>& goals,
+        const std::vector<Eigen::Vector2d>& confident_teammate_positions_Ff,
+        const std::vector<Eigen::Vector3d>& detected_robots_Ww) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
@@ -705,6 +714,30 @@ namespace module::localisation {
 
             // --- State change cost ---
             cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
+
+            // --- Teammate landmark cost ---
+            // For each confident teammate with a known field position, check if exactly one
+            // visual robot detection matches (unambiguous association). If so, penalise the
+            // distance between the detection (transformed to field frame under hypothesis x)
+            // and the teammate's broadcast position.
+            if (!confident_teammate_positions_Ff.empty() && !detected_robots_Ww.empty()) {
+                for (const auto& tm_pos : confident_teammate_positions_Ff) {
+                    int near_count      = 0;
+                    double nearest_dist = std::numeric_limits<double>::max();
+                    for (const auto& rRWw : detected_robots_Ww) {
+                        Eigen::Vector3d rRFf = Hfw * rRWw;
+                        double d             = (rRFf.head<2>() - tm_pos).norm();
+                        if (d < cfg.teammate_association_distance) {
+                            ++near_count;
+                            nearest_dist = std::min(nearest_dist, d);
+                        }
+                    }
+                    // Only add cost when the match is unambiguous (exactly one detection nearby)
+                    if (near_count == 1) {
+                        cost += cfg.teammate_landmark_weight * nearest_dist * nearest_dist;
+                    }
+                }
+            }
 
             return cost;
         };

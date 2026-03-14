@@ -31,6 +31,7 @@
 #include <nlopt.hpp>
 #include <nuclear>
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -249,6 +250,17 @@ namespace module::localisation {
             /// At cost=1.0 the ellipse radius equals this value in metres.
             double cost_to_sigma_scale = 1.0;
 
+            /// @brief |x| threshold [m] below which a fall is considered "near the centre line"
+            /// and triggers a full-field search on the next uncertainty_reset().
+            double centre_flip_threshold = 0.5;
+
+            /// @brief Weight for the teammate landmark cost term.
+            double teammate_landmark_weight = 2.0;
+
+            /// @brief Maximum distance [m] between a visual detection and a confident teammate's
+            /// broadcast position (under the current hypothesis) to count as a match.
+            double teammate_association_distance = 1.5;
+
             /// @brief Maximum distance for landmark association
             double max_association_distance = 0.0;
 
@@ -340,6 +352,14 @@ namespace module::localisation {
         /// @brief Number of times the cost has been over the threshold
         int num_over_cost = 0;
 
+        /// @brief True when the robot fell near the centre line — causes the next uncertainty_reset()
+        /// to search the full field instead of just the current half.
+        bool post_fall_uncertain = false;
+
+        /// @brief Stability from the previous localisation frame, used to detect fall→stand transitions.
+        message::behaviour::state::Stability prev_stability =
+            message::behaviour::state::Stability::UNKNOWN;
+
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
@@ -373,7 +393,9 @@ namespace module::localisation {
             const Eigen::Vector3d& initial_guess,
             const std::vector<Eigen::Vector3d>& field_lines,
             const std::shared_ptr<const FieldIntersections>& field_intersections,
-            const std::shared_ptr<const Goals>& goals);
+            const std::shared_ptr<const Goals>& goals,
+            const std::vector<Eigen::Vector2d>& confident_teammate_positions_Ff = {},
+            const std::vector<Eigen::Vector3d>& detected_robots_Ww              = {});
 
         /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour

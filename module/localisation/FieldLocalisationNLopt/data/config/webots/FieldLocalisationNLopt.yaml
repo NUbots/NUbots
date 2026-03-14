@@ -93,6 +93,15 @@ goal_post_pair_max_separation: 3.0
 # At cost=1.0 the ellipse radius equals this value. Tune to taste.
 cost_to_sigma_scale: 1.0
 
+# |x| threshold [m] below which a fall is considered near the centre line.
+centre_flip_threshold: 0.5
+
+# Weight for the teammate landmark soft cost term.
+teammate_landmark_weight: 2.0
+
+# Maximum distance [m] for unambiguous visual detection → teammate match.
+teammate_association_distance: 1.5
+
 opt:
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6

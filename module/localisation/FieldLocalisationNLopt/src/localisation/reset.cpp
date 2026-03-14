@@ -54,10 +54,17 @@ namespace module::localisation {
         double y_min = -(fd.dimensions.field_width / 2 + 0.2) + rRWf.y();
         double y_max = (fd.dimensions.field_width / 2 + 0.2) + rRWf.y();
 
-        // Handle the mirror field problem by halving the x boundary to the robot's current side
-        // This also avoids unnecessary computations
-        x_max = rRFf.x() < 0 ? rRWf.x() : x_max;
-        x_min = rRFf.x() > 0 ? rRWf.x() : x_min;
+        // Handle the mirror field problem by halving the x boundary to the robot's current side.
+        // Skip this constraint when post_fall_uncertain is set — the robot may have flipped during
+        // a fall near the centre line and needs to search the full field.
+        if (!post_fall_uncertain) {
+            x_max = rRFf.x() < 0 ? rRWf.x() : x_max;
+            x_min = rRFf.x() > 0 ? rRWf.x() : x_min;
+        }
+        else {
+            log<INFO>("Post-fall uncertainty: searching full field");
+            post_fall_uncertain = false;
+        }
 
         std::vector<double> angles{};
         for (int i = 0; i < cfg.num_angles; ++i) {
@@ -130,6 +137,13 @@ namespace module::localisation {
         std::sort(hypotheses.begin(), hypotheses.end(), [](const auto& a, const auto& b) {
             return a.second < b.second;
         });
+
+        if (hypotheses.empty()) {
+            log<ERROR>("Global uncertainty reset produced no hypotheses — keeping last certain state");
+            state          = last_certain_state;
+            filtered_state = state;
+            return;
+        }
 
         // Set the state to the best hypothesis
         state              = hypotheses[0].first;

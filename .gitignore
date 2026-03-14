@@ -109,3 +109,5 @@ tags
 
 # Datasets folder
 /datasets/
+venv/
+snapd/

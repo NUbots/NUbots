@@ -92,6 +92,19 @@ goal_post_pair_max_separation: 3.0
 # Scale factor for the confidence ellipse: radius = sqrt(cost) * cost_to_sigma_scale [m].
 cost_to_sigma_scale: 1.0
 
+# |x| threshold [m] below which a fall is considered near the centre line.
+# Falls within this range unlock full-field search on the next uncertainty_reset().
+centre_flip_threshold: 0.5
+
+# Weight for the teammate landmark soft cost term.
+# A confident teammate's broadcast position is used as a landmark when exactly one
+# visual robot detection matches it (unambiguous association).
+teammate_landmark_weight: 2.0
+
+# Maximum distance [m] between a visual detection and a teammate's expected position
+# (under the current hypothesis) for the detection to count as a match.
+teammate_association_distance: 1.5
+
 opt:
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
