@@ -168,7 +168,7 @@ namespace module::skill {
                     // Estimate using finite differences with exponential smoothing to reduce noise
                     const auto now                   = NUClear::clock::now();
                     JointVector joint_vel            = JointVector::Zero();
-                    static const double alpha        = 0.1;
+                    static const double alpha        = 0.5;
                     static JointVector filtered_vel  = JointVector::Zero();
                     static bool filtered_initialised = false;
 
