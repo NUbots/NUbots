@@ -55,6 +55,17 @@ namespace module::skill {
         return q;
     }
 
+    std::vector<int> action_conversion_order = {18, 2, 7, 8, 5, 19, 15, 10, 1, 9, 4, 14, 6, 11, 3, 13, 16, 0, 12, 17};
+
+    inline Eigen::Matrix<double, 20, 1> mjlab_to_nubots(const Eigen::Matrix<double, 20, 1>& mjlab_joint_offsets) {
+        Eigen::Matrix<double, 20, 1> nubots_joint_offsets = Eigen::Matrix<double, 20, 1>::Zero();
+        // Convert from MJlabs order to NUbots order
+        for (int i = 0; i < mjlab_joint_offsets.size(); ++i) {
+            nubots_joint_offsets(action_conversion_order[i]) = mjlab_joint_offsets(i);
+        }
+        return nubots_joint_offsets;
+    }
+
     RLWalk::RLWalk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("RLWalk.yaml").then([this](const Configuration& config) {
@@ -369,6 +380,8 @@ namespace module::skill {
             float action_scale        = 0.049445848912000656f;  // From mjlab
             JointVector joint_offsets = joint_angles_raw * action_scale;
 
+            // TODO: Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
+            // joint_offsets = mjlab_to_nubots(joint_offsets);
             return joint_offsets;
         }
         catch (const std::exception& e) {
