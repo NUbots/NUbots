@@ -155,10 +155,10 @@ namespace module::vision {
                 // Use the model's expected input size
                 int model_input_size = static_cast<int>(input_shape[2]);  // Assuming NCHW format
                 cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
-                                                              1.0 / 255.0,
-                                                              cv::Size(model_input_size, model_input_size),
-                                                              cv::Scalar(),
-                                                              true);
+                                                      1.0 / 255.0,
+                                                      cv::Size(model_input_size, model_input_size),
+                                                      cv::Scalar(),
+                                                      true);
 
                 // -------- Feed the blob into the input node of the Model -------
                 // Create tensor and copy data instead of using external memory pointer

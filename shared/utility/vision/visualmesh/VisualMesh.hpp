@@ -29,6 +29,7 @@
 #define UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <concepts>
 #include <iterator>
 #include <optional>
@@ -286,7 +287,6 @@ namespace utility::vision::visualmesh {
      * @return Circularity score measured as observed bounded points divided by expected bounded points.
      */
     template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
-        requires std::same_as<std::iter_value_t<Iterator>, int>
     double find_cluster_circularity(Iterator first,
                                     Sentinel last,
                                     const Eigen::MatrixXi& neighbours,
@@ -298,11 +298,10 @@ namespace utility::vision::visualmesh {
         std::vector<int> stack{};
 
         // Indices are known to be unique and are bounded in the cone so they are added to the stack without checks
-        while (first != last) {
+        for (; first != last; ++first) {
             const int idx = *first;
             stack.push_back(idx);
             visited[idx] = true;
-            ++first;
         }
 
         const size_t observed_bounded = stack.size();
@@ -344,19 +343,18 @@ namespace utility::vision::visualmesh {
      * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
      */
     template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
-        requires std::same_as<std::iter_value_t<Iterator>, int>
     Eigen::Vector3d find_cluster_central_axis(Iterator first,
                                               Sentinel last,
                                               const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
         Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
-        while (first != last) {
+        for (; first != last; ++first) {
             const int idx = *first;
-            ++first;
             uBCw += uPCw.col(idx);
         }
         if (uBCw.squaredNorm() > 0.0) {
             uBCw.normalize();
         }
+
         return uBCw;
     }
 
@@ -374,20 +372,18 @@ namespace utility::vision::visualmesh {
      * @return double, angular radius of cluster equal to cos(theta)
      */
     template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
-        requires std::same_as<std::iter_value_t<Iterator>, int>
     double find_cluster_angular_radius(Iterator first,
                                        Sentinel last,
                                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
                                        const Eigen::Vector3d& uBCw) {
         double radius = 1.0;
-        while (first != last) {
+        for (; first != last; ++first) {
             const int idx = *first;
-            ++first;
             // Unit vector from the camera to the ball edge, in world space
             const Eigen::Vector3d& uECw(uPCw.col(idx));
             // Find the vector that gives the largest angle between the central axis and ball edge
             // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
-            radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
+            radius = std::min(radius, uBCw.dot(uECw));
         }
 
         return radius;
