@@ -55,7 +55,8 @@ namespace module::skill {
         return q;
     }
 
-    std::vector<int> action_conversion_order = {18, 2, 7, 8, 5, 19, 15, 10, 1, 9, 4, 14, 6, 11, 3, 13, 16, 0, 12, 17};
+    // Comes from the XML on the mjlab training side.
+    std::vector<int> action_conversion_order = {7, 9, 11, 13, 15, 17, 6, 8, 10, 12, 14, 16, 18, 19, 1, 3, 5, 0, 2, 4};
 
     inline Eigen::Matrix<double, 20, 1> mjlab_to_nubots(const Eigen::Matrix<double, 20, 1>& mjlab_joint_offsets) {
         Eigen::Matrix<double, 20, 1> nubots_joint_offsets = Eigen::Matrix<double, 20, 1>::Zero();
@@ -179,7 +180,7 @@ namespace module::skill {
                     // Estimate using finite differences with exponential smoothing to reduce noise
                     const auto now                   = NUClear::clock::now();
                     JointVector joint_vel            = JointVector::Zero();
-                    static const double alpha        = 0.5;
+                    static const double alpha        = 0.3;
                     static JointVector filtered_vel  = JointVector::Zero();
                     static bool filtered_initialised = false;
 
@@ -271,18 +272,6 @@ namespace module::skill {
     }
 
     bool RLWalk::initialise_model_locked() {
-        auto shape_to_string = [](const ov::Shape& s) {
-            std::ostringstream oss;
-            oss << "[";
-            for (size_t i = 0; i < s.size(); ++i) {
-                if (i > 0)
-                    oss << ", ";
-                oss << s[i];
-            }
-            oss << "]";
-            return oss.str();
-        };
-
         try {
             const std::filesystem::path p(cfg.model_path);
             const auto abs = std::filesystem::absolute(p).string();
@@ -380,8 +369,8 @@ namespace module::skill {
             float action_scale        = 0.049445848912000656f;  // From mjlab
             JointVector joint_offsets = joint_angles_raw * action_scale;
 
-            // TODO: Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
-            // joint_offsets = mjlab_to_nubots(joint_offsets);
+            // Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
+            joint_offsets = mjlab_to_nubots(joint_offsets);
             return joint_offsets;
         }
         catch (const std::exception& e) {
