@@ -40,6 +40,7 @@
 #include "message/platform/RawSensors.hpp"
 #include "message/reflection.hpp"
 
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -56,6 +57,7 @@ namespace module::platform::NUSense {
     using message::platform::NUSenseHandshake;
     using message::platform::RawSensors;
     using message::platform::ServoIDStates;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
 
@@ -218,6 +220,8 @@ namespace module::platform::NUSense {
                     servo.profile_acceleration  = 0;  // Not present in NUSense message
                     servo.profile_velocity      = 0;  // Not present in NUSense message
 
+                    emit(graph("NUSense servo goal positoin for id " + std::to_string(val.id), servo.goal_position));
+
                     // Log any errors and timeouts from the servo.
                     if (val.packet_counts.packet_errors != 0) {
                         log<WARN>(fmt::format("{} packet-error(s) from ID {} ({})",
@@ -311,6 +315,25 @@ namespace module::platform::NUSense {
                                                              * offsets.offsets[target.id].direction,
                                                 is_nan ? 0.0 : target.gain,
                                                 is_nan ? 0 : target.torque);
+                                        }
+
+                                        // Emit only servo 13 command position
+                                        // NOTE: if your IDs are 0-based, servo 13 => id 13.
+                                        // If your IDs are 1-based, servo 13 => id 12 here.
+                                        constexpr size_t kServoToPlot = 13;
+
+                                        bool found           = false;
+                                        float servo_position = 0.0f;
+
+                                        for (const auto& t : servo_targets.targets) {
+                                            if (static_cast<size_t>(t.id) == kServoToPlot) {
+                                                servo_position = static_cast<float>(t.position);
+                                                found          = true;  // keep last value seen for that servo
+                                            }
+                                        }
+
+                                        if (found) {
+                                            emit(graph("Servo 13 target position", servo_position));
                                         }
 
                                         send_packet(servo_targets);

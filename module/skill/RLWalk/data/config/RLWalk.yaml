@@ -2,7 +2,7 @@
 log_level: DEBUG
 
 model:
-  path: /home/nubots/build/model.onnx
+  path: model.onnx
   device: CPU
   input_name: obs
   output_name: actions

@@ -345,7 +345,13 @@ namespace module::skill {
         }
         std::scoped_lock lock(model_mutex);
 
+        // Smoothing parameters
+        static const double action_alpha      = 0.5;
+        static JointVector filtered_action    = JointVector::Zero();
+        static bool action_filter_initialised = false;
+
         if (model_state != ModelState::READY) {
+            action_filter_initialised = false;
             return JointVector::Zero();
         }
 
@@ -383,7 +389,16 @@ namespace module::skill {
 
             // Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
             joint_offsets = mjlab_to_nubots(joint_offsets);
-            return joint_offsets;
+
+            // Smooth signal
+            if (!action_filter_initialised) {
+                filtered_action           = joint_offsets;
+                action_filter_initialised = true;
+            }
+            else {
+                filtered_action = action_alpha * joint_offsets + (1 - action_alpha) * filtered_action;
+            }
+            return filtered_action;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
