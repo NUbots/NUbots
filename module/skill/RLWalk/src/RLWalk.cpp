@@ -56,15 +56,25 @@ namespace module::skill {
     }
 
     // Comes from the XML on the mjlab training side.
-    std::vector<int> action_conversion_order = {7, 9, 11, 13, 15, 17, 6, 8, 10, 12, 14, 16, 18, 19, 1, 3, 5, 0, 2, 4};
-
+    std::vector<int> mj_to_nubots_order = {7, 9, 11, 13, 15, 17, 6, 8, 10, 12, 14, 16, 18, 19, 1, 3, 5, 0, 2, 4};
     inline Eigen::Matrix<double, 20, 1> mjlab_to_nubots(const Eigen::Matrix<double, 20, 1>& mjlab_joint_offsets) {
         Eigen::Matrix<double, 20, 1> nubots_joint_offsets = Eigen::Matrix<double, 20, 1>::Zero();
         // Convert from MJlabs order to NUbots order
         for (int i = 0; i < mjlab_joint_offsets.size(); ++i) {
-            nubots_joint_offsets(action_conversion_order[i]) = mjlab_joint_offsets(i);
+            nubots_joint_offsets(mj_to_nubots_order[i]) = mjlab_joint_offsets(i);
         }
         return nubots_joint_offsets;
+    }
+
+    // The inverse mapping of the above
+    std::vector<int> nubots_to_mj_order = {17, 14, 18, 15, 19, 16, 6, 0, 7, 1, 8, 2, 9, 3, 10, 4, 11, 5, 12, 13};
+    inline Eigen::Matrix<double, 20, 1> nubots_to_mjlab(const Eigen::Matrix<double, 20, 1>& nubots_joints) {
+        Eigen::Matrix<double, 20, 1> mjlab_joints = Eigen::Matrix<double, 20, 1>::Zero();
+        // Convert from NUbots order to Mjlab's expected order
+        for (int i = 0; i < nubots_joints.size(); ++i) {
+            mjlab_joints(nubots_to_mj_order[i]) = nubots_joints(i);
+        }
+        return mjlab_joints;
     }
 
     RLWalk::RLWalk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -167,10 +177,12 @@ namespace module::skill {
                     idx += GRAVITY_SIZE;
 
                     // Joint positions relative to default pose (20)
-                    auto temp_sensors                        = std::make_unique<Sensors>();
-                    temp_sensors->servo                      = sensors.servo;
-                    JointVector current_joints               = sensors_to_configuration(temp_sensors);
-                    observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
+                    auto temp_sensors                = std::make_unique<Sensors>();
+                    temp_sensors->servo              = sensors.servo;
+                    JointVector current_joints       = sensors_to_configuration(temp_sensors);
+                    JointVector joint_pos_rel_nubots = current_joints - default_pose;
+                    observation.segment<JOINT_POS_SIZE>(idx) =
+                        nubots_to_mjlab(joint_pos_rel_nubots);  // Convert to Mjlabs expected order of joints
                     if (log_level <= DEBUG) {
                         emit(graph("Joint current positions", current_joints.transpose()));
                     };
@@ -179,8 +191,8 @@ namespace module::skill {
                     // Joint velocities relative to default pose (20)
                     // Estimate using finite differences with exponential smoothing to reduce noise
                     const auto now                   = NUClear::clock::now();
-                    JointVector joint_vel            = JointVector::Zero();
-                    static const double alpha        = 0.3;
+                    JointVector joint_vel_nubots     = JointVector::Zero();
+                    static const double alpha        = 0.5;
                     static JointVector filtered_vel  = JointVector::Zero();
                     static bool filtered_initialised = false;
 
@@ -196,7 +208,7 @@ namespace module::skill {
                             else {
                                 filtered_vel = alpha * raw_vel + (1 - alpha) * filtered_vel;
                             }
-                            joint_vel = filtered_vel;
+                            joint_vel_nubots = filtered_vel;
                         }
                         else if (dt < 0.0) {
                             log<ERROR>("Negative dt for joint velocity estimation: ", dt, ". Assuming zero velocity");
@@ -208,14 +220,14 @@ namespace module::skill {
                     }
                     previous_pose                            = current_joints;
                     last_update_time                         = now;
-                    observation.segment<JOINT_POS_SIZE>(idx) = joint_vel;
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(joint_vel_nubots);
                     if (log_level <= DEBUG) {
-                        emit(graph("Joint velocity", joint_vel.transpose()));
+                        emit(graph("Joint velocity", joint_vel_nubots.transpose()));
                     };
                     idx += JOINT_POS_SIZE;
 
                     // Last action (20)
-                    observation.segment<JOINT_POS_SIZE>(idx) = last_action;
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(last_action);
                     idx += JOINT_POS_SIZE;
 
                     // Command (3)
