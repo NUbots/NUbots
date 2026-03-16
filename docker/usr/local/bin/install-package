@@ -5,8 +5,8 @@ set -e
 if ! [ $(id -u) = 0 ]; then
     sudo "$0" "$@"
 else
-    # Update pacman, install the packages and cleanup the cache to make the layer smaller
-    pacman -Syu --noconfirm --needed
-    pacman -S --noconfirm --needed "$@"
-    rm -rf /var/cache
+    # Update apt, install the packages and cleanup the cache to make the layer smaller
+    apt-get update
+    apt-get install -y --no-install-recommends "$@"
+    rm -rf /var/cache/apt /var/lib/apt/lists/*
 fi
