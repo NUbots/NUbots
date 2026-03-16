@@ -28,8 +28,6 @@ syntax = "proto3";
 
 package message.output;
 
-import "google/protobuf/timestamp.proto";
-import "Vector.proto";
 import "Transform.proto";
 
 message Mujoco {

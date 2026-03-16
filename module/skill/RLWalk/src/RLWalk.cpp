@@ -55,6 +55,28 @@ namespace module::skill {
         return q;
     }
 
+    // Comes from the XML on the mjlab training side.
+    std::vector<int> mj_to_nubots_order = {7, 9, 11, 13, 15, 17, 6, 8, 10, 12, 14, 16, 18, 19, 1, 3, 5, 0, 2, 4};
+    inline Eigen::Matrix<double, 20, 1> mjlab_to_nubots(const Eigen::Matrix<double, 20, 1>& mjlab_joint_offsets) {
+        Eigen::Matrix<double, 20, 1> nubots_joint_offsets = Eigen::Matrix<double, 20, 1>::Zero();
+        // Convert from MJlabs order to NUbots order
+        for (int i = 0; i < mjlab_joint_offsets.size(); ++i) {
+            nubots_joint_offsets(mj_to_nubots_order[i]) = mjlab_joint_offsets(i);
+        }
+        return nubots_joint_offsets;
+    }
+
+    // The inverse mapping of the above
+    std::vector<int> nubots_to_mj_order = {17, 14, 18, 15, 19, 16, 6, 0, 7, 1, 8, 2, 9, 3, 10, 4, 11, 5, 12, 13};
+    inline Eigen::Matrix<double, 20, 1> nubots_to_mjlab(const Eigen::Matrix<double, 20, 1>& nubots_joints) {
+        Eigen::Matrix<double, 20, 1> mjlab_joints = Eigen::Matrix<double, 20, 1>::Zero();
+        // Convert from NUbots order to Mjlab's expected order
+        for (int i = 0; i < nubots_joints.size(); ++i) {
+            mjlab_joints(nubots_to_mj_order[i]) = nubots_joints(i);
+        }
+        return mjlab_joints;
+    }
+
     RLWalk::RLWalk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("RLWalk.yaml").then([this](const Configuration& config) {
@@ -79,35 +101,23 @@ namespace module::skill {
             last_update_time   = NUClear::clock::now();
 
             // Initialize the model
-            initialize_model();
+            initialise_model_locked();
         });
 
-        // Load normalisation parameters from YAML
-        on<Configuration>("normalisation_params.yaml").then([this](const Configuration& norm_config) {
-            auto mean_vec = norm_config["obs_mean"].as<std::vector<double>>();
-            auto std_vec  = norm_config["obs_std"].as<std::vector<double>>();
-            auto var_vec  = norm_config["obs_var"].as<std::vector<double>>();
+        on<Every<1000, Per<std::chrono::milliseconds>>, Single>().then([this] {
+            std::scoped_lock lock(model_mutex);
+            if (model_state == ModelState::READY)
+                return;
 
-            if (mean_vec.size() != TOTAL_OBS_SIZE || std_vec.size() != TOTAL_OBS_SIZE
-                || var_vec.size() != TOTAL_OBS_SIZE) {
-                log<ERROR>("Normalization params size mismatch! Expected: ",
-                           TOTAL_OBS_SIZE,
-                           " Got mean: ",
-                           mean_vec.size(),
-                           " std: ",
-                           std_vec.size(),
-                           " var: ",
-                           var_vec.size());
+            const auto now = std::chrono::steady_clock::now();
+            if (now < next_retry) {
+                return;
             }
-            else {
-                for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                    _mean[i] = mean_vec[i];
-                    _std[i]  = std_vec[i];
-                    _var[i]  = var_vec[i];
-                }
-                normalisation_loaded = true;
-                log<INFO>("Loaded normalization parameters from normalisation_params.yaml");
+
+            if (initialise_model_locked()) {
+                log<INFO>("RLWalk inference model initialised successfully");
             }
+            log<DEBUG>("Model state after retry: ", (model_state == ModelState::READY ? "READY" : "FAILED"));
         });
 
         // Start - Runs every time the Walk provider starts
@@ -138,9 +148,8 @@ namespace module::skill {
 
                     // Accelerometer data in body frame (3)
                     observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
-                    // log<DEBUG>("Accelerometer: ", observation.segment<ACC_SIZE>(idx).transpose());
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors accelerometer values",
+                        emit(graph("Sensors accelerometer values",
                                    sensors.accelerometer.x(),
                                    sensors.accelerometer.y(),
                                    sensors.accelerometer.z()));
@@ -148,51 +157,42 @@ namespace module::skill {
                     idx += ACC_SIZE;
 
                     // Gyro data (3)
-                    observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;  // Convert to radians/s
-                    // log<DEBUG>("Gyro: ", observation.segment<GYRO_SIZE>(idx).transpose());
+                    observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors gyroscope values",
+                        emit(graph("Sensors gyroscope values",
                                    sensors.gyroscope.x(),
                                    sensors.gyroscope.y(),
                                    sensors.gyroscope.z()));
                     };
                     idx += GYRO_SIZE;
 
-                    // Gravity/Accelerometer data in world frame (3)
-                    Eigen::Vector3d gravity = sensors.Htw.inverse().rotation() * sensors.accelerometer;
-                    if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Sensors accelerometer in world frame values",
-                                   gravity.x(),
-                                   gravity.y(),
-                                   gravity.z()));
-                    };
-                    // log<DEBUG>("Gravity: ", gravity.transpose());
-                    // log<DEBUG>("Gravity magnitude: ", gravity.norm());
+                    // Gravity/Accelerometer data in body frame (3)
+                    const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
+                    Eigen::Vector3d gravity                = sensors.Htw.inverse().rotation() * g_world;
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
-                    // log<DEBUG>("Accelerometer in worldframe: ",
-                    // observation.segment<GRAVITY_SIZE>(idx).transpose());
+                    if (log_level <= DEBUG) {
+                        emit(
+                            graph("Sensors accelerometer in body frame values", gravity.x(), gravity.y(), gravity.z()));
+                    };
                     idx += GRAVITY_SIZE;
 
                     // Joint positions relative to default pose (20)
-                    // Note: We need to map the joint positions from sensors to the correct order
-                    // This is a placeholder - you'll need to map the actual joint positions TODO
-                    auto temp_sensors                        = std::make_unique<Sensors>();
-                    temp_sensors->servo                      = sensors.servo;
-                    JointVector current_joints               = sensors_to_configuration(temp_sensors);
-                    observation.segment<JOINT_POS_SIZE>(idx) = current_joints - default_pose;
+                    auto temp_sensors                = std::make_unique<Sensors>();
+                    temp_sensors->servo              = sensors.servo;
+                    JointVector current_joints       = sensors_to_configuration(temp_sensors);
+                    JointVector joint_pos_rel_nubots = current_joints - default_pose;
+                    observation.segment<JOINT_POS_SIZE>(idx) =
+                        nubots_to_mjlab(joint_pos_rel_nubots);  // Convert to Mjlabs expected order of joints
+                    if (log_level <= DEBUG) {
+                        emit(graph("Joint current positions", current_joints.transpose()));
+                    };
                     idx += JOINT_POS_SIZE;
-                    if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint current positions", current_joints.transpose()));
-                    };
-                    if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Servo default pose", default_pose.transpose()));
-                    };
 
                     // Joint velocities relative to default pose (20)
                     // Estimate using finite differences with exponential smoothing to reduce noise
                     const auto now                   = NUClear::clock::now();
-                    JointVector joint_vel            = JointVector::Zero();
-                    static const double alpha        = 0.1;
+                    JointVector joint_vel_nubots     = JointVector::Zero();
+                    static const double alpha        = 0.5;
                     static JointVector filtered_vel  = JointVector::Zero();
                     static bool filtered_initialised = false;
 
@@ -201,8 +201,6 @@ namespace module::skill {
                         double dt                             = elapsed.count();
                         if (dt > 0.0) {
                             JointVector raw_vel = (current_joints - previous_pose) / dt;
-                            // Convert to degrees/s for the inference
-                            raw_vel = raw_vel * (180.0 / M_PI);
                             if (!filtered_initialised) {
                                 filtered_vel         = raw_vel;
                                 filtered_initialised = true;
@@ -210,7 +208,7 @@ namespace module::skill {
                             else {
                                 filtered_vel = alpha * raw_vel + (1 - alpha) * filtered_vel;
                             }
-                            joint_vel = filtered_vel;
+                            joint_vel_nubots = filtered_vel;
                         }
                         else if (dt < 0.0) {
                             log<ERROR>("Negative dt for joint velocity estimation: ", dt, ". Assuming zero velocity");
@@ -220,57 +218,36 @@ namespace module::skill {
                         have_previous_pose   = true;
                         filtered_initialised = false;
                     }
-                    // joint_vel                                = JointVector::Zero();  // DEBUGGING removeme
                     previous_pose                            = current_joints;
                     last_update_time                         = now;
-                    observation.segment<JOINT_POS_SIZE>(idx) = joint_vel;
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(joint_vel_nubots);
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint velocity", joint_vel.transpose()));
+                        emit(graph("Joint velocity", joint_vel_nubots.transpose()));
                     };
                     idx += JOINT_POS_SIZE;
 
                     // Last action (20)
-                    observation.segment<JOINT_POS_SIZE>(idx) = last_action;
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(last_action);
                     idx += JOINT_POS_SIZE;
 
                     // Command (3)
                     observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
-                    // log<DEBUG>("Velocity target: ", observation.segment<COMMAND_SIZE>(idx).transpose());
+                    if (log_level <= DEBUG) {
+                        emit(graph("Walk velocity target",
+                                   walk_task.velocity_target.x(),
+                                   walk_task.velocity_target.y(),
+                                   walk_task.velocity_target.z()));
+                    }
                     idx += COMMAND_SIZE;
 
                     // Run inference
-                    JointVector joint_angles_deg = run_inference(observation);
-                    // Assume output is in degrees, convert to radians
-                    JointVector joint_angles_rad = joint_angles_deg * (M_PI / 180.0);
-                    // log<DEBUG>("Joint angles: ", joint_angles.transpose());
+                    JointVector joint_offsets_action = run_inference(observation);
                     if (log_level <= DEBUG) {
-                        emit(graph("DEBUG: Joint offset goal positions from inference", joint_angles_rad.transpose()));
+                        emit(graph("Joint offset action from inference", joint_offsets_action.transpose()));
                     };
 
-                    // Save example data to file
-                    std::ofstream data_file("recordings/example_data.json");
-                    data_file << std::fixed << std::setprecision(6);
-                    data_file << "{\n";
-                    data_file << "  \"observation\": [";
-                    for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                        data_file << observation[i];
-                        if (i < TOTAL_OBS_SIZE - 1)
-                            data_file << ", ";
-                    }
-                    data_file << "],\n";
-                    data_file << "  \"action\": [";
-                    for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                        data_file << joint_angles_rad[i];
-                        if (i < JOINT_POS_SIZE - 1)
-                            data_file << ", ";
-                    }
-                    data_file << "]\n";
-                    data_file << "}\n";
-                    data_file.close();
-                    // log<DEBUG>("Saved example data to example_data.json");
-
                     // Store the last action
-                    last_action = joint_angles_deg;
+                    last_action = joint_offsets_action;
 
                     // Emit servo commands
                     auto body = std::make_unique<Body>();
@@ -278,7 +255,7 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_angles_rad[i];
+                        servo->position                   = default_pose[i] + joint_offsets_action[i];
                         servo->state                      = ServoState(1.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
@@ -290,7 +267,6 @@ namespace module::skill {
                                                                   0.0);  // Phase not used
                     emit(walk_state);
 
-                    // Debug output
                     if (log_level <= DEBUG) {
                         emit(graph("Walk velocity target",
                                    walk_task.velocity_target.x(),
@@ -301,104 +277,94 @@ namespace module::skill {
             });
     }
 
-    void RLWalk::initialize_model() {
+    void RLWalk::invalidate_model_locked() {
+        compiled_model = ov::CompiledModel{};
+        infer_request  = ov::InferRequest{};
+        model_state    = ModelState::FAILED;
+    }
+
+    bool RLWalk::initialise_model_locked() {
         try {
-            // Create OpenVINO Core
-            ov::Core core;
+            const std::filesystem::path p(cfg.model_path);
+            const auto abs = std::filesystem::absolute(p).string();
 
-            // Read the model
-            auto model = core.read_model(cfg.model_path);
-
-            // Log model information
-            log<INFO>("Model loaded from: ", cfg.model_path);
-            log<INFO>("Model device: ", cfg.device);
-
-            // Log input information
-            for (const auto& input : model->inputs()) {
-                log<INFO>("Input: ", input.get_any_name());
-                log<INFO>("  Shape: ", input.get_shape());
-                log<INFO>("  Type: ", input.get_element_type());
+            if (!std::filesystem::exists(p)) {
+                throw std::runtime_error("Model file not found: " + abs);
             }
 
-            // Log output information
-            for (const auto& output : model->outputs()) {
-                log<INFO>("Output: ", output.get_any_name());
-                log<INFO>("  Shape: ", output.get_shape());
-                log<INFO>("  Type: ", output.get_element_type());
+            log<INFO>("RLWalk init model_path=",
+                      abs,
+                      " device=",
+                      cfg.device,
+                      " input_name=",
+                      cfg.input_name,
+                      " output_name=",
+                      cfg.output_name);
+
+            std::string last_error = "unknown";
+
+            auto model = core.read_model(abs);
+            auto cm    = core.compile_model(model, cfg.device);
+            auto req   = cm.create_infer_request();
+
+            // Validate configured ports and shapes once
+            const auto in  = cfg.input_name.empty() ? cm.input() : cm.input(cfg.input_name);
+            const auto out = cfg.output_name.empty() ? cm.output() : cm.output(cfg.output_name);
+
+            const auto in_shape  = in.get_shape();
+            const auto out_shape = out.get_shape();
+            if (in_shape.size() != 2 || in_shape[1] != static_cast<size_t>(TOTAL_OBS_SIZE)) {
+                throw std::runtime_error("Unexpected input shape");
+            }
+            if (out_shape.size() != 2 || out_shape[1] != static_cast<size_t>(JOINT_POS_SIZE)) {
+                throw std::runtime_error("Unexpected output shape");
             }
 
-            // Log available devices
-            log<INFO>("Available devices:");
-            for (const auto& device : core.get_available_devices()) {
-                log<INFO>("  ", device);
-            }
+            // Commit only after full success
+            compiled_model = std::move(cm);
+            infer_request  = std::move(req);
+            model_state    = ModelState::READY;
+            retry_backoff  = std::chrono::milliseconds(1000);
 
-            // Compile the model
-            compiled_model = core.compile_model(model, cfg.device);
+            log<INFO>("Initialisation success");
 
-            // Create inference request
-            infer_request = compiled_model.create_infer_request();
-
-            // Log compilation info
-            log<INFO>("Model compiled successfully");
-
-            // Validate input shape
-            auto input_shape = model->input().get_shape();
-            if (input_shape[1] != TOTAL_OBS_SIZE) {
-                log<ERROR>("Model input size mismatch. Expected: ", TOTAL_OBS_SIZE, " Got: ", input_shape[1]);
-                model_initialized = false;
-                return;
-            }
-
-            // Validate output shape
-            auto output_shape = model->output().get_shape();
-            if (output_shape[1] != JOINT_POS_SIZE) {
-                log<ERROR>("Model output size mismatch. Expected: ", JOINT_POS_SIZE, " Got: ", output_shape[1]);
-                model_initialized = false;
-                return;
-            }
-
-            model_initialized = true;
-            log<INFO>("RLWalk model initialized successfully");
+            return true;
         }
         catch (const std::exception& e) {
-            log<ERROR>("Failed to initialize RLWalk model: ", e.what());
-            model_initialized = false;
+            log<ERROR>("RLWalk model init failed: ", e.what());
+            invalidate_model_locked();
+            next_retry    = std::chrono::steady_clock::now() + retry_backoff;
+            retry_backoff = std::min(retry_backoff * 2, std::chrono::milliseconds(5000));
+            return false;
         }
     }
 
     JointVector RLWalk::run_inference(const ObservationVector& observation) {
-        if (!model_initialized) {
-            log<ERROR>("Cannot run inference: model not initialized");
-            log<INFO>("Attempting to reinitialize model...");
-            initialize_model();
-            return JointVector::Zero();
+        if (log_level <= DEBUG) {
+            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
         }
+        std::scoped_lock lock(model_mutex);
 
-        if (!normalisation_loaded) {
-            log<ERROR>("Cannot run inference: normalisation parameters not loaded");
+        // Smoothing parameters
+        static const double action_alpha      = 0.5;
+        static JointVector filtered_action    = JointVector::Zero();
+        static bool action_filter_initialised = false;
+
+        if (model_state != ModelState::READY) {
+            action_filter_initialised = false;
             return JointVector::Zero();
         }
 
         try {
-            // Normalise observation
-            const float epsilon         = 1e-2f;
-            const ObservationVector EPS = ObservationVector::Constant(epsilon);
-            emit(graph("DEBUG: NON-normalized observation", observation.transpose()));
-            ObservationVector norm_observation = (observation - _mean).cwiseQuotient(_std + EPS);
-            emit(graph("DEBUG: Normalized observation", norm_observation.transpose()));
 
-            // Convert normalised observation to float array
             std::vector<float> input_data(TOTAL_OBS_SIZE);
             for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                input_data[i] = static_cast<float>(norm_observation[i]);
+                input_data[i] = static_cast<float>(observation[i]);
             }
 
-            // Create input tensor
+            // Create & set input tensor
             ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
             ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
-
-            // Set input tensor
             infer_request.set_input_tensor(input_tensor);
 
             // Run inference
@@ -408,16 +374,36 @@ namespace module::skill {
             auto output_tensor = infer_request.get_output_tensor();
             float* output_data = output_tensor.data<float>();
 
-            // Convert output to Eigen vector
-            JointVector joint_angles_deg_out;
+            JointVector joint_angles_raw;
             for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                joint_angles_deg_out[i] = static_cast<double>(output_data[i]);
+                joint_angles_raw[i] = static_cast<double>(output_data[i]);
             }
 
-            return joint_angles_deg_out;
+            if (log_level <= DEBUG) {
+                emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
+            }
+
+            // Convert output values to joint angle offsets
+            float action_scale        = 0.049445848912000656f;  // From mjlab
+            JointVector joint_offsets = joint_angles_raw * action_scale;
+
+            // Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
+            joint_offsets = mjlab_to_nubots(joint_offsets);
+
+            // Smooth signal
+            if (!action_filter_initialised) {
+                filtered_action           = joint_offsets;
+                action_filter_initialised = true;
+            }
+            else {
+                filtered_action = action_alpha * joint_offsets + (1 - action_alpha) * filtered_action;
+            }
+            return filtered_action;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
+            invalidate_model_locked();
+            next_retry = std::chrono::steady_clock::now() + retry_backoff;
             return JointVector::Zero();
         }
     }

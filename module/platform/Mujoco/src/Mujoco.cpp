@@ -213,16 +213,15 @@ namespace module::platform {
             });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>, Priority::HIGH>().then(
-            [this](const ServoTargets& targets, const RawSensors& sensors) {
-                // Loop through each of our commands
-                for (const auto& target : targets.targets) {
-                    servo_state[target.name].id            = target.id;
-                    servo_state[target.name].servo_name    = target.name;
-                    servo_state[target.name].p_gain        = target.gain;
-                    servo_state[target.name].goal_position = target.position;
-                }
-            });
+        on<Trigger<ServoTargets>, Sync<ServoState>, Priority::HIGH>().then([this](const ServoTargets& targets) {
+            // Loop through each of our commands
+            for (const auto& target : targets.targets) {
+                servo_state[target.name].id            = target.id;
+                servo_state[target.name].servo_name    = target.name;
+                servo_state[target.name].p_gain        = target.gain;
+                servo_state[target.name].goal_position = target.position;
+            }
+        });
 
         on<Trigger<ServoTarget>, Priority::HIGH>().then([this](const ServoTarget& target) {
             auto targets = std::make_unique<ServoTargets>();

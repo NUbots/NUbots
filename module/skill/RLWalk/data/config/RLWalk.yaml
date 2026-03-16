@@ -2,31 +2,31 @@
 log_level: DEBUG
 
 model:
-  path: /home/nubots/build/model.onnx
+  path: model.onnx
   device: CPU
-  input_name: input
-  output_name: output
+  input_name: obs
+  output_name: actions
   num_joints: 20
   obs_size: 72
 
 default_pose: # Same as in Mujoco.yaml
-  - 1.71400e+00 # Right shoulder pitch
-  - 1.71600e+00 # Left shoulder pitch
-  - -1.98000e-01 # Right shoulder roll
-  - 1.98000e-01 # Left shoulder roll
-  - -7.20000e-01 # Right elbow pitch
-  - -7.15000e-01 # Left elbow pitch
-  - -3.30000e-02 # Right hip yaw
-  - 3.40000e-02 # Left hip yaw
-  - -1.62000e-01 # Right hip roll
-  - 1.63000e-01 # Left hip roll
-  - -9.05000e-01 # Right hip pitch
-  - -9.05000e-01 # Left hip pitch
-  - 1.20600e+00 # Right knee pitch
-  - 1.20600e+00 # Left knee pitch
-  - -5.10000e-01 # Right ankle pitch
-  - -5.12000e-01 # Left ankle pitch
-  - 1.68000e-01 # Right ankle roll
-  - -1.67000e-01 # Left ankle roll
-  - 0.00000e+00 # Neck yaw
-  - 0.00000e+00 # Head pitch
+  - 1.71400e+00 # Right shoulder pitch 0
+  - 1.71600e+00 # Left shoulder pitch 1
+  - -1.98000e-01 # Right shoulder roll 2
+  - 1.98000e-01 # Left shoulder roll 3
+  - -7.20000e-01 # Right elbow pitch 4
+  - -7.15000e-01 # Left elbow pitch 5
+  - -3.30000e-02 # Right hip yaw 6
+  - 3.40000e-02 # Left hip yaw 7
+  - -1.62000e-01 # Right hip roll 8
+  - 1.63000e-01 # Left hip roll 9
+  - -9.05000e-01 # Right hip pitch 10
+  - -9.05000e-01 # Left hip pitch 11
+  - 1.20600e+00 # Right knee pitch 12
+  - 1.20600e+00 # Left knee pitch 13
+  - -5.10000e-01 # Right ankle pitch 14
+  - -5.12000e-01 # Left ankle pitch 15
+  - 1.68000e-01 # Right ankle roll 16
+  - -1.67000e-01 # Left ankle roll 17
+  - 0.00000e+00 # Neck yaw 18
+  - 0.00000e+00 # Head pitch 19
