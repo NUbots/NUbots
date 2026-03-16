@@ -25,5 +25,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
+# Set the path to Piper directory
+set(PIPER_DIR "/openvino/piper" CACHE PATH "Path to the Piper directory")
+set(PIPER_LIB_DIR "${PIPER_DIR}/build/pi/lib" CACHE PATH "Path to the Piper library directory")
+set(PIPER_INCLUDE_DIR "${PIPER_DIR}/build/pi/include" CACHE PATH "Path to the Piper include directory")
+
+message("PIPER_DIR: ${PIPER_DIR}")
+message("PIPER_LIB_DIR: ${PIPER_LIB_DIR}")
+message("PIPER_INCLUDE_DIR: ${PIPER_INCLUDE_DIR}")
+
+# Add the include directory globally
+include_directories(SYSTEM "${PIPER_INCLUDE_DIR}")
+include_directories(SYSTEM "${PIPER_INCLUDE_DIR}/piper-phonemize")
+
+# Set up RPATH for finding libraries at runtime
+set(CMAKE_INSTALL_RPATH "${PIPER_LIB_DIR}")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# Check if the libraries exist with correct version numbers
+if(NOT EXISTS "${PIPER_LIB_DIR}/libpiper_phonemize.so.1.2.0" OR
+   NOT EXISTS "${PIPER_LIB_DIR}/libonnxruntime.so.1.14.1" OR
+   NOT EXISTS "${PIPER_LIB_DIR}/libespeak-ng.so.1.52.0.1")
+    message(WARNING "One or more Piper libraries not found in ${PIPER_LIB_DIR}")
+endif()
+
 # Build our NUClear module
-nuclear_module()
+nuclear_module(
+    INCLUDES
+        "${PIPER_INCLUDE_DIR}"
+        "${PIPER_INCLUDE_DIR}/piper-phonemize"
+    LIBRARIES
+        "${PIPER_LIB_DIR}/libpiper_phonemize.so.1.2.0"
+        "${PIPER_LIB_DIR}/libonnxruntime.so.1.14.1"
+        "${PIPER_LIB_DIR}/libespeak-ng.so.1.52.0.1"
+)
