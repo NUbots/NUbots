@@ -96,6 +96,7 @@ namespace module::vision {
             cfg.merge_preference      = config["merge_preference"].as<double>();
             cfg.minimum_ball_distance = config["minimum_ball_distance"].as<double>();
             cfg.distance_disagreement = config["distance_disagreement"].as<double>();
+            cfg.minimum_circularity   = config["minimum_circularity"].as<double>();
             cfg.maximum_deviation     = config["maximum_deviation"].as<double>();
             cfg.ball_angular_cov      = Eigen::Vector3d(config["ball_angular_cov"].as<Expression>());
         });
@@ -473,7 +474,7 @@ namespace module::vision {
                                                                          uPCw);
                     }
 
-                    if (candidate.circularity.value() < 0.15) {  // temp holder for now
+                    if (candidate.circularity.value() < cfg.minimum_circularity) {
                         // Balls that have too low circularity will show up as purple in NUsight
                         b.colour = !b.is_invalid ? message::conversion::math::vec4(0.62, 0.13, 0.94, 1.0) : b.colour;
                         b.is_invalid = true;

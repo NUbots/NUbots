@@ -13,6 +13,7 @@ minimum_ball_distance: 0.4 # Minimum distance for a cluster to be a viable ball
 distance_disagreement:
   1.0 # Percentage difference between width and projection based distances. 0.0 means
   # the distance measurements must match perfectly
+minimum_circularity: 0.15 # Minimum circularity required for a cluster to be considered a viable ball
 maximum_deviation:
   0.3 # A threshold on how large the standard deviation of the angle between ray and
   # cone axis can be

@@ -51,6 +51,8 @@ namespace module::vision {
             /// @brief Percentage difference between width and projection based distances. 0.0 means that the distance
             /// measurements must match perfectly
             double distance_disagreement = 0.0f;
+            /// @brief Minimum circularity required for a cluster to be considered a viable ball
+            double minimum_circularity = 0.0f;
             /// @brief A threshold on how large the standard deviation of the angle between ray and cone axis can be
             double maximum_deviation = 0.0f;
             /// @brief Measurement certainties for ball localisation
