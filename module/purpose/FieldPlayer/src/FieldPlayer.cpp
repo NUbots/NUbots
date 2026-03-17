@@ -211,7 +211,7 @@ namespace module::purpose {
                                                    true,
                                                    true,
                                                    game_state.team.team_colour));
-                                                   // Emit attack task with ball position information
+                    // Emit attack task with ball position information
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }

@@ -193,8 +193,8 @@ namespace module::strategy {
                 }
 
                 // Target positions in field frame
-                rTBf   = rTFf - rBFf;                              // Vector from ball to goal
-                uTBf   = rTBf.normalized();                        // Unit vector toward goal
+                rTBf   = rTFf - rBFf;        // Vector from ball to goal or ball to avoidance point
+                uTBf   = rTBf.normalized();  // Unit vector toward goal
                 uTBf_p = Eigen::Vector3d(-uTBf.y(), uTBf.x(), 0);  // perpendicular
 
                 // Compute desired heading angle (towards goal from ball)
@@ -203,8 +203,10 @@ namespace module::strategy {
                 // Compute kick target position (at the ball for now, change later)
                 Eigen::Vector3d target = rBFf;
 
-                // Simplify below calculations
-                auto progress = [](auto val, auto max_val) { return std::clamp(val / max_val, 0.0, 1.0); };
+                // We want to "back off" from the ball if we are out of alignment. Helper method.
+                auto normalised_misalignment = [](auto val, auto max_val) {
+                    return std::clamp(val / max_val, 0.0, 1.0);
+                };
 
                 // Error in the direction parallel to the ball-goal vector
                 const double err_x = (rRFf - rBFf).dot(uTBf);
@@ -221,9 +223,10 @@ namespace module::strategy {
                     target += uTBf_p * (err_y < 0 ? -1 : 1) * std::clamp(err_x, cfg.min_offset_y, cfg.max_offset_y);
                 }
                 // Aim for further behind the ball if we are perpendicular misaligned
-                target -= uTBf * progress(std::abs(err_y), cfg.max_error_y) * cfg.error_gain_perp;
+                target -= uTBf * normalised_misalignment(std::abs(err_y), cfg.max_error_y) * cfg.error_gain_perp;
                 // Aim for further behind the ball if our heading angle is wrong (to give us time to align)
-                target -= uTBf * cfg.ball_approach_distance * progress(std::abs(err_z), cfg.max_angle_error);
+                target -= uTBf * cfg.ball_approach_distance
+                          * normalised_misalignment(std::abs(err_z), cfg.max_angle_error);
 
                 // If no error is too high, we're ready to walk into the ball.
                 if (std::max(err_x, 0.0) < cfg.err_x_ok   //

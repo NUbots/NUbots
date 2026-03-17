@@ -36,7 +36,6 @@
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/support/FieldDescription.hpp"
-#include "message/strategy/FindBall.hpp"
 
 namespace module::purpose {
 
@@ -49,7 +48,6 @@ namespace module::purpose {
     using message::strategy::FindBall;
     using message::strategy::WalkToKickBall;
     using message::support::FieldDescription;
-    using message::strategy::FindBall;
 
     Attack::Attack(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
