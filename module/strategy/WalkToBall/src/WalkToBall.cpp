@@ -225,8 +225,8 @@ namespace module::strategy {
                 // Aim for further behind the ball if we are perpendicular misaligned
                 target -= uTBf * normalised_misalignment(std::abs(err_y), cfg.max_error_y) * cfg.error_gain_perp;
                 // Aim for further behind the ball if our heading angle is wrong (to give us time to align)
-                target -= uTBf * cfg.ball_approach_distance
-                          * normalised_misalignment(std::abs(err_z), cfg.max_angle_error);
+                target -=
+                    uTBf * cfg.ball_approach_distance * normalised_misalignment(std::abs(err_z), cfg.max_angle_error);
 
                 // If no error is too high, we're ready to walk into the ball.
                 if (std::max(err_x, 0.0) < cfg.err_x_ok   //
