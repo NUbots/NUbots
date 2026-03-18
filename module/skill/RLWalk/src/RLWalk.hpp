@@ -46,6 +46,12 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
+            /// @brief Servo proportional gain used for policy-generated commands
+            float servo_gain;
+            /// @brief Servo torque value used for policy-generated commands
+            float servo_torque;
+            /// @brief Servo proportional gain used for head joints
+            float head_servo_gain;
         } cfg;
 
         /// @brief OpenVINO model and inference request

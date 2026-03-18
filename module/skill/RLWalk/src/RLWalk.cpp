@@ -90,15 +90,21 @@ namespace module::skill {
             cfg.output_name = config["model"]["output_name"].as<std::string>();
             cfg.num_joints  = config["model"]["num_joints"].as<int>();
             cfg.obs_size    = config["model"]["obs_size"].as<int>();
+            cfg.servo_gain      = config["servos"]["gain"].as<float>(8.0f);
+            cfg.servo_torque    = config["servos"]["torque"].as<float>(100.0f);
+            cfg.head_servo_gain = config["servos"]["head_gains"].as<float>(6.0f);
 
             // Initialize vectors
             last_action = JointVector::Zero();
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
-            previous_pose      = JointVector(config["previous_pose"].as<Expression>());
+            previous_pose      = default_pose;
             have_previous_pose = false;
             last_update_time   = NUClear::clock::now();
+
+            // Walk-related behaviours rely on an initial stability message
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
 
             // Initialize the model
             initialise_model_locked();
