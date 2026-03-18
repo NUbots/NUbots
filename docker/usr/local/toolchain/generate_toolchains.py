@@ -32,16 +32,36 @@ from textwrap import dedent
 
 
 def generate_cmake_toolchain(target, prefix):
+    sysroot = target.get("sysroot", "")
+    sysroot_block = (
+        dedent(
+            """\
+            set(CMAKE_SYSROOT "{sysroot}")
+            set(CMAKE_FIND_ROOT_PATH
+                   "{sysroot}"
+                   {prefix}
+                   "/usr/local"
+                   "/usr")
+            """
+        ).format(sysroot=sysroot, prefix=prefix)
+        if sysroot
+        else dedent(
+            """\
+            set(CMAKE_FIND_ROOT_PATH
+                   {prefix}
+                   "/usr/local"
+                   "/usr")
+            """
+        ).format(prefix=prefix)
+    )
+
     template = dedent(
         """\
         set(CMAKE_SYSTEM_NAME Linux)
         set(CMAKE_SYSTEM_PROCESSOR {arch})
-        set(CMAKE_C_COMPILER /usr/bin/gcc)
-        set(CMAKE_CXX_COMPILER /usr/bin/g++)
-        set(CMAKE_FIND_ROOT_PATH
-               {prefix}
-               "/usr/local"
-               "/usr")
+        set(CMAKE_C_COMPILER {c_compiler})
+        set(CMAKE_CXX_COMPILER {cxx_compiler})
+        {sysroot_block}
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
         set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
         set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -70,21 +90,42 @@ def generate_cmake_toolchain(target, prefix):
 
     return template.format(
         c_compile_options="\n".join(
-            ['string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag) for flag in target["flags"]]
+            [
+                'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["flags"]
+            ]
         ),
         cxx_compile_options="\n".join(
-            ['string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag) for flag in target["flags"]]
+            [
+                'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["flags"]
+            ]
         ),
         asm_compile_options="\n".join(
-            ['string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag) for flag in target["asm_flags"]]
+            [
+                'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["asm_flags"]
+            ]
         ),
         asm_object=target["asm_object"],
         prefix=prefix,
-        arch=target["arch"]
+        arch=target["arch"],
+        c_compiler=target.get("c_compiler", "/usr/bin/gcc"),
+        cxx_compiler=target.get("cxx_compiler", "/usr/bin/g++"),
+        sysroot_block=sysroot_block,
     )
 
 
 def generate_meson_cross_file(target):
+    sysroot = target.get("sysroot", "")
+    sysroot_line = "sys_root = '{}'".format(sysroot) if sysroot else ""
+
+    c_compiler = target.get("c_compiler", "gcc")
+    cxx_compiler = target.get("cxx_compiler", "g++")
+    cross_compile_prefix = target.get("cross_compile_prefix", "")
+    ar = cross_compile_prefix + "ar" if cross_compile_prefix else "ar"
+    strip = cross_compile_prefix + "strip" if cross_compile_prefix else "strip"
+
     template = dedent(
         """\
         [host_machine]
@@ -98,25 +139,34 @@ def generate_meson_cross_file(target):
         cpp_args = [{flags}]
         fortran_args = [{flags}]
         growing_stack = false
+        {sysroot_line}
 
         [binaries]
-        c = 'gcc'
-        cpp = 'g++'
+        c = '{c_compiler}'
+        cpp = '{cxx_compiler}'
         fortran = 'gfortran'
-        ar = 'ar'
-        strip = 'strip'
+        ar = '{ar}'
+        strip = '{strip}'
         pkgconfig = 'pkg-config'
         """
     )
 
+    flags = ", ".join(
+        [
+            "'{}'".format(flag)
+            for flag in target["release_flags"]
+            + [param.replace(" ", "', '") for param in target["flags"]]
+        ]
+    )
+
     return template.format(
-        flags=", ".join(
-            [
-                "'{}'".format(flag)
-                for flag in target["release_flags"] + [param.replace(" ", "', '") for param in target["flags"]]
-            ],
-        arch=target["arch"]
-        )
+        flags=flags,
+        arch=target["arch"],
+        sysroot_line=sysroot_line,
+        c_compiler=c_compiler,
+        cxx_compiler=cxx_compiler,
+        ar=ar,
+        strip=strip,
     )
 
 
@@ -125,8 +175,8 @@ def generate_json_env(target, prefix):
     return json.dumps(
         {
             # Set our compilers
-            "CC": "/usr/bin/gcc",
-            "CXX": "/usr/bin/g++",
+            "CC": target.get("c_compiler", "/usr/bin/gcc"),
+            "CXX": target.get("cxx_compiler", "/usr/bin/g++"),
             # Set our package config so it finds things in the toolchain
             "PKG_CONFIG_PATH": f"{prefix}/lib/pkgconfig",
             # Set our optimisation flags
@@ -138,25 +188,31 @@ def generate_json_env(target, prefix):
 
 
 def generate_toolchain_script(target):
+    c_compiler = target.get("c_compiler", "/usr/bin/gcc")
+    cxx_compiler = target.get("cxx_compiler", "/usr/bin/g++")
     template = dedent(
         """\
         #!/bin/sh
 
         # Set our compilers
-        export CC=/usr/bin/gcc
-        export CXX=/usr/bin/g++
+        export CC={c_compiler}
+        export CXX={cxx_compiler}
 
         # Set our package config so it finds things in the toolchain
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 
         # Set our optimisation flags
         export CFLAGS="${{CFLAGS}} {flags}"
-        export CXXFLAGS="${{CXXFLAG}} ${{CFLAGS}}"
+        export CXXFLAGS="${{CXXFLAGS}} ${{CFLAGS}}"
         export CPPFLAGS="${{CPPFLAGS}} ${{CFLAGS}}"
         """
     )
 
-    return template.format(flags=" ".join(target["release_flags"] + target["flags"]))
+    return template.format(
+        c_compiler=c_compiler,
+        cxx_compiler=cxx_compiler,
+        flags=" ".join(target["release_flags"] + target["flags"]),
+    )
 
 
 def generate(prefix, toolchain, target):

@@ -31,18 +31,29 @@ import os
 
 import generate_toolchains
 
+_TOOLCHAIN_BIN = "/l4t/toolchain/aarch64--glibc--stable-2022.08-1/bin"
+_CROSS_PREFIX = "aarch64-buildroot-linux-gnu-"
+
 target = {
     "flags": ["-fPIC", "-mtune=cortex-a78ae", "-march=armv8.2-a"],
     "release_flags": ["-O3", "-DNDEBUG"],
     "asm_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
     "asm_object": "elf64",
     "arch": "aarch64",
+    "sysroot": "/l4t/targetfs",
+    "c_compiler": f"{_TOOLCHAIN_BIN}/{_CROSS_PREFIX}gcc",
+    "cxx_compiler": f"{_TOOLCHAIN_BIN}/{_CROSS_PREFIX}g++",
+    "cross_compile_prefix": f"{_TOOLCHAIN_BIN}/{_CROSS_PREFIX}",
 }
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate toolchain files for the docker images")
+    parser = argparse.ArgumentParser(
+        description="Generate toolchain files for the docker images"
+    )
     parser.add_argument(
-        "--prefix", default=os.path.join("usr", "local"), help="Prefix path to store generated files in"
+        "--prefix",
+        default=os.path.join("usr", "local"),
+        help="Prefix path to store generated files in",
     )
 
     args = parser.parse_args()
