@@ -256,7 +256,7 @@ namespace module::skill {
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
                         servo->position                   = default_pose[i] + joint_offsets_action[i];
-                        servo->state                      = ServoState(1.0, 100);  // Default gains
+                        servo->state                      = ServoState(5.0, 100);  // Default gains
                         body->servos[joint_map[i].second] = *servo;
                     }
                     emit<Task>(body);
@@ -346,7 +346,7 @@ namespace module::skill {
         std::scoped_lock lock(model_mutex);
 
         // Smoothing parameters
-        static const double action_alpha      = 0.5;
+        static const double action_alpha      = 0.1;
         static JointVector filtered_action    = JointVector::Zero();
         static bool action_filter_initialised = false;
 
