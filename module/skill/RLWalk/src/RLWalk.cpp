@@ -84,12 +84,12 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Load model configuration
-            cfg.model_path  = config["model"]["path"].as<std::string>();
-            cfg.device      = config["model"]["device"].as<std::string>();
-            cfg.input_name  = config["model"]["input_name"].as<std::string>();
-            cfg.output_name = config["model"]["output_name"].as<std::string>();
-            cfg.num_joints  = config["model"]["num_joints"].as<int>();
-            cfg.obs_size    = config["model"]["obs_size"].as<int>();
+            cfg.model_path      = config["model"]["path"].as<std::string>();
+            cfg.device          = config["model"]["device"].as<std::string>();
+            cfg.input_name      = config["model"]["input_name"].as<std::string>();
+            cfg.output_name     = config["model"]["output_name"].as<std::string>();
+            cfg.num_joints      = config["model"]["num_joints"].as<int>();
+            cfg.obs_size        = config["model"]["obs_size"].as<int>();
             cfg.servo_gain      = config["servos"]["gain"].as<float>(8.0f);
             cfg.servo_torque    = config["servos"]["torque"].as<float>(100.0f);
             cfg.head_servo_gain = config["servos"]["head_gains"].as<float>(6.0f);
@@ -174,7 +174,7 @@ namespace module::skill {
 
                     // Gravity/Accelerometer data in body frame (3)
                     const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
-                    Eigen::Vector3d gravity                = sensors.Htw.inverse().rotation() * g_world;
+                    Eigen::Vector3d gravity                = sensors.Htw.rotation() * g_world;
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
                     if (log_level <= DEBUG) {
                         emit(
@@ -261,8 +261,8 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_offsets_action[i];
-                        servo->state                      = ServoState(1.0, 100);  // Default gains
+                        servo->position = default_pose[i] + joint_offsets_action[i];
+                        servo->state    = ServoState((i < 18 ? cfg.servo_gain : cfg.head_servo_gain), cfg.servo_torque);
                         body->servos[joint_map[i].second] = *servo;
                     }
                     emit<Task>(body);
