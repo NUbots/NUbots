@@ -84,12 +84,12 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Load model configuration
-            cfg.model_path  = config["model"]["path"].as<std::string>();
-            cfg.device      = config["model"]["device"].as<std::string>();
-            cfg.input_name  = config["model"]["input_name"].as<std::string>();
-            cfg.output_name = config["model"]["output_name"].as<std::string>();
-            cfg.num_joints  = config["model"]["num_joints"].as<int>();
-            cfg.obs_size    = config["model"]["obs_size"].as<int>();
+            cfg.model_path      = config["model"]["path"].as<std::string>();
+            cfg.device          = config["model"]["device"].as<std::string>();
+            cfg.input_name      = config["model"]["input_name"].as<std::string>();
+            cfg.output_name     = config["model"]["output_name"].as<std::string>();
+            cfg.num_joints      = config["model"]["num_joints"].as<int>();
+            cfg.obs_size        = config["model"]["obs_size"].as<int>();
             cfg.servo_gain      = config["servos"]["gain"].as<float>(8.0f);
             cfg.servo_torque    = config["servos"]["torque"].as<float>(100.0f);
             cfg.head_servo_gain = config["servos"]["head_gains"].as<float>(6.0f);
@@ -352,7 +352,7 @@ namespace module::skill {
         std::scoped_lock lock(model_mutex);
 
         // Smoothing parameters
-        static const double action_alpha      = 0.5;
+        static const double action_alpha      = 0.1;
         static JointVector filtered_action    = JointVector::Zero();
         static bool action_filter_initialised = false;
 
