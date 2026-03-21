@@ -14,9 +14,10 @@ Include this module to allow your system to interact with OpenAI's GPT for natur
 
 ## Emits
 
-`message::skill::Say`: A Task requesting to speak using the output of the GPT model based on the input request.
+- `message::skill::Say`: A Task requesting to speak using the output of the GPT model based on the input request.
 
 ## Dependencies
 
+- Director
 - **nlohmann::json**: For JSON data serialization and deserialization.
 - **utility::openai::openai**: A utility to interface with the OpenAI API.

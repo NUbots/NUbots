@@ -29,5 +29,3 @@ The resulting filtered data will then be outputted as `message::input::Sensors` 
 - `message::input::ButtonMiddleDown` when button pressed.
 - `message::input::ButtonMiddleUp` when button released.
 - `message::eye::DataPoint` if log_level >= DEBUG, indicating if feet are down.
-
-## Dependencies

@@ -20,4 +20,5 @@ Include this module to allow the robot to get up after it has fallen over.
 
 ## Dependencies
 
+- Director
 - The `Script` extension to convert scripts into BodySequences

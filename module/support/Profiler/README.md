@@ -11,5 +11,3 @@ Include this module in role.
 ## Emits
 
 - `ReactionProfiles` aggregated profiling data, including individual reaction profiles with statistics on execution times.
-
-## Dependencies

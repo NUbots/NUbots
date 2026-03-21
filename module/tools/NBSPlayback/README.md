@@ -14,6 +14,4 @@ Provide `.nbs` file paths via the command line. For example `./b run <role> reco
 
 ## Dependencies
 
-Modules:
-
-- nbs/Player
+- `nbs/Player` module

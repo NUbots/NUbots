@@ -18,5 +18,6 @@ Include this module whenever the robot needs to vocalize or acknowledge messages
 
 ## Dependencies
 
+- Director
 - **mimic3**: External python based command-line text-to-speech tool.
 - **aplay**: Command-line sound player for Linux.

@@ -19,3 +19,6 @@ finished at which point it terminates the program.
 - `message::actuation::LimbsSequence` through the Script utility, which populates the requested Script/s into LimbsSequences.
 
 ## Dependencies
+
+- Director
+- Script system

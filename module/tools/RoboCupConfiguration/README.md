@@ -29,13 +29,6 @@ The interface has the following commands (shift-letter for uppercase)
 - W: disables wifi, useful for after a RoboCup game as wifi congestion is an issue at RoboCup and it is important to disconnect from any field networks when not playing.
 - X: shutdown the program
 
-## Consumes
-
-N/A
-
-## Emits
-
-N/A
 
 ## Dependencies
 
