@@ -19,5 +19,5 @@ Include this module to allow your system to interact with OpenAI's GPT for natur
 ## Dependencies
 
 - Director
-- **nlohmann::json**: For JSON data serialization and deserialization.
+- **nlohmann::json**: For JSON data serialisation and deserialisation.
 - **utility::openai::openai**: A utility to interface with the OpenAI API.

@@ -68,9 +68,9 @@ on<extension::FileWatch>(
 	});
 ```
 
-### Startup synchronization
+### Startup synchronisation
 
-`FileWatcher` emits `extension::FileWatcherReady` once its libuv loop is initialized. If you need to delay file operations until watches are active, trigger your startup logic from this event.
+`FileWatcher` emits `extension::FileWatcherReady` once its libuv loop is initialised. If you need to delay file operations until watches are active, trigger your startup logic from this event.
 
 ```cpp
 on<Trigger<extension::FileWatcherReady>>().then([this] {
@@ -80,7 +80,7 @@ on<Trigger<extension::FileWatcherReady>>().then([this] {
 
 ## Emits
 
-- `extension::FileWatcherReady`: emitted once when the watcher is initialized and ready
+- `extension::FileWatcherReady`: emitted once when the watcher is initialised and ready
 
 Note: `extension::FileWatch` is provided via the NUClear DSL/thread store and invokes matching reactions directly. It is not broadcast as a normal global message type.
 
