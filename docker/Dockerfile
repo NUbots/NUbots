@@ -131,6 +131,7 @@ RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
+    -DLLVM_INCLUDE_TESTS=OFF \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON

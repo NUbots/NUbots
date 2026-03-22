@@ -38,21 +38,30 @@ def generate_cmake_toolchain(target, prefix):
             """\
             set(CMAKE_SYSROOT "{sysroot}")
             set(CMAKE_FIND_ROOT_PATH
-                   "{sysroot}"
-                   {prefix}
-                   "/usr/local"
-                   "/usr")
+                    "{sysroot}"
+                    "{sysroot}/usr/aarch64-linux-gnu"
+                    "{sysroot}/usr/lib"
+                    "{toolchain_path}/aarch64-buildroot-linux-gnu/sysroot"
+                    "{toolchain_path}"
+                    {prefix}
+                    "/usr/local"
+                    "/usr")
             """
-        ).format(sysroot=sysroot, prefix=prefix)
+        ).format(sysroot=sysroot, prefix=prefix, toolchain_path=target.get("toolchain_path", ""))
         if sysroot
-        else dedent(
-            """\
-            set(CMAKE_FIND_ROOT_PATH
-                   {prefix}
-                   "/usr/local"
-                   "/usr")
-            """
-        ).format(prefix=prefix)
+        else "\n"
+    )
+
+    linker_flags = target.get("linker_flags", [])
+    linker_flags_block = (
+        'set(CMAKE_EXE_LINKER_FLAGS_INIT "{} " CACHE STRING "Flags used by the linker during all built types.")\n'.format(
+            " ".join(linker_flags)
+        )
+        + 'set(CMAKE_SHARED_LINKER_FLAGS_INIT "{} " CACHE STRING "Flags used by the linker during all built types.")\n'.format(
+            " ".join(linker_flags)
+        )
+        if linker_flags
+        else "\n"
     )
 
     template = dedent(
@@ -62,7 +71,7 @@ def generate_cmake_toolchain(target, prefix):
         set(CMAKE_C_COMPILER {c_compiler})
         set(CMAKE_CXX_COMPILER {cxx_compiler})
         {sysroot_block}
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
         set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
         set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
         set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
@@ -74,12 +83,13 @@ def generate_cmake_toolchain(target, prefix):
         {c_compile_options}
         {cxx_compile_options}
         {asm_compile_options}
+        {linker_flags_block}
 
         set(CMAKE_ASM_NASM_OBJECT_FORMAT "{asm_object}" CACHE STRING "Output object format of the ASM NASM compiler.")
 
-        set(CMAKE_INSTALL_PREFIX "{prefix}" CACHE STRING "Install path prefix, prepended onto install directories.")
+        set(CMAKE_INSTALL_PREFIX "{sysroot}{prefix}" CACHE STRING "Install path prefix, prepended onto install directories.")
         set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON CACHE STRING "Should pkg-config use the cmake prefix path for finding modules.")
-        set(CMAKE_PREFIX_PATH "{prefix}" CACHE STRING "")
+        set(CMAKE_PREFIX_PATH "{sysroot}{prefix}" CACHE STRING "")
         set(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Directory into which object files and object code libraries should be installed (Default: lib).")
 
         set(CMAKE_COLOR_MAKEFILE ON CACHE STRING "Enable/Disable color output during build.")
@@ -113,6 +123,8 @@ def generate_cmake_toolchain(target, prefix):
         c_compiler=target.get("c_compiler", "/usr/bin/gcc"),
         cxx_compiler=target.get("cxx_compiler", "/usr/bin/g++"),
         sysroot_block=sysroot_block,
+        sysroot=sysroot,
+        linker_flags_block=linker_flags_block
     )
 
 
