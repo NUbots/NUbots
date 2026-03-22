@@ -34,6 +34,7 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/algorithm/assignment.hpp"
+#include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
 
 namespace module::localisation {
@@ -52,6 +53,7 @@ namespace module::localisation {
     using message::vision::FieldLines;
 
     using utility::localisation::OccupancyMap;
+    using utility::math::angle::normalise_angle;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
@@ -101,8 +103,11 @@ namespace module::localisation {
             cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
             cfg.maxeval  = config["opt"]["maxeval"].as<int>();
 
-            // Exponential filter parameters
-            cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
+            // EKF parameters
+            cfg.process_noise           = Eigen::Vector3d(config["ekf"]["process_noise"].as<Expression>());
+            cfg.measurement_noise_scale = config["ekf"]["measurement_noise_scale"].as<double>();
+            cfg.initial_covariance      = config["ekf"]["initial_covariance"].as<double>();
+            cfg.large_reset_covariance  = config["ekf"]["large_reset_covariance"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -171,6 +176,8 @@ namespace module::localisation {
             first_measurement = true;
             startup           = true;
             last_reset        = NUClear::clock::now();
+            P                 = cfg.initial_covariance * Eigen::Matrix3d::Identity();
+            has_prev_Hrw      = false;
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
@@ -179,8 +186,14 @@ namespace module::localisation {
             filtered_state     = state;
             first_measurement  = true;
             last_reset         = NUClear::clock::now();
-            last_certain_state = state;  // Update the last certain state
+            last_certain_state = state;
+            P                  = cfg.initial_covariance * Eigen::Matrix3d::Identity();
+            has_prev_Hrw       = false;
         });
+
+        on<Trigger<Sensors>, With<Stability>, Sync<FieldLocalisationNLopt>>().then(
+            "EKF prediction step",
+            [this](const Sensors& sensors, const Stability& stability) { predict(sensors, stability); });
 
         on<Trigger<FieldLines>,
            Optional<With<FieldIntersections>>,
@@ -189,7 +202,7 @@ namespace module::localisation {
            Optional<With<RobotPoseGroundTruth>>,
            With<FieldDescription>,
            With<Sensors>,
-           Single>()
+           Sync<FieldLocalisationNLopt>>()
             .then(
                 "NLopt field localisation",
                 [this](const FieldLines& field_lines,
@@ -249,6 +262,9 @@ namespace module::localisation {
                         filtered_state     = state;
                         first_measurement  = true;
                         startup            = false;
+                        // Initialise EKF covariance and invalidate odometry reference
+                        P            = cfg.initial_covariance * Eigen::Matrix3d::Identity();
+                        has_prev_Hrw = false;
                     }
                     else {
                         // Run the optimisation routine
@@ -257,38 +273,26 @@ namespace module::localisation {
                         proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
 
-                        // Only accept the optimisation result if the cost is below the threshold
-                        if (chosen_state_cost < cfg.cost_threshold) {
-                            state = proposed_state;
-
-                            // Apply exponential filter to smooth the state estimate unless it is the first measurement.
-                            filtered_state =
-                                first_measurement
-                                    ? state
-                                    : cfg.alpha.cwiseProduct(state)
-                                          + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
-
-                            // Reset the flag.
-                            first_measurement = false;
-
-                            // Update the last certain state and reset counter
+                        // EKF measurement update (observer): fuse NLopt result into state
+                        state = proposed_state;
+                        if (measurement_update(state, chosen_state_cost)) {
                             last_certain_state = filtered_state;
                             num_over_cost      = 0;
                         }
                         else {
-                            // Reject the update, keep previous filtered state
+                            // Rejected — filtered_state stays at prediction; P grows naturally
                             log<DEBUG>("Rejecting optimisation result: cost ",
                                        chosen_state_cost,
                                        " exceeds threshold ",
                                        cfg.cost_threshold);
-                            // Keep the current filtered_state unchanged
-                            // Increment the over-cost counter for potential reset
                             num_over_cost++;
                         }
                     }
 
                     // Check if uncertainty is too high and trigger reset if needed
                     emit(graph("Cost", chosen_state_cost));
+                    emit(graph("EKF P trace", P.trace()));
+                    emit(graph("EKF P diag", P(0, 0), P(1, 1), P(2, 2)));
                     if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                         // Cost has been high too many times, reset the localisation
@@ -321,9 +325,32 @@ namespace module::localisation {
                     }
 
                     // Add cost, covariance, and uncertainty to the field message
-                    field->cost = chosen_state_cost;
+                    field->cost        = chosen_state_cost;
+                    field->covariance  = P;
+                    field->uncertainty = P.trace();
 
                     emit(field);
+
+                    // Ground truth error — available whenever simulator provides RobotPoseGroundTruth
+                    if (robot_pose_ground_truth) {
+                        // Hft.translation() = robot position in field frame (SensorFilter convention)
+                        const Eigen::Isometry3d Hft_gt(robot_pose_ground_truth->Hft);
+                        const double x_gt    = Hft_gt.translation().x();
+                        const double y_gt    = Hft_gt.translation().y();
+                        const double theta_gt = mat_to_rpy_intrinsic(Hft_gt.rotation()).z();
+
+                        const double x_err       = filtered_state.x() - x_gt;
+                        const double y_err       = filtered_state.y() - y_gt;
+                        const double pos_err     = std::sqrt(x_err * x_err + y_err * y_err);
+                        const double heading_err = std::abs(normalise_angle(filtered_state.z() - theta_gt));
+
+                        emit(graph("GT position error (m)", pos_err));
+                        emit(graph("GT heading error (rad)", heading_err));
+                        emit(graph("GT position actual", x_gt, y_gt));
+                        emit(graph("GT position estimated", filtered_state.x(), filtered_state.y()));
+                        emit(graph("GT heading actual", theta_gt));
+                        emit(graph("GT heading estimated", filtered_state.z()));
+                    }
                 });
     }
 

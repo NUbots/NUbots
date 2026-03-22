@@ -95,11 +95,12 @@ namespace module::localisation {
         // If local search is valid, use the lowest cost hypothesis
         if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
             log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
-            // Set the state to the best hypothesis
             state              = hypotheses[0].first;
             filtered_state     = state;
             first_measurement  = true;
-            last_certain_state = state;  // Update the last certain state
+            last_certain_state = state;
+            P                  = cfg.large_reset_covariance * Eigen::Matrix3d::Identity();
+            has_prev_Hrw       = false;
             return;
         }
 
@@ -135,7 +136,9 @@ namespace module::localisation {
         state              = hypotheses[0].first;
         filtered_state     = state;
         first_measurement  = true;
-        last_certain_state = state;  // Update the last certain state
+        last_certain_state = state;
+        P                  = cfg.large_reset_covariance * Eigen::Matrix3d::Identity();
+        has_prev_Hrw       = false;
     }
 
 }  // namespace module::localisation

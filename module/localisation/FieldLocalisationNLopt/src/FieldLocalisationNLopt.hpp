@@ -28,10 +28,13 @@
 #define MODULE_LOCALISATION_FIELDLOCALSATIONNLOPT_HPP
 
 #include <Eigen/Core>
+#include <Eigen/LU>
 #include <nlopt.hpp>
 #include <nuclear>
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/eye/DataPoint.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -257,16 +260,33 @@ namespace module::localisation {
             /// @brief Number of yaw angles to try during uncertainty reset
             int num_angles = 0;
 
-            /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
-            /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
-            Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
+            /// @brief EKF process noise diagonal [q_x, q_y, q_theta] — added to P each prediction step
+            Eigen::Vector3d process_noise = Eigen::Vector3d(0.001, 0.001, 0.001);
+
+            /// @brief Measurement noise scale: R = measurement_noise_scale * cost * I₃
+            double measurement_noise_scale = 0.5;
+
+            /// @brief Initial covariance: P₀ = initial_covariance * I₃ at startup/reset
+            double initial_covariance = 1.0;
+
+            /// @brief Large reset covariance: P = large_reset_covariance * I₃ after uncertainty_reset()
+            double large_reset_covariance = 10.0;
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
 
-        /// @brief Filtered state vector using exponential filter
+        /// @brief Filtered state vector (EKF estimate)
         Eigen::Vector3d filtered_state = Eigen::Vector3d::Zero();
+
+        /// @brief EKF covariance matrix for [x, y, theta]
+        Eigen::Matrix3d P = Eigen::Matrix3d::Identity();
+
+        /// @brief Previous robot-to-world transform for odometry delta computation
+        Eigen::Isometry3d Hrw_prev = Eigen::Isometry3d::Identity();
+
+        /// @brief True once the first valid Hrw has been stored
+        bool has_prev_Hrw = false;
 
         /// @brief Bool indicating if this is the first measurement
         bool first_measurement = true;
@@ -352,6 +372,26 @@ namespace module::localisation {
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief EKF prediction step — propagates state and covariance forward using odometry from Sensors.Hrw.
+         * Called from the Sensors reaction at ~100Hz.
+         *
+         * @param sensors The current Sensors message (provides Hrw for odometry delta).
+         * @param stability The current robot stability state (skips update when FALLING or below).
+         */
+        void predict(const message::input::Sensors& sensors,
+                     const message::behaviour::state::Stability& stability);
+
+        /**
+         * @brief EKF measurement update (observer) — fuses the NLopt result with the predicted state.
+         * Called from the FieldLines reaction after NLopt optimisation returns.
+         *
+         * @param nlopt_result The optimised pose [x, y, θ] from NLopt.
+         * @param cost The NLopt final cost (used to scale measurement noise R).
+         * @return true if the update was accepted (cost < threshold), false if rejected.
+         */
+        bool measurement_update(const Eigen::Vector3d& nlopt_result, double cost);
 
         /**
          * @brief Determines a new state by running a grid search and checking the cost of each hypothesis.
