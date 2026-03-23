@@ -171,7 +171,7 @@ function ProviderGroupNode({ data }: { data: GroupModel }) {
 
 const nodeTypes = { providerGroup: ProviderGroupNode };
 
-export function GraphView({ graph }: { graph: DirectorGraph }) {
+export function GraphView({ graph, robotId }: { graph: DirectorGraph; robotId?: string }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [translateExtent, setTranslateExtent] = React.useState<[[number, number], [number, number]] | undefined>(
@@ -226,9 +226,25 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
   // updates viewport limits.
   // ---------------------------------------------------------------------------
 
-  function LayoutUpdater() {
-    const { getNodes } = useReactFlow<GroupModel>();
+  const previousRobotIdRef = React.useRef<string | undefined>(undefined);
+  const pendingFitViewRef = React.useRef(false);
 
+  function LayoutUpdater() {
+    const { getNodes, fitView } = useReactFlow<GroupModel>();
+
+    // Flag fit view to graph whenever a new robot is selected
+    React.useLayoutEffect(() => {
+      if (!robotId) return;
+
+      const hasRobotChanged = previousRobotIdRef.current !== robotId;
+      previousRobotIdRef.current = robotId;
+
+      if (!hasRobotChanged) return;
+
+      pendingFitViewRef.current = true;
+    }, [robotId]);
+
+    // Perform layout whenever nodes or edges change
     React.useLayoutEffect(() => {
       const rfNodes = getNodes();
       if (!rfNodes.length) return;
@@ -277,7 +293,7 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
         minY = Infinity,
         maxX = -Infinity,
         maxY = -Infinity;
-      rfNodes.forEach((n: Node) => {
+      nextNodes.forEach((n: Node) => {
         minX = Math.min(minX, n.position.x);
         minY = Math.min(minY, n.position.y);
         maxX = Math.max(maxX, n.position.x + (n.width ?? 0));
@@ -315,7 +331,16 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
           }
         }
       }
-    }, [edges, getNodes]);
+
+      // Fit view to graph when a new robot is selected
+      if (pendingFitViewRef.current) {
+      pendingFitViewRef.current = false;
+
+      requestAnimationFrame(() => {
+        fitView({ padding: 0.15 });
+      });
+    }
+    }, [nodes, edges, getNodes, fitView]);
 
     return null;
   }
@@ -329,13 +354,12 @@ export function GraphView({ graph }: { graph: DirectorGraph }) {
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          fitView
           minZoom={minZoom}
           maxZoom={2}
           zoomOnScroll
           zoomOnPinch
-          panOnScroll
-          nodesDraggable={true}
+          panOnDrag
+          nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={true}
           translateExtent={translateExtent}

@@ -45,7 +45,7 @@ export class DirectorView extends React.Component<DirectorViewProps> {
         {/* Graph viewport */}
         <div className="flex-grow relative bg-auto-surface-1 overflow-auto p-4">
           {graph ? (
-            <GraphView graph={graph} />
+            <GraphView graph={graph} robotId={selectedRobot?.id} />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <p className="text-lg text-auto-contrast">Waiting for DirectorState...</p>
