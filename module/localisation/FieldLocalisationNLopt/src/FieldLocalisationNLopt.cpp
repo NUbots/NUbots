@@ -34,6 +34,7 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/algorithm/assignment.hpp"
+#include "utility/math/GaussianInfo.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
 
@@ -172,22 +173,22 @@ namespace module::localisation {
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
             state             = cfg.initial_hypotheses[0];
-            filtered_state    = state;
+            density           = utility::math::GaussianInfo<double>::fromMoment(
+                state, cfg.initial_covariance * Eigen::Matrix3d::Identity());
             first_measurement = true;
             startup           = true;
             last_reset        = NUClear::clock::now();
-            P                 = cfg.initial_covariance * Eigen::Matrix3d::Identity();
             has_prev_Hrw      = false;
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
             log<INFO>("Resetting field localisation for penalty kick");
             state              = reset.penalty_kick_position;
-            filtered_state     = state;
+            density            = utility::math::GaussianInfo<double>::fromMoment(
+                state, cfg.initial_covariance * Eigen::Matrix3d::Identity());
             first_measurement  = true;
             last_reset         = NUClear::clock::now();
             last_certain_state = state;
-            P                  = cfg.initial_covariance * Eigen::Matrix3d::Identity();
             has_prev_Hrw       = false;
         });
 
@@ -259,24 +260,23 @@ namespace module::localisation {
                         // For startup, always accept the best hypothesis
                         state              = proposed_state;
                         last_certain_state = state;
-                        filtered_state     = state;
+                        density            = utility::math::GaussianInfo<double>::fromMoment(
+                            state, cfg.initial_covariance * Eigen::Matrix3d::Identity());
                         first_measurement  = true;
                         startup            = false;
-                        // Initialise EKF covariance and invalidate odometry reference
-                        P            = cfg.initial_covariance * Eigen::Matrix3d::Identity();
-                        has_prev_Hrw = false;
+                        has_prev_Hrw       = false;
                     }
                     else {
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(filtered_state, field_lines.rPWw, field_intersections, goals);
+                            run_field_line_optimisation(density.mean(), field_lines.rPWw, field_intersections, goals);
                         proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
 
                         // EKF measurement update (observer): fuse NLopt result into state
                         state = proposed_state;
                         if (measurement_update(state, chosen_state_cost)) {
-                            last_certain_state = filtered_state;
+                            last_certain_state = density.mean();
                             num_over_cost      = 0;
                         }
                         else {
@@ -290,9 +290,10 @@ namespace module::localisation {
                     }
 
                     // Check if uncertainty is too high and trigger reset if needed
+                    const Eigen::Matrix3d P_cov = density.cov();
                     emit(graph("Cost", chosen_state_cost));
-                    emit(graph("EKF P trace", P.trace()));
-                    emit(graph("EKF P diag", P(0, 0), P(1, 1), P(2, 2)));
+                    emit(graph("EKF P trace", P_cov.trace()));
+                    emit(graph("EKF P diag", P_cov(0, 0), P_cov(1, 1), P_cov(2, 2)));
                     if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                         // Cost has been high too many times, reset the localisation
@@ -311,8 +312,9 @@ namespace module::localisation {
                     }
 
                     // Emit the field message
-                    auto field = std::make_unique<Field>();
-                    field->Hfw = compute_Hfw(filtered_state);
+                    const Eigen::Vector3d filtered_state = density.mean();
+                    auto field                           = std::make_unique<Field>();
+                    field->Hfw                           = compute_Hfw(filtered_state);
 
                     // Debugging
                     if (log_level <= DEBUG) {
@@ -326,8 +328,8 @@ namespace module::localisation {
 
                     // Add cost, covariance, and uncertainty to the field message
                     field->cost        = chosen_state_cost;
-                    field->covariance  = P;
-                    field->uncertainty = P.trace();
+                    field->covariance  = P_cov;
+                    field->uncertainty = P_cov.trace();
 
                     emit(field);
 
@@ -356,6 +358,7 @@ namespace module::localisation {
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw) {
         emit(graph("opt state", state.x(), state.y(), state.z()));
+        const Eigen::Vector3d filtered_state = density.mean();
         emit(graph("filtered state", filtered_state.x(), filtered_state.y(), filtered_state.z()));
         // Determine translational distance error
         Eigen::Vector3d true_rFWw  = ground_truth_Hfw.translation();

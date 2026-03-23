@@ -27,6 +27,7 @@
 
 #include "FieldLocalisationNLopt.hpp"
 
+#include "utility/math/GaussianInfo.hpp"
 #include "utility/math/angle.hpp"
 
 namespace module::localisation {
@@ -96,10 +97,10 @@ namespace module::localisation {
         if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
             log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
             state              = hypotheses[0].first;
-            filtered_state     = state;
+            density            = utility::math::GaussianInfo<double>::fromMoment(
+                state, cfg.large_reset_covariance * Eigen::Matrix3d::Identity());
             first_measurement  = true;
             last_certain_state = state;
-            P                  = cfg.large_reset_covariance * Eigen::Matrix3d::Identity();
             has_prev_Hrw       = false;
             return;
         }
@@ -134,10 +135,10 @@ namespace module::localisation {
 
         // Set the state to the best hypothesis
         state              = hypotheses[0].first;
-        filtered_state     = state;
+        density            = utility::math::GaussianInfo<double>::fromMoment(
+            state, cfg.large_reset_covariance * Eigen::Matrix3d::Identity());
         first_measurement  = true;
         last_certain_state = state;
-        P                  = cfg.large_reset_covariance * Eigen::Matrix3d::Identity();
         has_prev_Hrw       = false;
     }
 

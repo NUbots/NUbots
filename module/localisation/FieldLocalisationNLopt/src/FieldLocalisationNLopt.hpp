@@ -44,6 +44,7 @@
 
 #include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
+#include "utility/math/GaussianInfo.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -273,14 +274,11 @@ namespace module::localisation {
             double large_reset_covariance = 10.0;
         } cfg;
 
-        /// @brief State vector (x,y,yaw) of the Hfw transform
+        /// @brief State vector (x,y,yaw) of the Hfw transform (raw NLopt result)
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
 
-        /// @brief Filtered state vector (EKF estimate)
-        Eigen::Vector3d filtered_state = Eigen::Vector3d::Zero();
-
-        /// @brief EKF covariance matrix for [x, y, theta]
-        Eigen::Matrix3d P = Eigen::Matrix3d::Identity();
+        /// @brief EKF state in square-root information form (stores filtered pose + uncertainty)
+        utility::math::GaussianInfo<double> density;
 
         /// @brief Previous robot-to-world transform for odometry delta computation
         Eigen::Isometry3d Hrw_prev = Eigen::Isometry3d::Identity();
