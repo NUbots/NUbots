@@ -1,4 +1,4 @@
-# webots
+# Webots
 
 ## Description
 
@@ -17,9 +17,5 @@ the world in webots and run the role with the same `./b` command as above.
 
 ## Emits
 
-platform::RawSensors
-output::CompressedImage
-
-## Dependencies
-
-Configuration
+- `platform::RawSensors`
+- `output::CompressedImage`

@@ -21,4 +21,4 @@ Designed to be used by one robot as the main attacker.
 
 ## Dependencies
 
-- None
+- Director

@@ -18,3 +18,5 @@ Include this module and request a FindBall Task when needing to find the ball.
 - `message::planning::LookAround` to move the head around to find the ball
 
 ## Dependencies
+
+- Director
