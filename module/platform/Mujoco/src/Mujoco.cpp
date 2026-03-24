@@ -133,6 +133,21 @@ namespace module::platform {
                 // sensors
                 auto raw_sensors = std::make_unique<RawSensors>();
 
+                // // Linear velocity
+                // int vel_sensor_id = mj_name2id(m, mjOBJ_SENSOR, "local_linvel");
+                // if (vel_sensor_id != -1) {
+                //     int adr = m->sensor_adr[vel_sensor_id];
+                //     int dim = m->sensor_dim[vel_sensor_id];
+                //     if (dim == 3) {
+                //         raw_sensors->local_linvel.x() = d->sensordata[adr + 0];  // X
+                //         raw_sensors->local_linvel.y() = d->sensordata[adr + 1];  // Y
+                //         raw_sensors->local_linvel.z() = d->sensordata[adr + 2];  // Z
+                //     }
+                //     else {
+                //         log<WARN>("Local linear velocity sensor dimension not 3, got:", dim);
+                //     }
+                // }
+
                 // accelerometer
                 int accel_sensor_id = mj_name2id(m, mjOBJ_SENSOR, "accelerometer");
                 if (accel_sensor_id != -1) {

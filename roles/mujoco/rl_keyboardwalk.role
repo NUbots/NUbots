@@ -16,14 +16,14 @@ nuclear_role(
   # Director
   extension::Director
   # Servos
-  actuation::Kinematics
+  # actuation::Kinematics
   actuation::Servos
-  actuation::FootController
+  # actuation::FootController
   # Skills
   skill::RLWalk
-  skill::SplineKick
-  skill::GetUp
-  skill::Look
+  # skill::SplineKick
+  # skill::GetUp
+  # skill::Look
   # Planners
   # Purpose
   purpose::KeyboardWalk

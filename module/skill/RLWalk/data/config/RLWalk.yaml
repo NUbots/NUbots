@@ -7,7 +7,7 @@ model:
   input_name: obs
   output_name: actions
   num_joints: 20
-  obs_size: 72
+  obs_size: 69
 
 servos:
   gain: 30.0

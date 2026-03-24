@@ -23,6 +23,7 @@ namespace module::skill {
 
     using extension::Configuration;
 
+    using extension::behaviour::RunReason;
     using message::actuation::Body;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
@@ -145,22 +146,25 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
            Priority::HIGH>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors, const Stability& stability) {
+            .then([this](const WalkTask& walk_task,
+                         const RunReason& run_reason,
+                         const Sensors& sensors,
+                         const Stability& stability) {
+                // Keep policy updates at deterministic frequency (50 Hz)
+                if (run_reason != RunReason::OTHER_TRIGGER) {
+                    return;
+                }
+
                 // Only run if we're in a stable state
                 if (stability >= Stability::DYNAMIC) {
                     // Construct observation vector
                     ObservationVector observation;
                     int idx = 0;
 
-                    // Accelerometer data in body frame (3)
-                    observation.segment<ACC_SIZE>(idx) = sensors.accelerometer;
-                    if (log_level <= DEBUG) {
-                        emit(graph("Sensors accelerometer values",
-                                   sensors.accelerometer.x(),
-                                   sensors.accelerometer.y(),
-                                   sensors.accelerometer.z()));
-                    };
-                    idx += ACC_SIZE;
+                    // Linear torso velocity is not available on-robot.
+                    // Use commanded walk velocity as a proxy to avoid a permanently-zero segment.
+                    // observation.segment<ACC_SIZE>(idx) = walk_task.velocity_target;
+                    // idx += ACC_SIZE;
 
                     // Gyro data (3)
                     observation.segment<GYRO_SIZE>(idx) = sensors.gyroscope;

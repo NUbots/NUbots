@@ -19,7 +19,7 @@ namespace module::skill {
     static constexpr int JOINT_POS_SIZE = 20;
     static constexpr int COMMAND_SIZE   = 3;
     static constexpr int TOTAL_OBS_SIZE =
-        ACC_SIZE + GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE;  // 72
+        GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE;  // 69
 
     /// @brief Fixed-size observation vector type
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;
