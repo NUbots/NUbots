@@ -13,7 +13,6 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
-  network::PlotJuggler
   output::Overview
   output::ImageCompressor
   # Sensors and network (input)
@@ -24,7 +23,6 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  # vision::BallDetector
   vision::FieldLineDetector
   vision::Yolo
   # Localisation
@@ -65,5 +63,4 @@ nuclear_role(
   purpose::Support
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
-  # Datalogging support::logging::DataLogging
 )
