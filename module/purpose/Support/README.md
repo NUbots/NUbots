@@ -22,4 +22,5 @@ Include this module and emit a Support Director task to have the robot act as a 
 
 ## Dependencies
 
+- Director
 - `utility::math::euler::pos_rpy_to_transform` to change the position and orientation into a homogenous transformation matrix.

@@ -22,4 +22,5 @@ If relax has higher priority it may trigger mid getup
 
 ## Dependencies
 
+- Director
 - A module that can provide GetUp

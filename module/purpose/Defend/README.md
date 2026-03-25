@@ -23,4 +23,5 @@ Designed for keeping the robot at the back in case the ball is taken towards our
 
 ## Dependencies
 
+- Director
 - `utility::math::euler::pos_rpy_to_transform` to change the position and orientation into a homogenous transformation matrix.

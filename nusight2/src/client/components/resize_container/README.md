@@ -10,7 +10,7 @@ The `ResizePanel` provides props for managing attributes of each individual pane
 
 A resize container must contain `<ResizePanel>` elements as direct children. To nest containers, the order of elements should be `<ResizeContainer>` → `<ResizePanel>` → `<ResizeContainer>` → `<ResizePanel>`.
 
-The `<ResizePanel>` component exposes a custom ref object with a method for toggling the panel's state between "minimized", "maximized" and "default".
+The `<ResizePanel>` component exposes a custom ref object with a method for toggling the panel's state between "minimised", "maximised" and "default".
 
 ```tsx
 import { ResizeContainer } from './src/components/resize_container/resize_container';

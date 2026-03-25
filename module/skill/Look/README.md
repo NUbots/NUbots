@@ -19,4 +19,5 @@ Include this module to make the robot look in the given direction.
 
 ## Dependencies
 
+- Director
 - The coordinates utility

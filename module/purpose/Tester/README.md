@@ -10,8 +10,6 @@ enabling the WalkToBal and KickTo tasks in the config.
 
 Add this module and enable/disable strategies and planners in the config which you wish to test.
 
-## Consumes
-
 ## Emits
 
 If enabled in the config the module emits the following.
@@ -28,4 +26,5 @@ If enabled in the config the module emits the following.
 
 ## Dependencies
 
+- Director
 - Eigen
