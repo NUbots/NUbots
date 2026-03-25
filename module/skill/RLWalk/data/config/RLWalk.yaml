@@ -7,7 +7,12 @@ model:
   input_name: obs
   output_name: actions
   num_joints: 20
-  obs_size: 72
+  obs_size: 69
+
+servos:
+  gain: 5.0
+  torque: 100.0
+  head_gains: 6.0
 
 default_pose: # Same as in Mujoco.yaml
   - 1.71400e+00 # Right shoulder pitch 0

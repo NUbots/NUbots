@@ -19,7 +19,7 @@ namespace module::skill {
     static constexpr int JOINT_POS_SIZE = 20;
     static constexpr int COMMAND_SIZE   = 3;
     static constexpr int TOTAL_OBS_SIZE =
-        ACC_SIZE + GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE;  // 72
+        GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE;  // 69
 
     /// @brief Fixed-size observation vector type
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;
@@ -46,6 +46,12 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
+            /// @brief Servo proportional gain used for policy-generated commands
+            float servo_gain;
+            /// @brief Servo torque value used for policy-generated commands
+            float servo_torque;
+            /// @brief Servo proportional gain used for head joints
+            float head_servo_gain;
         } cfg;
 
         /// @brief OpenVINO model and inference request
@@ -72,7 +78,6 @@ namespace module::skill {
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;
 
-
         /// @brief Last action taken by the model
         JointVector last_action;
 
@@ -83,6 +88,9 @@ namespace module::skill {
         JointVector previous_pose;
         bool have_previous_pose = false;
         NUClear::clock::time_point last_update_time;
+
+        /// @brief Scale factor to convert inference outputs to joint angles
+        double NUGUS_ACTION_SCALE;
 
     public:
         /// @brief Called by the powerplant to build and setup the RLWalk reactor.
