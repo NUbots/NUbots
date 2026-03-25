@@ -60,29 +60,26 @@
   </default>
 
   <actuator>
-    <position joint="left_hip_yaw" name="left_hip_yaw"/>
-    <position joint="left_hip_roll" name="left_hip_roll"/>
-    <position joint="left_hip_pitch" name="left_hip_pitch"/>
-    <position joint="left_knee_pitch" name="left_knee_pitch"/>
-    <position joint="left_ankle_pitch" name="left_ankle_pitch"/>
-    <position joint="left_ankle_roll" name="left_ankle_roll"/>
-
-    <position joint="right_hip_yaw" name="right_hip_yaw"/>
-    <position joint="right_hip_roll" name="right_hip_roll"/>
-    <position joint="right_hip_pitch" name="right_hip_pitch"/>
-    <position joint="right_knee_pitch" name="right_knee_pitch"/>
-    <position joint="right_ankle_pitch" name="right_ankle_pitch"/>
-    <position joint="right_ankle_roll" name="right_ankle_roll"/>
-
-    <position joint="neck_yaw" name="neck_yaw"/>
-    <position joint="head_pitch" name="head_pitch"/>
-
-    <position joint="left_shoulder_pitch" name="left_shoulder_pitch"/>
-    <position joint="left_shoulder_roll" name="left_shoulder_roll"/>
-    <position joint="left_elbow_pitch" name="left_elbow_pitch"/>
     <position joint="right_shoulder_pitch" name="right_shoulder_pitch"/>
+    <position joint="left_shoulder_pitch" name="left_shoulder_pitch"/>
     <position joint="right_shoulder_roll" name="right_shoulder_roll"/>
+    <position joint="left_shoulder_roll" name="left_shoulder_roll"/>
     <position joint="right_elbow_pitch" name="right_elbow_pitch"/>
+    <position joint="left_elbow_pitch" name="left_elbow_pitch"/>
+    <position joint="right_hip_yaw" name="right_hip_yaw"/>
+    <position joint="left_hip_yaw" name="left_hip_yaw"/>
+    <position joint="right_hip_roll" name="right_hip_roll"/>
+    <position joint="left_hip_roll" name="left_hip_roll"/>
+    <position joint="right_hip_pitch" name="right_hip_pitch"/>
+    <position joint="left_hip_pitch" name="left_hip_pitch"/>
+    <position joint="right_knee_pitch" name="right_knee_pitch"/>
+    <position joint="left_knee_pitch" name="left_knee_pitch"/>
+    <position joint="right_ankle_pitch" name="right_ankle_pitch"/>
+    <position joint="left_ankle_pitch" name="left_ankle_pitch"/>
+    <position joint="right_ankle_roll" name="right_ankle_roll"/>
+    <position joint="left_ankle_roll" name="left_ankle_roll"/>
+    <position joint="neck_yaw" name="neck_yaw"/>
+    <position joint="head_pitch" name="head_pitch"/>    
   </actuator>
 
   <sensor>
@@ -125,6 +122,28 @@
     <jointpos joint="left_ankle_roll" name="left_ankle_roll_pos"/>
     <jointpos joint="neck_yaw" name="neck_yaw_pos"/>
     <jointpos joint="head_pitch" name="head_pitch_pos"/>
+
+    <!-- Joint velocity sensors -->
+    <jointvel joint="right_shoulder_pitch" name="right_shoulder_pitch_vel"/>
+    <jointvel joint="left_shoulder_pitch" name="left_shoulder_pitch_vel"/>
+    <jointvel joint="right_shoulder_roll" name="right_shoulder_roll_vel"/>
+    <jointvel joint="left_shoulder_roll" name="left_shoulder_roll_vel"/>
+    <jointvel joint="right_elbow_pitch" name="right_elbow_pitch_vel"/>
+    <jointvel joint="left_elbow_pitch" name="left_elbow_pitch_vel"/>
+    <jointvel joint="right_hip_yaw" name="right_hip_yaw_vel"/>
+    <jointvel joint="left_hip_yaw" name="left_hip_yaw_vel"/>
+    <jointvel joint="right_hip_roll" name="right_hip_roll_vel"/>
+    <jointvel joint="left_hip_roll" name="left_hip_roll_vel"/>
+    <jointvel joint="right_hip_pitch" name="right_hip_pitch_vel"/>
+    <jointvel joint="left_hip_pitch" name="left_hip_pitch_vel"/>
+    <jointvel joint="right_knee_pitch" name="right_knee_pitch_vel"/>
+    <jointvel joint="left_knee_pitch" name="left_knee_pitch_vel"/>
+    <jointvel joint="right_ankle_pitch" name="right_ankle_pitch_vel"/>
+    <jointvel joint="left_ankle_pitch" name="left_ankle_pitch_vel"/>
+    <jointvel joint="right_ankle_roll" name="right_ankle_roll_vel"/>
+    <jointvel joint="left_ankle_roll" name="left_ankle_roll_vel"/>
+    <jointvel joint="neck_yaw" name="neck_yaw_vel"/>
+    <jointvel joint="head_pitch" name="head_pitch_vel"/>
   </sensor>
 
   <worldbody>

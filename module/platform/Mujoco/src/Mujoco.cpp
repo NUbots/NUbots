@@ -133,21 +133,6 @@ namespace module::platform {
                 // sensors
                 auto raw_sensors = std::make_unique<RawSensors>();
 
-                // // Linear velocity
-                // int vel_sensor_id = mj_name2id(m, mjOBJ_SENSOR, "local_linvel");
-                // if (vel_sensor_id != -1) {
-                //     int adr = m->sensor_adr[vel_sensor_id];
-                //     int dim = m->sensor_dim[vel_sensor_id];
-                //     if (dim == 3) {
-                //         raw_sensors->local_linvel.x() = d->sensordata[adr + 0];  // X
-                //         raw_sensors->local_linvel.y() = d->sensordata[adr + 1];  // Y
-                //         raw_sensors->local_linvel.z() = d->sensordata[adr + 2];  // Z
-                //     }
-                //     else {
-                //         log<WARN>("Local linear velocity sensor dimension not 3, got:", dim);
-                //     }
-                // }
-
                 // accelerometer
                 int accel_sensor_id = mj_name2id(m, mjOBJ_SENSOR, "accelerometer");
                 if (accel_sensor_id != -1) {
@@ -200,6 +185,7 @@ namespace module::platform {
                     return d->sensordata[adr];
                 };
 
+                // Joint positions
                 raw_sensors->servo.r_shoulder_pitch.present_position = get_sensor_data("right_shoulder_pitch_pos");
                 raw_sensors->servo.l_shoulder_pitch.present_position = get_sensor_data("left_shoulder_pitch_pos");
                 raw_sensors->servo.r_shoulder_roll.present_position  = get_sensor_data("right_shoulder_roll_pos");
@@ -220,6 +206,28 @@ namespace module::platform {
                 raw_sensors->servo.l_ankle_roll.present_position     = get_sensor_data("left_ankle_roll_pos");
                 raw_sensors->servo.neck_yaw.present_position         = get_sensor_data("neck_yaw_pos");
                 raw_sensors->servo.head_pitch.present_position       = get_sensor_data("head_pitch_pos");
+
+                // Joint velocities
+                raw_sensors->servo.r_shoulder_pitch.present_velocity = get_sensor_data("right_shoulder_pitch_vel");
+                raw_sensors->servo.l_shoulder_pitch.present_velocity = get_sensor_data("left_shoulder_pitch_vel");
+                raw_sensors->servo.r_shoulder_roll.present_velocity  = get_sensor_data("right_shoulder_roll_vel");
+                raw_sensors->servo.l_shoulder_roll.present_velocity  = get_sensor_data("left_shoulder_roll_vel");
+                raw_sensors->servo.r_elbow.present_velocity          = get_sensor_data("right_elbow_pitch_vel");
+                raw_sensors->servo.l_elbow.present_velocity          = get_sensor_data("left_elbow_pitch_vel");
+                raw_sensors->servo.r_hip_yaw.present_velocity        = get_sensor_data("right_hip_yaw_vel");
+                raw_sensors->servo.l_hip_yaw.present_velocity        = get_sensor_data("left_hip_yaw_vel");
+                raw_sensors->servo.r_hip_roll.present_velocity       = get_sensor_data("right_hip_roll_vel");
+                raw_sensors->servo.l_hip_roll.present_velocity       = get_sensor_data("left_hip_roll_vel");
+                raw_sensors->servo.r_hip_pitch.present_velocity      = get_sensor_data("right_hip_pitch_vel");
+                raw_sensors->servo.l_hip_pitch.present_velocity      = get_sensor_data("left_hip_pitch_vel");
+                raw_sensors->servo.r_knee.present_velocity           = get_sensor_data("right_knee_pitch_vel");
+                raw_sensors->servo.l_knee.present_velocity           = get_sensor_data("left_knee_pitch_vel");
+                raw_sensors->servo.r_ankle_pitch.present_velocity    = get_sensor_data("right_ankle_pitch_vel");
+                raw_sensors->servo.l_ankle_pitch.present_velocity    = get_sensor_data("left_ankle_pitch_vel");
+                raw_sensors->servo.r_ankle_roll.present_velocity     = get_sensor_data("right_ankle_roll_vel");
+                raw_sensors->servo.l_ankle_roll.present_velocity     = get_sensor_data("left_ankle_roll_vel");
+                raw_sensors->servo.neck_yaw.present_velocity         = get_sensor_data("neck_yaw_vel");
+                raw_sensors->servo.head_pitch.present_velocity       = get_sensor_data("head_pitch_vel");
 
                 emit(std::move(raw_sensors));
 

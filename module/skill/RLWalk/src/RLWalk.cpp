@@ -56,6 +56,15 @@ namespace module::skill {
         return q;
     }
 
+    inline Eigen::Matrix<double, 20, 1> sensors_to_configuration_velocity(const std::unique_ptr<Sensors>& sensors) {
+        Eigen::Matrix<double, 20, 1> q = Eigen::Matrix<double, 20, 1>::Zero();
+        q.resize(sensors->servo.size(), 1);
+        for (const auto& [index, servo_id] : joint_map) {
+            q(index, 0) = sensors->servo.at(servo_id).present_velocity;
+        }
+        return q;
+    }  // TODO: Join two functions into one.
+
     // Comes from the XML on the mjlab training side.
     std::vector<int> mj_to_nubots_order = {7, 9, 11, 13, 15, 17, 6, 8, 10, 12, 14, 16, 18, 19, 1, 3, 5, 0, 2, 4};
     inline Eigen::Matrix<double, 20, 1> mjlab_to_nubots(const Eigen::Matrix<double, 20, 1>& mjlab_joint_offsets) {
@@ -91,9 +100,9 @@ namespace module::skill {
             cfg.output_name     = config["model"]["output_name"].as<std::string>();
             cfg.num_joints      = config["model"]["num_joints"].as<int>();
             cfg.obs_size        = config["model"]["obs_size"].as<int>();
-            cfg.servo_gain      = config["servos"]["gain"].as<float>(8.0f);
-            cfg.servo_torque    = config["servos"]["torque"].as<float>(100.0f);
-            cfg.head_servo_gain = config["servos"]["head_gains"].as<float>(6.0f);
+            cfg.servo_gain      = config["servos"]["gain"].as<float>();
+            cfg.servo_torque    = config["servos"]["torque"].as<float>();
+            cfg.head_servo_gain = config["servos"]["head_gains"].as<float>();
 
             // Initialize vectors
             last_action = JointVector::Zero();
@@ -103,6 +112,8 @@ namespace module::skill {
             previous_pose      = default_pose;
             have_previous_pose = false;
             last_update_time   = NUClear::clock::now();
+
+            NUGUS_ACTION_SCALE = 0.049445848912000656f;  // Defined in mjlab training.
 
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -186,58 +197,29 @@ namespace module::skill {
                     };
                     idx += GRAVITY_SIZE;
 
-                    // Joint positions relative to default pose (20)
-                    auto temp_sensors                = std::make_unique<Sensors>();
-                    temp_sensors->servo              = sensors.servo;
-                    JointVector current_joints       = sensors_to_configuration(temp_sensors);
-                    JointVector joint_pos_rel_nubots = current_joints - default_pose;
-                    observation.segment<JOINT_POS_SIZE>(idx) =
-                        nubots_to_mjlab(joint_pos_rel_nubots);  // Convert to Mjlabs expected order of joints
+                    // Joint positions relative to default pose (20) in Mujoco's expected tree-traversal order
+                    auto temp_sensors                        = std::make_unique<Sensors>();
+                    temp_sensors->servo                      = sensors.servo;
+                    JointVector current_joints               = sensors_to_configuration(temp_sensors);
+                    JointVector joint_pos_rel_nubots         = current_joints - default_pose;
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(joint_pos_rel_nubots);
                     if (log_level <= DEBUG) {
-                        emit(graph("Joint current positions", current_joints.transpose()));
+                        emit(graph("Joint current positions (nubots)", current_joints.transpose()));
                     };
                     idx += JOINT_POS_SIZE;
 
-                    // Joint velocities relative to default pose (20)
-                    // Estimate using finite differences with exponential smoothing to reduce noise
-                    const auto now                   = NUClear::clock::now();
-                    JointVector joint_vel_nubots     = JointVector::Zero();
-                    static const double alpha        = 0.5;
-                    static JointVector filtered_vel  = JointVector::Zero();
-                    static bool filtered_initialised = false;
-
-                    if (have_previous_pose) {
-                        std::chrono::duration<double> elapsed = now - last_update_time;
-                        double dt                             = elapsed.count();
-                        if (dt > 0.0) {
-                            JointVector raw_vel = (current_joints - previous_pose) / dt;
-                            if (!filtered_initialised) {
-                                filtered_vel         = raw_vel;
-                                filtered_initialised = true;
-                            }
-                            else {
-                                filtered_vel = alpha * raw_vel + (1 - alpha) * filtered_vel;
-                            }
-                            joint_vel_nubots = filtered_vel;
-                        }
-                        else if (dt < 0.0) {
-                            log<ERROR>("Negative dt for joint velocity estimation: ", dt, ". Assuming zero velocity");
-                        }
-                    }
-                    else {
-                        have_previous_pose   = true;
-                        filtered_initialised = false;
-                    }
-                    previous_pose                            = current_joints;
-                    last_update_time                         = now;
-                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(joint_vel_nubots);
+                    // Joint velocities (20) in Mujoco's expected tree-traversal order
+                    JointVector current_velocities           = sensors_to_configuration_velocity(temp_sensors);
+                    JointVector joint_vel_mjlab              = nubots_to_mjlab(current_velocities);
+                    observation.segment<JOINT_POS_SIZE>(idx) = joint_vel_mjlab;
                     if (log_level <= DEBUG) {
-                        emit(graph("Joint velocity", joint_vel_nubots.transpose()));
+                        emit(graph("Joint velocities (nubots)", current_velocities.transpose()));
                     };
                     idx += JOINT_POS_SIZE;
 
-                    // Last action (20)
-                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(last_action);
+
+                    // Last action (20) in Mujoco's tree-traversal order without scaling or offsets applied
+                    observation.segment<JOINT_POS_SIZE>(idx) = last_action;
                     idx += JOINT_POS_SIZE;
 
                     // Command (3)
@@ -251,13 +233,17 @@ namespace module::skill {
                     idx += COMMAND_SIZE;
 
                     // Run inference
-                    JointVector joint_offsets_action = run_inference(observation);
+                    JointVector inference_output_raw = run_inference(observation);
                     if (log_level <= DEBUG) {
-                        emit(graph("Joint offset action from inference", joint_offsets_action.transpose()));
+                        emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
-                    // Store the last action
-                    last_action = joint_offsets_action;
+                    // Store the last action. Needs raw policy output in tree-traversal order
+                    last_action = inference_output_raw;
+
+                    // Convert into NUbots order, apply scaling
+                    JointVector joint_offsets_scaled_nubots =
+                        mjlab_to_nubots(inference_output_raw * NUGUS_ACTION_SCALE);
 
                     // Emit servo commands
                     auto body = std::make_unique<Body>();
@@ -265,7 +251,7 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position = default_pose[i] + joint_offsets_action[i];
+                        servo->position = default_pose[i] + joint_offsets_scaled_nubots[i];
                         servo->state    = ServoState((i < 18 ? cfg.servo_gain : cfg.head_servo_gain), cfg.servo_torque);
                         body->servos[joint_map[i].second] = *servo;
                     }
@@ -356,14 +342,14 @@ namespace module::skill {
         std::scoped_lock lock(model_mutex);
 
         // Smoothing parameters
-        static const double action_alpha      = 0.5;
-        static JointVector filtered_action    = JointVector::Zero();
-        static bool action_filter_initialised = false;
+        // static const double action_alpha      = 0.5;
+        // static JointVector filtered_action    = JointVector::Zero();
+        // static bool action_filter_initialised = false;
 
-        if (model_state != ModelState::READY) {
-            action_filter_initialised = false;
-            return JointVector::Zero();
-        }
+        // if (model_state != ModelState::READY) {
+        //     action_filter_initialised = false;
+        //     return JointVector::Zero();
+        // }
 
         try {
 
@@ -393,22 +379,22 @@ namespace module::skill {
                 emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
             }
 
-            // Convert output values to joint angle offsets
-            float action_scale        = 0.049445848912000656f;  // From mjlab
-            JointVector joint_offsets = joint_angles_raw * action_scale;
+            // // Convert output values to joint angle offsets
+            // float action_scale        = 0.049445848912000656f;  // From mjlab
+            // JointVector joint_offsets = joint_angles_raw * action_scale;
 
-            // Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
-            joint_offsets = mjlab_to_nubots(joint_offsets);
+            // // Ensure order of joints action output is in the same order as in RLWalk.yaml default_pose
+            // joint_offsets = mjlab_to_nubots(joint_offsets);
 
-            // Smooth signal
-            if (!action_filter_initialised) {
-                filtered_action           = joint_offsets;
-                action_filter_initialised = true;
-            }
-            else {
-                filtered_action = action_alpha * joint_offsets + (1 - action_alpha) * filtered_action;
-            }
-            return filtered_action;
+            // // Smooth signal
+            // if (!action_filter_initialised) {
+            //     filtered_action           = joint_offsets;
+            //     action_filter_initialised = true;
+            // }
+            // else {
+            //     filtered_action = action_alpha * joint_offsets + (1 - action_alpha) * filtered_action;
+            // }
+            return joint_angles_raw;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());

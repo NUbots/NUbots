@@ -78,7 +78,6 @@ namespace module::skill {
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;
 
-
         /// @brief Last action taken by the model
         JointVector last_action;
 
@@ -89,6 +88,9 @@ namespace module::skill {
         JointVector previous_pose;
         bool have_previous_pose = false;
         NUClear::clock::time_point last_update_time;
+
+        /// @brief Scale factor to convert inference outputs to joint angles
+        double NUGUS_ACTION_SCALE;
 
     public:
         /// @brief Called by the powerplant to build and setup the RLWalk reactor.
