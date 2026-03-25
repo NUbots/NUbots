@@ -50,6 +50,18 @@ private:
         /// @brief Minimum valid opponent distance used to avoid normalising near-zero vectors
         double min_valid_obstacle_distance = 0.0;
 
+        /// @brief Weight for the lateral (sidestep) component of avoidance
+        double lateral_avoidance_weight = 0.0;
+
+        /// @brief Weight for the backward (retreat) component of avoidance
+        double retreat_avoidance_weight = 0.0;
+
+        /// @brief Minimum forward x (robot frame) for an obstacle to be considered in-front
+        double min_forward_obstacle_x = 0.0;
+
+        /// @brief Distance under which avoidance is forced even if obstacle is not in-front
+        double near_field_avoidance_distance = 0.0;
+
 
     } cfg;
 

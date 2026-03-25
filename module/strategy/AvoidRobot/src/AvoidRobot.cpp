@@ -33,21 +33,20 @@
 #include "extension/Configuration.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Robot.hpp"
+#include "message/strategy/AvoidRobot.hpp"
 
 namespace module::strategy {
 
     using extension::Configuration;
-    using message::planning::AvoidanceMode;
     using message::localisation::Robots;
     using message::planning::WalkProposal;
-    using message::planning::WalkTo;
     using message::input::Sensors;
+    using AvoidRobotTask = message::strategy::AvoidRobot;
 
     AvoidRobot::AvoidRobot(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Startup>().then([this] {
             log<INFO>("AvoidRobot loaded");
-            emit(std::make_unique<AvoidanceMode>(AvoidanceMode::INACTIVE));
         });
 
         on<Configuration>("AvoidRobot.yaml").then([this](const Configuration& config) {
@@ -57,52 +56,18 @@ namespace module::strategy {
             cfg.threshold_margin = config["threshold_margin"].as<double>();
             cfg.avoidance_walk_speed = config["avoidance_walk_speed"].as<double>();
             cfg.min_valid_obstacle_distance = config["min_valid_obstacle_distance"].as<double>();
+            cfg.lateral_avoidance_weight = config["lateral_avoidance_weight"].as<double>();
+            cfg.retreat_avoidance_weight = config["retreat_avoidance_weight"].as<double>();
+            cfg.min_forward_obstacle_x = config["min_forward_obstacle_x"].as<double>();
+            cfg.near_field_avoidance_distance = config["near_field_avoidance_distance"].as<double>();
         });
 
-        on<Trigger<Sensors>, Optional<With<Robots>>>().then(
-            [this](const Sensors& sensors, const std::shared_ptr<const Robots>& robots) {
-
-                const auto& Hrw = sensors.Hrw;
-                if (!robots || robots->robots.empty()) {
-                    avoid_active = false;
-                    emit(std::make_unique<AvoidanceMode>(AvoidanceMode::INACTIVE));
-                    log<INFO>("Setting Avoidance mode to INACTIVE since no robots");
-                    return;
-                }
-
-                std::vector<Eigen::Vector2d> all_obstacles{};
-                all_obstacles.reserve(robots->robots.size());
-                for (const auto& robot : robots->robots) {
-                    all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
-                }
-
-                std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
-                const double nearest_dist_to_opp = all_obstacles.front().norm();
-
-                if (nearest_dist_to_opp < cfg.min_distance_threshold) {
-                    avoid_active = true;
-                    log<INFO>("Setting Avoidance mode to TRUE");
-
-                }
-                else if (nearest_dist_to_opp > (cfg.min_distance_threshold + cfg.threshold_margin)) {
-                    avoid_active = false;
-                    log<INFO>("Setting Avoidance mode to FALSE");
-                }
-
-                emit(std::make_unique<AvoidanceMode>(avoid_active ? AvoidanceMode::ACTIVE : AvoidanceMode::INACTIVE));
-            });
-
-        on<Provide<WalkTo>,
-           Optional<With<Robots>>,
-           With<Sensors>,
-           When<AvoidanceMode, std::equal_to, AvoidanceMode::ACTIVE>>()
-            .then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
-
+        on<Provide<AvoidRobotTask>, Optional<With<Robots>>, With<Sensors>>().then(
+            [this](const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
             const auto& Hrw = sensors.Hrw;
             if (!robots || robots->robots.empty()) {
                 avoid_active = false;
-                log<DEBUG>("AvoidRobot tick: no robots available");
+                log<INFO>("AvoidRobot tick: no robots available");
                 return;
             }
 
@@ -116,17 +81,54 @@ namespace module::strategy {
 
             const Eigen::Vector2d nearest_obstacle = all_obstacles.front();
             const double nearest_dist_to_opp       = nearest_obstacle.norm();
+            // Front-gate to normally only avoid obstacles that are ahead in robot frame
+            const bool obstacle_in_front           = nearest_obstacle.x() > cfg.min_forward_obstacle_x;
+            // Near-field override to force avoidance only at very close range even if obstacle is side/behind
+            const bool near_field_obstacle         = nearest_dist_to_opp < cfg.near_field_avoidance_distance;
 
-            if (nearest_dist_to_opp > cfg.min_valid_obstacle_distance) {
-                //TODO: Temporary direction, needs better path planning
+            // Enter avoidance when either (a) close enough to be immediately unsafe, or (b) in-front and within
+            // the standard activation threshold
+            if (near_field_obstacle || (obstacle_in_front && nearest_dist_to_opp < cfg.min_distance_threshold)) {
+                avoid_active = true;
+                log<INFO>("Setting Avoidance mode to TRUE");
+            }
+            // Exit avoidance only once we are no longer in the forced near-field zone and either not in-front
+            // anymore or far enough away that we avoid rapid on/off switching near the distance threshold.
+            else if (!near_field_obstacle
+                     && (!obstacle_in_front
+                         || nearest_dist_to_opp > (cfg.min_distance_threshold + cfg.threshold_margin))) {
+                avoid_active = false;
+                log<INFO>("Setting Avoidance mode to FALSE");
+            }
+
+            if (avoid_active && nearest_dist_to_opp > cfg.min_valid_obstacle_distance) {
                 const Eigen::Vector2d away_direction = -nearest_obstacle.normalized();
-                const Eigen::Vector3d velocity_target(cfg.avoidance_walk_speed * away_direction.x(),
-                                                      cfg.avoidance_walk_speed * away_direction.y(),
+
+                // Use a deterministic sidestep direction so we do not oscillate left-right each tick
+                const Eigen::Vector2d left_perpendicular(-nearest_obstacle.y(), nearest_obstacle.x());
+                const Eigen::Vector2d right_perpendicular(nearest_obstacle.y(), -nearest_obstacle.x());
+                const Eigen::Vector2d side_direction = nearest_obstacle.y() >= 0.0
+                                                           ? right_perpendicular.normalized()
+                                                           : left_perpendicular.normalized();
+
+                // Failsafe behaviour to mostly sidestep to leave the collision line, with slight retreat
+                Eigen::Vector2d blended_direction = (cfg.lateral_avoidance_weight * side_direction)
+                                                    + (cfg.retreat_avoidance_weight * away_direction);
+
+                // If blend weights collapse to an invalid tiny vector, fall back to a stable pure retreat vector
+                if (blended_direction.squaredNorm() <= cfg.min_valid_obstacle_distance) {
+                    blended_direction = away_direction;
+                }
+                else {
+                    blended_direction.normalize();
+                }
+
+                const Eigen::Vector3d velocity_target(cfg.avoidance_walk_speed * blended_direction.x(),
+                                                      cfg.avoidance_walk_speed * blended_direction.y(),
                                                       0.0);
 
-                log<INFO>("Figure out a WalkProposal");
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
-                log<INFO>(fmt::format("Avoiding robot at ({:.3f}, {:.3f}) distance {:.3f}m with velocity ({:.3f}, {:.3f}, {:.3f})",
+                log<INFO>(fmt::format("Avoiding nearest robot at ({:.3f}, {:.3f}) distance {:.3f}m with velocity ({:.3f}, {:.3f}, {:.3f})",
                                        nearest_obstacle.x(),
                                        nearest_obstacle.y(),
                                        nearest_dist_to_opp,

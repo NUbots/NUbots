@@ -13,6 +13,7 @@ tasks:
   kick_to_goal_priority: 0
   stand_still_priority: 0
   walk_inside_bounded_box: 0
+  avoid_robot_priority: 2
 
   # Planners
   kick_to_priority: 1

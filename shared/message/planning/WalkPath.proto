@@ -30,11 +30,6 @@ package message.planning;
 import "Vector.proto";
 import "Transform.proto";
 
-enum AvoidanceMode {
-    INACTIVE = 0;
-    ACTIVE   = 1;
-}
-
 /// Plan a path to walk to the specified point
 message WalkTo {
     /// Transform from desired robot pose {d} to robot {r} space

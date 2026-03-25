@@ -54,7 +54,6 @@ namespace module::planning {
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
-    using message::planning::AvoidanceMode;
     using message::planning::WalkProposal;
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
@@ -123,14 +122,8 @@ namespace module::planning {
             stability = new_stability;
         });
 
-        on<Provide<WalkTo>,
-           Optional<With<Robots>>,
-           With<Sensors>,
-           When<AvoidanceMode, std::equal_to, AvoidanceMode::INACTIVE>>()
-            .then(
+        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
-
-                log<INFO>("PLanWalkPath is running");
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;
                 const auto& Hrw = sensors.Hrw;

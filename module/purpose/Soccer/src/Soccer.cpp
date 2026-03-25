@@ -70,6 +70,7 @@ namespace module::purpose {
     using message::platform::ResetWebotsServos;
     using message::purpose::FieldPlayer;
     using message::purpose::FindPurpose;
+    using message::strategy::AvoidRobot;
     using message::purpose::Goalie;
     using message::purpose::Purpose;
     using message::skill::Look;
@@ -150,7 +151,8 @@ namespace module::purpose {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
-                emit<Task>(std::make_unique<FallRecovery>(), 2);
+                emit<Task>(std::make_unique<AvoidRobot>(), 2);
+                emit<Task>(std::make_unique<FallRecovery>(), 3);
             }
         });
 
@@ -167,6 +169,7 @@ namespace module::purpose {
         on<Trigger<EnableIdle>>().then([this] {
             // Stop all tasks and stand still
             emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+            emit<Task>(std::unique_ptr<AvoidRobot>(nullptr));
             emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             log<INFO>("Idle mode enabled");
@@ -187,7 +190,8 @@ namespace module::purpose {
             // If the robot is not idle nor penalised, restart the Director graph for the soccer scenario!
             if (!idle && game_state.self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
-                emit<Task>(std::make_unique<FallRecovery>(), 2);
+                emit<Task>(std::make_unique<AvoidRobot>(), 2);
+                emit<Task>(std::make_unique<FallRecovery>(), 3);
                 log<INFO>("Idle mode disabled");
             }
         });
