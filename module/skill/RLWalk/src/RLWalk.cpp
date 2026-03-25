@@ -1,5 +1,6 @@
 #include "RLWalk.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 
@@ -229,12 +230,35 @@ namespace module::skill {
                         emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
+                    // Clip the output here as a safety measure to prevent extremely fast movements.
+                    const double max_joint_offset = 0.2;  // 0.1 radians per update (50 Hz) = ~300 degrees per second.
+
+                    // Convert raw action to physical joint offsets (mjlab order), then clip per-joint
+                    // against the current measured offsets to limit command rate.
+                    const JointVector desired_joint_offsets_mj = inference_output_raw * NUGUS_ACTION_SCALE;
+                    JointVector clipped_joint_offsets_mj       = desired_joint_offsets_mj;
+
+                    for (int i = 0; i < cfg.num_joints; ++i) {
+                        const double lower          = current_joints_rel_mj[i] - max_joint_offset;
+                        const double upper          = current_joints_rel_mj[i] + max_joint_offset;
+                        clipped_joint_offsets_mj[i] = std::clamp(desired_joint_offsets_mj[i], lower, upper);
+                    }
+
+                    JointVector clipped_action_raw = inference_output_raw;
+                    if (std::abs(NUGUS_ACTION_SCALE) > 1e-9) {
+                        clipped_action_raw = clipped_joint_offsets_mj / NUGUS_ACTION_SCALE;
+                    }
+
+
                     // Store the last action. Needs raw policy output in tree-traversal order
-                    last_action = inference_output_raw;
+                    last_action = clipped_action_raw;
 
                     // Convert into NUbots order, apply scaling
-                    JointVector joint_offsets_scaled_nubots =
-                        mjlab_to_nubots(inference_output_raw * NUGUS_ACTION_SCALE);
+                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(clipped_joint_offsets_mj);
+
+                    if (log_level <= DEBUG) {
+                        emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));
+                    }
 
                     // Emit servo commands
                     auto body = std::make_unique<Body>();
