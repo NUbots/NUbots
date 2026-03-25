@@ -102,7 +102,8 @@ namespace module::skill {
             cfg.head_servo_gain = config["servos"]["head_gains"].as<float>();
 
             // Initialize vectors
-            last_action = JointVector::Zero();
+            last_action      = JointVector::Zero();
+            have_last_action = false;
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
@@ -231,7 +232,7 @@ namespace module::skill {
                     };
 
                     // Clip the output here as a safety measure to prevent extremely fast movements.
-                    const double max_joint_offset = 0.2;  // 0.1 radians per update (50 Hz) = ~300 degrees per second.
+                    const double max_joint_offset = 0.2;  // 0.2 radians per update (50 Hz) = ~600 degrees per second.
 
                     // Convert raw action to physical joint offsets (mjlab order), then clip per-joint
                     // against the current measured offsets to limit command rate.
@@ -249,12 +250,23 @@ namespace module::skill {
                         clipped_action_raw = clipped_joint_offsets_mj / NUGUS_ACTION_SCALE;
                     }
 
+                    // Filter the actions using an exponential moving average
+                    const double action_filter_alpha = 0.8;
+                    JointVector filtered_action_raw  = clipped_action_raw;
+                    if (have_last_action) {
+                        filtered_action_raw =
+                            action_filter_alpha * clipped_action_raw + (1.0 - action_filter_alpha) * last_action;
+                    }
 
-                    // Store the last action. Needs raw policy output in tree-traversal order
-                    last_action = clipped_action_raw;
+                    // Store the filtered action in mjlab order without scaling or offsets.
+                    last_action      = filtered_action_raw;
+                    have_last_action = true;
+
+                    const JointVector filtered_joint_offsets_mj = filtered_action_raw * NUGUS_ACTION_SCALE;
+
 
                     // Convert into NUbots order, apply scaling
-                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(clipped_joint_offsets_mj);
+                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(filtered_joint_offsets_mj);
 
                     if (log_level <= DEBUG) {
                         emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));

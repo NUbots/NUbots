@@ -80,6 +80,7 @@ namespace module::skill {
 
         /// @brief Last action taken by the model
         JointVector last_action;
+        bool have_last_action = false;
 
         /// @brief Default pose for the robot
         JointVector default_pose;
