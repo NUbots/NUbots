@@ -482,7 +482,6 @@ export class ServosView extends React.Component<{
 
   @action.bound
   private onSelectRobot(robot?: RobotModel) {
-    console.log("Selected robot:", robot);
     this.props.controller.onSelectRobot(this.props.model, robot);
   }
 }
