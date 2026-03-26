@@ -11,7 +11,7 @@ import { DirectorModel } from "./model";
 
 export interface DirectorViewProps {
   model: DirectorModel;
-  controller: DirectorController
+  controller: DirectorController;
   Menu: ComponentType<PropsWithChildren>;
 }
 
@@ -25,7 +25,7 @@ export class DirectorView extends React.Component<DirectorViewProps> {
   render() {
     const {
       model: { selectedRobot, robots, graph },
-      Menu
+      Menu,
     } = this.props;
 
     return (

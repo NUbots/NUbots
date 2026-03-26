@@ -334,12 +334,12 @@ export function GraphView({ graph, robotId }: { graph: DirectorGraph; robotId?: 
 
       // Fit view to graph when a new robot is selected
       if (pendingFitViewRef.current) {
-      pendingFitViewRef.current = false;
+        pendingFitViewRef.current = false;
 
-      requestAnimationFrame(() => {
-        fitView({ padding: 0.15 });
-      });
-    }
+        requestAnimationFrame(() => {
+          fitView({ padding: 0.15 });
+        });
+      }
     }, [nodes, edges, getNodes, fitView]);
 
     return null;

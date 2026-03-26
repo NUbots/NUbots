@@ -85,12 +85,14 @@ export class DirectorSimulator extends Simulator {
 
     const purposeSubtasks: DirectorState.DirectorTask[] = [
       { name: "Striker", targetGroup: groupIds.strategy, priority: 10, optional: false },
-      ...(!plannersOn && !kickOn ? [] : [{ name: "StandStill", targetGroup: groupIds.recovery, priority: 2, optional: true }]),
+      ...(!plannersOn && !kickOn
+        ? []
+        : [{ name: "StandStill", targetGroup: groupIds.recovery, priority: 2, optional: true }]),
     ];
 
     const strategySubtasks: DirectorState.DirectorTask[] = [
       ...(plannersOn ? [{ name: "WalkToBall", targetGroup: groupIds.walkPlan, priority: 6, optional: false }] : []),
-      ...(plannersOn ? [{ name: "LookAround", targetGroup: groupIds.lookPlan, priority: 6, optional: false }] :  []),
+      ...(plannersOn ? [{ name: "LookAround", targetGroup: groupIds.lookPlan, priority: 6, optional: false }] : []),
     ];
 
     // Build core groups map
@@ -169,7 +171,7 @@ export class DirectorSimulator extends Simulator {
         activeProvider: walkActiveProvider,
         parentProvider: providerIds.strategy,
         subtasks: [{ name: "WalkTo", targetGroup: groupIds.walkPlan, priority: 6, optional: true }],
-      }
+      };
 
       groups[groupIds.lookPlan] = {
         type: "LookAround",
@@ -177,15 +179,13 @@ export class DirectorSimulator extends Simulator {
         activeProvider: providerIds.look,
         parentProvider: providerIds.strategy,
         subtasks: [{ name: "LookAround", targetGroup: groupIds.lookPlan, priority: 6, optional: true }],
-      }
+      };
 
       providers[providerIds.walkTo] = {
         id: providerIds.walkTo,
         group: groupIds.walkPlan,
         classification: Classification.START,
-        when: [
-          { type: "Phase", comparator: "==", expectedState: { name: "PLAYING", value: 1 }, current: plannerOn1 },
-        ],
+        when: [{ type: "Phase", comparator: "==", expectedState: { name: "PLAYING", value: 1 }, current: plannerOn1 }],
         causing: {},
         needs: [groupIds.lookPlan],
       };
@@ -194,9 +194,7 @@ export class DirectorSimulator extends Simulator {
         id: providerIds.turnOnSpot,
         group: groupIds.walkPlan,
         classification: Classification.START,
-        when: [
-          { type: "Phase", comparator: "==", expectedState: { name: "PLAYING", value: 1 }, current: plannerOn2 },
-        ],
+        when: [{ type: "Phase", comparator: "==", expectedState: { name: "PLAYING", value: 1 }, current: plannerOn2 }],
         causing: {},
         needs: [groupIds.lookPlan],
       };
@@ -219,7 +217,7 @@ export class DirectorSimulator extends Simulator {
         activeProvider: providerIds.kick,
         parentProvider: providerIds.strategy,
         subtasks: [{ name: "KickTo", targetGroup: groupIds.kickPlan, priority: 6, optional: true }],
-      }
+      };
 
       providers[providerIds.kick] = {
         id: providerIds.kick,
@@ -228,7 +226,7 @@ export class DirectorSimulator extends Simulator {
         when: [],
         causing: {},
         needs: [],
-      }
+      };
     }
 
     // Reset to core only
