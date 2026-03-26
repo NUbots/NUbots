@@ -22,4 +22,5 @@ Include this module to allow the robot to walk.
 
 ## Dependencies
 
+- Director
 - Eigen

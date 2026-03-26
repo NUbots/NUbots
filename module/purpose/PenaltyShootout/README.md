@@ -30,3 +30,7 @@ Include this module in a role and execute during penalty shootout game phases. T
 - `message::strategy::FallRecovery` to handle falls
 - `message::localisation::PenaltyReset` for resetting robot position when middle button is pressed
 - `message::output::Buzzer` for audio feedback when middle button is released
+
+## Dependencies
+
+- Director

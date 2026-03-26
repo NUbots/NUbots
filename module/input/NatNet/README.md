@@ -2,6 +2,11 @@
 
 ## Description
 
+Receives OptiTrack NatNet motion-capture packets and converts them into `message::input::MotionCapture`.
+
+The module listens to NatNet data broadcasts, pings the discovered server, requests model definitions, and then parses
+frame packets into NUbots mocap messages.
+
 In the Motive software, ensure the advanced streaming settings are set to the following:
 
 #### Motive Streaming Settings
@@ -42,6 +47,34 @@ In the Motive software, ensure the advanced streaming settings are set to the fo
 
 ## Usage
 
+Install `module::input::NatNet` and configure `NatNet.yaml`.
+
+Default configuration values:
+
+- `multicast_address: 239.255.42.99`
+- `command_port: 1510`
+- `data_port: 1511`
+- `dump_packets: false`
+- `max_delay_samples: 100`
+
+At runtime the module:
+
+- Binds UDP sockets for NatNet command and data traffic
+- Detects the active NatNet server from incoming broadcast packets
+- Sends a NatNet ping and reads the remote protocol version
+- Requests model definitions when needed
+- Estimates and logs network delay statistics
+
+## Consumes
+
+- `extension::Configuration` from `NatNet.yaml`
+- `NUClear::UDP::Packet` (NatNet command traffic)
+- `NUClear::UDP::Packet` via `UDP::Broadcast` on `data_port` (NatNet frame traffic)
+
 ## Emits
 
+- `message::input::MotionCapture`
+
 ## Dependencies
+
+- An OptiTrack motion capture system sending packets over the network using the NatNet protocol.

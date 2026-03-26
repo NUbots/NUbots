@@ -20,8 +20,6 @@ This module is built when the subcontroller CMake flag is set to `NUSense`. Usin
 - `message::platform::NUSense` with a `DIRECT` scope so that the message is picked up locally in this module to be converted to RawSensors.
 - `message::input::RawSensors` containing the current NUgus sensor data from the NUSense device.
 
-## Dependencies
-
 ## Notes
 
 There are 2 ways to generate nanopb messages for NUSense. The generated files must then go into the NUSense NUController repo before building the binaries onto the board. This will be a temporary solution until a `./b install` pipeline for NUSense is set up. The guides below will assume that the OS is some linux based distro.

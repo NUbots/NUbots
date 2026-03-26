@@ -13,10 +13,10 @@ Configuration from `ImageCompressor.yaml`
 
 ## Emits
 
-`message::output::CompressedImage`
+- `message::output::CompressedImage`
 
 ## Dependencies
 
-TurboJPEG
-libva (vaapi)
-intel media driver
+- TurboJPEG
+- libva (vaapi)
+- intel media driver

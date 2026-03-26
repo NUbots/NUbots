@@ -40,3 +40,5 @@ Add this module to the role and emit a Goalie Task.
 - `message::purpose::Purpose` information on the position the robot is playing (goalie), its ID and active state.
 
 ## Dependencies
+
+- Director
