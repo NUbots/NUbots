@@ -64,12 +64,25 @@ def generate_cmake_toolchain(target, prefix):
         else "\n"
     )
 
+    target_block = (
+        'set(CMAKE_C_COMPILER_TARGET "{target_c_compiler}")\n'.format(
+            target_c_compiler=target.get("target_c_compiler", "")
+        )
+        + 'set(CMAKE_CXX_COMPILER_TARGET "{target_cxx_compiler}")\n'.format(
+            target_cxx_compiler=target.get("target_cxx_compiler", "")
+        )
+        if target.get("target_c_compiler") and target.get("target_cxx_compiler")
+        else "\n"
+    )
+
     template = dedent(
         """\
         set(CMAKE_SYSTEM_NAME Linux)
         set(CMAKE_SYSTEM_PROCESSOR {arch})
         set(CMAKE_C_COMPILER {c_compiler})
         set(CMAKE_CXX_COMPILER {cxx_compiler})
+
+        {target_block}
         {sysroot_block}
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
         set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -122,6 +135,7 @@ def generate_cmake_toolchain(target, prefix):
         arch=target["arch"],
         c_compiler=target.get("c_compiler", "/usr/bin/gcc"),
         cxx_compiler=target.get("cxx_compiler", "/usr/bin/g++"),
+        target_block=target_block,
         sysroot_block=sysroot_block,
         sysroot=sysroot,
         linker_flags_block=linker_flags_block
@@ -191,6 +205,7 @@ def generate_json_env(target, prefix):
             "CXX": target.get("cxx_compiler", "/usr/bin/g++"),
             # Set our package config so it finds things in the toolchain
             "PKG_CONFIG_PATH": f"{prefix}/lib/pkgconfig",
+            "CPU_ARCH": target.get("arch", "x86_64"),
             # Set our optimisation flags
             "CFLAGS": flags,
             "CXXFLAGS": flags,

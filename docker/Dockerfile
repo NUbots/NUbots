@@ -127,14 +127,24 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python3 /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN if [ "${platform}" = "orinnx" ]; then \
+    LLVM_HOST_TRIPLE_ARG="-DLLVM_HOST_TRIPLE=aarch64-linux-gnu"; \
+    LLVM_TARGETS_TO_BUILD_ARG="-DLLVM_TARGETS_TO_BUILD=AArch64"; \
+    else \
+    LLVM_HOST_TRIPLE_ARG=""; \
+    LLVM_TARGETS_TO_BUILD_ARG=""; \
+    fi && \
+    install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_INCLUDE_TESTS=OFF \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    ${LLVM_HOST_TRIPLE_ARG} \
+    ${LLVM_TARGETS_TO_BUILD_ARG}
+
 
 # SPIRV LLVM Translator
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
@@ -392,6 +402,21 @@ RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
+
+# Install Booster Robotics SDK
+
+RUN curl -L https://github.com/BoosterRobotics/booster_robotics_sdk/archive/f9ab807a0475b51aa5fb28b093c85652dd57fb69.tar.gz \
+    -o /tmp/booster_robotics_sdk.tar.gz && \
+    cd /tmp && tar -xzf booster_robotics_sdk.tar.gz && \
+    rm /tmp/booster_robotics_sdk.tar.gz
+
+WORKDIR /tmp/booster_robotics_sdk
+RUN curl -L https://gist.githubusercontent.com/ZeoNyph/69e4ec80b66cc083191522de7eb4f43b/raw/36357b0fd9731865822ac4ee667d0cd3492d9688/install_script.patch \
+    -o install_script.patch && \
+    patch -p1 < install_script.patch
+
+RUN /tmp/booster_robotics_sdk/install.sh \
+    rm -rf /tmp/booster_robotics_sdk
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
