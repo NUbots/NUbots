@@ -93,16 +93,16 @@ def generate_cmake_toolchain(target, prefix):
         set(CMAKE_CXX_FLAGS_INIT "" CACHE STRING "Flags used by the CXX compiler during all built types.")
         set(CMAKE_NASM_ASM_FLAGS_INIT "" CACHE STRING "Flags used by the ASM NASM compiler during all built types.")
 
-        if(CMAKE_CROSSCOMPILING){
+        if(CMAKE_CROSSCOMPILING){{
             {c_target_compile_options}
             {cxx_target_compile_options}
             {asm_target_compile_options}
-        }
-        else{
+        }}
+        else{{
             {c_host_compile_options}
             {cxx_host_compile_options}
             {asm_host_compile_options}
-        }
+        }}
         {linker_flags_block}
 
         set(CMAKE_ASM_NASM_OBJECT_FORMAT "{asm_object}" CACHE STRING "Output object format of the ASM NASM compiler.")
