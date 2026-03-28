@@ -68,6 +68,11 @@ strip_sysroot(){
 
 setup_env(){
     export DEBIAN_FRONTEND=noninteractive
+    dpkg --add-architecture arm64
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse" > /etc/apt/sources.list.d/ubuntu-ports.list
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list.d/ubuntu-ports.list
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse" >> /etc/apt/sources.list.d/ubuntu-ports.list
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list.d/ubuntu-ports.list
 }
 
 extract_tars

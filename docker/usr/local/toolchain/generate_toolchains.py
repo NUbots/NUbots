@@ -64,17 +64,6 @@ def generate_cmake_toolchain(target, prefix):
         else "\n"
     )
 
-    target_block = (
-        'set(CMAKE_C_COMPILER_TARGET "{target_c_compiler}")\n'.format(
-            target_c_compiler=target.get("target_c_compiler", "")
-        )
-        + 'set(CMAKE_CXX_COMPILER_TARGET "{target_cxx_compiler}")\n'.format(
-            target_cxx_compiler=target.get("target_cxx_compiler", "")
-        )
-        if target.get("target_c_compiler") and target.get("target_cxx_compiler")
-        else "\n"
-    )
-
     template = dedent(
         """\
         set(CMAKE_SYSTEM_NAME Linux)
@@ -82,7 +71,6 @@ def generate_cmake_toolchain(target, prefix):
         set(CMAKE_C_COMPILER {c_compiler})
         set(CMAKE_CXX_COMPILER {cxx_compiler})
 
-        {target_block}
         {sysroot_block}
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
         set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -93,15 +81,11 @@ def generate_cmake_toolchain(target, prefix):
         set(CMAKE_CXX_FLAGS_INIT "" CACHE STRING "Flags used by the CXX compiler during all built types.")
         set(CMAKE_NASM_ASM_FLAGS_INIT "" CACHE STRING "Flags used by the ASM NASM compiler during all built types.")
 
-        if(CMAKE_CROSSCOMPILING)
-        {c_target_compile_options}
-        {cxx_target_compile_options}
-        {asm_target_compile_options}
-        else()
-        {c_host_compile_options}
-        {cxx_host_compile_options}
-        {asm_host_compile_options}
-        endif()
+
+        {c_compile_options}
+        {cxx_compile_options}
+        {asm_compile_options}
+
         {linker_flags_block}
 
         set(CMAKE_ASM_NASM_OBJECT_FORMAT "{asm_object}" CACHE STRING "Output object format of the ASM NASM compiler.")
@@ -118,40 +102,22 @@ def generate_cmake_toolchain(target, prefix):
     )
 
     return template.format(
-        c_target_compile_options="\n".join(
+        c_compile_options="\n".join(
             [
-                '   string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["target_flags"]
+                'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["flags"]
             ]
         ),
-        cxx_target_compile_options="\n".join(
+        cxx_compile_options="\n".join(
             [
-                '   string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["target_flags"]
+                'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["flags"]
             ]
         ),
-        asm_target_compile_options="\n".join(
+        asm_compile_options="\n".join(
             [
-                '   string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["asm_target_flags"]
-            ]
-        ),
-        c_host_compile_options="\n".join(
-            [
-                '   string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["host_flags"]
-            ]
-        ),
-        cxx_host_compile_options="\n".join(
-            [
-                '   string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["host_flags"]
-            ]
-        ),
-        asm_host_compile_options="\n".join(
-            [
-                '   string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["asm_host_flags"]
+                'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["asm_flags"]
             ]
         ),
         asm_object=target["asm_object"],
@@ -159,7 +125,6 @@ def generate_cmake_toolchain(target, prefix):
         arch=target["arch"],
         c_compiler=target.get("c_compiler", "/usr/bin/gcc"),
         cxx_compiler=target.get("cxx_compiler", "/usr/bin/g++"),
-        target_block=target_block,
         sysroot_block=sysroot_block,
         sysroot=sysroot,
         linker_flags_block=linker_flags_block
