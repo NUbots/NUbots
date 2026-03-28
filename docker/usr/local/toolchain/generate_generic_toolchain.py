@@ -36,6 +36,7 @@ target = {
     "target_flags": ["-fPIC", "-mtune=generic"],
     "release_flags": ["-O3", "-DNDEBUG"],
     "asm_host_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
+    "asm_target_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
     "asm_object": "elf64",
     "arch": "x86_64"
 }
