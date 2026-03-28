@@ -32,9 +32,10 @@ import os
 import generate_toolchains
 
 target = {
-    "flags": ["-fPIC", "-mtune=generic"],
+    "host_flags": ["-fPIC", "-mtune=generic"],
+    "target_flags": ["-fPIC", "-mtune=generic"],
     "release_flags": ["-O3", "-DNDEBUG"],
-    "asm_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
+    "asm_host_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
     "asm_object": "elf64",
     "arch": "x86_64"
 }

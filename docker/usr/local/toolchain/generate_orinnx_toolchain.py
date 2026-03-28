@@ -36,7 +36,7 @@ _CROSS_PREFIX = "aarch64-buildroot-linux-gnu"
 _TARGETFS_DIR = "/l4t/targetfs"
 
 target = {
-    "flags": [
+    "target_flags": [
         "-fPIC",
         "-mtune=cortex-a78ae",
         "-march=armv8.2-a",
@@ -48,8 +48,10 @@ target = {
         f"-isystem {_TARGETFS_DIR}/usr/include",
         f"-isystem {_TARGETFS_DIR}/usr/include/aarch64-linux-gnu"
     ],
+    "host_flags": ["-fPIC", "-mtune=generic"],
     "release_flags": ["-O3", "-DNDEBUG"],
-    "asm_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
+    "asm_target_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
+    "asm_host_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
     "linker_flags":[
         f"--sysroot={_TARGETFS_DIR}",
         f"-L{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",

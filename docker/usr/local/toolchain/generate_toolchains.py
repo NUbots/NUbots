@@ -93,9 +93,16 @@ def generate_cmake_toolchain(target, prefix):
         set(CMAKE_CXX_FLAGS_INIT "" CACHE STRING "Flags used by the CXX compiler during all built types.")
         set(CMAKE_NASM_ASM_FLAGS_INIT "" CACHE STRING "Flags used by the ASM NASM compiler during all built types.")
 
-        {c_compile_options}
-        {cxx_compile_options}
-        {asm_compile_options}
+        if(CMAKE_CROSSCOMPILING){
+            {c_target_compile_options}
+            {cxx_target_compile_options}
+            {asm_target_compile_options}
+        }
+        else{
+            {c_host_compile_options}
+            {cxx_host_compile_options}
+            {asm_host_compile_options}
+        }
         {linker_flags_block}
 
         set(CMAKE_ASM_NASM_OBJECT_FORMAT "{asm_object}" CACHE STRING "Output object format of the ASM NASM compiler.")
@@ -112,22 +119,40 @@ def generate_cmake_toolchain(target, prefix):
     )
 
     return template.format(
-        c_compile_options="\n".join(
+        c_target_compile_options="\n".join(
             [
                 'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["flags"]
+                for flag in target["target_flags"]
             ]
         ),
-        cxx_compile_options="\n".join(
+        cxx_target_compile_options="\n".join(
             [
                 'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["flags"]
+                for flag in target["target_flags"]
             ]
         ),
-        asm_compile_options="\n".join(
+        asm_target_compile_options="\n".join(
             [
                 'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["asm_flags"]
+                for flag in target["asm_target_flags"]
+            ]
+        ),
+        c_host_compile_options="\n".join(
+            [
+                'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["host_flags"]
+            ]
+        ),
+        cxx_host_compile_options="\n".join(
+            [
+                'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["host_flags"]
+            ]
+        ),
+        asm_host_compile_options="\n".join(
+            [
+                'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
+                for flag in target["asm_host_flags"]
             ]
         ),
         asm_object=target["asm_object"],
@@ -181,7 +206,7 @@ def generate_meson_cross_file(target):
         [
             "'{}'".format(flag)
             for flag in target["release_flags"]
-            + [param.replace(" ", "', '") for param in target["flags"]]
+            + [param.replace(" ", "', '") for param in target["target_flags"]]
         ]
     )
 
@@ -197,7 +222,7 @@ def generate_meson_cross_file(target):
 
 
 def generate_json_env(target, prefix):
-    flags = " ".join(target["release_flags"] + target["flags"])
+    flags = " ".join(target["release_flags"] + target["target_flags"])
     return json.dumps(
         {
             # Set our compilers
@@ -238,7 +263,7 @@ def generate_toolchain_script(target):
     return template.format(
         c_compiler=c_compiler,
         cxx_compiler=cxx_compiler,
-        flags=" ".join(target["release_flags"] + target["flags"]),
+        flags=" ".join(target["release_flags"] + target["target_flags"]),
     )
 
 
