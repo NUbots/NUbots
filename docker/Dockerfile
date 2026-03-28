@@ -127,23 +127,14 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python3 /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN if [ "${platform}" = "orinnx" ]; then \
-    LLVM_HOST_TRIPLE_ARG="-DLLVM_HOST_TRIPLE=aarch64-linux-gnu"; \
-    LLVM_TARGETS_TO_BUILD_ARG="-DLLVM_TARGETS_TO_BUILD=AArch64"; \
-    else \
-    LLVM_HOST_TRIPLE_ARG=""; \
-    LLVM_TARGETS_TO_BUILD_ARG=""; \
-    fi && \
-    install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_INCLUDE_TESTS=OFF \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON \
-    ${LLVM_HOST_TRIPLE_ARG} \
-    ${LLVM_TARGETS_TO_BUILD_ARG}
+    -DLLVM_LINK_LLVM_DYLIB=ON
 
 
 # SPIRV LLVM Translator

@@ -120,37 +120,37 @@ def generate_cmake_toolchain(target, prefix):
     return template.format(
         c_target_compile_options="\n".join(
             [
-                'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
+                '   string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
                 for flag in target["target_flags"]
             ]
         ),
         cxx_target_compile_options="\n".join(
             [
-                'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
+                '   string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
                 for flag in target["target_flags"]
             ]
         ),
         asm_target_compile_options="\n".join(
             [
-                'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
+                '   string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
                 for flag in target["asm_target_flags"]
             ]
         ),
         c_host_compile_options="\n".join(
             [
-                'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
+                '   string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
                 for flag in target["host_flags"]
             ]
         ),
         cxx_host_compile_options="\n".join(
             [
-                'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
+                '   string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
                 for flag in target["host_flags"]
             ]
         ),
         asm_host_compile_options="\n".join(
             [
-                'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
+                '   string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
                 for flag in target["asm_host_flags"]
             ]
         ),
