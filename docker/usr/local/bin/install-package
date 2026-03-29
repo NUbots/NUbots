@@ -1,12 +1,49 @@
 #!/bin/sh
 set -e
 
+# Parse arguments
+platform=""
+packages=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -p)
+            shift
+            platform="$1"
+            shift
+            ;;
+        *)
+            packages="$packages $1"
+            shift
+            ;;
+    esac
+done
+
 # If we are not root, rerun using sudo
 if ! [ $(id -u) = 0 ]; then
     sudo "$0" "$@"
 else
-    # Update apt, install the packages and cleanup the cache to make the layer smaller
-    apt-get update
-    apt-get install -y --no-install-recommends "$@"
-    rm -rf /var/cache/apt /var/lib/apt/lists/*
+    if [ -n "$platform" ]; then
+        # -p flag was provided with a value
+        if [ "$platform" = "orinnx" ]; then
+            # ARM extraction for orinnx
+            apt-get update
+            mkdir -p /tmp/debs
+            apt-get download "$(apt-cache depends --recurse --no-recommends $platform | grep '^\w' | sort -u | tr '\n' ' ')"
+            mv *.deb /tmp/debs/ 2>/dev/null || true
+            for deb in /tmp/debs/*.deb; do dpkg -x "$deb" /l4t/targetfs; done
+            rm -rf /tmp/debs
+            rm -rf /var/cache/apt /var/lib/apt/lists/*
+        else
+            # Normal install for other platforms
+            apt-get update
+            apt-get install -y --no-install-recommends $platform $packages
+            rm -rf /var/cache/apt /var/lib/apt/lists/*
+        fi
+    else
+        # No -p flag, just install the packages
+        apt-get update
+        apt-get install -y --no-install-recommends $packages
+        rm -rf /var/cache/apt /var/lib/apt/lists/*
+    fi
 fi

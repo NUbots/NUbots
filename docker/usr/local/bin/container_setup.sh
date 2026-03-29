@@ -75,6 +75,14 @@ setup_env(){
     echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list.d/ubuntu-ports.list
 }
 
+update_sys(){
+    apt-get update
+    apt-get upgrade -y
+    apt-get autoremove -y
+    rm -rf /var/cache/apt /var/lib/apt/lists/*
+}
+
 extract_tars
 strip_sysroot
+update_sys
 setup_env

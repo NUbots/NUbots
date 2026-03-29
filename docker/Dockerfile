@@ -46,12 +46,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY usr/local/bin/container_setup.sh /usr/local/bin/container_setup.sh
 RUN /usr/local/bin/container_setup.sh
 
-# Upgrade base packages
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/cache/apt /var/lib/apt/lists/*
-
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
 
@@ -127,14 +121,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python3 /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
-    --build-system cmake \
-    --configure-path "llvm" \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
-    -DLLVM_INCLUDE_TESTS=OFF \
-    -DLLVM_ENABLE_SPHINX=OFF \
-    -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON
+RUN install-package -p ${platform} llvm-14 clang-14 lld-14
 
 
 # SPIRV LLVM Translator
