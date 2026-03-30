@@ -7,7 +7,7 @@ line_length = 120
 known_first_party = ['b', 'utility']
 
 [project]
-name = "Horus"
+name = "nubots"
 version = "0.0.1"
 requires-python = ">=3.10,<3.13"
 
@@ -37,27 +37,11 @@ dependencies = [
     "protoc-exe==22.0rc1",
     "xxhash==3.5.0",
     "stringcase==1.2.0",
-    # Image Processing
-    "opencv-contrib-python-headless==4.11.0.86",
-    # Machine Learning
-    "tensorflow==2.19.0",
     # Optimisation
     "optuna==4.3.0",
-    # Reinforcement Learning
-    "mujoco",
-    "mujoco-mjx",
-    "brax",
-    "mediapy>=1.2.4",
-    "matplotlib>=3.10.1",
-    "jax[cuda12]>=0.5.3",
-    "tf2onnx>=1.8.4",
-    "colorama>=0.4.6",
-    "onnxruntime>=1.22.0",
     "casefy==1.1.0",
     "protoc-wheel==21.1",
-    # Note: Tom's RL branch used a newer version: "protoc-wheel-0==27.0"
     "protobuf==5.27.0",
-    # Note: Tom's RL branch used a newer version: "protobuf==5.27.5"
     "pycryptodomex==3.21.0",
     "natsort==8.4.0",
     "jsonschema==4.23.0",

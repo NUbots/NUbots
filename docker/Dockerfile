@@ -385,20 +385,6 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
-# MuJoCo
-RUN install-package libx11
-RUN install-package libxrandr
-RUN install-package libxinerama
-RUN install-package libxcursor
-RUN install-package libxi
-RUN install-package mesa
-RUN install-package mesa-utils
-RUN install-package mesa-libgl
-RUN install-package libglvnd
-RUN install-package glfw-x11
-RUN install-package ffmpeg
-RUN install-from-source https://github.com/Tom0Brien/mujoco/archive/e1b4a73e845b2096cfc026afc1566233c9844b85.tar.gz
-
 # lame
 RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
@@ -435,15 +421,6 @@ ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 RUN install-package clinfo
-
-# Add OpenGL and GPU-related environment variables
-ENV MUJOCO_GL=egl
-ENV LIBGL_ALWAYS_INDIRECT=0
-ENV LIBGL_ALWAYS_SOFTWARE=0
-ENV DISPLAY=:0
-ENV QT_X11_NO_MITSHM=1
-ENV XDG_RUNTIME_DIR=/tmp/runtime-nubots
-RUN mkdir -p $XDG_RUNTIME_DIR
 
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
