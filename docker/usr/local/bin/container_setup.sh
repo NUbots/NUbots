@@ -68,6 +68,11 @@ strip_sysroot(){
 
 setup_env(){
     export DEBIAN_FRONTEND=noninteractive
+    
+    # Restrict existing x86_64 repos to amd64 only before adding arm64 architecture
+    sed -i 's/^deb \([^[]\)/deb [arch=amd64] \1/' /etc/apt/sources.list
+    sed -i 's/^deb-src \([^[]\)/deb-src [arch=amd64] \1/' /etc/apt/sources.list
+    
     dpkg --add-architecture arm64
     echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse" > /etc/apt/sources.list.d/ubuntu-ports.list
     echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list.d/ubuntu-ports.list
@@ -84,5 +89,5 @@ update_sys(){
 
 extract_tars
 strip_sysroot
-update_sys
 setup_env
+update_sys

@@ -170,7 +170,7 @@ def generate_meson_cross_file(target):
         [
             "'{}'".format(flag)
             for flag in target["release_flags"]
-            + [param.replace(" ", "', '") for param in target["target_flags"]]
+            + [param.replace(" ", "', '") for param in target["flags"]]
         ]
     )
 
@@ -186,7 +186,7 @@ def generate_meson_cross_file(target):
 
 
 def generate_json_env(target, prefix):
-    flags = " ".join(target["release_flags"] + target["target_flags"])
+    flags = " ".join(target["release_flags"] + target["flags"])
     return json.dumps(
         {
             # Set our compilers
@@ -227,7 +227,7 @@ def generate_toolchain_script(target):
     return template.format(
         c_compiler=c_compiler,
         cxx_compiler=cxx_compiler,
-        flags=" ".join(target["release_flags"] + target["target_flags"]),
+        flags=" ".join(target["release_flags"] + target["flags"]),
     )
 
 

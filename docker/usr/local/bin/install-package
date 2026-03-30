@@ -26,12 +26,35 @@ else
     if [ -n "$platform" ]; then
         # -p flag was provided with a value
         if [ "$platform" = "orinnx" ]; then
-            # ARM extraction for orinnx
+            # Install amd64 packages on host AND extract arm64 to sysroot
             apt-get update
+
+            # Install amd64 versions on host
+            apt-get install -y --no-install-recommends $packages
+
+            # Download arm64 packages and their dependencies to sysroot
             mkdir -p /tmp/debs
-            apt-get download "$(apt-cache depends --recurse --no-recommends $platform | grep '^\w' | sort -u | tr '\n' ' ')"
-            mv *.deb /tmp/debs/ 2>/dev/null || true
-            for deb in /tmp/debs/*.deb; do dpkg -x "$deb" /l4t/targetfs; done
+            chmod 777 /tmp/debs
+            cd /tmp/debs
+
+            # Get recursive dependencies for arm64 and download them
+            for pkg in $packages; do
+                deps=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg:arm64" 2>/dev/null | grep "^\w" | sort -u)
+                if [ -z "$deps" ]; then
+                    echo "Error: No arm64 package found for $pkg" >&2
+                    exit 1
+                fi
+                for dep in $deps; do
+                    apt-get download "$dep" || { echo "Error: Failed to download $dep:arm64" >&2; exit 1; }
+                done
+            done
+
+            # Extract all downloaded debs to sysroot
+            for deb in /tmp/debs/*.deb; do
+                [ -f "$deb" ] && dpkg -x "$deb" /l4t/targetfs
+            done
+
+            cd /
             rm -rf /tmp/debs
             rm -rf /var/cache/apt /var/lib/apt/lists/*
         else
