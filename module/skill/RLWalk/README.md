@@ -9,17 +9,15 @@ On each policy update, it builds an observation vector from IMU and joint state,
 
 Include this module in your role to provide walking behaviour for `message::skill::Walk`.
 
-To run keyboardwalk in using the mujoco viewer:
+To run keyboardwalk in using the mujoco viewer (deprecated):
 
 `./b run mujoco/rl_keyboardwalk --environment DISPLAY=$DISPLAY --volume /tmp/.X11-unix:/tmp/.X11-unix:rw --gpus all`
 
 `DISPLAY` + the `/tmp/.X11-unix` bind-mount allow the Mujoco GUI to display on the host. `--gpus all` is also passed through for GPU-accelerated execution where supported by your OpenVINO/container setup.
 
-Model and actuator parameters are loaded from `module/skill/RLWalk/data/config/RLWalk.yaml` (e.g. `model.path`, `model.device`, `servos.gain`, `servos.torque`, `default_pose`).
-
 ## Consumes
 
-- `message::skill::Walk` A walk task containing `velocity_target` (desired linear/rotational velocity).
+- `message::skill::Walk` A walk task containing a vector of desired linear/rotational velocity.
 - `message::input::Sensors` Sensor inputs used to build the policy observation (gyro, gravity-in-body-frame, and servo present position/velocity).
 - `message::behaviour::state::Stability` Used to gate policy execution; RL inference runs only when stability is at least `Stability::DYNAMIC`.
 
@@ -31,7 +29,7 @@ Model and actuator parameters are loaded from `module/skill/RLWalk/data/config/R
 
 ## Dependencies
 
-- OpenVINO (ONNX model inference)
+- OpenVINO (ONNX model inference for intel hardware)
 - Eigen
 - TBB
 - Director

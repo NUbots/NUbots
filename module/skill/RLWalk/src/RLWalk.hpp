@@ -81,6 +81,9 @@ namespace module::skill {
         /// @brief Last action taken by the model
         JointVector last_action;
 
+        /// @brief Flag used by the action smoothing filter
+        bool have_last_action = false;
+
         /// @brief Default pose for the robot
         JointVector default_pose;
 
