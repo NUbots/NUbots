@@ -35,11 +35,13 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoOffsets.hpp"
+#include "message/actuation/ServoRanges.hpp"
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/reflection.hpp"
 
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -48,6 +50,7 @@ namespace module::platform::NUSense {
 
     using extension::Configuration;
     using message::actuation::ServoOffsets;
+    using message::actuation::ServoRanges;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::actuation::SubcontrollerServoTarget;
@@ -57,6 +60,8 @@ namespace module::platform::NUSense {
     using message::platform::RawSensors;
     using message::platform::ServoIDStates;
     using utility::support::Expression;
+
+    using utility::nusight::graph;
 
 
     /// @brief Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the
@@ -291,32 +296,39 @@ namespace module::platform::NUSense {
         });
 
         // Sync is used because uart write is a shared resource
-        servo_targets_catcher = on<Trigger<ServoTargets>, With<ServoOffsets>, With<NUSense>, Sync<HardwareIO>>()
-                                    .then([this](const ServoTargets& commands, const ServoOffsets& offsets) {
-                                        // Copy the data into a new message so we can use a duration instead of a
-                                        // timepoint and take the offsets and switch the direction.
-                                        auto servo_targets = SubcontrollerServoTargets();
+        servo_targets_catcher =
+            on<Trigger<ServoTargets>, With<ServoOffsets>, With<ServoRanges>, With<NUSense>, Sync<HardwareIO>>()
+                .then([this](const ServoTargets& commands, const ServoOffsets& offsets, const ServoRanges& ranges) {
+                    // Copy the data into a new message so we can use a duration instead of a
+                    // timepoint and take the offsets and switch the direction.
+                    auto servo_targets = SubcontrollerServoTargets();
 
-                                        // Change the timestamp in servo targets to the difference between the timestamp
-                                        // and now Take away the offset and switch the direction if needed
-                                        for (auto& target : commands.targets) {
-                                            bool is_nan = std::isnan(target.position) || std::isnan(target.gain)
-                                                          || std::isnan(target.torque);
+                    // Change the timestamp in servo targets to the difference between the timestamp
+                    // and now Take away the offset and switch the direction if needed
+                    for (auto& target : commands.targets) {
+                        bool is_nan =
+                            std::isnan(target.position) || std::isnan(target.gain) || std::isnan(target.torque);
 
-                                            servo_targets.targets.emplace_back(
-                                                target.time - NUClear::clock::now(),
-                                                target.id,
-                                                is_nan ? 0.0
-                                                       : (target.position - offsets.offsets[target.id].offset)
-                                                             * offsets.offsets[target.id].direction,
-                                                is_nan ? 0.0 : target.gain,
-                                                is_nan ? 0 : target.torque);
-                                        }
+                        servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
+                                                           target.id,
+                                                           is_nan ? 0.0
+                                                                  : (std::clamp(target.position,
+                                                                                ranges.ranges[target.id].min,
+                                                                                ranges.ranges[target.id].max)
+                                                                     - offsets.offsets[target.id].offset)
+                                                                        * offsets.offsets[target.id].direction,
+                                                           is_nan ? 0.0 : target.gain,
+                                                           is_nan ? 0 : target.torque);
 
-                                        send_packet(servo_targets);
-                                        log<DEBUG>("Sent a ServoTargets message to NUSense.");
-                                    })
-                                    .disable();
+                        emit(graph(
+                            fmt::format("Servo {}", nugus.device_name(static_cast<NUgus::ID>(target.id))),
+                            std::clamp(target.position, ranges.ranges[target.id].min, ranges.ranges[target.id].max)));
+                    }
+
+                    send_packet(servo_targets);
+                    log<DEBUG>("Sent a ServoTargets message to NUSense.");
+                })
+                .disable();
     }
 
 }  // namespace module::platform::NUSense
