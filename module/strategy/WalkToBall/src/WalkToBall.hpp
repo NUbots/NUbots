@@ -60,7 +60,7 @@ namespace module::strategy {
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
 
-            /// @brief Maximum error in the direction perpendicular to ball-target vector, used for scaling walk approach
+            /// @brief Max error in the direction perpendicular to ball-target vector, for scaling walk approach
             double max_error_y = 0.0;
 
             /// @brief Gain for the perpendicular error when approaching the ball
