@@ -208,9 +208,9 @@ namespace module::strategy {
                     return std::clamp(val / max_val, 0.0, 1.0);
                 };
 
-                // Error in the direction parallel to the ball-goal vector
+                // Signed distance error along the ball-target position direction
                 const double err_x = (rRFf - rBFf).dot(uTBf);
-                // Error in the direction perpendicular to the ball-goal vector
+                // Signed distance error perpendicular to the ball-target position direction
                 const double err_y = (rRFf - rBFf).dot(uTBf_p);
                 // Heading error (difference between robot and desired heading)
                 const double err_z = normalise_angle(desired_heading - robot_heading);
