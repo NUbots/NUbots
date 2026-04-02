@@ -99,6 +99,11 @@ message RawSensors {
         float z = 3;
     }
 
+    message FanWarning {
+        bool fan1_warning = 1;
+        bool fan2_warning = 2;
+    }
+
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
