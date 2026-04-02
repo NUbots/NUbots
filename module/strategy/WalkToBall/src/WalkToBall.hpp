@@ -60,12 +60,6 @@ namespace module::strategy {
             /// @brief Distance behind the ball to walk to when positioning
             double distance_behind_ball = 0.0;
 
-            /// @brief Maximum perpendicular translation error for scaling walk approach
-            double max_translation_perpendicular = 0.0;
-
-            /// @brief Maximum parallel translation error for scaling walk approach
-            double max_translation_parallel = 0.0;
-
             /// @brief Maximum error in the y direction for scaling walk approach
             double max_error_y = 0.0;
 
