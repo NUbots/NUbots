@@ -13,8 +13,8 @@ Configuration from `ImageDecompressor.yaml`
 
 ## Emits
 
-`message::input::Image`
+- `message::input::Image`
 
 ## Dependencies
 
-TurboJPEG
+- TurboJPEG

@@ -19,3 +19,7 @@ Emit a `message::strategy::FallRecovery` Task in order to activate this module's
 
 - `message::planning::GetUpWhenFalling` to activate the get up planner
 - `message::planning::RelaxWhenFalling` to activate a relax planner
+
+## Dependencies
+
+- Director

@@ -32,4 +32,5 @@ Emit a KickTo Task with the position to kick to. The contents of the message (po
 
 ## Dependencies
 
+- Director
 - The reaction will not run without localisation ball messages.

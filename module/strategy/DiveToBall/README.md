@@ -19,4 +19,5 @@ Add this module to the role to dive when the ball is close enough.
 
 ## Dependencies
 
+- Director
 - Needs the ball location to know when to dive

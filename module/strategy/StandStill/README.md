@@ -20,5 +20,6 @@ Add this module and emit a `message::strategy::StandStill` Task to make the robo
 
 ## Dependencies
 
+- Director
 - The script utility
 - The walk engine

@@ -10,8 +10,8 @@ Settings are defined in the `config/Cameras`
 
 ## Emits
 
-`message::input::Image`
+- `message::input::Image`
 
 ## Dependencies
 
-Aravis
+- Aravis

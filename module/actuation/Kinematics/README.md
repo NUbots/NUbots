@@ -23,4 +23,5 @@ Emit the corresponding IK message as a task.
 
 ## Dependencies
 
+- Director
 - `utility/actuation/InverseKinematics.hpp` provides the IK functions

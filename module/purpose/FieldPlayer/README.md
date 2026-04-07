@@ -44,5 +44,6 @@ Use this module by including it in the role and emitting a `message::purpose::Fi
 
 ## Dependencies
 
+- Director
 - `utility/strategy/positioning.hpp`
 - `utility/strategy/soccer_strategy.hpp`
