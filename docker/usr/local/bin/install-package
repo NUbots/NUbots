@@ -39,6 +39,10 @@ else
 
             # Get recursive dependencies for arm64 and download them
             for pkg in $packages; do
+                # Download the requested package itself so -dev artifacts (e.g. libudev.so)
+                # are present in the sysroot, not just its runtime dependencies.
+                apt-get download "$pkg:arm64" || { echo "Error: Failed to download $pkg:arm64" >&2; exit 1; }
+
                 deps=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg:arm64" 2>/dev/null | grep "^\w" | sort -u)
                 if [ -z "$deps" ]; then
                     echo "Error: No arm64 package found for $pkg" >&2
@@ -60,7 +64,7 @@ else
         else
             # Normal install for other platforms
             apt-get update
-            apt-get install -y --no-install-recommends $platform $packages
+            apt-get install -y --no-install-recommends $packages
             rm -rf /var/cache/apt /var/lib/apt/lists/*
         fi
     else

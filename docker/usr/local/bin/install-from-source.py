@@ -132,9 +132,13 @@ def handle_autotools(archive, args, env):
         elif "configure.ac" in root_files:
             subprocess.run(["autoreconf", "-fiv"], cwd=args.configure_path, env=env, check=True)
 
+    host_arg = ""
+    if env.get("CPU_ARCH") == "aarch64":
+        host_arg = "--host=aarch64-linux-gnu"
+
     # Configure the library
     subprocess.run(
-        ["./configure", f"--prefix={args.prefix}", *args.extra_args], cwd=args.configure_path, env=env, check=True
+        ["./configure", f"--prefix={args.prefix}", host_arg, *args.extra_args], cwd=args.configure_path, env=env, check=True
     )
 
     # Build the library

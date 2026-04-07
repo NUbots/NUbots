@@ -120,85 +120,17 @@ RUN pip3 install \
 RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python3 /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
-# LLVM and Clang
-RUN install-package -p ${platform} llvm-14 clang-14 lld-14
-
-
-# SPIRV LLVM Translator
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
-    --build-system cmake \
-    -DBUILD_SHARED_LIBS=ON \
-    -DLLVM_INCLUDE_TESTS=OFF
-
-# opencl-clang
-RUN install-from-source https://github.com/intel/opencl-clang/archive/470cf0018e1ef6fc92eda1356f5f31f7da452abc.tar.gz \
-    --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
-
-# Intel graphics compiler dependencies
-RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
-    -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
-    -DSPIRV_WERROR=Off \
-    -DBUILD_SHARED_LIBS=ON \
-    -DSPIRV_TOOLS_BUILD_STATIC=OFF \
-    -DSPIRV-Headers_SOURCE_DIR=${prefix}
-RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.6.2.tar.gz
 
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package libncurses-dev
 
 RUN pip3 install pyyaml mako
 
-# Intel graphics compiler
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
-    --patch https://gist.githubusercontent.com/ysims/3775531601b210507c478bca083b768d/raw/fa435e70c2870f2539c0da973a161ad7968d4696/built_tools_target.patch \
-    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_OPTION__CLANG_MODE=Prebuilds \
-    -DIGC_OPTION__LLD_MODE=Prebuilds \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.5' \
-    -DIGC_OPTION__LLVM_MODE=Prebuilds \
-    -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
-    -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
-    -DIGC_OPTION__SPIRV_TOOLS_MODE=Prebuilds \
-    -DIGC_OPTION__SPIRV_TRANSLATOR_MODE=Prebuilds \
-    -DIGC_OPTION__VC_INTRINSICS_MODE=Prebuilds \
-    -DINSTALL_GENX_IR=ON
-
-# gmmlib
-RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
-    --build-system cmake \
-    -DRUN_TEST_SUITE=OFF
-
-# Libpci access and libdrm for communicating with graphics hardware
-RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
-RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz \
-    --build-system meson \
-    -Dudev=false \
-    -Dvalgrind=false
-
-# Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
-RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
-    --build-system cmake \
-    -DINSTALL_DRIVER_SYSCONF=OFF \
-    -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
-    -DMEDIA_RUN_TEST_SUITE=OFF \
-    -DBUILD_TESTING=OFF \
-    -DBUILD_KERNELS=ON \
-    -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON
-
-# Install intel compute runtime (OpenCL implementation)
-RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
-    -DSKIP_UNIT_TESTS=ON \
-    -DIGC_DIR=${prefix}
-
 # Install OpenCL C Headers
 RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
 
 # OpenCL loader library
-RUN install-package ruby
+RUN install-package ruby autotools-dev automake libtool
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
 
 # OpenCV
@@ -230,19 +162,12 @@ RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 
     cd openvino && \
     git submodule update --init --recursive
 
-# Download AUR patches
-WORKDIR /openvino
-RUN curl -L -o openvino_patch.patch \
-    https://gist.github.com/ZeoNyph/cf8216bc1ffa15b0e44b17899f355c07/raw/42a6a040f41c03714507b86cf257546ebbb6a0cc/openvino_patch.patch
-
-# Apply patches
-RUN cd /openvino && \
-    patch -d . -p1 -i openvino_patch.patch
-
 # Build OpenVINO
+WORKDIR /l4t/openvino
 RUN mkdir build && cd build && \
     cmake .. -DBUILD_TESTING:BOOL='OFF' \
     -DCMAKE_BUILD_TYPE:STRING='Release' \
+    -DCMAKE_TOOLCHAIN_FILE=${prefix}/toolchain.cmake \
     -DENABLE_AVX512F:BOOL='OFF' \
     -DENABLE_PYTHON:BOOL='OFF' \
     -DENABLE_CLANG_FORMAT:BOOL='OFF' \
@@ -253,13 +178,17 @@ RUN mkdir build && cd build && \
     -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
     -DENABLE_SYSTEM_PROTOBUF:BOOL='OFF' \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+    -DENABLE_INTEL_GPU:BOOL='OFF' \
+    -DENABLE_INTEL_CPU:BOOL='OFF' \
     -DENABLE_CPPLINT:BOOL='OFF' \
     -DCMAKE_CXX_STANDARD='17' \
-    -Wno-dev && \
-    make -j$(nproc) && make install
+    -Wno-dev \
+    -GNinja && \
+    ninja -j$(nproc) && ninja -j$(nproc) install
 
 # Move OpenVino libraries to our library path
-RUN cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "Intel64") && \
+    cp /l4t/openvino/bin/${ARCH}/Release/* /usr/local/lib/ -r
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -305,20 +234,21 @@ RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.
     -DCATCH_CONFIG_CPP17_BYTE=ON
 
 # Aravis
-RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
-RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
-    --without-python
-RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-RUN install-package libglib2.0-dev
-RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
-    -Ddefault_library=both && \
-    cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
-RUN  ls ${prefix}/include && \
-    install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
-    -Ddefault_library=both \
-    -Dusb=enabled \
-    -Ddocumentation=disabled \
-    -Dintrospection=disabled
+# RUN install-package -p ${platform} libudev-dev libudev1
+# RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
+# RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
+#     --without-python
+# RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
+# RUN install-package libglib2.0-dev
+# RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
+#     -Ddefault_library=both && \
+#     cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
+# RUN  ls ${prefix}/include && \
+#     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
+#     -Ddefault_library=both \
+#     -Dusb=enabled \
+#     -Ddocumentation=disabled \
+#     -Dintrospection=disabled
 
 # LibUV
 RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz \
@@ -338,13 +268,7 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
     --without-debug
-RUN install-package alsa-utils
-RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz
-# Need to run ldconfig before building eSpeak because ...... ¯\_(ツ)_/¯
-RUN ldconfig && \
-    install-from-source https://github.com/espeak-ng/espeak-ng/archive/refs/tags/1.51.tar.gz \
-    --no-toolchain \
-    --autotools-force-regenerate
+RUN install-package -p ${platform} alsa-utils
 
 # mio memory mapping library
 RUN install-from-source https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz \
@@ -383,17 +307,21 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 # Install Booster Robotics SDK
 
+RUN install-package curl lsb-release
+
 RUN curl -L https://github.com/BoosterRobotics/booster_robotics_sdk/archive/f9ab807a0475b51aa5fb28b093c85652dd57fb69.tar.gz \
     -o /tmp/booster_robotics_sdk.tar.gz && \
     cd /tmp && tar -xzf booster_robotics_sdk.tar.gz && \
+    mv booster_robotics_sdk-f9ab807a0475b51aa5fb28b093c85652dd57fb69 booster_robotics_sdk && \
     rm /tmp/booster_robotics_sdk.tar.gz
 
 WORKDIR /tmp/booster_robotics_sdk
-RUN curl -L https://gist.githubusercontent.com/ZeoNyph/69e4ec80b66cc083191522de7eb4f43b/raw/36357b0fd9731865822ac4ee667d0cd3492d9688/install_script.patch \
+RUN curl -L https://gist.githubusercontent.com/ZeoNyph/69e4ec80b66cc083191522de7eb4f43b/raw/ef9393748b5a8797fb8ef08d9eaa56ade76d7547/install_script.patch \
     -o install_script.patch && \
     patch -p1 < install_script.patch
 
-RUN /tmp/booster_robotics_sdk/install.sh \
+RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
+    /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
 #######################################
@@ -445,20 +373,15 @@ RUN chmod 440 /etc/sudoers.d/user
 # Create the user and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
-ARG dialout_gid=20
-ARG video_gid=44
-ARG render_gid=110
 
 # useradd -G is not sufficient to add the nubots user to the dialout
 # group as docker manages to lose supplementary groups when changing
 # to the nubots user.
 # Also need to add "--group-add dialout" to the docker run command in run.py
 # Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
-RUN groupadd --gid $dialout_gid dialout \
-    && groupadd --gid $video_gid video_host \
-    && groupadd --gid $render_gid render_host \
-    && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp,video_host,render_host -m nubots
+
+RUN groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp,video,render -m nubots
 
 USER nubots
 

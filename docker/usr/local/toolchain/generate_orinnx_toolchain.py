@@ -50,7 +50,7 @@ target = {
     ],
     "release_flags": ["-O3", "-DNDEBUG"],
     "asm_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
-    "linker_flags":[
+    "linker_flags": [
         f"--sysroot={_TARGETFS_DIR}",
         f"-L{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
         f"-L{_TARGETFS_DIR}/usr/lib",
@@ -59,12 +59,14 @@ target = {
         f"-B{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
         f"-B{_TARGETFS_DIR}/usr/lib",
         f"-B{_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/sysroot/usr/lib",
+        f"-B{_TOOLCHAIN_DIR}/lib/gcc/{_CROSS_PREFIX}",
         f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
         f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib",
         "-Wl,--allow-shlib-undefined"
     ],
     "asm_object": "elf64",
     "arch": "aarch64",
+    "prefix": _CROSS_PREFIX,
     "sysroot": "/l4t/targetfs",
     "c_compiler": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}-gcc",
     "cxx_compiler": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}-g++",

@@ -60,6 +60,9 @@ def generate_cmake_toolchain(target, prefix):
         + 'set(CMAKE_SHARED_LINKER_FLAGS_INIT "{} " CACHE STRING "Flags used by the linker during all built types.")\n'.format(
             " ".join(linker_flags)
         )
+        + 'set(CMAKE_MODULE_LINKER_FLAGS_INIT "{} " CACHE STRING "Flags used by the linker during all built types.")\n'.format(
+            " ".join(linker_flags)
+        )
         if linker_flags
         else "\n"
     )
@@ -187,13 +190,31 @@ def generate_meson_cross_file(target):
 
 def generate_json_env(target, prefix):
     flags = " ".join(target["release_flags"] + target["flags"])
+    pkg_config_paths = [
+        f"{prefix}/lib/pkgconfig",
+        f"{prefix}/share/pkgconfig",
+    ]
+
+    # For cross builds, include pkg-config metadata from the sysroot as well.
+    sysroot = target.get("sysroot", "")
+    arch = target.get("arch", "")
+    if sysroot:
+        pkg_config_paths.extend(
+            [
+                f"{sysroot}/usr/lib/pkgconfig",
+                f"{sysroot}/usr/share/pkgconfig",
+            ]
+        )
+        if arch:
+            pkg_config_paths.append(f"{sysroot}/usr/lib/{arch}-linux-gnu/pkgconfig")
+
     return json.dumps(
         {
             # Set our compilers
             "CC": target.get("c_compiler", "/usr/bin/gcc"),
             "CXX": target.get("cxx_compiler", "/usr/bin/g++"),
             # Set our package config so it finds things in the toolchain
-            "PKG_CONFIG_PATH": f"{prefix}/lib/pkgconfig",
+            "PKG_CONFIG_PATH": ":".join(pkg_config_paths),
             "CPU_ARCH": target.get("arch", "x86_64"),
             # Set our optimisation flags
             "CFLAGS": flags,
@@ -203,9 +224,21 @@ def generate_json_env(target, prefix):
     )
 
 
-def generate_toolchain_script(target):
+def generate_toolchain_script(target, prefix):
     c_compiler = target.get("c_compiler", "/usr/bin/gcc")
     cxx_compiler = target.get("cxx_compiler", "/usr/bin/g++")
+
+    pkg_config_paths = [
+        f"{prefix}/lib/pkgconfig",
+        f"{prefix}/share/pkgconfig",
+    ]
+    sysroot = target.get("sysroot", "")
+    arch = target.get("arch", "")
+    if sysroot:
+        pkg_config_paths.extend([f"{sysroot}/usr/lib/pkgconfig", f"{sysroot}/usr/share/pkgconfig"])
+        if arch:
+            pkg_config_paths.append(f"{sysroot}/usr/lib/{arch}-linux-gnu/pkgconfig")
+
     template = dedent(
         """\
         #!/bin/sh
@@ -215,7 +248,7 @@ def generate_toolchain_script(target):
         export CXX={cxx_compiler}
 
         # Set our package config so it finds things in the toolchain
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
+        export PKG_CONFIG_PATH="{pkg_config_paths}"
 
         # Set our optimisation flags
         export CFLAGS="${{CFLAGS}} {flags}"
@@ -227,6 +260,7 @@ def generate_toolchain_script(target):
     return template.format(
         c_compiler=c_compiler,
         cxx_compiler=cxx_compiler,
+        pkg_config_paths=":".join(pkg_config_paths),
         flags=" ".join(target["release_flags"] + target["flags"]),
     )
 
@@ -238,7 +272,7 @@ def generate(prefix, toolchain, target):
 
     print("Generating toolchain script for {} in {}".format(toolchain, prefix))
     with open(os.path.join(prefix, "toolchain.sh"), "w") as f:
-        f.write(generate_toolchain_script(target))
+        f.write(generate_toolchain_script(target, prefix))
 
     print("Generating meson cross file for {} in {}".format(toolchain, prefix))
     with open(os.path.join(prefix, "meson.cross"), "w") as f:
