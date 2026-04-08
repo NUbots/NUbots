@@ -124,9 +124,9 @@ message NUSense {
      *  18 : head_yaw
      *  19 : head_pitch
      */
-    map<uint32, Servo> servo_map = 1;
-    IMU                imu       = 2;
-    Buttons            buttons   = 3;
+    map<uint32, Servo> servo_map    = 1;
+    IMU                imu          = 2;
+    Buttons            buttons      = 3;
     FanWarning         fan_warnings = 4;
 }
 
