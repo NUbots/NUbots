@@ -96,6 +96,9 @@ message Buttons {
     bool middle = 2;
 }
 
+// These two bools hold the warning status of the two fans (J401 & J402) on NUSense.
+// These two fan warnings are triggered by a fan dropping below the threshold speed.
+// (that threshold speed is defined in the NUSense firmware)
 message FanWarning {
     bool fan1_warning = 1;
     bool fan2_warning = 2;
