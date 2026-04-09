@@ -28,6 +28,7 @@ syntax = "proto3";
 package message.platform;
 
 import "message/platform/webots/messages.proto";
+import "message/platform/NUSenseData.proto";
 import "google/protobuf/timestamp.proto";
 
 import "Vector.proto";
@@ -97,11 +98,6 @@ message RawSensors {
         float x = 1;
         float y = 2;
         float z = 3;
-    }
-
-    message FanWarning {
-        bool fan1_warning = 1;
-        bool fan2_warning = 2;
     }
 
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
@@ -189,7 +185,7 @@ message RawSensors {
 
     /// Ground truth from a simulator
     webots.RobotPoseGroundTruth robot_pose_ground_truth = 12;
-    FanWarning                  fan_warning             = 13;
+    NUSenseData.FanWarning      fan_warning             = 13;
 }
 
 // Reset sensors and servo targets in Webots
