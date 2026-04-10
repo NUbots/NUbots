@@ -16,9 +16,6 @@ target_link_libraries(nuclear_utility PUBLIC zstr::zstr)
 find_package(mio REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC mio::mio)
 
-find_package(Aravis REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC Aravis::Aravis)
-
 find_package(tinyxml2 REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC tinyxml2::tinyxml2)
 

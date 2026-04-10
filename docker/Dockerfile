@@ -324,6 +324,14 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
     /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
+RUN ln -sf /l4t/targetfs/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 /lib/ld-linux-aarch64.so.1
+
+RUN install-package -p ${platform} xrandr-dev
+
+RUN install-from-source https://github.com/realsenseai/librealsense/archive/refs/tags/v2.57.7.tar.gz \
+    -DBUILD_EXAMPLES=true \
+    -DBUILD_GRAPHICAL_EXAMPLES=false
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -380,8 +388,8 @@ ARG user_gid=$user_uid
 # Also need to add "--group-add dialout" to the docker run command in run.py
 # Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
 
-RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp,video,render -m nubots
+RUN groupadd --gid 1000 nubots \
+    && useradd --uid 1000 --gid nubots -G audio,dialout,uucp,video,render -m nubots
 
 USER nubots
 
