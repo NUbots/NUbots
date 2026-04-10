@@ -185,7 +185,7 @@ message RawSensors {
 
     /// Ground truth from a simulator
     webots.RobotPoseGroundTruth robot_pose_ground_truth = 12;
-    NUSenseData.FanWarning      fan_warning             = 13;
+    FanWarning                  fan_warning             = 13;
 }
 
 // Reset sensors and servo targets in Webots
