@@ -137,9 +137,8 @@ RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
 # Protobuf
-RUN install-package protobuf-compiler && \
+RUN install-package -p ${platform} protobuf-compiler && \
     install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
-    --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
     -DWITH_PROTOC="/usr/bin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
@@ -188,7 +187,8 @@ RUN mkdir build && cd build && \
 
 # Move OpenVino libraries to our library path
 RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "Intel64") && \
-    cp /l4t/openvino/bin/${ARCH}/Release/* /usr/local/lib/ -r
+    LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
+    cp /l4t/openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -324,12 +324,10 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
     /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
-RUN ln -sf /l4t/targetfs/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 /lib/ld-linux-aarch64.so.1
-
-RUN install-package -p ${platform} xrandr-dev
+RUN install-package -p ${platform} libusb-1.0-0-dev
 
 RUN install-from-source https://github.com/realsenseai/librealsense/archive/refs/tags/v2.57.7.tar.gz \
-    -DBUILD_EXAMPLES=true \
+    -DBUILD_EXAMPLES=false \
     -DBUILD_GRAPHICAL_EXAMPLES=false
 
 #######################################
